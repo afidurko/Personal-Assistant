@@ -61,7 +61,20 @@
 
         <!-- Legacy spinal / CNS -->
         <svg id="nervous" class="lens-view hidden" viewBox="0 0 900 640" role="img" aria-label="Cam spinal nervous system">
-          <ellipse cx="450" cy="150" rx="260" ry="150" fill="url(#cortexWash)" />
+          <defs>
+            <radialGradient id="spineWash" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#5fd4c4" stop-opacity="0.14" />
+              <stop offset="100%" stop-color="#0c1210" stop-opacity="0" />
+            </radialGradient>
+            <filter id="spineGlow">
+              <feGaussianBlur stdDeviation="2.2" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <ellipse cx="450" cy="150" rx="260" ry="150" fill="url(#spineWash)" />
           <path d="M300 160 C300 70, 600 70, 600 160 C640 190, 620 250, 560 260 C520 290, 380 290, 340 260 C280 250, 260 190, 300 160 Z"
                 fill="none" stroke="rgba(230,213,184,0.35)" stroke-width="2" />
           <text class="region-title" x="400" y="48">Spinal periphery</text>
@@ -77,7 +90,20 @@
 
         <!-- SwiftGuide mind map -->
         <svg id="mindmap" class="lens-view hidden" viewBox="0 0 900 640" role="img" aria-label="Cam SwiftGuide mind map">
-          <circle cx="450" cy="320" r="220" fill="url(#cortexWash)" />
+          <defs>
+            <radialGradient id="mapWash" cx="50%" cy="50%" r="55%">
+              <stop offset="0%" stop-color="#c4a574" stop-opacity="0.18" />
+              <stop offset="100%" stop-color="#0c1210" stop-opacity="0" />
+            </radialGradient>
+            <filter id="mapGlow">
+              <feGaussianBlur stdDeviation="2.2" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <circle cx="450" cy="320" r="220" fill="url(#mapWash)" />
           <text class="region-title" x="330" y="36">Mind map lens · SwiftGuide pattern</text>
           <text class="label-sm" x="300" y="54">Classification · Architecture · 2026 stack · Cam pathways</text>
           <g id="mm-links"></g>

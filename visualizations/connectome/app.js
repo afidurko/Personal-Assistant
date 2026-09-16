@@ -442,7 +442,9 @@
   function spawnParticle(pathEl, color, host) {
     if (!pathEl) return Promise.resolve();
     const len = pathEl.getTotalLength();
-    const dot = el("circle", { r: 3.5, fill: color, filter: "url(#softGlow)" }, host);
+    const glow =
+      lens === "cortex" ? "url(#softGlow)" : lens === "mindmap" ? "url(#mapGlow)" : "url(#spineGlow)";
+    const dot = el("circle", { r: 3.5, fill: color, filter: glow }, host);
     const start = performance.now();
     return new Promise((resolve) => {
       function frame(t) {
