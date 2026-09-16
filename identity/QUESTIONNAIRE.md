@@ -180,6 +180,46 @@ For each domain rated ≥3: what does “done well” look like? What has failed
 
 ---
 
+## 14. Jarvis personality spectrum (from your Jarvis fork)
+
+For each pair, pick **A**, **B**, or **mid**. Used to tune tone — not a clinical test.
+
+96. makes lists  |  relies on memory
+97. sceptical  |  wants to believe
+98. bored by time alone  |  needs time alone
+99. accepts things as they are  |  unsatisfied with the ways things are
+100. keeps a clean room  |  just puts stuff wherever
+101. thinks "robotic" is an insult  |  strives to have a mechanical mind
+102. energetic  |  mellow
+103. prefer multiple choice  |  prefer essay answers
+104. chaotic  |  organized
+105. easily hurt  |  thick-skinned
+106. works best in groups  |  works best alone
+107. focused on the present  |  focused on the future
+108. plans far ahead  |  plans at the last minute
+109. wants people's respect  |  wants their love
+110. gets worn out by parties  |  gets fired up by parties
+111. fits in  |  stands out
+112. keeps options open  |  commits
+113. wants to be good at fixing things  |  wants to be good at fixing people
+114. talks more  |  listens more
+115. describes what happened  |  describes what it meant
+116. gets work done right away  |  procrastinates
+117. follows the heart  |  follows the head
+118. stays at home  |  goes out on the town
+119. wants the big picture  |  wants the details
+120. improvises  |  prepares
+121. morality on justice  |  morality on compassion
+122. theoretical  |  empirical
+123. works hard  |  plays hard
+124. uncomfortable with emotions  |  values emotions
+125. likes to perform  |  avoids public speaking
+126. likes who/what/when  |  likes why
+
+Source file: `integrations/jarvis/jarviscli/data/personality_questions.tsv`
+
+---
+
 ## Scoring self-test (optional but useful)
 
 For each statement, score 1–5 (disagree → agree):

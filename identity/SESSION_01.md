@@ -21,4 +21,6 @@ Reply with numbers. Short answers OK; you can expand later in `identity/QUESTION
 14. Comfortable with subagents spawning subagents? Max depth (e.g. 3)?
 15. In 30 days, what would make this a clear win?
 
-Full 95-question battery: [QUESTIONNAIRE.md](QUESTIONNAIRE.md)
+Full 95+ question battery (incl. Jarvis personality spectrum): [QUESTIONNAIRE.md](QUESTIONNAIRE.md)
+
+Jarvis local toolbelt is already wired as submodule `integrations/jarvis` — answer when ready.

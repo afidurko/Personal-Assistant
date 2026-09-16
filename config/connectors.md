@@ -5,6 +5,13 @@
 - iMessage, email, Telegram, Discord, Slack, WhatsApp, web, CLI
 - Tools: web_search, web_fetch, files, shell (sandboxed), delegate
 
+## Local utilities (Jarvis)
+
+- Submodule: `integrations/jarvis`
+- Use for deterministic CLI chores (weather, conversions, file helpers, etc.)
+- Invoked by `ops` / subagents — not a second brain
+- Memory bridged to `mesh/jarvis` (see `config/integrations/jarvis.md`)
+
 ## Bridge later (OpenClaw-inspired external plugins)
 
 - SMS via phone companion

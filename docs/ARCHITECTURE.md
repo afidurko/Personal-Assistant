@@ -14,10 +14,13 @@ and outbound contact (text / FaceTime / call) when needed.
 | [nullhub](https://github.com/nullclaw/nullhub) | **Human control plane** | Install, monitor, approve, mission control — where *you* override the team |
 | [Assistant- / OpenClaw](https://github.com/afidurko/Assistant-) | **Connector inspiration only** | Rich SMS / voice-call / companion-app patterns; too heavy to be the core |
 | [lucida](https://github.com/claritylab/lucida) | **Role ideas only** | Speech/vision “service team” concept; Java/Thrift stack rejected for simplicity |
+| [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools (weather, files, conversions, health helpers); vendored as submodule — not the brain |
 
 **Rule:** if two repos solve the same problem, pick the Null path (Zig, tiny,
 explicit contracts). Borrow OpenClaw/Lucida *behaviors* as external channel
 plugins or agent roles — never fork their full runtimes into this repo.
+Jarvis plugins are tools the `ops` role may call; they do not own memory,
+scheduling, or human gates.
 
 ## Mental model
 
@@ -34,7 +37,12 @@ You (human) ──override / approve──► nullhub
                     ▼                 ▼                 ▼
               Chief Agent      Specialist roles    Subagents…
               (nullclaw)       (research, docs,    (recursive
-                               jobs, comms…)        delegate)
+                               jobs, comms, ops…)   delegate)
+                                      │
+                                      ▼
+                               Jarvis CLI plugins
+                               (integrations/jarvis)
+                               local deterministic tools
 ```
 
 - **Tracker = source of truth** (nulltickets)
@@ -66,8 +74,9 @@ All agents share one mesh, not private silos:
 
 1. **Durable facts** → nulltickets `store` namespaces (`mesh/facts`, `mesh/people`, `mesh/prefs`, `mesh/projects`)
 2. **Session recall** → each nullclaw instance’s memory engine (default SQLite hybrid)
-3. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
-4. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
+3. **Jarvis local memory** → `integrations/jarvis` `memory.json` is a *cache*; sync into `mesh/jarvis` via `scripts/sync-jarvis-memory.py`
+4. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
+5. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
 
 This is the “neural meshing network”: a shared, searchable, versioned memory
 plus a durable work graph — not a separate ML training stack.
@@ -101,15 +110,17 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 ## Build order (after identity questionnaire)
 
 1. Capture who you are (`identity/`) — **in progress**
-2. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
-3. Seed pipelines: research, docs, careers, life-ops (all with human gates)
-4. Wire mesh namespaces + curator role
-5. Add connectors one at a time with approval tests
-6. Only then expand specialist depth / recursive subagents
+2. Keep Jarvis available as local CLI utilities (`integrations/jarvis`) — **added**
+3. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
+4. Seed pipelines: research, docs, careers, life-ops (all with human gates)
+5. Wire mesh namespaces + curator role (+ Jarvis memory sync)
+6. Add connectors one at a time with approval tests
+7. Only then expand specialist depth / recursive subagents
 
 ## Non-goals (v1)
 
 - Training custom neural nets
 - Replacing nullhub UI
 - Porting Lucida ASR/IMM services as-is
+- Making Jarvis the primary agent runtime (it stays a toolbelt)
 - Autonomous spending or unsupervised external outreach
