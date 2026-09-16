@@ -59,11 +59,13 @@
     },
     {
       "id": "switch.ios_capture",
-      "default": "tasked_only",
+      "default": "standing_on",
       "act": ["sense.ios.camera", "sense.ios.mic"],
       "hold": "no_capture",
       "flipped_by": ["Aaron"],
-      "notes": "iPhone camera/mic — tasked unless Aaron enables a standing monitor goal"
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-16",
+      "notes": "ENABLED — Aaron authorized live mic/camera converse; kill switch still pauses"
     }
   ],
   "antagonistic_pairs": [

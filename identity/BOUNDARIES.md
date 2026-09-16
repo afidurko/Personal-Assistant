@@ -46,14 +46,17 @@ Aaron authorized (2026-09-16): Cam has **full access to Aaron’s photos and fil
 - Do not enroll strangers as Aaron; do not clone Aaron for outbound impersonation unless asked
 - Details: `identity/persistence/AARON_MEDIA_ACCESS.md`
 
-## Live mic / camera converse (persistent grant)
+## Live mic / camera converse (ENABLED)
 
-Aaron authorized (2026-09-16): Cam may use microphone and camera companions to **hold live conversations** with Aaron.
+Aaron authorized **and enabled** (2026-09-16): Cam may use microphone and camera companions to **hold live conversations** with Aaron.
 
+- Status: **ON** — `identity/persistence/CAM_CONVERSE_ENABLED.md`
+- `switch.ios_capture` default: **standing_on**
 - Web companion: `companions/web/` + `scripts/cam-converse-server.py` (`docs/CAM_CONVERSE.md`)
 - iOS native companion: `companions/ios/` (same API)
 - Mic → `sense.ios.mic` · Camera → `sense.ios.camera` · speak via soft TTS / RIVA when studio up
-- Run the server on Aaron’s machine (Cloud Agent has no mic hardware)
+- Run the server on Aaron’s machine for real mic (Cloud Agent has no mic hardware)
+- Aaron kill switch still pauses all
 
 ## Unlimited subagents (persistent grant)
 

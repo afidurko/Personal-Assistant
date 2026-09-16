@@ -154,6 +154,9 @@ class Handler(BaseHTTPRequestHandler):
                         "mic": True,
                         "camera": True,
                         "speak": True,
+                        "enabled": True,
+                        "enabled_by": "Aaron",
+                        "ios_capture_mode": "standing_on",
                         "aaron_face_enrolled": VISUAL.exists(),
                         "host_has_local_mic": False,  # browser supplies mic
                     },

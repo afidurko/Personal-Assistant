@@ -46,6 +46,12 @@
       "id": "ios_identity_camera_mic",
       "title": "iOS companion: Aaron face/voice + camera/mic",
       "role": "comms"
+    },
+    {
+      "id": "cam_live_converse",
+      "title": "Cam live mic/camera converse (ENABLED)",
+      "role": "comms",
+      "enabled": true
     }
   ]
 }

@@ -1,4 +1,5 @@
-# Cam live converse (mic + camera + speak)
+## Status
+**ENABLED** by Aaron (2026-09-16). See `identity/persistence/CAM_CONVERSE_ENABLED.md`.
 
 ## What this adds
 Cam can hold a **voice conversation** through a companion:

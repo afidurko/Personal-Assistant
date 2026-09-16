@@ -25,9 +25,10 @@
 - Full design: `docs/IOS_IDENTITY.md`
 - **Granted:** Aaron face recognition, Aaron voice recognition, iPhone camera, iPhone mic
 - **Granted:** full photos + files access to learn Aaron’s look/sound and photo↔video same-person match (`identity/persistence/AARON_MEDIA_ACCESS.md`)
-- **Live converse:** web companion ready — `docs/CAM_CONVERSE.md` (`companions/web/` + `scripts/cam-converse-server.py`)
-- Capture mode default: **tasked_only** for background; converse UI is explicit opt-in
-- Status: **web converse runnable on Aaron’s machine**; native iOS app still scaffold
+- **Live converse:** **ENABLED** by Aaron — `identity/persistence/CAM_CONVERSE_ENABLED.md`
+- Capture mode: **standing_on** (`switch.ios_capture`)
+- UI: `docs/CAM_CONVERSE.md` (`companions/web/` + `scripts/cam-converse-server.py`)
+- Status: **feature on**; open companion on Aaron’s device for mic/camera
 
 ## Cam face & voice (LLMAvatarTalk)
 
