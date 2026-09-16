@@ -1,6 +1,6 @@
 {
   "subject": "Aaron",
-  "updated_at": "2026-09-16T13:45:00Z",
+  "updated_at": "2026-09-16T13:46:00Z",
   "purpose": "understand_aaron_look_and_sound",
   "photo_to_video_match": true,
   "primary_face_cluster": [
@@ -10,6 +10,16 @@
       "label": "Aaron",
       "confidence": "high",
       "notes": "mirror selfie; glasses; curly dark hair; goatee; iPhone Pro visible"
+    },
+    {
+      "id": "aaron-face-02-left",
+      "file": "aaron-02-gym-pair.jpg",
+      "label": "Aaron",
+      "bbox_hint": "left",
+      "confidence": "high",
+      "confirmed_by": "Aaron",
+      "confirmed_at": "2026-09-16",
+      "notes": "Yankees Baseball tee; yellow belt; short dark hair; no glasses; smiling"
     },
     {
       "id": "aaron-face-03",
@@ -26,18 +36,16 @@
       "notes": "cafe; trucker cap; glasses; laptop; latte"
     }
   ],
-  "pending_labels": [
+  "non_aaron_faces": [
     {
       "file": "aaron-02-gym-pair.jpg",
-      "reason": "two_faces",
-      "candidates": [
-        {"position": "left", "notes": "Yankees Baseball tee; yellow belt; short dark hair; no glasses"},
-        {"position": "right", "notes": "buzz cut; arm tattoos; Punch Gear tee"}
-      ],
-      "action_needed": "Aaron: which face is you? (left / right / neither)"
+      "bbox_hint": "right",
+      "label": "not_Aaron",
+      "notes": "buzz cut; arm tattoos; Punch Gear tee — do not match as Aaron"
     }
   ],
+  "pending_labels": [],
   "voices": [],
   "videos": [],
-  "status": "face_enrollment_partial_3_of_4_photos"
+  "status": "face_enrollment_complete_4_photos"
 }
