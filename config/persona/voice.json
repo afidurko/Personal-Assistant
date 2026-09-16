@@ -1,0 +1,26 @@
+{
+  "assistant": "Cam",
+  "human_only_approver": "Aaron",
+  "status": "awaiting_aaron_voice_pick",
+  "tts": {
+    "provider": "unset",
+    "voice_id": "unset",
+    "locale": "en-US",
+    "speaking_rate": 1.0,
+    "style_notes": "clear, calm, competent; not cartoonish; not celebrity-clone"
+  },
+  "stt": {
+    "provider": "unset",
+    "locale": "en-US"
+  },
+  "live": {
+    "text": true,
+    "call": true,
+    "facetime": true,
+    "requires_aaron_approval": true
+  },
+  "face": {
+    "asset": "identity/persona/cam-face.png",
+    "status": "awaiting_aaron_style_pick"
+  }
+}

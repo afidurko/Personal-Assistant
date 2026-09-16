@@ -46,7 +46,9 @@
     "kill_switch_default": "pause_all",
     "kill_switch_alternate": "outbound_only",
     "continuous_monitoring": false,
-    "other_operators_allowlist": []
+    "other_operators_allowlist": [],
+    "sole_operator": "Aaron",
+    "operator_note": "Aaron overturned Q55: only Aaron may task, authorize, or approve"
   },
   "priority_boot_order": [
     "persistence",

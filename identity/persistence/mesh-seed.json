@@ -11,11 +11,14 @@
   },
   "mesh/facts": {
     "gated_actions_still_require_approval": true,
+    "only_aaron_may_task_authorize_approve": true,
     "other_operators_allowlist_empty": true,
-    "session_01_all_capabilities_enabled": true
+    "session_01_all_capabilities_enabled": true,
+    "sole_operator": "Aaron"
   },
   "mesh/open-questions": {
-    "other_operators": "Aaron said others may order \u2014 names TBD",
+    "cam_face_style": "awaiting Aaron pick",
+    "cam_voice_provider": "awaiting Aaron pick",
     "quiet_hours_exact_window": "confirm with Aaron",
     "standing_approval_rules": "none yet"
   },
