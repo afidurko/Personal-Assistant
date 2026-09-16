@@ -1,11 +1,12 @@
 {
-  "version": 1,
-  "analogy": "Higher brain centers — specialization / dimorphic routing lives here",
+  "version": 2,
+  "analogy": "Compatibility shim — Brodmann areas are the primary higher cortex (see areas.json). Legacy center.* ids alias into areas.",
   "centers": [
     {
       "id": "center.chief",
       "role": "chief",
       "function": "executive integration; Aaron-facing voice of Cam",
+      "maps_to": "area.dlpfc",
       "accepts": ["spike.task", "spike.question", "spike.override", "spike.speech"],
       "projects_to": ["center.router", "center.memory", "center.qa", "center.comms", "switch.identity", "switch.tasking"]
     },
@@ -13,6 +14,7 @@
       "id": "center.memory",
       "role": "memory-curator",
       "function": "mesh + vault association / engrams",
+      "maps_to": "area.mtl",
       "accepts": ["spike.fact", "spike.note_ref", "spike.pref", "spike.tool_result"],
       "projects_to": ["center.chief", "switch.autonomy", "motor.mesh", "motor.vault"]
     },
@@ -20,6 +22,7 @@
       "id": "center.cartography",
       "role": "researcher",
       "function": "knowledge cartography — hierarchical mind maps (SwiftGuide pattern)",
+      "maps_to": "area.apfc",
       "accepts": ["spike.note_ref", "spike.fact", "spike.stack", "spike.question"],
       "projects_to": ["center.research", "center.docs", "center.memory", "center.qa", "sense.swiftguide.map"]
     },
@@ -27,6 +30,7 @@
       "id": "center.research",
       "role": "researcher",
       "function": "evidence hotspot; citations required",
+      "maps_to": "area.temporal",
       "accepts": ["spike.question", "spike.fact", "spike.note_ref"],
       "projects_to": ["center.qa", "sense.vault.hit"]
     },
@@ -34,6 +38,7 @@
       "id": "center.careers",
       "role": "careers",
       "function": "LinkedIn/Indeed hotspot",
+      "maps_to": "area.temporal",
       "accepts": ["spike.job", "spike.task"],
       "projects_to": ["center.qa", "switch.careers_submit"]
     },
@@ -41,6 +46,7 @@
       "id": "center.ops",
       "role": "ops",
       "function": "life-ops hotspot",
+      "maps_to": "area.parietal",
       "accepts": ["spike.schedule", "spike.task", "spike.tool_result"],
       "projects_to": ["switch.autonomy", "center.memory"]
     },
@@ -48,6 +54,7 @@
       "id": "center.comms",
       "role": "comms",
       "function": "social-motor planning + presence",
+      "maps_to": "area.broca",
       "accepts": ["spike.inbox", "spike.speech", "spike.task"],
       "projects_to": ["switch.outbound", "switch.presence"]
     },
@@ -55,6 +62,7 @@
       "id": "center.docs",
       "role": "docs",
       "function": "document planning",
+      "maps_to": "area.apfc",
       "accepts": ["spike.task", "spike.note_ref"],
       "projects_to": ["switch.autonomy"]
     },
@@ -62,6 +70,7 @@
       "id": "center.vision",
       "role": "vision",
       "function": "visual association",
+      "maps_to": "area.visual",
       "accepts": ["spike.visual", "spike.task"],
       "projects_to": ["center.chief", "center.memory", "center.comms"]
     },
@@ -69,6 +78,7 @@
       "id": "center.qa",
       "role": "qa",
       "function": "proofreading / consistency before motor",
+      "maps_to": "area.cingulate",
       "accepts": ["spike.*"],
       "projects_to": ["switch.autonomy", "switch.careers_submit", "center.chief"]
     },
@@ -76,6 +86,7 @@
       "id": "center.router",
       "role": "nullboiler",
       "function": "policy neuropil — who runs what",
+      "maps_to": "area.dlpfc",
       "accepts": ["spike.task"],
       "projects_to": [
         "center.research",
@@ -93,8 +104,9 @@
     "max_subagents": null,
     "unlimited": true,
     "human_gate_to_spawn": false,
-    "analogy": "unbounded interneuron recruitment — Cam may spawn freely to finish work",
+    "analogy": "unbounded columnar recruitment — Cam may spawn freely to finish work",
     "authorized_by": "Aaron",
     "authorized_at": "2026-09-16"
-  }
+  },
+  "preferred": "config/connectome/areas.json"
 }

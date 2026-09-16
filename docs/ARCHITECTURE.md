@@ -26,8 +26,9 @@ work without mid-task interference.
 
 ## Mental model
 
-Primary architecture is the **Cam Connectome** (sensory → higher centers → switches → motor),
-inspired by Berg et al. Cell 2026 Drosophila CNS mapping:
+Primary architecture is the **Cam Brodmann Cortex** (sensory → functional areas with
+agent/loop columns → association tracts / mesh → switches → motor), grounded in
+Brodmann mapping + Mountcastle columns + structural association connectomes:
 
 → Full design: [docs/CONNECTOME_ARCHITECTURE.md](CONNECTOME_ARCHITECTURE.md)  
 → Maps: `config/connectome/*.json` · router: `scripts/connectome-route.py`

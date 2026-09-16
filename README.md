@@ -18,22 +18,25 @@ Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md
 
 ## Connectome architecture (brain map)
 
-Cam is wired like a nervous system — see [docs/CONNECTOME_ARCHITECTURE.md](docs/CONNECTOME_ARCHITECTURE.md):
+Cam is a **Brodmann cortex** — see [docs/CONNECTOME_ARCHITECTURE.md](docs/CONNECTOME_ARCHITECTURE.md):
 
 ```text
-Aaron → sensory → higher centers → circuit switches → motor effectors
+Aaron → sensory → Brodmann areas (columns=agents/loops) → switches → motor
+                 ↘ association tracts = neural mesh ↗
 ```
 
-Dual lens: **CNS anatomy** + **SwiftGuide mind-map cartography** (`integrations/swiftguide`).
+Lenses: **Cortex** (Brodmann) · **Spinal** · **Mind map** (SwiftGuide).
 
 ```bash
 # Example: route a careers spike to motor plan
 python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch roles"
+# QA conflict-monitoring loop through ACC
+python3 scripts/connectome-route.py --sense sense.chat.aaron --goal "qa loop"
 # SwiftGuide → iOS companion stack brief
 python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "ios companion stack"
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
-# Live brain + spinal cord + mind-map visualization (all repos)
+# Live cortex + spinal + mind-map visualization
 bash scripts/serve-connectome-viz.sh
 # open http://127.0.0.1:8765/visualizations/connectome/
 ```

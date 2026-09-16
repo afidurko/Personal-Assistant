@@ -1,16 +1,13 @@
 # Cam Connectome
 
-Cam’s system architecture mirrors neuron/brain mapping (Berg et al., Cell 2026):
+Cam’s architecture is a **Brodmann functional cortex**:
 
-- Shared sensory periphery
-- Specialized higher centers + hotspots
-- Circuit switches for antagonistic outcomes
-- Motor effectors that only fire on mapped **act** pathways
+- Functional areas (`area.*`) instead of only fly-CNS centers
+- **Agents and repetitive loops = cortical columns** (`neuron.*`)
+- **Association tracts = neural mesh** (`tract.*` + `mesh/*`)
+- Shared sensory/motor periphery + Aaron-flipped circuit switches
 
-**Dual lens:** nervous-system anatomy **and** SwiftGuide-style mind-map cartography
-(`center.cartography` · `sense.swiftguide.map`).
-
-Repo docs: `docs/CONNECTOME_ARCHITECTURE.md`  
-Live viz: `visualizations/connectome/` (`bash scripts/serve-connectome-viz.sh`)  
-Research: [[2026-09-16-Drosophila-male-CNS-connectome-Cell]] · [[2026-09-16-SwiftGuide-brain-map]]  
-iOS stack from SwiftGuide: [[iOS-Companion-SwiftGuide-Stack]]
+Docs: `docs/CONNECTOME_ARCHITECTURE.md`  
+Live viz: `visualizations/connectome/` — lenses **Cortex · Spinal · Mind map**  
+Research: [[2026-09-16-Brodmann-neural-mesh-remap]] · [[2026-09-16-SwiftGuide-brain-map]] · [[2026-09-16-Drosophila-male-CNS-connectome-Cell]]  
+iOS stack: [[iOS-Companion-SwiftGuide-Stack]]

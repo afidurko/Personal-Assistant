@@ -53,7 +53,7 @@
 - Dual-lens brain map: CNS anatomy ↔ mind-map trees
 - iOS companion stack picks in `config/connectome/mindmap.json`
 - See `config/integrations/swiftguide.md`
-- Spikes: `sense.swiftguide.map` → `center.cartography`
+- Spikes: `sense.swiftguide.map` → `area.apfc` (cartography columns)
 
 ## Careers boards
 

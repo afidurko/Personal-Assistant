@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "analogy": "Association fibers + neural mesh — long-range coupling between Brodmann areas (Jung et al. structural↔functional networks; myelin-weighted SC–FC coupling; syncytial mesh coherence)",
+  "principles": [
+    "Intra-area links are dense and graded (local U-fibers / column recurrence)",
+    "Inter-area links are discrete tracts — only specific hubs bridge lobes",
+    "Mesh namespaces ride tracts: successful co-activation strengthens Hebbian weights",
+    "Callosal-like persistence couples workspaces without replacing synaptic tickets"
+  ],
+  "tracts": [
+    {
+      "id": "tract.arcuate",
+      "name": "Arcuate fasciculus",
+      "ends": ["area.wernicke", "area.broca"],
+      "mesh_ns": "mesh/language",
+      "function": "comprehension ↔ production language loop"
+    },
+    {
+      "id": "tract.slf",
+      "name": "Superior longitudinal fasciculus",
+      "ends": ["area.parietal", "area.dlpfc", "area.broca"],
+      "mesh_ns": "mesh/frontoparietal",
+      "function": "spatial-temporal ops ↔ executive ↔ outbound phrasing"
+    },
+    {
+      "id": "tract.uncinate",
+      "name": "Uncinate fasciculus",
+      "ends": ["area.ofc", "area.temporal"],
+      "mesh_ns": "mesh/valuation",
+      "function": "boundaries/identity ↔ careers/research semantics"
+    },
+    {
+      "id": "tract.cingulum",
+      "name": "Cingulum bundle",
+      "ends": ["area.cingulate", "area.mtl", "area.dlpfc"],
+      "mesh_ns": "mesh/runs",
+      "function": "QA conflict ↔ memory engrams ↔ executive"
+    },
+    {
+      "id": "tract.ilf",
+      "name": "Inferior longitudinal fasciculus",
+      "ends": ["area.visual", "area.temporal"],
+      "mesh_ns": "mesh/vision",
+      "function": "vision → semantic/temporal association"
+    },
+    {
+      "id": "tract.ifof",
+      "name": "Inferior fronto-occipital fasciculus",
+      "ends": ["area.visual", "area.apfc", "area.dlpfc"],
+      "mesh_ns": "mesh/projects",
+      "function": "vision → abstract planning / cartography"
+    },
+    {
+      "id": "tract.thalamo",
+      "name": "Thalamocortical radiations",
+      "ends": ["sense.*", "area.visual", "area.auditory", "area.wernicke", "area.parietal"],
+      "mesh_ns": "mesh/prefs",
+      "function": "sensory relay into primary/association cortex"
+    },
+    {
+      "id": "tract.corticospinal",
+      "name": "Corticospinal / corticobulbar",
+      "ends": ["area.premotor", "area.motor", "motor.*"],
+      "mesh_ns": "mesh/runs",
+      "function": "descending motor to effectors"
+    },
+    {
+      "id": "tract.mesh_callosal",
+      "name": "Callosal-like neural mesh",
+      "ends": ["area.*"],
+      "mesh_ns": "mesh/*",
+      "function": "cross-area + cross-workspace coherence (persist-export/import)",
+      "notes": "Software analog of diffuse mesh coupling — not a single anatomical tract"
+    }
+  ],
+  "hebbian": {
+    "strengthen_on": "completed_act_pathway",
+    "weaken_on": "qa_veto_or_kill",
+    "store": "nulltickets mesh weights under mesh/tracts"
+  }
+}

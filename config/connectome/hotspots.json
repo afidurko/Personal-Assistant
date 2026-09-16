@@ -1,14 +1,16 @@
 {
-  "version": 1,
-  "analogy": "Connection hotspots in higher centers — dense specialized subgraphs",
+  "version": 2,
+  "analogy": "Connection hotspots — dense specialized subgraphs across Brodmann areas (flexible association cortex binding specialized networks)",
   "hotspots": [
     {
       "id": "hotspot.careers",
-      "center": "center.careers",
+      "area": "area.temporal",
+      "columns": ["neuron.careers", "neuron.watch_loop"],
+      "tracts": ["tract.uncinate", "tract.cingulum"],
       "pathway": [
         "sense.careers.listing",
-        "center.careers",
-        "center.qa",
+        "area.temporal",
+        "area.cingulate",
         "switch.careers_submit",
         "motor.jobs"
       ],
@@ -17,14 +19,16 @@
     },
     {
       "id": "hotspot.research",
-      "center": "center.research",
+      "area": "area.temporal",
+      "columns": ["neuron.research", "neuron.semantic"],
+      "tracts": ["tract.cingulum", "tract.arcuate"],
       "pathway": [
         "sense.chat.aaron",
-        "center.chief",
-        "center.router",
-        "center.research",
+        "area.wernicke",
+        "area.dlpfc",
+        "area.temporal",
         "sense.vault.hit",
-        "center.qa",
+        "area.cingulate",
         "switch.autonomy",
         "motor.vault"
       ],
@@ -33,12 +37,14 @@
     },
     {
       "id": "hotspot.docs",
-      "center": "center.docs",
+      "area": "area.apfc",
+      "columns": ["neuron.docs", "neuron.plan_loop"],
+      "tracts": ["tract.cingulum"],
       "pathway": [
         "sense.chat.aaron",
-        "center.chief",
-        "center.router",
-        "center.docs",
+        "area.wernicke",
+        "area.dlpfc",
+        "area.apfc",
         "switch.autonomy",
         "motor.docs"
       ],
@@ -47,11 +53,14 @@
     },
     {
       "id": "hotspot.presence",
-      "center": "center.comms",
+      "area": "area.broca",
+      "columns": ["neuron.asr", "neuron.speak_loop", "neuron.comms"],
+      "tracts": ["tract.arcuate", "tract.corticospinal"],
       "pathway": [
         "sense.audio.transcript",
-        "center.chief",
-        "center.comms",
+        "area.auditory",
+        "area.dlpfc",
+        "area.broca",
         "switch.presence",
         "switch.outbound",
         "motor.speak"
@@ -60,10 +69,12 @@
     },
     {
       "id": "hotspot.life_ops",
-      "center": "center.ops",
+      "area": "area.parietal",
+      "columns": ["neuron.ops", "neuron.life_ops_loop"],
+      "tracts": ["tract.slf"],
       "pathway": [
         "sense.calendar.event",
-        "center.ops",
+        "area.parietal",
         "switch.autonomy",
         "motor.calendar"
       ],
@@ -72,10 +83,13 @@
     },
     {
       "id": "hotspot.email",
-      "center": "center.comms",
+      "area": "area.broca",
+      "columns": ["neuron.language_in", "neuron.comms"],
+      "tracts": ["tract.arcuate"],
       "pathway": [
         "sense.email.thread",
-        "center.comms",
+        "area.wernicke",
+        "area.broca",
         "switch.outbound",
         "motor.text"
       ],
@@ -83,12 +97,14 @@
     },
     {
       "id": "hotspot.vision",
-      "center": "center.vision",
+      "area": "area.visual",
+      "columns": ["neuron.vision"],
+      "tracts": ["tract.ilf", "tract.ifof"],
       "pathway": [
         "sense.vision.detection",
-        "center.vision",
-        "center.chief",
-        "center.memory",
+        "area.visual",
+        "area.dlpfc",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -96,11 +112,13 @@
     },
     {
       "id": "hotspot.jarvis",
-      "center": "center.ops",
+      "area": "area.parietal",
+      "columns": ["neuron.ops", "neuron.life_ops_loop"],
+      "tracts": ["tract.slf", "tract.cingulum"],
       "pathway": [
         "sense.jarvis.result",
-        "center.ops",
-        "center.memory",
+        "area.parietal",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -108,10 +126,12 @@
     },
     {
       "id": "hotspot.vault_recall",
-      "center": "center.memory",
+      "area": "area.mtl",
+      "columns": ["neuron.memory", "neuron.mesh_sync_loop"],
+      "tracts": ["tract.cingulum"],
       "pathway": [
         "sense.vault.hit",
-        "center.memory",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -119,10 +139,12 @@
     },
     {
       "id": "hotspot.mesh_recall",
-      "center": "center.memory",
+      "area": "area.mtl",
+      "columns": ["neuron.memory", "neuron.mesh_sync_loop"],
+      "tracts": ["tract.mesh_callosal"],
       "pathway": [
         "sense.mesh.hit",
-        "center.memory",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -130,13 +152,15 @@
     },
     {
       "id": "hotspot.aaron_face",
-      "center": "center.chief",
+      "area": "area.ofc",
+      "columns": ["neuron.identity_gate", "neuron.boundary"],
+      "tracts": ["tract.uncinate", "tract.cingulum"],
       "pathway": [
         "sense.aaron.face",
-        "center.chief",
+        "area.dlpfc",
         "switch.identity",
         "switch.tasking",
-        "center.memory",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -144,13 +168,15 @@
     },
     {
       "id": "hotspot.aaron_voice",
-      "center": "center.chief",
+      "area": "area.ofc",
+      "columns": ["neuron.identity_gate", "neuron.boundary"],
+      "tracts": ["tract.uncinate", "tract.cingulum"],
       "pathway": [
         "sense.aaron.voice",
-        "center.chief",
+        "area.dlpfc",
         "switch.identity",
         "switch.tasking",
-        "center.memory",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -158,13 +184,15 @@
     },
     {
       "id": "hotspot.ios_camera",
-      "center": "center.vision",
+      "area": "area.visual",
+      "columns": ["neuron.vision", "neuron.enroll_loop"],
+      "tracts": ["tract.ilf", "tract.ifof"],
       "pathway": [
         "sense.ios.camera",
         "switch.ios_capture",
-        "center.vision",
-        "center.chief",
-        "center.memory",
+        "area.visual",
+        "area.dlpfc",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -173,13 +201,16 @@
     },
     {
       "id": "hotspot.ios_mic",
-      "center": "center.comms",
+      "area": "area.auditory",
+      "columns": ["neuron.asr", "neuron.speak_loop"],
+      "tracts": ["tract.arcuate"],
       "pathway": [
         "sense.ios.mic",
         "switch.ios_capture",
-        "center.comms",
-        "center.chief",
-        "center.memory",
+        "area.auditory",
+        "area.broca",
+        "area.dlpfc",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -187,13 +218,15 @@
     },
     {
       "id": "hotspot.aaron_enroll_photos",
-      "center": "center.vision",
+      "area": "area.visual",
+      "columns": ["neuron.enroll_loop", "neuron.vision"],
+      "tracts": ["tract.ilf", "tract.cingulum"],
       "pathway": [
         "sense.photos.library",
-        "center.vision",
-        "center.chief",
+        "area.visual",
+        "area.dlpfc",
         "switch.identity",
-        "center.memory",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -202,14 +235,16 @@
     },
     {
       "id": "hotspot.aaron_enroll_media",
-      "center": "center.vision",
+      "area": "area.visual",
+      "columns": ["neuron.enroll_loop", "neuron.asr"],
+      "tracts": ["tract.ilf", "tract.arcuate"],
       "pathway": [
         "sense.files.media",
-        "center.vision",
-        "center.comms",
-        "center.chief",
+        "area.visual",
+        "area.auditory",
+        "area.dlpfc",
         "switch.identity",
-        "center.memory",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -218,12 +253,14 @@
     },
     {
       "id": "hotspot.knowledge_map",
-      "center": "center.cartography",
+      "area": "area.apfc",
+      "columns": ["neuron.cartographer", "neuron.mesh_sync_loop"],
+      "tracts": ["tract.cingulum", "tract.ifof"],
       "pathway": [
         "sense.swiftguide.map",
-        "center.cartography",
-        "center.memory",
-        "center.qa",
+        "area.apfc",
+        "area.mtl",
+        "area.cingulate",
         "switch.autonomy",
         "motor.vault"
       ],
@@ -232,17 +269,33 @@
     },
     {
       "id": "hotspot.ios_stack",
-      "center": "center.cartography",
+      "area": "area.apfc",
+      "columns": ["neuron.cartographer", "neuron.docs"],
+      "tracts": ["tract.cingulum"],
       "pathway": [
         "sense.swiftguide.map",
-        "center.cartography",
-        "center.docs",
-        "center.qa",
+        "area.apfc",
+        "area.cingulate",
         "switch.autonomy",
         "motor.docs"
       ],
       "side_effects": ["motor.vault", "motor.mesh"],
       "behavior": "recommend_ios_companion_stack_from_swiftguide"
+    },
+    {
+      "id": "hotspot.qa_cycle",
+      "area": "area.cingulate",
+      "columns": ["neuron.qa_cycle", "neuron.qa"],
+      "tracts": ["tract.cingulum", "tract.mesh_callosal"],
+      "pathway": [
+        "sense.chat.aaron",
+        "area.dlpfc",
+        "area.cingulate",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": ["motor.vault"],
+      "behavior": "continuous_conflict_monitoring_qa_loop"
     }
   ]
 }

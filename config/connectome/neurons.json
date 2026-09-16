@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "analogy": "Cortical columns (Mountcastle) / STAM modules — each Cam agent or repetitive loop is a recurrent columnar neuron ensemble inside a Brodmann area",
+  "rules": [
+    "Agents are columns that claim work and may spawn lateral mini-columns (subagents)",
+    "Repetitive loops are recurrent microcircuits that keep firing until hold/kill",
+    "Hebbian mesh writes strengthen tracts used by successful loops",
+    "No column accepts tasking except via Aaron-rooted spikes (OFC + identity gate)"
+  ],
+  "neurons": [
+    {
+      "id": "neuron.chief",
+      "kind": "agent",
+      "area": "area.dlpfc",
+      "role": "chief",
+      "recurrence": "always_on",
+      "notes": "Cam executive column — Aaron-facing"
+    },
+    {
+      "id": "neuron.router",
+      "kind": "agent",
+      "area": "area.dlpfc",
+      "role": "nullboiler",
+      "recurrence": "per_task",
+      "notes": "Policy neuropil — who runs what"
+    },
+    {
+      "id": "neuron.delegate_burst",
+      "kind": "loop",
+      "area": "area.dlpfc",
+      "role": "chief",
+      "recurrence": "unbounded_subagents",
+      "notes": "Interneuron burst — spawn subagent columns"
+    },
+    {
+      "id": "neuron.cartographer",
+      "kind": "agent",
+      "area": "area.apfc",
+      "role": "researcher",
+      "recurrence": "on_map_spike",
+      "notes": "SwiftGuide / mind-map cartography"
+    },
+    {
+      "id": "neuron.docs",
+      "kind": "agent",
+      "area": "area.apfc",
+      "role": "docs",
+      "recurrence": "per_task"
+    },
+    {
+      "id": "neuron.plan_loop",
+      "kind": "loop",
+      "area": "area.apfc",
+      "recurrence": "prospective",
+      "notes": "BA10-style prospective memory — revisit open goals"
+    },
+    {
+      "id": "neuron.boundary",
+      "kind": "agent",
+      "area": "area.ofc",
+      "role": "chief",
+      "recurrence": "standing",
+      "notes": "Valuation against identity/BOUNDARIES.md"
+    },
+    {
+      "id": "neuron.identity_gate",
+      "kind": "loop",
+      "area": "area.ofc",
+      "recurrence": "per_remote_spike",
+      "notes": "Aaron face/voice match threshold loop"
+    },
+    {
+      "id": "neuron.comms",
+      "kind": "agent",
+      "area": "area.broca",
+      "role": "comms",
+      "recurrence": "per_outbound"
+    },
+    {
+      "id": "neuron.speak_loop",
+      "kind": "loop",
+      "area": "area.broca",
+      "recurrence": "converse_turn",
+      "script": "scripts/cam-converse-server.py",
+      "notes": "ASR→reply→TTS repetitive turn loop"
+    },
+    {
+      "id": "neuron.motor_plan",
+      "kind": "loop",
+      "area": "area.premotor",
+      "recurrence": "pre_motor",
+      "notes": "Premotor sequencing before effectors"
+    },
+    {
+      "id": "neuron.effector",
+      "kind": "agent",
+      "area": "area.motor",
+      "recurrence": "spike",
+      "notes": "M1 — fires motor.*"
+    },
+    {
+      "id": "neuron.language_in",
+      "kind": "agent",
+      "area": "area.wernicke",
+      "recurrence": "per_language_spike",
+      "notes": "Comprehend Aaron chat / email / vault text"
+    },
+    {
+      "id": "neuron.semantic",
+      "kind": "loop",
+      "area": "area.wernicke",
+      "recurrence": "associative",
+      "notes": "Multimodal semantic binding"
+    },
+    {
+      "id": "neuron.research",
+      "kind": "agent",
+      "area": "area.temporal",
+      "role": "researcher",
+      "recurrence": "per_task"
+    },
+    {
+      "id": "neuron.careers",
+      "kind": "agent",
+      "area": "area.temporal",
+      "role": "careers",
+      "recurrence": "per_listing"
+    },
+    {
+      "id": "neuron.watch_loop",
+      "kind": "loop",
+      "area": "area.temporal",
+      "role": "careers",
+      "recurrence": "standing_watch",
+      "notes": "Repetitive LinkedIn/Indeed watch cycle"
+    },
+    {
+      "id": "neuron.ops",
+      "kind": "agent",
+      "area": "area.parietal",
+      "role": "ops",
+      "recurrence": "per_task"
+    },
+    {
+      "id": "neuron.life_ops_loop",
+      "kind": "loop",
+      "area": "area.parietal",
+      "role": "ops",
+      "recurrence": "calendar_cycle",
+      "notes": "Jarvis/calendar chore loop"
+    },
+    {
+      "id": "neuron.vision",
+      "kind": "agent",
+      "area": "area.visual",
+      "role": "vision",
+      "recurrence": "per_frame_batch"
+    },
+    {
+      "id": "neuron.enroll_loop",
+      "kind": "loop",
+      "area": "area.visual",
+      "recurrence": "until_enrolled",
+      "notes": "Aaron photo/video enrollment recurrence"
+    },
+    {
+      "id": "neuron.asr",
+      "kind": "agent",
+      "area": "area.auditory",
+      "recurrence": "streaming",
+      "notes": "RIVA / iOS mic transcript column"
+    },
+    {
+      "id": "neuron.memory",
+      "kind": "agent",
+      "area": "area.mtl",
+      "role": "memory-curator",
+      "recurrence": "standing"
+    },
+    {
+      "id": "neuron.mesh_sync_loop",
+      "kind": "loop",
+      "area": "area.mtl",
+      "recurrence": "after_run",
+      "notes": "Hebbian mesh PUT/GET after every completed pathway"
+    },
+    {
+      "id": "neuron.qa",
+      "kind": "agent",
+      "area": "area.cingulate",
+      "role": "qa",
+      "recurrence": "pre_motor"
+    },
+    {
+      "id": "neuron.qa_cycle",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "role": "qa",
+      "recurrence": "continuous",
+      "script": "scripts/qa-loop.py",
+      "notes": "Conflict-monitoring cycle — continuous QA campaign"
+    }
+  ]
+}

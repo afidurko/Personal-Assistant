@@ -213,6 +213,77 @@ svg#mindmap.hidden {
   box-shadow: 0 0 18px rgba(196, 165, 116, 0.3);
 }
 
+.area-core {
+  fill: rgba(27, 42, 38, 0.92);
+  stroke: var(--line);
+  stroke-width: 1.6;
+  transition: 0.2s ease;
+}
+.area-core.lit {
+  fill: rgba(95, 212, 196, 0.32);
+  stroke: var(--teal-bright);
+  filter: drop-shadow(0 0 10px rgba(95, 212, 196, 0.55));
+}
+.area-core.motor-fire {
+  fill: rgba(224, 122, 95, 0.4);
+  stroke: var(--coral);
+}
+.area-core.feedback {
+  fill: rgba(212, 168, 75, 0.35);
+  stroke: var(--gold);
+}
+
+.col-agent {
+  fill: #2a4038;
+  stroke: var(--teal);
+  stroke-width: 1.2;
+}
+.col-loop {
+  fill: #3a3020;
+  stroke: var(--gold);
+  stroke-width: 1.2;
+}
+.col-agent.lit,
+.col-loop.lit {
+  fill: rgba(95, 212, 196, 0.45);
+  stroke: var(--teal-bright);
+}
+.col-agent.looping,
+.col-loop.looping {
+  fill: rgba(212, 168, 75, 0.5);
+  stroke: var(--gold);
+  filter: drop-shadow(0 0 8px rgba(212, 168, 75, 0.7));
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+.tract-fiber {
+  fill: none;
+  stroke: rgba(230, 213, 184, 0.16);
+  stroke-width: 1.8;
+  stroke-dasharray: 3 7;
+}
+.tract-fiber.active {
+  stroke: rgba(95, 212, 196, 0.65);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 6px rgba(95, 212, 196, 0.4));
+  animation: dash 1.1s linear infinite;
+}
+
+svg#cortex,
+svg#nervous,
+svg#mindmap {
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  display: block;
+}
+
+svg#cortex.hidden,
+svg#nervous.hidden,
+svg#mindmap.hidden {
+  display: none;
+}
+
 .live-pill {
   display: inline-flex;
   align-items: center;

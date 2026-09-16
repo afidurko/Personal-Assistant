@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cam Connectome — Brain Map</title>
+  <title>Cam Cortex — Brodmann Brain Map</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -16,28 +16,26 @@
         <img src="../../identity/persona/cam-face.jpg" alt="Cam" />
         <div>
           <h1>Cam</h1>
-          <p>Brain map — nervous system + SwiftGuide mind trees</p>
+          <p>Brodmann cortex · neuron columns · association mesh</p>
         </div>
       </div>
       <div class="header-right">
         <div class="lens-toggle" role="tablist" aria-label="Map lens">
-          <button type="button" class="lens on" data-lens="cns" role="tab" aria-selected="true">Nervous system</button>
+          <button type="button" class="lens on" data-lens="cortex" role="tab" aria-selected="true">Cortex</button>
+          <button type="button" class="lens" data-lens="cns" role="tab" aria-selected="false">Spinal</button>
           <button type="button" class="lens" data-lens="mindmap" role="tab" aria-selected="false">Mind map</button>
         </div>
-        <div class="live-pill"><i></i> Live pathways</div>
+        <div class="live-pill"><i></i> Live mesh</div>
       </div>
     </header>
 
     <div class="workspace">
       <div class="viz-panel">
-        <svg id="nervous" class="lens-view" viewBox="0 0 900 640" role="img" aria-label="Cam nervous system visualization">
+        <!-- Brodmann cortical functional map -->
+        <svg id="cortex" class="lens-view" viewBox="0 0 900 640" role="img" aria-label="Cam Brodmann cortical map">
           <defs>
-            <linearGradient id="spineGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#3d9b8f" stop-opacity="0.35" />
-              <stop offset="100%" stop-color="#e6d5b8" stop-opacity="0.12" />
-            </linearGradient>
-            <radialGradient id="brainWash" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stop-color="#5fd4c4" stop-opacity="0.16" />
+            <radialGradient id="cortexWash" cx="45%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#5fd4c4" stop-opacity="0.14" />
               <stop offset="100%" stop-color="#0c1210" stop-opacity="0" />
             </radialGradient>
             <filter id="softGlow">
@@ -48,18 +46,28 @@
               </feMerge>
             </filter>
           </defs>
+          <ellipse cx="420" cy="300" rx="340" ry="240" fill="url(#cortexWash)" />
+          <!-- stylized hemisphere outline -->
+          <path d="M160 300 C160 120, 320 70, 480 90 C640 110, 760 180, 780 300 C760 430, 640 520, 480 540 C320 560, 160 480, 160 300 Z"
+                fill="none" stroke="rgba(230,213,184,0.28)" stroke-width="2" />
+          <text class="region-title" x="280" y="48">Brodmann functional cortex</text>
+          <text class="label-sm" x="250" y="66">agents + loops = columns · tracts = neural mesh</text>
+          <g id="cx-tracts"></g>
+          <g id="cx-areas"></g>
+          <g id="cx-neurons"></g>
+          <g id="cx-active"></g>
+          <g id="cx-particles"></g>
+        </svg>
 
-          <ellipse cx="450" cy="150" rx="260" ry="150" fill="url(#brainWash)" />
+        <!-- Legacy spinal / CNS -->
+        <svg id="nervous" class="lens-view hidden" viewBox="0 0 900 640" role="img" aria-label="Cam spinal nervous system">
+          <ellipse cx="450" cy="150" rx="260" ry="150" fill="url(#cortexWash)" />
           <path d="M300 160 C300 70, 600 70, 600 160 C640 190, 620 250, 560 260 C520 290, 380 290, 340 260 C280 250, 260 190, 300 160 Z"
                 fill="none" stroke="rgba(230,213,184,0.35)" stroke-width="2" />
-          <text class="region-title" x="400" y="48">Higher centers</text>
-          <text class="label-sm" x="318" y="68">nullclaw · cartography · vault · SwiftGuide</text>
-
+          <text class="region-title" x="400" y="48">Spinal periphery</text>
+          <text class="label-sm" x="330" y="68">sense left · motor right · Brodmann hubs above</text>
           <rect class="spine-glow" x="420" y="280" width="60" height="300" rx="28" />
           <rect x="432" y="290" width="36" height="280" rx="18" fill="#101816" stroke="rgba(95,212,196,0.35)" stroke-width="1.5" />
-          <text class="region-title" x="510" y="320">Spinal cord</text>
-          <text class="label-sm" x="510" y="338">shared periphery · sensory left · motor right</text>
-
           <g id="base-paths"></g>
           <g id="active-paths"></g>
           <g id="nodes"></g>
@@ -67,14 +75,9 @@
           <g id="particles"></g>
         </svg>
 
-        <svg id="mindmap" class="lens-view hidden" viewBox="0 0 900 640" role="img" aria-label="Cam SwiftGuide-style mind map">
-          <defs>
-            <radialGradient id="mapWash" cx="50%" cy="50%" r="55%">
-              <stop offset="0%" stop-color="#c4a574" stop-opacity="0.18" />
-              <stop offset="100%" stop-color="#0c1210" stop-opacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="450" cy="320" r="220" fill="url(#mapWash)" />
+        <!-- SwiftGuide mind map -->
+        <svg id="mindmap" class="lens-view hidden" viewBox="0 0 900 640" role="img" aria-label="Cam SwiftGuide mind map">
+          <circle cx="450" cy="320" r="220" fill="url(#cortexWash)" />
           <text class="region-title" x="330" y="36">Mind map lens · SwiftGuide pattern</text>
           <text class="label-sm" x="300" y="54">Classification · Architecture · 2026 stack · Cam pathways</text>
           <g id="mm-links"></g>
@@ -86,21 +89,19 @@
 
       <aside class="side">
         <section class="panel">
-          <h2>Repos in this nervous system</h2>
+          <h2>Repos / mesh corpus</h2>
           <div class="repos" id="repos"></div>
         </section>
-
         <section class="panel">
           <h2>Fire a sensory spike</h2>
           <div class="controls" id="controls"></div>
           <div class="status-bar" style="margin-top:0.7rem">
             <span class="chip on" id="chip-autonomy">autonomy ON</span>
             <span class="chip" id="chip-kill">kill armed</span>
-            <span class="chip" id="chip-loop">feedback loop</span>
-            <span class="chip" id="chip-lens">lens: CNS</span>
+            <span class="chip" id="chip-loop">column loops</span>
+            <span class="chip on" id="chip-lens">lens: cortex</span>
           </div>
         </section>
-
         <section class="panel">
           <h2>Live signal log</h2>
           <div class="log" id="log"></div>
@@ -109,7 +110,7 @@
     </div>
 
     <footer>
-      <span>Berg et al. Cell 2026 connectome · SwiftGuide mind-map cartography · Aaron sole task-giver</span>
+      <span>Brodmann areas · Mountcastle columns · association tracts (Jung et al.) · Aaron sole task-giver</span>
       <span>visualizations/connectome</span>
     </footer>
   </div>
