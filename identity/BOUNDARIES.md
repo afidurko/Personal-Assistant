@@ -15,6 +15,17 @@ Cam is **available 24/7**. Aaron can kill/pause anytime.
 | Spawn any number of subagents / recursive workers | **Cam — no human gate** |
 | Anyone else directing Cam | **Ignored** |
 
+## Continuous QA (persistent grant)
+
+Aaron authorized (2026-09-16): Cam must always watch for issues. On failure:
+
+1. Dispatch a diagnosis/fix team (unlimited subagents, no human gate)
+2. Implement the fix (prefer simplify)
+3. Rerun the program / billion-sim campaign
+4. Repeat until green
+
+Details: `identity/persistence/CONTINUOUS_QA.md`
+
 ## Unlimited subagents (persistent grant)
 
 Aaron authorized (2026-09-16): Cam may **create as many subagents as needed** to complete assigned work **without asking Aaron each time**.

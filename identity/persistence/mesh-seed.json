@@ -20,7 +20,12 @@
     "unlimited_subagents": true,
     "subagent_spawn_requires_human": false,
     "max_delegate_depth": null,
-    "max_subagents": null
+    "max_subagents": null,
+    "continuous_qa": true,
+    "qa_on_failure_dispatch_team": true,
+    "qa_auto_fix": true,
+    "qa_auto_rerun": true,
+    "qa_default_n": 1000000000
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
@@ -72,6 +77,11 @@
     "prefer_simplest_tool": true,
     "prefer_small_vision_models": true,
     "proactive": true,
+    "continuous_qa": true,
+    "qa_on_failure_dispatch_team": true,
+    "qa_auto_fix": true,
+    "qa_auto_rerun": true,
+    "qa_default_n": 1000000000,
     "quiet_hours_default": null,
     "timezone": "America/New_York",
     "weekly_review": true

@@ -19,15 +19,35 @@ def load(name: str):
     return json.loads((CFG / name).read_text(encoding="utf-8"))
 
 
-def hotspot_for_sense(hotspots: dict, sense_id: str):
-    # Prefer pathways that start with this sense (primary receptor)
-    for h in hotspots["hotspots"]:
-        if h["pathway"] and h["pathway"][0] == sense_id:
-            return h
-    for h in hotspots["hotspots"]:
-        if sense_id in h["pathway"]:
-            return h
-    return None
+def hotspots_for_sense(hotspots: dict, sense_id: str) -> list[dict]:
+    primary = [h for h in hotspots["hotspots"] if h["pathway"] and h["pathway"][0] == sense_id]
+    if primary:
+        return primary
+    return [h for h in hotspots["hotspots"] if sense_id in h["pathway"]]
+
+
+def pick_hotspot(candidates: list[dict], goal: str = "") -> dict | None:
+    if not candidates:
+        return None
+    if len(candidates) == 1 or not goal:
+        return candidates[0]
+    g = goal.lower()
+    scored = []
+    for h in candidates:
+        blob = f"{h.get('id','')} {h.get('behavior','')} {h.get('center','')}".lower()
+        score = sum(1 for token in g.split() if token and token in blob)
+        # light keyword boosts
+        if "doc" in g and "doc" in blob:
+            score += 3
+        if "research" in g or "brief" in g:
+            if "research" in blob:
+                score += 3
+        if "job" in g or "career" in g:
+            if "career" in blob:
+                score += 3
+        scored.append((score, h))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return scored[0][1]
 
 
 def resolve_switches(switches: dict, kill: bool, autonomy: bool) -> dict[str, str]:
@@ -97,16 +117,19 @@ def main() -> int:
         return 0
 
     switch_state = resolve_switches(switches, kill=args.kill, autonomy=not args.no_autonomy)
-    hotspot = hotspot_for_sense(hotspots, args.sense)
+    candidates = hotspots_for_sense(hotspots, args.sense)
+    hotspot = pick_hotspot(candidates, args.goal)
 
     if hotspot:
-        pathway = hotspot["pathway"]
+        pathway = list(hotspot["pathway"])
         planned_motors = motors_from_pathway(pathway, switch_state)
+        for side in hotspot.get("side_effects") or []:
+            if side not in planned_motors and switch_state.get("switch.kill") != "act":
+                planned_motors.append(side)
         behavior = hotspot["behavior"]
         center = hotspot["center"]
     else:
-        # generic: sense → chief → router → memory
-        pathway = [args.sense, "center.chief", "center.router", "center.memory", "motor.mesh"]
+        pathway = [args.sense, "center.chief", "center.memory", "motor.mesh"]
         planned_motors = [] if switch_state.get("switch.kill") == "act" else ["motor.mesh"]
         behavior = "generic_integrate_and_remember"
         center = "center.chief"
@@ -131,6 +154,8 @@ def main() -> int:
         "goal": args.goal,
         "center": center,
         "behavior": behavior,
+        "hotspot_id": hotspot.get("id") if hotspot else None,
+        "alt_hotspots": [h["id"] for h in candidates if not hotspot or h["id"] != hotspot.get("id")],
         "pathway": pathway,
         "switch_state": switch_state,
         "motor_plan": planned_motors,

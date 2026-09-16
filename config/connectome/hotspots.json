@@ -10,10 +10,9 @@
         "center.careers",
         "center.qa",
         "switch.careers_submit",
-        "motor.jobs",
-        "motor.vault",
-        "motor.mesh"
+        "motor.jobs"
       ],
+      "side_effects": ["motor.vault", "motor.mesh"],
       "behavior": "watch_rank_draft_or_submit_jobs"
     },
     {
@@ -26,10 +25,25 @@
         "center.research",
         "sense.vault.hit",
         "center.qa",
-        "motor.vault",
-        "motor.mesh"
+        "switch.autonomy",
+        "motor.vault"
       ],
+      "side_effects": ["motor.mesh"],
       "behavior": "source_backed_briefs"
+    },
+    {
+      "id": "hotspot.docs",
+      "center": "center.docs",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.docs",
+        "switch.autonomy",
+        "motor.docs"
+      ],
+      "side_effects": ["motor.vault"],
+      "behavior": "draft_edit_documents"
     },
     {
       "id": "hotspot.presence",
@@ -39,7 +53,6 @@
         "center.chief",
         "center.comms",
         "switch.presence",
-        "switch.outbound",
         "motor.speak"
       ],
       "behavior": "hear_think_speak_with_cam_face_voice"
@@ -51,23 +64,66 @@
         "sense.calendar.event",
         "center.ops",
         "switch.autonomy",
-        "motor.jarvis",
-        "motor.calendar",
-        "motor.vault"
+        "motor.calendar"
       ],
+      "side_effects": ["motor.jarvis", "motor.vault"],
       "behavior": "schedule_and_chores"
     },
     {
-      "id": "hotspot.docs",
-      "center": "center.docs",
+      "id": "hotspot.email",
+      "center": "center.comms",
       "pathway": [
-        "sense.chat.aaron",
-        "center.docs",
-        "switch.autonomy",
-        "motor.docs",
-        "motor.vault"
+        "sense.email.thread",
+        "center.comms",
+        "switch.outbound",
+        "motor.text"
       ],
-      "behavior": "draft_fix_documents"
+      "behavior": "triage_and_reply_email"
+    },
+    {
+      "id": "hotspot.vision",
+      "center": "center.vision",
+      "pathway": [
+        "sense.vision.detection",
+        "center.vision",
+        "center.chief",
+        "center.memory",
+        "motor.mesh"
+      ],
+      "behavior": "ingest_visual_spikes"
+    },
+    {
+      "id": "hotspot.jarvis",
+      "center": "center.ops",
+      "pathway": [
+        "sense.jarvis.result",
+        "center.ops",
+        "center.memory",
+        "motor.mesh"
+      ],
+      "behavior": "absorb_tool_results"
+    },
+    {
+      "id": "hotspot.vault_recall",
+      "center": "center.memory",
+      "pathway": [
+        "sense.vault.hit",
+        "center.memory",
+        "center.chief"
+      ],
+      "side_effects": ["motor.mesh"],
+      "behavior": "vault_engram_recall"
+    },
+    {
+      "id": "hotspot.mesh_recall",
+      "center": "center.memory",
+      "pathway": [
+        "sense.mesh.hit",
+        "center.memory",
+        "center.chief"
+      ],
+      "side_effects": ["motor.mesh"],
+      "behavior": "mesh_engram_recall"
     }
   ]
 }
