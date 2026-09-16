@@ -37,12 +37,29 @@ function resolveWorkspaceFromNode(
   return nodes.find((n) => n.id === nodeId)?.workspaceId ?? null;
 }
 
+function workspaceAliases(workspaceId: string): string[] {
+  const aliases = new Set<string>([workspaceId]);
+  if (workspaceId.startsWith('workspace-')) {
+    aliases.add(workspaceId.slice('workspace-'.length));
+  } else {
+    aliases.add(`workspace-${workspaceId}`);
+  }
+  return [...aliases];
+}
+
 function resolveNodeFromWorkspace(
   nodes: BrainNode[],
   workspaceId: string | null,
 ): string | null {
   if (!workspaceId) return null;
-  return nodes.find((n) => n.workspaceId === workspaceId)?.id ?? null;
+  const aliases = workspaceAliases(workspaceId);
+  return (
+    nodes.find(
+      (n) =>
+        (n.workspaceId && aliases.includes(n.workspaceId)) ||
+        aliases.some((a) => n.id === `ws-${a}` || n.id === a),
+    )?.id ?? null
+  );
 }
 
 export const useMeshStore = create<MeshStore>((set, get) => ({

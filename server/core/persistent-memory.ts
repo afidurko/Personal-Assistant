@@ -152,6 +152,14 @@ export class PersistentMemory {
       this.traces = this.traces.filter((t) => !drop.has(t.id));
     }
 
+    const semantics = this.traces
+      .filter((t) => t.kind === 'semantic')
+      .sort((a, b) => b.salience - a.salience);
+    if (semantics.length > 80) {
+      const drop = new Set(semantics.slice(80).map((t) => t.id));
+      this.traces = this.traces.filter((t) => !drop.has(t.id));
+    }
+
     // Also prune non-scan traces that are extremely weak and fully decayed.
     this.traces = this.traces.filter(
       (t) => !(t.salience < WEAK_SALIENCE && t.decay > 0.9 && t.kind !== 'semantic'),

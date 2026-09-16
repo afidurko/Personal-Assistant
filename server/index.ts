@@ -24,7 +24,11 @@ const orchestrator = new ScanOrchestrator({
 await orchestrator.init();
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'personal-assistant', scanning: orchestrator.isScanning() });
+  res.json({
+    ok: true,
+    service: 'personal-assistant',
+    scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+  });
 });
 
 app.get('/api/state', (_req, res) => {

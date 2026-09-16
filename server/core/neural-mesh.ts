@@ -88,7 +88,7 @@ export class NeuralMesh {
       nodes.push({
         id: `ws-${kind}`,
         label: meta.name,
-        workspaceId: kind,
+        workspaceId: `workspace-${kind}`,
         region: meta.region,
         x,
         y,
@@ -160,8 +160,10 @@ export class NeuralMesh {
     const activated = new Set<string>();
 
     for (const snap of snapshots) {
-      const node = this.nodes.find((n) => n.workspaceId === snap.id || n.id === `ws-${snap.id}`);
+      const node = this.findWorkspaceNode(snap.id, snap.kind);
       if (!node) continue;
+      // Keep workspaceId aligned with live snapshot ids for UI linking.
+      node.workspaceId = snap.id;
 
       const prev = node.activation;
       const target = scoreToActivation(snap.score);
@@ -292,6 +294,42 @@ export class NeuralMesh {
     }
 
     return [...related];
+  }
+
+  /** Resolve a workspace node from snapshot id (`workspace-health`) or kind (`health`). */
+  findWorkspaceNode(workspaceIdOrKind: string, kind?: string): BrainNode | undefined {
+    const candidates = [
+      workspaceIdOrKind,
+      kind,
+      workspaceIdOrKind.startsWith('workspace-')
+        ? workspaceIdOrKind.slice('workspace-'.length)
+        : `workspace-${workspaceIdOrKind}`,
+      kind ? `workspace-${kind}` : undefined,
+    ].filter(Boolean) as string[];
+
+    return this.nodes.find((n) => {
+      if (!n.workspaceId && !n.id.startsWith('ws-')) return false;
+      if (candidates.includes(n.workspaceId ?? '')) return true;
+      if (candidates.some((c) => n.id === `ws-${c}` || n.id === c)) return true;
+      return false;
+    });
+  }
+
+  /** Flash workspace nodes into scanning status for live brain-map color. */
+  markScanning(): void {
+    for (const node of this.nodes) {
+      if (!node.workspaceId && !node.id.startsWith('ws-')) continue;
+      if (node.id.startsWith('hub-')) continue;
+      node.status = 'scanning';
+      node.color = STATUS_COLORS.scanning;
+      node.activation = Math.max(node.activation, 0.7);
+    }
+    const cortex = this.nodes.find((n) => n.id === 'hub-cortex');
+    if (cortex) {
+      cortex.status = 'scanning';
+      cortex.color = STATUS_COLORS.scanning;
+      cortex.activation = Math.max(cortex.activation, 0.55);
+    }
   }
 
   colorForStatus(status: ScanStatus): string {

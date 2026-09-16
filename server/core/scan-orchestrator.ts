@@ -87,6 +87,8 @@ export class ScanOrchestrator extends EventEmitter {
   async runOnce(): Promise<ScanCycleResult> {
     await this.ensureReady();
     this.scanning = true;
+    // Paint the brain map scanning colors while workspaces run.
+    this.mesh.markScanning();
     this.emit('tick', { cycle: this.cycleCount + 1, at: new Date().toISOString() });
     this.emitState();
 
@@ -113,13 +115,15 @@ export class ScanOrchestrator extends EventEmitter {
 
     for (const snap of snapshots) {
       allFindings.push(...snap.findings);
+      const meshNode = this.mesh.findWorkspaceNode(snap.id, snap.kind);
+      const nodeId = meshNode?.id ?? `ws-${snap.kind}`;
       for (const finding of snap.findings) {
         const salience = severityToSalience(finding.severity);
         const trace = await this.memory.write({
           kind: 'scan',
           content: `${finding.title}: ${finding.detail}`,
           workspaceIds: [snap.id],
-          nodeIds: finding.relatedNodeIds ?? [`ws-${snap.id}`],
+          nodeIds: finding.relatedNodeIds ?? [nodeId],
           salience,
           createdAt: finding.createdAt || new Date().toISOString(),
           lastAccessedAt: new Date().toISOString(),
@@ -133,7 +137,7 @@ export class ScanOrchestrator extends EventEmitter {
         kind: 'scan',
         content: `Scan ${snap.name}: score=${snap.score} status=${snap.status} findings=${snap.findings.length}`,
         workspaceIds: [snap.id],
-        nodeIds: [`ws-${snap.id}`],
+        nodeIds: [nodeId],
         salience: Math.max(0.08, 0.2 + (100 - snap.score) / 200),
         createdAt: new Date().toISOString(),
         lastAccessedAt: new Date().toISOString(),
@@ -172,8 +176,9 @@ export class ScanOrchestrator extends EventEmitter {
       nodes,
       edges,
       workspaces: this.workspaces,
-      memory: this.memory.getTraces(),
-      scanning: this.scanning,
+      memory: this.memory.getTraces().slice(0, 120),
+      // Continuous loop armed, or a cycle currently in flight.
+      scanning: this.running || this.scanning,
       lastCycleAt: this.lastCycleAt,
       cycleCount: this.cycleCount,
     };
@@ -200,11 +205,7 @@ export class ScanOrchestrator extends EventEmitter {
   }
 
   focusWorkspace(workspaceId: string): { nodeId: string; workspaceIds: string[] } {
-    const { nodes } = this.mesh.getState();
-    const node =
-      nodes.find((n) => n.workspaceId === workspaceId) ??
-      nodes.find((n) => n.id === `ws-${workspaceId}`) ??
-      nodes.find((n) => n.id === workspaceId);
+    const node = this.mesh.findWorkspaceNode(workspaceId);
     if (!node) return { nodeId: workspaceId, workspaceIds: [workspaceId] };
     return this.focusNode(node.id);
   }
