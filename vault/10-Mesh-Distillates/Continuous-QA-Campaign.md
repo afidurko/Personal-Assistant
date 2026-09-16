@@ -7,44 +7,34 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 - `mesh/facts.continuous_qa = true`
 - Entrypoint: `python3 scripts/qa-loop.py --n 1000000000 --cycles 2`
 
-## What was working (pre-rewrite)
-- 100,000,000 sims: **0 failures** (~1.19M sims/s, 4 workers)
-- Kill-switch + non-Aaron holds exercised correctly
-- Feedback sinks validated on success routes
-- Unlimited subagent spawn authority persisted
-
-## What was not working / gaps found
-| Issue | Severity | Fix |
-|---|---|---|
-| Hotspot collision: `sense.chat.aaron` kept only one pathway (docs overwrote research) | high | Multi-option pathway table; pick among hotspots |
-| Orphan senses (email, vision, jarvis, vault, mesh) used generic fallback | med | Dedicated hotspots |
-| Pathway chained motors without synapse edges (18 missing) | med | Simplified pathways + filled synapses |
-| Default path used missing `center.router→center.memory` edge | med | Default now `chief→memory→mesh` |
-| Simulator default N still 100M while QA mandate is 1B | low | Default N = 1_000_000_000 |
-| No automated detect→dispatch→fix→rerun loop | high | `scripts/qa-loop.py` |
-
-## Rewrite (simulator v2)
-- Precompute per-sense pathway tables (no JSON in hot loop beyond worker boot)
-- Multi-hotspot support per sense
-- One-shot integrity scan + `--strict-edges`
-- Dropped unused dataclass / index noise
-- Smoke: 5,000,000 @ ~1.28M sims/s, **0 fail**, **0 missing edges**
-
-## Improvement suggestions (next loops)
-1. Weight sense sampling by real traffic mix (chat-heavy) instead of uniform
-2. Progress heartbeats every 50M sims for long campaigns
-3. CI job: `--n 1000000 --strict-edges` on every push
-4. Model side_effects as parallel fan-out spikes (not chained motors)
-5. Connect viz live counters to sim worker heartbeats
-
-## Campaign log
-Results land in `vault/10-Mesh-Distillates/` and `qa-cycles/`.
+## Campaign results
 
 ### Pass 1 (1B) — DONE · green
 - File: `connectome-sim-1b-pass1.json`
-- Passed 1,000,000,000 / failed 0
-- ~1.79M sims/s · ~559s · EXIT 0
+- 1,000,000,000 / 0 fail · ~1.79M sims/s · ~559s · EXIT 0
 
-### Pass 2 (1B, v2+audit) — RUNNING
+### Pass 2 (1B, v2+audit, strict-edges) — DONE · green
 - File: `connectome-sim-1b-pass2.json`
-- Simulator: v2-simplified with switch gating + feedback synapses
+- 1,000,000,000 / 0 fail · **0 missing edges** · ~2.64M sims/s · ~379s · EXIT 0
+- Throughput up ~47% vs pass 1 after rewrite/simplify
+
+## What was fixed this loop
+| Issue | Severity | Fix |
+|---|---|---|
+| Hotspot collision on chat (research vs docs) | high | Multi-option pathways + goal/`--hotspot` router |
+| Orphan senses | med | Dedicated hotspots |
+| Missing synapse / feedback edges | med | Filled synapses; real motor→memory feedback |
+| `side_effects` bypassed holds | high | Route gates via `requires_switch` + kill |
+| `motor.mesh` ignored kill | high | Added `switch.kill` |
+| Presence/vision/jarvis missing switches | high | Pathways include required switches |
+| No continuous QA automation | high | `scripts/qa-loop.py` |
+
+## Standing improvements (always watch)
+1. CI: `--n 1000000 --strict-edges` on push
+2. Heartbeats every 50M sims
+3. Traffic-weighted sense sampling
+4. Shared pathway validator module
+5. Mesh-mirror of QA dispatch events
+
+## Loop status
+**Green.** Continuous QA remains always-on; next failure auto-dispatches a fix team and reruns.

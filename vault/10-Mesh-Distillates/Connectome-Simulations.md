@@ -13,33 +13,47 @@ Aaron: run billion-scale live-action connectome simulations; spawn as many subag
 ## Harness
 - `scripts/connectome-simulate.py` (v2 simplified + audit fixes)
 - `scripts/qa-loop.py` — detect → dispatch team → fix → rerun
-- Workers = parallel subagent processes
 
-## Pass 1 — 1,000,000,000 (pre-rewrite harness in-flight binary)
+## Pass 1 — 1,000,000,000 (pre-rewrite harness)
 Source: `connectome-sim-1b-pass1.json`
 
 | Metric | Value |
 |---|---|
-| Simulations | 1,000,000,000 |
 | Passed / Failed | **1,000,000,000 / 0** |
-| Kill-switch holds | 2,000,738 |
-| Non-Aaron holds | 111,209 |
-| Feedback OK | 997,888,053 |
+| Kill holds / Non-Aaron | 2,000,738 / 111,209 |
 | Throughput | ~1.79M sims/sec |
-| Wall time | ~559s (4 workers) |
+| Wall time | ~559s |
 | Exit | 0 |
 
-**Verdict:** green — antagonistic switches behaved; no pathway failures.
+## Pass 2 — 1,000,000,000 (v2 + audit, `--strict-edges`)
+Source: `connectome-sim-1b-pass2.json`
 
-## Baseline (100,000,000 — earlier)
-| Passed / Failed | 100,000,000 / 0 |
-| Throughput | ~1.19M sims/sec |
+| Metric | Value |
+|---|---|
+| Passed / Failed | **1,000,000,000 / 0** |
+| Missing edges | **0** |
+| Kill holds / Non-Aaron | 1,998,716 / 110,697 |
+| Feedback OK | 997,890,587 |
+| Throughput | ~2.64M sims/sec |
+| Wall time | ~379s |
+| Simulator | v2-simplified |
+| Exit | 0 |
 
-## Simulator v2 smoke (post-rewrite / post-audit)
-- 5M + 2M + 1M strict-edge smokes: **0 fail**, **0 missing edges**
-- Route regressions: `--no-autonomy` / `--kill` → empty motors
+**Verdict:** both billion-sim passes green. Rewrite improved throughput (~47% faster) with stricter graph integrity.
 
-## Pass 2
-In progress → `connectome-sim-1b-pass2.json` (v2 + audit-fixed graph).
+## What works
+- Sense→center→switch→motor→feedback pathways
+- Kill + non-Aaron antagonistic holds
+- Multi-hotspot chat routing (research + docs)
+- Orphan-sense coverage (email, vision, jarvis, vault, mesh)
+- Continuous QA loop + unlimited subagents (no human gate)
+- Route gating: `--no-autonomy` / `--kill` silence motors correctly
+
+## Remaining improvements (standing watch)
+1. CI smoke: `--n 1000000 --strict-edges` on every push
+2. Progress heartbeats every 50M sims
+3. Traffic-weighted sense sampling (chat-heavy)
+4. Shared `validate_pathway()` for route + sim
+5. Mirror QA cycle events into mesh persistence
 
 See `Continuous-QA-Campaign.md` and `qa-cycles/AUDIT-FIX-20260916.md`.
