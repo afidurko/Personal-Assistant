@@ -14,13 +14,14 @@ and outbound contact (text / FaceTime / call) when needed.
 | [nullhub](https://github.com/nullclaw/nullhub) | **Human control plane** | Install, monitor, approve, mission control — where *you* override the team |
 | [Assistant- / OpenClaw](https://github.com/afidurko/Assistant-) | **Connector inspiration only** | Rich SMS / voice-call / companion-app patterns; too heavy to be the core |
 | [lucida](https://github.com/claritylab/lucida) | **Role ideas only** | Speech/vision “service team” concept; Java/Thrift stack rejected for simplicity |
-| [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools (weather, files, conversions, health helpers); vendored as submodule — not the brain |
+| [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools (weather, files, conversions, health helpers); submodule — not the brain |
+| [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection / pose / tracking for explicit media; replaces Lucida vision services; submodule — not always-on camera |
 
 **Rule:** if two repos solve the same problem, pick the Null path (Zig, tiny,
 explicit contracts). Borrow OpenClaw/Lucida *behaviors* as external channel
 plugins or agent roles — never fork their full runtimes into this repo.
-Jarvis plugins are tools the `ops` role may call; they do not own memory,
-scheduling, or human gates.
+Jarvis and PaddleDetection are tools specialist roles may call; they do not own
+memory, scheduling, or human gates.
 
 ## Mental model
 
@@ -37,12 +38,14 @@ You (human) ──override / approve──► nullhub
                     ▼                 ▼                 ▼
               Chief Agent      Specialist roles    Subagents…
               (nullclaw)       (research, docs,    (recursive
-                               jobs, comms, ops…)   delegate)
+                               jobs, comms, ops,    delegate)
+                               vision…)
                                       │
-                                      ▼
-                               Jarvis CLI plugins
-                               (integrations/jarvis)
-                               local deterministic tools
+                    ┌─────────────────┴─────────────────┐
+                    ▼                                   ▼
+             Jarvis CLI plugins                 PaddleDetection
+             (integrations/jarvis)              (integrations/paddledetection)
+             local deterministic tools          vision on approved media
 ```
 
 - **Tracker = source of truth** (nulltickets)
@@ -60,6 +63,7 @@ You (human) ──override / approve──► nullhub
 | `docs` | Draft/fix documents; diff before apply |
 | `careers` | Job search, applications, outreach drafts (approval-gated) |
 | `comms` | SMS / iMessage / call / FaceTime bridges when you want contact |
+| `vision` | PaddleDetection on approved media; never ambient surveillance |
 | `qa` | Verifies outputs, sources, and that human gates were honored |
 | `memory-curator` | Keeps the neural mesh coherent; merges/dedupes memories |
 
@@ -75,8 +79,9 @@ All agents share one mesh, not private silos:
 1. **Durable facts** → nulltickets `store` namespaces (`mesh/facts`, `mesh/people`, `mesh/prefs`, `mesh/projects`)
 2. **Session recall** → each nullclaw instance’s memory engine (default SQLite hybrid)
 3. **Jarvis local memory** → `integrations/jarvis` `memory.json` is a *cache*; sync into `mesh/jarvis` via `scripts/sync-jarvis-memory.py`
-4. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
-5. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
+4. **Vision distillates** → PaddleDetection outputs summarized into `mesh/vision` (no raw frames by default)
+5. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
+6. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
 
 This is the “neural meshing network”: a shared, searchable, versioned memory
 plus a durable work graph — not a separate ML training stack.
@@ -111,16 +116,18 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 
 1. Capture who you are (`identity/`) — **in progress**
 2. Keep Jarvis available as local CLI utilities (`integrations/jarvis`) — **added**
-3. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
-4. Seed pipelines: research, docs, careers, life-ops (all with human gates)
-5. Wire mesh namespaces + curator role (+ Jarvis memory sync)
-6. Add connectors one at a time with approval tests
-7. Only then expand specialist depth / recursive subagents
+3. Keep PaddleDetection for vision (`integrations/paddledetection` @ `release/2.9`) — **added**
+4. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
+5. Seed pipelines: research, docs, careers, life-ops, vision (all with human gates)
+6. Wire mesh namespaces + curator role (+ Jarvis / vision sync)
+7. Add connectors one at a time with approval tests
+8. Only then expand specialist depth / recursive subagents
 
 ## Non-goals (v1)
 
-- Training custom neural nets
+- Training custom neural nets in this repo (use upstream tools when you choose)
 - Replacing nullhub UI
 - Porting Lucida ASR/IMM services as-is
-- Making Jarvis the primary agent runtime (it stays a toolbelt)
+- Making Jarvis or PaddleDetection the primary agent runtime
+- Always-on camera / unsupervised video monitoring
 - Autonomous spending or unsupervised external outreach

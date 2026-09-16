@@ -11,6 +11,8 @@ Until you answer section 0 of the questionnaire, the team assumes **maximum caut
 - Sharing personal data with third parties
 - Deleting data or irreversibly changing systems
 - Contacting people on your behalf
+- Starting a camera, continuous video monitor, or analyzing call/FaceTime video
+- Running vision models on other people’s photos without your consent
 
 ## Allowed without approval (proposed defaults — confirm)
 
@@ -19,6 +21,8 @@ Until you answer section 0 of the questionnaire, the team assumes **maximum caut
 - Internal task bookkeeping in nulltickets
 - Updating mesh memory with non-sensitive notes you already provided
 - Reminding you of deadlines you set
+- Jarvis deterministic CLI lookups you request in-session
+- Vision inference on images **you explicitly attach/approve for that task** (no camera)
 
 ## Contact policy (proposed)
 
