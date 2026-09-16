@@ -28,6 +28,7 @@ export function useMeshSocket() {
   const setScanning = useMeshStore((s) => s.setScanning);
   const upsertMemory = useMeshStore((s) => s.upsertMemory);
   const selectNode = useMeshStore((s) => s.selectNode);
+  const selectConcept = useMeshStore((s) => s.selectConcept);
 
   useEffect(() => {
     unmountedRef.current = false;
@@ -77,8 +78,22 @@ export function useMeshSocket() {
           break;
         }
         case 'node_focus': {
-          const payload = msg.payload as { nodeId?: string };
+          const payload = msg.payload as { nodeId?: string; conceptId?: string };
           if (payload?.nodeId) selectNode(payload.nodeId);
+          if (payload?.conceptId) selectConcept(payload.conceptId);
+          break;
+        }
+        case 'guide_focus': {
+          const payload = msg.payload as {
+            nodeId?: string;
+            conceptId?: string;
+            guideStep?: number;
+          };
+          if (payload?.conceptId) selectConcept(payload.conceptId);
+          if (payload?.nodeId) selectNode(payload.nodeId);
+          if (typeof payload?.guideStep === 'number') {
+            setStateFromServer({ guideStep: payload.guideStep, activeConceptId: payload.conceptId });
+          }
           break;
         }
         default:
@@ -130,7 +145,7 @@ export function useMeshSocket() {
       wsRef.current = null;
       setConnected(false);
     };
-  }, [setConnected, setStateFromServer, setScanning, upsertMemory, selectNode]);
+  }, [setConnected, setStateFromServer, setScanning, upsertMemory, selectNode, selectConcept]);
 
   const send = (message: WsClientMessage) => {
     const ws = wsRef.current;
@@ -156,6 +171,13 @@ export function useMeshSocket() {
         type: 'open_workspace',
         payload: { workspaceId, id: workspaceId },
       }),
+    openConcept: (conceptId: string) => {
+      selectConcept(conceptId);
+      return send({ type: 'open_concept', payload: { conceptId, id: conceptId } });
+    },
+    guideStart: () => send({ type: 'guide_start' }),
+    guideNext: () => send({ type: 'guide_next' }),
+    guidePrev: () => send({ type: 'guide_prev' }),
   };
 }
 

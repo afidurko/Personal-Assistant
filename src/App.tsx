@@ -2,11 +2,21 @@ import { BrainMap } from '@/components/BrainMap';
 import { WorkspacePanel } from '@/components/WorkspacePanel';
 import { MemoryRail } from '@/components/MemoryRail';
 import { ScanControls } from '@/components/ScanControls';
+import { SwiftGuidePanel } from '@/components/SwiftGuidePanel';
 import { useMeshSocket } from '@/hooks/useMeshSocket';
 import { useMeshStore } from '@/store/meshStore';
 
 export default function App() {
-  const { startScan, stopScan, focusNode, openWorkspace } = useMeshSocket();
+  const {
+    startScan,
+    stopScan,
+    focusNode,
+    openWorkspace,
+    openConcept,
+    guideStart,
+    guideNext,
+    guidePrev,
+  } = useMeshSocket();
   const scanning = useMeshStore((s) => s.scanning);
   const cycleCount = useMeshStore((s) => s.cycleCount);
   const lastCycleAt = useMeshStore((s) => s.lastCycleAt);
@@ -19,8 +29,8 @@ export default function App() {
           <p className="brand">Personal Assistant</p>
           <h1 className="headline">Neural mesh for continuous system health</h1>
           <p className="lede">
-            Watch workspaces light up as the brain scans architecture, vulns, drift,
-            and improvements in one living map.
+            Scan workspaces light the brain; Swift Guide diamonds walk concepts that
+            mesh into those same regions.
           </p>
           <div className="hero-cta">
             <ScanControls
@@ -31,6 +41,9 @@ export default function App() {
               onStart={() => startScan()}
               onStop={() => stopScan()}
             />
+            <button type="button" className="btn" onClick={() => guideStart()}>
+              Swift Guide tour
+            </button>
             <span
               className={`connection-dot${connected ? ' online' : ''}`}
               title={connected ? 'Connected' : 'Reconnecting'}
@@ -45,8 +58,15 @@ export default function App() {
         <BrainMap onFocusNode={(id) => focusNode(id)} />
       </header>
 
-      <div className="detail-grid">
+      <div className="detail-grid three">
         <WorkspacePanel onOpenWorkspace={(id) => openWorkspace(id)} />
+        <SwiftGuidePanel
+          onOpenConcept={(id) => openConcept(id)}
+          onGuideStart={() => guideStart()}
+          onGuideNext={() => guideNext()}
+          onGuidePrev={() => guidePrev()}
+          onOpenWorkspace={(id) => openWorkspace(id)}
+        />
         <MemoryRail />
       </div>
     </div>

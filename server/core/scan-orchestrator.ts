@@ -8,6 +8,11 @@ import type {
   ScanCycleResult,
   WorkspaceSnapshot,
 } from '../../shared/types.js';
+import {
+  SWIFT_GUIDE_BY_ID,
+  SWIFT_GUIDE_CONCEPTS,
+  type SwiftConceptId,
+} from '../../shared/swiftGuide.js';
 import { NeuralMesh } from './neural-mesh.js';
 import { PersistentMemory } from './persistent-memory.js';
 import { runAllScans } from '../workspaces/index.js';
@@ -43,6 +48,8 @@ export class ScanOrchestrator extends EventEmitter {
   private workspaces: WorkspaceSnapshot[] = [];
   private scanning = false;
   private ready = false;
+  private activeConceptId: string | null = null;
+  private guideStep = 0;
 
   constructor(options: ScanOrchestratorOptions = {}) {
     super();
@@ -181,6 +188,8 @@ export class ScanOrchestrator extends EventEmitter {
       scanning: this.running || this.scanning,
       lastCycleAt: this.lastCycleAt,
       cycleCount: this.cycleCount,
+      activeConceptId: this.activeConceptId,
+      guideStep: this.guideStep,
     };
   }
 
@@ -208,6 +217,57 @@ export class ScanOrchestrator extends EventEmitter {
     const node = this.mesh.findWorkspaceNode(workspaceId);
     if (!node) return { nodeId: workspaceId, workspaceIds: [workspaceId] };
     return this.focusNode(node.id);
+  }
+
+  async openConcept(conceptId: string): Promise<{
+    nodeId: string;
+    conceptId: string;
+    workspaceIds: string[];
+    guideStep: number;
+  }> {
+    await this.ensureReady();
+    const concept = SWIFT_GUIDE_CONCEPTS.find((c) => c.id === conceptId);
+    if (!concept) {
+      return { nodeId: conceptId, conceptId, workspaceIds: [], guideStep: this.guideStep };
+    }
+    const focused = this.mesh.focusConcept(concept.id);
+    this.activeConceptId = concept.id;
+    this.guideStep = concept.tourOrder;
+    await this.memory.write({
+      kind: 'procedural',
+      content: `Swift Guide: explored ${concept.title} — ${concept.explore}`,
+      workspaceIds: focused.workspaceIds,
+      nodeIds: [focused.nodeId],
+      salience: 0.55,
+      createdAt: new Date().toISOString(),
+      lastAccessedAt: new Date().toISOString(),
+      decay: 0,
+      tags: ['swift-guide', concept.id, 'tour', ...concept.tags],
+    });
+    await this.mesh.save();
+    this.emit('memory_update', this.memory.getTraces().slice(0, 20));
+    this.emitState();
+    return { ...focused, guideStep: this.guideStep };
+  }
+
+  async guideStart(): Promise<ReturnType<ScanOrchestrator['openConcept']>> {
+    return this.openConcept(SWIFT_GUIDE_CONCEPTS[0].id);
+  }
+
+  async guideNext(): Promise<ReturnType<ScanOrchestrator['openConcept']> | null> {
+    const current = this.activeConceptId
+      ? SWIFT_GUIDE_BY_ID[this.activeConceptId as SwiftConceptId]
+      : null;
+    const nextId = current?.nextId ?? SWIFT_GUIDE_CONCEPTS[0]?.id;
+    if (!nextId) return null;
+    return this.openConcept(nextId);
+  }
+
+  async guidePrev(): Promise<ReturnType<ScanOrchestrator['openConcept']> | null> {
+    if (!this.activeConceptId) return this.guideStart();
+    const idx = SWIFT_GUIDE_CONCEPTS.findIndex((c) => c.id === this.activeConceptId);
+    const prev = SWIFT_GUIDE_CONCEPTS[Math.max(0, idx - 1)];
+    return this.openConcept(prev.id);
   }
 
   reinforce(from: string, to: string, delta = 0.05): void {

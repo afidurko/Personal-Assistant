@@ -6,6 +6,7 @@ import type {
   NeuralMeshState,
   WorkspaceSnapshot,
 } from '@shared/types';
+import { SWIFT_GUIDE_BY_ID, type SwiftConceptId } from '@shared/swiftGuide';
 
 const emptyState: NeuralMeshState = {
   nodes: [],
@@ -15,6 +16,8 @@ const emptyState: NeuralMeshState = {
   scanning: false,
   lastCycleAt: null,
   cycleCount: 0,
+  activeConceptId: null,
+  guideStep: 0,
 };
 
 export interface MeshStore extends NeuralMeshState {
@@ -25,6 +28,7 @@ export interface MeshStore extends NeuralMeshState {
   setStateFromServer: (state: Partial<NeuralMeshState> | NeuralMeshState) => void;
   selectNode: (nodeId: string | null) => void;
   selectWorkspace: (workspaceId: string | null) => void;
+  selectConcept: (conceptId: string | null) => void;
   setScanning: (scanning: boolean) => void;
   upsertMemory: (traces: MemoryTrace[]) => void;
 }
@@ -34,7 +38,14 @@ function resolveWorkspaceFromNode(
   nodeId: string | null,
 ): string | null {
   if (!nodeId) return null;
-  return nodes.find((n) => n.id === nodeId)?.workspaceId ?? null;
+  const node = nodes.find((n) => n.id === nodeId);
+  if (node?.workspaceId) return node.workspaceId;
+  if (node?.conceptId) {
+    const concept = SWIFT_GUIDE_BY_ID[node.conceptId as SwiftConceptId];
+    const kind = concept?.relatedWorkspaceKinds[0];
+    return kind ? `workspace-${kind}` : null;
+  }
+  return null;
 }
 
 function workspaceAliases(workspaceId: string): string[] {
@@ -84,14 +95,19 @@ export const useMeshStore = create<MeshStore>((set, get) => ({
         next.lastCycleAt !== undefined ? next.lastCycleAt : prev.lastCycleAt,
       cycleCount:
         typeof next.cycleCount === 'number' ? next.cycleCount : prev.cycleCount,
+      activeConceptId:
+        next.activeConceptId !== undefined ? next.activeConceptId : prev.activeConceptId,
+      guideStep: typeof next.guideStep === 'number' ? next.guideStep : prev.guideStep,
     });
   },
 
   selectNode: (nodeId) => {
     const { nodes } = get();
+    const node = nodeId ? nodes.find((n) => n.id === nodeId) : null;
     set({
       selectedNodeId: nodeId,
       selectedWorkspaceId: resolveWorkspaceFromNode(nodes, nodeId),
+      activeConceptId: node?.conceptId ?? get().activeConceptId,
     });
   },
 
@@ -100,6 +116,24 @@ export const useMeshStore = create<MeshStore>((set, get) => ({
     set({
       selectedWorkspaceId: workspaceId,
       selectedNodeId: resolveNodeFromWorkspace(nodes, workspaceId),
+    });
+  },
+
+  selectConcept: (conceptId) => {
+    const { nodes } = get();
+    const node = conceptId
+      ? nodes.find((n) => n.conceptId === conceptId || n.id === `swift-${conceptId}`)
+      : null;
+    const concept = conceptId
+      ? SWIFT_GUIDE_BY_ID[conceptId as SwiftConceptId]
+      : null;
+    set({
+      activeConceptId: conceptId,
+      guideStep: concept?.tourOrder ?? get().guideStep,
+      selectedNodeId: node?.id ?? null,
+      selectedWorkspaceId: concept
+        ? `workspace-${concept.relatedWorkspaceKinds[0]}`
+        : get().selectedWorkspaceId,
     });
   },
 

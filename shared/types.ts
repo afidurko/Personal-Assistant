@@ -49,6 +49,8 @@ export interface BrainNode {
   id: string;
   label: string;
   workspaceId: string | null;
+  /** Optional Swift Guide concept id when this node is a tour concept */
+  conceptId?: string | null;
   region: BrainRegion;
   x: number; // 0–1 normalized
   y: number;
@@ -58,6 +60,8 @@ export interface BrainNode {
   radius: number;
   tags: string[];
   interactive: boolean;
+  /** Distinguishes workspace/hub vs Swift Guide concept nodes */
+  kind?: 'workspace' | 'hub' | 'concept';
 }
 
 export type BrainRegion =
@@ -100,6 +104,9 @@ export interface NeuralMeshState {
   scanning: boolean;
   lastCycleAt: string | null;
   cycleCount: number;
+  /** Active Swift Guide concept (tour), if any */
+  activeConceptId?: string | null;
+  guideStep?: number;
 }
 
 export interface ScanCycleResult {
@@ -111,13 +118,29 @@ export interface ScanCycleResult {
 }
 
 export interface WsServerMessage {
-  type: 'state' | 'scan_tick' | 'scan_complete' | 'memory_update' | 'node_focus';
+  type:
+    | 'state'
+    | 'scan_tick'
+    | 'scan_complete'
+    | 'memory_update'
+    | 'node_focus'
+    | 'guide_focus';
   payload: unknown;
   at: string;
 }
 
 export interface WsClientMessage {
-  type: 'start_scan' | 'stop_scan' | 'focus_node' | 'open_workspace' | 'reinforce' | 'query_memory';
+  type:
+    | 'start_scan'
+    | 'stop_scan'
+    | 'focus_node'
+    | 'open_workspace'
+    | 'reinforce'
+    | 'query_memory'
+    | 'open_concept'
+    | 'guide_next'
+    | 'guide_prev'
+    | 'guide_start';
   payload?: unknown;
 }
 

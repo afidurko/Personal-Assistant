@@ -84,6 +84,16 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
         if (n.workspaceId === selectedWorkspaceId) set.add(n.id);
       }
     }
+    // Concept nodes light related workspace nodes
+    const selected = nodes.find((n) => n.id === selectedNodeId);
+    if (selected?.conceptId) {
+      for (const e of edges) {
+        if (e.from === selectedNodeId || e.to === selectedNodeId) {
+          set.add(e.from);
+          set.add(e.to);
+        }
+      }
+    }
     return set;
   }, [selectedNodeId, selectedWorkspaceId, edges, nodes]);
 
@@ -175,7 +185,10 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
 
         {nodes.map((node) => {
           const { cx, cy, r } = toSvg(node);
-          const color = STATUS_COLORS[node.status] ?? node.color ?? STATUS_COLORS.idle;
+          const isConcept = node.kind === 'concept' || Boolean(node.conceptId);
+          const color = isConcept
+            ? (node.color || STATUS_COLORS.idle)
+            : (STATUS_COLORS[node.status] ?? node.color ?? STATUS_COLORS.idle);
           const selected = selectedNodeId === node.id;
           const dimmed = linkedIds !== null && !linkedIds.has(node.id);
           const glowClass =
@@ -187,11 +200,12 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
           const glowR =
             r *
             (node.status === 'critical' ? 2.8 : node.status === 'warning' ? 2.3 : 1.8);
+          const diamond = r * 1.15;
 
           return (
             <g
               key={node.id}
-              className={`brain-node${selected ? ' selected' : ''}${node.status === 'scanning' || (scanning && node.workspaceId) ? ' scanning' : ''}${dimmed ? ' dimmed' : ''}`}
+              className={`brain-node${selected ? ' selected' : ''}${isConcept ? ' concept' : ''}${node.status === 'scanning' || (scanning && node.workspaceId) ? ' scanning' : ''}${dimmed ? ' dimmed' : ''}`}
               transform={`translate(${cx} ${cy})`}
               onClick={() => handleNodeClick(node)}
               onMouseEnter={(e) => {
@@ -204,7 +218,7 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
                 setTooltip({
                   x: e.clientX - rect.left,
                   y: e.clientY - rect.top,
-                  label: node.label,
+                  label: isConcept ? `Swift · ${node.label}` : node.label,
                   status: node.status,
                   score: ws?.score,
                 });
@@ -213,7 +227,8 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
             >
               {(node.status === 'critical' ||
                 node.status === 'warning' ||
-                selected) && (
+                selected ||
+                isConcept) && (
                 <circle
                   className={`node-glow ${glowClass}`}
                   r={glowR}
@@ -221,17 +236,46 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
                   filter="url(#soft-glow)"
                 />
               )}
-              <circle
-                className="node-ring"
-                r={r + 4 + node.activation * 4}
-                stroke={color}
-              />
-              <circle
-                className="node-core"
-                r={selected ? r * 1.2 : r}
-                fill={color}
-                opacity={0.85 + node.activation * 0.15}
-              />
+              {isConcept ? (
+                <>
+                  <rect
+                    className="node-ring concept-diamond"
+                    x={-diamond}
+                    y={-diamond}
+                    width={diamond * 2}
+                    height={diamond * 2}
+                    rx={2}
+                    transform="rotate(45)"
+                    stroke={color}
+                    fill="none"
+                  />
+                  <rect
+                    className="node-core concept-diamond"
+                    x={-r * 0.85}
+                    y={-r * 0.85}
+                    width={r * 1.7}
+                    height={r * 1.7}
+                    rx={1.5}
+                    transform="rotate(45)"
+                    fill={color}
+                    opacity={0.9}
+                  />
+                </>
+              ) : (
+                <>
+                  <circle
+                    className="node-ring"
+                    r={r + 4 + node.activation * 4}
+                    stroke={color}
+                  />
+                  <circle
+                    className="node-core"
+                    r={selected ? r * 1.2 : r}
+                    fill={color}
+                    opacity={0.85 + node.activation * 0.15}
+                  />
+                </>
+              )}
             </g>
           );
         })}
@@ -261,6 +305,10 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
             {label}
           </div>
         ))}
+        <div className="legend-item">
+          <span className="legend-swatch diamond" style={{ background: '#9adbc8' }} />
+          Swift concept
+        </div>
       </div>
     </div>
   );

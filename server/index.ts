@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { WsClientMessage, WsServerMessage } from '../shared/types.js';
+import { SWIFT_GUIDE_CONCEPTS, isSwiftConceptNodeId } from '../shared/swiftGuide.js';
 import { ScanOrchestrator } from './core/scan-orchestrator.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -68,9 +69,41 @@ app.get('/api/memory', (req, res) => {
   res.json(orchestrator.queryMemory(q));
 });
 
-app.post('/api/nodes/:id/focus', (req, res) => {
-  const result = orchestrator.focusNode(req.params.id);
+app.post('/api/nodes/:id/focus', async (req, res) => {
+  const id = req.params.id;
+  if (isSwiftConceptNodeId(id)) {
+    const conceptId = id.replace(/^swift-/, '');
+    const result = await orchestrator.openConcept(conceptId);
+    res.json(result);
+    return;
+  }
+  const result = orchestrator.focusNode(id);
   res.json(result);
+});
+
+app.get('/api/guide', (_req, res) => {
+  const state = orchestrator.getFullState();
+  res.json({
+    concepts: SWIFT_GUIDE_CONCEPTS,
+    activeConceptId: state.activeConceptId ?? null,
+    guideStep: state.guideStep ?? 0,
+  });
+});
+
+app.post('/api/guide/start', async (_req, res) => {
+  res.json(await orchestrator.guideStart());
+});
+
+app.post('/api/guide/next', async (_req, res) => {
+  res.json(await orchestrator.guideNext());
+});
+
+app.post('/api/guide/prev', async (_req, res) => {
+  res.json(await orchestrator.guidePrev());
+});
+
+app.post('/api/guide/concepts/:id', async (req, res) => {
+  res.json(await orchestrator.openConcept(req.params.id));
 });
 
 const server = createServer(app);
@@ -114,9 +147,17 @@ wss.on('connection', (socket) => {
         const payload = msg.payload as { id?: string; nodeId?: string } | undefined;
         const id = payload?.nodeId ?? payload?.id;
         if (id) {
-          const focused = orchestrator.focusNode(id);
-          send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          if (isSwiftConceptNodeId(id)) {
+            const conceptId = id.replace(/^swift-/, '');
+            const focused = await orchestrator.openConcept(conceptId);
+            send(socket, 'guide_focus', focused);
+            send(socket, 'node_focus', focused);
+            broadcast('state', orchestrator.getFullState());
+          } else {
+            const focused = orchestrator.focusNode(id);
+            send(socket, 'node_focus', focused);
+            broadcast('state', orchestrator.getFullState());
+          }
         }
         break;
       }
@@ -125,6 +166,43 @@ wss.on('connection', (socket) => {
         const id = payload?.workspaceId ?? payload?.id;
         if (id) {
           const focused = orchestrator.focusWorkspace(id);
+          send(socket, 'node_focus', focused);
+          broadcast('state', orchestrator.getFullState());
+        }
+        break;
+      }
+      case 'open_concept': {
+        const conceptId =
+          (msg.payload as { conceptId?: string; id?: string } | undefined)?.conceptId ??
+          (msg.payload as { id?: string } | undefined)?.id;
+        if (conceptId) {
+          const focused = await orchestrator.openConcept(conceptId);
+          send(socket, 'guide_focus', focused);
+          send(socket, 'node_focus', focused);
+          broadcast('state', orchestrator.getFullState());
+        }
+        break;
+      }
+      case 'guide_start': {
+        const focused = await orchestrator.guideStart();
+        send(socket, 'guide_focus', focused);
+        send(socket, 'node_focus', focused);
+        broadcast('state', orchestrator.getFullState());
+        break;
+      }
+      case 'guide_next': {
+        const focused = await orchestrator.guideNext();
+        if (focused) {
+          send(socket, 'guide_focus', focused);
+          send(socket, 'node_focus', focused);
+          broadcast('state', orchestrator.getFullState());
+        }
+        break;
+      }
+      case 'guide_prev': {
+        const focused = await orchestrator.guidePrev();
+        if (focused) {
+          send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
           broadcast('state', orchestrator.getFullState());
         }

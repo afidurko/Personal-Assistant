@@ -12,6 +12,11 @@ import {
   type WorkspaceKind,
   type WorkspaceSnapshot,
 } from '../../shared/types.js';
+import {
+  SWIFT_GUIDE_CONCEPTS,
+  conceptNodeId,
+  type SwiftConceptId,
+} from '../../shared/swiftGuide.js';
 import { layoutForRegion } from './brain-map-layout.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -56,6 +61,7 @@ export class NeuralMesh {
       this.seedDefaultTopology();
     }
     if (this.nodes.length === 0) this.seedDefaultTopology();
+    this.ensureSwiftGuideLayer();
     this.loaded = true;
   }
 
@@ -75,6 +81,9 @@ export class NeuralMesh {
     for (const hub of HUB_NODES) {
       regionCounts.set(hub.region, (regionCounts.get(hub.region) ?? 0) + 1);
     }
+    for (const concept of SWIFT_GUIDE_CONCEPTS) {
+      regionCounts.set(concept.region, (regionCounts.get(concept.region) ?? 0) + 1);
+    }
 
     const regionIndex = new Map<BrainRegion, number>();
     const nodes: BrainNode[] = [];
@@ -89,6 +98,8 @@ export class NeuralMesh {
         id: `ws-${kind}`,
         label: meta.name,
         workspaceId: `workspace-${kind}`,
+        conceptId: null,
+        kind: 'workspace',
         region: meta.region,
         x,
         y,
@@ -110,6 +121,8 @@ export class NeuralMesh {
         id: hub.id,
         label: hub.label,
         workspaceId: null,
+        conceptId: null,
+        kind: 'hub',
         region: hub.region,
         x,
         y,
@@ -118,6 +131,29 @@ export class NeuralMesh {
         color: STATUS_COLORS.idle,
         radius: 0.055,
         tags: hub.tags,
+        interactive: true,
+      });
+    }
+
+    for (const concept of SWIFT_GUIDE_CONCEPTS) {
+      const total = regionCounts.get(concept.region) ?? 1;
+      const idx = regionIndex.get(concept.region) ?? 0;
+      regionIndex.set(concept.region, idx + 1);
+      const { x, y } = layoutForRegion(concept.region, idx, total);
+      nodes.push({
+        id: conceptNodeId(concept.id),
+        label: concept.title,
+        workspaceId: null,
+        conceptId: concept.id,
+        kind: 'concept',
+        region: concept.region,
+        x,
+        y,
+        activation: 0.12,
+        status: 'idle',
+        color: concept.color,
+        radius: 0.032,
+        tags: ['swift-guide', concept.id, ...concept.tags],
         interactive: true,
       });
     }
@@ -151,8 +187,126 @@ export class NeuralMesh {
       edge('ws-updates', 'ws-health', 'hebbian', 0.2),
     ];
 
+    for (let i = 0; i < SWIFT_GUIDE_CONCEPTS.length - 1; i++) {
+      const from = conceptNodeId(SWIFT_GUIDE_CONCEPTS[i].id);
+      const to = conceptNodeId(SWIFT_GUIDE_CONCEPTS[i + 1].id);
+      edges.push(edge(from, to, 'suggests', 0.55, 'tour next'));
+    }
+    for (const concept of SWIFT_GUIDE_CONCEPTS) {
+      const from = conceptNodeId(concept.id);
+      for (const kind of concept.relatedWorkspaceKinds) {
+        edges.push(edge(from, `ws-${kind}`, 'correlates', 0.5, `${concept.title} ↔ ${kind}`));
+      }
+      edges.push(edge(from, 'hub-cortex', 'feeds', 0.3, 'concept → cortex'));
+    }
+
     this.nodes = nodes;
     this.edges = edges;
+  }
+
+  /** Merge Swift Guide nodes/edges into an existing persisted mesh. */
+  ensureSwiftGuideLayer(): void {
+    const haveConcept = this.nodes.some((n) => n.kind === 'concept' || n.id.startsWith('swift-'));
+    if (haveConcept) {
+      for (const n of this.nodes) {
+        if (n.id.startsWith('swift-') && !n.kind) n.kind = 'concept';
+        if (n.id.startsWith('ws-') && !n.kind) n.kind = 'workspace';
+        if (n.id.startsWith('hub-') && !n.kind) n.kind = 'hub';
+      }
+      return;
+    }
+
+    const regionCounts = new Map<BrainRegion, number>();
+    for (const n of this.nodes) {
+      regionCounts.set(n.region, (regionCounts.get(n.region) ?? 0) + 1);
+    }
+    for (const concept of SWIFT_GUIDE_CONCEPTS) {
+      regionCounts.set(concept.region, (regionCounts.get(concept.region) ?? 0) + 1);
+    }
+    const regionIndex = new Map<BrainRegion, number>();
+    for (const n of this.nodes) {
+      regionIndex.set(n.region, (regionIndex.get(n.region) ?? 0) + 1);
+      if (n.id.startsWith('ws-') && !n.kind) n.kind = 'workspace';
+      if (n.id.startsWith('hub-') && !n.kind) n.kind = 'hub';
+    }
+
+    for (const concept of SWIFT_GUIDE_CONCEPTS) {
+      const total = regionCounts.get(concept.region) ?? 1;
+      const idx = regionIndex.get(concept.region) ?? 0;
+      regionIndex.set(concept.region, idx + 1);
+      const { x, y } = layoutForRegion(concept.region, idx, total);
+      this.nodes.push({
+        id: conceptNodeId(concept.id),
+        label: concept.title,
+        workspaceId: null,
+        conceptId: concept.id,
+        kind: 'concept',
+        region: concept.region,
+        x,
+        y,
+        activation: 0.12,
+        status: 'idle',
+        color: concept.color,
+        radius: 0.032,
+        tags: ['swift-guide', concept.id, ...concept.tags],
+        interactive: true,
+      });
+    }
+
+    for (let i = 0; i < SWIFT_GUIDE_CONCEPTS.length - 1; i++) {
+      const from = conceptNodeId(SWIFT_GUIDE_CONCEPTS[i].id);
+      const to = conceptNodeId(SWIFT_GUIDE_CONCEPTS[i + 1].id);
+      if (!this.edges.some((e) => e.from === from && e.to === to)) {
+        this.edges.push(edge(from, to, 'suggests', 0.55, 'tour next'));
+      }
+    }
+    for (const concept of SWIFT_GUIDE_CONCEPTS) {
+      const from = conceptNodeId(concept.id);
+      for (const kind of concept.relatedWorkspaceKinds) {
+        const to = `ws-${kind}`;
+        if (!this.edges.some((e) => e.from === from && e.to === to)) {
+          this.edges.push(edge(from, to, 'correlates', 0.5, `${concept.title} ↔ ${kind}`));
+        }
+      }
+      if (!this.edges.some((e) => e.from === from && e.to === 'hub-cortex')) {
+        this.edges.push(edge(from, 'hub-cortex', 'feeds', 0.3, 'concept → cortex'));
+      }
+    }
+  }
+
+  focusConcept(conceptId: SwiftConceptId): {
+    nodeId: string;
+    conceptId: SwiftConceptId;
+    workspaceIds: string[];
+  } {
+    const nodeId = conceptNodeId(conceptId);
+    const node = this.nodes.find((n) => n.id === nodeId);
+    if (!node) {
+      return { nodeId, conceptId, workspaceIds: [] };
+    }
+    node.activation = clamp01(node.activation + 0.45);
+    node.status = 'scanning';
+    node.color = SWIFT_GUIDE_CONCEPTS.find((c) => c.id === conceptId)?.color ?? node.color;
+    this.spreadActivation(nodeId, 0.3);
+
+    const workspaceIds = new Set<string>();
+    for (const meshEdge of this.edges) {
+      if (meshEdge.from !== nodeId && meshEdge.to !== nodeId) continue;
+      const otherId = meshEdge.from === nodeId ? meshEdge.to : meshEdge.from;
+      const other = this.nodes.find((n) => n.id === otherId);
+      if (other?.workspaceId) workspaceIds.add(other.workspaceId);
+    }
+    const concept = SWIFT_GUIDE_CONCEPTS.find((c) => c.id === conceptId);
+    for (const kind of concept?.relatedWorkspaceKinds ?? []) {
+      workspaceIds.add(`workspace-${kind}`);
+      const wsNode = this.nodes.find((n) => n.id === `ws-${kind}`);
+      if (wsNode) {
+        wsNode.activation = clamp01(wsNode.activation + 0.25);
+        this.reinforceEdge(nodeId, wsNode.id, 0.04);
+      }
+    }
+
+    return { nodeId, conceptId, workspaceIds: [...workspaceIds] };
   }
 
   applyScanResults(snapshots: WorkspaceSnapshot[]): Record<string, number> {
