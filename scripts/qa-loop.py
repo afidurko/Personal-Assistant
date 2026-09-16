@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Continuous QA loop — detect → dispatch team → fix → rerun.
 
-Always-on mandate (Aaron 2026-09-16). Default campaign: 1_000_000_000 sims.
-Never waits for human mid-loop. Logs every cycle under qa-cycles/.
+Aaron mandate 2026-09-16. Default campaign N=1_000_000_000.
+Never waits for human mid-loop. Logs under vault/10-Mesh-Distillates/qa-cycles/.
 """
 
 from __future__ import annotations
@@ -39,21 +39,31 @@ def run_sim(n: int, workers: int, seed: int, out: Path) -> dict:
         "--out",
         str(out),
     ]
-    print(f"[qa] dispatch sim: {' '.join(cmd)}", flush=True)
+    print(f"[qa] sim: n={n:,} workers={workers} seed={seed}", flush=True)
     t0 = time.perf_counter()
-    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=False)
-    elapsed = time.perf_counter() - t0
-    summary = {}
+    proc = subprocess.run(cmd, cwd=str(ROOT))
+    wall = time.perf_counter() - t0
+    summary: dict = {}
     if out.exists():
         summary = json.loads(out.read_text(encoding="utf-8"))
     summary["qa_exit_code"] = proc.returncode
-    summary["qa_wall_s"] = elapsed
+    summary["qa_wall_s"] = wall
     return summary
 
 
-def dispatch_team(issue: str, cycle_dir: Path) -> dict:
-    """Record a virtual diagnosis team (unlimited subagents, no human gate)."""
+def log_issue(cycle_dir: Path, issue: str, detail: dict) -> None:
+    (cycle_dir / "issue.json").write_text(
+        json.dumps({"at": utc_now(), "issue": issue, "detail": detail}, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+    print(f"[qa] issue logged: {issue}", flush=True)
+
+
+def dispatch_team(cycle_dir: Path, issue: str) -> dict:
+    """Record diagnosis/fix team event — unlimited subagents, no human gate."""
     team = {
+        "event": "team_dispatch",
         "dispatched_at": utc_now(),
         "issue": issue,
         "roles": [
@@ -64,17 +74,29 @@ def dispatch_team(issue: str, cycle_dir: Path) -> dict:
         ],
         "authority": "unlimited_subagents",
         "human_gate": False,
+        "await_human": False,
     }
     (cycle_dir / "team-dispatch.json").write_text(
         json.dumps(team, indent=2) + "\n", encoding="utf-8"
     )
-    print(f"[qa] team dispatched for: {issue}", flush=True)
+    print(f"[qa] team dispatched: {issue}", flush=True)
     return team
 
 
 def diagnose(summary: dict) -> list[dict]:
-    """Produce concrete findings from a sim summary + static config scan."""
     findings: list[dict] = []
+    code = summary.get("qa_exit_code", 1)
+
+    if not summary.get("n") and code != 0:
+        findings.append(
+            {
+                "severity": "high",
+                "kind": "sim_crash_or_no_output",
+                "detail": {"exit_code": code},
+            }
+        )
+        return findings
+
     if summary.get("failed", 0) > 0:
         findings.append(
             {
@@ -86,7 +108,7 @@ def diagnose(summary: dict) -> list[dict]:
                 },
             }
         )
-    missing = summary.get("missing_edges_sample") or []
+
     if summary.get("missing_edges_count", 0) > 0:
         findings.append(
             {
@@ -94,41 +116,44 @@ def diagnose(summary: dict) -> list[dict]:
                 "kind": "missing_synapses",
                 "detail": {
                     "count": summary["missing_edges_count"],
-                    "sample": missing,
+                    "sample": summary.get("missing_edges_sample") or [],
                 },
                 "fix": "add_missing_edges",
             }
         )
-    if summary.get("qa_exit_code", 0) == 2:
+
+    if code == 2:
         findings.append(
             {
                 "severity": "high",
                 "kind": "integrity_fail",
-                "detail": "build_tables hard errors",
+                "detail": "connectome build_tables hard errors",
             }
         )
+
     return findings
 
 
-def apply_fixes(findings: list[dict], cycle_dir: Path) -> list[str]:
-    """Auto-apply safe structural fixes. Prefer simplify."""
+def apply_simplify_fixes(findings: list[dict], cycle_dir: Path) -> list[str]:
+    """Apply detectable structural fixes only. Prefer simplify."""
     applied: list[str] = []
+    if not any(f.get("fix") == "add_missing_edges" for f in findings):
+        (cycle_dir / "fixes-applied.json").write_text(
+            json.dumps({"applied": applied, "note": "no_detectable_auto_fix"})
+            + "\n",
+            encoding="utf-8",
+        )
+        return applied
+
     synapses_path = CFG / "synapses.json"
-    for f in findings:
-        if f.get("fix") != "add_missing_edges":
-            continue
-        sample = f["detail"].get("sample") or []
-        data = json.loads(synapses_path.read_text(encoding="utf-8"))
-        existing = {(e["from"], e["to"]) for e in data["edges"]}
-        added = 0
-        for item in sample:
-            # format: missing_edge:a->b
-            if not item.startswith("missing_edge:"):
-                continue
-            pair = item[len("missing_edge:") :]
-            if "->" not in pair:
-                continue
-            a, b = pair.split("->", 1)
+    hotspots = json.loads((CFG / "hotspots.json").read_text(encoding="utf-8"))
+    data = json.loads(synapses_path.read_text(encoding="utf-8"))
+    existing = {(e["from"], e["to"]) for e in data["edges"]}
+    added = 0
+
+    for h in hotspots["hotspots"]:
+        path = h["pathway"]
+        for a, b in zip(path, path[1:]):
             if (a, b) in existing:
                 continue
             data["edges"].append(
@@ -136,74 +161,69 @@ def apply_fixes(findings: list[dict], cycle_dir: Path) -> list[str]:
                     "from": a,
                     "to": b,
                     "weight": 1.0,
-                    "source": "qa-loop-auto",
+                    "source": "qa-loop-simplify",
                 }
             )
             existing.add((a, b))
             added += 1
-        if added:
-            synapses_path.write_text(
-                json.dumps(data, indent=2) + "\n", encoding="utf-8"
-            )
-            applied.append(f"added_{added}_synapse_edges")
-            (cycle_dir / "fix-synapses.json").write_text(
-                json.dumps({"added": added, "sample": sample}, indent=2) + "\n",
-                encoding="utf-8",
-            )
-    # Also scan all hotspot pathways for any missing edges not in sample.
-    if any(f.get("fix") == "add_missing_edges" for f in findings):
-        hotspots = json.loads((CFG / "hotspots.json").read_text(encoding="utf-8"))
-        data = json.loads(synapses_path.read_text(encoding="utf-8"))
-        existing = {(e["from"], e["to"]) for e in data["edges"]}
-        added = 0
-        for h in hotspots["hotspots"]:
-            path = h["pathway"]
-            for a, b in zip(path, path[1:]):
-                if (a, b) not in existing:
-                    data["edges"].append(
-                        {
-                            "from": a,
-                            "to": b,
-                            "weight": 1.0,
-                            "source": "qa-loop-hotspot-fill",
-                        }
-                    )
-                    existing.add((a, b))
-                    added += 1
-        if added:
-            synapses_path.write_text(
-                json.dumps(data, indent=2) + "\n", encoding="utf-8"
-            )
-            applied.append(f"filled_{added}_hotspot_edges")
+
+    if added:
+        synapses_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        applied.append(f"filled_{added}_hotspot_edges")
+        (cycle_dir / "fix-synapses.json").write_text(
+            json.dumps({"added": added}, indent=2) + "\n", encoding="utf-8"
+        )
+
     (cycle_dir / "fixes-applied.json").write_text(
         json.dumps({"applied": applied}, indent=2) + "\n", encoding="utf-8"
     )
     return applied
 
 
-def write_suggestions(cycle_dir: Path, summary: dict, findings: list[dict]) -> None:
+def metrics_from(summary: dict) -> dict:
+    return {
+        "n": summary.get("n"),
+        "passed": summary.get("passed"),
+        "failed": summary.get("failed"),
+        "kill_holds": summary.get("kill_holds"),
+        "non_aaron_holds": summary.get("non_aaron_holds"),
+        "feedback_ok": summary.get("feedback_ok"),
+        "missing_edges_count": summary.get("missing_edges_count"),
+        "sims_per_sec": summary.get("sims_per_sec"),
+        "elapsed_s": summary.get("elapsed_s"),
+        "qa_wall_s": summary.get("qa_wall_s"),
+        "workers": summary.get("workers"),
+        "first_errors": summary.get("first_errors", []),
+        "exit_code": summary.get("qa_exit_code"),
+    }
+
+
+def write_suggestions(
+    cycle_dir: Path, summary: dict, findings: list[dict], green: bool
+) -> None:
     lines = [
         "# QA cycle suggestions",
         "",
+        f"- status: {'green' if green else 'needs_work'}",
         f"- sims: {summary.get('n')}",
-        f"- passed: {summary.get('passed')} failed: {summary.get('failed')}",
+        f"- passed/failed: {summary.get('passed')}/{summary.get('failed')}",
         f"- throughput: {summary.get('sims_per_sec')} sims/s",
         f"- missing_edges: {summary.get('missing_edges_count')}",
         "",
         "## Findings",
     ]
     if not findings:
-        lines.append("- none — campaign green")
+        lines.append("- none")
     for f in findings:
         lines.append(f"- [{f['severity']}] {f['kind']}: {f.get('detail')}")
     lines += [
         "",
-        "## Improvement ideas",
-        "- Cover orphan senses (email, vision, jarvis, mesh, vault) with real hotspots",
-        "- Validate synapse edges in the hot loop under a --strict-edges mode for CI",
-        "- Add progress heartbeats every N million sims for long campaigns",
-        "- Weight sense sampling by real traffic mix instead of uniform",
-        "- Keep simulator v2 path tables; avoid re-parsing JSON inside workers",
+        "## After green (standing improvements)",
+        "- CI job: `--n 1_000_000 --strict-edges` smoke + nightly billion",
+        "- Progress heartbeats every N million sims for long campaigns",
+        "- Traffic-weighted sense sampling instead of uniform",
+        "- Promote `--strict-edges` as QA-loop default once synapses stay green",
+        "- Mirror each team_dispatch / cycle summary into mesh persistence",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
@@ -218,53 +238,71 @@ def main() -> int:
     args = p.parse_args()
 
     CYCLES.mkdir(parents=True, exist_ok=True)
-    overall_exit = 0
     stamp = utc_now()
+    overall_exit = 0
 
     for c in range(1, args.cycles + 1):
         cycle_dir = CYCLES / f"{stamp}-cycle-{c:02d}"
         cycle_dir.mkdir(parents=True, exist_ok=True)
-        out = cycle_dir / "sim-results.json"
         print(f"[qa] === cycle {c}/{args.cycles} ===", flush=True)
 
-        summary = run_sim(args.n, args.workers, args.seed + c, out)
+        summary = run_sim(
+            args.n, args.workers, args.seed + c, cycle_dir / "sim-results.json"
+        )
         findings = diagnose(summary)
-        write_suggestions(cycle_dir, summary, findings)
+        green = not findings and summary.get("qa_exit_code", 1) == 0
+        write_suggestions(cycle_dir, summary, findings, green)
 
         record = {
             "cycle": c,
-            "n": args.n,
-            "failed": summary.get("failed"),
-            "passed": summary.get("passed"),
-            "sims_per_sec": summary.get("sims_per_sec"),
+            "of": args.cycles,
+            "at": utc_now(),
+            "await_human": False,
+            "metrics": metrics_from(summary),
             "findings": findings,
-            "exit_code": summary.get("qa_exit_code"),
+            "status": "green" if green else "failed",
         }
 
-        if findings:
-            dispatch_team(
-                "; ".join(f["kind"] for f in findings),
+        if green:
+            print(f"[qa] cycle {c} green", flush=True)
+        else:
+            issue = "; ".join(f["kind"] for f in findings) or "unknown_failure"
+            log_issue(
                 cycle_dir,
+                issue,
+                {"metrics": record["metrics"], "findings": findings},
             )
-            applied = apply_fixes(findings, cycle_dir)
+            dispatch_team(cycle_dir, issue)
+            applied = apply_simplify_fixes(findings, cycle_dir)
             record["fixes_applied"] = applied
-            # Immediate rerun after fix inside the same cycle slot.
+
             if applied:
-                rerun_out = cycle_dir / "sim-results-rerun.json"
-                rerun = run_sim(args.n, args.workers, args.seed + c + 100, rerun_out)
+                rerun = run_sim(
+                    args.n,
+                    args.workers,
+                    args.seed + c + 100,
+                    cycle_dir / "sim-results-rerun.json",
+                )
+                rerun_findings = diagnose(rerun)
                 record["rerun"] = {
-                    "failed": rerun.get("failed"),
-                    "passed": rerun.get("passed"),
-                    "missing_edges_count": rerun.get("missing_edges_count"),
-                    "exit_code": rerun.get("qa_exit_code"),
+                    "metrics": metrics_from(rerun),
+                    "findings": rerun_findings,
+                    "status": (
+                        "green"
+                        if not rerun_findings and rerun.get("qa_exit_code") == 0
+                        else "failed"
+                    ),
                 }
-                if rerun.get("failed", 1) != 0:
+                if record["rerun"]["status"] != "green":
                     overall_exit = 1
+                else:
+                    print(f"[qa] cycle {c} green after fix+rerun", flush=True)
             else:
                 overall_exit = 1
-        else:
-            record["status"] = "green"
-            print(f"[qa] cycle {c} green", flush=True)
+                print(
+                    f"[qa] cycle {c} no auto-fix; continuing next cycle",
+                    flush=True,
+                )
 
         (cycle_dir / "cycle.json").write_text(
             json.dumps(record, indent=2) + "\n", encoding="utf-8"
