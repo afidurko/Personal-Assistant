@@ -17,7 +17,15 @@
 - Submodule: `integrations/paddledetection` @ `release/2.9`
 - Invoked by `vision` / subagents on media you provide or approve
 - Results distilled to `mesh/vision` (see `config/integrations/paddledetection.md`)
-- Camera / continuous monitor / call-video analysis require human approval
+- Live iPhone camera is via **iOS companion** (below), not PaddleDetection directly
+
+## iOS companion (Aaron face/voice + camera/mic)
+
+- Scaffold: `companions/ios/` · policy: `config/integrations/ios-companion.md`
+- Full design: `docs/IOS_IDENTITY.md`
+- **Granted:** Aaron face recognition, Aaron voice recognition, iPhone camera, iPhone mic
+- Capture mode default: **tasked_only** (not always-on surveillance)
+- Status: **scaffolded — native app not built yet**
 
 ## Cam face & voice (LLMAvatarTalk)
 
@@ -44,7 +52,7 @@
 ## Bridge later (OpenClaw-inspired external plugins)
 
 - SMS via phone companion
-- Voice call / FaceTime via macOS/iOS bridge
+- Voice call / FaceTime via macOS/iOS bridge (overlaps iOS companion)
 - Rich mobile node actions
 
 Each bridge must:

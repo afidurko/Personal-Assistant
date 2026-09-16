@@ -40,6 +40,7 @@
     {"from": "center.ops", "to": "center.memory", "weight": 0.8},
     {"from": "center.comms", "to": "switch.outbound", "weight": 1.0},
     {"from": "center.comms", "to": "switch.presence", "weight": 1.0},
+    {"from": "center.comms", "to": "center.chief", "weight": 0.8},
     {"from": "center.docs", "to": "switch.autonomy", "weight": 1.0},
     {"from": "center.vision", "to": "center.chief", "weight": 1.0},
     {"from": "center.vision", "to": "center.memory", "weight": 0.8},
@@ -74,6 +75,17 @@
     {"from": "motor.jobs", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
     {"from": "motor.vault", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
     {"from": "motor.calendar", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.mesh", "to": "center.memory", "weight": 0.9, "notes": "feedback"}
+    {"from": "motor.mesh", "to": "center.memory", "weight": 0.9, "notes": "feedback"},
+
+    {"from": "sense.aaron.face", "to": "center.chief", "weight": 1.0},
+    {"from": "sense.aaron.voice", "to": "center.chief", "weight": 1.0},
+    {"from": "sense.ios.camera", "to": "switch.ios_capture", "weight": 1.0},
+    {"from": "sense.ios.mic", "to": "switch.ios_capture", "weight": 1.0},
+    {"from": "center.chief", "to": "switch.identity", "weight": 1.0},
+    {"from": "center.chief", "to": "switch.tasking", "weight": 1.0},
+    {"from": "switch.identity", "to": "switch.tasking", "weight": 1.0},
+    {"from": "switch.tasking", "to": "center.memory", "weight": 0.9},
+    {"from": "switch.ios_capture", "to": "center.vision", "when": "act", "weight": 1.0},
+    {"from": "switch.ios_capture", "to": "center.comms", "when": "act", "weight": 1.0}
   ]
 }

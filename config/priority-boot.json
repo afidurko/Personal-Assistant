@@ -41,6 +41,11 @@
       "id": "vision_attached",
       "title": "Vision on attached media",
       "role": "vision"
+    },
+    {
+      "id": "ios_identity_camera_mic",
+      "title": "iOS companion: Aaron face/voice + camera/mic",
+      "role": "comms"
     }
   ]
 }

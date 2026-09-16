@@ -25,12 +25,21 @@
     "qa_on_failure_dispatch_team": true,
     "qa_auto_fix": true,
     "qa_auto_rerun": true,
-    "qa_default_n": 1000000000
+    "qa_default_n": 1000000000,
+    "ios_aaron_identity": true,
+    "ios_face_recognition": true,
+    "ios_voice_recognition": true,
+    "ios_camera_access": true,
+    "ios_microphone_access": true,
+    "ios_capture_mode": "tasked_only",
+    "ios_identity_threshold": 0.85
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
     "standing_approval_rules": "standing autonomy ON for session_01 grants",
-    "vault_path": "set \u2014 starter at repo vault/"
+    "vault_path": "set \u2014 starter at repo vault/",
+    "ios_companion_pair_code": "generate on first launch",
+    "ios_host_uri": "set on Aaron machine (Cam host reachable from iPhone)"
   },
   "mesh/persona": {
     "age": 32,
@@ -84,7 +93,14 @@
     "qa_default_n": 1000000000,
     "quiet_hours_default": null,
     "timezone": "America/New_York",
-    "weekly_review": true
+    "weekly_review": true,
+    "ios_aaron_identity": true,
+    "ios_face_recognition": true,
+    "ios_voice_recognition": true,
+    "ios_camera_access": true,
+    "ios_microphone_access": true,
+    "ios_capture_mode": "tasked_only",
+    "ios_identity_threshold": 0.85
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,

@@ -26,6 +26,16 @@ Aaron authorized (2026-09-16): Cam must always watch for issues. On failure:
 
 Details: `identity/persistence/CONTINUOUS_QA.md`
 
+## iOS identity + camera/mic (persistent grant)
+
+Aaron authorized (2026-09-16): recognize **Aaron’s** face and voice; use iPhone camera and microphone when tasked.
+
+- Enroll / match Aaron only (`sense.aaron.face`, `sense.aaron.voice`)
+- iPhone camera + mic via iOS companion (`sense.ios.camera`, `sense.ios.mic`)
+- Not always-on surveillance unless Aaron tasks a monitor goal
+- Strengthens Aaron-only tasking (`switch.identity` + `switch.tasking`)
+- Details: `docs/IOS_IDENTITY.md`
+
 ## Unlimited subagents (persistent grant)
 
 Aaron authorized (2026-09-16): Cam may **create as many subagents as needed** to complete assigned work **without asking Aaron each time**.

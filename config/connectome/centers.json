@@ -7,7 +7,7 @@
       "role": "chief",
       "function": "executive integration; Aaron-facing voice of Cam",
       "accepts": ["spike.task", "spike.question", "spike.override", "spike.speech"],
-      "projects_to": ["center.router", "center.memory", "center.qa", "center.comms"]
+      "projects_to": ["center.router", "center.memory", "center.qa", "center.comms", "switch.identity", "switch.tasking"]
     },
     {
       "id": "center.memory",

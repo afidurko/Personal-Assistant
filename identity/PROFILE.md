@@ -24,6 +24,8 @@
 Session 1 **1–60 = YES**, with **standing autonomy** to finish Aaron’s tasks end-to-end.
 Only Aaron assigns work. Logs retained. Kill switch = pause all.
 
+**iOS (2026-09-16):** Aaron face + voice recognition; iPhone camera + microphone access — granted, companion app scaffolded (`docs/IOS_IDENTITY.md`).
+
 ## Conflict resolutions
 
 | Tension | Resolution |
@@ -32,6 +34,7 @@ Only Aaron assigns work. Logs retained. Kill switch = pause all.
 | Quiet hours vs always available | Quiet hours **off** |
 | Others may order | **Overturned** — Aaron only |
 | Continuous monitoring | Off unless Aaron tasks it |
+| iPhone camera/mic | Tasked capture by default; biometrics enroll Aaron only |
 
 ## Memory policy
 
@@ -49,7 +52,8 @@ Only Aaron assigns work. Logs retained. Kill switch = pause all.
 6. Always-on comms + Cam presence  
 7. Docs  
 8. Vision when tasked  
+9. **iOS companion — Aaron face/voice + camera/mic**
 
 ## Sources
 
-- Session 1 answers + Aaron updates (sole operator, always-on, no interference, Cam appearance/voice, smart-second-brain)
+- Session 1 answers + Aaron updates (sole operator, always-on, no interference, Cam appearance/voice, smart-second-brain, iOS identity)

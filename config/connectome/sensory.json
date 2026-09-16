@@ -64,6 +64,34 @@
       "source": "jarvis_cli",
       "emits": ["spike.tool_result"],
       "notes": "Local utility feedback"
+    },
+    {
+      "id": "sense.ios.camera",
+      "modality": "vision",
+      "source": "ios_companion_avfoundation",
+      "emits": ["spike.visual", "spike.frame"],
+      "notes": "iPhone camera — tasked capture; not always-on unless Aaron enables monitor"
+    },
+    {
+      "id": "sense.ios.mic",
+      "modality": "audio",
+      "source": "ios_companion_avaudio",
+      "emits": ["spike.speech", "spike.audio"],
+      "notes": "iPhone microphone — tasked listen / ASR feed"
+    },
+    {
+      "id": "sense.aaron.face",
+      "modality": "identity",
+      "source": "ios_companion_face_match",
+      "emits": ["spike.aaron_present", "spike.identity"],
+      "notes": "Aaron face match score — strengthens switch.tasking / switch.identity"
+    },
+    {
+      "id": "sense.aaron.voice",
+      "modality": "identity",
+      "source": "ios_companion_speaker_id",
+      "emits": ["spike.aaron_present", "spike.identity"],
+      "notes": "Aaron voice/speaker-ID score — not the same as ASR transcript"
     }
   ]
 }

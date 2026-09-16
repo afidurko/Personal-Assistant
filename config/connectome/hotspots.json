@@ -127,6 +127,63 @@
         "motor.mesh"
       ],
       "behavior": "mesh_engram_recall"
+    },
+    {
+      "id": "hotspot.aaron_face",
+      "center": "center.chief",
+      "pathway": [
+        "sense.aaron.face",
+        "center.chief",
+        "switch.identity",
+        "switch.tasking",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "verify_aaron_face_for_tasking"
+    },
+    {
+      "id": "hotspot.aaron_voice",
+      "center": "center.chief",
+      "pathway": [
+        "sense.aaron.voice",
+        "center.chief",
+        "switch.identity",
+        "switch.tasking",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "verify_aaron_voice_for_tasking"
+    },
+    {
+      "id": "hotspot.ios_camera",
+      "center": "center.vision",
+      "pathway": [
+        "sense.ios.camera",
+        "switch.ios_capture",
+        "center.vision",
+        "center.chief",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": ["motor.vault"],
+      "behavior": "tasked_iphone_camera_ingest"
+    },
+    {
+      "id": "hotspot.ios_mic",
+      "center": "center.comms",
+      "pathway": [
+        "sense.ios.mic",
+        "switch.ios_capture",
+        "center.comms",
+        "center.chief",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "tasked_iphone_mic_listen"
     }
   ]
 }
