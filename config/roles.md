@@ -25,6 +25,7 @@
 - Vision: `integrations/paddledetection`
 - Presence: `integrations/llmavatartalk`
 - Second brain: `integrations/smart-second-brain`
+- Cartography: `integrations/swiftguide` (mind maps + iOS stack)
 
 ## Prompt stubs
 

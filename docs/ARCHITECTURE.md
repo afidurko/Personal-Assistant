@@ -18,9 +18,10 @@ and outbound contact (text / FaceTime / call) when needed.
 | [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection on approved media; submodule — not always-on camera |
 | [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); not a second brain |
 | [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
+| [SwiftGuide](https://github.com/afidurko/SwiftGuide) | **Knowledge cartography** | Hierarchical mind maps + 2026 Swift stack guide for iOS companion |
 
-**Rule:** Null stack owns execution truth. Jarvis, PaddleDetection, LLMAvatarTalk, and
-smart-second-brain are tools Cam uses. Only Aaron assigns work; Cam finishes granted
+**Rule:** Null stack owns execution truth. Jarvis, PaddleDetection, LLMAvatarTalk,
+smart-second-brain, and SwiftGuide are tools Cam uses. Only Aaron assigns work; Cam finishes granted
 work without mid-task interference.
 
 ## Mental model
@@ -66,8 +67,8 @@ You (human) ──override / kill──► nullhub / chat
                                       │
                     ┌─────────────────┴─────────────────┐
                     ▼         ▼          ▼              ▼
-                 Jarvis   PaddleDet   LLMAvatarTalk   smart-second-brain
-                 motor     sense       face/voice      memory cortex
+                 Jarvis   PaddleDet   LLMAvatarTalk   smart-second-brain   SwiftGuide
+                 motor     sense       face/voice      memory cortex       mind-map cartography
 ```
 
 - **Tracker = synaptic truth** (nulltickets)
@@ -141,6 +142,7 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 3. Keep PaddleDetection for vision (`integrations/paddledetection` @ `release/2.9`) — **added**
 4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
 5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
+5b. Keep SwiftGuide for mind-map cartography + iOS stack picks (`integrations/swiftguide`) — **added**
 6. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
 7. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
 8. Wire mesh + vault sync

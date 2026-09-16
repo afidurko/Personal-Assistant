@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "analogy": "SwiftGuide-style dual-lens maps — hierarchical Markdown mind trees over Cam + Swift ecosystem",
+  "lenses": [
+    {
+      "id": "lens.cns",
+      "label": "Nervous system",
+      "description": "Berg-style sensory → centers → switches → motor anatomy"
+    },
+    {
+      "id": "lens.mindmap",
+      "label": "Mind map",
+      "description": "SwiftGuide-inspired hierarchical knowledge cartography"
+    }
+  ],
+  "root": {
+    "id": "map.cam",
+    "label": "Cam",
+    "children": [
+      {
+        "id": "map.sense",
+        "label": "Sensory periphery",
+        "children": [
+          { "id": "sense.chat.aaron", "label": "Aaron chat" },
+          { "id": "sense.vault.hit", "label": "Vault recall" },
+          { "id": "sense.swiftguide.map", "label": "SwiftGuide map" },
+          { "id": "sense.careers.listing", "label": "Jobs boards" },
+          { "id": "sense.audio.transcript", "label": "ASR" },
+          { "id": "sense.ios.camera", "label": "iPhone camera" },
+          { "id": "sense.ios.mic", "label": "iPhone mic" }
+        ]
+      },
+      {
+        "id": "map.centers",
+        "label": "Higher centers",
+        "children": [
+          { "id": "center.chief", "label": "Cam chief" },
+          { "id": "center.cartography", "label": "Cartography" },
+          { "id": "center.memory", "label": "Memory" },
+          { "id": "center.research", "label": "Research" },
+          { "id": "center.ops", "label": "Ops" },
+          { "id": "center.comms", "label": "Comms" },
+          { "id": "center.vision", "label": "Vision" },
+          { "id": "center.router", "label": "Router" }
+        ]
+      },
+      {
+        "id": "map.motor",
+        "label": "Motor periphery",
+        "children": [
+          { "id": "motor.speak", "label": "Speak + face" },
+          { "id": "motor.vault", "label": "Vault write" },
+          { "id": "motor.mesh", "label": "Mesh" },
+          { "id": "motor.docs", "label": "Docs" },
+          { "id": "motor.jarvis", "label": "Jarvis" },
+          { "id": "motor.jobs", "label": "Apply" },
+          { "id": "motor.text", "label": "Text" }
+        ]
+      },
+      {
+        "id": "map.swiftguide",
+        "label": "SwiftGuide knowledge",
+        "source": "integrations/swiftguide",
+        "children": [
+          {
+            "id": "sg.classification",
+            "label": "Classification map",
+            "path": "2019/OpenSourceforSwift-Classification.md",
+            "children": [
+              { "id": "sg.class.foundation", "label": "App frameworks" },
+              { "id": "sg.class.ui", "label": "UI & SwiftUI" },
+              { "id": "sg.class.net", "label": "Network & security" },
+              { "id": "sg.class.data", "label": "Local-first data" }
+            ]
+          },
+          {
+            "id": "sg.architecture",
+            "label": "Application architecture",
+            "path": "2019/OpenSourceforSwift-ApplicationArchitecture.md",
+            "children": [
+              { "id": "sg.arch.tca", "label": "TCA state" },
+              { "id": "sg.arch.md", "label": "Markdown assets" },
+              { "id": "sg.arch.local", "label": "Local-first" }
+            ]
+          },
+          {
+            "id": "sg.2026",
+            "label": "2026 ecosystem report",
+            "path": "2026/Swift_open-source_ecosystem_report.en.md",
+            "children": [
+              { "id": "sg.2026.dev", "label": "20 developers" },
+              { "id": "sg.2026.proj", "label": "100 projects" },
+              { "id": "sg.2026.stack", "label": "Cam iOS stack picks" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "ios_companion_stack_picks": {
+    "analogy": "Distilled from SwiftGuide 2026 report for Cam's native companion",
+    "picks": [
+      {
+        "niche": "Architecture",
+        "prefer": ["swift-composable-architecture", "SwiftUI"],
+        "avoid_new": ["RxSwift", "PromiseKit", "ReSwift"]
+      },
+      {
+        "niche": "Local-first persistence",
+        "prefer": ["SwiftData", "GRDB.swift", "KeychainAccess"],
+        "avoid_new": ["SwiftyUserDefaults", "CoreStore"]
+      },
+      {
+        "niche": "Structured knowledge / Markdown",
+        "prefer": ["Down", "Splash", "native AttributedString(markdown:)"],
+        "notes": "Same longevity pattern as SwiftGuide ↔ vault maps"
+      },
+      {
+        "niche": "Network to Cam host",
+        "prefer": ["URLSession", "Starscream optional for converse WS"],
+        "notes": "Tailscale private network; minimal deps"
+      },
+      {
+        "niche": "Engineering",
+        "prefer": ["SwiftLint", "swift-snapshot-testing", "Tuist optional"]
+      }
+    ]
+  }
+}

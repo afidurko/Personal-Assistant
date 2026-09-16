@@ -51,6 +51,14 @@ def pick_hotspot(
             score += 3
         if ("job" in g or "career" in g) and "career" in blob:
             score += 3
+        if ("ios" in g or "swift" in g or "stack" in g) and (
+            "ios" in blob or "swift" in blob or "stack" in blob or "cartograph" in blob
+        ):
+            score += 4
+        if ("map" in g or "mind" in g or "cartograph" in g) and (
+            "map" in blob or "cartograph" in blob or "knowledge" in blob
+        ):
+            score += 3
         scored.append((score, h))
     scored.sort(key=lambda x: x[0], reverse=True)
     return scored[0][1]

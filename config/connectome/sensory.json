@@ -106,6 +106,13 @@
       "source": ["local_files", "icloud_paths", "attachments"],
       "emits": ["spike.visual", "spike.audio", "spike.aaron_enroll"],
       "notes": "Aaron-granted file access — photos/videos/audio for look+sound enrollment"
+    },
+    {
+      "id": "sense.swiftguide.map",
+      "modality": "knowledge_map",
+      "source": "swiftguide",
+      "emits": ["spike.note_ref", "spike.fact", "spike.stack"],
+      "notes": "SwiftGuide hierarchical mind-map hit — classification / architecture / 2026 stack"
     }
   ]
 }

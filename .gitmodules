@@ -11,3 +11,6 @@
 [submodule "integrations/smart-second-brain"]
 	path = integrations/smart-second-brain
 	url = https://github.com/afidurko/smart-second-brain.git
+[submodule "integrations/swiftguide"]
+	path = integrations/swiftguide
+	url = https://github.com/afidurko/SwiftGuide.git

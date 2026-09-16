@@ -6,7 +6,7 @@ talking presence — with a smart second brain over Aaron’s notes.
 
 ## Design
 
-- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain)
+- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
@@ -24,12 +24,16 @@ Cam is wired like a nervous system — see [docs/CONNECTOME_ARCHITECTURE.md](doc
 Aaron → sensory → higher centers → circuit switches → motor effectors
 ```
 
+Dual lens: **CNS anatomy** + **SwiftGuide mind-map cartography** (`integrations/swiftguide`).
+
 ```bash
 # Example: route a careers spike to motor plan
 python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch roles"
+# SwiftGuide → iOS companion stack brief
+python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "ios companion stack"
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
-# Live brain + spinal cord visualization (all repos)
+# Live brain + spinal cord + mind-map visualization (all repos)
 bash scripts/serve-connectome-viz.sh
 # open http://127.0.0.1:8765/visualizations/connectome/
 ```

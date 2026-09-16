@@ -17,6 +17,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/vision` | distilled detection/pose results (no raw frames by default) |
 | `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
 | `mesh/vault` | smart-second-brain vault path + topic distillates |
+| `mesh/cartography` | SwiftGuide mind-map hits + iOS stack distillates |
 | `mesh/persona` | Cam identity/voice/availability prefs |
 
 ## Write rules

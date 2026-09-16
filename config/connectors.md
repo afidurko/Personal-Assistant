@@ -46,6 +46,15 @@
 - See `config/integrations/smart-second-brain.md`
 - Set `config/persona/vault.json` → `vault_path`
 
+## Knowledge cartography (SwiftGuide)
+
+- Submodule: `integrations/swiftguide`
+- Hierarchical mind maps + 2026 Swift ecosystem report
+- Dual-lens brain map: CNS anatomy ↔ mind-map trees
+- iOS companion stack picks in `config/connectome/mindmap.json`
+- See `config/integrations/swiftguide.md`
+- Spikes: `sense.swiftguide.map` → `center.cartography`
+
 ## Careers boards
 
 - **LinkedIn** — watch matching roles, draft Easy-Apply/outreach; submit only after Aaron approves

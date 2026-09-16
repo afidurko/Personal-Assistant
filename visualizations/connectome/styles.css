@@ -92,6 +92,121 @@ header {
   font-size: 0.85rem;
 }
 
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+.lens-toggle {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border: 1px solid var(--line-dim);
+  border-radius: 12px;
+  background: rgba(12, 18, 16, 0.65);
+}
+
+.lens-toggle .lens {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 9px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  transform: none;
+}
+
+.lens-toggle .lens:hover {
+  color: var(--sand);
+  border: none;
+  transform: none;
+}
+
+.lens-toggle .lens.on {
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(196, 165, 116, 0.35), rgba(61, 155, 143, 0.18));
+  box-shadow: 0 0 0 1px rgba(230, 213, 184, 0.25);
+}
+
+.lens-view.hidden { display: none; }
+
+svg#nervous,
+svg#mindmap {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mm-core {
+  fill: rgba(196, 165, 116, 0.35);
+  stroke: var(--sand);
+  stroke-width: 2;
+}
+.mm-branch {
+  fill: #1b2a26;
+  stroke: var(--line);
+  stroke-width: 1.4;
+}
+.mm-leaf {
+  fill: #15221e;
+  stroke: var(--line-dim);
+  stroke-width: 1.2;
+}
+.mm-branch.lit,
+.mm-leaf.lit,
+.mm-core.lit {
+  fill: rgba(95, 212, 196, 0.35);
+  stroke: var(--teal-bright);
+  filter: drop-shadow(0 0 8px rgba(95, 212, 196, 0.55));
+}
+.mm-branch.motor-fire,
+.mm-leaf.motor-fire {
+  fill: rgba(224, 122, 95, 0.4);
+  stroke: var(--coral);
+}
+.mm-branch.feedback,
+.mm-leaf.feedback,
+.mm-core.feedback {
+  fill: rgba(212, 168, 75, 0.35);
+  stroke: var(--gold);
+}
+
+.mm-link {
+  fill: none;
+  stroke: rgba(230, 213, 184, 0.22);
+  stroke-width: 1.4;
+}
+.mm-link-active {
+  fill: none;
+  stroke: var(--teal-bright);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(95, 212, 196, 0.45));
+  stroke-dasharray: 6 8;
+  animation: dash 0.7s linear infinite;
+}
+.mm-link-feedback {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-dasharray: 4 7;
+  animation: dash-rev 0.85s linear infinite;
+}
+
+.repo.swiftguide {
+  border-color: rgba(196, 165, 116, 0.45);
+  color: var(--sand);
+}
+.repo.swiftguide.active {
+  border-color: var(--sand);
+  background: rgba(196, 165, 116, 0.28);
+  box-shadow: 0 0 18px rgba(196, 165, 116, 0.3);
+}
+
 .live-pill {
   display: inline-flex;
   align-items: center;

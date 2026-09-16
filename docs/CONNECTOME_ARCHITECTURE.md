@@ -19,7 +19,7 @@ Cam implements that as software connectome configs under `config/connectome/`.
 |---|---|
 | Sensory neurons (eyes, antennae, etc.) | Input adapters: chat, vault, email, LinkedIn/Indeed, calendar, ASR, vision |
 | Nerve cord / motor periphery | Effectors: text, call, FaceTime, Jarvis CLI, docs writers, job submitters, TTS/avatar |
-| Higher brain centers | Cam chief + specialists + nullboiler policy + mesh/vault memory |
+| Higher brain centers | Cam chief + specialists + cartography + nullboiler policy + mesh/vault memory |
 | Cell types (~11k typed neurons) | Typed roles / subagents with contracts (`config/roles/`) |
 | Synapses | Routed events on nulltickets (claim → events → transition) |
 | fruitless / doublesex markers | Persona + standing-autonomy tags (`config/persona/`, `identity/BOUNDARIES.md`) |
@@ -76,6 +76,7 @@ Examples:
 
 - `sense.chat.aaron` — Aaron message / task  
 - `sense.vault.hit` — smart-second-brain retrieval  
+- `sense.swiftguide.map` — SwiftGuide hierarchical mind-map hit  
 - `sense.careers.listing` — LinkedIn/Indeed item  
 - `sense.calendar.event` — schedule signal  
 - `sense.audio.transcript` — RIVA ASR  
@@ -89,6 +90,7 @@ Where specialization lives (paper: dimorphism concentrates centrally).
 |---|---|---|
 | `center.chief` | Central complex / executive | Cam `chief` |
 | `center.memory` | Mushroom-body-like association | `memory-curator` + mesh + vault |
+| `center.cartography` | Knowledge mind-map cortex | SwiftGuide hierarchical maps + researcher |
 | `center.research` | Evidence hotspot | `researcher` |
 | `center.careers` | Opportunity hotspot | `careers` |
 | `center.ops` | Life-ops hotspot | `ops` |
@@ -140,6 +142,8 @@ From the paper’s “male-specific connection hotspots” idea — Cam densifie
 2. **Research hotspot** — question → vault+web → cited brief → mesh/research  
 3. **Presence hotspot** — transcript → Cam reply → soft airy fluent English TTS → face  
 4. **Life-ops hotspot** — calendar/chores → Jarvis/calendar motor  
+5. **Knowledge-map hotspot** — SwiftGuide tree → cartography → vault/mesh  
+6. **iOS-stack hotspot** — SwiftGuide 2026 picks → docs brief for companion  
 
 Defined in `config/connectome/hotspots.json`.
 
@@ -168,6 +172,7 @@ Rules:
 | Neuron executors | nullclaw roles |
 | Human master switch | Aaron (+ nullhub when live) |
 | Long-term engram | smart-second-brain vault + mesh |
+| Knowledge cartography | SwiftGuide mind maps (`integrations/swiftguide`) |
 | Embodied voice/face motor | LLMAvatarTalk |
 
 ## Why this shape
@@ -179,12 +184,24 @@ Rules:
 
 ## Live visualization
 
-Interactive brain + spinal cord map with forward motor effects and feedback return:
+Interactive dual-lens brain map:
+
+1. **Nervous system** — anatomical brain + spinal cord (sense → centers → motor → feedback)
+2. **Mind map** — SwiftGuide-inspired hierarchical knowledge trees (Cam pathways + Swift ecosystem cartography)
 
 - `visualizations/connectome/index.html`
 - Serve: `bash scripts/serve-connectome-viz.sh` → http://127.0.0.1:8765/visualizations/connectome/
+- Mind-map config: `config/connectome/mindmap.json`
+- Integration: `config/integrations/swiftguide.md`
 
-All wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nullhub, Jarvis, PaddleDetection, LLMAvatarTalk, smart-second-brain, OpenClaw/Assistant- patterns).
+Wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nullhub, Jarvis, PaddleDetection, LLMAvatarTalk, smart-second-brain, **SwiftGuide**, OpenClaw/Assistant- patterns).
+
+Cartography spikes:
+
+```bash
+python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "ios companion stack"
+python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "browse knowledge map"
+```
 
 ## Files
 
@@ -194,8 +211,10 @@ All wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nu
 - `config/connectome/motor.json`  
 - `config/connectome/hotspots.json`  
 - `config/connectome/synapses.json` — allowed sense→center→motor edges  
+- `config/connectome/mindmap.json` — dual-lens tree + iOS stack picks from SwiftGuide  
 - `scripts/connectome-route.py` — validates/routes a spike through the map  
 
 ## Source
 
-Berg et al., Cell 2026; vault brief: `vault/04-Research/2026-09-16-Drosophila-male-CNS-connectome-Cell.md`
+Berg et al., Cell 2026; vault brief: `vault/04-Research/2026-09-16-Drosophila-male-CNS-connectome-Cell.md`  
+SwiftGuide mind-map pattern: `vault/04-Research/2026-09-16-SwiftGuide-brain-map.md`

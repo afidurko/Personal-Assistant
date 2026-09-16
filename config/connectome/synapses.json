@@ -92,6 +92,17 @@
     {"from": "sense.files.media", "to": "center.vision", "weight": 1.0},
     {"from": "sense.files.media", "to": "center.comms", "weight": 0.9},
     {"from": "center.vision", "to": "center.comms", "weight": 0.6, "notes": "photo-face to video-voice bridge"},
-    {"from": "switch.identity", "to": "center.memory", "weight": 1.0}
+    {"from": "switch.identity", "to": "center.memory", "weight": 1.0},
+
+    {"from": "sense.swiftguide.map", "to": "center.cartography", "weight": 1.0},
+    {"from": "center.cartography", "to": "center.research", "weight": 0.9},
+    {"from": "center.cartography", "to": "center.docs", "weight": 0.9},
+    {"from": "center.cartography", "to": "center.memory", "weight": 1.0},
+    {"from": "center.cartography", "to": "center.qa", "weight": 1.0},
+    {"from": "center.cartography", "to": "sense.swiftguide.map", "weight": 0.5, "notes": "map re-query drive"},
+    {"from": "center.router", "to": "center.cartography", "weight": 0.8},
+    {"from": "center.chief", "to": "center.cartography", "weight": 0.7},
+    {"from": "center.memory", "to": "center.qa", "weight": 0.8},
+    {"from": "center.docs", "to": "center.qa", "weight": 0.9}
   ]
 }

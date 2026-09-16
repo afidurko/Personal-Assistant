@@ -17,6 +17,13 @@
       "projects_to": ["center.chief", "switch.autonomy", "motor.mesh", "motor.vault"]
     },
     {
+      "id": "center.cartography",
+      "role": "researcher",
+      "function": "knowledge cartography — hierarchical mind maps (SwiftGuide pattern)",
+      "accepts": ["spike.note_ref", "spike.fact", "spike.stack", "spike.question"],
+      "projects_to": ["center.research", "center.docs", "center.memory", "center.qa", "sense.swiftguide.map"]
+    },
+    {
       "id": "center.research",
       "role": "researcher",
       "function": "evidence hotspot; citations required",
@@ -70,7 +77,15 @@
       "role": "nullboiler",
       "function": "policy neuropil — who runs what",
       "accepts": ["spike.task"],
-      "projects_to": ["center.research", "center.careers", "center.ops", "center.comms", "center.docs", "center.vision"]
+      "projects_to": [
+        "center.research",
+        "center.careers",
+        "center.ops",
+        "center.comms",
+        "center.docs",
+        "center.vision",
+        "center.cartography"
+      ]
     }
   ],
   "recursion": {

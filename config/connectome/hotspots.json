@@ -215,6 +215,34 @@
       ],
       "side_effects": ["motor.vault"],
       "behavior": "enroll_aaron_face_voice_photo_to_video"
+    },
+    {
+      "id": "hotspot.knowledge_map",
+      "center": "center.cartography",
+      "pathway": [
+        "sense.swiftguide.map",
+        "center.cartography",
+        "center.memory",
+        "center.qa",
+        "switch.autonomy",
+        "motor.vault"
+      ],
+      "side_effects": ["motor.mesh"],
+      "behavior": "browse_hierarchical_knowledge_map"
+    },
+    {
+      "id": "hotspot.ios_stack",
+      "center": "center.cartography",
+      "pathway": [
+        "sense.swiftguide.map",
+        "center.cartography",
+        "center.docs",
+        "center.qa",
+        "switch.autonomy",
+        "motor.docs"
+      ],
+      "side_effects": ["motor.vault", "motor.mesh"],
+      "behavior": "recommend_ios_companion_stack_from_swiftguide"
     }
   ]
 }
