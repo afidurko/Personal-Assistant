@@ -4,8 +4,8 @@ Fill this in over time. Partial answers are fine — mark unknowns as `TODO`.
 Every answer becomes mesh memory (`mesh/prefs`, `mesh/people`, `mesh/facts`)
 and steers how the assistant team behaves.
 
-**How to answer:** reply in chat section-by-section, or edit this file and
-commit. Prefer concrete examples over slogans.
+**How to answer:** start with [SESSION_01.md](SESSION_01.md) (yes/no capability checklist).
+Then optionally expand in this file. Partial answers are fine.
 
 ---
 
