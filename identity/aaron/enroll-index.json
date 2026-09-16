@@ -1,0 +1,43 @@
+{
+  "subject": "Aaron",
+  "updated_at": "2026-09-16T13:45:00Z",
+  "purpose": "understand_aaron_look_and_sound",
+  "photo_to_video_match": true,
+  "primary_face_cluster": [
+    {
+      "id": "aaron-face-01",
+      "file": "aaron-01-mirror-selfie.jpg",
+      "label": "Aaron",
+      "confidence": "high",
+      "notes": "mirror selfie; glasses; curly dark hair; goatee; iPhone Pro visible"
+    },
+    {
+      "id": "aaron-face-03",
+      "file": "aaron-03-closeup-glasses.jpg",
+      "label": "Aaron",
+      "confidence": "high",
+      "notes": "close frontal; glasses glare; curly hair; green tee"
+    },
+    {
+      "id": "aaron-face-04",
+      "file": "aaron-04-cafe-cap.jpg",
+      "label": "Aaron",
+      "confidence": "high",
+      "notes": "cafe; trucker cap; glasses; laptop; latte"
+    }
+  ],
+  "pending_labels": [
+    {
+      "file": "aaron-02-gym-pair.jpg",
+      "reason": "two_faces",
+      "candidates": [
+        {"position": "left", "notes": "Yankees Baseball tee; yellow belt; short dark hair; no glasses"},
+        {"position": "right", "notes": "buzz cut; arm tattoos; Punch Gear tee"}
+      ],
+      "action_needed": "Aaron: which face is you? (left / right / neither)"
+    }
+  ],
+  "voices": [],
+  "videos": [],
+  "status": "face_enrollment_partial_3_of_4_photos"
+}
