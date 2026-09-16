@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "weights": {
+    "tract.arcuate": 0.818,
+    "tract.slf": 0.47,
+    "tract.uncinate": 0.35,
+    "tract.cingulum": 0.9179999999999999,
+    "tract.ilf": 0.47,
+    "tract.ifof": 0.57,
+    "tract.thalamo": 0.47,
+    "tract.corticospinal": 0.47,
+    "tract.mesh_callosal": 0.47
+  },
+  "pruned": []
+}

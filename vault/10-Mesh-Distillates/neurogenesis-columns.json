@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "columns": [
+    {
+      "id": "neuron.mtl_new_001",
+      "area": "area.mtl",
+      "kind": "loop",
+      "age": 1,
+      "label": "immature",
+      "plasticity_gain": 1.6,
+      "can_motor": false
+    }
+  ],
+  "site": "area.mtl"
+}

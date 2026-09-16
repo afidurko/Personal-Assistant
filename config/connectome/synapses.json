@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "analogy": "Allowed synapses — Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
+  "version": 3,
+  "analogy": "Allowed synapses \u2014 Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
   "rules": [
     "Every motor fire needs an Aaron-rooted task or standing goal spike",
     "Non-Aaron tasking spikes die at switch.tasking (OFC identity gate)",
@@ -10,106 +10,577 @@
     "Successful act pathways Hebbian-strengthen matching tracts (config/connectome/tracts.json)"
   ],
   "edges": [
-    {"from": "sense.chat.aaron", "to": "area.wernicke", "weight": 1.0, "tract": "tract.thalamo"},
-    {"from": "sense.chat.aaron", "to": "area.dlpfc", "weight": 0.9, "tract": "tract.thalamo"},
-    {"from": "sense.audio.transcript", "to": "area.auditory", "weight": 1.0, "tract": "tract.thalamo"},
-    {"from": "sense.careers.listing", "to": "area.temporal", "weight": 1.0},
-    {"from": "sense.calendar.event", "to": "area.parietal", "weight": 1.0, "tract": "tract.thalamo"},
-    {"from": "sense.email.thread", "to": "area.wernicke", "weight": 1.0, "tract": "tract.thalamo"},
-    {"from": "sense.vision.detection", "to": "area.visual", "weight": 1.0, "tract": "tract.thalamo"},
-    {"from": "sense.jarvis.result", "to": "area.parietal", "weight": 0.9},
-    {"from": "sense.vault.hit", "to": "area.mtl", "weight": 1.0},
-    {"from": "sense.vault.hit", "to": "area.cingulate", "weight": 0.6},
-    {"from": "sense.mesh.hit", "to": "area.mtl", "weight": 1.0, "tract": "tract.mesh_callosal"},
-    {"from": "sense.swiftguide.map", "to": "area.apfc", "weight": 1.0},
-    {"from": "sense.aaron.face", "to": "area.dlpfc", "weight": 1.0},
-    {"from": "sense.aaron.voice", "to": "area.dlpfc", "weight": 1.0},
-    {"from": "sense.ios.camera", "to": "switch.ios_capture", "weight": 1.0},
-    {"from": "sense.ios.mic", "to": "switch.ios_capture", "weight": 1.0},
-    {"from": "sense.photos.library", "to": "area.visual", "weight": 1.0},
-    {"from": "sense.files.media", "to": "area.visual", "weight": 1.0},
-    {"from": "sense.files.media", "to": "area.auditory", "weight": 0.9},
-
-    {"from": "area.wernicke", "to": "area.dlpfc", "weight": 1.0, "tract": "tract.slf"},
-    {"from": "area.wernicke", "to": "area.broca", "weight": 1.0, "tract": "tract.arcuate"},
-    {"from": "area.wernicke", "to": "area.temporal", "weight": 0.8},
-    {"from": "area.auditory", "to": "area.dlpfc", "weight": 1.0},
-    {"from": "area.auditory", "to": "area.broca", "weight": 0.9, "tract": "tract.arcuate"},
-    {"from": "area.visual", "to": "area.dlpfc", "weight": 1.0, "tract": "tract.ifof"},
-    {"from": "area.visual", "to": "area.temporal", "weight": 0.8, "tract": "tract.ilf"},
-    {"from": "area.visual", "to": "area.auditory", "weight": 0.6, "notes": "photo↔voice enrollment bridge"},
-    {"from": "area.visual", "to": "area.mtl", "weight": 0.8},
-    {"from": "area.parietal", "to": "area.dlpfc", "weight": 0.9, "tract": "tract.slf"},
-    {"from": "area.parietal", "to": "area.mtl", "weight": 0.8},
-    {"from": "area.parietal", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "area.temporal", "to": "area.cingulate", "weight": 1.0},
-    {"from": "area.temporal", "to": "area.dlpfc", "weight": 0.8, "tract": "tract.uncinate"},
-    {"from": "area.temporal", "to": "sense.vault.hit", "weight": 0.5, "notes": "retrieval drive"},
-    {"from": "area.temporal", "to": "switch.careers_submit", "weight": 0.9},
-    {"from": "area.dlpfc", "to": "area.temporal", "weight": 1.0},
-    {"from": "area.dlpfc", "to": "area.apfc", "weight": 1.0},
-    {"from": "area.dlpfc", "to": "area.broca", "weight": 0.9, "tract": "tract.slf"},
-    {"from": "area.dlpfc", "to": "area.parietal", "weight": 0.8, "tract": "tract.slf"},
-    {"from": "area.dlpfc", "to": "area.visual", "weight": 0.7},
-    {"from": "area.dlpfc", "to": "area.mtl", "weight": 0.9, "tract": "tract.cingulum"},
-    {"from": "area.dlpfc", "to": "area.cingulate", "weight": 1.0, "tract": "tract.cingulum"},
-    {"from": "area.dlpfc", "to": "area.ofc", "weight": 1.0},
-    {"from": "area.dlpfc", "to": "switch.identity", "weight": 1.0},
-    {"from": "area.dlpfc", "to": "switch.tasking", "weight": 1.0},
-    {"from": "area.apfc", "to": "area.mtl", "weight": 1.0, "tract": "tract.cingulum"},
-    {"from": "area.apfc", "to": "area.cingulate", "weight": 1.0},
-    {"from": "area.apfc", "to": "area.temporal", "weight": 0.8},
-    {"from": "area.apfc", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "area.apfc", "to": "sense.swiftguide.map", "weight": 0.5, "notes": "map re-query"},
-    {"from": "area.broca", "to": "area.dlpfc", "weight": 0.8, "tract": "tract.arcuate"},
-    {"from": "area.broca", "to": "area.mtl", "weight": 0.7},
-    {"from": "area.broca", "to": "switch.outbound", "weight": 1.0},
-    {"from": "area.broca", "to": "switch.presence", "weight": 1.0},
-    {"from": "area.ofc", "to": "switch.identity", "weight": 1.0},
-    {"from": "area.ofc", "to": "switch.kill", "weight": 1.0},
-    {"from": "area.ofc", "to": "area.temporal", "weight": 0.8, "tract": "tract.uncinate"},
-    {"from": "area.mtl", "to": "area.dlpfc", "weight": 1.0, "tract": "tract.cingulum"},
-    {"from": "area.mtl", "to": "area.cingulate", "weight": 0.8},
-    {"from": "area.mtl", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "area.mtl", "to": "motor.mesh", "when": "act", "weight": 1.0},
-    {"from": "area.mtl", "to": "motor.vault", "when": "act", "weight": 0.9},
-    {"from": "area.cingulate", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "area.cingulate", "to": "switch.careers_submit", "weight": 0.9},
-    {"from": "area.cingulate", "to": "area.dlpfc", "weight": 0.8, "tract": "tract.cingulum"},
-    {"from": "area.premotor", "to": "area.motor", "weight": 1.0, "tract": "tract.corticospinal"},
-    {"from": "area.motor", "to": "motor.text", "when": "act", "weight": 1.0},
-    {"from": "area.motor", "to": "motor.speak", "when": "act", "weight": 1.0},
-
-    {"from": "switch.identity", "to": "switch.tasking", "weight": 1.0},
-    {"from": "switch.identity", "to": "area.mtl", "weight": 1.0},
-    {"from": "switch.tasking", "to": "area.mtl", "weight": 0.9},
-    {"from": "switch.ios_capture", "to": "area.visual", "when": "act", "weight": 1.0},
-    {"from": "switch.ios_capture", "to": "area.auditory", "when": "act", "weight": 1.0},
-    {"from": "switch.ios_capture", "to": "area.broca", "when": "act", "weight": 0.8},
-    {"from": "switch.presence", "to": "switch.outbound", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.text", "when": "act", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.call", "when": "act", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.facetime", "when": "act", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.speak", "when": "act", "weight": 0.8},
-    {"from": "switch.presence", "to": "motor.speak", "when": "act", "weight": 1.0},
-    {"from": "switch.careers_submit", "to": "motor.jobs", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.jarvis", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.docs", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.vault", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.calendar", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.mesh", "when": "act", "weight": 0.9},
-
-    {"from": "motor.text", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.call", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.facetime", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.speak", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.speak", "to": "sense.audio.transcript", "weight": 0.4, "notes": "self-hear loop"},
-    {"from": "motor.jarvis", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.docs", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.jobs", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.vault", "to": "area.mtl", "weight": 0.8, "notes": "feedback"},
-    {"from": "motor.calendar", "to": "area.mtl", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.mesh", "to": "area.mtl", "weight": 0.9, "notes": "feedback"},
-    {"from": "area.mtl", "to": "area.dlpfc", "weight": 1.0, "notes": "feedback integrate", "tract": "tract.cingulum"}
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.wernicke",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.dlpfc",
+      "weight": 0.9,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.audio.transcript",
+      "to": "area.auditory",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.careers.listing",
+      "to": "area.temporal",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.calendar.event",
+      "to": "area.parietal",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.email.thread",
+      "to": "area.wernicke",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.vision.detection",
+      "to": "area.visual",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.jarvis.result",
+      "to": "area.parietal",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.vault.hit",
+      "to": "area.mtl",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vault.hit",
+      "to": "area.cingulate",
+      "weight": 0.6
+    },
+    {
+      "from": "sense.mesh.hit",
+      "to": "area.mtl",
+      "weight": 1.0,
+      "tract": "tract.mesh_callosal"
+    },
+    {
+      "from": "sense.swiftguide.map",
+      "to": "area.apfc",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.aaron.face",
+      "to": "area.dlpfc",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.aaron.voice",
+      "to": "area.dlpfc",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.ios.camera",
+      "to": "switch.ios_capture",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.ios.mic",
+      "to": "switch.ios_capture",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.photos.library",
+      "to": "area.visual",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.files.media",
+      "to": "area.visual",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.files.media",
+      "to": "area.auditory",
+      "weight": 0.9
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.broca",
+      "weight": 1.0,
+      "tract": "tract.arcuate"
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.temporal",
+      "weight": 0.8
+    },
+    {
+      "from": "area.auditory",
+      "to": "area.dlpfc",
+      "weight": 1.0
+    },
+    {
+      "from": "area.auditory",
+      "to": "area.broca",
+      "weight": 0.9,
+      "tract": "tract.arcuate"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "tract": "tract.ifof"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.temporal",
+      "weight": 0.8,
+      "tract": "tract.ilf"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.auditory",
+      "weight": 0.6,
+      "notes": "photo\u2194voice enrollment bridge"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.mtl",
+      "weight": 0.8
+    },
+    {
+      "from": "area.parietal",
+      "to": "area.dlpfc",
+      "weight": 0.9,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.parietal",
+      "to": "area.mtl",
+      "weight": 0.8
+    },
+    {
+      "from": "area.parietal",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.temporal",
+      "to": "area.cingulate",
+      "weight": 1.0
+    },
+    {
+      "from": "area.temporal",
+      "to": "area.dlpfc",
+      "weight": 0.8,
+      "tract": "tract.uncinate"
+    },
+    {
+      "from": "area.temporal",
+      "to": "sense.vault.hit",
+      "weight": 0.5,
+      "notes": "retrieval drive"
+    },
+    {
+      "from": "area.temporal",
+      "to": "switch.careers_submit",
+      "weight": 0.9
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.temporal",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.apfc",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.broca",
+      "weight": 0.9,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.parietal",
+      "weight": 0.8,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.visual",
+      "weight": 0.7
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.cingulate",
+      "weight": 1.0,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.ofc",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "switch.identity",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "switch.tasking",
+      "weight": 1.0
+    },
+    {
+      "from": "area.apfc",
+      "to": "area.mtl",
+      "weight": 1.0,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.apfc",
+      "to": "area.cingulate",
+      "weight": 1.0
+    },
+    {
+      "from": "area.apfc",
+      "to": "area.temporal",
+      "weight": 0.8
+    },
+    {
+      "from": "area.apfc",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.apfc",
+      "to": "sense.swiftguide.map",
+      "weight": 0.5,
+      "notes": "map re-query"
+    },
+    {
+      "from": "area.broca",
+      "to": "area.dlpfc",
+      "weight": 0.8,
+      "tract": "tract.arcuate"
+    },
+    {
+      "from": "area.broca",
+      "to": "area.mtl",
+      "weight": 0.7
+    },
+    {
+      "from": "area.broca",
+      "to": "switch.outbound",
+      "weight": 1.0
+    },
+    {
+      "from": "area.broca",
+      "to": "switch.presence",
+      "weight": 1.0
+    },
+    {
+      "from": "area.ofc",
+      "to": "switch.identity",
+      "weight": 1.0
+    },
+    {
+      "from": "area.ofc",
+      "to": "switch.kill",
+      "weight": 1.0
+    },
+    {
+      "from": "area.ofc",
+      "to": "area.temporal",
+      "weight": 0.8,
+      "tract": "tract.uncinate"
+    },
+    {
+      "from": "area.mtl",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.mtl",
+      "to": "area.cingulate",
+      "weight": 0.8
+    },
+    {
+      "from": "area.mtl",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.mtl",
+      "to": "motor.mesh",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "area.mtl",
+      "to": "motor.vault",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "area.cingulate",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.cingulate",
+      "to": "switch.careers_submit",
+      "weight": 0.9
+    },
+    {
+      "from": "area.cingulate",
+      "to": "area.dlpfc",
+      "weight": 0.8,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.premotor",
+      "to": "area.motor",
+      "weight": 1.0,
+      "tract": "tract.corticospinal"
+    },
+    {
+      "from": "area.motor",
+      "to": "motor.text",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "area.motor",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.identity",
+      "to": "switch.tasking",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.identity",
+      "to": "area.mtl",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.tasking",
+      "to": "area.mtl",
+      "weight": 0.9
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "area.visual",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "area.auditory",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "area.broca",
+      "when": "act",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.presence",
+      "to": "switch.outbound",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.text",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.call",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.facetime",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.presence",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.careers_submit",
+      "to": "motor.jobs",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.jarvis",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.docs",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.vault",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.calendar",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.mesh",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "motor.text",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.call",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.facetime",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.speak",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.speak",
+      "to": "sense.audio.transcript",
+      "weight": 0.4,
+      "notes": "self-hear loop"
+    },
+    {
+      "from": "motor.jarvis",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.docs",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.jobs",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.vault",
+      "to": "area.mtl",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.calendar",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.mesh",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "area.mtl",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "notes": "feedback integrate",
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.apfc",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    },
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.cingulate",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.apfc",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    },
+    {
+      "from": "area.temporal",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    }
   ]
 }

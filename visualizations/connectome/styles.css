@@ -284,6 +284,110 @@ svg#mindmap.hidden {
   display: none;
 }
 
+.stage-3d {
+  height: 100%;
+}
+
+.workspace-3d {
+  grid-template-columns: 1.55fr 0.7fr;
+}
+
+.viz-panel-3d {
+  min-height: 560px;
+  padding: 0;
+  position: relative;
+}
+
+.viz-panel-3d canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  border-radius: 18px;
+}
+
+.hud {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.85rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+}
+
+.flat-link {
+  color: var(--sand-dim);
+  text-decoration: none;
+  font-size: 0.75rem;
+  border: 1px solid var(--line-dim);
+  border-radius: 9px;
+  padding: 0.35rem 0.65rem;
+}
+.flat-link:hover { color: var(--sand); border-color: var(--teal); }
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.55rem;
+}
+.timeline-row button {
+  padding: 0.4rem 0.55rem;
+  min-width: 2.2rem;
+}
+.timeline-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--teal-bright);
+}
+
+.weights {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 180px;
+  overflow: auto;
+}
+.weight-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.68rem;
+  color: var(--sand-dim);
+}
+.weight-row i {
+  display: block;
+  height: 6px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--gold), var(--teal-bright));
+}
+.weight-row em {
+  font-style: normal;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.label3d {
+  color: #e6d5b8;
+  font-family: "Sora", system-ui, sans-serif;
+  font-size: 10px;
+  text-align: center;
+  white-space: pre;
+  text-shadow: 0 1px 4px #0c1210;
+  opacity: 0.9;
+  transform: translateY(-4px);
+}
+
+body.viz3d {
+  overflow: hidden;
+}
+
+@media (max-width: 960px) {
+  body.viz3d { overflow: auto; }
+  .workspace-3d { grid-template-columns: 1fr; }
+  .viz-panel-3d { min-height: 420px; }
+}
+
 .live-pill {
   display: inline-flex;
   align-items: center;

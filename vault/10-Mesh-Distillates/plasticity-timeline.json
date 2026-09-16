@@ -1,0 +1,270 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "type": "synapse",
+      "from": "sense.chat.aaron",
+      "to": "area.wernicke",
+      "status": "ok",
+      "code": null,
+      "t": 0,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.wernicke",
+      "to": "area.temporal",
+      "status": "ok",
+      "code": null,
+      "t": 1,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.temporal",
+      "to": "switch.autonomy",
+      "status": "ok",
+      "code": null,
+      "t": 2,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "switch.autonomy",
+      "to": "motor.vault",
+      "status": "ok",
+      "code": null,
+      "t": 3,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "ltp",
+      "tracts": [
+        "tract.arcuate",
+        "tract.cingulum"
+      ],
+      "gain": 1.0,
+      "status": "ok",
+      "hotspot": "hotspot.research",
+      "pathway": [
+        "sense.chat.aaron",
+        "area.wernicke",
+        "area.temporal",
+        "switch.autonomy",
+        "motor.vault"
+      ],
+      "t": 4,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "sense.swiftguide.map",
+      "to": "area.apfc",
+      "status": "ok",
+      "code": null,
+      "t": 5,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.apfc",
+      "to": "switch.autonomy",
+      "status": "ok",
+      "code": null,
+      "t": 6,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "switch.autonomy",
+      "to": "motor.vault",
+      "status": "ok",
+      "code": null,
+      "t": 7,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "ltp",
+      "tracts": [
+        "tract.cingulum",
+        "tract.ifof"
+      ],
+      "gain": 1.0,
+      "status": "ok",
+      "hotspot": "hotspot.knowledge_map",
+      "pathway": [
+        "sense.swiftguide.map",
+        "area.apfc",
+        "switch.autonomy",
+        "motor.vault"
+      ],
+      "t": 8,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "sense.careers.listing",
+      "to": "area.temporal",
+      "status": "ok",
+      "code": null,
+      "t": 9,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.temporal",
+      "to": "switch.careers_submit",
+      "status": "ok",
+      "code": null,
+      "t": 10,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "switch.careers_submit",
+      "to": "motor.jobs",
+      "status": "error",
+      "code": "missing_edge",
+      "t": 11,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "error",
+      "code": "missing_edge",
+      "status": "error",
+      "tracts": [
+        "tract.uncinate"
+      ],
+      "t": 12,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "neurogenesis",
+      "column": "neuron.mtl_new_001",
+      "area": "area.mtl",
+      "stage": "progenitor",
+      "status": "ok",
+      "t": 13,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "sense.chat.aaron",
+      "to": "area.wernicke",
+      "status": "ok",
+      "code": null,
+      "t": 14,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.wernicke",
+      "to": "area.temporal",
+      "status": "ok",
+      "code": null,
+      "t": 15,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.temporal",
+      "to": "switch.autonomy",
+      "status": "ok",
+      "code": null,
+      "t": 16,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "switch.autonomy",
+      "to": "motor.vault",
+      "status": "ok",
+      "code": null,
+      "t": 17,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "ltp",
+      "tracts": [
+        "tract.arcuate",
+        "tract.cingulum"
+      ],
+      "gain": 1.0,
+      "status": "ok",
+      "hotspot": "hotspot.research",
+      "pathway": [
+        "sense.chat.aaron",
+        "area.wernicke",
+        "area.temporal",
+        "switch.autonomy",
+        "motor.vault"
+      ],
+      "t": 18,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "neurogenesis_mature",
+      "column": "neuron.mtl_new_001",
+      "stage": "immature",
+      "status": "ok",
+      "t": 19,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "sense.chat.aaron",
+      "to": "area.wernicke",
+      "status": "ok",
+      "code": null,
+      "t": 20,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.wernicke",
+      "to": "area.temporal",
+      "status": "ok",
+      "code": null,
+      "t": 21,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "area.temporal",
+      "to": "switch.autonomy",
+      "status": "ok",
+      "code": null,
+      "t": 22,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "synapse",
+      "from": "switch.autonomy",
+      "to": "motor.vault",
+      "status": "ok",
+      "code": null,
+      "t": 23,
+      "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "type": "ltp",
+      "tracts": [
+        "tract.arcuate",
+        "tract.cingulum"
+      ],
+      "gain": 1.6,
+      "status": "ok",
+      "hotspot": "hotspot.research",
+      "pathway": [
+        "sense.chat.aaron",
+        "area.wernicke",
+        "area.temporal",
+        "switch.autonomy",
+        "motor.vault"
+      ],
+      "t": 24,
+      "ts": "2026-09-16T23:54:44Z"
+    }
+  ],
+  "rules": "config/connectome/plasticity.json"
+}

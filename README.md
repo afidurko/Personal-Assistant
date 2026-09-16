@@ -25,7 +25,7 @@ Aaron → sensory → Brodmann areas (columns=agents/loops) → switches → mot
                  ↘ association tracts = neural mesh ↗
 ```
 
-Lenses: **Cortex** (Brodmann) · **Spinal** · **Mind map** (SwiftGuide).
+Lenses: **3D cortex** (spin + rewind) · **2D flat** · plasticity tape for tract errors.
 
 ```bash
 # Example: route a careers spike to motor plan
@@ -34,9 +34,11 @@ python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch 
 python3 scripts/connectome-route.py --sense sense.chat.aaron --goal "qa loop"
 # SwiftGuide → iOS companion stack brief
 python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "ios companion stack"
+# Plasticity / neurogenesis tape
+python3 scripts/connectome-plasticity.py --neurogenesis
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
-# Live cortex + spinal + mind-map visualization
+# Live 3D cortex
 bash scripts/serve-connectome-viz.sh
 # open http://127.0.0.1:8765/visualizations/connectome/
 ```

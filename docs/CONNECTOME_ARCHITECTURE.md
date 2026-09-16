@@ -138,28 +138,34 @@ See `config/connectome/switches.json` (tasking, autonomy, outbound, careers, pre
 
 ## Live visualization
 
-Three lenses in `visualizations/connectome/`:
+**3D cortex (primary):** `visualizations/connectome/index.html`
 
-1. **Cortex** — Brodmann areas + neuron columns + tract fibers
-2. **Spinal** — sensory/motor periphery map
-3. **Mind map** — SwiftGuide hierarchical cartography
+- Orbit / spin in space (drag)
+- Rewindable plasticity tape (scrubber) to inspect tract mesh errors
+- LTP / LTD / prune weights + MTL neurogenesis columns
+- Flat 2D fallback: `visualizations/connectome/flat.html`
 
 ```bash
 bash scripts/serve-connectome-viz.sh
 # http://127.0.0.1:8765/visualizations/connectome/
 
-python3 scripts/connectome-route.py --sense sense.chat.aaron --goal "qa loop"
-python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "ios companion stack"
-python3 scripts/connectome-check.py
+# Seed plasticity tape / neurogenesis
+python3 scripts/connectome-plasticity.py --sense sense.chat.aaron
+python3 scripts/connectome-plasticity.py --error missing_edge --sense sense.careers.listing
+python3 scripts/connectome-plasticity.py --neurogenesis && python3 scripts/connectome-plasticity.py --mature
 ```
+
+Plasticity rules: `config/connectome/plasticity.json`  
+Research: `vault/04-Research/2026-09-16-Neuroplasticity-neurogenesis-mesh.md`
 
 ## Files
 
 - `config/connectome/areas.json` — Brodmann areas  
 - `config/connectome/neurons.json` — agents + loops as columns  
 - `config/connectome/tracts.json` — association mesh fibers  
-- `config/connectome/hotspots.json` — sense→area→switch→motor chains  
+- `config/connectome/plasticity.json` — LTP/LTD/prune + MTL neurogenesis  
+- `config/connectome/hotspots.json` — short-path sense→area→switch→motor chains  
 - `config/connectome/synapses.json` — allowed edges  
 - `config/connectome/centers.json` — legacy aliases  
 - `config/connectome/mindmap.json` — SwiftGuide dual-lens trees  
-- `scripts/connectome-route.py` / `connectome-check.py` / `connectome-simulate.py`
+- `scripts/connectome-route.py` / `connectome-check.py` / `connectome-simulate.py` / `connectome-plasticity.py`

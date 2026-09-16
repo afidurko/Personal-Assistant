@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "analogy": "Neuroplasticity + adult neurogenesis applied to Cam's Brodmann mesh",
+  "literature": [
+    {
+      "cite": "Hebbian LTP/LTD and three-factor plasticity (Annu Rev Neurosci — synaptic plasticity forms)",
+      "use": "strengthen co-active tract synapses; depress unused; eligibility traces on mesh writes"
+    },
+    {
+      "cite": "Synaptic pruning / experience-dependent homeostasis (Neural Regen Res reviews)",
+      "use": "prune weak tract edges after repeated LTD or QA veto; keep excitation/inhibition balance"
+    },
+    {
+      "cite": "Adult hippocampal neurogenesis — granule cell integration & enhanced early LTP (CSH Perspectives)",
+      "use": "spawn immature MTL columns that mature into mesh-capable neurons over cycles"
+    },
+    {
+      "cite": "Structural homo-/heterosynaptic spine plasticity in adult-born GCs (PNAS)",
+      "use": "homosynaptic enlarge on act pathway; heterosynaptic shrink on competing unused tracts"
+    }
+  ],
+  "rules": {
+    "ltp": {
+      "id": "plasticity.ltp",
+      "trigger": "completed_act_pathway",
+      "effect": "increase tract weight along used edges",
+      "delta": 0.08,
+      "cap": 1.0,
+      "store": "mesh/tracts"
+    },
+    "ltd": {
+      "id": "plasticity.ltd",
+      "trigger": ["qa_veto", "kill_interrupt", "missing_edge", "switch_hold"],
+      "effect": "decrease tract weight on failed/error segments",
+      "delta": -0.12,
+      "floor": 0.05,
+      "store": "mesh/tracts"
+    },
+    "pruning": {
+      "id": "plasticity.prune",
+      "trigger": "tract_weight_below_threshold_for_n_cycles",
+      "threshold": 0.12,
+      "cycles": 5,
+      "effect": "mark tract segment pruned — router prefers alternate short path",
+      "notes": "Experience-dependent synaptic pruning analog"
+    },
+    "homeostasis": {
+      "id": "plasticity.scale",
+      "trigger": "area_column_overload",
+      "effect": "synaptic scaling — dampen all local column gains in area",
+      "notes": "Keeps E/I balance when too many loops fire"
+    },
+    "neurogenesis": {
+      "id": "plasticity.neurogenesis",
+      "site": "area.mtl",
+      "trigger": ["novel_goal", "pattern_separation_need", "standing_memory_pressure"],
+      "stages": [
+        { "age": 0, "label": "progenitor", "plasticity_gain": 0.0, "can_motor": false },
+        { "age": 1, "label": "immature", "plasticity_gain": 1.6, "can_motor": false },
+        { "age": 2, "label": "integrating", "plasticity_gain": 1.3, "can_motor": false },
+        { "age": 3, "label": "mature", "plasticity_gain": 1.0, "can_motor": true }
+      ],
+      "notes": "Adult-born MTL columns — high early LTP, then mature into mesh curators"
+    },
+    "efficiency": {
+      "prefer_short_paths": true,
+      "prefer_intra_area_loops": true,
+      "max_hops_soft": 6,
+      "notes": "Small-world: dense local columns, sparse long tracts — shorter act chains when safe"
+    }
+  },
+  "error_taxonomy": [
+    {
+      "code": "missing_edge",
+      "severity": "error",
+      "viz": "tract_segment_red",
+      "plasticity": "ltd"
+    },
+    {
+      "code": "qa_veto",
+      "severity": "hold",
+      "viz": "cingulate_flash_amber",
+      "plasticity": "ltd"
+    },
+    {
+      "code": "kill",
+      "severity": "error",
+      "viz": "all_motor_dark",
+      "plasticity": "ltd"
+    },
+    {
+      "code": "pruned_tract",
+      "severity": "reroute",
+      "viz": "tract_dashed_dim",
+      "plasticity": "prune"
+    },
+    {
+      "code": "column_overload",
+      "severity": "warn",
+      "viz": "area_scale_pulse",
+      "plasticity": "homeostasis"
+    }
+  ],
+  "timeline": {
+    "record_every_synapse": true,
+    "rewindable": true,
+    "store": "vault/10-Mesh-Distillates/plasticity-timeline.json"
+  }
+}
