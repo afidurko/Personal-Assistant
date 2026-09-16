@@ -1,32 +1,64 @@
-# Cam iOS companion (scaffold)
+# Cam iOS companion
 
-Native iPhone app for **Aaron face/voice recognition** and **camera/microphone** access.
+Native iPhone app for **Aaron face/voice recognition**, **camera**, **microphone**, and **live converse with Cam**.
 
 ## Status
-Scaffold only — no Xcode project checked in yet. Create with:
+- Capabilities **granted** in mesh/boundaries
+- Web companion works now: `companions/web/` + `docs/CAM_CONVERSE.md`
+- Native Xcode project: create on Mac (scaffold below)
 
+## Create project (Mac + Xcode)
 ```bash
-# on a Mac with Xcode
-mkdir -p companions/ios
 # File → New → App (SwiftUI, iOS 17+)
-# Bundle id suggestion: com.aaron.cam.companion
+# Bundle id: com.aaron.cam.companion
+# Add to this folder as companions/ios/CamCompanion/
 ```
 
+## Info.plist usage strings
+- `NSCameraUsageDescription` — Cam uses the camera to recognize Aaron and for tasked vision.
+- `NSMicrophoneUsageDescription` — Cam uses the microphone to recognize Aaron’s voice and converse.
+- `NSSpeechRecognitionUsageDescription` — Cam turns your speech into text for conversation.
+- `NSPhotoLibraryUsageDescription` — Cam reads your photos to learn your look (Aaron grant).
+
 ## Required capabilities
-- Camera (AVCaptureSession)
-- Microphone (AVAudioEngine)
-- On-device face enrollment + match (Vision / custom embedding)
-- On-device voice enrollment + speaker-ID
-- Secure pairing to Cam host
+- Camera (`AVCaptureSession`)
+- Microphone (`AVAudioEngine`)
+- Speech recognition (Speech framework) → `POST /api/turn`
+- Face enrollment + match (Vision)
+- Speaker-ID enrollment
+- Pair to Cam host (`CAM_HOST` e.g. `http://192.168.x.x:8787`)
 
 ## First screens
-1. Pair with Cam (setup code)
-2. Enroll Aaron face (guided)
-3. Enroll Aaron voice (guided phrases)
-4. Permissions: Camera + Microphone
-5. Live: match indicator + “task Cam” button
+1. Pair with Cam (host URL / setup code)
+2. Enroll Aaron face
+3. Enroll Aaron voice
+4. Permissions: Camera + Microphone + Speech + Photos
+5. Live converse (same loop as web companion)
 
-## Privacy copy (required by App Store)
-Camera and mic are used so Cam can recognize Aaron and run vision/listening **only when Aaron tasks it** (or when Aaron enables a standing monitor task).
+## Swift stub (drop into project)
 
-See `docs/IOS_IDENTITY.md` and `config/integrations/ios-companion.md`.
+```swift
+// CamAPI.swift
+import Foundation
+
+struct CamTurn: Codable {
+  let cam: String
+  let speak: Speak?
+  struct Speak: Codable { let rate: Double?; let pitch: Double?; let lang: String? }
+}
+
+enum CamAPI {
+  static var base = URL(string: "http://127.0.0.1:8787")!
+
+  static func turn(text: String, source: String = "mic") async throws -> CamTurn {
+    var req = URLRequest(url: base.appendingPathComponent("api/turn"))
+    req.httpMethod = "POST"
+    req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    req.httpBody = try JSONEncoder().encode(["text": text, "transcript": text, "source": source])
+    let (data, _) = try await URLSession.shared.data(for: req)
+    return try JSONDecoder().decode(CamTurn.self, from: data)
+  }
+}
+```
+
+See `docs/CAM_CONVERSE.md`, `docs/IOS_IDENTITY.md`, `config/integrations/ios-companion.md`.

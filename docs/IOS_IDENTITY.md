@@ -6,13 +6,16 @@
 
 | Capability | Have it today? | Notes |
 |---|---|---|
-| Recognize **Aaron’s** face | **No** | Need enrolled face print + iOS/Vision (or on-device model) |
-| Recognize **Aaron’s** voice | **No** | Need enrolled voice print + speaker-ID (not just ASR transcript) |
-| iPhone **camera** access | **No** | Needs native iOS companion with Camera permission |
-| iPhone **microphone** access | **No** | Needs native iOS companion with Mic permission |
-| Cam’s face / soft voice (assistant persona) | Yes (assets + LLMAvatarTalk plan) | That is Cam speaking/looking — not Aaron biometrics |
-| Speech-to-text (ASR) | Planned via RIVA | Transcribes words; does **not** prove it’s Aaron |
-| Object/person detection | PaddleDetection on **attached** media | Not live iPhone camera; not Aaron-ID |
+| Recognize **Aaron’s** face | **Enrollment started** | Photos enrolled; live matcher still companion-side |
+| Recognize **Aaron’s** voice | **Partial** | Needs voice samples + speaker-ID; converse uses ASR now |
+| iPhone **camera** access | **Yes via web companion** | Native iOS app still scaffold; browser camera works on device |
+| iPhone **microphone** access | **Yes via web companion** | Open `docs/CAM_CONVERSE.md` — run server on Aaron’s Mac/phone browser |
+| Live converse with Cam | **Yes via web companion** | Mic → transcript → Cam reply → soft TTS |
+| Cam’s face / soft voice (assistant persona) | Yes | Portrait + browser TTS / RIVA plan |
+| Speech-to-text (ASR) | Browser Speech API now; RIVA later | Transcribes words; speaker-ID still separate |
+| Object/person detection | PaddleDetection on media | Plus Aaron photo enrollment |
+
+**Important:** Cloud Agent VMs have no mic. Live talk requires running `cam-converse-server.py` on Aaron’s machine.
 
 ## What Aaron asked for
 
@@ -70,13 +73,14 @@ centers → motors (unchanged)
 
 ## Build plan
 
-1. **iOS companion app** (`companions/ios/`) — SwiftUI + AVFoundation; Info.plist `NSCameraUsageDescription` / `NSMicrophoneUsageDescription`
-2. **Enrollment flow** — Aaron records face + voice samples on-device; store embeddings in Keychain / Secure Enclave–backed store
-3. **Match APIs** — `POST /spike/aaron.face` · `POST /spike/aaron.voice` with score + device id
-4. **Connectome wiring** — senses + `switch.identity` (already scaffolded in config)
-5. **Optional** — Apple Speech framework for on-device ASR fallback when RIVA studio is down
+1. **Web companion (ready)** — `companions/web/` + `scripts/cam-converse-server.py` — mic/camera/converse in browser
+2. **iOS companion app** (`companions/ios/`) — SwiftUI + AVFoundation; same `/api/*` as web
+3. **Enrollment flow** — Aaron face (done from photos) + voice samples on-device
+4. **Match APIs** — `POST /spike/aaron.face` · `POST /spike/aaron.voice` with score + device id
+5. **RIVA studio** — swap browser TTS/ASR for full presence when Audio2Face is up
 
 ## Repo pointers
-- Companion scaffold: `companions/ios/README.md`
+- Live converse: `docs/CAM_CONVERSE.md`
+- Companion scaffold: `companions/ios/README.md` · `companions/web/`
 - Integration policy: `config/integrations/ios-companion.md`
 - Persistence: `mesh/facts.ios_aaron_identity = true`

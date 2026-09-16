@@ -39,7 +39,11 @@
     "aaron_face_photo_to_video_match": true,
     "aaron_voice_from_video": true,
     "retain_raw_media_in_mesh": false,
-    "identity_media_purpose": "understand_aaron_look_and_sound"
+    "identity_media_purpose": "understand_aaron_look_and_sound",
+    "cam_live_mic": true,
+    "cam_live_camera": true,
+    "cam_live_converse": true,
+    "cam_converse_port": 8787
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
@@ -114,7 +118,11 @@
     "aaron_face_photo_to_video_match": true,
     "aaron_voice_from_video": true,
     "retain_raw_media_in_mesh": false,
-    "identity_media_purpose": "understand_aaron_look_and_sound"
+    "identity_media_purpose": "understand_aaron_look_and_sound",
+    "cam_live_mic": true,
+    "cam_live_camera": true,
+    "cam_live_converse": true,
+    "cam_converse_port": 8787
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,

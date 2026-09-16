@@ -56,6 +56,11 @@
     "text": true,
     "call": true,
     "facetime": true,
+    "mic": true,
+    "camera": true,
+    "converse_companion": true,
+    "converse_server": "scripts/cam-converse-server.py",
+    "converse_web": "companions/web/",
     "always_available_to_aaron": true,
     "requires_aaron_as_sole_task_giver": true
   },

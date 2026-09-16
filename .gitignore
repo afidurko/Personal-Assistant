@@ -6,3 +6,4 @@ __pycache__/
 
 identity/persistence/cam-persistence.zip
 identity/aaron/local/
+vault/10-Mesh-Distillates/converse/*.jsonl

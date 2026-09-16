@@ -1,10 +1,14 @@
 # iOS companion — Aaron identity + camera/mic
 
 ## Purpose
-Native iPhone bridge so Cam can:
-- Capture camera / microphone when Aaron tasks it
+Native iPhone / web bridge so Cam can:
+- Capture camera / microphone when Aaron tasks it **or opens the converse UI**
+- Hold a live conversation (ASR → Cam reply → TTS)
 - Verify **Aaron’s** face and voice (speaker + face match)
 - Feed spikes into the connectome sensory layer
+
+Web companion (ready now): `companions/web/` + `docs/CAM_CONVERSE.md`  
+Native iOS: same `/api/*` contract once Xcode app is created.
 
 ## Not this
 - Not Cam’s avatar face/voice (that’s LLMAvatarTalk)
