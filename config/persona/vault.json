@@ -1,9 +1,10 @@
 {
   "assistant": "Cam",
   "human": "Aaron",
-  "vault_path": null,
+  "vault_path": "vault",
+  "vault_path_absolute_hint": "On Aaron's machine: <Personal-Assistant-clone>/vault",
   "plugin": "integrations/smart-second-brain",
-  "status": "awaiting_aaron_vault_path",
+  "status": "starter_vault_created",
   "sync_to_mesh_namespace": "mesh/vault",
-  "notes": "Set vault_path to Aaron's Obsidian vault absolute path on his machine"
+  "open_instructions": "Obsidian → Open folder as vault → select ./vault → install Smart Second Brain community plugin"
 }

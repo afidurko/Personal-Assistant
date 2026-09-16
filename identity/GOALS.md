@@ -18,7 +18,7 @@
 |---|---|---|
 | Persona face/voice locked | Cam | done |
 | Always-on autonomy | Cam | done |
-| smart-second-brain wired | memory-curator | submodule added — need vault_path |
+| smart-second-brain starter vault | memory-curator | **created** at `vault/` — open in Obsidian |
 | Persistence | memory-curator | done |
 | LinkedIn + Indeed | careers | enabled |
 | Avatar studio | comms | awaiting RIVA/Audio2Face on Aaron machine |

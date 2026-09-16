@@ -3,23 +3,23 @@
   "human": "Aaron",
   "order": [
     {
-  "id": "persistence",
-  "title": "Load/export persistence bundle + mesh seed",
-  "role": "memory-curator"
-},
-{
-  "id": "smart_second_brain",
-  "title": "Attach Obsidian vault via smart-second-brain",
-  "role": "memory-curator"
-},
-{
-  "id": "research_mesh",
-  "title": "Source-backed research into mesh/vault",
-  "role": "researcher"
-},
+      "id": "persistence",
+      "title": "Load/export persistence bundle + mesh seed",
+      "role": "memory-curator"
+    },
+    {
+      "id": "smart_second_brain",
+      "title": "Open starter vault/ in Obsidian + enable Smart Second Brain",
+      "role": "memory-curator"
+    },
+    {
+      "id": "research_mesh",
+      "title": "Source-backed research into mesh/vault",
+      "role": "researcher"
+    },
     {
       "id": "careers_linkedin_indeed",
-      "title": "Job watch on LinkedIn + Indeed (draft only)",
+      "title": "Job watch on LinkedIn + Indeed",
       "role": "careers"
     },
     {
@@ -28,8 +28,8 @@
       "role": "ops"
     },
     {
-      "id": "comms_gated",
-      "title": "Email/chat triage + gated text/call/FaceTime",
+      "id": "comms_presence",
+      "title": "Comms + Cam presence (LLMAvatarTalk)",
       "role": "comms"
     },
     {

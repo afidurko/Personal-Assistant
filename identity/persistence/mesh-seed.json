@@ -21,18 +21,21 @@
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
     "standing_approval_rules": "standing autonomy ON for session_01 grants",
-    "vault_path": "set config/persona/vault.json"
+    "vault_path": "set \u2014 starter at repo vault/"
   },
   "mesh/persona": {
     "age": 32,
+    "english": "fluent",
     "eyes": "blue",
     "face": "identity/persona/cam-face.jpg",
     "hair": "brown",
-    "languages": ["en", "es"],
-    "primary_language": "en",
-    "english": "fluent",
+    "languages": [
+      "en",
+      "es"
+    ],
     "name": "Cam",
     "origin": "Argentina",
+    "primary_language": "en",
     "voice": "soft airy fluent English"
   },
   "mesh/prefs": {
@@ -41,18 +44,21 @@
     "auto_archive_to_mesh": true,
     "brain_enhancement": "smart-second-brain",
     "cam_age": 32,
+    "cam_english": "fluent",
     "cam_eyes": "blue",
     "cam_hair": "brown",
     "cam_origin": "Argentina",
-    "cam_voice": "soft airy fluent English",
     "cam_primary_language": "en",
-    "cam_english": "fluent",
+    "cam_voice": "soft airy fluent English",
     "chief_voice": "Cam",
     "complete_without_interference": true,
     "continuous_monitoring": false,
     "face_asset": "identity/persona/cam-face.jpg",
     "human_name": "Aaron",
-    "job_boards": ["linkedin", "indeed"],
+    "job_boards": [
+      "linkedin",
+      "indeed"
+    ],
     "kill_switch_default": "pause_all",
     "max_delegate_depth": 3,
     "named_specialists": true,
@@ -73,6 +79,8 @@
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",
-    "vault_path": null
+    "status": "starter_vault_created",
+    "vault_path": "vault",
+    "welcome": "vault/Welcome.md"
   }
 }

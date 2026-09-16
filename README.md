@@ -7,6 +7,7 @@ talking presence — with a smart second brain over Aaron’s notes.
 ## Design
 
 - **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain)
+- **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
 - **Tools:** Jarvis · PaddleDetection · LinkedIn/Indeed
@@ -15,14 +16,14 @@ talking presence — with a smart second brain over Aaron’s notes.
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
 Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## Stack
+## Open the vault (2 minutes)
 
-```text
-Aaron (sole task-giver) → Cam team
-  → nulltickets mesh + smart-second-brain vault
-  → Jarvis / PaddleDetection / LinkedIn+Indeed
-  → LLMAvatarTalk presence
-```
+1. Install [Obsidian](https://obsidian.md)
+2. **Open folder as vault** → choose `vault/` in this repo
+3. Community plugins → install **Smart Second Brain** → Enable
+4. Start at [[Welcome]] (`vault/Welcome.md`)
+
+Cam is already pointed at `vault` via `config/persona/vault.json`.
 
 ## Submodules
 
@@ -32,9 +33,7 @@ bash scripts/cam-avatar-hint.sh
 python3 scripts/persist-export.py --seed-only
 ```
 
-Set Obsidian vault path in `config/persona/vault.json` when ready.
-
 ## Status
 
-Persona locked. Face created. Always-on autonomy set. smart-second-brain added.
-Next: vault path + RIVA/Audio2Face studio bring-up + live Null stack.
+Persona locked. Starter vault created. Always-on autonomy set.
+Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.

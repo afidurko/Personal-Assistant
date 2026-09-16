@@ -25,6 +25,8 @@ DEFAULT_INCLUDE = [
     "config/persona/vault.json",
     "docs/PERSISTENCE.md",
     "docs/PERSONA.md",
+    "vault/Welcome.md",
+    "vault/README.md",
 ]
 
 
