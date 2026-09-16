@@ -53,9 +53,12 @@
     "cam_converse_url_config": "config/network/tailscale.json",
     "ios_iphone_client": true,
     "ios_ipad_client": true,
-    "ios_mac_available": false,
+    "ios_mac_available": "later",
+    "ios_mac_slot_open": true,
+    "ios_mac_required_now": false,
     "ios_on_device_converse": true,
     "ios_preferred_cam_host": "aaron-ipad",
+    "ios_preferred_cam_host_when_mac_ready": "aaron-mac",
     "ios_devices_config": "config/network/ios-devices.json"
   },
   "mesh/open-questions": {
@@ -145,9 +148,12 @@
     "cam_converse_url_config": "config/network/tailscale.json",
     "ios_iphone_client": true,
     "ios_ipad_client": true,
-    "ios_mac_available": false,
+    "ios_mac_available": "later",
+    "ios_mac_slot_open": true,
+    "ios_mac_required_now": false,
     "ios_on_device_converse": true,
     "ios_preferred_cam_host": "aaron-ipad",
+    "ios_preferred_cam_host_when_mac_ready": "aaron-mac",
     "ios_devices_config": "config/network/ios-devices.json"
   },
   "mesh/research": {

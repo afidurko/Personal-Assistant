@@ -1,46 +1,40 @@
-# iPhone + iPad setup (no Mac)
+# iPhone + iPad now · Mac open for later
 
-Aaron’s current gear: **iPhone + iPad**, Tailscale already on. No Mac.
+Aaron’s gear **now:** iPhone + iPad + Tailscale.  
+**Mac:** allowed / configured as a slot — **not required** until Aaron can get to it.
 
-## What works now
+## Active now
 
-| Path | Works without Mac? | How |
+| Path | Status | How |
 |---|---|---|
-| On-device Cam in Safari | **Yes** | Open the web companion; mic/camera/TTS run on the device; Cam replies on-device if no server |
-| Tailscale mesh between iPhone ↔ iPad | **Yes** | Both on same tailnet |
-| Shared Cam server | Needs a host | Prefer **iPad** as host later (a-Shell) or any always-on Linux box on Tailscale |
-| Native Xcode iOS app | Needs Mac | Scaffold only until a Mac/Xcode is available |
+| On-device Cam in Safari | **Primary** | Mic/camera/TTS on device; Cam replies on-device if no server |
+| Tailscale iPhone ↔ iPad | **On** | Same tailnet |
+| Shared server on iPad | Optional | a-Shell + `cam-converse-server.py` |
+| Mac as Cam host | **Open for later** | Reserved MagicDNS `aaron-mac` — flip when ready |
+| Native Xcode app | Later (needs Mac) | Scaffold only |
 
-## Do this on iPhone / iPad
+## Do this on iPhone / iPad (today)
 
-1. Install / open **Tailscale** — confirm both devices online  
-2. On **either device**, open the Cam companion in **Safari**  
-3. Tap **Share → Add to Home Screen** (PWA)  
-4. Open **Cam** from home screen → **Enable mic & talk** → allow Microphone  
-5. Optional: **Enable camera**
+1. Tailscale on — both devices online  
+2. Safari → open `companions/web/` → **Add to Home Screen**  
+3. Open **Cam** → **Enable mic & talk**
 
-On-device mode talks to Cam even when `cam-converse-server.py` is not running.
+## Mac later (when you have it)
 
-## Optional: iPad as Cam host (shared session)
+No rush — slot stays open:
 
-When you want iPhone to hit the same server over Tailscale:
-
-1. On iPad install **a-Shell** (or similar)  
-2. Clone/pull this repo, run:
+1. Join Tailscale as `aaron-mac` (or edit MagicDNS in config)  
+2. Set `config/network/tailscale.json` → `hosts.mac_available: true` and `preferred_cam_host: "aaron-mac"`  
+3. Run:
 
 ```bash
 python3 scripts/cam-converse-server.py --host 0.0.0.0 --port 8787
 ```
 
-3. On iPhone Safari: `http://aaron-ipad:8787` (set real MagicDNS in `config/network/tailscale.json`)
+4. iPhone/iPad open `http://aaron-mac:8787`  
+5. Optional: Xcode native companion + RIVA studio
 
-## Config files
-- Devices: `config/network/ios-devices.json`
-- Tailscale: `config/network/tailscale.json` (cam host default = `aaron-ipad`)
+## Config
+- `config/network/ios-devices.json` — `mac.status: open_for_later`  
+- `config/network/tailscale.json` — `mac_slot_open: true`  
 - Companion: `companions/web/`
-- Converse docs: `docs/CAM_CONVERSE.md`
-
-## Limits (honest)
-- Cloud Agent cannot press Allow on your mic permission sheet  
-- Safari blocks mic on insecure remote `http://` unless host is localhost — on-device / Home Screen mode avoids that  
-- Full RIVA / Audio2Face presence still needs a stronger host later

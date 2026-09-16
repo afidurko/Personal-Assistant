@@ -2,16 +2,21 @@
 
 **Status:** ENABLED · Aaron’s tailnet · **iPhone + iPad** (no Mac)
 
-## Topology (current)
+## Topology (current → later)
 
 ```text
-aaron-iphone  ←──tailnet──►  aaron-ipad
-       │                         │
-       └─ Safari Cam PWA         ├─ Safari Cam PWA (on-device)
-                                 └─ optional: cam-converse-server (a-Shell)
+NOW:
+  aaron-iphone  ←──tailnet──►  aaron-ipad
+         │                         │
+         └─ Safari Cam PWA         ├─ Safari Cam PWA
+                                   └─ optional a-Shell host
+
+LATER (slot open):
+  aaron-mac  ── preferred Cam host + optional Xcode / RIVA
 ```
 
-Default Cam host MagicDNS: **`aaron-ipad`** (`config/network/tailscale.json`).
+Default Cam host **now:** `aaron-ipad`  
+Reserved for later: `aaron-mac` (`mac_slot_open: true` — not required yet)
 
 ## Setup
 1. Tailscale app on iPhone + iPad — both online  

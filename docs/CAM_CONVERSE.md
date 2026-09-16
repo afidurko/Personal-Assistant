@@ -2,7 +2,7 @@
 
 ## Status
 **ENABLED** by Aaron (2026-09-16).  
-**Devices:** iPhone + iPad (**no Mac**) — `docs/IOS_DEVICES.md`.  
+**Devices:** iPhone + iPad **now**; Mac host **open for later** (not required) — `docs/IOS_DEVICES.md`.  
 **Network:** Tailscale — `docs/TAILSCALE.md`.
 
 ## What this adds
