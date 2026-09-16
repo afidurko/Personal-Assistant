@@ -184,6 +184,37 @@
         "motor.mesh"
       ],
       "behavior": "tasked_iphone_mic_listen"
+    },
+    {
+      "id": "hotspot.aaron_enroll_photos",
+      "center": "center.vision",
+      "pathway": [
+        "sense.photos.library",
+        "center.vision",
+        "center.chief",
+        "switch.identity",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": ["motor.vault"],
+      "behavior": "enroll_aaron_face_from_photos"
+    },
+    {
+      "id": "hotspot.aaron_enroll_media",
+      "center": "center.vision",
+      "pathway": [
+        "sense.files.media",
+        "center.vision",
+        "center.comms",
+        "center.chief",
+        "switch.identity",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": ["motor.vault"],
+      "behavior": "enroll_aaron_face_voice_photo_to_video"
     }
   ]
 }

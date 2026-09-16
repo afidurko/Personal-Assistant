@@ -24,8 +24,9 @@
 - Scaffold: `companions/ios/` · policy: `config/integrations/ios-companion.md`
 - Full design: `docs/IOS_IDENTITY.md`
 - **Granted:** Aaron face recognition, Aaron voice recognition, iPhone camera, iPhone mic
-- Capture mode default: **tasked_only** (not always-on surveillance)
-- Status: **scaffolded — native app not built yet**
+- **Granted:** full photos + files access to learn Aaron’s look/sound and photo↔video same-person match (`identity/persistence/AARON_MEDIA_ACCESS.md`)
+- Capture mode default: **tasked_only** for live camera/mic
+- Status: **scaffolded — native app / enrollment pipeline not built yet**
 
 ## Cam face & voice (LLMAvatarTalk)
 

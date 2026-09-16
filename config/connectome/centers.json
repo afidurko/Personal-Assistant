@@ -56,7 +56,7 @@
       "role": "vision",
       "function": "visual association",
       "accepts": ["spike.visual", "spike.task"],
-      "projects_to": ["center.chief", "center.memory"]
+      "projects_to": ["center.chief", "center.memory", "center.comms"]
     },
     {
       "id": "center.qa",

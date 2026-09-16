@@ -32,7 +32,14 @@
     "ios_camera_access": true,
     "ios_microphone_access": true,
     "ios_capture_mode": "tasked_only",
-    "ios_identity_threshold": 0.85
+    "ios_identity_threshold": 0.85,
+    "aaron_photos_full_access": true,
+    "aaron_files_full_access": true,
+    "aaron_identity_from_media": true,
+    "aaron_face_photo_to_video_match": true,
+    "aaron_voice_from_video": true,
+    "retain_raw_media_in_mesh": false,
+    "identity_media_purpose": "understand_aaron_look_and_sound"
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
@@ -100,7 +107,14 @@
     "ios_camera_access": true,
     "ios_microphone_access": true,
     "ios_capture_mode": "tasked_only",
-    "ios_identity_threshold": 0.85
+    "ios_identity_threshold": 0.85,
+    "aaron_photos_full_access": true,
+    "aaron_files_full_access": true,
+    "aaron_identity_from_media": true,
+    "aaron_face_photo_to_video_match": true,
+    "aaron_voice_from_video": true,
+    "retain_raw_media_in_mesh": false,
+    "identity_media_purpose": "understand_aaron_look_and_sound"
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,

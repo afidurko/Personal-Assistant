@@ -36,6 +36,16 @@ Aaron authorized (2026-09-16): recognize **Aaron’s** face and voice; use iPhon
 - Strengthens Aaron-only tasking (`switch.identity` + `switch.tasking`)
 - Details: `docs/IOS_IDENTITY.md`
 
+## Photos & files for Aaron identity (persistent grant)
+
+Aaron authorized (2026-09-16): Cam has **full access to Aaron’s photos and files** to learn who Aaron is — look, sound, and that the **same face in a photo** is the person **talking in a video**.
+
+- Read photo library + files Aaron makes available
+- Build cross-modal identity (photo face ↔ video face ↔ voice)
+- Mesh keeps summaries/embedding refs; raw libraries stay local (gitignored)
+- Do not enroll strangers as Aaron; do not clone Aaron for outbound impersonation unless asked
+- Details: `identity/persistence/AARON_MEDIA_ACCESS.md`
+
 ## Unlimited subagents (persistent grant)
 
 Aaron authorized (2026-09-16): Cam may **create as many subagents as needed** to complete assigned work **without asking Aaron each time**.

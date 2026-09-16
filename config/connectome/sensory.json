@@ -92,6 +92,20 @@
       "source": "ios_companion_speaker_id",
       "emits": ["spike.aaron_present", "spike.identity"],
       "notes": "Aaron voice/speaker-ID score — not the same as ASR transcript"
+    },
+    {
+      "id": "sense.photos.library",
+      "modality": "vision",
+      "source": ["ios_photos", "local_files"],
+      "emits": ["spike.visual", "spike.aaron_enroll"],
+      "notes": "Aaron-granted full photo access for identity learning"
+    },
+    {
+      "id": "sense.files.media",
+      "modality": "multimodal",
+      "source": ["local_files", "icloud_paths", "attachments"],
+      "emits": ["spike.visual", "spike.audio", "spike.aaron_enroll"],
+      "notes": "Aaron-granted file access — photos/videos/audio for look+sound enrollment"
     }
   ]
 }

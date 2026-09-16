@@ -86,6 +86,12 @@
     {"from": "switch.identity", "to": "switch.tasking", "weight": 1.0},
     {"from": "switch.tasking", "to": "center.memory", "weight": 0.9},
     {"from": "switch.ios_capture", "to": "center.vision", "when": "act", "weight": 1.0},
-    {"from": "switch.ios_capture", "to": "center.comms", "when": "act", "weight": 1.0}
+    {"from": "switch.ios_capture", "to": "center.comms", "when": "act", "weight": 1.0},
+
+    {"from": "sense.photos.library", "to": "center.vision", "weight": 1.0},
+    {"from": "sense.files.media", "to": "center.vision", "weight": 1.0},
+    {"from": "sense.files.media", "to": "center.comms", "weight": 0.9},
+    {"from": "center.vision", "to": "center.comms", "weight": 0.6, "notes": "photo-face to video-voice bridge"},
+    {"from": "switch.identity", "to": "center.memory", "weight": 1.0}
   ]
 }

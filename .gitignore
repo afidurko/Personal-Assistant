@@ -5,3 +5,4 @@ __pycache__/
 .venv/
 
 identity/persistence/cam-persistence.zip
+identity/aaron/local/

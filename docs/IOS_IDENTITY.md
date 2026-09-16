@@ -20,8 +20,26 @@
 2. Facial recognition of **Aaron**
 3. Access to iPhone camera
 4. Access to iPhone microphone
+5. **Full access to photos and files** to learn Aaron’s look/sound, including matching a face in a photo to the same person talking in a video
 
 These are granted as standing capabilities (Aaron-only enrollment + use).
+
+## Photo / file enrollment (granted 2026-09-16)
+
+```text
+Photos library + files
+  ├─ still faces     → face embeddings
+  ├─ video faces     → face track + match to stills
+  └─ video/audio     → speaker embedding
+           │
+           ▼
+  Aaron identity engram (photo ↔ video ↔ voice linked)
+           │
+           ▼
+  switch.identity / sense.aaron.face / sense.aaron.voice
+```
+
+Details: `identity/persistence/AARON_MEDIA_ACCESS.md` · local refs: `identity/aaron/`
 
 ## Design (Null stack + iOS companion)
 

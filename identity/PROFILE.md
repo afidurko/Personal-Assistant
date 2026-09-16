@@ -26,6 +26,8 @@ Only Aaron assigns work. Logs retained. Kill switch = pause all.
 
 **iOS (2026-09-16):** Aaron face + voice recognition; iPhone camera + microphone access — granted, companion app scaffolded (`docs/IOS_IDENTITY.md`).
 
+**Media (2026-09-16):** Full access to Aaron’s photos and files to learn look/sound and match photo-face ↔ talking-in-video — granted (`identity/persistence/AARON_MEDIA_ACCESS.md`).
+
 ## Conflict resolutions
 
 | Tension | Resolution |

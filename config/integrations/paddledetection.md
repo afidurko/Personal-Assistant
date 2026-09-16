@@ -21,9 +21,12 @@ It is **not** the brain and **not** always-on surveillance.
 | Vision inference on images/video you provide | **PaddleDetection** |
 
 The `vision` role (and subagents summoned by `docs` / `ops` / `research`) may
-run inference on **explicitly provided** media. Camera capture, continuous
-monitoring, or analyzing other people’s photos without consent are
-**approval-gated** (see `identity/BOUNDARIES.md`).
+run inference on media Aaron provides **or** on Aaron’s photos/files under the
+standing **Aaron media access** grant (identity learning: look, sound, photo↔video
+same-person link). See `identity/persistence/AARON_MEDIA_ACCESS.md`.
+
+Camera capture for live tasks uses the iOS companion. Continuous monitoring of
+people other than Aaron is not authorized.
 
 ## Install (on your machine — heavy)
 
@@ -60,6 +63,8 @@ When nulltickets is up, curator/`vision` `PUT`s that document under `mesh/vision
 
 ## Privacy defaults
 
-- No background camera loop
-- No FaceTime/video call content analysis unless you explicitly request it for that session
-- Distill labels + boxes + confidence into mesh; do not retain raw frames unless you ask
+- No background camera loop unless Aaron tasks a monitor goal
+- Aaron photos/files: **full access granted** for identity (look/sound/photo↔video)
+- Do not enroll non-Aaron faces as Aaron
+- Distill labels + boxes + confidence + identity refs into mesh; raw libraries stay local by default
+- No FaceTime/video call analysis of third parties without Aaron asking
