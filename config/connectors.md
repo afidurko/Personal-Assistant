@@ -23,9 +23,16 @@
 
 - Submodule: `integrations/llmavatartalk`
 - RIVA ASR/TTS + Audio2Face (+ optional Unreal Metahuman)
-- Brain stays Cam/nullclaw — AvatarTalk is presence I/O, not a second agent
-- See `docs/PERSONA.md` and `config/integrations/llmavatartalk.md`
-- Starting a live avatar session requires Aaron
+- Portrait: `identity/persona/cam-face.jpg`
+- Soft airy Argentine voice style in `config/persona/voice.json`
+- Brain stays Cam/nullclaw + smart-second-brain
+
+## Knowledge cortex (smart-second-brain)
+
+- Submodule: `integrations/smart-second-brain`
+- Obsidian vault search / graph / agents
+- See `config/integrations/smart-second-brain.md`
+- Set `config/persona/vault.json` → `vault_path`
 
 ## Careers boards
 

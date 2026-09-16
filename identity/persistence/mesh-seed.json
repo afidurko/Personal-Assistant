@@ -5,28 +5,51 @@
       "indeed"
     ],
     "draft_applications": true,
-    "submit_requires_approval": true,
+    "submit_requires_approval": false,
+    "submit_under_standing_autonomy": true,
     "track_in_tickets": true,
     "watch_enabled": true
   },
   "mesh/facts": {
-    "gated_actions_still_require_approval": true,
-    "only_aaron_may_task_authorize_approve": true,
-    "other_operators_allowlist_empty": true,
+    "always_on": true,
+    "only_aaron_may_assign_tasks": true,
+    "quiet_hours": null,
     "session_01_all_capabilities_enabled": true,
-    "sole_operator": "Aaron"
+    "sole_operator": "Aaron",
+    "standing_autonomy_complete_without_interference": true
   },
   "mesh/open-questions": {
-    "cam_face_style": "llmavatartalk presence + optional still portrait",
-    "cam_voice_provider": "nvidia_riva default English-US.Female-1",
-    "quiet_hours_exact_window": "confirm with Aaron",
-    "standing_approval_rules": "none yet"
+    "riva_studio_uri": "set on Aaron machine",
+    "standing_approval_rules": "standing autonomy ON for session_01 grants",
+    "vault_path": "set config/persona/vault.json"
+  },
+  "mesh/persona": {
+    "age": 32,
+    "eyes": "blue",
+    "face": "identity/persona/cam-face.jpg",
+    "hair": "brown",
+    "languages": [
+      "en",
+      "es"
+    ],
+    "name": "Cam",
+    "origin": "Argentina",
+    "voice": "soft airy"
   },
   "mesh/prefs": {
+    "always_on": true,
     "assistant_name": "Cam",
     "auto_archive_to_mesh": true,
+    "brain_enhancement": "smart-second-brain",
+    "cam_age": 32,
+    "cam_eyes": "blue",
+    "cam_hair": "brown",
+    "cam_origin": "Argentina",
+    "cam_voice": "soft airy",
     "chief_voice": "Cam",
+    "complete_without_interference": true,
     "continuous_monitoring": false,
+    "face_asset": "identity/persona/cam-face.jpg",
     "human_name": "Aaron",
     "job_boards": [
       "linkedin",
@@ -39,7 +62,7 @@
     "prefer_simplest_tool": true,
     "prefer_small_vision_models": true,
     "proactive": true,
-    "quiet_hours_default": "22:00-08:00",
+    "quiet_hours_default": null,
     "timezone": "America/New_York",
     "weekly_review": true
   },
@@ -47,6 +70,11 @@
     "adversarial_on_sensitive": true,
     "citations_required": true,
     "include_counterarguments": true,
-    "save_to_mesh": true
+    "save_to_mesh": true,
+    "use_smart_second_brain": true
+  },
+  "mesh/vault": {
+    "plugin": "integrations/smart-second-brain",
+    "vault_path": null
   }
 }

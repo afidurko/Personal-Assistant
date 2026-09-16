@@ -8,3 +8,6 @@
 [submodule "integrations/llmavatartalk"]
 	path = integrations/llmavatartalk
 	url = https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant.git
+[submodule "integrations/smart-second-brain"]
+	path = integrations/smart-second-brain
+	url = https://github.com/afidurko/smart-second-brain.git

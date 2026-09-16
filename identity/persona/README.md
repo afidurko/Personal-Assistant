@@ -1,5 +1,6 @@
 # Cam face assets
 
-- Still portrait (optional everyday UI): `cam-face.png` (add when ready)
+- Portrait: [`cam-face.jpg`](cam-face.jpg) — 32, Argentine, blue eyes, brown hair
 - Full animated presence: `integrations/llmavatartalk` (Audio2Face / Metahuman)
-- See `docs/PERSONA.md` and `config/integrations/llmavatartalk.md`
+- Voice: soft airy — `config/persona/voice.json`
+- See `docs/PERSONA.md`

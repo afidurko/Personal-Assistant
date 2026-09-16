@@ -1,27 +1,24 @@
 # Goals — Aaron / Cam
 
 ## 30-day win
-- Cam remembers Aaron across workspaces (persistence working)
-- Research briefs with citations landing in mesh
-- LinkedIn + Indeed watchlist producing ranked draft opportunities
-- Calendar/life-ops + gated text reminders reducing dropped balls
+- Cam always-on with locked persona (face + soft airy voice)
+- Persistence + smart-second-brain vault linked
+- Research and careers (LinkedIn/Indeed) running to completion without mid-task interruption
 
 ## 90-day win
-- Full gated outbound (email/SMS/call/FaceTime) in daily use
-- Docs + resume pipeline trusted
-- Applications submitted only via Cam drafts + Aaron approve
-- Recursive specialist team running reliably under human gates
+- Full RIVA/Audio2Face presence daily
+- Vault + mesh as one memory
+- Life ops + comms + docs flowing under standing autonomy
 
 ## First pain to eliminate
-- Losing context between chats/workspaces + forgotten follow-ups
+- Context loss across workspaces + unfinished follow-ups
 
 ## Active pursuits
-| Goal | Owner | Status | Gate |
-|---|---|---|---|
-| Persistence across workspaces | memory-curator / Cam | in progress | Aaron |
-| Research → mesh | researcher | enabled | citations required |
-| LinkedIn + Indeed job watch | careers | enabled | submit = gate |
-| Life ops + Jarvis | ops | enabled | money/calendar write = gate |
-| Comms escalation | comms | enabled | all outbound = gate |
-| Docs pipeline | docs | enabled | in-place/send = gate |
-| Vision on attach | vision | enabled | camera/call = gate |
+| Goal | Owner | Status |
+|---|---|---|
+| Persona face/voice locked | Cam | done |
+| Always-on autonomy | Cam | done |
+| smart-second-brain wired | memory-curator | submodule added — need vault_path |
+| Persistence | memory-curator | done |
+| LinkedIn + Indeed | careers | enabled |
+| Avatar studio | comms | awaiting RIVA/Audio2Face on Aaron machine |

@@ -42,13 +42,23 @@
     }
   },
   "resolutions": {
-    "contact_others": "approval_required",
+    "contact_others": "allowed_under_standing_autonomy_when_aaron_tasked",
     "kill_switch_default": "pause_all",
     "kill_switch_alternate": "outbound_only",
     "continuous_monitoring": false,
     "other_operators_allowlist": [],
     "sole_operator": "Aaron",
-    "operator_note": "Aaron overturned Q55: only Aaron may task, authorize, or approve"
+    "operator_note": "Only Aaron may assign tasks. Cam completes with standing autonomy, no mid-task interference, 24/7.",
+    "quiet_hours": null,
+    "always_on": true,
+    "complete_without_interference": true,
+    "cam_persona": {
+      "age": 32,
+      "origin": "Argentina",
+      "eyes": "blue",
+      "hair": "brown",
+      "voice": "soft airy"
+    }
   },
   "priority_boot_order": [
     "persistence",

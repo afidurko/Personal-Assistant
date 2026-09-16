@@ -16,21 +16,22 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/jarvis` | synced Jarvis `memory.json` cache (local utilities) |
 | `mesh/vision` | distilled detection/pose results (no raw frames by default) |
 | `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
+| `mesh/vault` | smart-second-brain vault path + topic distillates |
+| `mesh/persona` | Cam identity/voice/availability prefs |
 
 ## Write rules
 
 - Distill; do not dump raw chat transcripts
 - Tag sensitivity: `public` | `team` | `private`
 - Private never leaves local store / approved channels
-- Curator dedupes conflicting facts; human resolves ties
-- Jarvis memory syncs via `scripts/sync-jarvis-memory.py` — mesh wins on conflict unless you say otherwise
-- Vision results sync via `scripts/pack-vision-result.py` — keep sensitivity `private` unless you downgrade
-- Cross-workspace: refresh portable bundle via `scripts/persist-export.py` (see `docs/PERSISTENCE.md`)
+- Curator dedupes conflicting facts; Aaron resolves ties
+- Jarvis memory syncs via `scripts/sync-jarvis-memory.py`
+- Vision results sync via `scripts/pack-vision-result.py`
+- Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
+- Cross-workspace: `scripts/persist-export.py` / `persist-import.py`
 
 ## Read rules
 
-- Before claiming work, search relevant namespaces
-- Cite mesh keys used in run events for auditability
-- Before Jarvis-backed chores, pull `mesh/jarvis` if present
-- Before vision follow-ups, pull `mesh/vision` summaries (not frames)
-- On new workspace boot, import persistence bundle then load `mesh-seed.json`
+- Before claiming work, search mesh + vault
+- Cite mesh keys / vault notes used
+- Prefer vault knowledge before inventing Aaron’s personal facts

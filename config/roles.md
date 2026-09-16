@@ -10,19 +10,22 @@
 | Careers | `careers` | yes | applications / outreach |
 | Comms | `comms` | limited | all outbound |
 | QA | `qa` | yes | can block release |
-| Memory Curator | `memory-curator` | no | mesh merges only |
+| Memory Curator | `memory-curator` | no | mesh + smart-second-brain |
+| Vision | `vision` | yes | PaddleDetection when tasked |
 
 ## Recursion
 
 - Default `max_delegate_depth`: 3
-- Subagents inherit parent boundaries and mesh namespaces
-- Child work is always a nulltickets task (or child dependency), never a fire-and-forget thread
+- Subagents inherit boundaries and mesh/vault access
+- Child work is always a nulltickets task
 
 ## Local tools
 
-- Jarvis CLI: `integrations/jarvis` — see `config/integrations/jarvis.md`
-- Vision: `integrations/paddledetection` (`release/2.9`) — see `config/integrations/paddledetection.md`
+- Jarvis: `integrations/jarvis`
+- Vision: `integrations/paddledetection`
+- Presence: `integrations/llmavatartalk`
+- Second brain: `integrations/smart-second-brain`
 
 ## Prompt stubs
 
-Detailed prompts live in `config/roles/*.md` and are loaded by nullclaw role config.
+Detailed prompts live in `config/roles/*.md`.

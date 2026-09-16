@@ -17,10 +17,14 @@ DEFAULT_INCLUDE = [
     "identity/GOALS.md",
     "identity/persistence/manifest.json",
     "identity/persistence/mesh-seed.json",
+    "identity/persona/cam-face.jpg",
     "config/priority-boot.json",
     "config/connectors.md",
     "config/roles/careers.md",
+    "config/persona/voice.json",
+    "config/persona/vault.json",
     "docs/PERSISTENCE.md",
+    "docs/PERSONA.md",
 ]
 
 

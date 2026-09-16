@@ -16,11 +16,12 @@ and outbound contact (text / FaceTime / call) when needed.
 | [lucida](https://github.com/claritylab/lucida) | **Role ideas only** | Speech/vision “service team” concept; Java/Thrift stack rejected for simplicity |
 | [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools; submodule — not the brain |
 | [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection on approved media; submodule — not always-on camera |
-| [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); submodule — not a second brain |
+| [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); not a second brain |
+| [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
 
-**Rule:** if two repos solve the same problem, pick the Null path (Zig, tiny,
-explicit contracts). Jarvis, PaddleDetection, and LLMAvatarTalk are tools Cam
-may call; they do not own memory, scheduling, or Aaron’s approvals.
+**Rule:** Null stack owns execution truth. Jarvis, PaddleDetection, LLMAvatarTalk, and
+smart-second-brain are tools Cam uses. Only Aaron assigns work; Cam finishes granted
+work without mid-task interference.
 
 ## Mental model
 
@@ -41,9 +42,9 @@ You (human) ──override / approve──► nullhub
                                vision…)
                                       │
                     ┌─────────────────┴─────────────────┐
-                    ▼                 ▼                 ▼
-             Jarvis CLI         PaddleDetection    LLMAvatarTalk
-             local utilities    vision (gated)     Cam face/voice presence
+                    ▼         ▼          ▼              ▼
+                 Jarvis   PaddleDet   LLMAvatarTalk   smart-second-brain
+                 utilities  vision    face/voice      vault knowledge
 ```
 
 - **Tracker = source of truth** (nulltickets)
@@ -55,15 +56,15 @@ You (human) ──override / approve──► nullhub
 
 | Role id | Job |
 |---|---|
-| `chief` | Talks to you; breaks work into tasks; never bypasses your approvals |
-| `researcher` | Source-backed research; every claim cites URL/title/date |
-| `ops` | Life automation, calendars, reminders, recurring chores |
-| `docs` | Draft/fix documents; diff before apply |
-| `careers` | Job search, applications, outreach drafts (approval-gated) |
-| `comms` | SMS / iMessage / call / FaceTime bridges when you want contact |
-| `vision` | PaddleDetection on approved media; never ambient surveillance |
-| `qa` | Verifies outputs, sources, and that human gates were honored |
-| `memory-curator` | Keeps the neural mesh coherent; merges/dedupes memories |
+| `chief` | Cam — talks to Aaron; always-on; finishes work without mid-task interruption |
+| `researcher` | Source-backed research; uses vault + web |
+| `ops` | Life automation; Jarvis |
+| `docs` | Draft/fix documents |
+| `careers` | LinkedIn + Indeed |
+| `comms` | Text / call / FaceTime + avatar presence |
+| `vision` | PaddleDetection on tasked media |
+| `qa` | Verifies outputs and logs |
+| `memory-curator` | Mesh + smart-second-brain coherence |
 
 Any role may **summon subagents**; subagents may summon more. Depth is
 capped in config (`max_delegate_depth`) so recursion stays bounded.
@@ -116,19 +117,18 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 2. Keep Jarvis available as local CLI utilities (`integrations/jarvis`) — **added**
 3. Keep PaddleDetection for vision (`integrations/paddledetection` @ `release/2.9`) — **added**
 4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
-5. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
-6. Seed pipelines: research, docs, careers, life-ops, vision (all with human gates)
-7. Wire mesh namespaces + curator role (+ Jarvis / vision sync)
-8. Bridge AvatarTalk I/O to Cam (skip embedded LLM) on Aaron’s studio machine
-9. Add connectors one at a time with approval tests
-10. Only then expand specialist depth / recursive subagents
+5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
+6. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
+7. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
+8. Wire mesh + vault sync
+9. Bridge AvatarTalk I/O to Cam on Aaron’s studio machine
+10. Add connectors; expand specialists
 
 ## Non-goals (v1)
 
-- Training custom neural nets in this repo (use upstream tools when you choose)
+- Training custom neural nets in this repo
 - Replacing nullhub UI
 - Porting Lucida ASR/IMM services as-is
-- Making Jarvis, PaddleDetection, or LLMAvatarTalk the primary agent runtime
-- Letting AvatarTalk’s demo LLM bypass Cam / Aaron gates
-- Always-on camera / unsupervised video monitoring
-- Autonomous spending or unsupervised external outreach
+- Letting AvatarTalk or smart-second-brain bypass Aaron as sole task-giver
+- Always-on surveillance without Aaron tasking it
+- Accepting orders from anyone but Aaron

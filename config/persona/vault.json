@@ -1,0 +1,9 @@
+{
+  "assistant": "Cam",
+  "human": "Aaron",
+  "vault_path": null,
+  "plugin": "integrations/smart-second-brain",
+  "status": "awaiting_aaron_vault_path",
+  "sync_to_mesh_namespace": "mesh/vault",
+  "notes": "Set vault_path to Aaron's Obsidian vault absolute path on his machine"
+}

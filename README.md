@@ -1,71 +1,40 @@
 # Personal-Assistant — Cam for Aaron
 
-Cam is Aaron’s human-governed AI team for life automation, source-backed research,
-documents, job search (LinkedIn + Indeed), and approved outbound contact
-(text / call / FaceTime) with optional talking avatar presence.
+Cam is Aaron’s always-on Argentine assistant (32, blue eyes, brown hair, soft airy voice)
+for life automation, source-backed research, documents, LinkedIn/Indeed jobs, and
+talking presence — with a smart second brain over Aaron’s notes.
 
-## Design in one paragraph
+## Design
 
-We run on the **Null stack** for efficiency: **nullclaw** executes,
-**nulltickets** remembers work and shared mesh memory, **nullboiler**
-schedules the team, **nullhub** is where **Aaron** stays in charge.
-**Jarvis** is the local CLI toolbelt. **PaddleDetection** is gated vision.
-**LLMAvatarTalk** gives Cam face + voice (RIVA + Audio2Face; optional Metahuman).
-Only Aaron may task, authorize, or approve.
+- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain)
+- **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
+- **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
+- **Tools:** Jarvis · PaddleDetection · LinkedIn/Indeed
+- **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available
 
-**Persistence:** across this and future workspaces — [docs/PERSISTENCE.md](docs/PERSISTENCE.md)  
-**Persona:** [docs/PERSONA.md](docs/PERSONA.md)  
-**Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
+Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## Current phase
-
-Identity captured. AvatarTalk wired as presence submodule. Next: studio bring-up
-(RIVA/Audio2Face) + Null stack in priority order.
-
-→ Profile: [identity/PROFILE.md](identity/PROFILE.md)  
-→ Boundaries: [identity/BOUNDARIES.md](identity/BOUNDARIES.md)
-
-## Stack (target)
+## Stack
 
 ```text
-Aaron → nullhub (approve / override)
-        → nullboiler (who runs what)
-          → nulltickets (tasks + mesh KV)
-            → Cam / nullclaw agents (specialists + recursive subagents)
-                → Jarvis · PaddleDetection · LinkedIn/Indeed
-                → LLMAvatarTalk (hear/speak/animate Cam)
+Aaron (sole task-giver) → Cam team
+  → nulltickets mesh + smart-second-brain vault
+  → Jarvis / PaddleDetection / LinkedIn+Indeed
+  → LLMAvatarTalk presence
 ```
 
-## Repo layout
-
-```text
-docs/                         architecture, persistence, persona
-identity/                     Aaron/Cam profile, persistence bundle
-config/                       roles, connectors, persona voice, priority-boot
-integrations/jarvis/
-integrations/paddledetection/   @ release/2.9
-integrations/llmavatartalk/     Cam face/voice presence
-scripts/                      persist + avatar hints
-```
-
-## Integrations
+## Submodules
 
 ```bash
 git submodule update --init --recursive
-python3 scripts/persist-export.py --seed-only
 bash scripts/cam-avatar-hint.sh
+python3 scripts/persist-export.py --seed-only
 ```
 
-## Principles
-
-1. Aaron has ultimate say (sole operator).
-2. Shared persistent mesh memory across agents and future workspaces.
-3. Tasks queue and retry until done or Aaron cancels.
-4. Research cites sources.
-5. Simplest efficient path — AvatarTalk for presence, Null for brain.
-6. Outbound contact, cameras, money, and irreversible actions are approval-gated.
+Set Obsidian vault path in `config/persona/vault.json` when ready.
 
 ## Status
 
-Aaron / Cam / EST locked. Capabilities enabled with gates. Persistence added.
-LLMAvatarTalk submodule added for face/voice. Studio setup on Aaron’s machine next.
+Persona locked. Face created. Always-on autonomy set. smart-second-brain added.
+Next: vault path + RIVA/Audio2Face studio bring-up + live Null stack.

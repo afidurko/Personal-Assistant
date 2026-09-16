@@ -3,15 +3,20 @@
   "human": "Aaron",
   "order": [
     {
-      "id": "persistence",
-      "title": "Load/export persistence bundle + mesh seed",
-      "role": "memory-curator"
-    },
-    {
-      "id": "research_mesh",
-      "title": "Source-backed research into mesh",
-      "role": "researcher"
-    },
+  "id": "persistence",
+  "title": "Load/export persistence bundle + mesh seed",
+  "role": "memory-curator"
+},
+{
+  "id": "smart_second_brain",
+  "title": "Attach Obsidian vault via smart-second-brain",
+  "role": "memory-curator"
+},
+{
+  "id": "research_mesh",
+  "title": "Source-backed research into mesh/vault",
+  "role": "researcher"
+},
     {
       "id": "careers_linkedin_indeed",
       "title": "Job watch on LinkedIn + Indeed (draft only)",
