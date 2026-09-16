@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SIM = ROOT / "scripts" / "connectome-simulate.py"
+CHECK = ROOT / "scripts" / "connectome-check.py"
 CFG = ROOT / "config" / "connectome"
 CYCLES = ROOT / "vault" / "10-Mesh-Distillates" / "qa-cycles"
 
@@ -26,7 +27,22 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
-def run_sim(n: int, workers: int, seed: int, out: Path) -> dict:
+def run_static_check() -> dict:
+    proc = subprocess.run(
+        [sys.executable, str(CHECK), "--json"],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    try:
+        report = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        report = {"ok": False, "parse_error": proc.stdout[:500]}
+    report["exit_code"] = proc.returncode
+    return report
+
+
+def run_sim(n: int, workers: int, seed: int, out: Path, strict_edges: bool = True) -> dict:
     cmd = [
         sys.executable,
         str(SIM),
@@ -39,7 +55,9 @@ def run_sim(n: int, workers: int, seed: int, out: Path) -> dict:
         "--out",
         str(out),
     ]
-    print(f"[qa] sim: n={n:,} workers={workers} seed={seed}", flush=True)
+    if strict_edges:
+        cmd.append("--strict-edges")
+    print(f"[qa] sim: n={n:,} workers={workers} seed={seed} strict={strict_edges}", flush=True)
     t0 = time.perf_counter()
     proc = subprocess.run(cmd, cwd=str(ROOT))
     wall = time.perf_counter() - t0
@@ -219,11 +237,12 @@ def write_suggestions(
     lines += [
         "",
         "## After green (standing improvements)",
-        "- CI job: `--n 1_000_000 --strict-edges` smoke + nightly billion",
-        "- Progress heartbeats every N million sims for long campaigns",
-        "- Traffic-weighted sense sampling instead of uniform",
-        "- Promote `--strict-edges` as QA-loop default once synapses stay green",
-        "- Mirror each team_dispatch / cycle summary into mesh persistence",
+        "- CI: `python3 scripts/connectome-check.py` + `--n 1000000 --strict-edges` on push",
+        "- Nightly billion fuzz via `qa-loop.py --n 1000000000 --cycles 1`",
+        "- Progress heartbeats every 50M sims for long campaigns",
+        "- Traffic-weighted sense sampling (chat-heavy)",
+        "- Mirror QA cycle events into mesh persistence",
+        "- When Mac is available: flip Tailscale preferred host to aaron-mac",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
@@ -235,19 +254,60 @@ def main() -> int:
     p.add_argument("--cycles", type=int, default=2)
     p.add_argument("--workers", type=int, default=max(1, os.cpu_count() or 4))
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--no-strict-edges", action="store_true")
     args = p.parse_args()
 
     CYCLES.mkdir(parents=True, exist_ok=True)
     stamp = utc_now()
     overall_exit = 0
+    strict = not args.no_strict_edges
 
     for c in range(1, args.cycles + 1):
         cycle_dir = CYCLES / f"{stamp}-cycle-{c:02d}"
         cycle_dir.mkdir(parents=True, exist_ok=True)
         print(f"[qa] === cycle {c}/{args.cycles} ===", flush=True)
 
+        check = run_static_check()
+        (cycle_dir / "static-check.json").write_text(
+            json.dumps(check, indent=2) + "\n", encoding="utf-8"
+        )
+        if not check.get("ok"):
+            print("[qa] static check FAIL — dispatching fix team", flush=True)
+            dispatch_team(cycle_dir, "static_graph_fail")
+            findings = [
+                {
+                    "severity": "high",
+                    "kind": "static_graph_fail",
+                    "detail": check,
+                    "fix": "add_missing_edges",
+                }
+            ]
+            applied = apply_simplify_fixes(findings, cycle_dir)
+            check = run_static_check()
+            if not check.get("ok"):
+                overall_exit = 1
+                write_suggestions(cycle_dir, {"n": 0}, findings, False)
+                (cycle_dir / "cycle.json").write_text(
+                    json.dumps(
+                        {
+                            "cycle": c,
+                            "status": "failed",
+                            "static_check": check,
+                            "fixes_applied": applied,
+                        },
+                        indent=2,
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                continue
+
         summary = run_sim(
-            args.n, args.workers, args.seed + c, cycle_dir / "sim-results.json"
+            args.n,
+            args.workers,
+            args.seed + c,
+            cycle_dir / "sim-results.json",
+            strict_edges=strict,
         )
         findings = diagnose(summary)
         green = not findings and summary.get("qa_exit_code", 1) == 0
@@ -258,6 +318,7 @@ def main() -> int:
             "of": args.cycles,
             "at": utc_now(),
             "await_human": False,
+            "static_check": {"ok": check.get("ok"), "missing": check.get("missing_edges")},
             "metrics": metrics_from(summary),
             "findings": findings,
             "status": "green" if green else "failed",
@@ -282,6 +343,7 @@ def main() -> int:
                     args.workers,
                     args.seed + c + 100,
                     cycle_dir / "sim-results-rerun.json",
+                    strict_edges=strict,
                 )
                 rerun_findings = diagnose(rerun)
                 record["rerun"] = {
