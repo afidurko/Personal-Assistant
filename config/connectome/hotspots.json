@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "analogy": "Connection hotspots in higher centers — dense specialized subgraphs",
+  "hotspots": [
+    {
+      "id": "hotspot.careers",
+      "center": "center.careers",
+      "pathway": [
+        "sense.careers.listing",
+        "center.careers",
+        "center.qa",
+        "switch.careers_submit",
+        "motor.jobs",
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "watch_rank_draft_or_submit_jobs"
+    },
+    {
+      "id": "hotspot.research",
+      "center": "center.research",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.research",
+        "sense.vault.hit",
+        "center.qa",
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "source_backed_briefs"
+    },
+    {
+      "id": "hotspot.presence",
+      "center": "center.comms",
+      "pathway": [
+        "sense.audio.transcript",
+        "center.chief",
+        "center.comms",
+        "switch.presence",
+        "switch.outbound",
+        "motor.speak"
+      ],
+      "behavior": "hear_think_speak_with_cam_face_voice"
+    },
+    {
+      "id": "hotspot.life_ops",
+      "center": "center.ops",
+      "pathway": [
+        "sense.calendar.event",
+        "center.ops",
+        "switch.autonomy",
+        "motor.jarvis",
+        "motor.calendar",
+        "motor.vault"
+      ],
+      "behavior": "schedule_and_chores"
+    },
+    {
+      "id": "hotspot.docs",
+      "center": "center.docs",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.docs",
+        "switch.autonomy",
+        "motor.docs",
+        "motor.vault"
+      ],
+      "behavior": "draft_fix_documents"
+    }
+  ]
+}

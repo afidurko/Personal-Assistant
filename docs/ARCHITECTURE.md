@@ -25,32 +25,55 @@ work without mid-task interference.
 
 ## Mental model
 
+Primary architecture is the **Cam Connectome** (sensory → higher centers → switches → motor),
+inspired by Berg et al. Cell 2026 Drosophila CNS mapping:
+
+→ Full design: [docs/CONNECTOME_ARCHITECTURE.md](CONNECTOME_ARCHITECTURE.md)  
+→ Maps: `config/connectome/*.json` · router: `scripts/connectome-route.py`
+
 ```
-You (human) ──override / approve──► nullhub
+Aaron (sole task-giver)
+   │
+   ▼
+Sensory periphery  (chat, vault, boards, calendar, ASR, vision)
+   │
+   ▼
+Higher centers     (Cam chief, specialists, memory, nullboiler router)
+   │
+   ▼
+Circuit switches   (autonomy / outbound / careers / presence / kill)
+   │
+   ├─ act  → Motor periphery (text, call, FaceTime, speak, Jarvis, docs, jobs, vault)
+   └─ hold → mesh log only
+```
+
+Runtime binding:
+
+```
+You (human) ──override / kill──► nullhub / chat
                                       │
                                       ▼
-                               nullboiler  (policy: who runs what)
+                               nullboiler  (center.router)
                                       │
                                       ▼
-                               nulltickets (truth: tasks, leases, mesh KV)
+                               nulltickets (synapses + mesh)
                                       │
                     ┌─────────────────┼─────────────────┐
                     ▼                 ▼                 ▼
-              Chief Agent      Specialist roles    Subagents…
-              (nullclaw)       (research, docs,    (recursive
-                               jobs, comms, ops,    delegate)
-                               vision…)
+              Cam centers      Hotspot roles      Subagents…
+              (nullclaw)       (research, jobs,   (interneurons)
+                               ops, comms…)
                                       │
                     ┌─────────────────┴─────────────────┐
                     ▼         ▼          ▼              ▼
                  Jarvis   PaddleDet   LLMAvatarTalk   smart-second-brain
-                 utilities  vision    face/voice      vault knowledge
+                 motor     sense       face/voice      memory cortex
 ```
 
-- **Tracker = source of truth** (nulltickets)
-- **Orchestrator = policy** (nullboiler)
-- **Agent = executor** (nullclaw)
-- **Human = final authority** (nullhub gates + explicit approval stages)
+- **Tracker = synaptic truth** (nulltickets)
+- **Orchestrator = higher-center policy** (nullboiler)
+- **Agent = neuron executor** (nullclaw)
+- **Human = master switch** (Aaron only)
 
 ## Team roles (initial)
 

@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "analogy": "Higher brain centers — specialization / dimorphic routing lives here",
+  "centers": [
+    {
+      "id": "center.chief",
+      "role": "chief",
+      "function": "executive integration; Aaron-facing voice of Cam",
+      "accepts": ["spike.task", "spike.question", "spike.override", "spike.speech"],
+      "projects_to": ["center.router", "center.memory", "center.qa"]
+    },
+    {
+      "id": "center.memory",
+      "role": "memory-curator",
+      "function": "mesh + vault association / engrams",
+      "accepts": ["spike.fact", "spike.note_ref", "spike.pref", "spike.tool_result"],
+      "projects_to": ["center.chief", "motor.mesh", "motor.vault"]
+    },
+    {
+      "id": "center.research",
+      "role": "researcher",
+      "function": "evidence hotspot; citations required",
+      "accepts": ["spike.question", "spike.fact", "spike.note_ref"],
+      "projects_to": ["center.qa", "motor.vault", "motor.mesh"]
+    },
+    {
+      "id": "center.careers",
+      "role": "careers",
+      "function": "LinkedIn/Indeed hotspot",
+      "accepts": ["spike.job", "spike.task"],
+      "projects_to": ["switch.careers_submit", "motor.jobs", "motor.vault"]
+    },
+    {
+      "id": "center.ops",
+      "role": "ops",
+      "function": "life-ops hotspot",
+      "accepts": ["spike.schedule", "spike.task", "spike.tool_result"],
+      "projects_to": ["motor.jarvis", "motor.calendar", "motor.vault"]
+    },
+    {
+      "id": "center.comms",
+      "role": "comms",
+      "function": "social-motor planning + presence",
+      "accepts": ["spike.inbox", "spike.speech", "spike.task"],
+      "projects_to": ["switch.outbound", "switch.presence", "motor.text", "motor.call", "motor.facetime", "motor.speak"]
+    },
+    {
+      "id": "center.docs",
+      "role": "docs",
+      "function": "document planning",
+      "accepts": ["spike.task", "spike.note_ref"],
+      "projects_to": ["motor.docs", "motor.vault"]
+    },
+    {
+      "id": "center.vision",
+      "role": "vision",
+      "function": "visual association",
+      "accepts": ["spike.visual", "spike.task"],
+      "projects_to": ["center.chief", "motor.mesh", "motor.vault"]
+    },
+    {
+      "id": "center.qa",
+      "role": "qa",
+      "function": "proofreading / consistency before motor",
+      "accepts": ["spike.*"],
+      "projects_to": ["switch.autonomy", "center.chief"]
+    },
+    {
+      "id": "center.router",
+      "role": "nullboiler",
+      "function": "policy neuropil — who runs what",
+      "accepts": ["spike.task"],
+      "projects_to": ["center.research", "center.careers", "center.ops", "center.comms", "center.docs", "center.vision"]
+    }
+  ],
+  "recursion": {
+    "max_delegate_depth": 3,
+    "analogy": "local interneuron bursts"
+  }
+}

@@ -16,6 +16,21 @@ talking presence — with a smart second brain over Aaron’s notes.
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
 Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
+## Connectome architecture (brain map)
+
+Cam is wired like a nervous system — see [docs/CONNECTOME_ARCHITECTURE.md](docs/CONNECTOME_ARCHITECTURE.md):
+
+```text
+Aaron → sensory → higher centers → circuit switches → motor effectors
+```
+
+```bash
+# Example: route a careers spike to motor plan
+python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch roles"
+# Kill switch silences motors
+python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
+```
+
 ## Open the vault (2 minutes)
 
 1. Install [Obsidian](https://obsidian.md)

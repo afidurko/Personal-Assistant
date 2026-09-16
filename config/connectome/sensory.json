@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "analogy": "Drosophila sensory periphery — shared receptors, little policy",
+  "neurons": [
+    {
+      "id": "sense.chat.aaron",
+      "modality": "language",
+      "source": "aaron_chat",
+      "emits": ["spike.task", "spike.question", "spike.override"],
+      "notes": "Only Aaron spikes are authoritative tasking signals"
+    },
+    {
+      "id": "sense.vault.hit",
+      "modality": "memory",
+      "source": "smart_second_brain",
+      "emits": ["spike.fact", "spike.note_ref"],
+      "notes": "Vault retrieval — isomorphic knowledge periphery"
+    },
+    {
+      "id": "sense.mesh.hit",
+      "modality": "memory",
+      "source": "nulltickets_store",
+      "emits": ["spike.fact", "spike.pref"],
+      "notes": "Cross-agent mesh recall"
+    },
+    {
+      "id": "sense.careers.listing",
+      "modality": "opportunity",
+      "source": ["linkedin", "indeed"],
+      "emits": ["spike.job"],
+      "notes": "Job board periphery"
+    },
+    {
+      "id": "sense.email.thread",
+      "modality": "language",
+      "source": "email",
+      "emits": ["spike.inbox"],
+      "notes": "Email triage input"
+    },
+    {
+      "id": "sense.calendar.event",
+      "modality": "time",
+      "source": "calendar",
+      "emits": ["spike.schedule"],
+      "notes": "Schedule periphery"
+    },
+    {
+      "id": "sense.audio.transcript",
+      "modality": "audio",
+      "source": "nvidia_riva_asr",
+      "emits": ["spike.speech"],
+      "notes": "Presence hearing via LLMAvatarTalk/RIVA"
+    },
+    {
+      "id": "sense.vision.detection",
+      "modality": "vision",
+      "source": "paddledetection",
+      "emits": ["spike.visual"],
+      "notes": "Distilled detections only"
+    },
+    {
+      "id": "sense.jarvis.result",
+      "modality": "tool",
+      "source": "jarvis_cli",
+      "emits": ["spike.tool_result"],
+      "notes": "Local utility feedback"
+    }
+  ]
+}
