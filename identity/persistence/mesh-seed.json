@@ -28,13 +28,12 @@
     "eyes": "blue",
     "face": "identity/persona/cam-face.jpg",
     "hair": "brown",
-    "languages": [
-      "en",
-      "es"
-    ],
+    "languages": ["en", "es"],
+    "primary_language": "en",
+    "english": "fluent",
     "name": "Cam",
     "origin": "Argentina",
-    "voice": "soft airy"
+    "voice": "soft airy fluent English"
   },
   "mesh/prefs": {
     "always_on": true,
@@ -45,16 +44,15 @@
     "cam_eyes": "blue",
     "cam_hair": "brown",
     "cam_origin": "Argentina",
-    "cam_voice": "soft airy",
+    "cam_voice": "soft airy fluent English",
+    "cam_primary_language": "en",
+    "cam_english": "fluent",
     "chief_voice": "Cam",
     "complete_without_interference": true,
     "continuous_monitoring": false,
     "face_asset": "identity/persona/cam-face.jpg",
     "human_name": "Aaron",
-    "job_boards": [
-      "linkedin",
-      "indeed"
-    ],
+    "job_boards": ["linkedin", "indeed"],
     "kill_switch_default": "pause_all",
     "max_delegate_depth": 3,
     "named_specialists": true,

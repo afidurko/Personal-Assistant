@@ -57,7 +57,9 @@
       "origin": "Argentina",
       "eyes": "blue",
       "hair": "brown",
-      "voice": "soft airy"
+      "voice": "soft airy",
+      "primary_language": "en",
+      "english": "fluent"
     }
   },
   "priority_boot_order": [
