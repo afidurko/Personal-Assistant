@@ -14,14 +14,13 @@ and outbound contact (text / FaceTime / call) when needed.
 | [nullhub](https://github.com/nullclaw/nullhub) | **Human control plane** | Install, monitor, approve, mission control — where *you* override the team |
 | [Assistant- / OpenClaw](https://github.com/afidurko/Assistant-) | **Connector inspiration only** | Rich SMS / voice-call / companion-app patterns; too heavy to be the core |
 | [lucida](https://github.com/claritylab/lucida) | **Role ideas only** | Speech/vision “service team” concept; Java/Thrift stack rejected for simplicity |
-| [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools (weather, files, conversions, health helpers); submodule — not the brain |
-| [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection / pose / tracking for explicit media; replaces Lucida vision services; submodule — not always-on camera |
+| [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools; submodule — not the brain |
+| [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection on approved media; submodule — not always-on camera |
+| [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); submodule — not a second brain |
 
 **Rule:** if two repos solve the same problem, pick the Null path (Zig, tiny,
-explicit contracts). Borrow OpenClaw/Lucida *behaviors* as external channel
-plugins or agent roles — never fork their full runtimes into this repo.
-Jarvis and PaddleDetection are tools specialist roles may call; they do not own
-memory, scheduling, or human gates.
+explicit contracts). Jarvis, PaddleDetection, and LLMAvatarTalk are tools Cam
+may call; they do not own memory, scheduling, or Aaron’s approvals.
 
 ## Mental model
 
@@ -42,10 +41,9 @@ You (human) ──override / approve──► nullhub
                                vision…)
                                       │
                     ┌─────────────────┴─────────────────┐
-                    ▼                                   ▼
-             Jarvis CLI plugins                 PaddleDetection
-             (integrations/jarvis)              (integrations/paddledetection)
-             local deterministic tools          vision on approved media
+                    ▼                 ▼                 ▼
+             Jarvis CLI         PaddleDetection    LLMAvatarTalk
+             local utilities    vision (gated)     Cam face/voice presence
 ```
 
 - **Tracker = source of truth** (nulltickets)
@@ -117,17 +115,20 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 1. Capture who you are (`identity/`) — **in progress**
 2. Keep Jarvis available as local CLI utilities (`integrations/jarvis`) — **added**
 3. Keep PaddleDetection for vision (`integrations/paddledetection` @ `release/2.9`) — **added**
-4. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
-5. Seed pipelines: research, docs, careers, life-ops, vision (all with human gates)
-6. Wire mesh namespaces + curator role (+ Jarvis / vision sync)
-7. Add connectors one at a time with approval tests
-8. Only then expand specialist depth / recursive subagents
+4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
+5. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
+6. Seed pipelines: research, docs, careers, life-ops, vision (all with human gates)
+7. Wire mesh namespaces + curator role (+ Jarvis / vision sync)
+8. Bridge AvatarTalk I/O to Cam (skip embedded LLM) on Aaron’s studio machine
+9. Add connectors one at a time with approval tests
+10. Only then expand specialist depth / recursive subagents
 
 ## Non-goals (v1)
 
 - Training custom neural nets in this repo (use upstream tools when you choose)
 - Replacing nullhub UI
 - Porting Lucida ASR/IMM services as-is
-- Making Jarvis or PaddleDetection the primary agent runtime
+- Making Jarvis, PaddleDetection, or LLMAvatarTalk the primary agent runtime
+- Letting AvatarTalk’s demo LLM bypass Cam / Aaron gates
 - Always-on camera / unsupervised video monitoring
 - Autonomous spending or unsupervised external outreach

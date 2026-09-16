@@ -1,59 +1,64 @@
 # Cam persona — face & voice
 
-Goal: Cam is not a nameless bot. Aaron should recognize Cam’s **face** and **voice**
-in chat, calls, and FaceTime-style sessions — with Aaron as sole approver.
+Goal: Aaron recognizes **Cam** by face and voice. Only Aaron may task / approve.
 
-## How we do it (three layers)
+## Stack choice
+
+Aaron’s repo [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) is now the **full presence** path:
 
 ```text
-1) Face  → still portrait + optional talking-head later
-2) Voice → TTS for Cam speaking; STT for Aaron talking back
-3) Live  → phone / FaceTime / voice-call bridge (gated)
+Aaron speaks → RIVA ASR → Cam (nullclaw team) → RIVA TTS → Audio2Face → (optional Metahuman)
 ```
 
-Keep it simple: ship face + TTS first; add live call video avatar only if needed.
+Submodule: `integrations/llmavatartalk`  
+Details: `config/integrations/llmavatartalk.md`
 
-### Layer 1 — Face (now)
+Everyday / low-resource mode stays simpler:
 
-| Option | Effort | Notes |
-|---|---|---|
-| **A. Generated portrait** (recommended first) | Low | Create `identity/persona/cam-face.png`; use in README, nullhub, chat UI |
-| B. Photo you provide | Low | You upload a reference; we derive a consistent avatar |
-| C. Animated / talking head | Medium | Lip-sync or realtime avatar for calls later |
+```text
+Still portrait (identity/persona/cam-face.png) + light TTS (config/persona/voice.json)
+```
 
-### Layer 2 — Voice (now)
+## Modes
 
-| Option | Effort | Notes |
-|---|---|---|
-| **A. Cloud TTS** (OpenAI / similar) | Low | Stable “Cam” voice id in `config/persona/voice.json` |
-| B. Local TTS (macOS `say`, Piper, etc.) | Low–Med | Private, works offline; quality varies |
-| C. Cloned / premium voice (ElevenLabs-class) | Med | More “human”; needs API key + consent policy |
+| Mode | Face | Voice | When |
+|---|---|---|---|
+| Simple | Still portrait | Cloud/local TTS | Default chat |
+| Full presence | Audio2Face (+ UE Metahuman) | NVIDIA RIVA TTS | Desk avatar / rich talk |
+| Live bridge | Same as active mode | Same | Text / call / FaceTime `[gate]` |
 
-Pair with STT (Whisper / provider STT) so Aaron can talk to Cam hands-free.
+## Recommended bring-up order
 
-### Layer 3 — Live talk (next)
+1. **Simple face** — generate or set `identity/persona/cam-face.png` (chat/UI)
+2. **RIVA + AvatarTalk studio** — follow upstream RIVA / Audio2Face tutorials on Aaron’s GPU machine
+3. **Point TTS voice id** in `config/persona/voice.json` at the RIVA voice Cam should use
+4. **Bridge** AvatarTalk I/O to Cam (nullclaw) so AvatarTalk is not a second brain
+5. **Optional** Metahuman in Unreal for full-body presence
+6. Wire call/FaceTime to the same voice (and face if video)
 
-- Text / call / FaceTime already granted with `[gate]`
-- Bridge via nullclaw channels + OpenClaw-style phone/macOS companion for FaceTime
-- On call: Cam uses TTS voice; optional face overlay or companion video later
-- Never analyze call video unless Aaron asks that session
+## Voice defaults (editable)
 
-## Recommended path for this repo
+```json
+{
+  "provider": "nvidia_riva",
+  "voice_id": "English-US.Female-1",
+  "locale": "en-US"
+}
+```
 
-1. Aaron picks face style + voice style (below)
-2. Generate/store Cam face under `identity/persona/`
-3. Save voice profile in `config/persona/voice.json`
-4. Wire TTS into comms role for spoken replies / call scripts
-5. Later: live FaceTime/call bridge using that same face+voice
+Aaron can change voice id anytime; Cam must not clone Aaron’s voice unless Aaron asks.
 
 ## Privacy
 
-- Face/voice assets are Cam’s brand — not Aaron’s likeness unless Aaron opts in
-- No voice-cloning of Aaron without explicit ask
-- Outbound spoken messages still `[gate]`
+- Aaron-only control
+- No always-on listen while Aaron is away
+- Outbound spoken / FaceTime still `[gate]`
+- Raw audio not committed to git
 
 ## Status
 
-- Operator lock: Aaron-only — done
-- Face file: awaiting style pick
-- Voice profile: stub ready, awaiting provider pick
+- LLMAvatarTalk submodule: **added**
+- Operator lock: Aaron-only
+- Simple portrait file: still optional polish
+- Full presence: requires Aaron’s RIVA/Audio2Face machine setup
+- Production Cam↔AvatarTalk bridge (skip embedded LLM): next implementation step

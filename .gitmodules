@@ -5,3 +5,6 @@
 	path = integrations/paddledetection
 	url = https://github.com/afidurko/PaddleDetection.git
 	branch = release/2.9
+[submodule "integrations/llmavatartalk"]
+	path = integrations/llmavatartalk
+	url = https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant.git

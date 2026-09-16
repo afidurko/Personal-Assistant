@@ -17,8 +17,8 @@
     "sole_operator": "Aaron"
   },
   "mesh/open-questions": {
-    "cam_face_style": "awaiting Aaron pick",
-    "cam_voice_provider": "awaiting Aaron pick",
+    "cam_face_style": "llmavatartalk presence + optional still portrait",
+    "cam_voice_provider": "nvidia_riva default English-US.Female-1",
     "quiet_hours_exact_window": "confirm with Aaron",
     "standing_approval_rules": "none yet"
   },

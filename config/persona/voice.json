@@ -1,26 +1,43 @@
 {
   "assistant": "Cam",
   "human_only_approver": "Aaron",
-  "status": "awaiting_aaron_voice_pick",
+  "status": "llmavatartalk_wired_awaiting_studio_setup",
+  "modes": {
+    "simple": {
+      "face_asset": "identity/persona/cam-face.png",
+      "tts_provider": "unset_light_fallback"
+    },
+    "full_presence": {
+      "integration": "integrations/llmavatartalk",
+      "asr": "nvidia_riva",
+      "tts": "nvidia_riva",
+      "face": "nvidia_audio2face",
+      "optional_body": "unreal_metahuman",
+      "brain": "nullclaw_cam_not_avatartalk_llm"
+    }
+  },
   "tts": {
-    "provider": "unset",
-    "voice_id": "unset",
+    "provider": "nvidia_riva",
+    "voice_id": "English-US.Female-1",
     "locale": "en-US",
     "speaking_rate": 1.0,
-    "style_notes": "clear, calm, competent; not cartoonish; not celebrity-clone"
+    "style_notes": "clear, calm, competent; Cam brand voice — not Aaron clone",
+    "riva_uri_config": "integrations/llmavatartalk/config.py URI"
   },
   "stt": {
-    "provider": "unset",
+    "provider": "nvidia_riva",
     "locale": "en-US"
   },
   "live": {
     "text": true,
     "call": true,
     "facetime": true,
-    "requires_aaron_approval": true
+    "requires_aaron_approval": true,
+    "avatar_session_requires_aaron": true
   },
   "face": {
     "asset": "identity/persona/cam-face.png",
-    "status": "awaiting_aaron_style_pick"
+    "animated_runtime": "integrations/llmavatartalk",
+    "status": "runtime_added_still_portrait_optional"
   }
 }

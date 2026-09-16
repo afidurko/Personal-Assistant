@@ -19,6 +19,14 @@
 - Results distilled to `mesh/vision` (see `config/integrations/paddledetection.md`)
 - Camera / continuous monitor / call-video analysis require human approval
 
+## Cam face & voice (LLMAvatarTalk)
+
+- Submodule: `integrations/llmavatartalk`
+- RIVA ASR/TTS + Audio2Face (+ optional Unreal Metahuman)
+- Brain stays Cam/nullclaw — AvatarTalk is presence I/O, not a second agent
+- See `docs/PERSONA.md` and `config/integrations/llmavatartalk.md`
+- Starting a live avatar session requires Aaron
+
 ## Careers boards
 
 - **LinkedIn** — watch matching roles, draft Easy-Apply/outreach; submit only after Aaron approves

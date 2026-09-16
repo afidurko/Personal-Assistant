@@ -39,9 +39,12 @@ Interpreted defaults:
 
 ## Persona
 
-- Face asset: `identity/persona/cam-face.png` (pending Aaron style pick — see `docs/PERSONA.md`)
-- Voice profile: `config/persona/voice.json` (pending Aaron voice pick)
-- Live talk: text / call / FaceTime bridges under `[gate]`
+- Full presence runtime: `integrations/llmavatartalk` (RIVA ASR/TTS + Audio2Face + optional Metahuman)
+- Still portrait (optional UI): `identity/persona/cam-face.png`
+- Voice profile: `config/persona/voice.json` (default RIVA `English-US.Female-1`)
+- Brain stays Cam/nullclaw — AvatarTalk does not approve or plan
+- Live talk: text / call / FaceTime under `[gate]`
+- Docs: `docs/PERSONA.md`
 
 ## Memory policy
 
