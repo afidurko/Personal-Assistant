@@ -118,6 +118,7 @@ For each domain rated ≥3: what does “done well” look like? What has failed
 64. Channels that are **off-limits**.
 65. Signature / voice for messages sent as you vs as the assistant.
 66. People the assistant may contact on your behalf (and who never).
+66b. Vision: may it analyze photos you attach? Camera? FaceTime video? Never?
 
 ---
 

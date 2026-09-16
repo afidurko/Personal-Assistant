@@ -12,6 +12,13 @@
 - Invoked by `ops` / subagents — not a second brain
 - Memory bridged to `mesh/jarvis` (see `config/integrations/jarvis.md`)
 
+## Vision (PaddleDetection)
+
+- Submodule: `integrations/paddledetection` @ `release/2.9`
+- Invoked by `vision` / subagents on media you provide or approve
+- Results distilled to `mesh/vision` (see `config/integrations/paddledetection.md`)
+- Camera / continuous monitor / call-video analysis require human approval
+
 ## Bridge later (OpenClaw-inspired external plugins)
 
 - SMS via phone companion

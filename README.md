@@ -9,6 +9,7 @@ We run on the **Null stack** for efficiency: **nullclaw** executes,
 **nulltickets** remembers work and shared mesh memory, **nullboiler**
 schedules the team, **nullhub** is where **you** stay in charge.
 **Jarvis** (submodule) is the local CLI toolbelt for deterministic chores.
+**PaddleDetection** (submodule, `release/2.9`) is vision inference on media you approve.
 OpenClaw/Assistant- and Lucida inspire connectors and specialist roles only —
 their heavy runtimes are not the core.
 
@@ -30,34 +31,37 @@ you → nullhub (approve / override)
           → nulltickets (tasks + mesh KV)
             → nullclaw agents (chief + specialists + recursive subagents)
                 → Jarvis CLI plugins (local utilities)
+                → PaddleDetection (vision on approved media)
 ```
 
 ## Repo layout
 
 ```text
-docs/                 architecture and policies
-identity/             questionnaire, profile, boundaries, goals
-config/               roles, pipelines, connector policies
-integrations/jarvis/  Jarvis submodule (local CLI toolbelt)
-scripts/              thin helpers (Jarvis↔mesh sync, bootstrap hints)
+docs/                         architecture and policies
+identity/                     questionnaire, profile, boundaries, goals
+config/                       roles, pipelines, connector policies
+integrations/jarvis/          Jarvis submodule (local CLI toolbelt)
+integrations/paddledetection/ PaddleDetection @ release/2.9 (vision)
+scripts/                      thin helpers (Jarvis/vision ↔ mesh)
 ```
 
-## Jarvis
+## Integrations
 
 ```bash
 git submodule update --init --recursive
-# see config/integrations/jarvis.md
+# Jarvis: config/integrations/jarvis.md
+# Vision: config/integrations/paddledetection.md
 ```
 
 ## Principles
 
 1. Human has ultimate say.
-2. Shared persistent mesh memory across all agents (including Jarvis cache sync).
+2. Shared persistent mesh memory across all agents (including Jarvis/vision sync).
 3. Tasks queue and retry until done or you cancel.
 4. Research cites sources.
 5. Simplest efficient code — prefer config over frameworks.
-6. Outbound contact and irreversible actions are approval-gated.
+6. Outbound contact, cameras, and irreversible actions are approval-gated.
 
 ## Status
 
-Foundation docs + Jarvis submodule. Runtime install comes after identity capture.
+Foundation docs + Jarvis + PaddleDetection submodules. Runtime install after identity capture.

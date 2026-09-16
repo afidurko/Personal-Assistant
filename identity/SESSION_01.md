@@ -23,4 +23,6 @@ Reply with numbers. Short answers OK; you can expand later in `identity/QUESTION
 
 Full 95+ question battery (incl. Jarvis personality spectrum): [QUESTIONNAIRE.md](QUESTIONNAIRE.md)
 
-Jarvis local toolbelt is already wired as submodule `integrations/jarvis` — answer when ready.
+Jarvis local toolbelt is wired as submodule `integrations/jarvis`.
+PaddleDetection vision toolkit is wired as submodule `integrations/paddledetection` (`release/2.9`).
+Answer Session 1 when ready.

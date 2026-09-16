@@ -5,6 +5,7 @@
 | Chief of Staff | `chief` | yes | mediates all |
 | Researcher | `researcher` | yes | citations required |
 | Life Ops | `ops` | yes | scheduling changes; may call Jarvis |
+| Vision | `vision` | yes | PaddleDetection on approved media |
 | Documents | `docs` | yes | external send |
 | Careers | `careers` | yes | applications / outreach |
 | Comms | `comms` | limited | all outbound |
@@ -20,6 +21,7 @@
 ## Local tools
 
 - Jarvis CLI: `integrations/jarvis` — see `config/integrations/jarvis.md`
+- Vision: `integrations/paddledetection` (`release/2.9`) — see `config/integrations/paddledetection.md`
 
 ## Prompt stubs
 
