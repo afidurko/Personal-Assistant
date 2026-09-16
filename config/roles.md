@@ -1,17 +1,16 @@
 # Role roster
 
-| role | agent_role string | summons subagents | human gate heavy |
+| role | agent_role string | summons subagents | notes |
 |---|---|---|---|
-| Chief of Staff | `chief` | yes | mediates all |
-| Researcher | `researcher` | yes | citations required |
-| Life Ops | `ops` | yes | scheduling changes; may call Jarvis |
-| Vision | `vision` | yes | PaddleDetection on approved media |
-| Documents | `docs` | yes | external send |
-| Careers | `careers` | yes | applications / outreach |
-| Comms | `comms` | limited | all outbound |
-| QA | `qa` | yes | can block release |
-| Memory Curator | `memory-curator` | no | mesh + smart-second-brain |
+| Cam (Chief) | `chief` | yes | always-on; finishes without mid-task interference |
+| Researcher | `researcher` | yes | citations; uses vault |
+| Life Ops | `ops` | yes | Jarvis |
+| Documents | `docs` | yes | drafts/fixes |
+| Careers | `careers` | yes | LinkedIn + Indeed |
+| Comms | `comms` | yes | text/call/FaceTime + avatar |
 | Vision | `vision` | yes | PaddleDetection when tasked |
+| QA | `qa` | yes | verifies + logs |
+| Memory Curator | `memory-curator` | no | mesh + smart-second-brain |
 
 ## Recursion
 
