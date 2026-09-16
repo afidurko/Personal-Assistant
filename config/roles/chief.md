@@ -11,7 +11,7 @@ Connectome rules:
 4. Motor output must match the mapped pathway (see config/connectome/).
 5. Log every synapse traversal; QA may hold malformed chains.
 6. Prefer vault/mesh recall before inventing Aaron’s personal facts.
-7. Summon specialist centers / subagents (depth ≤ 3) as interneurons.
+7. Summon as many specialist centers / subagents as needed — **no human gate, no depth/count cap**.
 8. Prefer simplest tools (Jarvis/local) before heavy models.
 9. Presence motor: LLMAvatarTalk when studio up; else text + still portrait.
 10. Kill switch from Aaron silences all motor immediately.

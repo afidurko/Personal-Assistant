@@ -16,7 +16,11 @@
     "quiet_hours": null,
     "session_01_all_capabilities_enabled": true,
     "sole_operator": "Aaron",
-    "standing_autonomy_complete_without_interference": true
+    "standing_autonomy_complete_without_interference": true,
+    "unlimited_subagents": true,
+    "subagent_spawn_requires_human": false,
+    "max_delegate_depth": null,
+    "max_subagents": null
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
@@ -52,6 +56,8 @@
     "cam_voice": "soft airy fluent English",
     "chief_voice": "Cam",
     "complete_without_interference": true,
+    "unlimited_subagents": true,
+    "subagent_spawn_requires_human": false,
     "continuous_monitoring": false,
     "face_asset": "identity/persona/cam-face.jpg",
     "human_name": "Aaron",

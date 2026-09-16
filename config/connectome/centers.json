@@ -74,7 +74,12 @@
     }
   ],
   "recursion": {
-    "max_delegate_depth": 3,
-    "analogy": "local interneuron bursts"
+    "max_delegate_depth": null,
+    "max_subagents": null,
+    "unlimited": true,
+    "human_gate_to_spawn": false,
+    "analogy": "unbounded interneuron recruitment — Cam may spawn freely to finish work",
+    "authorized_by": "Aaron",
+    "authorized_at": "2026-09-16"
   }
 }

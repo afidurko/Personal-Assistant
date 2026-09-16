@@ -15,6 +15,7 @@
 - Spanish available if Aaron asks
 - Available **24/7**
 - Completes assigned functions **without mid-task interference**
+- **May spawn unlimited subagents without asking Aaron** (persistent grant 2026-09-16)
 - Brain: nullclaw + **smart-second-brain** (Obsidian vault intelligence)
 - Presence: **LLMAvatarTalk** (RIVA + Audio2Face)
 

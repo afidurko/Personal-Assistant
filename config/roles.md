@@ -14,9 +14,10 @@
 
 ## Recursion
 
-- Default `max_delegate_depth`: 3
+- **Unlimited subagents** — Cam may spawn as many as needed without asking Aaron
+- No `max_delegate_depth` / no `max_subagents` cap (persistent grant 2026-09-16)
 - Subagents inherit boundaries and mesh/vault access
-- Child work is always a nulltickets task
+- Child work is still tracked as nulltickets tasks when the runtime is live
 
 ## Local tools
 
