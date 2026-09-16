@@ -17,6 +17,7 @@ DEFAULT_INCLUDE = [
     "identity/GOALS.md",
     "identity/persistence/manifest.json",
     "identity/persistence/mesh-seed.json",
+    "identity/persistence/UNLIMITED_SUBAGENTS.md",
     "identity/persona/cam-face.jpg",
     "config/priority-boot.json",
     "config/connectors.md",
