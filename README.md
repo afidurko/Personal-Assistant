@@ -29,6 +29,9 @@ Aaron → sensory → higher centers → circuit switches → motor effectors
 python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch roles"
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
+# Live brain + spinal cord visualization (all repos)
+bash scripts/serve-connectome-viz.sh
+# open http://127.0.0.1:8765/visualizations/connectome/
 ```
 
 ## Open the vault (2 minutes)

@@ -177,6 +177,15 @@ Rules:
 - Makes motor output **correspond** to mapped pathways, not ad-hoc tool calls  
 - Preserves Aaron as the only task-giver while allowing standing autonomy on granted act routes  
 
+## Live visualization
+
+Interactive brain + spinal cord map with forward motor effects and feedback return:
+
+- `visualizations/connectome/index.html`
+- Serve: `bash scripts/serve-connectome-viz.sh` → http://127.0.0.1:8765/visualizations/connectome/
+
+All wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nullhub, Jarvis, PaddleDetection, LLMAvatarTalk, smart-second-brain, OpenClaw/Assistant- patterns).
+
 ## Files
 
 - `config/connectome/sensory.json`  
