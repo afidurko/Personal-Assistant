@@ -50,7 +50,13 @@
     "cam_converse_port": 8787,
     "tailscale_enabled": true,
     "cam_converse_via": "tailscale",
-    "cam_converse_url_config": "config/network/tailscale.json"
+    "cam_converse_url_config": "config/network/tailscale.json",
+    "ios_iphone_client": true,
+    "ios_ipad_client": true,
+    "ios_mac_available": false,
+    "ios_on_device_converse": true,
+    "ios_preferred_cam_host": "aaron-ipad",
+    "ios_devices_config": "config/network/ios-devices.json"
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
@@ -136,7 +142,13 @@
     "cam_converse_port": 8787,
     "tailscale_enabled": true,
     "cam_converse_via": "tailscale",
-    "cam_converse_url_config": "config/network/tailscale.json"
+    "cam_converse_url_config": "config/network/tailscale.json",
+    "ios_iphone_client": true,
+    "ios_ipad_client": true,
+    "ios_mac_available": false,
+    "ios_on_device_converse": true,
+    "ios_preferred_cam_host": "aaron-ipad",
+    "ios_devices_config": "config/network/ios-devices.json"
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,

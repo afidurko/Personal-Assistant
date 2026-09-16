@@ -207,11 +207,12 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
 
-        # static companion
+        # static companion (relative paths for iOS PWA / on-device)
         rel = "index.html" if path in ("/", "") else path.lstrip("/")
-        # allow Cam face asset
-        if rel.startswith("assets/cam-face"):
-            file_path = ROOT / "identity" / "persona" / "cam-face.jpg"
+        if rel in {"assets/cam-face.jpg", "face.jpg"}:
+            file_path = WEB / "face.jpg"
+            if not file_path.is_file():
+                file_path = ROOT / "identity" / "persona" / "cam-face.jpg"
         else:
             file_path = (WEB / rel).resolve()
             if not str(file_path).startswith(str(WEB.resolve())):
@@ -223,7 +224,10 @@ class Handler(BaseHTTPRequestHandler):
         data = file_path.read_bytes()
         self.send_response(200)
         self._cors()
-        self.send_header("Content-Type", MIME.get(file_path.suffix, "application/octet-stream"))
+        ctype = MIME.get(file_path.suffix, "application/octet-stream")
+        if file_path.name.endswith(".webmanifest"):
+            ctype = "application/manifest+json"
+        self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)

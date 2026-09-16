@@ -3,20 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Cam" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#1a2228" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
   <title>Cam — listen & speak</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="stage">
     <header class="brand">
-      <img class="face" src="/assets/cam-face.jpg" alt="Cam" />
+      <img class="face" id="camFace" src="face.jpg" alt="Cam"
+           onerror="this.style.display='none'; document.getElementById('faceFallback').hidden=false" />
+      <div class="face-fallback" id="faceFallback" hidden aria-hidden="true"></div>
       <div>
         <h1>Cam</h1>
-        <p class="tag">soft airy · listening for Aaron</p>
+        <p class="tag">soft airy · iPhone &amp; iPad</p>
       </div>
     </header>
 
     <section class="status" id="status">Starting…</section>
+    <p class="hint" id="hint">Safari → Share → Add to Home Screen for best mic access.</p>
 
     <section class="media">
       <video id="camPreview" playsinline muted autoplay></video>
@@ -35,10 +45,10 @@
     </section>
 
     <form id="textForm" class="text-fallback">
-      <input id="textIn" type="text" placeholder="Or type to Cam…" autocomplete="off" />
+      <input id="textIn" type="text" enterkeyhint="send" placeholder="Or type to Cam…" autocomplete="off" />
       <button type="submit">Send</button>
     </form>
   </main>
-  <script src="/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

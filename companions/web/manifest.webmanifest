@@ -1,0 +1,18 @@
+{
+  "name": "Cam",
+  "short_name": "Cam",
+  "description": "Aaron’s personal assistant — mic, camera, soft airy voice",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a2228",
+  "theme_color": "#1a2228",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -3,26 +3,34 @@
   "authorized_by": "Aaron",
   "authorized_at": "2026-09-16",
   "role": "default_companion_network",
+  "hosts": {
+    "mac_available": false,
+    "preferred_cam_host": "aaron-ipad",
+    "clients": ["aaron-iphone", "aaron-ipad"]
+  },
   "converse": {
     "via": "tailscale",
     "port": 8787,
     "bind_host": "0.0.0.0",
     "path": "/",
-    "cam_host_magicdns": "cam-host",
+    "cam_host_magicdns": "aaron-ipad",
     "cam_host_tailscale_ip": "",
     "iphone_magicdns": "aaron-iphone",
+    "ipad_magicdns": "aaron-ipad",
     "url_template": "http://{cam_host_magicdns}:{port}",
-    "notes": "Set cam_host_magicdns to your Mac's Tailscale MagicDNS name (tailscale status)"
+    "on_device_fallback": true,
+    "notes": "No Mac — iPhone/iPad only. Use on-device Safari companion; optional iPad a-Shell host later."
   },
   "rules": [
     "Prefer MagicDNS over raw 100.x when available",
     "Do not expose converse port on the public internet",
-    "Aaron devices only on this tailnet for Cam companion traffic"
+    "Aaron devices only on this tailnet for Cam companion traffic",
+    "Without a Mac host, on-device Safari mode is the primary path"
   ],
   "checklist": [
-    "tailscale status shows cam-host + aaron-iphone online",
-    "cam-converse-server.py listening on 0.0.0.0:8787",
-    "iPhone opens http://<cam-host-magicdns>:8787",
-    "Enable mic & talk succeeds"
+    "Tailscale app signed in on iPhone + iPad",
+    "Open companions/web on-device (or Cam URL when a host exists)",
+    "Safari → Enable mic & talk",
+    "Optional: run server on iPad via a-Shell for shared session"
   ]
 }

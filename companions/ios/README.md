@@ -1,65 +1,25 @@
-# Cam iOS companion
+# Cam iOS companion — iPhone & iPad (no Mac required for on-device talk)
 
-Native iPhone app for **Aaron face/voice recognition**, **camera**, **microphone**, and **live converse with Cam**.
+## Your gear
+- **iPhone** + **iPad** · Tailscale on · **no Mac**
+- Config: `config/network/ios-devices.json` · `docs/IOS_DEVICES.md`
 
-## Status
-- Capabilities **granted** in mesh/boundaries
-- Web companion works now: `companions/web/` + `docs/CAM_CONVERSE.md`
-- Native Xcode project: create on Mac (scaffold below)
+## Use Cam now (Safari on-device)
+1. Get the `companions/web/` files onto the device (Files app / repo sync / host URL)
+2. Open `index.html` in **Safari**, or open Cam URL if a host is running
+3. Share → **Add to Home Screen**
+4. Open **Cam** → **Enable mic & talk**
 
-## Create project (Mac + Xcode)
-```bash
-# File → New → App (SwiftUI, iOS 17+)
-# Bundle id: com.aaron.cam.companion
-# Add to this folder as companions/ios/CamCompanion/
-```
+On-device mode replies locally when no Cam server is reachable.
 
-## Info.plist usage strings
-- `NSCameraUsageDescription` — Cam uses the camera to recognize Aaron and for tasked vision.
-- `NSMicrophoneUsageDescription` — Cam uses the microphone to recognize Aaron’s voice and converse.
-- `NSSpeechRecognitionUsageDescription` — Cam turns your speech into text for conversation.
-- `NSPhotoLibraryUsageDescription` — Cam reads your photos to learn your look (Aaron grant).
+## Tailscale names (edit to match Tailscale app)
+- iPhone: `aaron-iphone`
+- iPad (preferred host later): `aaron-ipad`
 
-## Pair to Cam host
-Prefer **Tailscale MagicDNS** (Aaron’s tailnet). Set host in `config/network/tailscale.json`, then:
+## Optional shared server on iPad
+Use **a-Shell** on iPad to run `scripts/cam-converse-server.py`, then open `http://aaron-ipad:8787` on iPhone.
 
-```text
-http://<cam-host-magicdns>:8787
-```
+## Native Xcode app
+Still needs a Mac — scaffold/API only for now (`CamAPI` talks to same `/api/turn`).
 
-See `docs/TAILSCALE.md`. Same `/api/*` contract as the web companion.
-
-## First screens
-1. Pair with Cam (host URL / setup code)
-2. Enroll Aaron face
-3. Enroll Aaron voice
-4. Permissions: Camera + Microphone + Speech + Photos
-5. Live converse (same loop as web companion)
-
-## Swift stub (drop into project)
-
-```swift
-// CamAPI.swift
-import Foundation
-
-struct CamTurn: Codable {
-  let cam: String
-  let speak: Speak?
-  struct Speak: Codable { let rate: Double?; let pitch: Double?; let lang: String? }
-}
-
-enum CamAPI {
-  static var base = URL(string: "http://127.0.0.1:8787")!
-
-  static func turn(text: String, source: String = "mic") async throws -> CamTurn {
-    var req = URLRequest(url: base.appendingPathComponent("api/turn"))
-    req.httpMethod = "POST"
-    req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    req.httpBody = try JSONEncoder().encode(["text": text, "transcript": text, "source": source])
-    let (data, _) = try await URLSession.shared.data(for: req)
-    return try JSONDecoder().decode(CamTurn.self, from: data)
-  }
-}
-```
-
-See `docs/CAM_CONVERSE.md`, `docs/IOS_IDENTITY.md`, `config/integrations/ios-companion.md`.
+See `docs/CAM_CONVERSE.md`, `docs/TAILSCALE.md`, `docs/IOS_DEVICES.md`.

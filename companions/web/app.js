@@ -11,6 +11,7 @@
   const btnStop = $("btnStop");
   const textForm = $("textForm");
   const textIn = $("textIn");
+  const hintEl = $("hint");
 
   let recognizing = false;
   let recognition = null;
@@ -19,6 +20,12 @@
   let micStream = null;
   let camStream = null;
   let raf = 0;
+  let mode = "on_device"; // on_device | server
+  let history = [];
+
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   function setStatus(msg, kind = "") {
     statusEl.textContent = msg;
@@ -34,6 +41,30 @@
     transcriptEl.scrollTop = transcriptEl.scrollHeight;
   }
 
+  function camReplyLocal(aaronText) {
+    const t = (aaronText || "").trim();
+    const low = t.toLowerCase();
+    if (!t) return "I'm here, Aaron. Whenever you're ready — I'm listening.";
+    if (/hello|hi cam|hey cam|^hi\b|^hey\b/.test(low)) {
+      return "Hi Aaron. Soft and clear on this device. Mic path is on — say what you need.";
+    }
+    if (/mic|microphone|hear me|working/.test(low)) {
+      return "Yes — I can hear you in on-device mode on your iPhone or iPad. Keep talking.";
+    }
+    if (/camera|face|see me/.test(low)) {
+      return "Camera is available here too. I already know your face from the photos you shared.";
+    }
+    if (/who are you|your name/.test(low)) {
+      return "I'm Cam — thirty-two, from Argentina, soft airy English. You're Aaron, my only task-giver.";
+    }
+    if (/thank/.test(low)) return "Of course. I'm right here.";
+    if (/ipad|iphone|tailscale/.test(low)) {
+      return "We're set for iPhone and iPad over Tailscale. On-device mode works without a Mac.";
+    }
+    const short = t.length < 120 ? t : t.slice(0, 117) + "…";
+    return `I heard you: “${short}”. Tell me the next step and I'll take it from there.`;
+  }
+
   function speakCam(text, opts = {}) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
@@ -41,11 +72,11 @@
     u.lang = opts.lang || "en-US";
     u.rate = opts.rate ?? 0.95;
     u.pitch = opts.pitch ?? 1.05;
-    // Prefer a soft female English voice when available
     const voices = window.speechSynthesis.getVoices();
-    const prefer = voices.find((v) =>
-      /female|samantha|karen|moira|tessa|fiona|victoria|zira/i.test(v.name)
-    ) || voices.find((v) => v.lang.startsWith("en"));
+    const prefer =
+      voices.find((v) =>
+        /female|samantha|karen|moira|tessa|fiona|victoria|zira/i.test(v.name)
+      ) || voices.find((v) => v.lang && v.lang.startsWith("en"));
     if (prefer) u.voice = prefer;
     window.speechSynthesis.speak(u);
   }
@@ -64,17 +95,39 @@
     if (!text.trim()) return;
     addBubble("aaron", text);
     partialEl.textContent = "";
-    setStatus("Cam is thinking…");
+    history.push({ role: "aaron", text });
+    setStatus("Cam is listening…");
     try {
-      await postJSON("/api/spike/mic", {
-        purpose: "conversation",
-        transcript: text,
-        duration_ms: null,
-      });
-      const turn = await postJSON("/api/turn", { text, transcript: text, source });
-      addBubble("cam", turn.cam);
-      speakCam(turn.cam, turn.speak || {});
-      setStatus("Listening — mic ready", "ok");
+      let reply;
+      let speak = { rate: 0.95, pitch: 1.05, lang: "en-US" };
+      if (mode === "server") {
+        try {
+          await postJSON("/api/spike/mic", {
+            purpose: "conversation",
+            transcript: text,
+          });
+          const turn = await postJSON("/api/turn", {
+            text,
+            transcript: text,
+            source,
+          });
+          reply = turn.cam;
+          speak = turn.speak || speak;
+        } catch (_) {
+          mode = "on_device";
+          reply = camReplyLocal(text);
+          setStatus("Server unreachable — on-device Cam", "warn");
+        }
+      } else {
+        reply = camReplyLocal(text);
+      }
+      history.push({ role: "cam", text: reply });
+      addBubble("cam", reply);
+      speakCam(reply, speak);
+      setStatus(
+        mode === "server" ? "Listening — server mode" : "Listening — on-device (iOS)",
+        "ok"
+      );
     } catch (e) {
       setStatus("Turn failed: " + e.message, "warn");
     }
@@ -104,6 +157,7 @@
       video: false,
     });
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") await audioCtx.resume();
     const src = audioCtx.createMediaStreamSource(micStream);
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
@@ -112,7 +166,7 @@
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      setStatus("Mic on, but speech recognition unsupported — type below.", "warn");
+      setStatus("Mic on — Safari speech unsupported here; type below.", "warn");
       btnStop.disabled = false;
       return;
     }
@@ -131,10 +185,14 @@
       partialEl.textContent = interim || "…";
       if (finalText.trim()) sendTurn(finalText.trim(), "mic");
     };
-    recognition.onerror = (ev) => setStatus("Speech error: " + ev.error, "warn");
+    recognition.onerror = (ev) => {
+      if (ev.error !== "no-speech") setStatus("Speech: " + ev.error, "warn");
+    };
     recognition.onend = () => {
       if (recognizing) {
-        try { recognition.start(); } catch (_) {}
+        try {
+          recognition.start();
+        } catch (_) {}
       }
     };
     recognizing = true;
@@ -154,19 +212,26 @@
       audio: false,
     });
     video.srcObject = camStream;
-    await postJSON("/api/spike/camera", {
-      purpose: "presence",
-      aaron_face_hint: true,
-      frame_bytes: null,
-    });
+    video.setAttribute("playsinline", "true");
+    await video.play().catch(() => {});
+    if (mode === "server") {
+      try {
+        await postJSON("/api/spike/camera", {
+          purpose: "presence",
+          aaron_face_hint: true,
+        });
+      } catch (_) {}
+    }
     btnCam.disabled = true;
     btnStop.disabled = false;
-    setStatus("Camera on — face path spiked", "ok");
+    setStatus("Camera on", "ok");
   }
 
   function stopAll() {
     recognizing = false;
-    try { recognition?.stop(); } catch (_) {}
+    try {
+      recognition?.stop();
+    } catch (_) {}
     recognition = null;
     if (raf) cancelAnimationFrame(raf);
     raf = 0;
@@ -185,8 +250,12 @@
     setStatus("Stopped. Enable mic or camera to continue.");
   }
 
-  btnMic.addEventListener("click", () => enableMic().catch((e) => setStatus(e.message, "warn")));
-  btnCam.addEventListener("click", () => enableCam().catch((e) => setStatus(e.message, "warn")));
+  btnMic.addEventListener("click", () =>
+    enableMic().catch((e) => setStatus(e.message, "warn"))
+  );
+  btnCam.addEventListener("click", () =>
+    enableCam().catch((e) => setStatus(e.message, "warn"))
+  );
   btnStop.addEventListener("click", stopAll);
   textForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -195,23 +264,35 @@
     sendTurn(v, "text");
   });
 
+  if (isIOS) {
+    hintEl.textContent =
+      "iPhone/iPad: use Safari → Share → Add to Home Screen, then open Cam and tap Enable mic & talk.";
+  }
+
+  // Prefer server if present; else on-device
   fetch("/api/health")
     .then((r) => r.json())
     .then((h) => {
-      const net = h.network || {};
-      const via = net.tailscale_enabled ? `tailscale · ${net.iphone_open || net.url || ""}` : "local";
-      setStatus(
-        h.ok
-          ? `Cam online · ENABLED · ${via} · tap Enable mic & talk`
-          : "Cam health failed",
-        h.ok ? "ok" : "warn"
-      );
+      if (h && h.ok) {
+        mode = "server";
+        const net = h.network || {};
+        const via = net.tailscale_enabled
+          ? `tailscale · ${net.iphone_open || net.url || ""}`
+          : "local server";
+        setStatus(`Cam online · ENABLED · ${via}`, "ok");
+      } else {
+        mode = "on_device";
+        setStatus("On-device Cam (no server) — ready for mic", "ok");
+      }
     })
-    .catch(() => setStatus("Cannot reach Cam server", "warn"));
+    .catch(() => {
+      mode = "on_device";
+      setStatus("On-device Cam for iPhone/iPad — tap Enable mic & talk", "ok");
+    });
 
-  // Warm voices for TTS
   if (window.speechSynthesis) {
     window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () =>
+      window.speechSynthesis.getVoices();
   }
 })();

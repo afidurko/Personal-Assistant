@@ -1,0 +1,38 @@
+{
+  "platform": "ios",
+  "mac_available": false,
+  "devices": {
+    "iphone": {
+      "role": "client",
+      "tailscale_magicdns": "aaron-iphone",
+      "apps": ["Safari", "Tailscale"],
+      "capabilities": ["mic", "camera", "speech", "photos"]
+    },
+    "ipad": {
+      "role": ["client", "optional_cam_host"],
+      "tailscale_magicdns": "aaron-ipad",
+      "apps": ["Safari", "Tailscale", "a-Shell (optional host)"],
+      "capabilities": ["mic", "camera", "speech", "photos"],
+      "notes": "Without a Mac, iPad can host cam-converse via a-Shell later; until then use on-device Safari mode"
+    }
+  },
+  "converse": {
+    "default_mode": "on_device_safari",
+    "server_mode_when": "ipad_or_other_host_running_cam_converse",
+    "pwa": "companions/web/",
+    "add_to_home_screen": true,
+    "requires_user_gesture_for_mic": true,
+    "ios_safari_notes": [
+      "Use Safari (not Chrome) for best SpeechRecognition support",
+      "Mic/camera need a secure context: https OR localhost OR on-device fallback page opened from a trusted host",
+      "Add to Home Screen for app-like mic prompts"
+    ]
+  },
+  "tailscale": {
+    "enabled": true,
+    "iphone": "aaron-iphone",
+    "ipad": "aaron-ipad",
+    "cam_host": "aaron-ipad",
+    "notes": "Prefer iPad as Cam host when no Mac; set real MagicDNS names after checking Tailscale app"
+  }
+}

@@ -41,12 +41,27 @@ html, body {
   letter-spacing: 0.02em;
 }
 .tag { margin: 0.15rem 0 0; color: var(--mute); font-size: 0.95rem; }
+.hint {
+  margin: -0.35rem 0 0;
+  color: var(--mute);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
 .face {
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--line);
+}
+.face-fallback {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 35% 30%, #e8d5b5 0%, transparent 40%),
+    linear-gradient(145deg, #6b8cae, #3d5566);
 }
 
 .status {
