@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Personal Assistant with brain mapping, neural meshing, and continuous system health scanning",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "concurrently -n server,web -c cyan,magenta \"npm run dev:server\" \"npm run dev:web\"",
     "dev:web": "vite",
