@@ -41,6 +41,25 @@ Source: `connectome-sim-1b-pass2.json`
 
 **Verdict:** both billion-sim passes green. Rewrite improved throughput (~47% faster) with stricter graph integrity.
 
+## Merge-prep Pass A — 1,000,000,000 (seed 201, `--strict-edges`)
+Source: `connectome-sim-1b-merge-a.json`
+
+| Metric | Value |
+|---|---|
+| Passed / Failed | **1,000,000,000 / 0** |
+| Missing edges | **0** |
+| Kill holds / Non-Aaron | 1,999,955 / 66,435 |
+| Feedback OK | 997,933,610 |
+| Throughput | ~2.42M sims/sec |
+| Wall time | ~413s |
+| Simulator | v2-simplified |
+| Exit | 0 |
+
+## Merge-prep Pass B — 1,000,000,000 (seed 301, `--strict-edges`)
+Source: `connectome-sim-1b-merge-b.json` (in progress)
+
+Independent seed rerun after Pass A green. Merge readiness gated on B `failed=0`.
+
 ## What works
 - Sense→center→switch→motor→feedback pathways
 - Kill + non-Aaron antagonistic holds
