@@ -1,0 +1,20 @@
+{
+  "n": 100000000,
+  "parts": 4,
+  "parallel_wall_s_approx": 84.45589999200001,
+  "sum_cpu_s": 330.55193540099935,
+  "passed": 100000000,
+  "failed": 0,
+  "kill_holds": 200107,
+  "non_aaron_holds": 11144,
+  "feedback_ok": 99788749,
+  "first_errors": [],
+  "unlimited_subagents": true,
+  "part_files": [
+    "vault/10-Mesh-Distillates/sim-part-A.json",
+    "vault/10-Mesh-Distillates/sim-part-B.json",
+    "vault/10-Mesh-Distillates/sim-part-C.json",
+    "vault/10-Mesh-Distillates/sim-part-D.json"
+  ],
+  "pass_rate": 1.0
+}
