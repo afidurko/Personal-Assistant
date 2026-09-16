@@ -39,3 +39,12 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 
 ## Campaign log
 Results land in `vault/10-Mesh-Distillates/` and `qa-cycles/`.
+
+### Pass 1 (1B) — DONE · green
+- File: `connectome-sim-1b-pass1.json`
+- Passed 1,000,000,000 / failed 0
+- ~1.79M sims/s · ~559s · EXIT 0
+
+### Pass 2 (1B, v2+audit) — RUNNING
+- File: `connectome-sim-1b-pass2.json`
+- Simulator: v2-simplified with switch gating + feedback synapses

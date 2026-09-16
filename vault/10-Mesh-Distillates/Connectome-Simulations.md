@@ -11,28 +11,35 @@ Aaron: run billion-scale live-action connectome simulations; spawn as many subag
 - `mesh/facts.continuous_qa = true`
 
 ## Harness
-- `scripts/connectome-simulate.py` (v2 simplified) — sense→center→switch→motor→feedback
+- `scripts/connectome-simulate.py` (v2 simplified + audit fixes)
 - `scripts/qa-loop.py` — detect → dispatch team → fix → rerun
 - Workers = parallel subagent processes
 
-## Baseline (100,000,000 — pre-rewrite)
+## Pass 1 — 1,000,000,000 (pre-rewrite harness in-flight binary)
+Source: `connectome-sim-1b-pass1.json`
+
 | Metric | Value |
 |---|---|
+| Simulations | 1,000,000,000 |
+| Passed / Failed | **1,000,000,000 / 0** |
+| Kill-switch holds | 2,000,738 |
+| Non-Aaron holds | 111,209 |
+| Feedback OK | 997,888,053 |
+| Throughput | ~1.79M sims/sec |
+| Wall time | ~559s (4 workers) |
+| Exit | 0 |
+
+**Verdict:** green — antagonistic switches behaved; no pathway failures.
+
+## Baseline (100,000,000 — earlier)
 | Passed / Failed | 100,000,000 / 0 |
 | Throughput | ~1.19M sims/sec |
-| Wall time | ~84s (4 workers) |
 
-## Simulator v2 smoke (5,000,000 — post-rewrite, strict edges)
-| Metric | Value |
-|---|---|
-| Passed / Failed | 5,000,000 / 0 |
-| Missing synapse edges | 0 |
-| Throughput | ~1.28M sims/sec |
+## Simulator v2 smoke (post-rewrite / post-audit)
+- 5M + 2M + 1M strict-edge smokes: **0 fail**, **0 missing edges**
+- Route regressions: `--no-autonomy` / `--kill` → empty motors
 
-## Fixes applied this cycle
-- Multi-hotspot pathways per sense (chat→research **and** docs)
-- Orphan-sense hotspots: email, vision, jarvis, vault, mesh
-- Synapse fill + pathway simplify (no chained motors)
-- Continuous QA loop + campaign docs
+## Pass 2
+In progress → `connectome-sim-1b-pass2.json` (v2 + audit-fixed graph).
 
-See `Continuous-QA-Campaign.md` for full working/not-working + suggestions.
+See `Continuous-QA-Campaign.md` and `qa-cycles/AUDIT-FIX-20260916.md`.
