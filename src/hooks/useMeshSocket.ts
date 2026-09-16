@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import type {
   MemoryTrace,
   NeuralMeshState,
+  ScanCycleResult,
   WsClientMessage,
   WsServerMessage,
 } from '@shared/types';
@@ -40,16 +41,32 @@ export function useMeshSocket() {
       }
 
       switch (msg.type) {
-        case 'state':
-        case 'scan_tick':
-        case 'scan_complete': {
-          const payload = msg.payload as Partial<NeuralMeshState>;
+        case 'state': {
+          const payload = msg.payload as NeuralMeshState;
           setStateFromServer(payload);
           if (typeof payload.scanning === 'boolean') {
             setScanning(payload.scanning);
           }
-          if (Array.isArray(payload.memory) && msg.type !== 'state') {
-            upsertMemory(payload.memory);
+          break;
+        }
+        case 'scan_tick': {
+          const payload = msg.payload as { cycle?: number; at?: string };
+          setScanning(true);
+          setStateFromServer({
+            scanning: true,
+            cycleCount: typeof payload.cycle === 'number' ? payload.cycle : undefined,
+            lastCycleAt: payload.at ?? undefined,
+          });
+          break;
+        }
+        case 'scan_complete': {
+          const payload = msg.payload as ScanCycleResult;
+          setStateFromServer({
+            workspaces: payload.workspaces,
+            scanning: true,
+          });
+          if (Array.isArray(payload.memoryWrites)) {
+            upsertMemory(payload.memoryWrites);
           }
           break;
         }
@@ -132,9 +149,13 @@ export function useMeshSocket() {
       setScanning(false);
       return send({ type: 'stop_scan' });
     },
-    focusNode: (nodeId: string) => send({ type: 'focus_node', payload: { nodeId } }),
+    focusNode: (nodeId: string) =>
+      send({ type: 'focus_node', payload: { nodeId, id: nodeId } }),
     openWorkspace: (workspaceId: string) =>
-      send({ type: 'open_workspace', payload: { workspaceId } }),
+      send({
+        type: 'open_workspace',
+        payload: { workspaceId, id: workspaceId },
+      }),
   };
 }
 

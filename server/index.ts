@@ -111,7 +111,8 @@ wss.on('connection', (socket) => {
         broadcast('state', orchestrator.getFullState());
         break;
       case 'focus_node': {
-        const id = (msg.payload as { id?: string } | undefined)?.id;
+        const payload = msg.payload as { id?: string; nodeId?: string } | undefined;
+        const id = payload?.nodeId ?? payload?.id;
         if (id) {
           const focused = orchestrator.focusNode(id);
           send(socket, 'node_focus', focused);
@@ -120,7 +121,8 @@ wss.on('connection', (socket) => {
         break;
       }
       case 'open_workspace': {
-        const id = (msg.payload as { id?: string } | undefined)?.id;
+        const payload = msg.payload as { id?: string; workspaceId?: string } | undefined;
+        const id = payload?.workspaceId ?? payload?.id;
         if (id) {
           const focused = orchestrator.focusWorkspace(id);
           send(socket, 'node_focus', focused);
