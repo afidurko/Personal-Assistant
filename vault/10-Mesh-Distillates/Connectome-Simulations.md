@@ -56,9 +56,20 @@ Source: `connectome-sim-1b-merge-a.json`
 | Exit | 0 |
 
 ## Merge-prep Pass B — 1,000,000,000 (seed 301, `--strict-edges`)
-Source: `connectome-sim-1b-merge-b.json` (in progress)
+Source: `connectome-sim-1b-merge-b.json`
 
-Independent seed rerun after Pass A green. Merge readiness gated on B `failed=0`.
+| Metric | Value |
+|---|---|
+| Passed / Failed | **1,000,000,000 / 0** |
+| Missing edges | **0** |
+| Kill holds / Non-Aaron | 2,000,553 / 66,211 |
+| Feedback OK | 997,933,236 |
+| Throughput | ~2.48M sims/sec |
+| Wall time | ~403s |
+| Simulator | v2-simplified |
+| Exit | 0 |
+
+**Merge verdict:** Pass A + Pass B both green. See `MERGE_READINESS.md`.
 
 ## What works
 - Sense→center→switch→motor→feedback pathways
