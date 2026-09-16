@@ -1,0 +1,27 @@
+{
+  "n": 25000000,
+  "workers": 1,
+  "elapsed_s": 84.45589999200001,
+  "sims_per_sec": 296012.47517779213,
+  "passed": 25000000,
+  "failed": 0,
+  "kill_holds": 49924,
+  "non_aaron_holds": 2754,
+  "feedback_ok": 24947322,
+  "first_errors": [],
+  "unlimited_subagents": true,
+  "notation_note": "default n=100_000_000 interprets 1,00,000,000 (Indian grouping)",
+  "workers_detail": [
+    {
+      "worker_id": 0,
+      "attempted": 25000000,
+      "passed": 25000000,
+      "failed": 0,
+      "kill_holds": 49924,
+      "non_aaron_holds": 2754,
+      "feedback_ok": 24947322,
+      "first_error": null,
+      "elapsed_s": 84.43407586399917
+    }
+  ]
+}
