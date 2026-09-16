@@ -25,7 +25,7 @@ Cam should query the second brain before answering from thin air when Aaron’s 
 
 ## How Cam uses it
 
-1. Aaron keeps an Obsidian vault (path recorded in `config/persona/vault.json` when set)
+1. Aaron opens the starter vault at repo `vault/` (already created)
 2. Smart Second Brain plugin indexes search + graph
 3. Cam (researcher / memory-curator / chief) pulls vault context for research, docs, careers, life ops
 4. Writes/edits to the vault follow autonomy policy (complete without interference once Aaron tasked) and are logged
@@ -33,9 +33,10 @@ Cam should query the second brain before answering from thin air when Aaron’s 
 ## Install (Aaron’s machine)
 
 1. Install Obsidian
-2. Install **Smart Second Brain** community plugin (or build from this submodule — see upstream README/CONTRIBUTING)
-3. Point Cam at the vault path in `config/persona/vault.json`
-4. Optional: embeddings + AI provider inside the plugin for full agent mode
+2. **Open folder as vault** → `Personal-Assistant/vault`
+3. Install **Smart Second Brain** community plugin (or build from this submodule)
+4. Path already set: `config/persona/vault.json` → `"vault"`
+5. Optional: embeddings + AI provider inside the plugin for full agent mode
 
 Out of the box upstream: search/graph can stay local; network only to providers Aaron configures.
 
