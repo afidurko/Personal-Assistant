@@ -1,0 +1,49 @@
+{
+  "mesh/careers": {
+    "boards": [
+      "linkedin",
+      "indeed"
+    ],
+    "draft_applications": true,
+    "submit_requires_approval": true,
+    "track_in_tickets": true,
+    "watch_enabled": true
+  },
+  "mesh/facts": {
+    "gated_actions_still_require_approval": true,
+    "other_operators_allowlist_empty": true,
+    "session_01_all_capabilities_enabled": true
+  },
+  "mesh/open-questions": {
+    "other_operators": "Aaron said others may order \u2014 names TBD",
+    "quiet_hours_exact_window": "confirm with Aaron",
+    "standing_approval_rules": "none yet"
+  },
+  "mesh/prefs": {
+    "assistant_name": "Cam",
+    "auto_archive_to_mesh": true,
+    "chief_voice": "Cam",
+    "continuous_monitoring": false,
+    "human_name": "Aaron",
+    "job_boards": [
+      "linkedin",
+      "indeed"
+    ],
+    "kill_switch_default": "pause_all",
+    "max_delegate_depth": 3,
+    "named_specialists": true,
+    "persistence_cross_workspace": true,
+    "prefer_simplest_tool": true,
+    "prefer_small_vision_models": true,
+    "proactive": true,
+    "quiet_hours_default": "22:00-08:00",
+    "timezone": "America/New_York",
+    "weekly_review": true
+  },
+  "mesh/research": {
+    "adversarial_on_sensitive": true,
+    "citations_required": true,
+    "include_counterarguments": true,
+    "save_to_mesh": true
+  }
+}

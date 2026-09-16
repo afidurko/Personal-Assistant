@@ -19,6 +19,13 @@
 - Results distilled to `mesh/vision` (see `config/integrations/paddledetection.md`)
 - Camera / continuous monitor / call-video analysis require human approval
 
+## Careers boards
+
+- **LinkedIn** — watch matching roles, draft Easy-Apply/outreach; submit only after Aaron approves
+- **Indeed** — watch matching roles, draft applications; submit only after Aaron approves
+- Credentials stay in local secrets (never commit)
+- All opportunities logged to `mesh/careers` + tickets for cross-workspace persistence
+
 ## Bridge later (OpenClaw-inspired external plugins)
 
 - SMS via phone companion
@@ -44,3 +51,5 @@ specialist tool or modern API — not the Java/Thrift stack.
 - [ ] Quiet hours honored
 - [ ] Approval stage wired
 - [ ] Test message/call in dry-run mode
+- [ ] LinkedIn connected (careers watch)
+- [ ] Indeed connected (careers watch)

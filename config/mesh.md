@@ -15,6 +15,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/open-questions` | unresolved questions for the team |
 | `mesh/jarvis` | synced Jarvis `memory.json` cache (local utilities) |
 | `mesh/vision` | distilled detection/pose results (no raw frames by default) |
+| `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
 
 ## Write rules
 
@@ -24,6 +25,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 - Curator dedupes conflicting facts; human resolves ties
 - Jarvis memory syncs via `scripts/sync-jarvis-memory.py` — mesh wins on conflict unless you say otherwise
 - Vision results sync via `scripts/pack-vision-result.py` — keep sensitivity `private` unless you downgrade
+- Cross-workspace: refresh portable bundle via `scripts/persist-export.py` (see `docs/PERSISTENCE.md`)
 
 ## Read rules
 
@@ -31,3 +33,4 @@ Shared across every agent. Backed by nulltickets `/store`.
 - Cite mesh keys used in run events for auditability
 - Before Jarvis-backed chores, pull `mesh/jarvis` if present
 - Before vision follow-ups, pull `mesh/vision` summaries (not frames)
+- On new workspace boot, import persistence bundle then load `mesh-seed.json`
