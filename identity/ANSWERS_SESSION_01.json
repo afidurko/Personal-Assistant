@@ -1,0 +1,78 @@
+{
+  "human": {
+    "preferred_name": "Aaron",
+    "timezone": "America/New_York"
+  },
+  "assistant": {
+    "name": "Cam",
+    "voice": "chief"
+  },
+  "answered_at": "2026-09-16",
+  "sections": {
+    "A_contact": { "1": true, "2": true, "3": true, "4": true, "5": true, "6": true, "7": true },
+    "B_life_ops": { "8": true, "9": true, "10": true, "11": true, "12": true, "13": true, "14": true, "15": true, "16": true },
+    "C_email_chat": { "17": true, "18": true, "19": true, "20": true, "21": true },
+    "D_research": {
+      "22": true,
+      "23": true,
+      "24": true,
+      "25": true,
+      "26": true,
+      "notes": "Store all under memory for this workspace and all future workspaces; add persistence feature"
+    },
+    "E_documents": { "27": true, "28": true, "29": true, "30": true, "31": true, "32": true },
+    "F_careers": {
+      "33": true,
+      "34": true,
+      "35": true,
+      "36": true,
+      "37": true,
+      "38": true,
+      "boards": ["linkedin", "indeed"]
+    },
+    "G_vision": { "39": true, "40": true, "41": true, "42": true },
+    "H_team_memory": { "43": true, "44": true, "45": true, "46": true, "47": true, "48": true, "49": true },
+    "I_control": { "50": true, "51": true, "52": true, "53": true, "54": true, "55": true },
+    "J_efficiency": { "56": true, "57": true, "58": true, "59": true, "60": true },
+    "anchors": {
+      "61": "Aaron",
+      "62": "EST / America/New_York",
+      "63": "most_priority_first",
+      "assistant_name": "Cam"
+    }
+  },
+  "resolutions": {
+    "contact_others": "allowed_under_standing_autonomy_when_aaron_tasked",
+    "kill_switch_default": "pause_all",
+    "kill_switch_alternate": "outbound_only",
+    "continuous_monitoring": false,
+    "other_operators_allowlist": [],
+    "sole_operator": "Aaron",
+    "operator_note": "Only Aaron may assign tasks. Cam completes with standing autonomy; may spawn unlimited subagents without asking. Kill switch remains Aaron-only.",
+    "quiet_hours": null,
+    "always_on": true,
+    "complete_without_interference": true,
+    "unlimited_subagents": true,
+    "subagent_spawn_requires_human": false,
+    "max_delegate_depth": null,
+    "max_subagents": null,
+    "cam_persona": {
+      "age": 32,
+      "origin": "Argentina",
+      "eyes": "blue",
+      "hair": "brown",
+      "voice": "soft airy",
+      "primary_language": "en",
+      "english": "fluent"
+    }
+  },
+  "priority_boot_order": [
+    "persistence",
+    "research_mesh",
+    "careers_linkedin_indeed",
+    "life_ops_jarvis",
+    "comms_gated",
+    "docs",
+    "vision_attached"
+  ]
+}

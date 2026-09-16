@@ -1,0 +1,10 @@
+{
+  "cycle": 1,
+  "n": 2000000,
+  "failed": 0,
+  "passed": 2000000,
+  "sims_per_sec": 1407891.7265935945,
+  "findings": [],
+  "exit_code": 0,
+  "status": "green"
+}

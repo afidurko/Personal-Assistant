@@ -1,0 +1,52 @@
+{
+  "enabled": true,
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-16",
+  "role": "default_companion_network",
+  "hosts": {
+    "mac_available": "later",
+    "mac_slot_open": true,
+    "mac_required_now": false,
+    "preferred_cam_host": "aaron-ipad",
+    "preferred_cam_host_when_mac_ready": "aaron-mac",
+    "clients": ["aaron-iphone", "aaron-ipad"],
+    "future_hosts": ["aaron-mac"]
+  },
+  "converse": {
+    "via": "tailscale",
+    "port": 8787,
+    "bind_host": "0.0.0.0",
+    "path": "/",
+    "cam_host_magicdns": "aaron-ipad",
+    "cam_host_tailscale_ip": "",
+    "iphone_magicdns": "aaron-iphone",
+    "ipad_magicdns": "aaron-ipad",
+    "mac_magicdns": "aaron-mac",
+    "url_template": "http://{cam_host_magicdns}:{port}",
+    "on_device_fallback": true,
+    "notes": "iPhone/iPad now; Mac host slot open for later — not required yet."
+  },
+  "mac_later": {
+    "status": "open",
+    "when_ready": [
+      "Set hosts.mac_available to true",
+      "Set preferred_cam_host to aaron-mac (or real MagicDNS)",
+      "On Mac: python3 scripts/cam-converse-server.py --host 0.0.0.0",
+      "Optional: build native companions/ios with Xcode",
+      "Optional: bring up RIVA / LLMAvatarTalk studio"
+    ]
+  },
+  "rules": [
+    "Prefer MagicDNS over raw 100.x when available",
+    "Do not expose converse port on the public internet",
+    "Aaron devices only on this tailnet for Cam companion traffic",
+    "Mac is allowed later but not required — on-device / iPad path stays primary until then"
+  ],
+  "checklist": [
+    "Tailscale app signed in on iPhone + iPad",
+    "Open companions/web on-device (or Cam URL when a host exists)",
+    "Safari → Enable mic & talk",
+    "Optional: run server on iPad via a-Shell for shared session",
+    "Later: plug in Mac as aaron-mac Cam host"
+  ]
+}

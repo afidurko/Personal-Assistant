@@ -1,0 +1,24 @@
+{
+  "assistant": "Cam",
+  "bundle_version": 3,
+  "created_at": "2026-09-16T11:54:24.299085+00:00",
+  "excludes": [
+    "secrets",
+    "oauth_tokens",
+    "raw_media",
+    "phone_numbers"
+  ],
+  "human": "Aaron",
+  "includes": [
+    "identity/ANSWERS_SESSION_01.json",
+    "identity/PROFILE.md",
+    "identity/BOUNDARIES.md",
+    "identity/GOALS.md",
+    "identity/persistence/mesh-seed.json",
+    "config/priority-boot.json",
+    "config/connectors.md",
+    "config/roles/careers.md"
+  ],
+  "scope": "this_workspace_and_future_workspaces",
+  "timezone": "America/New_York"
+}

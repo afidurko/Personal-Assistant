@@ -1,0 +1,4 @@
+[
+  {"label": "demo-cup", "score": 0.91, "bbox": [10, 20, 100, 200]},
+  {"label": "demo-book", "score": 0.87, "bbox": [120, 40, 300, 280]}
+]

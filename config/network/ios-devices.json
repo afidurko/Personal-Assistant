@@ -1,0 +1,58 @@
+{
+  "platform": "ios_primary",
+  "mac_available": "later",
+  "mac_required_now": false,
+  "mac_slot_open": true,
+  "devices": {
+    "iphone": {
+      "role": "client",
+      "tailscale_magicdns": "aaron-iphone",
+      "apps": ["Safari", "Tailscale"],
+      "capabilities": ["mic", "camera", "speech", "photos"],
+      "status": "active"
+    },
+    "ipad": {
+      "role": ["client", "optional_cam_host"],
+      "tailscale_magicdns": "aaron-ipad",
+      "apps": ["Safari", "Tailscale", "a-Shell (optional host)"],
+      "capabilities": ["mic", "camera", "speech", "photos"],
+      "status": "active",
+      "notes": "Current optional host when shared server needed; on-device Safari is default"
+    },
+    "mac": {
+      "role": ["preferred_cam_host_when_available", "xcode_native_companion"],
+      "tailscale_magicdns": "aaron-mac",
+      "apps": ["Terminal", "Tailscale", "Xcode (native app later)", "Safari"],
+      "capabilities": ["mic", "camera", "speech", "host_cam_converse", "riva_studio_optional"],
+      "status": "open_for_later",
+      "available_now": false,
+      "notes": "Slot reserved — enable when Aaron has Mac access; no blocker until then"
+    }
+  },
+  "host_priority": [
+    "on_device_safari",
+    "aaron-ipad",
+    "aaron-mac"
+  ],
+  "converse": {
+    "default_mode": "on_device_safari",
+    "server_mode_when": "ipad_or_mac_running_cam_converse",
+    "pwa": "companions/web/",
+    "add_to_home_screen": true,
+    "requires_user_gesture_for_mic": true,
+    "ios_safari_notes": [
+      "Use Safari (not Chrome) for best SpeechRecognition support",
+      "Mic/camera need a secure context: https OR localhost OR on-device fallback page opened from a trusted host",
+      "Add to Home Screen for app-like mic prompts"
+    ]
+  },
+  "tailscale": {
+    "enabled": true,
+    "iphone": "aaron-iphone",
+    "ipad": "aaron-ipad",
+    "mac": "aaron-mac",
+    "cam_host_now": "aaron-ipad",
+    "cam_host_when_mac_ready": "aaron-mac",
+    "notes": "Mac MagicDNS reserved; flip preferred host when Mac comes online"
+  }
+}

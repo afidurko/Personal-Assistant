@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "analogy": "Motor periphery — effectors fire only after switch resolves to act",
+  "effectors": [
+    {
+      "id": "motor.text",
+      "channel": ["sms", "imessage", "chat"],
+      "requires_switch": ["switch.outbound", "switch.kill"],
+      "persona": "Cam fluent English soft airy when speaking as Cam"
+    },
+    {
+      "id": "motor.call",
+      "channel": ["phone"],
+      "requires_switch": ["switch.outbound", "switch.kill"]
+    },
+    {
+      "id": "motor.facetime",
+      "channel": ["facetime"],
+      "requires_switch": ["switch.outbound", "switch.kill"]
+    },
+    {
+      "id": "motor.speak",
+      "channel": ["riva_tts", "audio2face", "metahuman_optional"],
+      "requires_switch": ["switch.presence", "switch.outbound", "switch.kill"],
+      "voice_profile": "config/persona/voice.json"
+    },
+    {
+      "id": "motor.jarvis",
+      "channel": ["jarvis_cli"],
+      "requires_switch": ["switch.autonomy", "switch.kill"]
+    },
+    {
+      "id": "motor.docs",
+      "channel": ["filesystem", "docs_editors"],
+      "requires_switch": ["switch.autonomy", "switch.kill"]
+    },
+    {
+      "id": "motor.jobs",
+      "channel": ["linkedin", "indeed"],
+      "requires_switch": ["switch.careers_submit", "switch.kill"]
+    },
+    {
+      "id": "motor.vault",
+      "channel": ["obsidian_vault"],
+      "path": "vault",
+      "requires_switch": ["switch.autonomy", "switch.kill"]
+    },
+    {
+      "id": "motor.calendar",
+      "channel": ["calendar"],
+      "requires_switch": ["switch.autonomy", "switch.kill"]
+    },
+    {
+      "id": "motor.mesh",
+      "channel": ["nulltickets_store"],
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Kill pauses new mesh claims; curator may flush logs only if Aaron allows"
+    }
+  ],
+  "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"
+}

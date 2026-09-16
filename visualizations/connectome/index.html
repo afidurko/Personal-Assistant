@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cam Connectome — Live Brain & Spinal Cord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="stage">
+    <header>
+      <div class="brand">
+        <img src="../../identity/persona/cam-face.jpg" alt="Cam" />
+        <div>
+          <h1>Cam Connectome</h1>
+          <p>Brain + spinal cord live map — sense → centers → motor → feedback</p>
+        </div>
+      </div>
+      <div class="live-pill"><i></i> Live pathways</div>
+    </header>
+
+    <div class="workspace">
+      <div class="viz-panel">
+        <svg id="nervous" viewBox="0 0 900 640" role="img" aria-label="Cam nervous system visualization">
+          <defs>
+            <linearGradient id="spineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3d9b8f" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#e6d5b8" stop-opacity="0.12" />
+            </linearGradient>
+            <radialGradient id="brainWash" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#5fd4c4" stop-opacity="0.16" />
+              <stop offset="100%" stop-color="#0c1210" stop-opacity="0" />
+            </radialGradient>
+            <filter id="softGlow">
+              <feGaussianBlur stdDeviation="2.2" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Brain wash -->
+          <ellipse cx="450" cy="150" rx="260" ry="150" fill="url(#brainWash)" />
+
+          <!-- Brain outline -->
+          <path d="M300 160 C300 70, 600 70, 600 160 C640 190, 620 250, 560 260 C520 290, 380 290, 340 260 C280 250, 260 190, 300 160 Z"
+                fill="none" stroke="rgba(230,213,184,0.35)" stroke-width="2" />
+          <text class="region-title" x="410" y="52">Higher centers (brain)</text>
+          <text class="label-sm" x="355" y="72">nullclaw · nullboiler · mesh · vault cortex</text>
+
+          <!-- Spinal cord column -->
+          <rect class="spine-glow" x="420" y="280" width="60" height="300" rx="28" />
+          <rect x="432" y="290" width="36" height="280" rx="18" fill="#101816" stroke="rgba(95,212,196,0.35)" stroke-width="1.5" />
+          <text class="region-title" x="510" y="320">Spinal cord</text>
+          <text class="label-sm" x="510" y="338">shared periphery · sensory left · motor right</text>
+
+          <!-- Base wiring -->
+          <g id="base-paths"></g>
+          <g id="active-paths"></g>
+          <g id="nodes"></g>
+          <g id="bursts"></g>
+          <g id="particles"></g>
+        </svg>
+      </div>
+
+      <aside class="side">
+        <section class="panel">
+          <h2>Repos in this nervous system</h2>
+          <div class="repos" id="repos"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Fire a sensory spike</h2>
+          <div class="controls" id="controls"></div>
+          <div class="status-bar" style="margin-top:0.7rem">
+            <span class="chip on" id="chip-autonomy">autonomy ON</span>
+            <span class="chip" id="chip-kill">kill armed</span>
+            <span class="chip" id="chip-loop">feedback loop</span>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Live signal log</h2>
+          <div class="log" id="log"></div>
+        </section>
+      </aside>
+    </div>
+
+    <footer>
+      <span>Architecture from Berg et al. Cell 2026 connectome principles · Cam fluent English · Aaron sole task-giver</span>
+      <span>visualizations/connectome</span>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

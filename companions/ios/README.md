@@ -1,0 +1,25 @@
+# Cam iOS companion — iPhone & iPad (no Mac required for on-device talk)
+
+## Your gear
+- **iPhone** + **iPad** · Tailscale on · **no Mac**
+- Config: `config/network/ios-devices.json` · `docs/IOS_DEVICES.md`
+
+## Use Cam now (Safari on-device)
+1. Get the `companions/web/` files onto the device (Files app / repo sync / host URL)
+2. Open `index.html` in **Safari**, or open Cam URL if a host is running
+3. Share → **Add to Home Screen**
+4. Open **Cam** → **Enable mic & talk**
+
+On-device mode replies locally when no Cam server is reachable.
+
+## Tailscale names (edit to match Tailscale app)
+- iPhone: `aaron-iphone`
+- iPad (preferred host later): `aaron-ipad`
+
+## Optional shared server on iPad
+Use **a-Shell** on iPad to run `scripts/cam-converse-server.py`, then open `http://aaron-ipad:8787` on iPhone.
+
+## Native Xcode app
+Still needs a Mac — scaffold/API only for now (`CamAPI` talks to same `/api/turn`).
+
+See `docs/CAM_CONVERSE.md`, `docs/TAILSCALE.md`, `docs/IOS_DEVICES.md`.

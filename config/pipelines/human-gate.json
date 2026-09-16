@@ -1,0 +1,42 @@
+{
+  "name": "personal-assistant-human-gate",
+  "description": "Template pipeline: draft → human approve → act → done",
+  "definition": {
+    "initial": "todo",
+    "states": {
+      "todo": {
+        "agent_role": "chief",
+        "description": "Claimed work; plan and draft only"
+      },
+      "awaiting_human": {
+        "agent_role": "chief",
+        "description": "Blocked on human approval",
+        "requires_human": true
+      },
+      "acting": {
+        "agent_role": "ops",
+        "description": "Approved execution"
+      },
+      "qa": {
+        "agent_role": "qa",
+        "description": "Verify outcome and sources"
+      },
+      "done": {
+        "terminal": true,
+        "description": "Completed"
+      },
+      "cancelled": {
+        "terminal": true,
+        "description": "Cancelled by human"
+      }
+    },
+    "transitions": [
+      { "from": "todo", "to": "awaiting_human", "trigger": "ready_for_approval" },
+      { "from": "awaiting_human", "to": "acting", "trigger": "human_approve" },
+      { "from": "awaiting_human", "to": "cancelled", "trigger": "human_reject" },
+      { "from": "acting", "to": "qa", "trigger": "executed" },
+      { "from": "qa", "to": "done", "trigger": "pass" },
+      { "from": "qa", "to": "todo", "trigger": "rework" }
+    ]
+  }
+}
