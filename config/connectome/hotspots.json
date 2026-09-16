@@ -53,6 +53,7 @@
         "center.chief",
         "center.comms",
         "switch.presence",
+        "switch.outbound",
         "motor.speak"
       ],
       "behavior": "hear_think_speak_with_cam_face_voice"
@@ -88,6 +89,7 @@
         "center.vision",
         "center.chief",
         "center.memory",
+        "switch.autonomy",
         "motor.mesh"
       ],
       "behavior": "ingest_visual_spikes"
@@ -99,6 +101,7 @@
         "sense.jarvis.result",
         "center.ops",
         "center.memory",
+        "switch.autonomy",
         "motor.mesh"
       ],
       "behavior": "absorb_tool_results"
@@ -109,9 +112,9 @@
       "pathway": [
         "sense.vault.hit",
         "center.memory",
-        "center.chief"
+        "switch.autonomy",
+        "motor.mesh"
       ],
-      "side_effects": ["motor.mesh"],
       "behavior": "vault_engram_recall"
     },
     {
@@ -120,9 +123,9 @@
       "pathway": [
         "sense.mesh.hit",
         "center.memory",
-        "center.chief"
+        "switch.autonomy",
+        "motor.mesh"
       ],
-      "side_effects": ["motor.mesh"],
       "behavior": "mesh_engram_recall"
     }
   ]

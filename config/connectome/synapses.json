@@ -47,9 +47,11 @@
     {"from": "center.qa", "to": "switch.careers_submit", "weight": 0.9},
     {"from": "center.qa", "to": "center.chief", "weight": 0.8},
     {"from": "center.memory", "to": "center.chief", "weight": 1.0},
+    {"from": "center.memory", "to": "switch.autonomy", "weight": 1.0},
     {"from": "center.memory", "to": "motor.mesh", "when": "act", "weight": 1.0},
     {"from": "center.memory", "to": "motor.vault", "when": "act", "weight": 0.9},
 
+    {"from": "switch.presence", "to": "switch.outbound", "weight": 1.0},
     {"from": "switch.outbound", "to": "motor.text", "when": "act", "weight": 1.0},
     {"from": "switch.outbound", "to": "motor.call", "when": "act", "weight": 1.0},
     {"from": "switch.outbound", "to": "motor.facetime", "when": "act", "weight": 1.0},
@@ -60,6 +62,18 @@
     {"from": "switch.autonomy", "to": "motor.docs", "when": "act", "weight": 1.0},
     {"from": "switch.autonomy", "to": "motor.vault", "when": "act", "weight": 1.0},
     {"from": "switch.autonomy", "to": "motor.calendar", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.mesh", "when": "act", "weight": 0.9}
+    {"from": "switch.autonomy", "to": "motor.mesh", "when": "act", "weight": 0.9},
+
+    {"from": "motor.text", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.call", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.facetime", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.speak", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.speak", "to": "sense.audio.transcript", "weight": 0.4, "notes": "self-hear loop"},
+    {"from": "motor.jarvis", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.docs", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.jobs", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.vault", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
+    {"from": "motor.calendar", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
+    {"from": "motor.mesh", "to": "center.memory", "weight": 0.9, "notes": "feedback"}
   ]
 }

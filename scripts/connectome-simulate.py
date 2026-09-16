@@ -2,7 +2,7 @@
 """Cam connectome live-action simulations — sense→center→switch→motor→feedback.
 
 Default N = 1_000_000_000 (continuous QA campaign size).
-Workers = parallel subagent processes. Prefer simplify over complicate.
+Static integrity scan is the real gate; fuzz campaign stress-tests holds.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ DEFAULT_PATH = (
     "sense.chat.aaron",
     "center.chief",
     "center.memory",
+    "switch.autonomy",
     "motor.mesh",
 )
 DEFAULT_FEEDBACK = ("motor.mesh", "center.memory", "center.chief")
@@ -64,50 +65,70 @@ def build_tables():
     )
     edges = {(e["from"], e["to"]) for e in synapses["edges"]}
     motor_ids = {e["id"] for e in motor["effectors"]}
+    effector_reqs = {
+        e["id"]: [r for r in (e.get("requires_switch") or []) if r != "switch.kill"]
+        for e in motor["effectors"]
+    }
 
-    # Multiple hotspots may share a sense — keep a list, pick at runtime.
-    by_sense: dict[str, list[tuple[tuple[str, ...], tuple[str, ...]]]] = {
+    by_sense: dict[str, list[tuple[str, tuple[str, ...], tuple[str, ...]]]] = {
         s: [] for s in sense_ids
     }
     for h in hotspots["hotspots"]:
         path = tuple(h["pathway"])
+        sides = tuple(h.get("side_effects") or [])
         motors = [n for n in path if n.startswith("motor.")]
-        fb = (
-            (motors[-1], path[0], "center.memory", "center.chief")
-            if motors
-            else ("center.memory", "center.chief")
-        )
-        by_sense.setdefault(path[0], []).append((path, fb))
+        if motors:
+            last = motors[-1]
+            fb = (last, "center.memory", "center.chief")
+        else:
+            fb = ("center.memory", "center.chief")
+        by_sense.setdefault(path[0], []).append((h["id"], path, fb, sides))
 
     for s in sense_ids:
         if not by_sense[s]:
-            by_sense[s] = [(DEFAULT_PATH, DEFAULT_FEEDBACK)]
+            by_sense[s] = [("default", DEFAULT_PATH, DEFAULT_FEEDBACK, ())]
 
-    # Static integrity scan (once, not in the hot loop).
     integrity_errors: list[str] = []
     for sense, options in by_sense.items():
-        for path, fb in options:
+        for hid, path, fb, sides in options:
             for node in path:
                 if not node_ok(node):
-                    integrity_errors.append(f"bad_node:{node}")
-                elif node not in known and not node.startswith("sense."):
-                    # senses may appear mid-path as memory periphery
-                    if node not in known:
-                        integrity_errors.append(f"unknown_node:{node}")
+                    integrity_errors.append(f"bad_node:{hid}:{node}")
+                elif node not in known:
+                    integrity_errors.append(f"unknown_node:{hid}:{node}")
             for mi, node in enumerate(path):
-                if node.startswith("motor."):
-                    if mi == 0:
-                        integrity_errors.append("orphan_motor")
-                    if node not in motor_ids:
-                        integrity_errors.append(f"unknown_motor:{node}")
+                if not node.startswith("motor."):
+                    continue
+                if mi == 0:
+                    integrity_errors.append(f"orphan_motor:{hid}")
+                if node not in motor_ids:
+                    integrity_errors.append(f"unknown_motor:{hid}:{node}")
+                for req in effector_reqs.get(node, []):
+                    if req not in path:
+                        integrity_errors.append(
+                            f"motor_missing_switch:{hid}:{node}:{req}"
+                        )
+            for side in sides:
+                if side not in motor_ids:
+                    integrity_errors.append(f"unknown_side:{hid}:{side}")
             if not fb or fb[-1] not in FEEDBACK_SINKS:
-                integrity_errors.append(f"bad_feedback_sink:{sense}")
+                integrity_errors.append(f"bad_feedback_sink:{hid}")
             for a, b in zip(path, path[1:]):
-                if edges and (a, b) not in edges:
-                    # soft: record missing synapse, still simulate pathway shape
+                if (a, b) not in edges:
                     integrity_errors.append(f"missing_edge:{a}->{b}")
+            for a, b in zip(fb, fb[1:]):
+                if (a, b) not in edges:
+                    integrity_errors.append(f"missing_feedback_edge:{a}->{b}")
 
-    return sense_ids, by_sense, known, motor_ids, edges, integrity_errors
+    # Soft = missing edges only (hard = unknown nodes / unguarded pathway motors).
+    hard = [
+        e
+        for e in integrity_errors
+        if not e.startswith("missing_edge:")
+        and not e.startswith("missing_feedback_edge:")
+    ]
+    soft = [e for e in integrity_errors if e not in hard]
+    return sense_ids, by_sense, known, motor_ids, edges, hard, soft
 
 
 def run_batch(payload):
@@ -116,13 +137,11 @@ def run_batch(payload):
     n_senses = len(sense_ids)
     passed = failed = kill_holds = non_aaron_holds = feedback_ok = 0
     first_error = None
-    # Pre-bind locals for speed
     choice = rng.choice
     rand = rng.random
     t0 = time.perf_counter()
     for _ in range(count):
         sense = sense_ids[int(rand() * n_senses)]
-        # antagonistic switches
         if sense == "sense.chat.aaron" and rand() < 0.001:
             non_aaron_holds += 1
             passed += 1
@@ -187,19 +206,28 @@ def main() -> int:
     parser.add_argument(
         "--strict-edges",
         action="store_true",
-        help="fail load if pathway edges missing from synapses.json",
+        help="fail load if pathway/feedback edges missing from synapses.json",
     )
     args = parser.parse_args()
 
-    sense_ids, by_sense, _known, _motors, _edges, integrity = build_tables()
-    missing_edges = [e for e in integrity if e.startswith("missing_edge:")]
-    hard = [e for e in integrity if not e.startswith("missing_edge:")]
+    sense_ids, by_sense, _known, _motors, _edges, hard, soft = build_tables()
+    missing = [
+        e
+        for e in soft
+        if e.startswith("missing_edge:") or e.startswith("missing_feedback_edge:")
+    ]
     if hard:
-        print("INTEGRITY FAIL:", hard[:20], flush=True)
+        print("INTEGRITY FAIL:", hard[:40], flush=True)
         return 2
-    if args.strict_edges and missing_edges:
-        print("STRICT EDGE FAIL:", missing_edges[:20], flush=True)
+    if args.strict_edges and missing:
+        print("STRICT EDGE FAIL:", missing[:40], flush=True)
         return 2
+
+    # Flatten tables for worker pickling (drop sides in hot path payload shape)
+    by_sense_runtime = {
+        s: [(path, fb) for _hid, path, fb, _sides in opts]
+        for s, opts in by_sense.items()
+    }
 
     n = args.n
     workers = min(args.workers, n)
@@ -208,11 +236,14 @@ def main() -> int:
     for w in range(workers):
         count = base + (1 if w < rem else 0)
         if count:
-            batches.append((w, count, args.seed + w * 1_000_003, sense_ids, by_sense))
+            batches.append(
+                (w, count, args.seed + w * 1_000_003, sense_ids, by_sense_runtime)
+            )
 
     print(
         f"Cam connectome sims: n={n:,} workers={len(batches)} "
-        f"senses={len(sense_ids)} missing_edges={len(missing_edges)}",
+        f"senses={len(sense_ids)} missing_edges={len(missing)} "
+        f"soft_warnings={len(soft)}",
         flush=True,
     )
     t0 = time.perf_counter()
@@ -242,8 +273,9 @@ def main() -> int:
         "non_aaron_holds": sum(r["non_aaron_holds"] for r in results),
         "feedback_ok": sum(r["feedback_ok"] for r in results),
         "first_errors": [r["first_error"] for r in results if r["first_error"]],
-        "missing_edges_count": len(missing_edges),
-        "missing_edges_sample": missing_edges[:40],
+        "missing_edges_count": len(missing),
+        "missing_edges_sample": missing[:40],
+        "soft_warnings_sample": soft[:40],
         "unlimited_subagents": True,
         "continuous_qa": True,
         "simulator": "v2-simplified",

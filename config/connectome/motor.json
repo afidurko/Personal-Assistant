@@ -53,8 +53,8 @@
     {
       "id": "motor.mesh",
       "channel": ["nulltickets_store"],
-      "requires_switch": ["switch.autonomy"],
-      "notes": "Internal engram writes still allowed under kill for audit? No — kill pauses new claims; curator may flush logs if Aaron allows"
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Kill pauses new mesh claims; curator may flush logs only if Aaron allows"
     }
   ],
   "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"
