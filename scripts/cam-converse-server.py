@@ -26,6 +26,28 @@ WEB = ROOT / "companions" / "web"
 LOG_DIR = ROOT / "vault" / "10-Mesh-Distillates" / "converse"
 VOICE = json.loads((ROOT / "config" / "persona" / "voice.json").read_text(encoding="utf-8"))
 VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
+TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
+
+
+def load_tailscale() -> dict:
+    if not TAILSCALE.exists():
+        return {"enabled": False}
+    return json.loads(TAILSCALE.read_text(encoding="utf-8"))
+
+
+def converse_urls(ts: dict) -> dict:
+    c = ts.get("converse") or {}
+    host = c.get("cam_host_tailscale_ip") or c.get("cam_host_magicdns") or "cam-host"
+    port = int(c.get("port") or 8787)
+    url = f"http://{host}:{port}"
+    return {
+        "via": c.get("via", "tailscale" if ts.get("enabled") else "local"),
+        "cam_host": host,
+        "port": port,
+        "url": url,
+        "iphone_open": url,
+        "local_open": f"http://127.0.0.1:{port}",
+    }
 
 MIME = {
     ".html": "text/html; charset=utf-8",
@@ -143,6 +165,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path == "/api/health":
+            ts = load_tailscale()
+            urls = converse_urls(ts)
             self._json(
                 200,
                 {
@@ -159,6 +183,11 @@ class Handler(BaseHTTPRequestHandler):
                         "ios_capture_mode": "standing_on",
                         "aaron_face_enrolled": VISUAL.exists(),
                         "host_has_local_mic": False,  # browser supplies mic
+                        "tailscale": bool(ts.get("enabled")),
+                    },
+                    "network": {
+                        "tailscale_enabled": bool(ts.get("enabled")),
+                        **urls,
                     },
                     "voice": {
                         "character": VOICE["identity"]["voice_character"],
@@ -271,15 +300,20 @@ class Handler(BaseHTTPRequestHandler):
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--host", default="0.0.0.0")
-    p.add_argument("--port", type=int, default=8787)
+    p.add_argument("--host", default="")
+    p.add_argument("--port", type=int, default=0)
     args = p.parse_args()
+    ts = load_tailscale()
+    urls = converse_urls(ts)
+    host = args.host or (ts.get("converse") or {}).get("bind_host") or "0.0.0.0"
+    port = args.port or urls["port"]
     WEB.mkdir(parents=True, exist_ok=True)
-    httpd = ThreadingHTTPServer((args.host, args.port), Handler)
+    httpd = ThreadingHTTPServer((host, port), Handler)
     print(
-        f"Cam converse listening on http://{args.host}:{args.port}\n"
-        f"  open companion: http://127.0.0.1:{args.port}/\n"
-        f"  health:         http://127.0.0.1:{args.port}/api/health\n"
+        f"Cam converse listening on http://{host}:{port}\n"
+        f"  local:     {urls['local_open']}\n"
+        f"  tailscale: {urls['iphone_open']}  (set MagicDNS in config/network/tailscale.json)\n"
+        f"  health:    http://127.0.0.1:{port}/api/health\n"
         f"  session: {STATE.session_id}",
         flush=True,
     )

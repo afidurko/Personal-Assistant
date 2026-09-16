@@ -198,9 +198,11 @@
   fetch("/api/health")
     .then((r) => r.json())
     .then((h) => {
+      const net = h.network || {};
+      const via = net.tailscale_enabled ? `tailscale · ${net.iphone_open || net.url || ""}` : "local";
       setStatus(
         h.ok
-          ? `Cam online · session ${h.session_id.slice(0, 8)} · tap Enable mic & talk`
+          ? `Cam online · ENABLED · ${via} · tap Enable mic & talk`
           : "Cam health failed",
         h.ok ? "ok" : "warn"
       );

@@ -51,11 +51,11 @@ Aaron authorized (2026-09-16): Cam has **full access to Aaron’s photos and fil
 Aaron authorized **and enabled** (2026-09-16): Cam may use microphone and camera companions to **hold live conversations** with Aaron.
 
 - Status: **ON** — `identity/persistence/CAM_CONVERSE_ENABLED.md`
+- Network: **Tailscale** default — `docs/TAILSCALE.md` · `config/network/tailscale.json`
 - `switch.ios_capture` default: **standing_on**
 - Web companion: `companions/web/` + `scripts/cam-converse-server.py` (`docs/CAM_CONVERSE.md`)
 - iOS native companion: `companions/ios/` (same API)
 - Mic → `sense.ios.mic` · Camera → `sense.ios.camera` · speak via soft TTS / RIVA when studio up
-- Run the server on Aaron’s machine for real mic (Cloud Agent has no mic hardware)
 - Aaron kill switch still pauses all
 
 ## Unlimited subagents (persistent grant)

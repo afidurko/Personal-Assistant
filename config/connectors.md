@@ -26,9 +26,10 @@
 - **Granted:** Aaron face recognition, Aaron voice recognition, iPhone camera, iPhone mic
 - **Granted:** full photos + files access to learn Aaron’s look/sound and photo↔video same-person match (`identity/persistence/AARON_MEDIA_ACCESS.md`)
 - **Live converse:** **ENABLED** by Aaron — `identity/persistence/CAM_CONVERSE_ENABLED.md`
+- Network: **Tailscale** — `docs/TAILSCALE.md`
 - Capture mode: **standing_on** (`switch.ios_capture`)
 - UI: `docs/CAM_CONVERSE.md` (`companions/web/` + `scripts/cam-converse-server.py`)
-- Status: **feature on**; open companion on Aaron’s device for mic/camera
+- Status: **feature on**; iPhone reaches Cam host over Tailscale
 
 ## Cam face & voice (LLMAvatarTalk)
 

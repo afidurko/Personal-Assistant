@@ -47,7 +47,10 @@
     "cam_live_mic_enabled": true,
     "cam_live_camera_enabled": true,
     "auto_start_converse_server": true,
-    "cam_converse_port": 8787
+    "cam_converse_port": 8787,
+    "tailscale_enabled": true,
+    "cam_converse_via": "tailscale",
+    "cam_converse_url_config": "config/network/tailscale.json"
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
@@ -130,7 +133,10 @@
     "cam_live_mic_enabled": true,
     "cam_live_camera_enabled": true,
     "auto_start_converse_server": true,
-    "cam_converse_port": 8787
+    "cam_converse_port": 8787,
+    "tailscale_enabled": true,
+    "cam_converse_via": "tailscale",
+    "cam_converse_url_config": "config/network/tailscale.json"
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,

@@ -20,13 +20,14 @@ Native iPhone app for **Aaron face/voice recognition**, **camera**, **microphone
 - `NSSpeechRecognitionUsageDescription` — Cam turns your speech into text for conversation.
 - `NSPhotoLibraryUsageDescription` — Cam reads your photos to learn your look (Aaron grant).
 
-## Required capabilities
-- Camera (`AVCaptureSession`)
-- Microphone (`AVAudioEngine`)
-- Speech recognition (Speech framework) → `POST /api/turn`
-- Face enrollment + match (Vision)
-- Speaker-ID enrollment
-- Pair to Cam host (`CAM_HOST` e.g. `http://192.168.x.x:8787`)
+## Pair to Cam host
+Prefer **Tailscale MagicDNS** (Aaron’s tailnet). Set host in `config/network/tailscale.json`, then:
+
+```text
+http://<cam-host-magicdns>:8787
+```
+
+See `docs/TAILSCALE.md`. Same `/api/*` contract as the web companion.
 
 ## First screens
 1. Pair with Cam (host URL / setup code)

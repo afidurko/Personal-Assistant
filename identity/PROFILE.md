@@ -28,7 +28,7 @@ Only Aaron assigns work. Logs retained. Kill switch = pause all.
 
 **Media (2026-09-16):** Full access to Aaron’s photos and files to learn look/sound and match photo-face ↔ talking-in-video — granted (`identity/persistence/AARON_MEDIA_ACCESS.md`).
 
-**Live converse (2026-09-16):** Mic + camera conversation **ENABLED** by Aaron — `identity/persistence/CAM_CONVERSE_ENABLED.md`.
+**Live converse (2026-09-16):** Mic + camera conversation **ENABLED** by Aaron — Tailscale default path (`docs/TAILSCALE.md`, `docs/CAM_CONVERSE.md`).
 
 ## Conflict resolutions
 
