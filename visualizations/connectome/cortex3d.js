@@ -124,16 +124,17 @@ scene.add(brain);
 
 function cortexMat(opacity = 0.55) {
   return new THREE.MeshStandardMaterial({
-    color: 0xd4b8a0,
-    roughness: 0.72,
-    metalness: 0.05,
+    color: 0xc9a992,
+    roughness: 0.78,
+    metalness: 0.02,
     transparent: true,
     opacity,
+    depthWrite: false,
   });
 }
 
 function addEllipsoid(pos, scale, opacity = 0.5) {
-  const g = new THREE.SphereGeometry(1, 40, 28);
+  const g = new THREE.SphereGeometry(1, 48, 32);
   g.scale(...scale);
   const m = new THREE.Mesh(g, cortexMat(opacity));
   m.position.set(...pos);
@@ -143,73 +144,94 @@ function addEllipsoid(pos, scale, opacity = 0.5) {
 
 /** Human brain built from lobe masses (not a sphere) */
 function buildHumanBrain() {
-  // Hemispheres — slightly flattened ovals like a real cerebrum
-  addEllipsoid([-0.58, 0.5, 0.12], [1.42, 1.0, 1.62], 0.26);
-  addEllipsoid([0.58, 0.5, 0.12], [1.42, 1.0, 1.62], 0.26);
-  // Frontal poles (more pointed)
-  addEllipsoid([-1.65, 0.48, 0.95], [0.9, 0.72, 0.78], 0.34);
-  addEllipsoid([1.65, 0.48, 0.95], [0.9, 0.72, 0.78], 0.34);
-  addEllipsoid([-0.15, 0.65, 1.25], [0.5, 0.4, 0.38], 0.22);
+  // Hemispheres — readable cerebrum mass
+  addEllipsoid([-0.62, 0.48, 0.1], [1.48, 1.05, 1.68], 0.42);
+  addEllipsoid([0.62, 0.48, 0.1], [1.48, 1.05, 1.68], 0.42);
+  // Frontal poles
+  addEllipsoid([-1.72, 0.42, 1.0], [0.95, 0.78, 0.82], 0.48);
+  addEllipsoid([1.72, 0.42, 1.0], [0.95, 0.78, 0.82], 0.48);
+  addEllipsoid([-0.1, 0.55, 1.35], [0.55, 0.42, 0.4], 0.35);
   // Temporal lobes hang lower + forward
-  addEllipsoid([-1.05, -0.65, 1.05], [0.75, 0.58, 0.9], 0.38);
-  addEllipsoid([1.05, -0.65, 1.05], [0.75, 0.58, 0.9], 0.38);
-  addEllipsoid([-1.35, -0.95, 0.55], [0.4, 0.32, 0.45], 0.3);
-  addEllipsoid([1.35, -0.95, 0.55], [0.4, 0.32, 0.45], 0.3);
-  // Occipital bulge
-  addEllipsoid([0.05, 0.35, -1.35], [0.95, 0.75, 0.55], 0.3);
-  addEllipsoid([-0.85, 0.3, -1.05], [0.55, 0.55, 0.5], 0.28);
-  addEllipsoid([0.85, 0.3, -1.05], [0.55, 0.55, 0.5], 0.28);
+  addEllipsoid([-1.15, -0.72, 1.1], [0.82, 0.62, 0.95], 0.52);
+  addEllipsoid([1.15, -0.72, 1.1], [0.82, 0.62, 0.95], 0.52);
+  addEllipsoid([-1.4, -1.05, 0.5], [0.42, 0.35, 0.48], 0.45);
+  addEllipsoid([1.4, -1.05, 0.5], [0.42, 0.35, 0.48], 0.45);
+  // Occipital bulge (rear)
+  addEllipsoid([0.0, 0.32, -1.45], [1.05, 0.8, 0.62], 0.45);
+  addEllipsoid([-0.9, 0.28, -1.15], [0.58, 0.58, 0.52], 0.4);
+  addEllipsoid([0.9, 0.28, -1.15], [0.58, 0.58, 0.52], 0.4);
   // Parietal crown
-  addEllipsoid([0.0, 1.35, -0.05], [1.15, 0.42, 1.0], 0.24);
+  addEllipsoid([0.0, 1.4, -0.08], [1.2, 0.48, 1.05], 0.38);
   // Insula / medial hint
-  addEllipsoid([0.0, 0.15, 0.35], [0.35, 0.55, 0.7], 0.18);
-  // Cerebellum (two lobes + vermis)
-  addEllipsoid([0.55, -0.95, -0.95], [0.7, 0.45, 0.5], 0.42);
-  addEllipsoid([-0.55, -0.95, -0.95], [0.7, 0.45, 0.5], 0.42);
-  addEllipsoid([0.0, -0.85, -1.05], [0.35, 0.35, 0.4], 0.38);
+  addEllipsoid([0.0, 0.12, 0.4], [0.32, 0.55, 0.75], 0.22);
+  // Cerebellum (two lobes + vermis) — slightly cooler tone
+  const cerebMat = () =>
+    new THREE.MeshStandardMaterial({
+      color: 0xa88878,
+      roughness: 0.85,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    });
+  for (const [px, sx] of [
+    [0.58, 0.72],
+    [-0.58, 0.72],
+    [0.0, 0.38],
+  ]) {
+    const g = new THREE.SphereGeometry(1, 28, 20);
+    g.scale(sx, 0.48, 0.52);
+    const m = new THREE.Mesh(g, cerebMat());
+    m.position.set(px, -1.0, -1.05);
+    brain.add(m);
+  }
   // Brainstem + pons
   const pons = new THREE.Mesh(
-    new THREE.SphereGeometry(0.28, 16, 12),
-    new THREE.MeshStandardMaterial({ color: 0xb89a86, roughness: 0.85, transparent: true, opacity: 0.55 })
+    new THREE.SphereGeometry(0.3, 16, 12),
+    new THREE.MeshStandardMaterial({ color: 0x9a8070, roughness: 0.85, transparent: true, opacity: 0.65 })
   );
-  pons.position.set(0.0, -1.15, -0.35);
-  pons.scale.set(1.1, 0.7, 1.2);
+  pons.position.set(0.0, -1.2, -0.4);
+  pons.scale.set(1.15, 0.7, 1.25);
   brain.add(pons);
   const stem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.14, 0.2, 1.0, 12),
-    new THREE.MeshStandardMaterial({ color: 0xb89a86, roughness: 0.8, transparent: true, opacity: 0.55 })
+    new THREE.CylinderGeometry(0.13, 0.2, 1.05, 12),
+    new THREE.MeshStandardMaterial({ color: 0x9a8070, roughness: 0.8, transparent: true, opacity: 0.7 })
   );
-  stem.position.set(0.0, -1.55, -0.15);
+  stem.position.set(0.0, -1.65, -0.18);
   stem.rotation.x = 0.28;
   brain.add(stem);
 
-  // Soft gyral ridges (read as folds, not cards)
-  for (let i = 0; i < 14; i++) {
-    const ang = (i / 14) * Math.PI * 2;
+  // Soft gyral ridges
+  for (let i = 0; i < 16; i++) {
+    const ang = (i / 16) * Math.PI * 2;
     const ridge = new THREE.Mesh(
-      new THREE.TorusGeometry(1.55 + (i % 3) * 0.08, 0.035, 6, 48, Math.PI * 0.55),
-      new THREE.MeshBasicMaterial({ color: 0xc9b09a, transparent: true, opacity: 0.12 })
+      new THREE.TorusGeometry(1.6 + (i % 3) * 0.1, 0.04, 6, 48, Math.PI * 0.5),
+      new THREE.MeshBasicMaterial({ color: 0xe0c4a8, transparent: true, opacity: 0.18 })
     );
-    ridge.position.set(Math.cos(ang) * 0.15, 0.55 + Math.sin(i) * 0.15, Math.sin(ang) * 0.1);
-    ridge.rotation.set(0.4 + i * 0.05, ang, 0.2);
+    ridge.position.set(Math.cos(ang) * 0.2, 0.5 + Math.sin(i) * 0.18, Math.sin(ang) * 0.12);
+    ridge.rotation.set(0.45 + i * 0.04, ang, 0.15);
     brain.add(ridge);
   }
 
-  // Soft outer silhouette wire for read
-  const shell = new THREE.Mesh(
-    new THREE.SphereGeometry(2.55, 40, 28),
-    new THREE.MeshBasicMaterial({ color: 0xe6d5b8, wireframe: true, transparent: true, opacity: 0.04 })
+  // Outer silhouette rim (helps read brain outline)
+  const rimShell = new THREE.Mesh(
+    new THREE.SphereGeometry(2.5, 48, 32),
+    new THREE.MeshBasicMaterial({
+      color: 0xd4b8a0,
+      transparent: true,
+      opacity: 0.07,
+      side: THREE.BackSide,
+    })
   );
-  shell.scale.set(1.35, 0.95, 1.2);
-  shell.position.set(0.0, 0.15, 0.05);
-  brain.add(shell);
+  rimShell.scale.set(1.4, 0.98, 1.25);
+  rimShell.position.set(0.0, 0.12, 0.08);
+  brain.add(rimShell);
 
-  // Longitudinal fissure hint
+  // Longitudinal fissure
   const fissure = new THREE.Mesh(
-    new THREE.BoxGeometry(0.05, 1.9, 2.6),
-    new THREE.MeshBasicMaterial({ color: 0x0b1014, transparent: true, opacity: 0.4 })
+    new THREE.BoxGeometry(0.07, 2.0, 2.8),
+    new THREE.MeshBasicMaterial({ color: 0x0b1014, transparent: true, opacity: 0.55 })
   );
-  fissure.position.set(0, 0.5, 0.05);
+  fissure.position.set(0, 0.48, 0.05);
   brain.add(fissure);
 }
 
@@ -228,12 +250,14 @@ AREAS.forEach((a) => {
     emissive: 0x0a1814,
     roughness: 0.5,
     metalness: 0.12,
+    transparent: true,
+    opacity: 0.72,
   });
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(a.r, 22, 16), mat);
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(a.r * 0.82, 22, 16), mat);
   mesh.position.set(...a.p);
   brain.add(mesh);
   const lab = makeLabel(`${a.label}\n${a.ba}`);
-  lab.position.set(a.p[0], a.p[1] + a.r + 0.14, a.p[2]);
+  lab.position.set(a.p[0], a.p[1] + a.r + 0.08, a.p[2]);
   brain.add(lab);
   areaMeshes[a.id] = mesh;
 });
@@ -296,18 +320,21 @@ function fillNeurons(catalog = []) {
     addDot(p, col, n.kind === "loop" ? 0.045 : 0.038, { id: n.id, area: n.area, kind: n.kind });
   });
 
-  // Ambient filler neurons across brain volume (fill)
-  for (let i = 0; i < 420; i++) {
+  // Ambient filler neurons across brain volume (fill) — brain-shaped envelope
+  for (let i = 0; i < 520; i++) {
     const u = Math.random() * Math.PI * 2;
     const v = Math.acos(2 * Math.random() - 1);
-    const rr = 0.7 + Math.random() * 1.7;
-    // deform into brainier envelope
-    const x = Math.sin(v) * Math.cos(u) * rr * 1.25 + (Math.random() - 0.5) * 0.15;
-    const y = Math.cos(v) * rr * 0.85 + 0.25 + (Math.random() - 0.5) * 0.1;
-    const z = Math.sin(v) * Math.sin(u) * rr * 1.05 + 0.15;
-    // prefer cortex shell
-    if (y < -1.6) continue;
-    addDot(new THREE.Vector3(x, y, z), 0x3d5a50, 0.02, { id: `ambient_${i}`, kind: "interneuron" });
+    // prefer shell near cortex surface
+    const rr = 1.15 + Math.random() * 1.15;
+    let x = Math.sin(v) * Math.cos(u) * rr * 1.35;
+    let y = Math.cos(v) * rr * 0.82 + 0.2;
+    let z = Math.sin(v) * Math.sin(u) * rr * 1.15 + 0.1;
+    // temporal hang
+    if (Math.abs(x) > 0.8 && y < 0.1) y -= 0.25 * Math.random();
+    // skip far below cerebellum / outside
+    if (y < -1.55 || y > 1.75) continue;
+    if (z < -1.85) continue;
+    addDot(new THREE.Vector3(x, y, z), 0x4a6b5e, 0.018, { id: `ambient_${i}`, kind: "interneuron" });
   }
 
   const geo = new THREE.BufferGeometry();
@@ -506,13 +533,18 @@ async function fireSpike(spike, injectError = false) {
         healthStatus[c.neuron] = c.status;
       });
       fillNeurons(catalogNeurons);
+      clearLights();
+      for (const id of spike.pathway || []) {
+        setAreaLit(id, r.overall === "critical" ? "error" : r.overall === "warning" ? "feedback" : "lit");
+        await new Promise((res) => setTimeout(res, 180));
+      }
       pushLocalEvent({
         type: "health_scan",
         status: r.overall === "critical" ? "warn" : "ok",
         overall: r.overall,
         neurons: r.neurons_fired || [],
       });
-      (spike.pathway || []).forEach((id) => setAreaLit(id, "lit"));
+      log(`<span class="center">HEALTH</span> overall=${r.overall} · ${(r.checks || []).map((c) => c.neuron.replace("neuron.", "")).slice(0, 6).join(", ")}…`);
       return;
     } catch (e) {
       log(`<span class="motor">HEALTH</span> distillate missing — run system-health-scan.py`);
