@@ -62,6 +62,13 @@
       "enabled": true
     },
     {
+      "id": "workspace_integration_check",
+      "title": "Confirm workspace registry + submodule + persist wiring",
+      "role": "memory-curator",
+      "script": "scripts/workspace-integration-check.py",
+      "enabled": true
+    },
+    {
       "id": "ios_identity_camera_mic",
       "title": "iOS companion: Aaron face/voice + camera/mic",
       "role": "comms"

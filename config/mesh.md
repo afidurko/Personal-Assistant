@@ -18,6 +18,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
 | `mesh/vault` | smart-second-brain vault path + topic distillates |
 | `mesh/persona` | Cam identity/voice/availability prefs |
+<<<<<<< HEAD
 | `mesh/agent-commute` | Task commute paths + efficiency rankings |
 | `mesh/agent-memory` | Agent-consolidated memory promotions |
 | `mesh/agent-persistence` | Sticky jobs until completion |
@@ -31,6 +32,11 @@ Stacked on the interactive brain map (`server/core/agent-mesh.ts`):
 2. **Memory** — consolidate + amplify recall  
 3. **Persistence** — keep jobs alive until done  
 4. **Issue-fix loop** — dedicated automated detect → fix → verify → escalate agents  
+=======
+| `mesh/enhance` | sLM/DL cortex recipes + cam_enhance gate state |
+| `mesh/research/agi-scan` | daily AGI paper distillates (via vault mirror) |
+| `mesh/workspaces` | scan-workspace snapshots when PR#2 server is live |
+>>>>>>> d6bc4c6 (Confirm multi-workspace integration and close persist-export gaps)
 
 ## Write rules
 
@@ -41,8 +47,9 @@ Stacked on the interactive brain map (`server/core/agent-mesh.ts`):
 - Jarvis memory syncs via `scripts/sync-jarvis-memory.py`
 - Vision results sync via `scripts/pack-vision-result.py`
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
+- AGI daily scan archives via `scripts/agi-research-scan.py` → vault + mesh distillates
 - Cross-workspace: `scripts/persist-export.py` / `persist-import.py`
-
+- Integration confirmation: `scripts/workspace-integration-check.py` · `docs/WORKSPACES_WORKFLOW.md`
 ## Read rules
 
 - Before claiming work, search mesh + vault

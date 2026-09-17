@@ -15,7 +15,7 @@ talking presence — with a smart second brain, **agent teams**, and a **sLM/DL 
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
-Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Workspaces: [docs/WORKSPACES_WORKFLOW.md](docs/WORKSPACES_WORKFLOW.md)
 
 ## Connectome architecture (brain map)
 
@@ -32,6 +32,8 @@ python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch 
 python3 scripts/connectome-route.py --sense sense.clock.daily --goal "daily agi scan"
 # Run the daily scan (arXiv → vault/mesh proposals)
 python3 scripts/agi-research-scan.py
+# Confirm workspace + integration wiring
+python3 scripts/workspace-integration-check.py
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
 # Live brain + spinal cord visualization (all repos)
