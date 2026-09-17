@@ -261,10 +261,10 @@ export class AgentMeshRuntime {
       }
     }
 
-    // Cap job list
+    // Cap job list — generous room for Cam + spawn of agents
     this.jobs = this.jobs
       .sort((a, b) => SEVERITY_ORDER[b.severity] - SEVERITY_ORDER[a.severity])
-      .slice(0, 40);
+      .slice(0, 80);
 
     return count;
   }
@@ -310,7 +310,7 @@ export class AgentMeshRuntime {
       (j) => j.status === 'queued' || j.status === 'running' || j.status === 'verifying',
     );
 
-    for (const job of queue.slice(0, 6)) {
+    for (const job of queue.slice(0, 12)) {
       job.status = 'running';
       job.attempts += 1;
       job.assignedAgentId = job.assignedAgentId || fixer.id;

@@ -1,0 +1,79 @@
+{
+  "version": 2,
+  "analogy": "Cortical columns — role agents, repetitive loops, and system-health interneurons that keep Cam + workspaces alive",
+  "rules": [
+    "Agents claim work; loops recur until hold/kill",
+    "Health neurons fire standing scans into mesh distillates",
+    "Hebbian mesh writes strengthen tracts used by successful loops",
+    "No column accepts tasking except via Aaron-rooted spikes"
+  ],
+  "catalog_groups": {
+    "executive": "DLPFC / aPFC / OFC — control, planning, boundaries",
+    "language": "Wernicke / Broca — comprehend + produce",
+    "associative": "temporal / parietal / visual / auditory",
+    "memory": "MTL — engrams, neurogenesis, persist",
+    "health": "ACC + parietal + DLPFC — workspace / system health interneurons"
+  },
+  "neurons": [
+    {"id": "neuron.chief", "kind": "agent", "area": "area.dlpfc", "role": "chief", "recurrence": "always_on", "notes": "Cam executive"},
+    {"id": "neuron.router", "kind": "agent", "area": "area.dlpfc", "role": "nullboiler", "recurrence": "per_task"},
+    {"id": "neuron.delegate_burst", "kind": "loop", "area": "area.dlpfc", "role": "chief", "recurrence": "unbounded_subagents"},
+    {"id": "neuron.priority_boot", "kind": "loop", "area": "area.dlpfc", "recurrence": "boot", "config": "config/priority-boot.json", "notes": "Watch priority boot order"},
+    {"id": "neuron.workspace_orchestrator", "kind": "agent", "area": "area.dlpfc", "recurrence": "standing", "notes": "Coordinate multi-workspace Cam instances"},
+
+    {"id": "neuron.cartographer", "kind": "agent", "area": "area.apfc", "role": "researcher", "recurrence": "on_map_spike"},
+    {"id": "neuron.docs", "kind": "agent", "area": "area.apfc", "role": "docs", "recurrence": "per_task"},
+    {"id": "neuron.plan_loop", "kind": "loop", "area": "area.apfc", "recurrence": "prospective"},
+    {"id": "neuron.improve_engine", "kind": "loop", "area": "area.apfc", "recurrence": "after_health_scan", "script": "scripts/system-health-scan.py", "notes": "Turn health findings into actionable improvements"},
+
+    {"id": "neuron.boundary", "kind": "agent", "area": "area.ofc", "role": "chief", "recurrence": "standing"},
+    {"id": "neuron.identity_gate", "kind": "loop", "area": "area.ofc", "recurrence": "per_remote_spike"},
+    {"id": "neuron.secret_hygiene", "kind": "loop", "area": "area.ofc", "recurrence": "standing_scan", "script": "scripts/system-health-scan.py", "notes": "No credentials committed"},
+
+    {"id": "neuron.comms", "kind": "agent", "area": "area.broca", "role": "comms", "recurrence": "per_outbound"},
+    {"id": "neuron.speak_loop", "kind": "loop", "area": "area.broca", "recurrence": "converse_turn", "script": "scripts/cam-converse-server.py"},
+    {"id": "neuron.converse_health", "kind": "loop", "area": "area.broca", "recurrence": "standing_scan", "notes": "Probe /api/health on converse server"},
+
+    {"id": "neuron.motor_plan", "kind": "loop", "area": "area.premotor", "recurrence": "pre_motor"},
+    {"id": "neuron.effector", "kind": "agent", "area": "area.motor", "recurrence": "spike"},
+
+    {"id": "neuron.language_in", "kind": "agent", "area": "area.wernicke", "recurrence": "per_language_spike"},
+    {"id": "neuron.semantic", "kind": "loop", "area": "area.wernicke", "recurrence": "associative"},
+
+    {"id": "neuron.research", "kind": "agent", "area": "area.temporal", "role": "researcher", "recurrence": "per_task"},
+    {"id": "neuron.careers", "kind": "agent", "area": "area.temporal", "role": "careers", "recurrence": "per_listing"},
+    {"id": "neuron.watch_loop", "kind": "loop", "area": "area.temporal", "role": "careers", "recurrence": "standing_watch"},
+
+    {"id": "neuron.ops", "kind": "agent", "area": "area.parietal", "role": "ops", "recurrence": "per_task"},
+    {"id": "neuron.life_ops_loop", "kind": "loop", "area": "area.parietal", "role": "ops", "recurrence": "calendar_cycle"},
+    {"id": "neuron.vitals_loop", "kind": "loop", "area": "area.parietal", "recurrence": "standing_scan", "script": "scripts/system-health-scan.py", "notes": "Host load / resource vitals"},
+    {"id": "neuron.tailscale_reach", "kind": "loop", "area": "area.parietal", "recurrence": "standing_scan", "notes": "iPhone/iPad Tailscale reachability"},
+    {"id": "neuron.integration_pulse", "kind": "loop", "area": "area.parietal", "recurrence": "standing_scan", "notes": "Jarvis/Paddle/Avatar/SSB/SwiftGuide present"},
+
+    {"id": "neuron.vision", "kind": "agent", "area": "area.visual", "role": "vision", "recurrence": "per_frame_batch"},
+    {"id": "neuron.enroll_loop", "kind": "loop", "area": "area.visual", "recurrence": "until_enrolled"},
+
+    {"id": "neuron.asr", "kind": "agent", "area": "area.auditory", "recurrence": "streaming"},
+
+    {"id": "neuron.memory", "kind": "agent", "area": "area.mtl", "role": "memory-curator", "recurrence": "standing"},
+    {"id": "neuron.mesh_sync_loop", "kind": "loop", "area": "area.mtl", "recurrence": "after_run"},
+    {"id": "neuron.persist_sync", "kind": "loop", "area": "area.mtl", "recurrence": "cross_workspace", "script": "scripts/persist-export.py", "notes": "Export/import persistence bundles"},
+    {"id": "neuron.neurogenesis_loop", "kind": "loop", "area": "area.mtl", "recurrence": "on_novelty", "script": "scripts/connectome-plasticity.py", "notes": "Spawn/mature MTL columns"},
+
+    {"id": "neuron.qa", "kind": "agent", "area": "area.cingulate", "role": "qa", "recurrence": "pre_motor"},
+    {"id": "neuron.qa_cycle", "kind": "loop", "area": "area.cingulate", "role": "qa", "recurrence": "continuous", "script": "scripts/qa-loop.py"},
+    {"id": "neuron.connectome_check", "kind": "loop", "area": "area.cingulate", "recurrence": "standing_scan", "script": "scripts/connectome-check.py"},
+    {"id": "neuron.arch_scan", "kind": "loop", "area": "area.cingulate", "recurrence": "standing_scan", "notes": "Architecture coupling / layering signals"},
+    {"id": "neuron.vuln_scan", "kind": "loop", "area": "area.cingulate", "recurrence": "standing_scan", "notes": "Static threat heuristics (offline)"},
+    {"id": "neuron.drift_scan", "kind": "loop", "area": "area.cingulate", "recurrence": "standing_scan", "notes": "Docs/config drift vs live cortex"},
+    {"id": "neuron.submodule_health", "kind": "loop", "area": "area.cingulate", "recurrence": "standing_scan", "notes": "Git submodule init/sync status"},
+    {"id": "neuron.health_conductor", "kind": "loop", "area": "area.cingulate", "recurrence": "standing_scan", "script": "scripts/system-health-scan.py", "notes": "Conducts all health neurons; writes system-health.json"}
+  ],
+  "suggested_next_implementations": [
+    {
+      "neuron": "neuron.schematic_hud",
+      "why": "Optional 2D circuit-board overlay synced to live feed",
+      "impl": "flat.html neurotransmitter legend mode"
+    }
+  ]
+}

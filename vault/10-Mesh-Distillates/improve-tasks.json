@@ -1,0 +1,158 @@
+{
+  "updatedAt": "2026-09-17T11:08:38.727Z",
+  "camSelfTasks": [
+    {
+      "id": "cam-self-640a6623",
+      "title": "Refresh live activity feed for cortex fibers",
+      "detail": "Merge recent converse + agent pulses into live-activity.json for DTI brightness.",
+      "severity": "medium",
+      "status": "running",
+      "neuron": "neuron.mesh_sync_loop",
+      "area": "area.mtl",
+      "createdAt": "2026-09-17T11:08:38.721Z",
+      "updatedAt": "2026-09-17T11:08:38.721Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-aabd87ac",
+      "title": "Health conductor standing scan",
+      "detail": "Background vitals pass so the cortex health neurons stay honest.",
+      "severity": "medium",
+      "status": "running",
+      "neuron": "neuron.health_conductor",
+      "area": "area.cingulate",
+      "createdAt": "2026-09-17T11:08:38.721Z",
+      "updatedAt": "2026-09-17T11:08:38.723Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-1cd2a387",
+      "title": "Sweep spawn bay capacity for subagents",
+      "detail": "Ensure loop job lanes stay open so Cam and her agents have room to work.",
+      "severity": "medium",
+      "status": "running",
+      "neuron": "neuron.delegate_burst",
+      "area": "area.dlpfc",
+      "createdAt": "2026-09-17T11:08:38.721Z",
+      "updatedAt": "2026-09-17T11:08:38.724Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-96fbc733",
+      "title": "Consolidate episodic converse into semantic memory",
+      "detail": "Distill recent Aaron↔Cam turns into vault mesh notes for faster recall.",
+      "severity": "low",
+      "status": "done",
+      "neuron": "neuron.memory",
+      "area": "area.mtl",
+      "createdAt": "2026-09-17T11:08:26.718Z",
+      "updatedAt": "2026-09-17T11:08:38.725Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-6c0dc3a5",
+      "title": "Tune speak/hear arcuate pathway",
+      "detail": "Pulse language tracts after mic turns so Broca↔Wernicke stay warm.",
+      "severity": "low",
+      "status": "running",
+      "neuron": "neuron.speak_loop",
+      "area": "area.broca",
+      "createdAt": "2026-09-17T11:08:14.714Z",
+      "updatedAt": "2026-09-17T11:08:14.714Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-19f0a64b",
+      "title": "Sweep spawn bay capacity for subagents",
+      "detail": "Ensure loop job lanes stay open so Cam and her agents have room to work.",
+      "severity": "medium",
+      "status": "done",
+      "neuron": "neuron.delegate_burst",
+      "area": "area.dlpfc",
+      "createdAt": "2026-09-17T11:08:02.709Z",
+      "updatedAt": "2026-09-17T11:08:14.715Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-dc198226",
+      "title": "Health conductor standing scan",
+      "detail": "Background vitals pass so the cortex health neurons stay honest.",
+      "severity": "medium",
+      "status": "done",
+      "neuron": "neuron.health_conductor",
+      "area": "area.cingulate",
+      "createdAt": "2026-09-17T11:08:02.709Z",
+      "updatedAt": "2026-09-17T11:08:14.716Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-42637739",
+      "title": "Refresh live activity feed for cortex fibers",
+      "detail": "Merge recent converse + agent pulses into live-activity.json for DTI brightness.",
+      "severity": "medium",
+      "status": "done",
+      "neuron": "neuron.mesh_sync_loop",
+      "area": "area.mtl",
+      "createdAt": "2026-09-17T11:08:02.709Z",
+      "updatedAt": "2026-09-17T11:08:14.716Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-663a4d88",
+      "title": "Consolidate episodic converse into semantic memory",
+      "detail": "Distill recent Aaron↔Cam turns into vault mesh notes for faster recall.",
+      "severity": "low",
+      "status": "done",
+      "neuron": "neuron.memory",
+      "area": "area.mtl",
+      "createdAt": "2026-09-17T11:07:50.708Z",
+      "updatedAt": "2026-09-17T11:08:14.717Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-416175ec",
+      "title": "Propose Cam system enhancement from scan findings",
+      "detail": "Turn weak workspace scores into self-improve tasks (Aaron gates apply).",
+      "severity": "high",
+      "status": "done",
+      "neuron": "neuron.improve_engine",
+      "area": "area.apfc",
+      "createdAt": "2026-09-17T11:07:50.708Z",
+      "updatedAt": "2026-09-17T11:08:14.717Z",
+      "source": "cam_autonomy"
+    },
+    {
+      "id": "cam-self-88ea9978",
+      "title": "Tune speak/hear arcuate pathway",
+      "detail": "Pulse language tracts after mic turns so Broca↔Wernicke stay warm.",
+      "severity": "low",
+      "status": "done",
+      "neuron": "neuron.speak_loop",
+      "area": "area.broca",
+      "createdAt": "2026-09-17T11:07:50.708Z",
+      "updatedAt": "2026-09-17T11:08:02.712Z",
+      "source": "cam_autonomy"
+    }
+  ],
+  "loopJobs": [
+    {
+      "id": "sug-suggest-finding-093b4909-ec68-414f-a8e4-652e68b7e959",
+      "title": "Run npm audit in CI on a schedule for advisory coverage.",
+      "detail": "Run npm audit in CI on a schedule for advisory coverage.",
+      "severity": "medium",
+      "status": "fixed",
+      "attempts": 1,
+      "maxAttempts": 4,
+      "sourceWorkspaceId": "workspace-vulnerability",
+      "assignedAgentId": "completion-guardian",
+      "fixSketch": "POST /api/agents/cycle\n# focus agent-commute-router",
+      "createdAt": "2026-09-17T11:07:50.740Z",
+      "updatedAt": "2026-09-17T11:07:50.741Z"
+    }
+  ],
+  "capacity": {
+    "selfTaskSlots": 64,
+    "loopJobHint": 80,
+    "note": "Room for Cam and her spawn"
+  }
+}
