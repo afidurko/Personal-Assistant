@@ -8,6 +8,8 @@ import type { WsClientMessage, WsServerMessage } from '../shared/types.js';
 import { SWIFT_GUIDE_CONCEPTS, isSwiftConceptNodeId } from '../shared/swiftGuide.js';
 import { AGENT_LAYERS, MESH_AGENTS } from '../shared/agentLayers.js';
 import { ScanOrchestrator } from './core/scan-orchestrator.js';
+import { CamConverse } from './core/cam-converse.js';
+import { CamAutonomy } from './core/cam-autonomy.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -23,13 +25,26 @@ const orchestrator = new ScanOrchestrator({
   dataDir: path.join(ROOT, 'data'),
 });
 
+const converse = new CamConverse(ROOT);
+const autonomy = new CamAutonomy(ROOT);
+let micListeningHint = false;
+
 await orchestrator.init();
 
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'personal-assistant',
+    assistant: 'Cam',
     scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    capabilities: {
+      mic: true,
+      speak: true,
+      cortex3d: true,
+      autonomy: true,
+      enabled: true,
+    },
+    session_id: converse.sessionId,
   });
 });
 
@@ -81,6 +96,8 @@ app.get('/api/agents', (_req, res) => {
     loopArmed: orchestrator.isIssueLoopArmed(),
     jobs: orchestrator.getLoopJobs(),
     lastCycle: orchestrator.getFullState().lastAgentCycle ?? null,
+    camSelfTasks: autonomy.getTasks(),
+    capacity: { selfTaskSlots: 64, loopJobHint: 80 },
   });
 });
 
@@ -99,6 +116,65 @@ app.post('/api/agents/issue-loop/stop', (_req, res) => {
   res.json({ loopArmed: false });
 });
 
+app.get('/api/cam/autonomy', (_req, res) => {
+  res.json({
+    tasks: autonomy.getTasks(),
+    capacity: { selfTaskSlots: 64, loopJobHint: 80 },
+    listening: micListeningHint,
+  });
+});
+
+app.post('/api/cam/autonomy/tick', async (_req, res) => {
+  const result = await autonomy.tick({
+    workspaces: orchestrator.getWorkspaces(),
+    loopJobs: orchestrator.getLoopJobs(),
+    listening: micListeningHint,
+  });
+  res.json(result);
+});
+
+app.get('/api/session', (_req, res) => {
+  res.json({
+    session_id: converse.sessionId,
+    started: converse.started,
+    history: converse.getHistory(),
+  });
+});
+
+app.post('/api/turn', async (req, res) => {
+  const body = req.body as { text?: string; transcript?: string; source?: string };
+  const text = String(body.text ?? body.transcript ?? '');
+  const source = String(body.source ?? 'text');
+  const reply = await converse.turn(text, source);
+  // Pulse autonomy when Aaron talks so Cam keeps self-tasks warm
+  void autonomy.tick({
+    workspaces: orchestrator.getWorkspaces(),
+    loopJobs: orchestrator.getLoopJobs(),
+    listening: true,
+  });
+  res.json(reply);
+});
+
+app.post('/api/spike/mic', (req, res) => {
+  micListeningHint = true;
+  const body = req.body as { purpose?: string; transcript?: string };
+  res.json({
+    ok: true,
+    sense: 'sense.ios.mic',
+    purpose: body.purpose ?? 'conversation',
+    accepted: true,
+  });
+});
+
+app.post('/api/spike/camera', (req, res) => {
+  const body = req.body as { purpose?: string };
+  res.json({
+    ok: true,
+    sense: 'sense.ios.camera',
+    purpose: body.purpose ?? 'presence',
+    accepted: true,
+  });
+});
 
 app.post('/api/nodes/:id/focus', async (req, res) => {
   const id = req.params.id;
@@ -136,6 +212,18 @@ app.post('/api/guide/prev', async (_req, res) => {
 app.post('/api/guide/concepts/:id', async (req, res) => {
   res.json(await orchestrator.openConcept(req.params.id));
 });
+
+// Static assets for Cam face, 3D cortex, and live-activity JSON the cortex polls
+app.use('/identity', express.static(path.join(ROOT, 'identity')));
+app.use('/vault', express.static(path.join(ROOT, 'vault')));
+app.use('/config', express.static(path.join(ROOT, 'config')));
+app.use('/viz', express.static(path.join(ROOT, 'visualizations')));
+app.use('/companions', express.static(path.join(ROOT, 'companions')));
+// Relative fetches from /viz/connectome → ../../vault|config|identity
+app.use('/visualizations', express.static(path.join(ROOT, 'visualizations')));
+
+const distWeb = path.join(ROOT, 'dist');
+app.use(express.static(distWeb));
 
 const server = createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
@@ -281,6 +369,31 @@ wss.on('connection', (socket) => {
 // Auto-start continuous scanning so the brain map always scans
 orchestrator.start();
 
+// Cam background autonomy — self-improve tasks while she listens
+const autonomyMs = Number(process.env.CAM_AUTONOMY_MS ?? 12_000);
+const autonomyTimer = setInterval(() => {
+  void autonomy
+    .tick({
+      workspaces: orchestrator.getWorkspaces(),
+      loopJobs: orchestrator.getLoopJobs(),
+      listening: micListeningHint,
+    })
+    .then((result) => {
+      if (result.spawned > 0 || result.advanced > 0) {
+        broadcast('loop_update', orchestrator.getLoopJobs());
+      }
+    })
+    .catch(() => undefined);
+}, autonomyMs);
+autonomyTimer.unref?.();
+// Kick once immediately so spawn bay isn't empty
+void autonomy.tick({
+  workspaces: orchestrator.getWorkspaces(),
+  loopJobs: orchestrator.getLoopJobs(),
+  listening: false,
+});
+
 server.listen(PORT, () => {
-  console.log(`Personal Assistant neural mesh on http://localhost:${PORT}`);
+  console.log(`Cam neural mesh + 3D cortex on http://localhost:${PORT}`);
+  console.log(`  3D viz → http://localhost:${PORT}/viz/connectome/`);
 });

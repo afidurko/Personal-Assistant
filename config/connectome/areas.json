@@ -1,0 +1,300 @@
+{
+  "version": 3,
+  "architecture": "brodmann_cortical_functional_map",
+  "analogy": "Human Brodmann cytoarchitectonic areas as Cam functional cortex \u2014 agents/loops are cortical columns; association tracts are the neural mesh",
+  "literature": [
+    {
+      "cite": "Brodmann (1909) cytoarchitectonic cortical map; Radiopaedia / Kenhub functional summaries",
+      "use": "area numbering and primary functions"
+    },
+    {
+      "cite": "Yeo et al. / association-cortex specialization (PMC4598819)",
+      "use": "flexible frontal\u2013parietal binding across specialized networks"
+    },
+    {
+      "cite": "Jung et al. Brain Struct Funct \u2014 structural connectivity of association cortices (PMC5726605)",
+      "use": "intra-lobe dense graded links vs discrete inter-lobe tracts mirroring functional networks"
+    },
+    {
+      "cite": "Mountcastle cortical column; Hawkins Thousand Brains / STAM columns",
+      "use": "agents and repetitive loops as recurrent columnar modules"
+    },
+    {
+      "cite": "Syncytial / Brain-Mesh models (astrocytic + white-matter coupling)",
+      "use": "mesh as cross-area coherence layer beyond point synapses"
+    }
+  ],
+  "areas": [
+    {
+      "id": "area.dlpfc",
+      "label": "DLPFC",
+      "brodmann": [
+        "BA9",
+        "BA46"
+      ],
+      "lobe": "frontal",
+      "function": "executive control, working memory, task organization",
+      "cam_roles": [
+        "chief"
+      ],
+      "legacy_centers": [
+        "center.chief",
+        "center.router"
+      ],
+      "columns": [
+        "neuron.chief",
+        "neuron.router",
+        "neuron.delegate_burst",
+        "neuron.priority_boot",
+        "neuron.workspace_orchestrator"
+      ]
+    },
+    {
+      "id": "area.apfc",
+      "label": "aPFC",
+      "brodmann": [
+        "BA10"
+      ],
+      "lobe": "frontal",
+      "function": "prospective memory, abstract planning, knowledge cartography",
+      "cam_roles": [
+        "researcher",
+        "docs"
+      ],
+      "legacy_centers": [
+        "center.cartography",
+        "center.docs"
+      ],
+      "columns": [
+        "neuron.cartographer",
+        "neuron.docs",
+        "neuron.plan_loop",
+        "neuron.improve_engine"
+      ]
+    },
+    {
+      "id": "area.ofc",
+      "label": "OFC",
+      "brodmann": [
+        "BA11",
+        "BA12"
+      ],
+      "lobe": "frontal",
+      "function": "valuation, boundaries, identity gating, kill priority",
+      "cam_roles": [
+        "chief"
+      ],
+      "legacy_centers": [],
+      "columns": [
+        "neuron.boundary",
+        "neuron.identity_gate",
+        "neuron.secret_hygiene"
+      ]
+    },
+    {
+      "id": "area.broca",
+      "label": "Broca",
+      "brodmann": [
+        "BA44",
+        "BA45"
+      ],
+      "lobe": "frontal",
+      "function": "language / speech production and outbound phrasing",
+      "cam_roles": [
+        "comms"
+      ],
+      "legacy_centers": [
+        "center.comms"
+      ],
+      "columns": [
+        "neuron.comms",
+        "neuron.speak_loop",
+        "neuron.converse_health"
+      ]
+    },
+    {
+      "id": "area.premotor",
+      "label": "Premotor/SMA",
+      "brodmann": [
+        "BA6"
+      ],
+      "lobe": "frontal",
+      "function": "motor planning before effectors fire",
+      "cam_roles": [
+        "ops",
+        "comms"
+      ],
+      "legacy_centers": [],
+      "columns": [
+        "neuron.motor_plan"
+      ]
+    },
+    {
+      "id": "area.motor",
+      "label": "M1",
+      "brodmann": [
+        "BA4"
+      ],
+      "lobe": "frontal",
+      "function": "primary motor cortex \u2014 effector fire",
+      "cam_roles": [],
+      "legacy_centers": [],
+      "columns": [
+        "neuron.effector"
+      ]
+    },
+    {
+      "id": "area.wernicke",
+      "label": "Wernicke+",
+      "brodmann": [
+        "BA22",
+        "BA39",
+        "BA40"
+      ],
+      "lobe": "temporoparietal",
+      "function": "language comprehension, multimodal semantic integration",
+      "cam_roles": [
+        "researcher",
+        "comms"
+      ],
+      "legacy_centers": [],
+      "columns": [
+        "neuron.language_in",
+        "neuron.semantic"
+      ]
+    },
+    {
+      "id": "area.temporal",
+      "label": "Temporal assoc.",
+      "brodmann": [
+        "BA20",
+        "BA21",
+        "BA37"
+      ],
+      "lobe": "temporal",
+      "function": "semantic memory, careers/opportunity, research association",
+      "cam_roles": [
+        "researcher",
+        "careers"
+      ],
+      "legacy_centers": [
+        "center.research",
+        "center.careers"
+      ],
+      "columns": [
+        "neuron.research",
+        "neuron.careers",
+        "neuron.watch_loop"
+      ]
+    },
+    {
+      "id": "area.parietal",
+      "label": "Parietal assoc.",
+      "brodmann": [
+        "BA5",
+        "BA7"
+      ],
+      "lobe": "parietal",
+      "function": "spatial-temporal integration, life-ops, calendar",
+      "cam_roles": [
+        "ops"
+      ],
+      "legacy_centers": [
+        "center.ops"
+      ],
+      "columns": [
+        "neuron.ops",
+        "neuron.life_ops_loop",
+        "neuron.vitals_loop",
+        "neuron.tailscale_reach",
+        "neuron.integration_pulse"
+      ]
+    },
+    {
+      "id": "area.visual",
+      "label": "Visual",
+      "brodmann": [
+        "BA17",
+        "BA18",
+        "BA19"
+      ],
+      "lobe": "occipital",
+      "function": "primary + associative vision",
+      "cam_roles": [
+        "vision"
+      ],
+      "legacy_centers": [
+        "center.vision"
+      ],
+      "columns": [
+        "neuron.vision",
+        "neuron.enroll_loop"
+      ]
+    },
+    {
+      "id": "area.auditory",
+      "label": "Auditory",
+      "brodmann": [
+        "BA41",
+        "BA42"
+      ],
+      "lobe": "temporal",
+      "function": "primary auditory / ASR intake",
+      "cam_roles": [
+        "comms"
+      ],
+      "legacy_centers": [],
+      "columns": [
+        "neuron.asr"
+      ]
+    },
+    {
+      "id": "area.mtl",
+      "label": "MTL / memory",
+      "brodmann": [
+        "hippocampal-adjacent"
+      ],
+      "lobe": "medial_temporal",
+      "function": "engrams \u2014 mesh + vault long-term memory",
+      "cam_roles": [
+        "memory-curator"
+      ],
+      "legacy_centers": [
+        "center.memory"
+      ],
+      "columns": [
+        "neuron.memory",
+        "neuron.mesh_sync_loop",
+        "neuron.persist_sync",
+        "neuron.neurogenesis_loop"
+      ]
+    },
+    {
+      "id": "area.cingulate",
+      "label": "ACC / cingulate",
+      "brodmann": [
+        "BA24",
+        "BA32"
+      ],
+      "lobe": "medial",
+      "function": "conflict monitoring, QA proofreading, error loops",
+      "cam_roles": [
+        "qa"
+      ],
+      "legacy_centers": [
+        "center.qa"
+      ],
+      "columns": [
+        "neuron.qa",
+        "neuron.qa_cycle",
+        "neuron.connectome_check",
+        "neuron.arch_scan",
+        "neuron.vuln_scan",
+        "neuron.drift_scan",
+        "neuron.submodule_health",
+        "neuron.health_conductor"
+      ]
+    }
+  ],
+  "routing_rule": "Spikes enter primary/association cortex \u2192 DLPFC/aPFC bind flexible networks \u2192 OFC/cingulate gate \u2192 premotor \u2192 motor. Columns (agents/loops) recur locally; tracts carry inter-area mesh."
+}
