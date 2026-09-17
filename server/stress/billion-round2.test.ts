@@ -158,7 +158,8 @@ describe('integration after suggestive implementations', () => {
       await orch.init();
       await orch.runOnce();
       const state = orch.getFullState();
-      expect(state.workspaces.length).toBe(5);
+      expect(state.workspaces.length).toBe(6);
+      expect(state.workspaces.some((w) => w.kind === 'agi_research')).toBe(true);
       expect(state.suggestions?.length ?? 0).toBeGreaterThan(0);
       expect(state.nodes.some((n) => n.kind === 'concept')).toBe(true);
 

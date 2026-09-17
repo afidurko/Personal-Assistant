@@ -24,35 +24,35 @@
         "kind": "health",
         "source_pr": 2,
         "module": "server/workspaces/health.ts",
-        "status": "pending_merge_pr2"
+        "status": "merged_main"
       },
       {
         "id": "scan.architecture",
         "kind": "architecture",
         "source_pr": 2,
         "module": "server/workspaces/architecture.ts",
-        "status": "pending_merge_pr2"
+        "status": "merged_main"
       },
       {
         "id": "scan.vulnerability",
         "kind": "vulnerability",
         "source_pr": 2,
         "module": "server/workspaces/vulnerability.ts",
-        "status": "pending_merge_pr2"
+        "status": "merged_main"
       },
       {
         "id": "scan.updates",
         "kind": "updates",
         "source_pr": 2,
         "module": "server/workspaces/updates.ts",
-        "status": "pending_merge_pr2"
+        "status": "merged_main"
       },
       {
         "id": "scan.improvements",
         "kind": "improvements",
         "source_pr": 2,
         "module": "server/workspaces/improvements.ts",
-        "status": "pending_merge_pr2",
+        "status": "merged_main",
         "notes": "Synthesizes from core scanners"
       },
       {
@@ -60,6 +60,7 @@
         "kind": "agi_research",
         "source_pr": 4,
         "team": "team.agi-research-scan",
+        "module": "server/workspaces/agi-research.ts",
         "script": "scripts/agi-research-scan.py",
         "hotspot": "hotspot.agi_daily_scan",
         "status": "active_this_branch",
@@ -101,7 +102,7 @@
         "number": 2,
         "role": "scan_workspaces_neural_mesh_ui",
         "branch": "cursor/system-health-brain-scan-d12d",
-        "state": "open"
+        "state": "merged"
       },
       {
         "number": 3,
@@ -114,6 +115,12 @@
         "number": 4,
         "role": "agi_teams_slm_dl",
         "branch": "cursor/cam-brain-agi-scan-teams-bded",
+        "state": "draft"
+      },
+      {
+        "number": 5,
+        "role": "cline_shared_effector",
+        "branch": "cursor/integrate-cline-all-agents-91d1",
         "state": "draft"
       }
     ]

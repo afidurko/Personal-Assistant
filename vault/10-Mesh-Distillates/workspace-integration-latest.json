@@ -2,7 +2,6 @@
   "ok": true,
   "hard_errors": [],
   "soft_warnings": [
-    "PR#2 scan workspaces (server/workspaces) not in this checkout yet",
     "submodule empty: integrations/jarvis (run git submodule update --init --recursive)",
     "submodule empty: integrations/paddledetection (run git submodule update --init --recursive)",
     "submodule empty: integrations/llmavatartalk (run git submodule update --init --recursive)",
@@ -42,7 +41,7 @@
       "policy_exists": true
     }
   ],
-  "pr2_scan_workspaces_present": false,
+  "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
     "detail": "senses=20 edges=134"

@@ -10,20 +10,22 @@ Aaron runs Cam across **repo checkouts**, **scan workspaces**, **integration sub
 | **Persistence bundle** | Cross-checkout Cam memory (`persist-export` / `persist-import`) | Present; must include teams + AGI grants |
 | **Vault areas** | Obsidian second brain (`vault/01`…`10`) | Wired via smart-second-brain config |
 | **Integration submodules** | Jarvis · PaddleDetection · LLMAvatarTalk · smart-second-brain | **Declared but empty until `git submodule update --init --recursive`** |
-| **Scan workspaces (PR #2)** | health · architecture · vulnerability · updates · improvements | Lives on `cursor/system-health-brain-scan-d12d` — not in `main` yet |
+| **Scan workspaces (PR #2)** | health · architecture · vulnerability · updates · improvements · **agi_research** | **Merged to main** + AGI scanner on this branch |
 | **Brodmann / 3D cortex (PR #3)** | Plasticity + human brain viz + health conductor | Lives on `cursor/swiftguide-brain-map-0f2c` — overlaps connectome viz |
 | **Agent teams (PR #4 / this)** | AGI Research Scan · Capability · Information + sLM/DL | This branch |
+| **Cline effector (PR #5)** | Shared coding effector | Parallel draft — rebase after #4 |
 
 ## Parallel cloud-agent branches (same environment)
 
 | Agent | Branch | PR | Role |
 |---|---|---|---|
 | Assistant (foundation) | `cursor/personal-assistant-foundation-ba29` | #1 merged | Base connectome |
-| Brain map system intelligence | `cursor/system-health-brain-scan-d12d` | [#2 open](https://github.com/afidurko/Personal-Assistant/pull/2) | Continuous workspace scanners + neural mesh UI |
+| Brain map system intelligence | `cursor/system-health-brain-scan-d12d` | [#2 merged](https://github.com/afidurko/Personal-Assistant/pull/2) | Continuous workspace scanners + neural mesh UI |
 | Brain map swiftguide concepts | `cursor/swiftguide-brain-map-0f2c` | [#3 draft](https://github.com/afidurko/Personal-Assistant/pull/3) | Brodmann 3D + plasticity + system-health conductor |
 | Cam AI research agents | `cursor/cam-brain-agi-scan-teams-bded` | [#4 draft](https://github.com/afidurko/Personal-Assistant/pull/4) | Daily AGI scan teams + sLM/DL cortex |
+| Cline shared effector | `cursor/integrate-cline-all-agents-91d1` | [#5 draft](https://github.com/afidurko/Personal-Assistant/pull/5) | Shared coding effector |
 
-**Conflict note:** PR #4 ↔ PR #2 = low (README only). PR #4 ↔ PR #3 = **high** on `config/connectome/*`, `visualizations/connectome/app.js`, `scripts/connectome-route.py`. Merge order matters.
+**Conflict note:** PR #4 was rebased onto `main` after #2. PR #4 ↔ PR #3 = **high** on `config/connectome/*` and viz. Merge #4 before rebasing #3/#5.
 
 ## End-to-end workflow (target)
 
@@ -82,9 +84,9 @@ Aaron (sole task-giver / kill / enhance-approve)
 
 ## Suggested merge / update order
 
-1. **Keep PR #4 focused** on teams + AGI scan + sLM/DL + persistence completeness (this doc + export fix).
-2. **Merge PR #2** next for continuous health/arch/vuln/updates workspaces + mesh UI — then add `agi_research` as a sixth `WorkspaceKind`.
-3. **Rebase PR #3** onto the result — viz/plasticity should adopt AGI/sLM/DL nodes from #4 rather than the other way around.
+1. **Merge PR #4** (this) — teams + AGI scan + sLM/DL + `agi_research` workspace scanner (rebased onto #2).
+2. **Rebase PR #3** onto the result — viz/plasticity should adopt AGI/sLM/DL nodes from #4.
+3. **Rebase PR #5** (Cline) after #4.
 4. After merges: init submodules; run `scripts/workspace-integration-check.py`.
 
 ## Commands

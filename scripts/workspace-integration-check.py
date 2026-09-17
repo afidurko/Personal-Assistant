@@ -176,6 +176,13 @@ def main() -> int:
     soft = []
     if not pr2_scan_server:
         soft.append("PR#2 scan workspaces (server/workspaces) not in this checkout yet")
+    else:
+        agi_mod = ROOT / "server/workspaces/agi-research.ts"
+        if not agi_mod.exists():
+            hard_errors.append("missing:server/workspaces/agi-research.ts")
+        types_txt = (ROOT / "shared/types.ts").read_text(encoding="utf-8")
+        if "agi_research" not in types_txt:
+            hard_errors.append("missing_workspace_kind:agi_research")
     for integ in integrations:
         if not integ["populated"]:
             soft.append(f"submodule empty: {integ['path']} (run git submodule update --init --recursive)")
