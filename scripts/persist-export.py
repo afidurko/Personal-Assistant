@@ -20,6 +20,7 @@ DEFAULT_INCLUDE = [
     "identity/persistence/UNLIMITED_SUBAGENTS.md",
     "identity/persistence/cline-session-cache.json",
     "identity/persistence/cline-schedules.export.json",
+    "identity/persistence/qa-mesh-latest.json",
     "identity/persona/cam-face.jpg",
     "config/priority-boot.json",
     "config/connectors.md",

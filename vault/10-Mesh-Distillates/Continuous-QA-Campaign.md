@@ -24,10 +24,11 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 - Includes `motor.cline` / `center.coding` / `sense.cline.result` pathways
 - Unit tests: `scripts/test_cline_workspaces.py` (16) OK
 
-### Pass 4 (1B, simulator v3 weighted+heartbeats) — in progress / see latest
-- Simulator: `v3-weighted-heartbeats`
-- Traffic-weighted senses (chat/vault/cline-heavy)
-- Heartbeats every 50M sims per worker
+### Pass 4 (1B, simulator v3 weighted+heartbeats) — DONE · green
+- File: `connectome-sim-1b-cline-pass2.json`
+- QA cycle: `qa-cycles/20260917T013738Z-cycle-01/`
+- 1,000,000,000 / 0 fail · 0 missing edges · ~2.22M sims/s · ~451s · EXIT 0
+- Simulator: `v3-weighted-heartbeats` (traffic-weighted + 50M heartbeats)
 - Mesh mirror: `identity/persistence/qa-mesh-latest.json`
 
 ## What was fixed this loop

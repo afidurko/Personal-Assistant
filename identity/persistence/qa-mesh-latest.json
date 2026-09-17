@@ -1,0 +1,25 @@
+{
+  "namespace": "mesh/runs",
+  "kind": "qa_cycle",
+  "cycle_dir": "vault/10-Mesh-Distillates/qa-cycles/20260917T013738Z-cycle-01",
+  "at": "20260917T014509Z",
+  "status": "green",
+  "metrics": {
+    "n": 1000000000,
+    "passed": 1000000000,
+    "failed": 0,
+    "kill_holds": 2001480,
+    "non_aaron_holds": 234848,
+    "feedback_ok": 997763672,
+    "missing_edges_count": 0,
+    "sims_per_sec": 2215728.4532309906,
+    "elapsed_s": 451.3188421359996,
+    "qa_wall_s": 451.36196944899984,
+    "workers": 4,
+    "first_errors": [],
+    "exit_code": 0
+  },
+  "findings": [],
+  "await_human": false,
+  "continuous_qa": true
+}
