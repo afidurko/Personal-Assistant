@@ -62,16 +62,19 @@
     {
       "id": "center.research",
       "role": "researcher",
-      "function": "evidence hotspot; citations required",
+      "function": "evidence hotspot; citations required; Google Scholar + vault",
       "maps_to": "area.temporal",
       "accepts": [
         "spike.question",
         "spike.fact",
-        "spike.note_ref"
+        "spike.note_ref",
+        "spike.paper",
+        "spike.cite"
       ],
       "projects_to": [
         "center.qa",
-        "sense.vault.hit"
+        "sense.vault.hit",
+        "switch.research_scan"
       ]
     },
     {
@@ -267,19 +270,21 @@
     {
       "id": "center.info",
       "role": "info-retriever",
-      "function": "vault\u2192mesh\u2192web information gather with citations",
+      "function": "vault\u2192mesh\u2192Scholar\u2192web information gather with citations",
       "accepts": [
         "spike.question",
         "spike.fact",
         "spike.note_ref",
-        "spike.paper"
+        "spike.paper",
+        "spike.cite"
       ],
       "projects_to": [
         "center.research",
         "center.memory",
         "center.agi_scan",
         "center.slm",
-        "center.qa"
+        "center.qa",
+        "switch.research_scan"
       ],
       "team": "team.info"
     },

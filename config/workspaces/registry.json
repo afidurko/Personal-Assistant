@@ -180,6 +180,15 @@
         "policy": "config/integrations/smart-second-brain.md"
       },
       {
+        "id": "google-scholar",
+        "path": "config/integrations/google-scholar.json",
+        "policy": "config/integrations/google-scholar.md",
+        "script": "scripts/scholar-search.py",
+        "sense": "sense.web.scholar",
+        "hotspot": "hotspot.google_scholar",
+        "credential_env": "SERPAPI_API_KEY"
+      },
+      {
         "id": "cline",
         "path": "integrations/cline",
         "policy": "config/integrations/cline.md",
@@ -355,7 +364,8 @@
     "cline_mcp": "scripts/cam-mcp-server.py",
     "cline_schedules": "scripts/sync-cline-schedules.py",
     "ci_connectome": "scripts/ci-connectome.sh",
-    "swarm_check": "scripts/swarm-check.py"
+    "swarm_check": "scripts/swarm-check.py",
+    "scholar_search": "scripts/scholar-search.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",

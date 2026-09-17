@@ -1,0 +1,42 @@
+{
+  "id": "google-scholar",
+  "name": "Google Scholar",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "role": "Academic paper / citation periphery for Information + Research (+ AGI scan when relevant)",
+  "policy": "config/integrations/google-scholar.md",
+  "sense": "sense.web.scholar",
+  "hotspot": "hotspot.google_scholar",
+  "motor": "motor.web_fetch",
+  "switch": "switch.research_scan",
+  "mesh_namespace": "mesh/research",
+  "vault_dir": "vault/04-Research/scholar",
+  "provider": {
+    "primary": "serpapi",
+    "engine": "google_scholar",
+    "author_engine": "google_scholar_author",
+    "api_base": "https://serpapi.com/search.json",
+    "credential_env": "SERPAPI_API_KEY",
+    "notes": "Google Scholar has no official public API; SerpAPI is the supported bridge. Key stays in local .env — never commit."
+  },
+  "profile": {
+    "author_id": null,
+    "author_url": null,
+    "author_name": null,
+    "notes": "Set author_id (from scholar.google.com/citations?user=…) when Aaron wants citation/profile watch"
+  },
+  "defaults": {
+    "num_results": 10,
+    "language": "en",
+    "cite_required": true,
+    "save_to_mesh": true,
+    "save_to_vault": true
+  },
+  "scripts": {
+    "search": "scripts/scholar-search.py",
+    "pack": "scripts/pack-scholar-result.py"
+  },
+  "teams": ["team.info", "team.agi-research-scan"],
+  "roles": ["info-retriever", "researcher", "agi-scout"]
+}

@@ -8,7 +8,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/facts` | durable facts about you / world |
 | `mesh/people` | people graph notes |
 | `mesh/projects` | active projects |
-| `mesh/research` | research briefs + source lists |
+| `mesh/research` | research briefs + source lists (+ Scholar distillates) |
 | `mesh/careers` | job search state |
 | `mesh/docs` | document index / templates |
 | `mesh/runs` | distilled run outcomes |
@@ -77,6 +77,7 @@ Config (not a second runtime): `config/swarm/`
 - Cline tickets via `scripts/export-cline-tickets.py` → `mesh/runs`
 - Workspace registry via `scripts/choose-workspace.py --mesh-projects`
 - Vision results sync via `scripts/pack-vision-result.py` (+ `config/enhancement/vision-grounding.json`)
+- Scholar results sync via `scripts/pack-scholar-result.py` / `scripts/scholar-search.py`
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
 - Knowledge maps via SwiftGuide; sync stack/taxonomy distillates to `mesh/cartography`
 - AGI daily scan archives via `scripts/agi-research-scan.py` → vault + mesh distillates

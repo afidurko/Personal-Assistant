@@ -4,6 +4,7 @@ Mission: Every day (and on demand), scan open web sources for new AI/AGI papers 
 
 Sources (prefer primary):
 - arXiv (cs.AI, cs.LG, cs.CL, cs.MA, cs.NE, stat.ML)
+- Google Scholar (`scripts/scholar-search.py` · `sense.web.scholar`) for citation-aware hits
 - OpenReview, ACL Anthology, Hugging Face Papers
 - Major lab research blogs when useful
 

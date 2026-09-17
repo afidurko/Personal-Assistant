@@ -705,6 +705,12 @@
       "weight": 1.0
     },
     {
+      "from": "center.research",
+      "to": "switch.research_scan",
+      "weight": 0.9,
+      "notes": "Scholar / paper fetch"
+    },
+    {
       "from": "center.careers",
       "to": "center.qa",
       "weight": 1.0
@@ -957,6 +963,22 @@
       "weight": 1.0
     },
     {
+      "from": "sense.web.scholar",
+      "to": "center.info",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.web.scholar",
+      "to": "center.research",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.web.scholar",
+      "to": "center.agi_scan",
+      "weight": 0.7,
+      "notes": "when query is AI/AGI-relevant"
+    },
+    {
       "from": "sense.slm.inference",
       "to": "center.slm",
       "weight": 1.0
@@ -1111,6 +1133,12 @@
       "to": "sense.vault.hit",
       "weight": 0.6,
       "notes": "retrieval drive"
+    },
+    {
+      "from": "center.info",
+      "to": "switch.research_scan",
+      "weight": 0.8,
+      "notes": "Scholar fetch under research_scan"
     },
     {
       "from": "center.slm",

@@ -12,7 +12,7 @@ talking presence — with a smart second brain, **agent teams**, and a **sLM/DL 
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed · `config/tools/registry.json`
+- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed · **Google Scholar** · `config/tools/registry.json`
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents (privilege inheritance, no escalation)
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
@@ -40,6 +40,9 @@ python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "ios com
 python3 scripts/connectome-plasticity.py --neurogenesis
 # Daily AGI research scan pathway
 python3 scripts/connectome-route.py --sense sense.clock.daily --goal "daily agi scan"
+# Google Scholar literature search (fixture / live)
+python3 scripts/connectome-route.py --sense sense.web.scholar --goal "scholar search"
+python3 scripts/scholar-search.py --query "connectome mapping" --offline
 # Run the daily scan (arXiv → vault/mesh proposals)
 python3 scripts/agi-research-scan.py
 # Confirm workspace + integration wiring

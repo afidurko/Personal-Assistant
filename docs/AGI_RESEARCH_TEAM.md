@@ -23,7 +23,8 @@ All members may spawn unlimited subagents.
 
 ## Sources
 
-arXiv (cs.AI/LG/CL/MA/NE, stat.ML), OpenReview, ACL Anthology, Hugging Face Papers, major lab blogs.
+arXiv (cs.AI/LG/CL/MA/NE, stat.ML), OpenReview, ACL Anthology, Hugging Face Papers, major lab blogs,
+and **Google Scholar** (`sense.web.scholar` · `config/integrations/google-scholar.md`) for citation-aware literature.
 
 ## Connectome pathway
 

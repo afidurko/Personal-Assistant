@@ -83,7 +83,7 @@ You (human) ──override / kill──► nullhub / chat
 | Role id | Job |
 |---|---|
 | `chief` | Cam — talks to Aaron; always-on; finishes work without mid-task interruption |
-| `researcher` | Source-backed research; uses vault + web |
+| `researcher` | Source-backed research; vault + **Google Scholar** + web |
 | `ops` | Life automation; Jarvis |
 | `docs` | Draft/fix documents |
 | `coding` | Cline-powered code edits (also invokable by every role) |

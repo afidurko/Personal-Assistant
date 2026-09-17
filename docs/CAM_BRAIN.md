@@ -6,7 +6,7 @@ Cam’s brain is a **connectome** plus standing **agent teams**, a **DL + sLM co
 
 ```text
 Aaron
-  └─ sensory periphery (chat, vault, web/arxiv, clock, ASR, vision, sLM/DL feedback, swarm bus)
+  └─ sensory periphery (chat, vault, web/arxiv, Google Scholar, clock, ASR, vision, sLM/DL feedback, swarm bus)
        └─ higher centers (chief, router, specialists, AGI scan, enhance, info, capability, tooling, slm, dl)
             └─ circuit switches (autonomy, research_scan, cam_enhance, tooling, slm_local, dl_local, kill, …)
                  └─ motor (vault, mesh, web_fetch, enhance, tool, swarm, slm, dl, speak, jobs, …)
@@ -18,7 +18,7 @@ Aaron
 |---|---|---|
 | **AGI Research Scan** | `center.agi_scan` | Everyday internet scan for AI/AGI papers/findings that can enhance Cam |
 | **Capability** | `center.capability` / `center.enhance` | Complete tasks; broker specialists + models; gate Cam upgrades |
-| **Information** | `center.info` | Vault → mesh → web cited answers |
+| **Information** | `center.info` | Vault → mesh → **Google Scholar** → web cited answers |
 | **Tooling** | `center.tooling` | Tool-creator → tool-user; boss/worker synapse ops |
 
 Configs: `config/teams/*.json` · Swarm: `config/swarm/` · Runtime: `server/core/swarm-runtime.ts` · Docs: [HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md)

@@ -50,7 +50,7 @@ Only Aaron assigns work. Logs retained. Kill switch = pause all.
 
 1. Persistence + mesh seed  
 2. Smart Second Brain vault link  
-3. Research → mesh/vault  
+3. Research → mesh/vault (**Google Scholar** connected)  
 4. LinkedIn + Indeed  
 5. Life ops + Jarvis  
 6. Always-on comms + Cam presence  

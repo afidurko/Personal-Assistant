@@ -65,9 +65,9 @@
     },
     {
       "id": "motor.web_fetch",
-      "channel": ["http_fetch", "arxiv_api"],
+      "channel": ["http_fetch", "arxiv_api", "google_scholar", "serpapi_scholar"],
       "requires_switch": ["switch.research_scan", "switch.kill"],
-      "notes": "Fetch papers/findings for AGI scan and info team — no outbound messaging"
+      "notes": "Fetch papers/findings for Scholar, AGI scan, and info team — no outbound messaging"
     },
     {
       "id": "motor.enhance",
