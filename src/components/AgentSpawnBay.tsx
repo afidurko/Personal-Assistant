@@ -1,16 +1,6 @@
-import { useEffect, useState } from 'react';
 import { AGENT_LAYERS, MESH_AGENTS } from '@shared/agentLayers';
 import type { LoopJob } from '@shared/types';
 import { useMeshStore } from '@/store/meshStore';
-
-interface SelfTask {
-  id: string;
-  title: string;
-  detail: string;
-  status: string;
-  neuron: string;
-  severity: string;
-}
 
 interface AgentSpawnBayProps {
   onFocusNode: (nodeId: string) => void;
@@ -28,28 +18,7 @@ export function AgentSpawnBay({
   const loopJobs = useMeshStore((s) => s.loopJobs ?? []);
   const lastAgentCycle = useMeshStore((s) => s.lastAgentCycle);
   const selectedNodeId = useMeshStore((s) => s.selectedNodeId);
-  const [selfTasks, setSelfTasks] = useState<SelfTask[]>([]);
-  const [capacity, setCapacity] = useState<{ selfTaskSlots?: number; loopJobHint?: number }>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = () => {
-      void fetch('/api/cam/autonomy')
-        .then((r) => r.json())
-        .then((data: { tasks?: SelfTask[]; capacity?: typeof capacity }) => {
-          if (cancelled) return;
-          setSelfTasks(Array.isArray(data.tasks) ? data.tasks : []);
-          if (data.capacity) setCapacity(data.capacity);
-        })
-        .catch(() => undefined);
-    };
-    load();
-    const id = setInterval(load, 8_000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
+  const selfTasks = useMeshStore((s) => s.camSelfTasks ?? []);
 
   const openJobs = loopJobs.filter((j) => j.status !== 'fixed');
   const openSelf = selfTasks.filter((t) => t.status !== 'done');
@@ -64,11 +33,10 @@ export function AgentSpawnBay({
         </p>
         <div className="spawn-capacity">
           <span>
-            Self-task slots · {openSelf.length}/
-            {capacity.selfTaskSlots ?? 64}
+            Self-task slots · {openSelf.length}/64
           </span>
           <span>
-            Loop jobs · {openJobs.length}/{capacity.loopJobHint ?? 80}
+            Loop jobs · {openJobs.length}/80
           </span>
           <span>Layers · {AGENT_LAYERS.length}</span>
           <span>Agents · {MESH_AGENTS.length}</span>

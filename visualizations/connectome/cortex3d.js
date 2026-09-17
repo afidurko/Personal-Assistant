@@ -3,6 +3,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 
+const EMBED =
+  document.documentElement.classList.contains("embed") ||
+  new URLSearchParams(location.search).get("embed") === "1" ||
+  new URLSearchParams(location.search).get("embed") === "true";
+const POLL_MS = EMBED ? 5000 : 2500;
+const AMBIENT_HIGH = EMBED ? 420 : 900;
+const AMBIENT_LOW = EMBED ? 160 : 280;
+
 const AREAS = [
   { id: "area.dlpfc", label: "DLPFC", ba: "BA9/46", p: [-1.35, 1.15, 0.85], r: 0.28, lobe: "frontal" },
   { id: "area.apfc", label: "aPFC", ba: "BA10", p: [-1.95, 1.05, 0.55], r: 0.22, lobe: "frontal" },
@@ -90,6 +98,7 @@ const areaMeshes = {};
 const tractLineGroups = {};
 
 function log(html) {
+  if (!logEl) return;
   const d = document.createElement("div");
   d.className = "entry";
   d.innerHTML = html;
@@ -339,10 +348,13 @@ function buildAmbientConnectome(budget = 900) {
   brain.add(ambientLines);
 }
 
-const isMobile = /Mobi|Android/i.test(navigator.userAgent) || Math.min(window.innerWidth, window.innerHeight) < 700;
+const isMobile =
+  EMBED ||
+  /Mobi|Android/i.test(navigator.userAgent) ||
+  Math.min(window.innerWidth, window.innerHeight) < 700;
 lodHigh = !isMobile;
 TRACTS.forEach(buildDtiFasciculus);
-buildAmbientConnectome(lodHigh ? 900 : 280);
+buildAmbientConnectome(lodHigh ? AMBIENT_HIGH : AMBIENT_LOW);
 
 AREAS.forEach((a) => {
   const mat = new THREE.MeshBasicMaterial({
@@ -796,24 +808,25 @@ function renderControls() {
   document.getElementById("view-sagittal")?.addEventListener("click", () => setCameraView("sagittal"));
   document.getElementById("view-lod")?.addEventListener("click", () => {
     lodHigh = !lodHigh;
-    buildAmbientConnectome(lodHigh ? 900 : 280);
+    buildAmbientConnectome(lodHigh ? AMBIENT_HIGH : AMBIENT_LOW);
     log(`<span class="center">LOD</span> ${lodHigh ? "high" : "low"} ambient fibers`);
   });
 }
 
-document.getElementById("btn-play").addEventListener("click", () => {
+document.getElementById("btn-play")?.addEventListener("click", () => {
   playing = !playing;
-  document.getElementById("btn-play").textContent = playing ? "⏸" : "▶";
+  const btn = document.getElementById("btn-play");
+  if (btn) btn.textContent = playing ? "⏸" : "▶";
 });
-document.getElementById("btn-rew").addEventListener("click", () => {
+document.getElementById("btn-rew")?.addEventListener("click", () => {
   playing = false;
   seek(cursor - 1);
 });
-document.getElementById("btn-fwd").addEventListener("click", () => {
+document.getElementById("btn-fwd")?.addEventListener("click", () => {
   playing = false;
   seek(cursor + 1);
 });
-scrub.addEventListener("input", () => {
+scrub?.addEventListener("input", () => {
   playing = false;
   seek(Number(scrub.value));
 });
@@ -860,14 +873,47 @@ async function loadSeed() {
 
 renderControls();
 loadSeed();
-setInterval(pollLiveActivity, 2500);
+let livePoll = setInterval(pollLiveActivity, POLL_MS);
 
 let lastPlay = 0;
 let lastDecay = performance.now();
 let viewMode = 0; // cycle coronal / axial / sagittal-ish on soft auto
+let animating = true;
+let rafId = 0;
+
+function setAnimating(on) {
+  if (on === animating) return;
+  animating = on;
+  if (on) {
+    lastDecay = performance.now();
+    if (!rafId) rafId = requestAnimationFrame(animate);
+    clearInterval(livePoll);
+    livePoll = setInterval(pollLiveActivity, POLL_MS);
+  } else {
+    clearInterval(livePoll);
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  setAnimating(!(document.hidden || document.visibilityState === "hidden"));
+});
+window.addEventListener("message", (ev) => {
+  const data = ev?.data;
+  if (!data || typeof data !== "object") return;
+  if (data.type === "cam-cortex-pause") setAnimating(false);
+  if (data.type === "cam-cortex-resume") setAnimating(true);
+  if (data.type === "cam-cortex-lod") {
+    lodHigh = Boolean(data.high);
+    buildAmbientConnectome(lodHigh ? AMBIENT_HIGH : AMBIENT_LOW);
+  }
+});
 
 function animate(now) {
-  requestAnimationFrame(animate);
+  if (!animating) {
+    rafId = 0;
+    return;
+  }
+  rafId = requestAnimationFrame(animate);
   const dt = Math.min(0.05, (now - lastDecay) / 1000);
   lastDecay = now;
   controls.update();
@@ -879,7 +925,8 @@ function animate(now) {
     if (cursor < events.length - 1) seek(cursor + 1);
     else {
       playing = false;
-      document.getElementById("btn-play").textContent = "▶";
+      const btn = document.getElementById("btn-play");
+      if (btn) btn.textContent = "▶";
     }
   }
   neuroColumns.forEach((m, i) => {
@@ -909,6 +956,10 @@ function animate(now) {
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
-requestAnimationFrame(animate);
+rafId = requestAnimationFrame(animate);
 
-log(`<span class="center">READY</span> DTI tractography · live agents · RGB fibers · orbit`);
+log(
+  `<span class="center">READY</span> DTI tractography · live agents · RGB fibers · orbit${
+    EMBED ? " · embed" : ""
+  }`
+);

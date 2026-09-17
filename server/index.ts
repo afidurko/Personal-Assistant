@@ -21,7 +21,7 @@ app.use(express.json());
 
 const orchestrator = new ScanOrchestrator({
   rootDir: ROOT,
-  intervalMs: Number(process.env.SCAN_INTERVAL_MS ?? 15_000),
+  intervalMs: Number(process.env.SCAN_INTERVAL_MS ?? 25_000),
   dataDir: path.join(ROOT, 'data'),
 });
 
@@ -30,6 +30,13 @@ const autonomy = new CamAutonomy(ROOT);
 let micListeningHint = false;
 
 await orchestrator.init();
+
+function fullState() {
+  return {
+    ...orchestrator.getFullState(),
+    camSelfTasks: autonomy.getTasks(),
+  };
+}
 
 app.get('/api/health', (_req, res) => {
   res.json({
@@ -49,7 +56,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.get('/api/state', (_req, res) => {
-  res.json(orchestrator.getFullState());
+  res.json(fullState());
 });
 
 app.get('/api/workspaces', (_req, res) => {
@@ -166,6 +173,11 @@ app.post('/api/spike/mic', (req, res) => {
   });
 });
 
+app.post('/api/spike/mic/stop', (_req, res) => {
+  micListeningHint = false;
+  res.json({ ok: true, listening: false });
+});
+
 app.post('/api/spike/camera', (req, res) => {
   const body = req.body as { purpose?: string };
   res.json({
@@ -239,13 +251,13 @@ function broadcast(type: WsServerMessage['type'], payload: unknown) {
 
 orchestrator.on('tick', (payload) => broadcast('scan_tick', payload));
 orchestrator.on('complete', (payload) => broadcast('scan_complete', payload));
-orchestrator.on('state', (payload) => broadcast('state', payload));
+orchestrator.on('state', () => broadcast('state', fullState()));
 orchestrator.on('memory_update', (payload) => broadcast('memory_update', payload));
 orchestrator.on('agent_cycle', (payload) => broadcast('agent_cycle', payload));
 orchestrator.on('loop_update', (payload) => broadcast('loop_update', payload));
 
 wss.on('connection', (socket) => {
-  send(socket, 'state', orchestrator.getFullState());
+  send(socket, 'state', fullState());
 
   socket.on('message', async (raw) => {
     let msg: WsClientMessage;
@@ -258,11 +270,11 @@ wss.on('connection', (socket) => {
     switch (msg.type) {
       case 'start_scan':
         orchestrator.start();
-        broadcast('state', orchestrator.getFullState());
+        broadcast('state', fullState());
         break;
       case 'stop_scan':
         orchestrator.stop();
-        broadcast('state', orchestrator.getFullState());
+        broadcast('state', fullState());
         break;
       case 'focus_node': {
         const payload = msg.payload as { id?: string; nodeId?: string } | undefined;
@@ -273,11 +285,11 @@ wss.on('connection', (socket) => {
             const focused = await orchestrator.openConcept(conceptId);
             send(socket, 'guide_focus', focused);
             send(socket, 'node_focus', focused);
-            broadcast('state', orchestrator.getFullState());
+            broadcast('state', fullState());
           } else {
             const focused = orchestrator.focusNode(id);
             send(socket, 'node_focus', focused);
-            broadcast('state', orchestrator.getFullState());
+            broadcast('state', fullState());
           }
         }
         break;
@@ -288,7 +300,7 @@ wss.on('connection', (socket) => {
         if (id) {
           const focused = orchestrator.focusWorkspace(id);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcast('state', fullState());
         }
         break;
       }
@@ -300,7 +312,7 @@ wss.on('connection', (socket) => {
           const focused = await orchestrator.openConcept(conceptId);
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcast('state', fullState());
         }
         break;
       }
@@ -308,7 +320,7 @@ wss.on('connection', (socket) => {
         const focused = await orchestrator.guideStart();
         send(socket, 'guide_focus', focused);
         send(socket, 'node_focus', focused);
-        broadcast('state', orchestrator.getFullState());
+        broadcast('state', fullState());
         break;
       }
       case 'guide_next': {
@@ -316,7 +328,7 @@ wss.on('connection', (socket) => {
         if (focused) {
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcast('state', fullState());
         }
         break;
       }
@@ -325,33 +337,33 @@ wss.on('connection', (socket) => {
         if (focused) {
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcast('state', fullState());
         }
         break;
       }
       case 'run_agent_cycle': {
         const result = await orchestrator.runAgentCycle();
         send(socket, 'agent_cycle', result);
-        broadcast('state', orchestrator.getFullState());
+        broadcast('state', fullState());
         break;
       }
       case 'start_issue_loop': {
         orchestrator.setIssueLoopArmed(true);
         send(socket, 'loop_update', orchestrator.getLoopJobs());
-        broadcast('state', orchestrator.getFullState());
+        broadcast('state', fullState());
         break;
       }
       case 'stop_issue_loop': {
         orchestrator.setIssueLoopArmed(false);
         send(socket, 'loop_update', orchestrator.getLoopJobs());
-        broadcast('state', orchestrator.getFullState());
+        broadcast('state', fullState());
         break;
       }
       case 'reinforce': {
         const edge = msg.payload as { from?: string; to?: string; delta?: number } | undefined;
         if (edge?.from && edge?.to) {
           orchestrator.reinforce(edge.from, edge.to, edge.delta ?? 0.05);
-          broadcast('state', orchestrator.getFullState());
+          broadcast('state', fullState());
         }
         break;
       }
@@ -370,7 +382,7 @@ wss.on('connection', (socket) => {
 orchestrator.start();
 
 // Cam background autonomy — self-improve tasks while she listens
-const autonomyMs = Number(process.env.CAM_AUTONOMY_MS ?? 12_000);
+const autonomyMs = Number(process.env.CAM_AUTONOMY_MS ?? 18_000);
 const autonomyTimer = setInterval(() => {
   void autonomy
     .tick({
@@ -380,7 +392,12 @@ const autonomyTimer = setInterval(() => {
     })
     .then((result) => {
       if (result.spawned > 0 || result.advanced > 0) {
-        broadcast('loop_update', orchestrator.getLoopJobs());
+        broadcast('autonomy_update', {
+          tasks: autonomy.getTasks(),
+          loopJobs: orchestrator.getLoopJobs(),
+          spawned: result.spawned,
+          advanced: result.advanced,
+        });
       }
     })
     .catch(() => undefined);
@@ -391,6 +408,11 @@ void autonomy.tick({
   workspaces: orchestrator.getWorkspaces(),
   loopJobs: orchestrator.getLoopJobs(),
   listening: false,
+}).then(() => {
+  broadcast('autonomy_update', {
+    tasks: autonomy.getTasks(),
+    loopJobs: orchestrator.getLoopJobs(),
+  });
 });
 
 server.listen(PORT, () => {

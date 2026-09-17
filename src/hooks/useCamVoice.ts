@@ -124,6 +124,7 @@ export function useCamVoice() {
     setPartial('');
     setStatus('idle');
     window.speechSynthesis?.cancel();
+    void fetch('/api/spike/mic/stop', { method: 'POST' }).catch(() => undefined);
   }, []);
 
   const startListening = useCallback(async () => {

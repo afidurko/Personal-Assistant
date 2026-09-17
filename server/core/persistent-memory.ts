@@ -160,6 +160,15 @@ export class PersistentMemory {
       this.traces = this.traces.filter((t) => !drop.has(t.id));
     }
 
+    // Cap agent / loop traces so continuous autonomy doesn't balloon memory.json
+    const agents = this.traces
+      .filter((t) => t.kind === 'agent' || t.kind === 'loop')
+      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    if (agents.length > 120) {
+      const drop = new Set(agents.slice(120).map((t) => t.id));
+      this.traces = this.traces.filter((t) => !drop.has(t.id));
+    }
+
     // Also prune non-scan traces that are extremely weak and fully decayed.
     this.traces = this.traces.filter(
       (t) => !(t.salience < WEAK_SALIENCE && t.decay > 0.9 && t.kind !== 'semantic'),

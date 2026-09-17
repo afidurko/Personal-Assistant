@@ -108,6 +108,17 @@ export function useMeshSocket() {
           if (Array.isArray(jobs)) setStateFromServer({ loopJobs: jobs });
           break;
         }
+        case 'autonomy_update': {
+          const payload = msg.payload as {
+            tasks?: NeuralMeshState['camSelfTasks'];
+            loopJobs?: LoopJob[];
+          };
+          setStateFromServer({
+            camSelfTasks: payload.tasks,
+            loopJobs: payload.loopJobs ?? undefined,
+          });
+          break;
+        }
         default:
           break;
       }

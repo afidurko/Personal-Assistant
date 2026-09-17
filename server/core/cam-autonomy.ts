@@ -81,6 +81,8 @@ const SELF_IMPROVE_CATALOG: Array<{
 export class CamAutonomy {
   private tasks: CamSelfTask[] = [];
   private tickCount = 0;
+  private lastImproveFingerprint = '';
+  private lastLiveFingerprint = '';
 
   constructor(private readonly rootDir: string) {}
 
@@ -98,6 +100,7 @@ export class CamAutonomy {
     let spawned = 0;
     let advanced = 0;
     let activityEvents = 0;
+    const advancedTasks: CamSelfTask[] = [];
 
     // Always keep a few open self-tasks so Cam is working in the background
     const open = this.tasks.filter((t) => t.status !== 'done');
@@ -105,7 +108,7 @@ export class CamAutonomy {
     const catalog = [...SELF_IMPROVE_CATALOG].sort(() => Math.random() - 0.5);
 
     for (const item of catalog) {
-      if (spawned >= Math.min(3, slots)) break;
+      if (spawned >= Math.min(2, slots)) break;
       if (open.some((t) => t.title === item.title)) continue;
       // Bias toward improve_engine when workspaces look weak
       const weak =
@@ -128,24 +131,35 @@ export class CamAutonomy {
       spawned += 1;
     }
 
-    // Advance queued → running → done
-    for (const task of this.tasks.filter((t) => t.status !== 'done').slice(0, 8)) {
+    // Advance queued → running → done (emit activity only on transitions)
+    for (const task of this.tasks.filter((t) => t.status !== 'done').slice(0, 6)) {
+      let changed = false;
       if (task.status === 'queued') {
         task.status = 'running';
         task.updatedAt = new Date().toISOString();
         advanced += 1;
-      } else if (task.status === 'running' && Math.random() > 0.35) {
+        changed = true;
+      } else if (task.status === 'running' && Math.random() > 0.45) {
         task.status = 'done';
         task.updatedAt = new Date().toISOString();
         advanced += 1;
+        changed = true;
       }
-      activityEvents += await this.emitActivity(task, input.listening ?? false);
+      if (changed) {
+        advancedTasks.push(task);
+        activityEvents += await this.emitActivity(task, input.listening ?? false);
+      }
     }
 
     // Cap history but leave generous room for spawn
     this.tasks = this.tasks.slice(0, 64);
-    await this.persistImproveTasks(input.loopJobs ?? []);
-    await this.refreshLiveActivity();
+
+    const dirty = spawned > 0 || advanced > 0 || this.tickCount === 1;
+    if (dirty) {
+      await this.persistImproveTasks(input.loopJobs ?? []);
+      await this.refreshLiveActivity();
+      await this.trimActivityLog();
+    }
 
     return {
       tasks: this.getTasks(),
@@ -209,6 +223,12 @@ export class CamAutonomy {
         loopJobs: loopJobs.slice(0, 40),
         capacity: { selfTaskSlots: 64, loopJobHint: 80, note: 'Room for Cam and her spawn' },
       };
+      const fingerprint = JSON.stringify({
+        tasks: payload.camSelfTasks.map((t) => [t.id, t.status]),
+        jobs: payload.loopJobs.map((j) => [j.id, j.status, j.attempts]),
+      });
+      if (fingerprint === this.lastImproveFingerprint) return;
+      this.lastImproveFingerprint = fingerprint;
       await writeFile(path.join(dir, 'improve-tasks.json'), JSON.stringify(payload, null, 2), 'utf8');
     } catch {
       /* best-effort */
@@ -281,9 +301,31 @@ export class CamAutonomy {
         standing: true,
         note: 'Cam home autonomy + converse feed',
       };
+      const fingerprint = JSON.stringify({
+        firing: unique.map((f) => [f.neuron, f.intensity]),
+        tasks: live.recent_tasks,
+      });
+      if (fingerprint === this.lastLiveFingerprint) return;
+      this.lastLiveFingerprint = fingerprint;
       await writeFile(path.join(dir, 'live-activity.json'), JSON.stringify(live, null, 2), 'utf8');
     } catch {
       /* best-effort */
+    }
+  }
+
+  /** Keep activity-events.jsonl from growing without bound. */
+  private async trimActivityLog(): Promise<void> {
+    try {
+      const eventsPath = path.join(
+        this.rootDir,
+        'vault/10-Mesh-Distillates/activity-events.jsonl',
+      );
+      const raw = await readFile(eventsPath, 'utf8');
+      const lines = raw.trim().split('\n').filter(Boolean);
+      if (lines.length <= 120) return;
+      await writeFile(eventsPath, `${lines.slice(-80).join('\n')}\n`, 'utf8');
+    } catch {
+      /* missing or busy */
     }
   }
 }
