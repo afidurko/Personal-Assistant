@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-17T19:48:57.477569+00:00",
-    "mode": "plan",
-    "summary": "Human brain UI plan: FreeSurfer/GLB shell + parcel heat + DTI-in-cortex; docs/HUMAN_BRAIN_UI_PLAN.md; PR #11",
+    "at": "2026-09-17T22:02:13.021834+00:00",
+    "mode": "act",
+    "summary": "Implemented anatomical Cam cortex GLB + live parcel heat in cortex3d; BrainMap silhouette; PR #11",
     "workspace": "personal-assistant"
   },
   "notes": [
