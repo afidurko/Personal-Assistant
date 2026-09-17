@@ -1,13 +1,13 @@
 {
-  "at": "2026-09-17T00:14:15Z",
+  "at": "2026-09-17T01:12:04Z",
   "overall": "warning",
   "checks": [
     {
       "neuron": "neuron.vitals_loop",
       "loadavg": [
-        4.67626953125,
-        4.7275390625,
-        4.04248046875
+        4.56591796875,
+        4.6044921875,
+        4.8076171875
       ],
       "cwd": "/workspace",
       "status": "healthy"

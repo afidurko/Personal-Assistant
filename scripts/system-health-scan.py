@@ -267,6 +267,12 @@ def main() -> int:
         for c in checks:
             print(f"  {c['status']:8} {c['neuron']}")
         print(f"wrote {OUT.relative_to(ROOT)}")
+
+    # Refresh live agent activity feed for DTI viz
+    feed = ROOT / "scripts" / "live-activity-feed.py"
+    if feed.exists():
+        run([sys.executable, str(feed)])
+
     return 0 if report["overall"] != "critical" else 1
 
 

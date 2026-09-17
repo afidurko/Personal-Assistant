@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cam Cortex — 3D Plastic Mesh</title>
+  <title>Cam Cortex — DTI Live Tractography</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script type="importmap">
   {
@@ -17,17 +17,22 @@
   }
   </script>
 </head>
-<body class="viz3d">
+<body class="viz3d dti-mode">
   <div class="stage stage-3d">
     <header>
       <div class="brand">
         <img src="../../identity/persona/cam-face.jpg" alt="Cam" />
         <div>
           <h1>Cam</h1>
-          <p>Human cortex · fasciculus mesh · AGI buses · spin · rewind</p>
+          <p>DTI tractography · live agents · RGB fibers</p>
         </div>
       </div>
       <div class="header-right">
+        <div class="dti-legend" title="DTI direction encoding">
+          <span class="lg r">L↔R</span>
+          <span class="lg g">A↔P</span>
+          <span class="lg b">S↔I</span>
+        </div>
         <a class="flat-link" href="flat.html">2D map</a>
         <div class="live-pill"><i></i> Live mesh</div>
       </div>
@@ -36,12 +41,18 @@
     <div class="workspace workspace-3d">
       <div class="viz-panel viz-panel-3d" id="viewport">
         <canvas id="c"></canvas>
-        <div class="hud">
-          <span>Drag to orbit · scroll zoom · scrub time to rewind tract errors</span>
+        <div class="hud hud-dti">
+          <span>Orbit · zoom · fibers brighten with running agents/tasks</span>
+          <span class="chip on" id="chip-live">0 agents</span>
         </div>
       </div>
 
       <aside class="side">
+        <section class="panel">
+          <h2>Live agents / tasks</h2>
+          <div class="agents" id="agents"></div>
+        </section>
+
         <section class="panel">
           <h2>Time · plasticity tape</h2>
           <div class="timeline-row">
@@ -69,14 +80,14 @@
         </section>
 
         <section class="panel">
-          <h2>Tract weights</h2>
+          <h2>Active fasciculi</h2>
           <div class="weights" id="weights"></div>
         </section>
       </aside>
     </div>
 
     <footer>
-      <span>Catani AF · Yeh systems · MAP planning buses · dual-stream language · Aaron sole task-giver</span>
+      <span>DTI RGB · Catani AF · Yeh systems · live-activity feed · Aaron sole task-giver</span>
       <span>visualizations/connectome · 3D</span>
     </footer>
   </div>
