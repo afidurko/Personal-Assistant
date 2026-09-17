@@ -104,6 +104,16 @@
       "enabled_by": "Aaron",
       "enabled_at": "2026-09-17",
       "notes": "Local DL embeddings/rerank/identity/paper vectors"
+    },
+    {
+      "id": "switch.tooling",
+      "default": "standing_on",
+      "act": ["motor.tool", "motor.swarm"],
+      "hold": "no_new_tools",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-17",
+      "notes": "ENABLED — tool-creator/tool-user + boss/worker synapse ops; cam_enhance still gates core Cam changes"
     }
   ],
   "antagonistic_pairs": [
@@ -114,6 +124,7 @@
     ["run", "kill"],
     ["aaron_match", "reject_identity"],
     ["scan", "pause_scan"],
-    ["apply_enhance", "propose_only"]
+    ["apply_enhance", "propose_only"],
+    ["tool_run", "no_new_tools"]
   ]
 }

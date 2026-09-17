@@ -98,12 +98,29 @@ You (human) ──override / kill──► nullhub / chat
 | `info-retriever` | Vault → mesh → web cited information |
 | `slm-runtime` | Local small-LM cortex assists |
 | `dl-enhance` | Embeddings / rerank / identity / paper vectors |
+| `tool-creator` | Design/register tools (`team.tooling`) |
+| `tool-user` | Run registered tools under switches |
 
 Any role or team may **summon subagents**; subagents may summon more.
-Depth/count are **uncapped** (`unlimited_subagents`). Aaron retains ultimate say
+Depth/count are **uncapped** (`unlimited_subagents`). Privileges **inherit as a
+subset** of the parent (`config/swarm/privileges.json`); aaron_only privileges
+never transfer. Ancestors may terminate lineage. Aaron retains ultimate say
 over Cam functionality apply (`switch.cam_enhance`).
 
-Teams: `config/teams/` · Brain: [docs/CAM_BRAIN.md](CAM_BRAIN.md) · AGI scan: [docs/AGI_RESEARCH_TEAM.md](AGI_RESEARCH_TEAM.md)
+Teams: `config/teams/` · Brain: [docs/CAM_BRAIN.md](CAM_BRAIN.md) · AGI scan: [docs/AGI_RESEARCH_TEAM.md](AGI_RESEARCH_TEAM.md) · HAAS patterns: [docs/HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md)
+
+## HAAS → Cam (patterns only)
+
+Upstream: [OpenAI_Agent_Swarm](https://github.com/afidurko/OpenAI_Agent_Swarm) — **inspiration**, not runtime.
+
+| Keep | Skip |
+|---|---|
+| Privilege inheritance, lineage terminate | Assistants API HAAS Python stack |
+| Boss/worker synapse primitives | Supreme Oversight Board of archetypes |
+| Tool-creator → tool-user team | Unsupervised root goal invention |
+| Autonomy triad under Aaron gates | Heuristic imperatives as tasking |
+
+Validate: `python3 scripts/swarm-check.py`
 
 ## Neural mesh (shared persistent memory)
 

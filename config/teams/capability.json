@@ -45,7 +45,10 @@
   },
   "subagents": {
     "unlimited": true,
-    "human_gate_to_spawn": false
+    "human_gate_to_spawn": false,
+    "privilege_inheritance": true,
+    "lineage_terminate": true
   },
+  "related_teams": ["team.tooling", "team.info"],
   "pathway_hotspot": "hotspot.capability"
 }

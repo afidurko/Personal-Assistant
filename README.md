@@ -7,12 +7,13 @@ talking presence — with a smart second brain, **agent teams**, and a **sLM/DL 
 ## Design
 
 - **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
-- **Teams:** AGI Research Scan (daily) · Capability · Information — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
+- **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
+- **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed
-- **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents
+- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed · `config/tools/registry.json`
+- **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents (privilege inheritance, no escalation)
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
 Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Workspaces: [docs/WORKSPACES_WORKFLOW.md](docs/WORKSPACES_WORKFLOW.md)
@@ -34,6 +35,8 @@ python3 scripts/connectome-route.py --sense sense.clock.daily --goal "daily agi 
 python3 scripts/agi-research-scan.py
 # Confirm workspace + integration wiring
 python3 scripts/workspace-integration-check.py
+# HAAS→Cam privilege + boss/worker contracts
+python3 scripts/swarm-check.py
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
 # Live brain + spinal cord visualization (all repos)

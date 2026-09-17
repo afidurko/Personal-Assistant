@@ -390,6 +390,51 @@
       "side_effects": ["motor.vault", "motor.mesh"],
       "behavior": "aaron_gated_apply_cam_functionality_enhancement",
       "team": "team.capability"
+    },
+    {
+      "id": "hotspot.tooling",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.tooling",
+        "center.qa",
+        "switch.tooling",
+        "motor.tool"
+      ],
+      "side_effects": ["motor.swarm", "motor.mesh", "motor.jarvis"],
+      "behavior": "create_or_run_registered_tool_under_privileges",
+      "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.swarm_bus",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.swarm.message",
+        "center.tooling",
+        "center.capability",
+        "switch.autonomy",
+        "motor.swarm"
+      ],
+      "side_effects": ["motor.mesh"],
+      "behavior": "boss_worker_assign_broadcast_resolve",
+      "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.tool_result",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.tool.result",
+        "center.tooling",
+        "center.qa",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": ["motor.vault"],
+      "behavior": "absorb_tool_result_into_mesh",
+      "team": "team.tooling"
     }
   ]
 }

@@ -148,6 +148,20 @@
       "source": "dl_enhance",
       "emits": ["spike.tool_result", "spike.fact"],
       "notes": "Embedding / rerank / cluster distillates"
+    },
+    {
+      "id": "sense.swarm.message",
+      "modality": "agent_bus",
+      "source": "mesh_agent_commute",
+      "emits": ["spike.swarm", "spike.task", "spike.tool_result"],
+      "notes": "Internal boss/worker messages (assign/broadcast/resolve) — not human outbound"
+    },
+    {
+      "id": "sense.tool.result",
+      "modality": "tool",
+      "source": "tool_user",
+      "emits": ["spike.tool_result"],
+      "notes": "Registered tool execution results from team.tooling"
     }
   ]
 }

@@ -1,0 +1,53 @@
+{
+  "id": "team.tooling",
+  "name": "Tooling Team",
+  "purpose": "Create and exercise tools for Cam’s motors (Jarvis, scripts, thin APIs) using HAAS tool-creator → tool-user pattern — without adopting the HAAS Assistants runtime.",
+  "source": "https://github.com/afidurko/OpenAI_Agent_Swarm (patterns only)",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "lead_center": "center.tooling",
+  "lead_role": "tool-creator",
+  "members": [
+    {
+      "role": "tool-creator",
+      "job": "Design tool specs; register under config/tools + mesh/tools; propose Cam enhance when needed",
+      "spawns_subagents": true
+    },
+    {
+      "role": "tool-user",
+      "job": "Load registered tools and execute under switches for assigned units",
+      "spawns_subagents": true
+    },
+    {
+      "role": "ops",
+      "job": "Jarvis / local CLI motor coordination",
+      "spawns_subagents": true
+    },
+    {
+      "role": "qa",
+      "job": "Verify tool specs and run outcomes before motor side effects",
+      "spawns_subagents": true
+    }
+  ],
+  "human_ultimate_say": {
+    "task_execution": "Aaron assigns; Cam finishes without mid-task interference",
+    "functionality_changes_to_cam": "requires_aaron_via_switch.cam_enhance",
+    "kill_switch": "Aaron anytime"
+  },
+  "subagents": {
+    "unlimited": true,
+    "human_gate_to_spawn": false,
+    "privilege_inheritance": true,
+    "lineage_terminate": true
+  },
+  "primitives": [
+    "synapse.assign_task",
+    "synapse.broadcast",
+    "synapse.resolve_task",
+    "synapse.send_message",
+    "synapse.spawn",
+    "synapse.terminate_lineage"
+  ],
+  "tool_registry": "config/tools/registry.json",
+  "pathway_hotspot": "hotspot.tooling"
+}

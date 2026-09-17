@@ -20,6 +20,8 @@
 | Info Retriever | `info-retriever` | yes | `team.info` | vault→mesh→web facts |
 | SLM Runtime | `slm-runtime` | yes | — | local small-LM cortex |
 | DL Enhance | `dl-enhance` | yes | — | embeddings / rerank / vectors |
+| Tool Creator | `tool-creator` | yes | `team.tooling` | design/register tools (HAAS pattern) |
+| Tool User | `tool-user` | yes | `team.tooling` | run registered tools under switches |
 
 ## Teams
 
@@ -28,13 +30,17 @@
 | AGI Research Scan | `config/teams/agi-research-scan.json` | **daily** internet scan for Cam-enhancing AI/AGI findings |
 | Capability | `config/teams/capability.json` | on Aaron tasks / enhance proposals |
 | Information | `config/teams/info.json` | on information needs |
+| Tooling | `config/teams/tooling.json` | create/run tools; boss/worker synapse ops |
 
 ## Recursion
 
 - **Unlimited subagents** — Cam **and every team/agent** may spawn as many as needed without asking Aaron
 - No `max_delegate_depth` / no `max_subagents` cap (persistent grant 2026-09-16; reaffirmed 2026-09-17)
+- **Privilege inheritance** — child privileges ⊆ parent; spawn at `parent.level + 1`; no escalation (`config/swarm/privileges.json`)
+- **Lineage terminate** — ancestors (or Aaron kill) may cancel descendants
 - Subagents inherit boundaries and mesh/vault access
 - Child work is still tracked as nulltickets tasks when the runtime is live
+- Boss/worker primitives: `config/swarm/primitives.json`
 - **Any role may invoke Cline** (`motor.cline`) for coding — not siloed to `coding`
 
 ## Enhancement cortex (DL + sLMs)
@@ -43,6 +49,12 @@
 - Centers: `center.slm`, `center.dl`
 - Aaron ultimate say on functionality apply: `switch.cam_enhance` (default hold)
 
+## HAAS → Cam (patterns only)
+
+- Docs: `docs/HAAS_CAM_PATTERNS.md`
+- Swarm configs: `config/swarm/`
+- Validate: `python3 scripts/swarm-check.py`
+
 ## Local tools
 
 - Jarvis: `integrations/jarvis`
@@ -50,6 +62,7 @@
 - Vision: `integrations/paddledetection`
 - Presence: `integrations/llmavatartalk`
 - Second brain: `integrations/smart-second-brain`
+- Tool registry: `config/tools/registry.json`
 
 ## Prompt stubs
 

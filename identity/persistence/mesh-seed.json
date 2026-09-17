@@ -1,4 +1,10 @@
 {
+  "mesh/agent-lineage": {
+    "enabled": true,
+    "lineage_terminate": true,
+    "namespace": "mesh/agent-lineage",
+    "privilege_inheritance": true
+  },
   "mesh/careers": {
     "boards": [
       "linkedin",
@@ -47,6 +53,7 @@
     "all_teams_may_spawn_subagents": true,
     "always_on": true,
     "auto_start_converse_server": true,
+    "boss_worker_primitives": true,
     "cam_converse_port": 8787,
     "cam_converse_url_config": "config/network/tailscale.json",
     "cam_converse_via": "tailscale",
@@ -65,6 +72,8 @@
     "continuous_qa": true,
     "daily_agi_research_scan": true,
     "dl_cortex_enabled": true,
+    "haas_assistants_runtime": false,
+    "haas_cam_patterns": true,
     "identity_media_purpose": "understand_aaron_look_and_sound",
     "ios_aaron_identity": true,
     "ios_camera_access": true,
@@ -82,9 +91,11 @@
     "ios_preferred_cam_host": "aaron-ipad",
     "ios_preferred_cam_host_when_mac_ready": "aaron-mac",
     "ios_voice_recognition": true,
+    "lineage_terminate": true,
     "max_delegate_depth": null,
     "max_subagents": null,
     "only_aaron_may_assign_tasks": true,
+    "privilege_inheritance": true,
     "qa_auto_fix": true,
     "qa_auto_rerun": true,
     "qa_default_n": 1000000000,
@@ -96,7 +107,10 @@
     "sole_operator": "Aaron",
     "standing_autonomy_complete_without_interference": true,
     "subagent_spawn_requires_human": false,
+    "supreme_oversight_board": false,
+    "swarm_config": "config/swarm/privileges.json",
     "tailscale_enabled": true,
+    "tool_creator_user": true,
     "unlimited_subagents": true
   },
   "mesh/open-questions": {
@@ -132,6 +146,7 @@
     "assistant_name": "Cam",
     "auto_archive_to_mesh": true,
     "auto_start_converse_server": true,
+    "boss_worker_primitives": true,
     "brain_enhancement": "smart-second-brain+slm-dl",
     "cam_age": 32,
     "cam_converse_port": 8787,
@@ -162,6 +177,8 @@
     "daily_agi_research_scan": true,
     "dl_cortex_enabled": true,
     "face_asset": "identity/persona/cam-face.jpg",
+    "haas_assistants_runtime": false,
+    "haas_cam_patterns": true,
     "human_name": "Aaron",
     "identity_media_purpose": "understand_aaron_look_and_sound",
     "ios_aaron_identity": true,
@@ -185,12 +202,14 @@
       "indeed"
     ],
     "kill_switch_default": "pause_all",
-    "max_delegate_depth": 3,
+    "lineage_terminate": true,
+    "max_delegate_depth": null,
     "max_subagents": null,
     "named_specialists": true,
     "persistence_cross_workspace": true,
     "prefer_simplest_tool": true,
     "prefer_small_vision_models": true,
+    "privilege_inheritance": true,
     "proactive": true,
     "qa_auto_fix": true,
     "qa_auto_rerun": true,
@@ -200,8 +219,11 @@
     "retain_raw_media_in_mesh": false,
     "slm_cortex_enabled": true,
     "subagent_spawn_requires_human": false,
+    "supreme_oversight_board": false,
+    "swarm_config": "config/swarm/privileges.json",
     "tailscale_enabled": true,
     "timezone": "America/New_York",
+    "tool_creator_user": true,
     "unlimited_subagents": true,
     "weekly_review": true
   },
@@ -222,6 +244,11 @@
     "include_counterarguments": true,
     "save_to_mesh": true,
     "use_smart_second_brain": true
+  },
+  "mesh/tools": {
+    "registry": "config/tools/registry.json",
+    "status": "active",
+    "team": "team.tooling"
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",

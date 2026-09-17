@@ -495,20 +495,21 @@ export class NeuralMesh {
     }
   }
 
-  /** Deep agent + layer hubs for commute / memory / persistence / issue-loop. */
+  /** Deep agent + layer hubs — merges missing layers/agents into existing meshes. */
   ensureAgentMeshLayer(): void {
-    const haveAgents = this.nodes.some((n) => n.kind === 'agent' || n.kind === 'layer');
-    if (haveAgents) return;
-
     const regionCounts = new Map<BrainRegion, number>();
     for (const n of this.nodes) {
       regionCounts.set(n.region, (regionCounts.get(n.region) ?? 0) + 1);
     }
     for (const layer of AGENT_LAYERS) {
-      regionCounts.set(layer.region, (regionCounts.get(layer.region) ?? 0) + 1);
+      if (!this.nodes.some((n) => n.id === layerHubId(layer.id))) {
+        regionCounts.set(layer.region, (regionCounts.get(layer.region) ?? 0) + 1);
+      }
     }
     for (const agent of MESH_AGENTS) {
-      regionCounts.set(agent.region, (regionCounts.get(agent.region) ?? 0) + 1);
+      if (!this.nodes.some((n) => n.id === agentNodeId(agent.id))) {
+        regionCounts.set(agent.region, (regionCounts.get(agent.region) ?? 0) + 1);
+      }
     }
 
     const regionIndex = new Map<BrainRegion, number>();
@@ -517,6 +518,7 @@ export class NeuralMesh {
     }
 
     for (const layer of AGENT_LAYERS) {
+      if (this.nodes.some((n) => n.id === layerHubId(layer.id))) continue;
       const total = regionCounts.get(layer.region) ?? 1;
       const idx = regionIndex.get(layer.region) ?? 0;
       regionIndex.set(layer.region, idx + 1);
@@ -542,6 +544,7 @@ export class NeuralMesh {
     }
 
     for (const agent of MESH_AGENTS) {
+      if (this.nodes.some((n) => n.id === agentNodeId(agent.id))) continue;
       const total = regionCounts.get(agent.region) ?? 1;
       const idx = regionIndex.get(agent.region) ?? 0;
       regionIndex.set(agent.region, idx + 1);
@@ -566,28 +569,65 @@ export class NeuralMesh {
       });
     }
 
-    // Layer stack: commute → memory → persistence → issue-loop
+    // Ensure workspace nodes exist for every WORKSPACE_META kind (incl. swarm)
+    for (const kind of Object.keys(WORKSPACE_META) as WorkspaceKind[]) {
+      const id = `ws-${kind}`;
+      if (this.nodes.some((n) => n.id === id)) continue;
+      const meta = WORKSPACE_META[kind];
+      regionCounts.set(meta.region, (regionCounts.get(meta.region) ?? 0) + 1);
+      const total = regionCounts.get(meta.region) ?? 1;
+      const idx = regionIndex.get(meta.region) ?? 0;
+      regionIndex.set(meta.region, idx + 1);
+      const { x, y } = layoutForRegion(meta.region, idx, total);
+      this.nodes.push({
+        id,
+        label: meta.name,
+        workspaceId: `workspace-${kind}`,
+        conceptId: null,
+        kind: 'workspace',
+        region: meta.region,
+        x,
+        y,
+        activation: 0.15,
+        status: 'idle',
+        color: meta.defaultColor,
+        radius: 0.045,
+        tags: [kind, 'workspace', meta.region],
+        interactive: true,
+      });
+    }
+
+    // Layer stack edges
     for (let i = 0; i < AGENT_LAYERS.length - 1; i++) {
       const from = layerHubId(AGENT_LAYERS[i].id);
       const to = layerHubId(AGENT_LAYERS[i + 1].id);
-      this.edges.push(edge(from, to, 'feeds', 0.55, 'deeper layer'));
+      if (!this.edges.some((e) => e.from === from && e.to === to && e.kind === 'feeds')) {
+        this.edges.push(edge(from, to, 'feeds', 0.55, 'deeper layer'));
+      }
     }
 
     for (const agent of MESH_AGENTS) {
       const agentId = agentNodeId(agent.id);
-      this.edges.push(edge(agentId, layerHubId(agent.layer), 'depends_on', 0.6, 'in layer'));
-      this.edges.push(edge(agentId, 'hub-cortex', 'feeds', 0.25, 'agent → cortex'));
-      this.edges.push(edge(agentId, 'hub-hippocampus', 'feeds', 0.35, 'agent → memory'));
+      const ensure = (from: string, to: string, kind: MeshEdgeKind, weight: number, label: string) => {
+        if (!this.edges.some((e) => e.from === from && e.to === to && e.kind === kind)) {
+          this.edges.push(edge(from, to, kind, weight, label));
+        }
+      };
+      ensure(agentId, layerHubId(agent.layer), 'depends_on', 0.6, 'in layer');
+      ensure(agentId, 'hub-cortex', 'feeds', 0.25, 'agent → cortex');
+      ensure(agentId, 'hub-hippocampus', 'feeds', 0.35, 'agent → memory');
       for (const kind of agent.relatedWorkspaceKinds) {
-        this.edges.push(
-          edge(agentId, `ws-${kind}`, 'correlates', 0.45, `${agent.name} ↔ ${kind}`),
-        );
+        ensure(agentId, `ws-${kind}`, 'correlates', 0.45, `${agent.name} ↔ ${kind}`);
       }
       if (agent.layer === 'issue-loop') {
-        this.edges.push(edge(agentId, layerHubId('persistence'), 'loops', 0.5, 'loop ↔ persist'));
+        ensure(agentId, layerHubId('persistence'), 'loops', 0.5, 'loop ↔ persist');
       }
       if (agent.layer === 'commute') {
-        this.edges.push(edge(agentId, layerHubId('memory'), 'commutes', 0.4, 'commute ↔ memory'));
+        ensure(agentId, layerHubId('memory'), 'commutes', 0.4, 'commute ↔ memory');
+      }
+      if (agent.layer === 'swarm') {
+        ensure(agentId, layerHubId('persistence'), 'inherits', 0.45, 'swarm ↔ persist');
+        ensure(agentId, layerHubId('commute'), 'assigns', 0.4, 'swarm ↔ commute');
       }
     }
   }
