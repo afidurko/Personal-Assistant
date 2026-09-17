@@ -59,9 +59,9 @@ Live scan note: `vault/04-Research/agi-daily/2026-09-17/`.
 - Social-harness ideas for open agent societies are larger than Aaron-only Cam — adopt messaging validation among Cam’s own teams, not internet-wide agents.  
 - Persona RL fine-tunes conflict with “prompts + config over new code”; start with evaluation metrics + prompt governance.
 
-## Recommendation
+**Recommendation**
 
-**Approve research direction, not code yet:** implement HMO-style mesh tiers + MMP-style claim fields + OCL/CPV checks as config/scripts proposals first. Hold model fine-tunes and new runtimes until Aaron flips `switch.cam_enhance` per proposal.
+**Done (Aaron 2026-09-17):** HMO tiers + MMP claim fields + OCL/CPV checks + dual-process + persona continuity + related role/config wiring are **applied**. Future model fine-tunes or new runtimes still need a fresh Aaron-approved proposal.
 
 ## Sources
 
