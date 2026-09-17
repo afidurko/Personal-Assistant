@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "analogy": "Circuit switches — same sensory input, antagonistic motor outcomes",
+  "sole_operator": "Aaron",
+  "switches": [
+    {
+      "id": "switch.tasking",
+      "default": "aaron_only",
+      "act": "accept_spike_as_task",
+      "hold": "ignore_non_aaron",
+      "flipped_by": ["Aaron"]
+    },
+    {
+      "id": "switch.autonomy",
+      "default": "standing_on",
+      "act": "complete_end_to_end_without_mid_task_interrupt",
+      "hold": "pause_or_ask_aaron",
+      "flipped_by": ["Aaron"],
+      "notes": "Standing autonomy for Session 1 YES capabilities"
+    },
+    {
+      "id": "switch.outbound",
+      "default": "act_under_autonomy",
+      "act": ["motor.text", "motor.call", "motor.facetime", "motor.speak"],
+      "hold": "draft_only",
+      "flipped_by": ["Aaron", "switch.kill"]
+    },
+    {
+      "id": "switch.careers_submit",
+      "default": "act_under_autonomy",
+      "act": ["motor.jobs"],
+      "hold": "draft_opportunity_only",
+      "flipped_by": ["Aaron", "switch.kill"]
+    },
+    {
+      "id": "switch.presence",
+      "default": "studio_when_available",
+      "act": ["motor.speak", "sense.audio.transcript"],
+      "hold": "text_and_still_portrait",
+      "flipped_by": ["Aaron"]
+    },
+    {
+      "id": "switch.kill",
+      "default": "armed_allow_motor",
+      "act": "silence_all_motor",
+      "hold": null,
+      "flipped_by": ["Aaron"],
+      "priority": "highest",
+      "notes": "Pause-all; mesh/tickets retained"
+    },
+    {
+      "id": "switch.identity",
+      "default": "require_aaron_biometrics_when_remote",
+      "act": "accept_aaron_face_or_voice_match",
+      "hold": "reject_non_aaron_identity",
+      "flipped_by": ["Aaron"],
+      "threshold": 0.85,
+      "notes": "Aaron face/voice recognition via iOS companion; enroll Aaron only"
+    },
+    {
+      "id": "switch.ios_capture",
+      "default": "standing_on",
+      "act": ["sense.ios.camera", "sense.ios.mic"],
+      "hold": "no_capture",
+      "flipped_by": ["Aaron"],
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-16",
+      "notes": "ENABLED — Aaron authorized live mic/camera converse; kill switch still pauses"
+    }
+  ],
+  "antagonistic_pairs": [
+    ["act", "hold"],
+    ["send", "draft"],
+    ["submit", "watch"],
+    ["speak", "text_only"],
+    ["run", "kill"],
+    ["aaron_match", "reject_identity"]
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "assistant": "Cam",
+  "human": "Aaron",
+  "order": [
+    {
+      "id": "persistence",
+      "title": "Load/export persistence bundle + mesh seed",
+      "role": "memory-curator"
+    },
+    {
+      "id": "smart_second_brain",
+      "title": "Open starter vault/ in Obsidian + enable Smart Second Brain",
+      "role": "memory-curator"
+    },
+    {
+      "id": "research_mesh",
+      "title": "Source-backed research into mesh/vault",
+      "role": "researcher"
+    },
+    {
+      "id": "careers_linkedin_indeed",
+      "title": "Job watch on LinkedIn + Indeed",
+      "role": "careers"
+    },
+    {
+      "id": "life_ops_jarvis",
+      "title": "Calendar/life ops + Jarvis utilities",
+      "role": "ops"
+    },
+    {
+      "id": "comms_presence",
+      "title": "Comms + Cam presence (LLMAvatarTalk)",
+      "role": "comms"
+    },
+    {
+      "id": "docs",
+      "title": "Document draft/fix pipeline",
+      "role": "docs"
+    },
+    {
+      "id": "vision_attached",
+      "title": "Vision on attached media",
+      "role": "vision"
+    },
+    {
+      "id": "ios_identity_camera_mic",
+      "title": "iOS companion: Aaron face/voice + camera/mic",
+      "role": "comms"
+    },
+    {
+      "id": "cam_live_converse",
+      "title": "Cam live mic/camera converse (ENABLED)",
+      "role": "comms",
+      "enabled": true
+    }
+  ]
+}

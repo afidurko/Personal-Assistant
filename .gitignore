@@ -1,3 +1,4 @@
+# Node / neural-mesh app
 node_modules/
 dist/
 dist-server/
@@ -8,3 +9,13 @@ data/*.json
 .env
 .env.*
 coverage/
+
+# Python / Cam stack
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+identity/persistence/cam-persistence.zip
+identity/aaron/local/
+vault/10-Mesh-Distillates/converse/*.jsonl
