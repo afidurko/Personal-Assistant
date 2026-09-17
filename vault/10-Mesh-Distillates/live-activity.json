@@ -1,23 +1,10 @@
 {
-  "at": "2026-09-17T11:08:38.728Z",
-  "epoch": 1789643318728,
+  "at": "2026-09-17T11:16:26.781Z",
+  "epoch": 1789643786781,
   "firing": [
     {
-      "neuron": "neuron.improve_engine",
-      "kind": "agent",
-      "area": "area.apfc",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.slf",
-        "tract.cingulum",
-        "tract.forceps_minor"
-      ],
-      "reason": "cam_autonomy:running:Propose Cam system enhancement from scan fi",
-      "ts": "2026-09-17T11:07:13.984Z"
-    },
-    {
       "neuron": "neuron.memory",
-      "kind": "agent",
+      "kind": "loop",
       "area": "area.mtl",
       "intensity": 0.95,
       "tracts": [
@@ -25,8 +12,21 @@
         "tract.cingulum",
         "tract.cingulum2"
       ],
-      "reason": "cam_autonomy:running:Consolidate episodic converse into semantic",
-      "ts": "2026-09-17T11:07:13.984Z"
+      "reason": "cam_autonomy:done:Consolidate episodic converse into semantic me",
+      "ts": "2026-09-17T11:16:14.778Z"
+    },
+    {
+      "neuron": "neuron.delegate_burst",
+      "kind": "loop",
+      "area": "area.dlpfc",
+      "intensity": 0.95,
+      "tracts": [
+        "tract.slf",
+        "tract.cingulum",
+        "tract.forceps_minor"
+      ],
+      "reason": "cam_autonomy:done:Sweep spawn bay capacity for subagents",
+      "ts": "2026-09-17T11:16:26.780Z"
     },
     {
       "neuron": "neuron.speak_loop",
@@ -39,7 +39,7 @@
         "tract.fat"
       ],
       "reason": "cam_autonomy:done:Tune speak/hear arcuate pathway",
-      "ts": "2026-09-17T11:07:13.985Z"
+      "ts": "2026-09-17T11:16:26.779Z"
     },
     {
       "neuron": "neuron.mesh_sync_loop",
@@ -52,7 +52,7 @@
         "tract.cingulum2"
       ],
       "reason": "cam_autonomy:done:Refresh live activity feed for cortex fibers",
-      "ts": "2026-09-17T11:07:13.985Z"
+      "ts": "2026-09-17T11:16:14.778Z"
     },
     {
       "neuron": "neuron.health_conductor",
@@ -65,108 +65,114 @@
         "tract.forceps_minor"
       ],
       "reason": "cam_autonomy:running:Health conductor standing scan",
-      "ts": "2026-09-17T11:07:13.985Z"
+      "ts": "2026-09-17T11:16:26.780Z"
     },
     {
-      "neuron": "neuron.delegate_burst",
-      "kind": "agent",
-      "area": "area.dlpfc",
-      "intensity": 0.7,
+      "neuron": "neuron.improve_engine",
+      "kind": "loop",
+      "area": "area.apfc",
+      "intensity": 0.95,
       "tracts": [
         "tract.slf",
         "tract.cingulum",
         "tract.forceps_minor"
       ],
-      "reason": "cam_autonomy:running:Sweep spawn bay capacity for subagents",
-      "ts": "2026-09-17T11:08:38.724Z"
+      "reason": "cam_autonomy:done:Propose Cam system enhancement from scan findi",
+      "ts": "2026-09-17T11:16:26.780Z"
     }
   ],
   "active_areas": [
-    "area.apfc",
     "area.mtl",
+    "area.dlpfc",
     "area.broca",
     "area.cingulate",
-    "area.dlpfc"
+    "area.apfc"
   ],
   "active_tracts": [
-    "tract.slf",
-    "tract.cingulum",
-    "tract.forceps_minor",
     "tract.fornix",
+    "tract.cingulum",
     "tract.cingulum2",
+    "tract.slf",
+    "tract.forceps_minor",
     "tract.arcuate",
     "tract.af_anterior",
     "tract.fat"
   ],
   "recent_tasks": [
     {
-      "id": "cam-self-640a6623",
-      "title": "Refresh live activity feed for cortex fibers",
-      "status": "running",
-      "neuron": "neuron.mesh_sync_loop"
-    },
-    {
-      "id": "cam-self-aabd87ac",
-      "title": "Health conductor standing scan",
-      "status": "running",
-      "neuron": "neuron.health_conductor"
-    },
-    {
-      "id": "cam-self-1cd2a387",
-      "title": "Sweep spawn bay capacity for subagents",
-      "status": "running",
-      "neuron": "neuron.delegate_burst"
-    },
-    {
-      "id": "cam-self-96fbc733",
-      "title": "Consolidate episodic converse into semantic memory",
-      "status": "done",
-      "neuron": "neuron.memory"
-    },
-    {
-      "id": "cam-self-6c0dc3a5",
+      "id": "cam-self-092682a1",
       "title": "Tune speak/hear arcuate pathway",
-      "status": "running",
+      "status": "done",
       "neuron": "neuron.speak_loop"
     },
     {
-      "id": "cam-self-19f0a64b",
-      "title": "Sweep spawn bay capacity for subagents",
-      "status": "done",
-      "neuron": "neuron.delegate_burst"
-    },
-    {
-      "id": "cam-self-dc198226",
-      "title": "Health conductor standing scan",
-      "status": "done",
-      "neuron": "neuron.health_conductor"
-    },
-    {
-      "id": "cam-self-42637739",
-      "title": "Refresh live activity feed for cortex fibers",
-      "status": "done",
-      "neuron": "neuron.mesh_sync_loop"
-    },
-    {
-      "id": "cam-self-663a4d88",
-      "title": "Consolidate episodic converse into semantic memory",
-      "status": "done",
-      "neuron": "neuron.memory"
-    },
-    {
-      "id": "cam-self-416175ec",
+      "id": "cam-self-e264f30c",
       "title": "Propose Cam system enhancement from scan findings",
       "status": "done",
       "neuron": "neuron.improve_engine"
     },
     {
-      "id": "cam-self-88ea9978",
+      "id": "cam-self-8ee2b7ce",
+      "title": "Sweep spawn bay capacity for subagents",
+      "status": "done",
+      "neuron": "neuron.delegate_burst"
+    },
+    {
+      "id": "cam-self-f90895b1",
+      "title": "Refresh live activity feed for cortex fibers",
+      "status": "done",
+      "neuron": "neuron.mesh_sync_loop"
+    },
+    {
+      "id": "cam-self-c35c2b68",
+      "title": "Consolidate episodic converse into semantic memory",
+      "status": "done",
+      "neuron": "neuron.memory"
+    },
+    {
+      "id": "cam-self-19458713",
+      "title": "Sweep spawn bay capacity for subagents",
+      "status": "done",
+      "neuron": "neuron.delegate_burst"
+    },
+    {
+      "id": "cam-self-cfd1e66d",
+      "title": "Propose Cam system enhancement from scan findings",
+      "status": "done",
+      "neuron": "neuron.improve_engine"
+    },
+    {
+      "id": "cam-self-3f52818f",
+      "title": "Health conductor standing scan",
+      "status": "running",
+      "neuron": "neuron.health_conductor"
+    },
+    {
+      "id": "cam-self-a05d184a",
       "title": "Tune speak/hear arcuate pathway",
       "status": "done",
       "neuron": "neuron.speak_loop"
+    },
+    {
+      "id": "cam-self-d9c9ca19",
+      "title": "Refresh live activity feed for cortex fibers",
+      "status": "done",
+      "neuron": "neuron.mesh_sync_loop"
+    },
+    {
+      "id": "cam-self-c0334598",
+      "title": "Consolidate episodic converse into semantic memory",
+      "status": "done",
+      "neuron": "neuron.memory"
+    },
+    {
+      "id": "cam-self-8210c9e7",
+      "title": "Propose Cam system enhancement from scan findings",
+      "status": "done",
+      "neuron": "neuron.improve_engine"
     }
   ],
-  "improve_tasks": 4,
+  "improve_tasks": 1,
   "neuron_count": 6,
   "firing_count": 6,
   "standing": true,
