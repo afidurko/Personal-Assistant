@@ -107,6 +107,29 @@ export interface NeuralMeshState {
   /** Active Swift Guide concept (tour), if any */
   activeConceptId?: string | null;
   guideStep?: number;
+  /** Ranked actionable suggestions derived from latest scans */
+  suggestions?: SuggestiveImplementation[];
+}
+
+export type SuggestionKind =
+  | 'security'
+  | 'architecture'
+  | 'ops'
+  | 'learning'
+  | 'dependency'
+  | 'dx';
+
+export interface SuggestiveImplementation {
+  id: string;
+  kind: SuggestionKind;
+  title: string;
+  rationale: string;
+  implementation: string;
+  sketch?: string;
+  priority: number;
+  relatedWorkspaceIds: string[];
+  relatedConceptIds: string[];
+  sourceFindingIds: string[];
 }
 
 export interface ScanCycleResult {

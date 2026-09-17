@@ -69,6 +69,10 @@ app.get('/api/memory', (req, res) => {
   res.json(orchestrator.queryMemory(q));
 });
 
+app.get('/api/suggestions', (_req, res) => {
+  res.json(orchestrator.getSuggestions());
+});
+
 app.post('/api/nodes/:id/focus', async (req, res) => {
   const id = req.params.id;
   if (isSwiftConceptNodeId(id)) {

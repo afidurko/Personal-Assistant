@@ -15,6 +15,10 @@ import {
 } from '../../shared/swiftGuide.js';
 import { NeuralMesh } from './neural-mesh.js';
 import { PersistentMemory } from './persistent-memory.js';
+import {
+  buildSuggestiveImplementations,
+  type SuggestiveImplementation,
+} from './suggestions.js';
 import { runAllScans } from '../workspaces/index.js';
 
 export type ScanOrchestratorEvent = 'tick' | 'complete' | 'state' | 'memory_update';
@@ -50,6 +54,7 @@ export class ScanOrchestrator extends EventEmitter {
   private ready = false;
   private activeConceptId: string | null = null;
   private guideStep = 0;
+  private suggestions: SuggestiveImplementation[] = [];
 
   constructor(options: ScanOrchestratorOptions = {}) {
     super();
@@ -110,6 +115,7 @@ export class ScanOrchestrator extends EventEmitter {
 
     this.workspaces = snapshots;
     const activationDeltas = this.mesh.applyScanResults(snapshots);
+    this.suggestions = buildSuggestiveImplementations(snapshots);
 
     const { nodes } = this.mesh.getState();
     const colorMap: Record<string, string> = {};
@@ -190,7 +196,17 @@ export class ScanOrchestrator extends EventEmitter {
       cycleCount: this.cycleCount,
       activeConceptId: this.activeConceptId,
       guideStep: this.guideStep,
+      suggestions: this.suggestions,
     };
+  }
+
+  getSuggestions(): SuggestiveImplementation[] {
+    return this.suggestions.map((s) => ({
+      ...s,
+      relatedWorkspaceIds: [...s.relatedWorkspaceIds],
+      relatedConceptIds: [...s.relatedConceptIds],
+      sourceFindingIds: [...s.sourceFindingIds],
+    }));
   }
 
   getWorkspaces(): WorkspaceSnapshot[] {

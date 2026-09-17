@@ -44,6 +44,21 @@ describe('NeuralMesh workspace linking', () => {
     expect(updates?.color).toBe(STATUS_COLORS.warning);
   });
 
+  it('aligns mesh thresholds with workspace utils (80/50)', () => {
+    const mesh = new NeuralMesh({ dataDir: '/tmp/pa-mesh-thresh' });
+    mesh.seedDefaultTopology();
+    mesh.applyScanResults([
+      snap({ id: 'workspace-health', kind: 'health', score: 80, status: 'healthy' }),
+      snap({ id: 'workspace-updates', kind: 'updates', score: 79, status: 'warning' }),
+      snap({ id: 'workspace-vulnerability', kind: 'vulnerability', score: 49, status: 'critical' }),
+    ]);
+    expect(mesh.findWorkspaceNode('health')?.status).toBe('healthy');
+    expect(mesh.findWorkspaceNode('updates')?.status).toBe('warning');
+    expect(mesh.findWorkspaceNode('vulnerability')?.status).toBe('critical');
+  });
+});
+
+describe('NeuralMesh workspace linking extras', () => {
   it('marks workspace nodes scanning for live color pulse', () => {
     const mesh = new NeuralMesh({ dataDir: '/tmp/pa-mesh-test-2' });
     mesh.seedDefaultTopology();

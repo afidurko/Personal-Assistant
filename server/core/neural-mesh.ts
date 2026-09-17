@@ -517,9 +517,10 @@ function scoreToActivation(score: number): number {
 
 function statusFromScore(score: number, fallback: ScanStatus): ScanStatus {
   if (fallback === 'scanning' || fallback === 'stale') return fallback;
-  if (score >= 85) return 'healthy';
-  if (score >= 60) return 'warning';
-  if (score < 60) return 'critical';
+  // Keep thresholds aligned with workspace utils.statusFromScore
+  if (score >= 80) return 'healthy';
+  if (score >= 50) return 'warning';
+  if (score < 50) return 'critical';
   return fallback;
 }
 

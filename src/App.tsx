@@ -3,6 +3,7 @@ import { WorkspacePanel } from '@/components/WorkspacePanel';
 import { MemoryRail } from '@/components/MemoryRail';
 import { ScanControls } from '@/components/ScanControls';
 import { SwiftGuidePanel } from '@/components/SwiftGuidePanel';
+import { SuggestionsPanel } from '@/components/SuggestionsPanel';
 import { useMeshSocket } from '@/hooks/useMeshSocket';
 import { useMeshStore } from '@/store/meshStore';
 
@@ -30,7 +31,7 @@ export default function App() {
           <h1 className="headline">Neural mesh for continuous system health</h1>
           <p className="lede">
             Scan workspaces light the brain; Swift Guide diamonds walk concepts that
-            mesh into those same regions.
+            mesh into those same regions. Suggestions surface concrete next implementations.
           </p>
           <div className="hero-cta">
             <ScanControls
@@ -68,6 +69,13 @@ export default function App() {
           onOpenWorkspace={(id) => openWorkspace(id)}
         />
         <MemoryRail />
+      </div>
+
+      <div className="detail-grid">
+        <SuggestionsPanel
+          onOpenWorkspace={(id) => openWorkspace(id)}
+          onOpenConcept={(id) => openConcept(id)}
+        />
       </div>
     </div>
   );

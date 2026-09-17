@@ -4,6 +4,7 @@ import type {
   MemoryTrace,
   MeshEdge,
   NeuralMeshState,
+  SuggestiveImplementation,
   WorkspaceSnapshot,
 } from '@shared/types';
 import { SWIFT_GUIDE_BY_ID, type SwiftConceptId } from '@shared/swiftGuide';
@@ -18,6 +19,7 @@ const emptyState: NeuralMeshState = {
   cycleCount: 0,
   activeConceptId: null,
   guideStep: 0,
+  suggestions: [],
 };
 
 export interface MeshStore extends NeuralMeshState {
@@ -98,6 +100,8 @@ export const useMeshStore = create<MeshStore>((set, get) => ({
       activeConceptId:
         next.activeConceptId !== undefined ? next.activeConceptId : prev.activeConceptId,
       guideStep: typeof next.guideStep === 'number' ? next.guideStep : prev.guideStep,
+      suggestions:
+        (next.suggestions as SuggestiveImplementation[] | undefined) ?? prev.suggestions,
     });
   },
 
