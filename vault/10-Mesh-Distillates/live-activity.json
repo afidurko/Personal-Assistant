@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-17T01:36:28Z",
-  "epoch": 1789608988,
+  "at": "2026-09-17T01:36:53Z",
+  "epoch": 1789609013,
   "firing": [
     {
       "neuron": "neuron.mesh_sync_loop",
@@ -42,56 +42,15 @@
       "source": "workspace_orchestrator"
     },
     {
-      "neuron": "neuron.secret_hygiene",
+      "neuron": "neuron.priority_boot",
       "kind": "loop",
-      "area": "area.ofc",
+      "area": "area.dlpfc",
       "intensity": 0.55,
-      "reason": "standing:standing_scan",
+      "reason": "standing:boot",
       "tracts": [
-        "tract.uncinate",
-        "tract.emc"
-      ]
-    },
-    {
-      "neuron": "neuron.integration_pulse",
-      "kind": "loop",
-      "area": "area.parietal",
-      "intensity": 0.55,
-      "reason": "standing:standing_scan",
-      "tracts": [
-        "tract.af_anterior",
-        "tract.af_posterior",
-        "tract.slf1",
         "tract.slf",
-        "tract.slf3",
-        "tract.mdlf"
-      ]
-    },
-    {
-      "neuron": "neuron.connectome_check",
-      "kind": "loop",
-      "area": "area.cingulate",
-      "intensity": 0.55,
-      "reason": "standing:standing_scan",
-      "tracts": [
-        "tract.slf1",
-        "tract.fat",
+        "tract.ifof",
         "tract.cingulum",
-        "tract.fornix",
-        "tract.forceps_minor"
-      ]
-    },
-    {
-      "neuron": "neuron.health_conductor",
-      "kind": "loop",
-      "area": "area.cingulate",
-      "intensity": 0.55,
-      "reason": "standing:standing_scan",
-      "tracts": [
-        "tract.slf1",
-        "tract.fat",
-        "tract.cingulum",
-        "tract.fornix",
         "tract.forceps_minor"
       ]
     },
@@ -186,7 +145,6 @@
     "area.cingulate",
     "area.dlpfc",
     "area.mtl",
-    "area.ofc",
     "area.parietal"
   ],
   "active_tracts": [
@@ -194,7 +152,6 @@
     "tract.af_posterior",
     "tract.arcuate",
     "tract.cingulum",
-    "tract.emc",
     "tract.fat",
     "tract.forceps_minor",
     "tract.fornix",
@@ -204,8 +161,7 @@
     "tract.mesh_callosal",
     "tract.slf",
     "tract.slf1",
-    "tract.slf3",
-    "tract.uncinate"
+    "tract.slf3"
   ],
   "recent_tasks": [
     {
@@ -281,5 +237,5 @@
   "health_overall": "healthy",
   "improve_tasks": 0,
   "neuron_count": 42,
-  "firing_count": 13
+  "firing_count": 10
 }

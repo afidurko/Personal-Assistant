@@ -9,7 +9,7 @@ Cam’s cortex catalogs **42 columns**. Health / workspace ones that matter most
 | `neuron.connectome_check` | ACC | Pathway integrity gate | **impl** `connectome-check.py` |
 | `neuron.submodule_health` | ACC | Fresh clones missing integrations | **impl** in health scan |
 | `neuron.integration_pulse` | Parietal | Jarvis/Paddle/Avatar/SSB/SwiftGuide present | **impl** in health scan |
-| `neuron.persist_sync` | MTL | Cross-workspace Aaron memory | **partial** — export exists; hook weekly |
+| `neuron.persist_sync` | MTL | Cross-workspace Aaron memory | **impl** weekly hook after green health |
 | `neuron.secret_hygiene` | OFC | No credentials committed | **impl** heuristic in health scan |
 | `neuron.drift_scan` | ACC | Docs/config vs live cortex | **impl** in health scan |
 | `neuron.converse_health` | Broca | `/api/health` on converse server | **impl** (idle if down) |
@@ -33,9 +33,8 @@ QA loop fires `health_conductor` each cycle (writes `system-health.json` under t
 
 Distillate: `vault/10-Mesh-Distillates/system-health.json`
 
-## Suggested next (not yet wired)
+## Suggested next
 
-1. **tailscale_reach** — `tailscale status --json` → ping aaron-iphone / aaron-ipad peers.
-2. **improve_engine** — read `system-health.json` warnings → open nulltickets / Cam tasks.
-3. **workspace_orchestrator** — lease mesh namespaces so multi-Cam workspaces don’t collide.
-4. **persist_sync weekly** — cron `persist-export.py` after green health scans.
+1. Hook `cam-converse-server.py` to emit `activity-events.jsonl` on each turn
+2. Optional schematic 2D HUD (circuit-board legend) synced to live feed
+3. Confirm interim open-question defaults with Aaron (`Open-Questions-Fasciculus-AGI`)
