@@ -1,5 +1,14 @@
-import type { Finding, Severity, WorkspaceSnapshot, SuggestiveImplementation, SuggestionKind } from '../../shared/types.js';
+import type {
+  Finding,
+  Severity,
+  WorkspaceSnapshot,
+  SuggestiveImplementation,
+  SuggestionKind,
+  LoopJob,
+  AgentCycleResult,
+} from '../../shared/types.js';
 import { SWIFT_GUIDE_CONCEPTS } from '../../shared/swiftGuide.js';
+import { AGENT_LAYERS, MESH_AGENTS } from '../../shared/agentLayers.js';
 
 export type { SuggestiveImplementation, SuggestionKind };
 
@@ -11,12 +20,18 @@ const SEVERITY_PRIORITY: Record<Severity, number> = {
   info: 15,
 };
 
+export interface SuggestionContext {
+  loopJobs?: LoopJob[];
+  lastAgentCycle?: AgentCycleResult | null;
+}
+
 /**
  * Turn live workspace findings into actionable, suggestive implementations
- * that mesh with Swift Guide concepts when relevant.
+ * that mesh with Swift Guide concepts and deep agent layers.
  */
 export function buildSuggestiveImplementations(
   workspaces: WorkspaceSnapshot[],
+  context: SuggestionContext = {},
 ): SuggestiveImplementation[] {
   const out: SuggestiveImplementation[] = [];
 
@@ -25,7 +40,6 @@ export function buildSuggestiveImplementations(
       out.push(fromFinding(ws, finding));
     }
 
-    // Workspace-level heuristics even when findings are sparse
     if (ws.kind === 'vulnerability' && ws.score < 90) {
       out.push({
         id: `suggest-${ws.id}-harden`,
@@ -50,7 +64,7 @@ export function buildSuggestiveImplementations(
         rationale: `${ws.metrics.deepImportHits} deep import hit(s) increase coupling.`,
         implementation:
           'Prefer `@/` and `@shared/` path aliases for cross-layer imports instead of long `../../../` chains.',
-        sketch: 'import { STATUS_COLORS } from \'@shared/types\';',
+        sketch: "import { STATUS_COLORS } from '@shared/types';",
         priority: 55,
         relatedWorkspaceIds: [ws.id],
         relatedConceptIds: ['objects-classes', 'protocols-extensions'],
@@ -74,7 +88,6 @@ export function buildSuggestiveImplementations(
     }
   }
 
-  // Always offer a learning path tied to the weakest workspace
   const weakest = [...workspaces].sort((a, b) => a.score - b.score)[0];
   if (weakest) {
     const concept =
@@ -92,9 +105,27 @@ export function buildSuggestiveImplementations(
       relatedConceptIds: [concept.id],
       sourceFindingIds: [],
     });
+
+    const commuteAgent =
+      MESH_AGENTS.find(
+        (a) => a.layer === 'commute' && a.relatedWorkspaceKinds.includes(weakest.kind),
+      ) ?? MESH_AGENTS.find((a) => a.id === 'commute-router')!;
+    out.push({
+      id: `suggest-commute-${weakest.kind}`,
+      kind: 'agent-commute',
+      title: `Commute via ${commuteAgent.name}`,
+      rationale: `Weakest workspace ${weakest.name} should take the shortest high-confidence agent hop.`,
+      implementation: `Focus hex node “${commuteAgent.name}”, then Run agent cycle so commute paths reinforce ${weakest.kind} → agent edges.`,
+      sketch: `POST /api/agents/cycle\n# focus agent-${commuteAgent.id}`,
+      priority: 50 + Math.round((100 - weakest.score) / 4),
+      relatedWorkspaceIds: [weakest.id],
+      relatedConceptIds: [],
+      sourceFindingIds: [],
+    });
   }
 
-  // Deduplicate by id, keep highest priority
+  out.push(...fromAgentContext(workspaces, context));
+
   const byId = new Map<string, SuggestiveImplementation>();
   for (const s of out) {
     const prev = byId.get(s.id);
@@ -102,6 +133,104 @@ export function buildSuggestiveImplementations(
   }
 
   return [...byId.values()].sort((a, b) => b.priority - a.priority);
+}
+
+function fromAgentContext(
+  workspaces: WorkspaceSnapshot[],
+  context: SuggestionContext,
+): SuggestiveImplementation[] {
+  const out: SuggestiveImplementation[] = [];
+  const jobs = context.loopJobs ?? [];
+  const cycle = context.lastAgentCycle;
+
+  const escalated = jobs.filter((j) => j.status === 'escalated');
+  if (escalated.length > 0) {
+    const job = escalated[0];
+    out.push({
+      id: `suggest-loop-escalate-${job.id}`,
+      kind: 'agent-repair',
+      title: `Escalate issue-loop: ${shorten(job.title, 48)}`,
+      rationale: `Issue-fix loop exhausted ${job.attempts}/${job.maxAttempts} attempts.`,
+      implementation:
+        job.fixSketch ??
+        'Open the Issue-fix loop panel, review the escalated job, and apply the fix sketch manually or with a subagent.',
+      sketch: job.fixSketch,
+      priority: 92,
+      relatedWorkspaceIds: job.sourceWorkspaceId ? [job.sourceWorkspaceId] : [],
+      relatedConceptIds: ['error-handling'],
+      sourceFindingIds: job.sourceFindingId ? [job.sourceFindingId] : [],
+    });
+  }
+
+  const queued = jobs.filter((j) => j.status === 'queued' || j.status === 'running');
+  if (queued.length >= 3) {
+    out.push({
+      id: 'suggest-persistence-batch',
+      kind: 'agent-persistence',
+      title: 'Batch sticky jobs through persistence layer',
+      rationale: `${queued.length} open loop jobs — Completion Guardian should gate closes until fixed.`,
+      implementation:
+        'Keep issue loop armed; run agent cycle so Job Persistence re-queues stalled work before starting new scans.',
+      sketch: 'POST /api/agents/issue-loop/start\nPOST /api/agents/cycle',
+      priority: 68,
+      relatedWorkspaceIds: [
+        ...new Set(queued.map((j) => j.sourceWorkspaceId).filter(Boolean) as string[]),
+      ],
+      relatedConceptIds: ['concurrency'],
+      sourceFindingIds: [],
+    });
+  }
+
+  if (cycle && cycle.efficiencyGain < 0.25 && workspaces.some((w) => w.score < 85)) {
+    const layer = AGENT_LAYERS.find((l) => l.id === 'commute')!;
+    out.push({
+      id: 'suggest-commute-efficiency',
+      kind: 'agent-commute',
+      title: 'Raise commute efficiency',
+      rationale: `Last agent cycle efficiency was ${Math.round(cycle.efficiencyGain * 100)}% with weak workspace scores.`,
+      implementation: `Focus layer hub “${layer.name}”, reinforce commute edges, then re-run agent cycle.`,
+      sketch: 'POST /api/agents/cycle',
+      priority: 58,
+      relatedWorkspaceIds: workspaces.filter((w) => w.score < 85).map((w) => w.id),
+      relatedConceptIds: [],
+      sourceFindingIds: [],
+    });
+  }
+
+  if (cycle && cycle.memoryWrites === 0) {
+    out.push({
+      id: 'suggest-memory-consolidate',
+      kind: 'agent-memory',
+      title: 'Trigger memory consolidation',
+      rationale: 'Agent cycle wrote no memory promotions — recall will stay cold.',
+      implementation:
+        'Ensure workspaces have findings or open jobs, then run agent cycle so Memory Consolidator / Recall Amplifier fire.',
+      sketch: 'POST /api/agents/cycle',
+      priority: 45,
+      relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+      relatedConceptIds: ['simple-values'],
+      sourceFindingIds: [],
+    });
+  }
+
+  const critical = workspaces.flatMap((w) => w.findings.filter((f) => f.severity === 'critical'));
+  if (critical.length > 0) {
+    const fixer = MESH_AGENTS.find((a) => a.id === 'issue-fix-loop')!;
+    out.push({
+      id: 'suggest-arm-issue-loop',
+      kind: 'agent-repair',
+      title: 'Arm automated issue-fix loop',
+      rationale: `${critical.length} critical finding(s) — ${fixer.name} should loop detect→fix→verify.`,
+      implementation: `Arm the issue loop, focus hex “${fixer.name}”, and let scan cycles drive autonomous attempts.`,
+      sketch: 'POST /api/agents/issue-loop/start\nPOST /api/scan',
+      priority: 88,
+      relatedWorkspaceIds: [...new Set(critical.map((f) => f.workspaceId))],
+      relatedConceptIds: ['error-handling'],
+      sourceFindingIds: critical.map((f) => f.id).slice(0, 5),
+    });
+  }
+
+  return out;
 }
 
 function fromFinding(ws: WorkspaceSnapshot, finding: Finding): SuggestiveImplementation {
@@ -151,5 +280,8 @@ function sketchFor(finding: Finding): string | undefined {
     return 'export API_KEY=…  # never commit literals';
   }
   if (t.includes('test')) return 'npm test -- --run';
+  if (t.includes('loop') || t.includes('regress')) {
+    return 'POST /api/agents/issue-loop/start && POST /api/agents/cycle';
+  }
   return undefined;
 }

@@ -134,6 +134,11 @@ export class ScanOrchestrator extends EventEmitter {
       workspaces: snapshots,
       suggestions: this.suggestions,
     });
+    // Rebuild suggestions with live loop/cycle context for agent-aware implementations.
+    this.suggestions = buildSuggestiveImplementations(snapshots, {
+      loopJobs: agentRuntime.getJobs(),
+      lastAgentCycle: this.lastAgentCycle,
+    });
     this.emit('agent_cycle', this.lastAgentCycle);
     this.emit('loop_update', agentRuntime.getJobs());
 
@@ -241,6 +246,10 @@ export class ScanOrchestrator extends EventEmitter {
     this.lastAgentCycle = await this.agents.runCycle({
       workspaces: this.workspaces,
       suggestions: this.suggestions,
+    });
+    this.suggestions = buildSuggestiveImplementations(this.workspaces, {
+      loopJobs: this.agents.getJobs(),
+      lastAgentCycle: this.lastAgentCycle,
     });
     this.emit('agent_cycle', this.lastAgentCycle);
     this.emit('loop_update', this.agents.getJobs());

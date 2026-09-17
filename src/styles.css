@@ -1054,8 +1054,21 @@ h2,
   color: var(--teal-soft);
 }
 
+.suggestion-kind.agent-repair,
 .suggestion-kind.security {
   color: var(--coral);
+}
+
+.suggestion-kind.agent-commute {
+  color: #6ec6ff;
+}
+
+.suggestion-kind.agent-memory {
+  color: #b39ddb;
+}
+
+.suggestion-kind.agent-persistence {
+  color: #80cbc4;
 }
 
 .suggestion-kind.learning {

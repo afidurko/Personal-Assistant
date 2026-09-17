@@ -61,14 +61,32 @@ describe('suggestive implementations', () => {
     expect(suggestions.some((s) => s.kind === 'learning')).toBe(true);
   });
 
-  it('includes a Swift Guide learning suggestion for the weakest workspace', () => {
+  it('includes agent-commute and agent-repair suggestions for weak/critical workspaces', () => {
     const suggestions = buildSuggestiveImplementations([
-      snap({ id: 'workspace-architecture', kind: 'architecture', score: 55, status: 'warning' }),
-      snap({ id: 'workspace-health', kind: 'health', score: 100 }),
+      snap({
+        id: 'workspace-vulnerability',
+        kind: 'vulnerability',
+        score: 40,
+        status: 'critical',
+        findings: [
+          {
+            id: 'f1',
+            workspaceId: 'workspace-vulnerability',
+            title: 'Missing lockfile',
+            detail: 'No lockfile',
+            severity: 'critical',
+            category: 'supply-chain',
+            suggestion: 'Commit package-lock.json',
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      }),
+      snap({ id: 'workspace-health', kind: 'health', score: 100, findings: [] }),
     ]);
-    const learn = suggestions.find((s) => s.kind === 'learning');
-    expect(learn).toBeTruthy();
-    expect(learn?.relatedConceptIds.length).toBeGreaterThan(0);
+
+    expect(suggestions.some((s) => s.kind === 'agent-commute')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'agent-repair')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'learning')).toBe(true);
   });
 });
 

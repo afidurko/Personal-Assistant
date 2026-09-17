@@ -158,7 +158,11 @@ export type SuggestionKind =
   | 'ops'
   | 'learning'
   | 'dependency'
-  | 'dx';
+  | 'dx'
+  | 'agent-commute'
+  | 'agent-memory'
+  | 'agent-persistence'
+  | 'agent-repair';
 
 export interface SuggestiveImplementation {
   id: string;
