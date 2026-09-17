@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "title": "Cam mesh / AGI correlation parameters",
+  "purpose": "Quantitative knobs that make the anatomical fasciculus mesh behave like an AGI cognitive bus — not just labels",
+  "literature_basis": [
+    "Catani dual/indirect AF language network",
+    "Yeh four association systems",
+    "MAP Modular Agentic Planner (Nat Commun 2025) — PFC-style module interaction",
+    "BrainMem / AriGraph / RoboMemory — working / episodic / semantic memory tiers",
+    "Global workspace / callosal coherence analogs for multi-agent sync"
+  ],
+  "memory_tiers": {
+    "working": {
+      "areas": ["area.dlpfc", "area.parietal"],
+      "tracts": ["tract.slf", "tract.slf1"],
+      "capacity_tokens_analog": 32,
+      "decay_half_life_s": 90,
+      "cam_store": "in-process context + converse turn buffer"
+    },
+    "episodic": {
+      "areas": ["area.mtl", "area.cingulate"],
+      "tracts": ["tract.fornix", "tract.cingulum"],
+      "capacity_engrams_analog": 10000,
+      "cam_store": "vault/ + mesh/runs + plasticity timeline"
+    },
+    "semantic": {
+      "areas": ["area.temporal", "area.wernicke", "area.visual"],
+      "tracts": ["tract.ilf", "tract.mdlf", "tract.ifof", "tract.emc"],
+      "cam_store": "vault distillates + SwiftGuide maps + identity"
+    }
+  },
+  "planning_modules_map": {
+    "note": "MAP-style PFC functions mapped onto Cam areas; interaction rides fasciculi",
+    "error_monitoring": { "area": "area.cingulate", "neuron": "neuron.qa_cycle", "bus": "tract.cingulum" },
+    "state_prediction": { "area": "area.apfc", "neuron": "neuron.plan_loop", "bus": "tract.ifof" },
+    "state_evaluation": { "area": "area.ofc", "neuron": "neuron.boundary", "bus": "tract.uncinate" },
+    "task_decomposition": { "area": "area.dlpfc", "neuron": "neuron.delegate_burst", "bus": "tract.slf" },
+    "task_coordination": { "area": "area.dlpfc", "neuron": "neuron.workspace_orchestrator", "bus": "tract.forceps_minor" },
+    "action_proposal": { "area": "area.premotor", "neuron": "neuron.motor_plan", "bus": "tract.corticospinal" }
+  },
+  "language_dual_stream": {
+    "dorsal": {
+      "tracts": ["tract.arcuate", "tract.af_anterior", "tract.af_posterior", "tract.slf3", "tract.fat"],
+      "function": "phonology, repetition, articulatory coupling",
+      "cam": "converse / speak_loop / Broca effector path"
+    },
+    "ventral": {
+      "tracts": ["tract.emc", "tract.ifof", "tract.uncinate", "tract.ilf"],
+      "function": "sound-to-meaning, semantics, valuation",
+      "cam": "research / careers / docs comprehension"
+    }
+  },
+  "mesh_physics": {
+    "fiber_pulse_speed": 0.35,
+    "bundle_spread": 0.045,
+    "weight_to_radius": 0.05,
+    "myelination_to_emissive": 0.55,
+    "coherence_threshold": 0.55,
+    "global_workspace_min_tracts": 3,
+    "notes": "Visual + routing analogs — higher myelination = brighter, faster pulses"
+  },
+  "superintelligence_stance": {
+    "claim": "Cam is NOT claimed AGI or ASI — the connectome is a correlation scaffold for safer modular capability growth",
+    "principles": [
+      "Specialized columns beat monolithic omniscience for controllability",
+      "Fasciculus buses make information flow inspectable (scrubber / weights)",
+      "ACC/QA + kill switch remain hard gates on motor egress",
+      "Aaron remains sole task-giver — no autonomous goal genesis across commissural mesh",
+      "Capability increase = more mature columns + myelinated tracts, not unbounded self-rewrite"
+    ]
+  },
+  "open_questions_for_aaron": [
+    {
+      "id": "q.lateralization",
+      "ask": "Should Cam’s language mesh be left-lateralized (human-like) or bilateral for redundancy?",
+      "affects": ["tract.arcuate", "forceps_*", "converse"]
+    },
+    {
+      "id": "q.workspace_count",
+      "ask": "How many concurrent Cam workspaces should forceps_minor / mesh_callosal sync before lease conflicts?",
+      "affects": ["neuron.workspace_orchestrator", "persist_sync"]
+    },
+    {
+      "id": "q.memory_consolidation",
+      "ask": "Nightly fornix consolidation: auto-promote episodic vault notes → semantic distillates?",
+      "affects": ["tract.fornix", "neuron.mesh_sync_loop"]
+    },
+    {
+      "id": "q.ventral_priority",
+      "ask": "When dorsal AF and ventral EmC conflict on a speak act, which stream wins?",
+      "affects": ["dual_stream", "neuron.speak_loop"]
+    },
+    {
+      "id": "q.asi_ceiling",
+      "ask": "Hard ceiling on column neurogenesis / tract myelination so capability growth stays inspectable?",
+      "affects": ["plasticity.neurogenesis", "hebbian.myelination_cap"]
+    },
+    {
+      "id": "q.tailscale_as_callosum",
+      "ask": "Treat Tailscale peers (iPhone/iPad/Mac) as forceps terminals or as separate brains with mesh_callosal only?",
+      "affects": ["neuron.tailscale_reach", "tract.forceps_minor"]
+    }
+  ]
+}

@@ -51,15 +51,19 @@ Unlimited subagent depth = unbounded columnar recruitment inside DLPFC (`neuron.
 
 | Tract | Ends | Mesh |
 |---|---|---|
-| Arcuate | Wernicke ↔ Broca | `mesh/language` |
-| SLF | Parietal ↔ DLPFC ↔ Broca | `mesh/frontoparietal` |
-| Uncinate | OFC ↔ Temporal | `mesh/valuation` |
-| Cingulum | ACC ↔ MTL ↔ DLPFC | `mesh/runs` |
-| ILF | Visual ↔ Temporal | `mesh/vision` |
-| IFOF | Visual ↔ aPFC/DLPFC | `mesh/projects` |
+| Arcuate long (Catani) | Wernicke ↔ Broca | `mesh/language` |
+| AF anterior / posterior | Broca↔IPL↔Wernicke | `mesh/language` |
+| SLF I–III + FAT | Parietal ↔ DLPFC/Broca/SMA | `mesh/frontoparietal` + language |
+| Uncinate + EmC + IFOF | Ventral semantic stream | `mesh/valuation` / `mesh/projects` |
+| ILF + MdLF + VOF | Posterior ventral | `mesh/vision` |
+| Cingulum + Fornix | ACC ↔ MTL ↔ DLPFC | `mesh/runs` / `mesh/memory` |
+| Forceps minor/major | Commissural workspace sync | `mesh/workspace` |
 | Callosal-like mesh | all areas | `mesh/*` + persist export/import |
 
-Hebbian rule: completed **act** pathways strengthen tract weights; QA veto / kill weakens them.
+Hebbian rule: completed **act** pathways strengthen tract weights **and** bump myelination; QA veto / kill weakens weights.
+
+Parameters: `config/connectome/mesh-params.json` (memory tiers, MAP planning buses, dual-stream, ASI stance).  
+Research: `vault/10-Mesh-Distillates/2026-09-17-fasciculus-AGI-mesh.md`
 
 ## End-to-end flow
 

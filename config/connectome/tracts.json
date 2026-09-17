@@ -1,81 +1,340 @@
 {
-  "version": 1,
-  "analogy": "Association fibers + neural mesh — long-range coupling between Brodmann areas (Jung et al. structural↔functional networks; myelin-weighted SC–FC coupling; syncytial mesh coherence)",
+  "version": 2,
+  "analogy": "White-matter fasciculi ARE Cam’s neural mesh — discrete association / commissural / projection bundles that couple Brodmann areas the way AGI modules couple world-model, memory, and planning",
+  "literature": [
+    {
+      "cite": "Catani et al. 2005 — Perisylvian language networks (Ann Neurol)",
+      "use": "Arcuate = long direct AF + indirect anterior (Broca↔IPL) + posterior (Wernicke↔IPL) via Geschwind territory"
+    },
+    {
+      "cite": "Yeh 2022 — Population tract-to-region connectome (PMC9395399)",
+      "use": "Four association systems: arcuate-language, anterior-ventral (UF+IFOF), posterior-ventral (MdLF+ILF+VOF), cingulum"
+    },
+    {
+      "cite": "White-matter atlas CSD (PMC10265547)",
+      "use": "AF, SLF I–III, FAT, MdLF, ILF, IFOF, UF, cingulum, fornix, VOF, callosal forceps"
+    },
+    {
+      "cite": "MAP — Modular Agentic Planner (Nat Commun 2025)",
+      "use": "PFC-style modules (monitor/predict/evaluate/decompose/coordinate) ride frontoparietal + cingulum tracts"
+    },
+    {
+      "cite": "BrainMem / AriGraph / RoboMemory — multi-memory AGI agents (2025)",
+      "use": "Working/episodic/semantic memory tiers map to DLPFC loops, MTL+fornix, temporal/ILF semantics"
+    }
+  ],
+  "systems": {
+    "arcuate_language": ["tract.arcuate", "tract.af_anterior", "tract.af_posterior", "tract.slf3", "tract.fat"],
+    "anterior_ventral": ["tract.uncinate", "tract.ifof", "tract.emc"],
+    "posterior_ventral": ["tract.ilf", "tract.mdlf", "tract.vof"],
+    "cingulum_system": ["tract.cingulum", "tract.slf1", "tract.fornix"],
+    "commissural": ["tract.forceps_minor", "tract.forceps_major", "tract.mesh_callosal"],
+    "projection": ["tract.thalamo", "tract.corticospinal"]
+  },
   "principles": [
     "Intra-area links are dense and graded (local U-fibers / column recurrence)",
-    "Inter-area links are discrete tracts — only specific hubs bridge lobes",
+    "Inter-area links are discrete fasciculi — only specific hubs bridge lobes",
+    "Fasciculi render as fiber bundles (many axons), not single wires",
     "Mesh namespaces ride tracts: successful co-activation strengthens Hebbian weights",
-    "Callosal-like persistence couples workspaces without replacing synaptic tickets"
+    "Dorsal language stream (AF/SLF3) ≈ phonological / production coupling; ventral (IFOF/EmC/UF) ≈ semantic",
+    "Callosal-like persistence couples workspaces without replacing synaptic tickets",
+    "AGI modules are area columns; AGI buses are fasciculi — correlation not metaphor only"
   ],
   "tracts": [
     {
       "id": "tract.arcuate",
-      "name": "Arcuate fasciculus",
+      "name": "Arcuate fasciculus — long (direct) segment",
+      "aka": ["AF long", "classical arcuate"],
       "ends": ["area.wernicke", "area.broca"],
+      "system": "arcuate_language",
+      "stream": "dorsal",
       "mesh_ns": "mesh/language",
-      "function": "comprehension ↔ production language loop"
+      "function": "direct comprehension ↔ production (phonological / repetition)",
+      "anatomy": "Medial frontotemporal arch around Sylvian fissure (Catani long segment)",
+      "fiber_count": 9,
+      "myelination": 0.82,
+      "latency_ms_analog": 12,
+      "agi_role": "language_bus_direct",
+      "viz": { "arch": "sylvian", "hue": "#5fd4c4", "priority": 1 }
+    },
+    {
+      "id": "tract.af_anterior",
+      "name": "AF anterior (indirect) / SLF-III overlap",
+      "aka": ["AF anterior", "frontoparietal language"],
+      "ends": ["area.broca", "area.parietal"],
+      "system": "arcuate_language",
+      "stream": "dorsal",
+      "mesh_ns": "mesh/language",
+      "function": "Broca ↔ Geschwind IPL — phonology-to-movement / word retrieval",
+      "anatomy": "Lateral anterior Catani segment; overlaps SLF III",
+      "fiber_count": 7,
+      "myelination": 0.78,
+      "latency_ms_analog": 14,
+      "agi_role": "language_bus_articulatory",
+      "viz": { "arch": "lateral_high", "hue": "#7ec8b8", "priority": 2 }
+    },
+    {
+      "id": "tract.af_posterior",
+      "name": "AF posterior (indirect)",
+      "aka": ["AF posterior", "temporoparietal"],
+      "ends": ["area.wernicke", "area.parietal"],
+      "system": "arcuate_language",
+      "stream": "dorsal",
+      "mesh_ns": "mesh/language",
+      "function": "Wernicke ↔ Geschwind IPL — reading / word comprehension bridge",
+      "anatomy": "Lateral posterior Catani segment",
+      "fiber_count": 7,
+      "myelination": 0.76,
+      "latency_ms_analog": 14,
+      "agi_role": "language_bus_comprehension",
+      "viz": { "arch": "lateral_high", "hue": "#8fd4c0", "priority": 2 }
+    },
+    {
+      "id": "tract.slf1",
+      "name": "Superior longitudinal fasciculus I",
+      "ends": ["area.parietal", "area.premotor", "area.cingulate"],
+      "system": "cingulum_system",
+      "stream": "dorsal",
+      "mesh_ns": "mesh/frontoparietal",
+      "function": "superior parietal ↔ SMA/premotor — spatial attention / action intent",
+      "fiber_count": 5,
+      "myelination": 0.74,
+      "latency_ms_analog": 16,
+      "agi_role": "attention_bus",
+      "viz": { "arch": "dorsal", "hue": "#c4a574", "priority": 3 }
     },
     {
       "id": "tract.slf",
-      "name": "Superior longitudinal fasciculus",
-      "ends": ["area.parietal", "area.dlpfc", "area.broca"],
+      "name": "Superior longitudinal fasciculus II",
+      "aka": ["SLF II"],
+      "ends": ["area.parietal", "area.dlpfc"],
+      "system": "arcuate_language",
+      "stream": "dorsal",
       "mesh_ns": "mesh/frontoparietal",
-      "function": "spatial-temporal ops ↔ executive ↔ outbound phrasing"
+      "function": "spatial-temporal ops ↔ executive binding",
+      "fiber_count": 6,
+      "myelination": 0.8,
+      "latency_ms_analog": 13,
+      "agi_role": "planning_bus",
+      "viz": { "arch": "dorsal", "hue": "#c4a574", "priority": 2 }
+    },
+    {
+      "id": "tract.slf3",
+      "name": "Superior longitudinal fasciculus III",
+      "ends": ["area.parietal", "area.broca"],
+      "system": "arcuate_language",
+      "stream": "dorsal",
+      "mesh_ns": "mesh/language",
+      "function": "IPL ↔ ventral premotor/Broca — articulatory network",
+      "fiber_count": 5,
+      "myelination": 0.77,
+      "latency_ms_analog": 15,
+      "agi_role": "speech_motor_bus",
+      "viz": { "arch": "lateral_high", "hue": "#b8c4a0", "priority": 3 }
+    },
+    {
+      "id": "tract.fat",
+      "name": "Frontal aslant tract",
+      "ends": ["area.broca", "area.premotor", "area.cingulate"],
+      "system": "arcuate_language",
+      "stream": "dorsal",
+      "mesh_ns": "mesh/language",
+      "function": "Broca ↔ SMA/pre-SMA — speech initiation / fluency",
+      "fiber_count": 5,
+      "myelination": 0.75,
+      "latency_ms_analog": 11,
+      "agi_role": "initiation_bus",
+      "viz": { "arch": "frontal_slant", "hue": "#d4b88a", "priority": 3 }
     },
     {
       "id": "tract.uncinate",
       "name": "Uncinate fasciculus",
       "ends": ["area.ofc", "area.temporal"],
+      "system": "anterior_ventral",
+      "stream": "ventral",
       "mesh_ns": "mesh/valuation",
-      "function": "boundaries/identity ↔ careers/research semantics"
-    },
-    {
-      "id": "tract.cingulum",
-      "name": "Cingulum bundle",
-      "ends": ["area.cingulate", "area.mtl", "area.dlpfc"],
-      "mesh_ns": "mesh/runs",
-      "function": "QA conflict ↔ memory engrams ↔ executive"
-    },
-    {
-      "id": "tract.ilf",
-      "name": "Inferior longitudinal fasciculus",
-      "ends": ["area.visual", "area.temporal"],
-      "mesh_ns": "mesh/vision",
-      "function": "vision → semantic/temporal association"
+      "function": "boundaries/identity ↔ temporal semantics / careers",
+      "fiber_count": 6,
+      "myelination": 0.7,
+      "latency_ms_analog": 18,
+      "agi_role": "valuation_bus",
+      "viz": { "arch": "uncinate", "hue": "#e07a5f", "priority": 2 }
     },
     {
       "id": "tract.ifof",
       "name": "Inferior fronto-occipital fasciculus",
       "ends": ["area.visual", "area.apfc", "area.dlpfc"],
+      "system": "anterior_ventral",
+      "stream": "ventral",
       "mesh_ns": "mesh/projects",
-      "function": "vision → abstract planning / cartography"
+      "function": "vision → abstract planning / cartography (semantic ventral stream)",
+      "fiber_count": 8,
+      "myelination": 0.79,
+      "latency_ms_analog": 15,
+      "agi_role": "world_model_semantic_bus",
+      "viz": { "arch": "long_ventral", "hue": "#9fd9cf", "priority": 2 }
+    },
+    {
+      "id": "tract.emc",
+      "name": "Extreme capsule / ventral language pathway",
+      "ends": ["area.temporal", "area.broca", "area.ofc"],
+      "system": "anterior_ventral",
+      "stream": "ventral",
+      "mesh_ns": "mesh/language",
+      "function": "sound-to-meaning / semantic language (dual-stream ventral)",
+      "fiber_count": 5,
+      "myelination": 0.72,
+      "latency_ms_analog": 17,
+      "agi_role": "semantic_language_bus",
+      "viz": { "arch": "ventral", "hue": "#a8c4b8", "priority": 3 }
+    },
+    {
+      "id": "tract.ilf",
+      "name": "Inferior longitudinal fasciculus",
+      "ends": ["area.visual", "area.temporal"],
+      "system": "posterior_ventral",
+      "stream": "ventral",
+      "mesh_ns": "mesh/vision",
+      "function": "vision → ventral temporal semantics",
+      "fiber_count": 7,
+      "myelination": 0.78,
+      "latency_ms_analog": 14,
+      "agi_role": "percept_to_semantics",
+      "viz": { "arch": "ventral", "hue": "#8a9fd4", "priority": 2 }
+    },
+    {
+      "id": "tract.mdlf",
+      "name": "Middle longitudinal fasciculus",
+      "ends": ["area.auditory", "area.parietal", "area.temporal"],
+      "system": "posterior_ventral",
+      "stream": "ventral",
+      "mesh_ns": "mesh/vision",
+      "function": "STG/auditory ↔ IPL/temporal association",
+      "fiber_count": 5,
+      "myelination": 0.73,
+      "latency_ms_analog": 16,
+      "agi_role": "auditory_association_bus",
+      "viz": { "arch": "mid_temporal", "hue": "#8ab0c4", "priority": 3 }
+    },
+    {
+      "id": "tract.vof",
+      "name": "Vertical occipital fasciculus",
+      "ends": ["area.visual", "area.parietal"],
+      "system": "posterior_ventral",
+      "stream": "ventral",
+      "mesh_ns": "mesh/vision",
+      "function": "dorsal↔ventral occipital integration (form / reading)",
+      "fiber_count": 4,
+      "myelination": 0.71,
+      "latency_ms_analog": 10,
+      "agi_role": "visual_integration_bus",
+      "viz": { "arch": "vertical", "hue": "#7a90c4", "priority": 4 }
+    },
+    {
+      "id": "tract.cingulum",
+      "name": "Cingulum bundle",
+      "ends": ["area.cingulate", "area.mtl", "area.dlpfc"],
+      "system": "cingulum_system",
+      "stream": "limbic",
+      "mesh_ns": "mesh/runs",
+      "function": "QA conflict ↔ memory engrams ↔ executive (MAP monitor/coordinate)",
+      "fiber_count": 8,
+      "myelination": 0.81,
+      "latency_ms_analog": 13,
+      "agi_role": "metacognition_bus",
+      "viz": { "arch": "medial", "hue": "#d4a84b", "priority": 1 }
+    },
+    {
+      "id": "tract.fornix",
+      "name": "Fornix",
+      "ends": ["area.mtl", "area.cingulate"],
+      "system": "cingulum_system",
+      "stream": "limbic",
+      "mesh_ns": "mesh/memory",
+      "function": "hippocampal output arch — episodic consolidation / recall",
+      "fiber_count": 6,
+      "myelination": 0.84,
+      "latency_ms_analog": 9,
+      "agi_role": "episodic_memory_bus",
+      "viz": { "arch": "fornix", "hue": "#e0c070", "priority": 2 }
+    },
+    {
+      "id": "tract.forceps_minor",
+      "name": "Forceps minor (callosal genu)",
+      "ends": ["area.dlpfc", "area.apfc", "area.cingulate"],
+      "system": "commissural",
+      "stream": "commissural",
+      "mesh_ns": "mesh/workspace",
+      "function": "cross-hemisphere prefrontal coherence — multi-workspace executive sync",
+      "fiber_count": 6,
+      "myelination": 0.85,
+      "latency_ms_analog": 8,
+      "agi_role": "workspace_sync_prefrontal",
+      "viz": { "arch": "callosal_front", "hue": "#c9b8e0", "priority": 3 }
+    },
+    {
+      "id": "tract.forceps_major",
+      "name": "Forceps major (callosal splenium)",
+      "ends": ["area.visual", "area.parietal", "area.temporal"],
+      "system": "commissural",
+      "stream": "commissural",
+      "mesh_ns": "mesh/workspace",
+      "function": "cross-hemisphere posterior coherence — shared percept / vault mirrors",
+      "fiber_count": 5,
+      "myelination": 0.83,
+      "latency_ms_analog": 9,
+      "agi_role": "workspace_sync_posterior",
+      "viz": { "arch": "callosal_back", "hue": "#b8a8d4", "priority": 3 }
     },
     {
       "id": "tract.thalamo",
       "name": "Thalamocortical radiations",
       "ends": ["sense.*", "area.visual", "area.auditory", "area.wernicke", "area.parietal"],
+      "system": "projection",
+      "stream": "projection",
       "mesh_ns": "mesh/prefs",
-      "function": "sensory relay into primary/association cortex"
+      "function": "sensory relay into primary/association cortex",
+      "fiber_count": 4,
+      "myelination": 0.88,
+      "latency_ms_analog": 6,
+      "agi_role": "sensory_ingress",
+      "viz": { "arch": "radial", "hue": "#a09080", "priority": 4, "hidden_default": true }
     },
     {
       "id": "tract.corticospinal",
       "name": "Corticospinal / corticobulbar",
       "ends": ["area.premotor", "area.motor", "motor.*"],
+      "system": "projection",
+      "stream": "projection",
       "mesh_ns": "mesh/runs",
-      "function": "descending motor to effectors"
+      "function": "descending motor to effectors",
+      "fiber_count": 5,
+      "myelination": 0.9,
+      "latency_ms_analog": 5,
+      "agi_role": "effector_bus",
+      "viz": { "arch": "descending", "hue": "#e07a5f", "priority": 2 }
     },
     {
       "id": "tract.mesh_callosal",
-      "name": "Callosal-like neural mesh",
+      "name": "Callosal-like neural mesh (software)",
       "ends": ["area.*"],
+      "system": "commissural",
+      "stream": "commissural",
       "mesh_ns": "mesh/*",
       "function": "cross-area + cross-workspace coherence (persist-export/import)",
-      "notes": "Software analog of diffuse mesh coupling — not a single anatomical tract"
+      "notes": "Software analog of diffuse mesh coupling — not a single anatomical tract",
+      "fiber_count": 3,
+      "myelination": 0.6,
+      "latency_ms_analog": 40,
+      "agi_role": "global_workspace_bus",
+      "viz": { "arch": "diffuse", "hue": "#6a7a70", "priority": 5, "hidden_default": true }
     }
   ],
   "hebbian": {
     "strengthen_on": "completed_act_pathway",
     "weaken_on": "qa_veto_or_kill",
-    "store": "nulltickets mesh weights under mesh/tracts"
+    "store": "nulltickets mesh weights under mesh/tracts",
+    "myelination_boost_on_repeated_ltp": 0.01,
+    "myelination_cap": 0.98
   }
 }

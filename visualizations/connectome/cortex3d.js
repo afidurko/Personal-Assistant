@@ -20,23 +20,44 @@ const AREAS = [
   { id: "area.cingulate", label: "ACC", ba: "BA24/32", p: [-0.15, 1.45, 0.15], r: 0.22, lobe: "limbic" },
 ];
 
+/** Anatomical fasciculi — multi-fiber neural mesh (Catani AF + Yeh systems) */
 const TRACTS = [
-  { id: "tract.arcuate", a: "area.wernicke", b: "area.broca" },
-  { id: "tract.slf", a: "area.parietal", b: "area.dlpfc" },
-  { id: "tract.uncinate", a: "area.ofc", b: "area.temporal" },
-  { id: "tract.cingulum", a: "area.cingulate", b: "area.mtl" },
-  { id: "tract.cingulum2", a: "area.mtl", b: "area.dlpfc", alias: "tract.cingulum" },
-  { id: "tract.ilf", a: "area.visual", b: "area.temporal" },
-  { id: "tract.ifof", a: "area.visual", b: "area.apfc" },
-  { id: "tract.corticospinal", a: "area.premotor", b: "area.motor" },
+  // Arcuate language system (Catani long + indirect)
+  { id: "tract.arcuate", a: "area.wernicke", b: "area.broca", arch: "sylvian", fibers: 9, hue: 0x5fd4c4, system: "arcuate_language", stream: "dorsal", myelination: 0.82 },
+  { id: "tract.af_anterior", a: "area.broca", b: "area.parietal", arch: "lateral_high", fibers: 7, hue: 0x7ec8b8, system: "arcuate_language", stream: "dorsal", myelination: 0.78 },
+  { id: "tract.af_posterior", a: "area.wernicke", b: "area.parietal", arch: "lateral_high", fibers: 7, hue: 0x8fd4c0, system: "arcuate_language", stream: "dorsal", myelination: 0.76 },
+  { id: "tract.slf3", a: "area.parietal", b: "area.broca", arch: "lateral_high", fibers: 5, hue: 0xb8c4a0, system: "arcuate_language", stream: "dorsal", myelination: 0.77 },
+  { id: "tract.fat", a: "area.broca", b: "area.premotor", arch: "frontal_slant", fibers: 5, hue: 0xd4b88a, system: "arcuate_language", stream: "dorsal", myelination: 0.75 },
+  // Frontoparietal / cingulum system
+  { id: "tract.slf", a: "area.parietal", b: "area.dlpfc", arch: "dorsal", fibers: 6, hue: 0xc4a574, system: "arcuate_language", stream: "dorsal", myelination: 0.8 },
+  { id: "tract.slf1", a: "area.parietal", b: "area.premotor", arch: "dorsal", fibers: 5, hue: 0xc4a574, system: "cingulum_system", stream: "dorsal", myelination: 0.74 },
+  { id: "tract.cingulum", a: "area.cingulate", b: "area.mtl", arch: "medial", fibers: 8, hue: 0xd4a84b, system: "cingulum_system", stream: "limbic", myelination: 0.81 },
+  { id: "tract.cingulum2", a: "area.mtl", b: "area.dlpfc", alias: "tract.cingulum", arch: "medial", fibers: 6, hue: 0xd4a84b, system: "cingulum_system", stream: "limbic", myelination: 0.81 },
+  { id: "tract.fornix", a: "area.mtl", b: "area.cingulate", arch: "fornix", fibers: 6, hue: 0xe0c070, system: "cingulum_system", stream: "limbic", myelination: 0.84 },
+  // Anterior ventral (semantic)
+  { id: "tract.uncinate", a: "area.ofc", b: "area.temporal", arch: "uncinate", fibers: 6, hue: 0xe07a5f, system: "anterior_ventral", stream: "ventral", myelination: 0.7 },
+  { id: "tract.ifof", a: "area.visual", b: "area.apfc", arch: "long_ventral", fibers: 8, hue: 0x9fd9cf, system: "anterior_ventral", stream: "ventral", myelination: 0.79 },
+  { id: "tract.emc", a: "area.temporal", b: "area.broca", arch: "ventral", fibers: 5, hue: 0xa8c4b8, system: "anterior_ventral", stream: "ventral", myelination: 0.72 },
+  // Posterior ventral
+  { id: "tract.ilf", a: "area.visual", b: "area.temporal", arch: "ventral", fibers: 7, hue: 0x8a9fd4, system: "posterior_ventral", stream: "ventral", myelination: 0.78 },
+  { id: "tract.mdlf", a: "area.auditory", b: "area.parietal", arch: "mid_temporal", fibers: 5, hue: 0x8ab0c4, system: "posterior_ventral", stream: "ventral", myelination: 0.73 },
+  { id: "tract.vof", a: "area.visual", b: "area.parietal", arch: "vertical", fibers: 4, hue: 0x7a90c4, system: "posterior_ventral", stream: "ventral", myelination: 0.71 },
+  // Commissural (workspace sync)
+  { id: "tract.forceps_minor", a: "area.dlpfc", b: "area.apfc", arch: "callosal_front", fibers: 6, hue: 0xc9b8e0, system: "commissural", stream: "commissural", myelination: 0.85 },
+  { id: "tract.forceps_major", a: "area.visual", b: "area.parietal", arch: "callosal_back", fibers: 5, hue: 0xb8a8d4, system: "commissural", stream: "commissural", myelination: 0.83 },
+  // Projection
+  { id: "tract.corticospinal", a: "area.premotor", b: "area.motor", arch: "descending", fibers: 5, hue: 0xe07a5f, system: "projection", stream: "projection", myelination: 0.9 },
 ];
 
 const SPIKES = [
   { id: "sense.chat.aaron", label: "Aaron task", pathway: ["area.wernicke", "area.temporal", "area.mtl"], tracts: ["tract.arcuate", "tract.cingulum", "tract.cingulum2"], gold: true },
-  { id: "sense.swiftguide.map", label: "SwiftGuide", pathway: ["area.apfc", "area.mtl"], tracts: ["tract.ifof", "tract.cingulum"], gold: true },
-  { id: "sense.audio.transcript", label: "Speak/hear", pathway: ["area.auditory", "area.broca", "area.motor"], tracts: ["tract.arcuate", "tract.corticospinal"] },
+  { id: "sense.language.af", label: "AF language", pathway: ["area.wernicke", "area.parietal", "area.broca"], tracts: ["tract.arcuate", "tract.af_posterior", "tract.af_anterior"], gold: true, system: "arcuate_language" },
+  { id: "sense.dual.ventral", label: "Ventral semantic", pathway: ["area.visual", "area.temporal", "area.ofc"], tracts: ["tract.ilf", "tract.emc", "tract.uncinate"], system: "anterior_ventral" },
+  { id: "sense.swiftguide.map", label: "SwiftGuide", pathway: ["area.apfc", "area.mtl"], tracts: ["tract.ifof", "tract.cingulum", "tract.fornix"], gold: true },
+  { id: "sense.audio.transcript", label: "Speak/hear", pathway: ["area.auditory", "area.broca", "area.motor"], tracts: ["tract.arcuate", "tract.fat", "tract.corticospinal"] },
   { id: "sense.careers.listing", label: "Jobs", pathway: ["area.temporal", "area.ofc"], tracts: ["tract.uncinate"] },
-  { id: "sense.vision.detection", label: "Vision", pathway: ["area.visual", "area.temporal", "area.mtl"], tracts: ["tract.ilf", "tract.cingulum"] },
+  { id: "sense.vision.detection", label: "Vision", pathway: ["area.visual", "area.temporal", "area.mtl"], tracts: ["tract.ilf", "tract.vof", "tract.cingulum"] },
+  { id: "sense.memory.fornix", label: "Episodic recall", pathway: ["area.mtl", "area.cingulate", "area.dlpfc"], tracts: ["tract.fornix", "tract.cingulum", "tract.cingulum2"] },
   { id: "health.scan", label: "Health scan", pathway: ["area.cingulate", "area.parietal", "area.dlpfc", "area.mtl"], tracts: ["tract.cingulum", "tract.cingulum2", "tract.slf"], gold: true, health: true },
 ];
 
@@ -59,6 +80,7 @@ const weightsEl = document.getElementById("weights");
 const controlsEl = document.getElementById("controls");
 
 let weights = Object.fromEntries(TRACTS.map((t) => [t.alias || t.id, 0.55]));
+let myelination = Object.fromEntries(TRACTS.map((t) => [t.alias || t.id, t.myelination || 0.7]));
 let events = [];
 let cursor = 0;
 let playing = false;
@@ -68,9 +90,13 @@ let neuronPoints = [];
 let catalogNeurons = [];
 let errorCount = 0;
 let healthStatus = {};
+let meshPhysics = { fiber_pulse_speed: 0.35, bundle_spread: 0.045, weight_to_radius: 0.05, myelination_to_emissive: 0.55 };
+let fiberPulses = [];
+let highlightedSystem = null;
 
 const areaMeshes = {};
 const tractMeshes = {};
+const tractBundles = {};
 
 function log(html) {
   const d = document.createElement("div");
@@ -300,31 +326,144 @@ AREAS.forEach((a) => {
   areaMeshes[a.id] = mesh;
 });
 
-function curveBetween(a, b) {
-  const A = new THREE.Vector3(...areaById[a].p);
-  const B = new THREE.Vector3(...areaById[b].p);
+function fasciculusCurve(t) {
+  const A = new THREE.Vector3(...areaById[t.a].p);
+  const B = new THREE.Vector3(...areaById[t.b].p);
   const mid = A.clone().add(B).multiplyScalar(0.5);
-  mid.y += 0.45;
+  const arch = t.arch || "dorsal";
+  if (arch === "sylvian") {
+    // Classical AF: arch up and slightly lateral around Sylvian fissure
+    mid.y += 0.85;
+    mid.x += 0.35;
+    mid.z += 0.25;
+  } else if (arch === "lateral_high") {
+    mid.y += 0.7;
+    mid.x += 0.55;
+  } else if (arch === "dorsal") {
+    mid.y += 0.65;
+  } else if (arch === "medial") {
+    mid.y += 0.35;
+    mid.x *= 0.3;
+  } else if (arch === "fornix") {
+    mid.y += 0.95;
+    mid.z -= 0.2;
+  } else if (arch === "uncinate") {
+    mid.y -= 0.35;
+    mid.z += 0.45;
+  } else if (arch === "long_ventral") {
+    mid.y -= 0.25;
+    mid.z += 0.15;
+  } else if (arch === "ventral") {
+    mid.y -= 0.4;
+  } else if (arch === "mid_temporal") {
+    mid.y += 0.15;
+    mid.z += 0.35;
+  } else if (arch === "vertical") {
+    mid.x += 0.2;
+  } else if (arch === "frontal_slant") {
+    mid.y += 0.55;
+    mid.z += 0.2;
+  } else if (arch === "callosal_front" || arch === "callosal_back") {
+    mid.x = 0;
+    mid.y += arch === "callosal_front" ? 0.5 : 0.25;
+  } else if (arch === "descending") {
+    mid.y -= 0.15;
+  } else {
+    mid.y += 0.45;
+  }
   return new THREE.QuadraticBezierCurve3(A, mid, B);
 }
 
-TRACTS.forEach((t) => {
-  const curve = curveBetween(t.a, t.b);
-  const w = weights[t.alias || t.id] || 0.55;
-  const tube = new THREE.Mesh(
-    new THREE.TubeGeometry(curve, 40, 0.018 + w * 0.045, 8, false),
+function offsetCurve(curve, idx, n, spread) {
+  const pts = [];
+  const steps = 28;
+  const ang = (idx / Math.max(n, 1)) * Math.PI * 2;
+  const rad = spread * (0.35 + (idx % 3) * 0.35);
+  for (let i = 0; i <= steps; i++) {
+    const u = i / steps;
+    const p = curve.getPoint(u);
+    const tng = curve.getTangent(u).normalize();
+    const up = Math.abs(tng.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+    const nrm = new THREE.Vector3().crossVectors(tng, up).normalize();
+    const bin = new THREE.Vector3().crossVectors(tng, nrm).normalize();
+    p.addScaledVector(nrm, Math.cos(ang) * rad);
+    p.addScaledVector(bin, Math.sin(ang) * rad);
+    pts.push(p);
+  }
+  return new THREE.CatmullRomCurve3(pts);
+}
+
+function buildFasciculus(t) {
+  const key = t.alias || t.id;
+  const w = weights[key] ?? 0.55;
+  const my = myelination[key] ?? t.myelination ?? 0.7;
+  const curve = fasciculusCurve(t);
+  const group = new THREE.Group();
+  group.userData = { id: t.id, alias: key, curve, system: t.system, stream: t.stream, fibers: [] };
+  const nFibers = t.fibers || 5;
+  const spread = meshPhysics.bundle_spread || 0.045;
+  const baseR = 0.006 + w * (meshPhysics.weight_to_radius || 0.05) * 0.35;
+  const hue = new THREE.Color(t.hue || 0xc4a574);
+  const lit = colorForWeight(w).lerp(hue, 0.45);
+
+  // Core trunk (thicker)
+  const trunk = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, 48, baseR * 1.6, 8, false),
     new THREE.MeshStandardMaterial({
-      color: colorForWeight(w),
-      emissive: colorForWeight(w),
-      emissiveIntensity: 0.18,
+      color: lit,
+      emissive: lit,
+      emissiveIntensity: 0.12 + my * (meshPhysics.myelination_to_emissive || 0.55) * 0.35,
       transparent: true,
-      opacity: 0.88,
+      opacity: 0.55 + my * 0.35,
     })
   );
-  tube.userData = { id: t.id, alias: t.alias || t.id, curve };
-  brain.add(tube);
-  tractMeshes[t.id] = tube;
-});
+  trunk.userData = { fiber: true, trunk: true };
+  group.add(trunk);
+
+  // Parallel axons in the fasciculus
+  for (let i = 0; i < nFibers; i++) {
+    const fc = offsetCurve(curve, i, nFibers, spread * (0.8 + w));
+    const fiber = new THREE.Mesh(
+      new THREE.TubeGeometry(fc, 36, baseR * 0.45, 5, false),
+      new THREE.MeshBasicMaterial({
+        color: lit,
+        transparent: true,
+        opacity: 0.35 + my * 0.4,
+      })
+    );
+    fiber.userData = { fiber: true, curve: fc };
+    group.add(fiber);
+    group.userData.fibers.push(fiber);
+  }
+
+  // Midpoint fasciculus label for priority tracts
+  if ((t.fibers || 0) >= 7 || t.id === "tract.arcuate" || t.id === "tract.fornix") {
+    const name = (t.id || "").replace("tract.", "").replace("af_", "AF ");
+    const lab = makeLabel(name);
+    const mp = curve.getPoint(0.5);
+    lab.position.copy(mp).add(new THREE.Vector3(0, 0.12, 0));
+    group.add(lab);
+  }
+
+  brain.add(group);
+  tractMeshes[t.id] = group;
+  tractBundles[t.id] = group;
+  return group;
+}
+
+TRACTS.forEach(buildFasciculus);
+
+function pulseAlongTract(tractId, color = 0x5fd4c4) {
+  const g = tractMeshes[tractId];
+  if (!g?.userData?.curve) return;
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.05, 10, 8),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95 })
+  );
+  mesh.userData = { curve: g.userData.curve, u: 0, speed: meshPhysics.fiber_pulse_speed || 0.35, tractId };
+  brain.add(mesh);
+  fiberPulses.push(mesh);
+}
 
 /** Fill cortex with catalog neurons + ambient interneurons */
 function fillNeurons(catalog = []) {
@@ -423,17 +562,39 @@ function setAreaLit(id, mode) {
 
 function refreshTracts(errorIds = new Set()) {
   TRACTS.forEach((t) => {
-    const mesh = tractMeshes[t.id];
+    const group = tractMeshes[t.id];
+    if (!group) return;
     const key = t.alias || t.id;
     const w = weights[key] ?? 0.55;
+    const my = myelination[key] ?? t.myelination ?? 0.7;
     const errored = errorIds.has(t.id) || errorIds.has(key);
-    const curve = mesh.userData.curve;
-    mesh.geometry.dispose();
-    mesh.geometry = new THREE.TubeGeometry(curve, 40, 0.014 + w * 0.055, 8, false);
-    mesh.material.color.copy(colorForWeight(w, errored));
-    mesh.material.emissive.copy(colorForWeight(w, errored));
-    mesh.material.emissiveIntensity = errored ? 0.75 : 0.12 + w * 0.4;
-    mesh.material.opacity = w < 0.15 ? 0.25 : 0.9;
+    const dimmed = highlightedSystem && t.system !== highlightedSystem;
+    const curve = group.userData.curve;
+    const hue = new THREE.Color(t.hue || 0xc4a574);
+    const lit = errored ? new THREE.Color("#e07a5f") : colorForWeight(w).lerp(hue, 0.45);
+    const spread = meshPhysics.bundle_spread || 0.045;
+    const baseR = 0.006 + w * (meshPhysics.weight_to_radius || 0.05) * 0.35;
+
+    // rebuild geometries in group
+    const children = [...group.children];
+    children.forEach((ch) => {
+      if (ch.isCSS2DObject) return;
+      if (ch.userData?.trunk) {
+        ch.geometry.dispose();
+        ch.geometry = new THREE.TubeGeometry(curve, 48, baseR * 1.6, 8, false);
+        ch.material.color.copy(lit);
+        ch.material.emissive?.copy(lit);
+        if (ch.material.emissiveIntensity != null) {
+          ch.material.emissiveIntensity = errored ? 0.85 : 0.12 + my * 0.35;
+        }
+        ch.material.opacity = dimmed ? 0.12 : w < 0.15 ? 0.2 : 0.55 + my * 0.35;
+      } else if (ch.userData?.fiber && ch.userData?.curve) {
+        // leave offset fibers; tint only
+        ch.material.color.copy(lit);
+        ch.material.opacity = dimmed ? 0.05 : 0.3 + my * 0.4;
+      }
+    });
+    group.visible = !dimmed || errored;
   });
   renderWeights();
 }
@@ -443,11 +604,18 @@ function renderWeights() {
   Object.entries(weights)
     .sort((a, b) => b[1] - a[1])
     .forEach(([id, w]) => {
+      const my = myelination[id] ?? 0.7;
       const row = document.createElement("div");
       row.className = "weight-row";
-      row.innerHTML = `<span>${id.replace("tract.", "")}</span><i style="width:${Math.round(w * 100)}%"></i><em>${w.toFixed(2)}</em>`;
+      row.innerHTML = `<span>${id.replace("tract.", "")}</span><i style="width:${Math.round(w * 100)}%"></i><em>${w.toFixed(2)} · my${my.toFixed(2)}</em>`;
       weightsEl.appendChild(row);
     });
+}
+
+function highlightSystem(sys) {
+  highlightedSystem = highlightedSystem === sys ? null : sys;
+  refreshTracts();
+  log(`<span class="center">MESH</span> system filter: ${highlightedSystem || "all"}`);
 }
 
 function clearLights() {
@@ -468,12 +636,14 @@ function applyEvent(ev) {
   } else if (ev.type === "ltp") {
     (ev.tracts || []).forEach((tid) => {
       weights[tid] = Math.min(1, (weights[tid] || 0.55) + 0.08 * (ev.gain || 1));
+      myelination[tid] = Math.min(0.98, (myelination[tid] || 0.7) + 0.01);
     });
     Object.keys(weights).forEach((tid) => {
       if (!(ev.tracts || []).includes(tid)) weights[tid] = Math.max(0.05, weights[tid] - 0.015);
     });
     (ev.pathway || []).filter((x) => x.startsWith("area.")).forEach((id) => setAreaLit(id, "feedback"));
-    chipPlast.textContent = "LTP +";
+    (ev.tracts || []).forEach((tid) => pulseAlongTract(tid, 0x5fd4c4));
+    chipPlast.textContent = "LTP + myelin";
     chipPlast.classList.add("on");
     log(`<span class="center">LTP</span> ${(ev.tracts || []).join(", ")}`);
     refreshTracts();
@@ -539,6 +709,7 @@ function seek(t) {
   scrub.value = String(cursor);
   chipT.textContent = `t=${cursor}/${Math.max(events.length - 1, 0)}`;
   weights = Object.fromEntries(TRACTS.map((tr) => [tr.alias || tr.id, 0.55]));
+  myelination = Object.fromEntries(TRACTS.map((tr) => [tr.alias || tr.id, tr.myelination || 0.7]));
   errorCount = 0;
   killed = false;
   chipKill.classList.remove("on");
@@ -546,6 +717,7 @@ function seek(t) {
   chipErr.textContent = "errors: 0";
   chipErr.classList.remove("on");
   neuroColumns.splice(0).forEach((m) => brain.remove(m));
+  fiberPulses.splice(0).forEach((m) => brain.remove(m));
   clearLights();
   for (let i = 0; i <= cursor; i++) applyEvent(events[i]);
   refreshTracts();
@@ -564,6 +736,7 @@ async function fireSpike(spike, injectError = false) {
   }
   log(`<span class="in">IN</span> ${spike.id}`);
   clearLights();
+  if (spike.system) highlightSystem(spike.system);
   if (spike.health) {
     try {
       const r = await fetch("../../vault/10-Mesh-Distillates/system-health.json").then((x) => x.json());
@@ -594,6 +767,7 @@ async function fireSpike(spike, injectError = false) {
     const to = path[i];
     const isErr = injectError && i === path.length - 1;
     pushLocalEvent({ type: "synapse", from, to, status: isErr ? "error" : "ok", code: isErr ? "missing_edge" : null });
+    (spike.tracts || []).forEach((tid) => pulseAlongTract(tid, isErr ? 0xe07a5f : 0x5fd4c4));
     await new Promise((r) => setTimeout(r, 260));
   }
   if (injectError) pushLocalEvent({ type: "error", code: "missing_edge", status: "error", tracts: spike.tracts });
@@ -615,10 +789,19 @@ function renderControls() {
     b.addEventListener("click", () => fireSpike(s, false));
     controlsEl.appendChild(b);
   });
+
+  ["arcuate_language", "anterior_ventral", "posterior_ventral", "cingulum_system", "commissural"].forEach((sys) => {
+    const b = document.createElement("button");
+    b.textContent = sys.replace(/_/g, " ");
+    b.title = `Highlight ${sys} fasciculi`;
+    b.addEventListener("click", () => highlightSystem(sys));
+    controlsEl.appendChild(b);
+  });
+
   const err = document.createElement("button");
   err.textContent = "Inject tract error";
   err.className = "danger";
-  err.addEventListener("click", () => fireSpike(SPIKES[3], true));
+  err.addEventListener("click", () => fireSpike(SPIKES[0], true));
   controlsEl.appendChild(err);
 
   const neuro = document.createElement("button");
@@ -658,6 +841,7 @@ function renderControls() {
   reset.addEventListener("click", () => {
     events = [];
     scrub.max = "0";
+    highlightedSystem = null;
     seek(0);
     log(`<span class="center">RESET</span> plasticity tape cleared`);
   });
@@ -683,14 +867,16 @@ scrub.addEventListener("input", () => {
 
 async function loadSeed() {
   try {
-    const [w, t, c, n, h] = await Promise.all([
+    const [w, t, c, n, h, mp] = await Promise.all([
       fetch("../../vault/10-Mesh-Distillates/tract-weights.json").then((r) => r.json()).catch(() => ({})),
       fetch("../../vault/10-Mesh-Distillates/plasticity-timeline.json").then((r) => r.json()).catch(() => ({})),
       fetch("../../vault/10-Mesh-Distillates/neurogenesis-columns.json").then((r) => r.json()).catch(() => ({})),
       fetch("../../config/connectome/neurons.json").then((r) => r.json()),
       fetch("../../vault/10-Mesh-Distillates/system-health.json").then((r) => r.json()).catch(() => null),
+      fetch("../../config/connectome/mesh-params.json").then((r) => r.json()).catch(() => null),
     ]);
     catalogNeurons = n.neurons || [];
+    if (mp?.mesh_physics) meshPhysics = { ...meshPhysics, ...mp.mesh_physics };
     if (h?.checks) {
       h.checks.forEach((c0) => {
         healthStatus[c0.neuron] = c0.status;
@@ -699,6 +885,7 @@ async function loadSeed() {
     }
     fillNeurons(catalogNeurons);
     log(`<span class="center">NEURONS</span> ${catalogNeurons.length} catalog + ambient fill`);
+    log(`<span class="center">MESH</span> ${TRACTS.length} fasciculi · Catani AF + Yeh systems`);
     if (w.weights) weights = { ...weights, ...w.weights };
     if (t.events?.length) {
       events = t.events;
@@ -733,9 +920,20 @@ function animate(now) {
   neuroColumns.forEach((m, i) => {
     m.position.y = areaById["area.mtl"].p[1] + 0.22 + Math.sin(now * 0.004 + i) * 0.05;
   });
+  // Fasciculus axon pulses
+  for (let i = fiberPulses.length - 1; i >= 0; i--) {
+    const p = fiberPulses[i];
+    p.userData.u += (p.userData.speed || 0.35) * 0.016;
+    if (p.userData.u >= 1) {
+      brain.remove(p);
+      fiberPulses.splice(i, 1);
+      continue;
+    }
+    p.position.copy(p.userData.curve.getPoint(p.userData.u));
+  }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
 requestAnimationFrame(animate);
 
-log(`<span class="center">READY</span> human cortex · filled neurons · drag to orbit · scrub to rewind`);
+log(`<span class="center">READY</span> human cortex · fasciculus mesh · spin · rewind`);

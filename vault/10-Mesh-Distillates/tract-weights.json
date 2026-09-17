@@ -9,7 +9,18 @@
     "tract.ifof": 0.57,
     "tract.thalamo": 0.47,
     "tract.corticospinal": 0.47,
-    "tract.mesh_callosal": 0.47
+    "tract.mesh_callosal": 0.47,
+    "tract.af_anterior": 0.762,
+    "tract.af_posterior": 0.754,
+    "tract.slf1": 0.746,
+    "tract.slf3": 0.758,
+    "tract.fat": 0.75,
+    "tract.emc": 0.738,
+    "tract.mdlf": 0.742,
+    "tract.vof": 0.734,
+    "tract.fornix": 0.786,
+    "tract.forceps_minor": 0.79,
+    "tract.forceps_major": 0.782
   },
   "pruned": []
 }

@@ -67,6 +67,13 @@
       "prefer_intra_area_loops": true,
       "max_hops_soft": 6,
       "notes": "Small-world: dense local columns, sparse long tracts — shorter act chains when safe"
+    },
+    "myelination": {
+      "id": "plasticity.myelinate",
+      "trigger": "repeated_ltp_on_tract",
+      "boost": 0.01,
+      "cap": 0.98,
+      "notes": "Repeated successful pathways myelinate — lower latency, brighter fasciculus emissive"
     }
   },
   "error_taxonomy": [
