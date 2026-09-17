@@ -19,6 +19,11 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/vision` | distilled detection/pose results (no raw frames by default) |
 | `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
 | `mesh/vault` | smart-second-brain vault path + topic distillates |
+| `mesh/cartography` | SwiftGuide mind-map hits + iOS stack distillates |
+| `mesh/language` | Arcuate language loop distillates (Wernicke↔Broca) |
+| `mesh/frontoparietal` | SLF ops↔executive coupling |
+| `mesh/valuation` | Uncinate OFC↔temporal boundary notes |
+| `mesh/tracts` | Hebbian association-fiber weights |
 | `mesh/persona` | Cam identity/voice/availability prefs |
 | `mesh/agent-commute` | Task commute paths + efficiency rankings |
 | `mesh/agent-memory` | Agent-consolidated memory promotions |
@@ -70,6 +75,7 @@ Config (not a second runtime): `config/swarm/`
 - Workspace registry via `scripts/choose-workspace.py --mesh-projects`
 - Vision results sync via `scripts/pack-vision-result.py`
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
+- Knowledge maps via SwiftGuide; sync stack/taxonomy distillates to `mesh/cartography`
 - AGI daily scan archives via `scripts/agi-research-scan.py` → vault + mesh distillates
 - Tool specs/runs via team.tooling → `mesh/tools`
 - Cross-workspace: `scripts/persist-export.py` / `persist-import.py`

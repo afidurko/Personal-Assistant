@@ -1,0 +1,131 @@
+{
+  "at": "2026-09-17T10:54:09Z",
+  "overall": "healthy",
+  "checks": [
+    {
+      "neuron": "neuron.vitals_loop",
+      "loadavg": [
+        4.97802734375,
+        4.66845703125,
+        4.607421875
+      ],
+      "cwd": "/workspace",
+      "status": "healthy"
+    },
+    {
+      "senses": 16,
+      "hotspot_options": 19,
+      "known_nodes": 100,
+      "motors": 10,
+      "edges": 101,
+      "hard_errors": [],
+      "missing_edges": [],
+      "soft_warnings": [],
+      "ok": true,
+      "neuron": "neuron.connectome_check",
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.submodule_health",
+      "count": 5,
+      "uninitialized": 0,
+      "status": "healthy",
+      "sample": [
+        " 0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis (heads/master)",
+        " 93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk (heads/main)",
+        " b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection (heads/release/2.9)",
+        " baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain (heads/main)",
+        " 64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide (heads/master)"
+      ]
+    },
+    {
+      "neuron": "neuron.integration_pulse",
+      "present": [
+        "integrations/jarvis",
+        "integrations/paddledetection",
+        "integrations/llmavatartalk",
+        "integrations/smart-second-brain",
+        "integrations/swiftguide"
+      ],
+      "missing": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.persist_sync",
+      "manifest": true,
+      "mesh_seed": true,
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.secret_hygiene",
+      "suspects": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.drift_scan",
+      "readme_mentions_3d": true,
+      "plasticity_config": true,
+      "areas_config": true,
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.converse_health",
+      "reachable": true,
+      "body": "{\n  \"ok\": true,\n  \"assistant\": \"Cam\",\n  \"session_id\": \"b80640e3-a9be-485b-9cdf-b9a10aba1262\",\n  \"started\": \"2026-09-17T01:40:32.728318+00:00\",\n  \"capabilities\": {\n    \"mic\": true,\n    \"camera\": true,\n",
+      "status": "healthy",
+      "notes": "idle if converse server not running \u2014 not critical"
+    },
+    {
+      "neuron": "neuron.arch_scan",
+      "issues": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.vuln_scan",
+      "findings": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.priority_boot",
+      "present": true,
+      "step_count": 10,
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.tailscale_reach",
+      "status": "idle",
+      "cli": false,
+      "notes": "tailscale CLI not available in this environment",
+      "wanted": [
+        "aaron-iphone",
+        "aaron-ipad"
+      ]
+    }
+  ],
+  "neurons_fired": [
+    "neuron.vitals_loop",
+    "neuron.connectome_check",
+    "neuron.submodule_health",
+    "neuron.integration_pulse",
+    "neuron.persist_sync",
+    "neuron.secret_hygiene",
+    "neuron.drift_scan",
+    "neuron.converse_health",
+    "neuron.arch_scan",
+    "neuron.vuln_scan",
+    "neuron.priority_boot",
+    "neuron.tailscale_reach"
+  ],
+  "workspace": "/workspace",
+  "hooks": {
+    "persist_weekly": {
+      "neuron": "neuron.persist_sync",
+      "skipped": true,
+      "reason": "recent"
+    },
+    "fornix": {
+      "exit": 0,
+      "preview": "fornix: skipped (recent)\n"
+    }
+  }
+}

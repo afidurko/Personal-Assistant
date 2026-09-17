@@ -19,6 +19,8 @@ __pycache__/
 identity/persistence/cam-persistence.zip
 identity/aaron/local/
 vault/10-Mesh-Distillates/converse/*.jsonl
+vault/10-Mesh-Distillates/.fornix-last-run
+vault/10-Mesh-Distillates/.persist-weekly
 scripts/__pycache__/
 identity/persistence/tickets/pending/*.json
 identity/persistence/tickets/done/*.json

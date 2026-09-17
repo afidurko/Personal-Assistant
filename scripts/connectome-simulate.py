@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cam connectome live-action simulations — sense→center→switch→motor→feedback.
+"""Cam connectome live-action simulations — sense→area→switch→motor→feedback.
 
 Default N = 1_000_000_000 (continuous QA campaign size).
 Static integrity scan is the real gate; fuzz campaign stress-tests holds.
@@ -21,6 +21,14 @@ OUT_DIR = ROOT / "vault" / "10-Mesh-Distillates"
 
 FEEDBACK_SINKS = frozenset(
     {
+        "area.dlpfc",
+        "area.mtl",
+        "area.cingulate",
+        "area.wernicke",
+        "area.parietal",
+        "area.broca",
+        "area.visual",
+        "area.apfc",
         "center.chief",
         "center.memory",
         "center.ops",
@@ -35,12 +43,13 @@ FEEDBACK_SINKS = frozenset(
 )
 DEFAULT_PATH = (
     "sense.chat.aaron",
-    "center.chief",
-    "center.memory",
+    "area.wernicke",
+    "area.dlpfc",
+    "area.mtl",
     "switch.autonomy",
     "motor.mesh",
 )
-DEFAULT_FEEDBACK = ("motor.mesh", "center.memory", "center.chief")
+DEFAULT_FEEDBACK = ("motor.mesh", "area.mtl", "area.dlpfc")
 
 
 def load_json(name: str):
@@ -48,24 +57,28 @@ def load_json(name: str):
 
 
 def node_ok(node: str) -> bool:
-    return node.startswith(("sense.", "center.", "switch.", "motor."))
+    return node.startswith(("sense.", "center.", "area.", "switch.", "motor.", "neuron."))
 
 
 def build_tables():
     """Precompute per-sense pathway + feedback tables and inventories."""
     sensory = load_json("sensory.json")
     centers = load_json("centers.json")
+    areas = load_json("areas.json")
     switches = load_json("switches.json")
     motor = load_json("motor.json")
     hotspots = load_json("hotspots.json")
     synapses = load_json("synapses.json")
+    neurons = load_json("neurons.json")
 
     sense_ids = [n["id"] for n in sensory["neurons"]]
     known = (
         {n["id"] for n in sensory["neurons"]}
         | {c["id"] for c in centers["centers"]}
+        | {a["id"] for a in areas["areas"]}
         | {s["id"] for s in switches["switches"]}
         | {e["id"] for e in motor["effectors"]}
+        | {n["id"] for n in neurons["neurons"]}
     )
     edges = {(e["from"], e["to"]) for e in synapses["edges"]}
     motor_ids = {e["id"] for e in motor["effectors"]}
@@ -83,9 +96,9 @@ def build_tables():
         motors = [n for n in path if n.startswith("motor.")]
         if motors:
             last = motors[-1]
-            fb = (last, "center.memory", "center.chief")
+            fb = (last, "area.mtl", "area.dlpfc")
         else:
-            fb = ("center.memory", "center.chief")
+            fb = ("area.mtl", "area.dlpfc")
         by_sense.setdefault(path[0], []).append((h["id"], path, fb, sides))
 
     for s in sense_ids:
@@ -185,8 +198,10 @@ def run_batch(payload):
             if not (
                 node.startswith("sense.")
                 or node.startswith("center.")
+                or node.startswith("area.")
                 or node.startswith("switch.")
                 or node.startswith("motor.")
+                or node.startswith("neuron.")
             ):
                 ok = False
                 code = f"bad_node:{node}"

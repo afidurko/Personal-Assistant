@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "leases": [
+    {
+      "id": "74e00317",
+      "workspace": "cam-cloud",
+      "ns": "mesh/*",
+      "acquired_at": "2026-09-17T01:36:13Z",
+      "expires_at_epoch": 1789612573.9816782,
+      "bus": "tract.forceps_minor"
+    }
+  ]
+}

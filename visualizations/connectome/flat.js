@@ -1,18 +1,17 @@
 /* Cam Connectome — Brodmann cortex + columns + association mesh + spinal + mind map */
 (() => {
   const REPOS = [
-    { id: "nullclaw", label: "nullclaw", region: "brain" },
-    { id: "nulltickets", label: "nulltickets", region: "spine" },
-    { id: "nullboiler", label: "nullboiler", region: "brain" },
-    { id: "nullhub", label: "nullhub", region: "brain" },
-    { id: "jarvis", label: "Jarvis", region: "motor" },
-    { id: "cline", label: "Cline", region: "motor" },
-    { id: "paddledetection", label: "PaddleDetection", region: "sense" },
-    { id: "llmavatartalk", label: "LLMAvatarTalk", region: "motor" },
-    { id: "smart-second-brain", label: "smart-second-brain", region: "brain" },
-    { id: "swiftguide", label: "SwiftGuide", special: true, region: "brain" },
-    { id: "openclaw", label: "OpenClaw patterns", region: "motor" },
-    { id: "assistant", label: "Assistant-", region: "motor" },
+    { id: "nullclaw", label: "nullclaw" },
+    { id: "nulltickets", label: "nulltickets" },
+    { id: "nullboiler", label: "nullboiler" },
+    { id: "nullhub", label: "nullhub" },
+    { id: "jarvis", label: "Jarvis" },
+    { id: "paddledetection", label: "PaddleDetection" },
+    { id: "llmavatartalk", label: "LLMAvatarTalk" },
+    { id: "smart-second-brain", label: "smart-second-brain" },
+    { id: "swiftguide", label: "SwiftGuide", special: true },
+    { id: "openclaw", label: "OpenClaw patterns" },
+    { id: "assistant", label: "Assistant-" },
   ];
 
   // Brodmann functional areas (lateral cortex layout)
@@ -72,7 +71,7 @@
     { id: "neuron.effector", area: "area.motor", kind: "agent", label: "fire" },
   ];
 
-  // Spinal nodes (periphery) for CNS lens — keyed to Brodmann hubs + Cline/HAAS centers
+  // Spinal nodes (periphery) for CNS lens — keyed to Brodmann hubs
   const NODES = {
     ...Object.fromEntries(
       Object.entries(AREAS).map(([id, a]) => [
@@ -80,24 +79,10 @@
         { x: a.x, y: Math.min(a.y, 240), r: Math.max(12, a.r * 0.55), label: a.label, kind: "area", repos: a.repos },
       ])
     ),
-    // Main-only higher centers (Cline / AGI / enhance / swarm)
-    "center.coding": { x: 340, y: 255, r: 15, label: "coding", kind: "center", repos: ["cline"] },
-    "center.agi_scan": { x: 280, y: 145, r: 16, label: "AGI scan", kind: "center", repos: ["smart-second-brain", "nullclaw"] },
-    "center.enhance": { x: 250, y: 210, r: 14, label: "enhance", kind: "center", repos: ["nullclaw"] },
-    "center.capability": { x: 620, y: 200, r: 15, label: "capability", kind: "center", repos: ["nullclaw", "nullboiler"] },
-    "center.info": { x: 340, y: 250, r: 14, label: "info", kind: "center", repos: ["smart-second-brain"] },
-    "center.slm": { x: 580, y: 175, r: 13, label: "sLM", kind: "center", repos: ["nullclaw"] },
-    "center.dl": { x: 270, y: 270, r: 13, label: "DL", kind: "center", repos: ["paddledetection", "nullclaw"] },
-    "center.tooling": { x: 600, y: 240, r: 14, label: "tooling", kind: "center", repos: ["jarvis", "nullclaw"] },
     "switch.autonomy": { x: 450, y: 310, r: 12, label: "autonomy", kind: "switch", repos: ["nulltickets"] },
     "switch.outbound": { x: 520, y: 340, r: 11, label: "outbound", kind: "switch", repos: ["openclaw"] },
     "switch.careers_submit": { x: 560, y: 300, r: 11, label: "submit", kind: "switch", repos: ["nulltickets"] },
     "switch.presence": { x: 580, y: 250, r: 11, label: "presence", kind: "switch", repos: ["llmavatartalk"] },
-    "switch.research_scan": { x: 380, y: 300, r: 11, label: "scan", kind: "switch", repos: ["nulltickets"] },
-    "switch.cam_enhance": { x: 320, y: 330, r: 11, label: "enhance", kind: "switch", repos: ["nullhub"] },
-    "switch.slm_local": { x: 600, y: 310, r: 10, label: "sLM on", kind: "switch", repos: ["nullclaw"] },
-    "switch.dl_local": { x: 280, y: 340, r: 10, label: "DL on", kind: "switch", repos: ["nullclaw"] },
-    "switch.tooling": { x: 540, y: 360, r: 11, label: "tools", kind: "switch", repos: ["jarvis", "nulltickets"] },
     "switch.kill": { x: 450, y: 360, r: 13, label: "KILL", kind: "switch", repos: ["nullhub"] },
     "switch.identity": { x: 400, y: 340, r: 11, label: "identity", kind: "switch", repos: ["nullhub"] },
     "switch.tasking": { x: 380, y: 370, r: 11, label: "tasking", kind: "switch", repos: ["nullclaw"] },
@@ -110,18 +95,9 @@
     "sense.audio.transcript": { x: 280, y: 230, r: 13, label: "ASR", kind: "sense", repos: ["llmavatartalk"] },
     "sense.vision.detection": { x: 200, y: 190, r: 13, label: "vision in", kind: "sense", repos: ["paddledetection"] },
     "sense.email.thread": { x: 230, y: 540, r: 12, label: "email", kind: "sense", repos: ["openclaw"] },
-    "sense.cline.result": { x: 200, y: 360, r: 12, label: "Cline result", kind: "sense", repos: ["cline"] },
-    "sense.clock.daily": { x: 180, y: 260, r: 12, label: "daily clock", kind: "sense", repos: ["nullboiler"] },
-    "sense.web.arxiv": { x: 170, y: 320, r: 12, label: "arXiv", kind: "sense", repos: ["smart-second-brain"] },
-    "sense.web.agi_feed": { x: 165, y: 380, r: 12, label: "AGI feeds", kind: "sense", repos: ["smart-second-brain"] },
-    "sense.slm.inference": { x: 200, y: 160, r: 11, label: "sLM out", kind: "sense", repos: ["nullclaw"] },
-    "sense.dl.embedding": { x: 190, y: 120, r: 11, label: "DL out", kind: "sense", repos: ["nullclaw"] },
-    "sense.swarm.message": { x: 175, y: 450, r: 11, label: "swarm bus", kind: "sense", repos: ["nulltickets"] },
-    "sense.tool.result": { x: 185, y: 500, r: 11, label: "tool result", kind: "sense", repos: ["jarvis"] },
-    "motor.text": { x: 680, y: 340, r: 14, label: "text", kind: "motor", repos: ["openclaw", "assistant"] },
+    "motor.text": { x: 680, y: 340, r: 14, label: "text", kind: "motor", repos: ["openclaw"] },
     "motor.speak": { x: 670, y: 250, r: 16, label: "speak+face", kind: "motor", repos: ["llmavatartalk"] },
     "motor.jarvis": { x: 710, y: 490, r: 13, label: "Jarvis", kind: "motor", repos: ["jarvis"] },
-    "motor.cline": { x: 740, y: 460, r: 14, label: "Cline", kind: "motor", repos: ["cline"] },
     "motor.docs": { x: 660, y: 540, r: 12, label: "docs", kind: "motor", repos: ["nullclaw", "swiftguide"] },
     "motor.jobs": { x: 720, y: 300, r: 14, label: "apply", kind: "motor", repos: ["nullclaw"] },
     "motor.vault": { x: 650, y: 190, r: 13, label: "vault write", kind: "motor", repos: ["smart-second-brain"] },
@@ -129,12 +105,6 @@
     "motor.calendar": { x: 730, y: 540, r: 12, label: "cal write", kind: "motor", repos: ["jarvis"] },
     "motor.call": { x: 700, y: 390, r: 12, label: "call", kind: "motor", repos: ["openclaw"] },
     "motor.facetime": { x: 690, y: 440, r: 12, label: "FaceTime", kind: "motor", repos: ["assistant"] },
-    "motor.web_fetch": { x: 640, y: 280, r: 13, label: "web fetch", kind: "motor", repos: ["nullclaw"] },
-    "motor.enhance": { x: 630, y: 220, r: 12, label: "enhance", kind: "motor", repos: ["nullhub", "nullclaw"] },
-    "motor.slm": { x: 700, y: 220, r: 12, label: "sLM run", kind: "motor", repos: ["nullclaw"] },
-    "motor.dl": { x: 710, y: 170, r: 12, label: "DL run", kind: "motor", repos: ["nullclaw"] },
-    "motor.tool": { x: 735, y: 250, r: 12, label: "tool run", kind: "motor", repos: ["jarvis", "nullclaw"] },
-    "motor.swarm": { x: 740, y: 330, r: 12, label: "swarm ops", kind: "motor", repos: ["nulltickets"] },
   };
 
   const HOTSPOTS = {
@@ -202,42 +172,6 @@
       behavior: "BA10 cartography → stack brief",
       repos: ["swiftguide", "smart-second-brain"],
       mindFocus: ["map.swiftguide", "sg.2026", "sg.2026.stack", "map.centers", "center.cartography"],
-    },
-    "sense.cline.result": {
-      pathway: ["sense.cline.result", "center.coding", "area.mtl", "switch.autonomy", "motor.mesh"],
-      feedback: ["motor.mesh", "sense.cline.result", "center.coding", "area.dlpfc"],
-      behavior: "Cline result → mesh (all workspaces)",
-      repos: ["cline", "nulltickets"],
-    },
-    "sense.clock.daily": {
-      pathway: ["sense.clock.daily", "center.agi_scan", "center.enhance", "area.cingulate", "switch.research_scan", "motor.web_fetch", "motor.vault", "motor.mesh"],
-      feedback: ["motor.web_fetch", "area.mtl", "area.dlpfc"],
-      behavior: "daily AGI scan → propose Cam enhancements",
-      repos: ["nullclaw", "smart-second-brain", "nulltickets"],
-    },
-    "sense.web.arxiv": {
-      pathway: ["sense.web.arxiv", "center.agi_scan", "center.enhance", "area.cingulate", "switch.research_scan", "motor.web_fetch", "motor.vault"],
-      feedback: ["motor.vault", "area.mtl", "area.dlpfc"],
-      behavior: "arXiv papers → Cam relevance proposals",
-      repos: ["smart-second-brain", "nullclaw"],
-    },
-    "sense.web.agi_feed": {
-      pathway: ["sense.web.agi_feed", "center.agi_scan", "center.enhance", "area.cingulate", "switch.research_scan", "motor.web_fetch"],
-      feedback: ["motor.web_fetch", "area.mtl", "area.dlpfc"],
-      behavior: "AGI feeds → distill",
-      repos: ["smart-second-brain", "nullclaw"],
-    },
-    "sense.swarm.message": {
-      pathway: ["sense.swarm.message", "center.tooling", "center.capability", "switch.autonomy", "motor.swarm"],
-      feedback: ["motor.swarm", "sense.swarm.message", "area.mtl", "area.dlpfc"],
-      behavior: "boss/worker assign → broadcast → resolve",
-      repos: ["nulltickets", "nullclaw", "jarvis"],
-    },
-    "sense.tool.result": {
-      pathway: ["sense.tool.result", "center.tooling", "area.cingulate", "area.mtl", "switch.autonomy", "motor.mesh"],
-      feedback: ["motor.mesh", "sense.tool.result", "center.tooling"],
-      behavior: "tool result → QA → mesh",
-      repos: ["jarvis", "nulltickets", "nullclaw"],
     },
   };
 
@@ -662,7 +596,6 @@
       ["sense.vision.detection", "Vision", ""],
       ["sense.email.thread", "Email", ""],
       ["sense.vault.hit", "Vault recall", ""],
-      ["sense.cline.result", "Cline result", ""],
       ["__demo__", "Auto demo", "gold"],
       ["__kill__", "Kill switch", "danger"],
       ["__reset__", "Reset", ""],

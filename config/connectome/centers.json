@@ -1,11 +1,12 @@
 {
-  "version": 1,
-  "analogy": "Higher brain centers \u2014 specialization / dimorphic routing lives here",
+  "version": 2,
+  "analogy": "Compatibility shim \u2014 Brodmann areas are the primary higher cortex (see areas.json). Legacy center.* ids alias into areas.",
   "centers": [
     {
       "id": "center.chief",
       "role": "chief",
       "function": "executive integration; Aaron-facing voice of Cam",
+      "maps_to": "area.dlpfc",
       "accepts": [
         "spike.task",
         "spike.question",
@@ -25,6 +26,7 @@
       "id": "center.memory",
       "role": "memory-curator",
       "function": "mesh + vault association / engrams",
+      "maps_to": "area.mtl",
       "accepts": [
         "spike.fact",
         "spike.note_ref",
@@ -39,9 +41,29 @@
       ]
     },
     {
+      "id": "center.cartography",
+      "role": "researcher",
+      "function": "knowledge cartography \u2014 hierarchical mind maps (SwiftGuide pattern)",
+      "maps_to": "area.apfc",
+      "accepts": [
+        "spike.note_ref",
+        "spike.fact",
+        "spike.stack",
+        "spike.question"
+      ],
+      "projects_to": [
+        "center.research",
+        "center.docs",
+        "center.memory",
+        "center.qa",
+        "sense.swiftguide.map"
+      ]
+    },
+    {
       "id": "center.research",
       "role": "researcher",
       "function": "evidence hotspot; citations required",
+      "maps_to": "area.temporal",
       "accepts": [
         "spike.question",
         "spike.fact",
@@ -56,6 +78,7 @@
       "id": "center.careers",
       "role": "careers",
       "function": "LinkedIn/Indeed hotspot",
+      "maps_to": "area.temporal",
       "accepts": [
         "spike.job",
         "spike.task"
@@ -69,6 +92,7 @@
       "id": "center.ops",
       "role": "ops",
       "function": "life-ops hotspot",
+      "maps_to": "area.parietal",
       "accepts": [
         "spike.schedule",
         "spike.task",
@@ -83,6 +107,7 @@
       "id": "center.comms",
       "role": "comms",
       "function": "social-motor planning + presence",
+      "maps_to": "area.broca",
       "accepts": [
         "spike.inbox",
         "spike.speech",
@@ -97,12 +122,70 @@
       "id": "center.docs",
       "role": "docs",
       "function": "document planning",
+      "maps_to": "area.apfc",
       "accepts": [
         "spike.task",
         "spike.note_ref"
       ],
       "projects_to": [
         "switch.autonomy"
+      ]
+    },
+    {
+      "id": "center.vision",
+      "role": "vision",
+      "function": "visual association",
+      "maps_to": "area.visual",
+      "accepts": [
+        "spike.visual",
+        "spike.task"
+      ],
+      "projects_to": [
+        "center.chief",
+        "center.memory",
+        "center.comms"
+      ]
+    },
+    {
+      "id": "center.qa",
+      "role": "qa",
+      "function": "proofreading / consistency before motor",
+      "maps_to": "area.cingulate",
+      "accepts": [
+        "spike.*"
+      ],
+      "projects_to": [
+        "switch.autonomy",
+        "switch.careers_submit",
+        "center.chief",
+        "center.memory",
+        "switch.tooling"
+      ]
+    },
+    {
+      "id": "center.router",
+      "role": "nullboiler",
+      "function": "policy neuropil \u2014 who runs what",
+      "maps_to": "area.dlpfc",
+      "accepts": [
+        "spike.task"
+      ],
+      "projects_to": [
+        "center.research",
+        "center.careers",
+        "center.ops",
+        "center.comms",
+        "center.docs",
+        "center.vision",
+        "center.cartography",
+        "center.coding",
+        "center.agi_scan",
+        "center.enhance",
+        "center.capability",
+        "center.info",
+        "center.slm",
+        "center.dl",
+        "center.tooling"
       ]
     },
     {
@@ -120,59 +203,6 @@
         "center.memory"
       ],
       "notes": "Any Cam role may summon; Cline is motor not brain"
-    },
-    {
-      "id": "center.vision",
-      "role": "vision",
-      "function": "visual association",
-      "accepts": [
-        "spike.visual",
-        "spike.task"
-      ],
-      "projects_to": [
-        "center.chief",
-        "center.memory",
-        "center.comms"
-      ]
-    },
-    {
-      "id": "center.qa",
-      "role": "qa",
-      "function": "proofreading / consistency before motor",
-      "accepts": [
-        "spike.*"
-      ],
-      "projects_to": [
-        "switch.autonomy",
-        "switch.careers_submit",
-        "center.chief",
-        "center.memory",
-        "switch.tooling"
-      ]
-    },
-    {
-      "id": "center.router",
-      "role": "nullboiler",
-      "function": "policy neuropil \u2014 who runs what",
-      "accepts": [
-        "spike.task"
-      ],
-      "projects_to": [
-        "center.research",
-        "center.careers",
-        "center.ops",
-        "center.comms",
-        "center.docs",
-        "center.coding",
-        "center.vision",
-        "center.agi_scan",
-        "center.enhance",
-        "center.capability",
-        "center.info",
-        "center.slm",
-        "center.dl",
-        "center.tooling"
-      ]
     },
     {
       "id": "center.agi_scan",
@@ -294,13 +324,26 @@
     {
       "id": "center.tooling",
       "role": "tool-creator",
-      "function": "tool-creator → tool-user; privilege-aware tool registry for motors",
-      "accepts": ["spike.task", "spike.tool_result", "spike.swarm", "spike.question"],
-      "projects_to": ["center.capability", "center.ops", "center.qa", "center.slm", "switch.autonomy", "switch.tooling"],
+      "function": "tool-creator \u2192 tool-user; privilege-aware tool registry for motors",
+      "accepts": [
+        "spike.task",
+        "spike.tool_result",
+        "spike.swarm",
+        "spike.question"
+      ],
+      "projects_to": [
+        "center.capability",
+        "center.ops",
+        "center.qa",
+        "center.slm",
+        "switch.autonomy",
+        "switch.tooling"
+      ],
       "team": "team.tooling",
       "swarm": "config/swarm/privileges.json"
     }
   ],
+  "preferred": "config/connectome/areas.json",
   "teams": [
     "team.agi-research-scan",
     "team.capability",
@@ -312,13 +355,13 @@
     "max_subagents": null,
     "unlimited": true,
     "human_gate_to_spawn": false,
+    "analogy": "unbounded interneuron recruitment with privilege inheritance \u2014 count/depth uncapped; privileges never escalate",
+    "authorized_by": "Aaron",
+    "authorized_at": "2026-09-16",
     "all_teams_may_spawn_subagents": true,
     "privilege_inheritance": true,
     "lineage_terminate": true,
     "spawn_one_level_below_only": true,
-    "analogy": "unbounded interneuron recruitment with privilege inheritance — count/depth uncapped; privileges never escalate",
-    "authorized_by": "Aaron",
-    "authorized_at": "2026-09-16",
     "reaffirmed_at": "2026-09-17",
     "swarm_config": "config/swarm/privileges.json"
   }
