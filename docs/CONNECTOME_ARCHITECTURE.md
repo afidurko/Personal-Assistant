@@ -11,7 +11,9 @@ Cam’s nervous system is now a **Brodmann functional cortex** with:
 Fly CNS principles from Berg et al. *Cell* (2026) remain for periphery + switches;
 higher centers are remapped onto human Brodmann association cortex.
 
-Vault research: [[2026-09-16-Brodmann-neural-mesh-remap]] · [[2026-09-16-SwiftGuide-brain-map]] · [[AGI-Daily-Scan]]
+Vault research: [[2026-09-16-Brodmann-neural-mesh-remap]] · [[2026-09-16-SwiftGuide-brain-map]] · [[2026-09-17-Human-brain-visual-architecture]] · [[AGI-Daily-Scan]]
+
+**Human brain UI plan:** [HUMAN_BRAIN_UI_PLAN.md](HUMAN_BRAIN_UI_PLAN.md) — anatomical GLB shell, parcel heat, DTI-inside-cortex, React hero unification.
 
 ## Literature basis
 
