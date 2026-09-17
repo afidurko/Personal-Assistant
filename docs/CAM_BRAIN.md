@@ -21,7 +21,9 @@ Aaron
 | **Information** | `center.info` | Vault → mesh → web cited answers |
 | **Tooling** | `center.tooling` | Tool-creator → tool-user; boss/worker synapse ops |
 
-Configs: `config/teams/*.json` · Swarm: `config/swarm/` · Docs: [HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md)
+Configs: `config/teams/*.json` · Swarm: `config/swarm/` · Runtime: `server/core/swarm-runtime.ts` · Docs: [HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md)
+
+Neural mesh layer **swarm** (privilege-broker, lineage-guardian, boss-router, tool-broker) runs on every scan cycle and writes shared memory namespaces for **all agents and workspaces**.
 
 ## Deep learning + sLMs
 

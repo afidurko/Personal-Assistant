@@ -213,6 +213,55 @@ function fromAgentContext(
     });
   }
 
+  if (cycle?.swarm && cycle.swarm.denials > 0) {
+    out.push({
+      id: 'suggest-swarm-privilege-ok',
+      kind: 'swarm-privilege',
+      title: 'Privilege broker blocked escalations',
+      rationale: `Swarm cycle denied ${cycle.swarm.denials} illegal privilege grant(s) — inheritance is active across agents.`,
+      implementation:
+        'Keep config/swarm/privileges.json loaded; focus Privilege Broker hex and confirm aaron_only never lands on agents.',
+      sketch: 'python3 scripts/swarm-check.py\nPOST /api/agents/cycle',
+      priority: 42,
+      relatedWorkspaceIds: workspaces.filter((w) => w.kind === 'swarm').map((w) => w.id),
+      relatedConceptIds: [],
+      sourceFindingIds: [],
+    });
+  }
+
+  if (cycle?.swarm && cycle.swarm.activeAgents > 0) {
+    out.push({
+      id: 'suggest-swarm-lineage-memory',
+      kind: 'swarm-lineage',
+      title: 'Persist swarm lineage across workspaces',
+      rationale: `${cycle.swarm.activeAgents} active swarm agents; namespaces ${cycle.swarm.namespacesTouched.slice(0, 3).join(', ')}…`,
+      implementation:
+        'Export persistence bundle so mesh/agent-lineage + mesh/swarm/* travel to future workspaces; run swarm-check after import.',
+      sketch: 'python3 scripts/persist-export.py --out /tmp/cam.zip',
+      priority: 48,
+      relatedWorkspaceIds: workspaces.map((w) => w.id),
+      relatedConceptIds: [],
+      sourceFindingIds: [],
+    });
+  }
+
+  const swarmWs = workspaces.find((w) => w.kind === 'swarm');
+  if (swarmWs && swarmWs.score < 90) {
+    out.push({
+      id: 'suggest-swarm-tooling',
+      kind: 'swarm-tooling',
+      title: 'Harden tooling team + tool registry',
+      rationale: `Swarm Mesh score ${swarmWs.score} — privilege/bus/tooling wiring needs attention.`,
+      implementation:
+        'Restore team.tooling, config/tools/registry.json, and center.tooling; re-run swarm scanner.',
+      sketch: 'python3 scripts/swarm-check.py\nnpm run scan',
+      priority: 72,
+      relatedWorkspaceIds: [swarmWs.id],
+      relatedConceptIds: [],
+      sourceFindingIds: swarmWs.findings.map((f) => f.id).slice(0, 5),
+    });
+  }
+
   const critical = workspaces.flatMap((w) => w.findings.filter((f) => f.severity === 'critical'));
   if (critical.length > 0) {
     const fixer = MESH_AGENTS.find((a) => a.id === 'issue-fix-loop')!;

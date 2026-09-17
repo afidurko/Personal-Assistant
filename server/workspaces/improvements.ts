@@ -4,6 +4,7 @@ import type { WorkspaceScanner } from './types.js';
 import { architectureScanner } from './architecture.js';
 import { agiResearchScanner } from './agi-research.js';
 import { healthScanner } from './health.js';
+import { swarmScanner } from './swarm.js';
 import { updatesScanner } from './updates.js';
 import { vulnerabilityScanner } from './vulnerability.js';
 import {
@@ -31,6 +32,7 @@ async function lightRescan(rootDir: string): Promise<WorkspaceSnapshot[]> {
     vulnerabilityScanner.scan(rootDir),
     updatesScanner.scan(rootDir),
     agiResearchScanner.scan(rootDir),
+    swarmScanner.scan(rootDir),
   ]);
 }
 
@@ -51,6 +53,21 @@ function synthesize(prior: WorkspaceSnapshot[]): Finding[] {
   const vuln = map.vulnerability;
   const updates = map.updates;
   const agi = map.agi_research;
+  const swarm = map.swarm;
+
+  if (swarm && (swarm.score < 50 || swarm.status === 'critical')) {
+    findings.push(
+      makeFinding(ID, {
+        title: 'Repair swarm privilege / lineage wiring',
+        detail: `Swarm workspace score is ${swarm.score} with ${swarm.findings.length} finding(s).`,
+        severity: 'high',
+        category: 'priority',
+        suggestion:
+          'Restore config/swarm/* + team.tooling + privilege_inheritance so all agents share the bus.',
+        relatedNodeIds: ['workspace-swarm', 'layer-swarm'],
+      }),
+    );
+  }
 
   if (agi && (agi.score < 50 || agi.status === 'critical')) {
     findings.push(
@@ -243,6 +260,8 @@ export const improvementsScanner: WorkspaceScanner & {
       architectureScore: map.architecture?.score ?? -1,
       vulnerabilityScore: map.vulnerability?.score ?? -1,
       updatesScore: map.updates?.score ?? -1,
+      agiResearchScore: map.agi_research?.score ?? -1,
+      swarmScore: map.swarm?.score ?? -1,
       suggestionCount: findings.length,
       findingCount: findings.length,
       usedPrior: Boolean(prior?.length),

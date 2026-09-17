@@ -8,7 +8,7 @@ talking presence — with a smart second brain, **agent teams**, and a **sLM/DL 
 
 - **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
 - **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
-- **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
+- **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)

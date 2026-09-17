@@ -96,6 +96,18 @@
         "status": "active_this_branch",
         "cadence": "daily",
         "human_gate_for_apply": "switch.cam_enhance"
+      },
+      {
+        "id": "scan.swarm",
+        "kind": "swarm",
+        "source_pr": 6,
+        "team": "team.tooling",
+        "module": "server/workspaces/swarm.ts",
+        "script": "scripts/swarm-check.py",
+        "runtime": "server/core/swarm-runtime.ts",
+        "hotspot": "hotspot.tooling",
+        "status": "active_this_branch",
+        "notes": "Privilege inheritance + lineage + boss/worker bus across all agents/workspaces"
       }
     ],
     "agent_teams": [
@@ -110,8 +122,30 @@
       {
         "id": "team.info",
         "config": "config/teams/info.json"
+      },
+      {
+        "id": "team.tooling",
+        "config": "config/teams/tooling.json"
       }
     ],
+    "swarm_contracts": {
+      "config": "config/swarm/",
+      "privileges": "config/swarm/privileges.json",
+      "primitives": "config/swarm/primitives.json",
+      "runtime": "server/core/swarm-runtime.ts",
+      "mesh_namespaces": [
+        "mesh/agent-lineage",
+        "mesh/tools",
+        "mesh/swarm/bus",
+        "mesh/swarm/privileges"
+      ],
+      "persistence": [
+        "data/swarm-lineage.json",
+        "data/mesh-namespaces.json"
+      ],
+      "cross_workspace": true,
+      "all_agents": true
+    },
     "enhancement_cortex": {
       "config": "config/enhancement/slm-dl.json",
       "centers": [
@@ -182,8 +216,14 @@
         "number": 5,
         "role": "cline_shared_effector",
         "branch": "cursor/integrate-cline-all-agents-91d1",
-        "state": "in_merge",
+        "state": "merged",
         "notes": "Cline coding workspaces merged into layers.coding_workspaces"
+      },
+      {
+        "number": 6,
+        "role": "haas_cam_swarm_patterns",
+        "branch": "cursor/haas-cam-patterns-d308",
+        "state": "open"
       }
     ],
     "coding_workspaces": [
@@ -314,7 +354,8 @@
     "cline_install_rules": "scripts/install-cline-rules.py",
     "cline_mcp": "scripts/cam-mcp-server.py",
     "cline_schedules": "scripts/sync-cline-schedules.py",
-    "ci_connectome": "scripts/ci-connectome.sh"
+    "ci_connectome": "scripts/ci-connectome.sh",
+    "swarm_check": "scripts/swarm-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",

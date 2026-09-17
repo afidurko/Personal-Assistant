@@ -29,11 +29,27 @@ HAAS Executive        →  Cam chief + capability-broker
 HAAS Sub-agent        →  specialists / unlimited subagents with privilege inheritance
 ```
 
+## Neural mesh + memory (all workspaces / agents)
+
+| Piece | Path |
+|---|---|
+| Privilege TS engine | `shared/swarmPrivileges.ts` |
+| Swarm cycle runtime | `server/core/swarm-runtime.ts` |
+| Agent layer | `swarm` in `shared/agentLayers.ts` (privilege-broker, lineage-guardian, boss-router, tool-broker) |
+| Scan workspace | `server/workspaces/swarm.ts` |
+| Lineage file | `data/swarm-lineage.json` |
+| Namespace mirror | `data/mesh-namespaces.json` |
+| Memory traces | `kind: swarm` + semantic tags `mesh/agent-lineage`, `cross-workspace`, `all-agents` |
+
+Every `AgentMeshRuntime.runCycle` (after commute/memory/persistence/issue-loop) runs the swarm cycle so **all scan workspaces** get assign/broadcast/resolve traffic and shared namespace updates.
+
 ## Validate
 
 ```bash
 python3 scripts/swarm-check.py
 python3 scripts/swarm-check.py --json
+npm test -- server/core/swarm-runtime.test.ts
+npm run scan
 ```
 
 ## Connectome

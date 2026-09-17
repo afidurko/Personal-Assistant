@@ -43,6 +43,10 @@ HARD_PATHS = [
     "scripts/swarm-check.py",
     "scripts/persist-export.py",
     "scripts/persist-import.py",
+    "server/core/swarm-runtime.ts",
+    "server/workspaces/swarm.ts",
+    "shared/swarmPrivileges.ts",
+    "shared/agentLayers.ts",
 ]
 
 PERSIST_MUST_INCLUDE = [

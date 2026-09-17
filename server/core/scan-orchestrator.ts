@@ -80,7 +80,10 @@ export class ScanOrchestrator extends EventEmitter {
   async init(): Promise<void> {
     await this.mesh.load();
     await this.memory.load();
-    this.agents = new AgentMeshRuntime(this.mesh, this.memory);
+    this.agents = new AgentMeshRuntime(this.mesh, this.memory, {
+      rootDir: this.rootDir,
+      dataDir: this.dataDir,
+    });
     this.ready = true;
     this.emitState();
   }
@@ -128,7 +131,12 @@ export class ScanOrchestrator extends EventEmitter {
     const activationDeltas = this.mesh.applyScanResults(snapshots);
     this.suggestions = buildSuggestiveImplementations(snapshots);
 
-    const agentRuntime = this.agents ?? new AgentMeshRuntime(this.mesh, this.memory);
+    const agentRuntime =
+      this.agents ??
+      new AgentMeshRuntime(this.mesh, this.memory, {
+        rootDir: this.rootDir,
+        dataDir: this.dataDir,
+      });
     this.agents = agentRuntime;
     this.lastAgentCycle = await agentRuntime.runCycle({
       workspaces: snapshots,

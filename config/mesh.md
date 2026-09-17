@@ -38,6 +38,15 @@ Stacked on the interactive brain map (`server/core/agent-mesh.ts`):
 2. **Memory** — consolidate + amplify recall  
 3. **Persistence** — keep jobs alive until done  
 4. **Issue-fix loop** — dedicated automated detect → fix → verify → escalate agents  
+5. **Swarm** — privilege inheritance, lineage terminate, boss/worker bus for **all agents + all workspaces**
+
+Runtime: `server/core/swarm-runtime.ts` writes:
+
+- `data/swarm-lineage.json` — live agent tree  
+- `data/mesh-namespaces.json` — cross-workspace mirror of `mesh/agent-lineage`, `mesh/tools`, `mesh/swarm/*`  
+- PersistentMemory traces with `kind: swarm` tagged `cross-workspace` / `all-agents`
+
+Scan workspace: `server/workspaces/swarm.ts` (`workspace-swarm`)
 
 ## HAAS → Cam swarm layer
 
@@ -46,6 +55,7 @@ Config (not a second runtime): `config/swarm/`
 - Privilege inheritance + lineage terminate
 - Boss/worker primitives → `motor.swarm` / `sense.swarm.message`
 - Validate: `python3 scripts/swarm-check.py`
+- Neural integration: every scan cycle runs swarm after issue-loop
 
 ## Write rules
 

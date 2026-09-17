@@ -12,6 +12,7 @@ const REGION_ANCHORS: Record<BrainRegion, { x: number; y: number }> = {
   basal_ganglia: { x: 0.38, y: 0.4 },
   striatum: { x: 0.58, y: 0.55 },
   repair_loop: { x: 0.78, y: 0.36 },
+  swarm_bus: { x: 0.22, y: 0.52 },
 };
 
 /**
