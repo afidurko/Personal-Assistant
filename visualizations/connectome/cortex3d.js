@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
-import { loadCamCortex, applyFsCameraUp } from "./cortex-anatomy.js";
+import { loadCamCortex, applyFsCameraUp, installGlassEnvironment } from "./cortex-anatomy.js";
 
 /** Positions are FreeSurfer-like RAS (X=R+, Y=A+, Z=S+) matching cam-cortex.glb */
 const AREAS = [
@@ -123,6 +123,9 @@ const canvas = document.getElementById("c");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setClearColor(0x05080a, 1);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
 
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.domElement.style.position = "absolute";
@@ -131,7 +134,7 @@ labelRenderer.domElement.style.pointerEvents = "none";
 viewport.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x05080a, 0.035);
+scene.fog = new THREE.FogExp2(0x05080a, 0.022);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
 applyFsCameraUp(camera);
@@ -145,16 +148,20 @@ controls.minDistance = 2.2;
 controls.maxDistance = 14;
 applyFsCameraUp(camera, controls);
 
-scene.add(new THREE.AmbientLight(0xc8ddd8, 0.55));
-const key = new THREE.DirectionalLight(0xfff2e0, 0.65);
+scene.add(new THREE.AmbientLight(0xb8d4cc, 0.7));
+const key = new THREE.DirectionalLight(0xfff5e8, 0.85);
 key.position.set(3, 4, 6);
 scene.add(key);
-const fill = new THREE.DirectionalLight(0x88aacc, 0.25);
+const fill = new THREE.DirectionalLight(0x88b0cc, 0.35);
 fill.position.set(-4, -2, 2);
 scene.add(fill);
-const rim = new THREE.DirectionalLight(0x5fd4c4, 0.2);
+const rim = new THREE.DirectionalLight(0x5fd4c4, 0.4);
 rim.position.set(0, -5, 3);
 scene.add(rim);
+const bounce = new THREE.HemisphereLight(0xcfe8e0, 0x1a1008, 0.35);
+scene.add(bounce);
+
+installGlassEnvironment(renderer, scene);
 
 const brain = new THREE.Group();
 scene.add(brain);
@@ -231,7 +238,7 @@ function buildDtiFasciculus(t) {
   const key = t.alias || t.id;
   const curve = fasciculusCurve(t);
   const group = new THREE.Group();
-  group.userData = { id: t.id, alias: key, curve, system: t.system, lines: [], baseOpacity: 0.22 };
+  group.userData = { id: t.id, alias: key, curve, system: t.system, lines: [], baseOpacity: 0.32 };
   const n = t.fibers || 28;
   const spread = 0.07;
 
@@ -254,12 +261,13 @@ function buildDtiFasciculus(t) {
     const mat = new THREE.LineBasicMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.32,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
     });
     const line = new THREE.Line(geo, mat);
     line.userData = { fiber: true };
+    line.renderOrder = 0;
     group.add(line);
     group.userData.lines.push(line);
   }
@@ -350,12 +358,13 @@ function buildAmbientConnectome(budget = 900) {
   const mat = new THREE.LineBasicMaterial({
     vertexColors: true,
     transparent: true,
-    opacity: 0.28,
+    opacity: 0.38,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
   ambientLines = new THREE.LineSegments(geo, mat);
   ambientLines.userData = { ambient: true };
+  ambientLines.renderOrder = 0;
   brain.add(ambientLines);
 }
 
@@ -425,7 +434,8 @@ async function bootAnatomy() {
     cortexApi = await loadCamCortex(brain, { url: new URL("./assets/cam-cortex.glb", import.meta.url).href });
     reanchorAreasFromCortex();
     anatomyReady = true;
-    log(`<span class="center">CORTEX</span> anatomical shell · ${Object.keys(cortexApi.parcels).length} parcels · CC BY-SA`);
+    cortexApi.setTranslucency(0.82);
+    log(`<span class="center">CORTEX</span> glass shell · ${Object.keys(cortexApi.parcels).length} parcels · CC BY-SA`);
   } catch (e) {
     anatomyReady = false;
     // Show fallback spheres if GLB missing
@@ -503,7 +513,7 @@ function setTractGlow(tractId, intensity) {
   const g = tractLineGroups[tractId];
   if (!g) return;
   tractActivity[tractId] = Math.max(tractActivity[tractId] || 0, intensity);
-  const op = 0.18 + intensity * 0.72;
+  const op = 0.28 + intensity * 0.7;
   g.userData.lines.forEach((ln) => {
     ln.material.opacity = op;
   });
@@ -515,7 +525,7 @@ function decayActivity(dt) {
     const g = tractLineGroups[id];
     if (!g) return;
     const dimmed = highlightedSystem && g.userData.system !== highlightedSystem;
-    const op = dimmed ? 0.04 : 0.16 + tractActivity[id] * 0.75;
+    const op = dimmed ? 0.06 : 0.26 + tractActivity[id] * 0.72;
     g.userData.lines.forEach((ln) => {
       ln.material.opacity = op;
     });
@@ -925,6 +935,16 @@ function renderControls() {
     lodHigh = !lodHigh;
     buildAmbientConnectome(lodHigh ? 700 : 220);
     log(`<span class="center">LOD</span> ${lodHigh ? "high" : "low"} ambient fibers`);
+  });
+
+  let glassHigh = true;
+  const glassBtn = document.getElementById("view-glass");
+  glassBtn?.addEventListener("click", () => {
+    if (!cortexApi?.setTranslucency) return;
+    glassHigh = !glassHigh;
+    cortexApi.setTranslucency(glassHigh ? 0.82 : 0.28);
+    glassBtn.classList.toggle("on", glassHigh);
+    log(`<span class="center">GLASS</span> shell ${glassHigh ? "near-clear" : "solid"}`);
   });
 }
 
