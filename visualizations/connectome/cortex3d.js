@@ -142,29 +142,67 @@ function addEllipsoid(pos, scale, opacity = 0.5) {
   return m;
 }
 
-/** Human brain built from lobe masses (not a sphere) */
+/** Human brain built from lobe masses + lathed cerebrum silhouette */
 function buildHumanBrain() {
+  // Primary cerebrum silhouette — lathe of a sagittal outline (reads as a brain)
+  const profile = [];
+  const pts = [
+    [0.05, -0.35], // ventral frontal
+    [0.55, -0.15],
+    [1.05, 0.15],
+    [1.45, 0.55], // frontal pole tip region → will become radial
+    [1.55, 0.95],
+    [1.35, 1.35], // superior frontal
+    [0.85, 1.55], // vertex
+    [0.25, 1.5],
+    [-0.35, 1.35], // parietal
+    [-0.85, 1.05],
+    [-1.15, 0.65], // occipital start
+    [-1.35, 0.25],
+    [-1.25, -0.15], // occipital pole
+    [-0.95, -0.45],
+    [-0.45, -0.55],
+    [-0.05, -0.45],
+  ];
+  // Lathe expects x = radius from Y axis; remap so anterior is +Z via later rotation
+  for (const [z, y] of pts) {
+    const r = Math.max(0.08, Math.abs(z) * 0.55 + 0.85);
+    profile.push(new THREE.Vector2(r * (0.75 + 0.25 * Math.cos((y + 0.5) * 0.9)), y));
+  }
+  const lathe = new THREE.LatheGeometry(profile, 48);
+  const cerebrum = new THREE.Mesh(
+    lathe,
+    new THREE.MeshStandardMaterial({
+      color: 0xc9a992,
+      roughness: 0.82,
+      metalness: 0.02,
+      transparent: true,
+      opacity: 0.38,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    })
+  );
+  cerebrum.scale.set(1.15, 1.0, 1.35);
+  cerebrum.position.set(0, 0.15, 0.15);
+  cerebrum.rotation.y = Math.PI * 0.5;
+  brain.add(cerebrum);
+
   // Hemispheres — readable cerebrum mass
-  addEllipsoid([-0.62, 0.48, 0.1], [1.48, 1.05, 1.68], 0.42);
-  addEllipsoid([0.62, 0.48, 0.1], [1.48, 1.05, 1.68], 0.42);
+  addEllipsoid([-0.55, 0.48, 0.1], [1.35, 0.95, 1.55], 0.36);
+  addEllipsoid([0.55, 0.48, 0.1], [1.35, 0.95, 1.55], 0.36);
   // Frontal poles
-  addEllipsoid([-1.72, 0.42, 1.0], [0.95, 0.78, 0.82], 0.48);
-  addEllipsoid([1.72, 0.42, 1.0], [0.95, 0.78, 0.82], 0.48);
-  addEllipsoid([-0.1, 0.55, 1.35], [0.55, 0.42, 0.4], 0.35);
+  addEllipsoid([-1.55, 0.4, 1.05], [0.85, 0.7, 0.75], 0.4);
+  addEllipsoid([1.55, 0.4, 1.05], [0.85, 0.7, 0.75], 0.4);
   // Temporal lobes hang lower + forward
-  addEllipsoid([-1.15, -0.72, 1.1], [0.82, 0.62, 0.95], 0.52);
-  addEllipsoid([1.15, -0.72, 1.1], [0.82, 0.62, 0.95], 0.52);
-  addEllipsoid([-1.4, -1.05, 0.5], [0.42, 0.35, 0.48], 0.45);
-  addEllipsoid([1.4, -1.05, 0.5], [0.42, 0.35, 0.48], 0.45);
+  addEllipsoid([-1.1, -0.75, 1.05], [0.78, 0.58, 0.88], 0.48);
+  addEllipsoid([1.1, -0.75, 1.05], [0.78, 0.58, 0.88], 0.48);
+  addEllipsoid([-1.35, -1.05, 0.45], [0.38, 0.32, 0.42], 0.4);
+  addEllipsoid([1.35, -1.05, 0.45], [0.38, 0.32, 0.42], 0.4);
   // Occipital bulge (rear)
-  addEllipsoid([0.0, 0.32, -1.45], [1.05, 0.8, 0.62], 0.45);
-  addEllipsoid([-0.9, 0.28, -1.15], [0.58, 0.58, 0.52], 0.4);
-  addEllipsoid([0.9, 0.28, -1.15], [0.58, 0.58, 0.52], 0.4);
+  addEllipsoid([0.0, 0.3, -1.4], [0.95, 0.72, 0.55], 0.4);
   // Parietal crown
-  addEllipsoid([0.0, 1.4, -0.08], [1.2, 0.48, 1.05], 0.38);
-  // Insula / medial hint
-  addEllipsoid([0.0, 0.12, 0.4], [0.32, 0.55, 0.75], 0.22);
-  // Cerebellum (two lobes + vermis) — slightly cooler tone
+  addEllipsoid([0.0, 1.35, -0.05], [1.1, 0.4, 0.95], 0.32);
+  // Cerebellum
   const cerebMat = () =>
     new THREE.MeshStandardMaterial({
       color: 0xa88878,
@@ -174,62 +212,62 @@ function buildHumanBrain() {
       depthWrite: false,
     });
   for (const [px, sx] of [
-    [0.58, 0.72],
-    [-0.58, 0.72],
-    [0.0, 0.38],
+    [0.55, 0.68],
+    [-0.55, 0.68],
+    [0.0, 0.35],
   ]) {
     const g = new THREE.SphereGeometry(1, 28, 20);
-    g.scale(sx, 0.48, 0.52);
+    g.scale(sx, 0.45, 0.5);
     const m = new THREE.Mesh(g, cerebMat());
-    m.position.set(px, -1.0, -1.05);
+    m.position.set(px, -1.0, -1.0);
     brain.add(m);
   }
   // Brainstem + pons
   const pons = new THREE.Mesh(
-    new THREE.SphereGeometry(0.3, 16, 12),
-    new THREE.MeshStandardMaterial({ color: 0x9a8070, roughness: 0.85, transparent: true, opacity: 0.65 })
+    new THREE.SphereGeometry(0.28, 16, 12),
+    new THREE.MeshStandardMaterial({ color: 0x9a8070, roughness: 0.85, transparent: true, opacity: 0.7 })
   );
-  pons.position.set(0.0, -1.2, -0.4);
+  pons.position.set(0.0, -1.2, -0.35);
   pons.scale.set(1.15, 0.7, 1.25);
   brain.add(pons);
   const stem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.13, 0.2, 1.05, 12),
-    new THREE.MeshStandardMaterial({ color: 0x9a8070, roughness: 0.8, transparent: true, opacity: 0.7 })
+    new THREE.CylinderGeometry(0.12, 0.18, 1.0, 12),
+    new THREE.MeshStandardMaterial({ color: 0x9a8070, roughness: 0.8, transparent: true, opacity: 0.75 })
   );
-  stem.position.set(0.0, -1.65, -0.18);
+  stem.position.set(0.0, -1.65, -0.15);
   stem.rotation.x = 0.28;
   brain.add(stem);
 
   // Soft gyral ridges
-  for (let i = 0; i < 16; i++) {
-    const ang = (i / 16) * Math.PI * 2;
+  for (let i = 0; i < 12; i++) {
+    const ang = (i / 12) * Math.PI * 2;
     const ridge = new THREE.Mesh(
-      new THREE.TorusGeometry(1.6 + (i % 3) * 0.1, 0.04, 6, 48, Math.PI * 0.5),
-      new THREE.MeshBasicMaterial({ color: 0xe0c4a8, transparent: true, opacity: 0.18 })
+      new THREE.TorusGeometry(1.55 + (i % 3) * 0.08, 0.035, 6, 40, Math.PI * 0.45),
+      new THREE.MeshBasicMaterial({ color: 0xe0c4a8, transparent: true, opacity: 0.16 })
     );
-    ridge.position.set(Math.cos(ang) * 0.2, 0.5 + Math.sin(i) * 0.18, Math.sin(ang) * 0.12);
-    ridge.rotation.set(0.45 + i * 0.04, ang, 0.15);
+    ridge.position.set(Math.cos(ang) * 0.18, 0.55 + Math.sin(i) * 0.15, Math.sin(ang) * 0.1);
+    ridge.rotation.set(0.45 + i * 0.04, ang, 0.12);
     brain.add(ridge);
   }
 
-  // Outer silhouette rim (helps read brain outline)
+  // Outer silhouette rim
   const rimShell = new THREE.Mesh(
-    new THREE.SphereGeometry(2.5, 48, 32),
+    new THREE.SphereGeometry(2.45, 48, 32),
     new THREE.MeshBasicMaterial({
       color: 0xd4b8a0,
       transparent: true,
-      opacity: 0.07,
+      opacity: 0.06,
       side: THREE.BackSide,
     })
   );
-  rimShell.scale.set(1.4, 0.98, 1.25);
+  rimShell.scale.set(1.38, 0.95, 1.22);
   rimShell.position.set(0.0, 0.12, 0.08);
   brain.add(rimShell);
 
   // Longitudinal fissure
   const fissure = new THREE.Mesh(
-    new THREE.BoxGeometry(0.07, 2.0, 2.8),
-    new THREE.MeshBasicMaterial({ color: 0x0b1014, transparent: true, opacity: 0.55 })
+    new THREE.BoxGeometry(0.08, 2.0, 2.7),
+    new THREE.MeshBasicMaterial({ color: 0x0b1014, transparent: true, opacity: 0.6 })
   );
   fissure.position.set(0, 0.48, 0.05);
   brain.add(fissure);
