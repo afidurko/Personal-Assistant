@@ -71,24 +71,14 @@
   ],
   "suggested_next_implementations": [
     {
-      "neuron": "neuron.tailscale_reach",
-      "why": "iOS companion fails closed without mesh reach",
-      "impl": "ping aaron-iphone/aaron-ipad via Tailscale status"
+      "neuron": "neuron.converse_live_feed",
+      "why": "Push each converse turn into activity-events.jsonl",
+      "impl": "hook cam-converse-server.py emit on /api/turn"
     },
     {
-      "neuron": "neuron.improve_engine",
-      "why": "Turn scan findings into Cam tasks automatically",
-      "impl": "read system-health.json → nulltickets suggestions"
-    },
-    {
-      "neuron": "neuron.workspace_orchestrator",
-      "why": "Multiple Cam workspaces share mesh without conflict",
-      "impl": "lease mesh namespaces per workspace id"
-    },
-    {
-      "neuron": "neuron.persist_sync",
-      "why": "Aaron required cross-workspace memory",
-      "impl": "wire persist-export into health conductor weekly"
+      "neuron": "neuron.schematic_hud",
+      "why": "Optional 2D circuit-board overlay synced to live feed",
+      "impl": "flat.html neurotransmitter legend mode"
     }
   ]
 }

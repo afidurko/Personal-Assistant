@@ -250,7 +250,16 @@ function buildDtiFasciculus(t) {
 }
 
 /** Ambient U-fibers + projection spray so the volume reads as a full DTI brain */
-function buildAmbientConnectome() {
+let ambientLines = null;
+let lodHigh = true;
+
+function buildAmbientConnectome(budget = 900) {
+  if (ambientLines) {
+    brain.remove(ambientLines);
+    ambientLines.geometry.dispose();
+    ambientLines.material.dispose();
+    ambientLines = null;
+  }
   const positions = [];
   const colors = [];
   // Local U-fibers between nearby areas
@@ -259,7 +268,8 @@ function buildAmbientConnectome() {
       const A = new THREE.Vector3(...AREAS[i].p);
       const B = new THREE.Vector3(...AREAS[j].p);
       if (A.distanceTo(B) > 2.2) continue;
-      for (let k = 0; k < 6; k++) {
+      const copies = budget > 500 ? 6 : 2;
+      for (let k = 0; k < copies; k++) {
         const mid = A.clone().add(B).multiplyScalar(0.5);
         mid.y += 0.15 + Math.random() * 0.35;
         mid.add(new THREE.Vector3((Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.3));
@@ -281,7 +291,8 @@ function buildAmbientConnectome() {
   const stem = new THREE.Vector3(0, -1.7, -0.2);
   AREAS.forEach((a) => {
     const A = new THREE.Vector3(...a.p);
-    for (let k = 0; k < 8; k++) {
+    const copies = budget > 500 ? 8 : 3;
+    for (let k = 0; k < copies; k++) {
       const mid = A.clone().lerp(stem, 0.5);
       mid.x += (Math.random() - 0.5) * 0.4;
       const curve = new THREE.QuadraticBezierCurve3(A, mid, stem);
@@ -295,7 +306,7 @@ function buildAmbientConnectome() {
     }
   });
   // Dense random shell fibers for DTI hair volume
-  for (let i = 0; i < 900; i++) {
+  for (let i = 0; i < budget; i++) {
     const u = Math.random() * Math.PI * 2;
     const v = Math.acos(2 * Math.random() - 1);
     const rr = 1.0 + Math.random() * 1.4;
@@ -305,7 +316,6 @@ function buildAmbientConnectome() {
     if (y < -1.8) continue;
     const len = 0.12 + Math.random() * 0.35;
     const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
-    // bias by lobe: more L-R near midline, more A-P laterally
     if (Math.abs(x) < 0.4) dir.set(Math.sign(Math.random() - 0.5) || 1, dir.y * 0.3, dir.z * 0.4).normalize();
     const p0 = new THREE.Vector3(x, y, z);
     const p1 = p0.clone().addScaledVector(dir, len);
@@ -324,13 +334,15 @@ function buildAmbientConnectome() {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
-  const lines = new THREE.LineSegments(geo, mat);
-  lines.userData = { ambient: true };
-  brain.add(lines);
+  ambientLines = new THREE.LineSegments(geo, mat);
+  ambientLines.userData = { ambient: true };
+  brain.add(ambientLines);
 }
 
+const isMobile = /Mobi|Android/i.test(navigator.userAgent) || Math.min(window.innerWidth, window.innerHeight) < 700;
+lodHigh = !isMobile;
 TRACTS.forEach(buildDtiFasciculus);
-buildAmbientConnectome();
+buildAmbientConnectome(lodHigh ? 900 : 280);
 
 AREAS.forEach((a) => {
   const mat = new THREE.MeshBasicMaterial({
@@ -508,6 +520,7 @@ function applyEvent(ev) {
     chipPlast.textContent = "LTP + myelin";
     chipPlast.classList.add("on");
     log(`<span class="center">LTP</span> ${(ev.tracts || []).join(", ")}`);
+    persistWeights();
     refreshTracts();
   } else if (ev.type === "error") {
     errorCount += 1;
@@ -683,20 +696,70 @@ async function pollLiveActivity() {
   }
 }
 
+function persistWeights() {
+  // Best-effort: browsers can't write to vault; stash in localStorage + log
+  try {
+    localStorage.setItem(
+      "cam.tractWeights",
+      JSON.stringify({ weights, myelination, at: Date.now() })
+    );
+  } catch (_) {
+    /* private mode */
+  }
+}
+
+function setCameraView(mode) {
+  brain.rotation.y = 0;
+  if (mode === "coronal") {
+    camera.position.set(0.1, 0.4, 7.2);
+    controls.target.set(0.05, 0.25, 0.1);
+  } else if (mode === "axial") {
+    camera.position.set(0.1, 7.5, 0.2);
+    controls.target.set(0.05, 0.2, 0.1);
+  } else if (mode === "sagittal") {
+    camera.position.set(6.8, 0.5, 0.3);
+    controls.target.set(0.05, 0.25, 0.15);
+  }
+  controls.update();
+  log(`<span class="center">VIEW</span> ${mode}`);
+}
+
 function renderControls() {
-  SPIKES.forEach((s) => {
-    const b = document.createElement("button");
-    b.textContent = s.label;
-    if (s.gold) b.className = "gold";
-    b.addEventListener("click", () => fireSpike(s, false));
-    controlsEl.appendChild(b);
+  const groups = [
+    { title: "Tasks", ids: ["sense.chat.aaron", "sense.language.af", "sense.dual.ventral", "sense.swiftguide.map", "sense.audio.transcript", "sense.careers.listing", "sense.vision.detection", "sense.memory.fornix", "health.scan"] },
+  ];
+  groups.forEach((g) => {
+    const lab = document.createElement("div");
+    lab.className = "ctrl-group";
+    lab.textContent = g.title;
+    controlsEl.appendChild(lab);
+    g.ids.forEach((id) => {
+      const s = SPIKES.find((x) => x.id === id);
+      if (!s) return;
+      const b = document.createElement("button");
+      b.textContent = s.label;
+      if (s.gold) b.className = "gold";
+      b.addEventListener("click", () => fireSpike(s, false));
+      controlsEl.appendChild(b);
+    });
   });
+
+  const sysLab = document.createElement("div");
+  sysLab.className = "ctrl-group";
+  sysLab.textContent = "Systems";
+  controlsEl.appendChild(sysLab);
   ["arcuate_language", "anterior_ventral", "posterior_ventral", "cingulum_system", "commissural"].forEach((sys) => {
     const b = document.createElement("button");
     b.textContent = sys.replace(/_/g, " ");
     b.addEventListener("click", () => highlightSystem(sys));
     controlsEl.appendChild(b);
   });
+
+  const util = document.createElement("div");
+  util.className = "ctrl-group";
+  util.textContent = "Utility";
+  controlsEl.appendChild(util);
+
   const err = document.createElement("button");
   err.textContent = "Inject tract error";
   err.className = "danger";
@@ -727,6 +790,15 @@ function renderControls() {
     log(`<span class="center">RESET</span> plasticity tape cleared`);
   });
   controlsEl.appendChild(reset);
+
+  document.getElementById("view-coronal")?.addEventListener("click", () => setCameraView("coronal"));
+  document.getElementById("view-axial")?.addEventListener("click", () => setCameraView("axial"));
+  document.getElementById("view-sagittal")?.addEventListener("click", () => setCameraView("sagittal"));
+  document.getElementById("view-lod")?.addEventListener("click", () => {
+    lodHigh = !lodHigh;
+    buildAmbientConnectome(lodHigh ? 900 : 280);
+    log(`<span class="center">LOD</span> ${lodHigh ? "high" : "low"} ambient fibers`);
+  });
 }
 
 document.getElementById("btn-play").addEventListener("click", () => {
@@ -764,6 +836,13 @@ async function loadSeed() {
       log(`<span class="center">HEALTH</span> overall=${h.overall}`);
     }
     log(`<span class="center">DTI</span> ${TRACTS.length} fasciculi · RGB direction · live agents`);
+    try {
+      const cached = JSON.parse(localStorage.getItem("cam.tractWeights") || "null");
+      if (cached?.weights) weights = { ...weights, ...cached.weights };
+      if (cached?.myelination) myelination = { ...myelination, ...cached.myelination };
+    } catch (_) {
+      /* ignore */
+    }
     if (w.weights) weights = { ...weights, ...w.weights };
     if (t.events?.length) {
       events = t.events;

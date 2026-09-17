@@ -9,6 +9,15 @@
     "BrainMem / AriGraph / RoboMemory — working / episodic / semantic memory tiers",
     "Global workspace / callosal coherence analogs for multi-agent sync"
   ],
+  "defaults_applied": {
+    "note": "Interim Aaron defaults so implementation can proceed; override via open_questions answers",
+    "language_lateralization": "bilateral_failover",
+    "max_workspaces": 3,
+    "fornix_consolidation": "nightly_enabled",
+    "dual_stream_conflict": "dorsal_wins_speak_ventral_wins_docs",
+    "asi_ceiling": {"max_neuro_columns": 24, "myelination_cap": 0.98},
+    "tailscale_as_callosum": "forceps_terminals"
+  },
   "memory_tiers": {
     "working": {
       "areas": ["area.dlpfc", "area.parietal"],
@@ -48,7 +57,24 @@
       "tracts": ["tract.emc", "tract.ifof", "tract.uncinate", "tract.ilf"],
       "function": "sound-to-meaning, semantics, valuation",
       "cam": "research / careers / docs comprehension"
+    },
+    "conflict_policy": {
+      "speak": "dorsal",
+      "docs": "ventral",
+      "research": "ventral",
+      "default": "dorsal"
     }
+  },
+  "workspace_leases": {
+    "max_concurrent": 3,
+    "lease_ttl_s": 3600,
+    "store": "vault/10-Mesh-Distillates/workspace-leases.json",
+    "bus": "tract.forceps_minor"
+  },
+  "asi_ceiling": {
+    "max_neuro_columns": 24,
+    "myelination_cap": 0.98,
+    "notes": "Capability growth stays scrubber-inspectable"
   },
   "mesh_physics": {
     "fiber_pulse_speed": 0.35,
@@ -57,6 +83,8 @@
     "myelination_to_emissive": 0.55,
     "coherence_threshold": 0.55,
     "global_workspace_min_tracts": 3,
+    "ambient_fiber_budget_desktop": 900,
+    "ambient_fiber_budget_mobile": 280,
     "notes": "Visual + routing analogs — higher myelination = brighter, faster pulses"
   },
   "superintelligence_stance": {
@@ -73,32 +101,44 @@
     {
       "id": "q.lateralization",
       "ask": "Should Cam’s language mesh be left-lateralized (human-like) or bilateral for redundancy?",
-      "affects": ["tract.arcuate", "forceps_*", "converse"]
+      "affects": ["tract.arcuate", "forceps_*", "converse"],
+      "answer": "bilateral_failover",
+      "interim": true
     },
     {
       "id": "q.workspace_count",
       "ask": "How many concurrent Cam workspaces should forceps_minor / mesh_callosal sync before lease conflicts?",
-      "affects": ["neuron.workspace_orchestrator", "persist_sync"]
+      "affects": ["neuron.workspace_orchestrator", "persist_sync"],
+      "answer": 3,
+      "interim": true
     },
     {
       "id": "q.memory_consolidation",
       "ask": "Nightly fornix consolidation: auto-promote episodic vault notes → semantic distillates?",
-      "affects": ["tract.fornix", "neuron.mesh_sync_loop"]
+      "affects": ["tract.fornix", "neuron.mesh_sync_loop"],
+      "answer": "nightly_enabled",
+      "interim": true
     },
     {
       "id": "q.ventral_priority",
       "ask": "When dorsal AF and ventral EmC conflict on a speak act, which stream wins?",
-      "affects": ["dual_stream", "neuron.speak_loop"]
+      "affects": ["dual_stream", "neuron.speak_loop"],
+      "answer": "dorsal_wins_speak_ventral_wins_docs",
+      "interim": true
     },
     {
       "id": "q.asi_ceiling",
       "ask": "Hard ceiling on column neurogenesis / tract myelination so capability growth stays inspectable?",
-      "affects": ["plasticity.neurogenesis", "hebbian.myelination_cap"]
+      "affects": ["plasticity.neurogenesis", "hebbian.myelination_cap"],
+      "answer": {"max_neuro_columns": 24, "myelination_cap": 0.98},
+      "interim": true
     },
     {
       "id": "q.tailscale_as_callosum",
       "ask": "Treat Tailscale peers (iPhone/iPad/Mac) as forceps terminals or as separate brains with mesh_callosal only?",
-      "affects": ["neuron.tailscale_reach", "tract.forceps_minor"]
+      "affects": ["neuron.tailscale_reach", "tract.forceps_minor"],
+      "answer": "forceps_terminals",
+      "interim": true
     }
   ]
 }

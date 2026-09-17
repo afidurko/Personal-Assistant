@@ -17,6 +17,8 @@ CFG = ROOT / "config" / "connectome"
 OUT = ROOT / "vault" / "10-Mesh-Distillates" / "live-activity.json"
 HEALTH = ROOT / "vault" / "10-Mesh-Distillates" / "system-health.json"
 TIMELINE = ROOT / "vault" / "10-Mesh-Distillates" / "plasticity-timeline.json"
+EVENTS = ROOT / "vault" / "10-Mesh-Distillates" / "activity-events.jsonl"
+IMPROVE = ROOT / "vault" / "10-Mesh-Distillates" / "improve-tasks.json"
 
 
 def utc() -> str:
@@ -32,11 +34,27 @@ def load(path: Path, default):
         return default
 
 
+def recent_event_rows(max_age_s: float = 120.0) -> list[dict]:
+    if not EVENTS.exists():
+        return []
+    now = time.time()
+    rows = []
+    for ln in EVENTS.read_text(encoding="utf-8").splitlines()[-200:]:
+        try:
+            row = json.loads(ln)
+        except json.JSONDecodeError:
+            continue
+        # keep recent-ish; if no parseable ts, keep last 40 anyway
+        rows.append(row)
+    return rows[-40:]
+
+
 def main() -> int:
     neurons = load(CFG / "neurons.json", {}).get("neurons", [])
     tracts = load(CFG / "tracts.json", {}).get("tracts", [])
     health = load(HEALTH, {})
     timeline = load(TIMELINE, {})
+    improve = load(IMPROVE, {})
 
     # Map area → tracts touching it
     area_tracts: dict[str, list[str]] = {}
@@ -66,15 +84,14 @@ def main() -> int:
         if status in ("warning", "critical"):
             intensity = 0.95 if status == "critical" else 0.75
             reason = f"health:{status}"
-        elif status == "healthy" and "health" in nid or "scan" in nid or "vitals" in nid:
+        elif status == "healthy" and ("health" in nid or "scan" in nid or "vitals" in nid or "tailscale" in nid):
             intensity = 0.45
             reason = "health:healthy"
         elif rec in ("always_on", "standing", "standing_scan", "continuous", "boot"):
-            # Round-robin standing activity so the mesh stays alive
             if (i + phase) % 5 == 0:
                 intensity = 0.55 if kind == "loop" else 0.4
                 reason = f"standing:{rec}"
-        elif rec in ("per_task", "on_map_spike", "per_outbound"):
+        elif rec in ("per_task", "on_map_spike", "per_outbound", "after_health_scan"):
             if (i + phase) % 11 == 0:
                 intensity = 0.35
                 reason = "idle_ready"
@@ -91,6 +108,42 @@ def main() -> int:
                 "tracts": area_tracts.get(area, [])[:6],
             }
         )
+
+    # Real process events from scripts (improve/lease/fornix/dual-stream/qa)
+    by_neuron = {f["neuron"]: f for f in firing}
+    for row in recent_event_rows():
+        nid = row.get("neuron")
+        if not nid:
+            continue
+        intensity = float(row.get("intensity") or 0.7)
+        entry = {
+            "neuron": nid,
+            "kind": row.get("kind") or "agent",
+            "area": row.get("area"),
+            "intensity": intensity,
+            "reason": row.get("reason") or row.get("source") or "event",
+            "tracts": row.get("tracts") or area_tracts.get(row.get("area") or "", [])[:6],
+            "source": row.get("source"),
+        }
+        prev = by_neuron.get(nid)
+        if not prev or intensity >= prev.get("intensity", 0):
+            by_neuron[nid] = entry
+    firing = list(by_neuron.values())
+
+    # Improve-engine open tasks keep aPFC lit
+    if improve.get("task_count"):
+        by_neuron.setdefault(
+            "neuron.improve_engine",
+            {
+                "neuron": "neuron.improve_engine",
+                "kind": "loop",
+                "area": "area.apfc",
+                "intensity": 0.8,
+                "reason": f"open_tasks:{improve['task_count']}",
+                "tracts": ["tract.ifof", "tract.slf"],
+            },
+        )
+        firing = list(by_neuron.values())
 
     # Recent timeline events → task spikes
     recent_tasks = []
@@ -115,6 +168,7 @@ def main() -> int:
         ),
         "recent_tasks": recent_tasks,
         "health_overall": health.get("overall", "unknown"),
+        "improve_tasks": improve.get("task_count", 0),
         "neuron_count": len(neurons),
         "firing_count": len(firing),
     }

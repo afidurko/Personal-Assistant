@@ -206,9 +206,122 @@ def check_priority_boot() -> dict:
         return {"neuron": "neuron.priority_boot", "status": "critical", "present": True, "parse": "fail"}
 
 
+def check_tailscale_reach() -> dict:
+    """Probe Tailscale peers (aaron-iphone / aaron-ipad) — idle if CLI absent."""
+    cfg_path = ROOT / "config" / "network" / "tailscale.json"
+    peers_wanted = ["aaron-iphone", "aaron-ipad"]
+    if cfg_path.exists():
+        try:
+            cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+            hosts = (cfg.get("hosts") or {}).get("clients") or peers_wanted
+            peers_wanted = list(hosts)
+        except json.JSONDecodeError:
+            pass
+
+    code, out = run(["tailscale", "status", "--json"])
+    if code != 0:
+        # also try plain status text
+        code2, out2 = run(["tailscale", "status"])
+        if code2 != 0:
+            return {
+                "neuron": "neuron.tailscale_reach",
+                "status": "idle",
+                "cli": False,
+                "notes": "tailscale CLI not available in this environment",
+                "wanted": peers_wanted,
+            }
+        online = []
+        for ln in out2.splitlines():
+            low = ln.lower()
+            for p in peers_wanted:
+                if p.lower() in low and "offline" not in low:
+                    online.append(p)
+        missing = [p for p in peers_wanted if p not in online]
+        return {
+            "neuron": "neuron.tailscale_reach",
+            "status": "healthy" if not missing else "warning",
+            "cli": True,
+            "online": online,
+            "missing": missing,
+            "wanted": peers_wanted,
+        }
+
+    try:
+        data = json.loads(out)
+    except json.JSONDecodeError:
+        return {
+            "neuron": "neuron.tailscale_reach",
+            "status": "warning",
+            "cli": True,
+            "parse": "fail",
+            "wanted": peers_wanted,
+        }
+
+    peer_map = data.get("Peer") or data.get("Peers") or {}
+    names = []
+    if isinstance(peer_map, dict):
+        for meta in peer_map.values():
+            if isinstance(meta, dict):
+                dn = meta.get("DNSName") or meta.get("HostName") or ""
+                names.append(dn.lower().rstrip("."))
+                if meta.get("Online"):
+                    names.append("online:" + (meta.get("HostName") or "").lower())
+    online = []
+    for want in peers_wanted:
+        w = want.lower()
+        if any(w in n for n in names):
+            # prefer Online flag when present
+            online.append(want)
+    # If JSON has Self + peers but Online flags exist, refine
+    online_precise = []
+    if isinstance(peer_map, dict):
+        for meta in peer_map.values():
+            if not isinstance(meta, dict):
+                continue
+            host = (meta.get("HostName") or meta.get("DNSName") or "").lower()
+            for want in peers_wanted:
+                if want.lower() in host and meta.get("Online") is True:
+                    online_precise.append(want)
+    if online_precise:
+        online = sorted(set(online_precise))
+    missing = [p for p in peers_wanted if p not in online]
+    # If we saw the names but couldn't confirm Online, treat as warning not critical
+    status = "healthy" if not missing else "warning"
+    return {
+        "neuron": "neuron.tailscale_reach",
+        "status": status,
+        "cli": True,
+        "online": online,
+        "missing": missing,
+        "wanted": peers_wanted,
+        "bus": "tract.forceps_minor",
+    }
+
+
+def maybe_weekly_persist(overall: str) -> dict | None:
+    """After green/idle health, weekly persist-export --seed-only."""
+    marker = ROOT / "vault" / "10-Mesh-Distillates" / ".persist-weekly"
+    if overall not in ("healthy", "idle"):
+        return None
+    now = time.time()
+    if marker.exists() and now - marker.stat().st_mtime < 6 * 86400:
+        return {"neuron": "neuron.persist_sync", "skipped": True, "reason": "recent"}
+    code, out = run([sys.executable, str(ROOT / "scripts" / "persist-export.py"), "--seed-only"])
+    marker.write_text(utc() + "\n", encoding="utf-8")
+    return {
+        "neuron": "neuron.persist_sync",
+        "ran": True,
+        "exit": code,
+        "out": out[:300],
+        "status": "healthy" if code == 0 else "warning",
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--no-improve", action="store_true", help="skip improve_engine hook")
+    ap.add_argument("--no-persist", action="store_true", help="skip weekly persist hook")
     args = ap.parse_args()
 
     checks = [
@@ -223,6 +336,7 @@ def main() -> int:
         check_arch_scan(),
         check_vuln_scan(),
         check_priority_boot(),
+        check_tailscale_reach(),
     ]
     severity = {"healthy": 0, "idle": 0, "warning": 1, "critical": 2}
     worst = max(checks, key=lambda c: severity.get(c.get("status", "idle"), 0))
@@ -259,6 +373,20 @@ def main() -> int:
         + "\n",
         encoding="utf-8",
     )
+
+    hooks = {}
+    if not args.no_improve:
+        code, out = run([sys.executable, str(ROOT / "scripts" / "improve-engine.py"), "--json"])
+        hooks["improve_engine"] = {"exit": code, "preview": out[:400]}
+    if not args.no_persist:
+        hooks["persist_weekly"] = maybe_weekly_persist(report["overall"])
+    # fornix consolidation (respects its own schedule)
+    fornix = ROOT / "scripts" / "fornix-consolidate.py"
+    if fornix.exists():
+        code, out = run([sys.executable, str(fornix)])
+        hooks["fornix"] = {"exit": code, "preview": out[:200]}
+    report["hooks"] = hooks
+    OUT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     if args.json:
         print(json.dumps(report, indent=2))

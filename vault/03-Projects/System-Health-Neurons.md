@@ -16,9 +16,9 @@ Cam’s cortex catalogs **42 columns**. Health / workspace ones that matter most
 | `neuron.arch_scan` | ACC | Coupling / abs-path layering signals | **impl** in health scan |
 | `neuron.vuln_scan` | ACC | Offline key/world-writable heuristics | **impl** in health scan |
 | `neuron.priority_boot` | DLPFC | Watch boot order config | **impl** in health scan |
-| `neuron.tailscale_reach` | Parietal | iPhone/iPad reachability | **suggested** — Tailscale status ping |
-| `neuron.improve_engine` | aPFC | Findings → Cam tasks | **suggested** — nulltickets from health JSON |
-| `neuron.workspace_orchestrator` | DLPFC | Multi-workspace mesh leases | **suggested** |
+| `neuron.tailscale_reach` | Parietal | iPhone/iPad reachability | **impl** — idle if CLI absent |
+| `neuron.improve_engine` | aPFC | Findings → Cam tasks | **impl** `scripts/improve-engine.py` |
+| `neuron.workspace_orchestrator` | DLPFC | Multi-workspace mesh leases | **impl** `scripts/workspace-lease.py` |
 | `neuron.neurogenesis_loop` | MTL | Spawn/mature memory columns | **impl** plasticity script |
 
 ## Run

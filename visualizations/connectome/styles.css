@@ -742,3 +742,35 @@ body.dti-mode .side {
   grid-template-rows: auto auto 1fr auto;
   overflow: auto;
 }
+
+.view-presets {
+  display: flex;
+  gap: 0.25rem;
+}
+.view-presets button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid rgba(95, 180, 255, 0.35);
+  background: rgba(20, 40, 80, 0.6);
+  color: #cfe4ff;
+  cursor: pointer;
+}
+.view-presets button:hover { border-color: #5fd4ff; color: #fff; }
+.ctrl-group {
+  grid-column: 1 / -1;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a889c;
+  margin-top: 0.45rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(80, 120, 200, 0.2);
+}
+body.dti-mode .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}

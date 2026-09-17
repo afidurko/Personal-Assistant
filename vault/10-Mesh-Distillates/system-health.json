@@ -1,13 +1,13 @@
 {
-  "at": "2026-09-17T01:12:04Z",
-  "overall": "warning",
+  "at": "2026-09-17T01:36:13Z",
+  "overall": "healthy",
   "checks": [
     {
       "neuron": "neuron.vitals_loop",
       "loadavg": [
-        4.56591796875,
-        4.6044921875,
-        4.8076171875
+        4.5380859375,
+        4.58740234375,
+        4.77734375
       ],
       "cwd": "/workspace",
       "status": "healthy"
@@ -28,13 +28,13 @@
     {
       "neuron": "neuron.submodule_health",
       "count": 5,
-      "uninitialized": 4,
-      "status": "warning",
+      "uninitialized": 0,
+      "status": "healthy",
       "sample": [
-        "-0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis",
-        "-93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk",
-        "-b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection",
-        "-baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain",
+        " 0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis (heads/master)",
+        " 93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk (heads/main)",
+        " b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection (heads/release/2.9)",
+        " baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain (heads/main)",
         " 64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide (heads/master)"
       ]
     },
@@ -90,6 +90,16 @@
       "present": true,
       "step_count": 10,
       "status": "healthy"
+    },
+    {
+      "neuron": "neuron.tailscale_reach",
+      "status": "idle",
+      "cli": false,
+      "notes": "tailscale CLI not available in this environment",
+      "wanted": [
+        "aaron-iphone",
+        "aaron-ipad"
+      ]
     }
   ],
   "neurons_fired": [
@@ -103,7 +113,25 @@
     "neuron.converse_health",
     "neuron.arch_scan",
     "neuron.vuln_scan",
-    "neuron.priority_boot"
+    "neuron.priority_boot",
+    "neuron.tailscale_reach"
   ],
-  "workspace": "/workspace"
+  "workspace": "/workspace",
+  "hooks": {
+    "improve_engine": {
+      "exit": 0,
+      "preview": "{\n  \"at\": \"2026-09-17T01:36:13Z\",\n  \"health_overall\": \"healthy\",\n  \"task_count\": 0,\n  \"tasks\": [],\n  \"neuron\": \"neuron.improve_engine\"\n}\n"
+    },
+    "persist_weekly": {
+      "neuron": "neuron.persist_sync",
+      "ran": true,
+      "exit": 0,
+      "out": "refreshed identity/persistence/mesh-seed.json\n",
+      "status": "healthy"
+    },
+    "fornix": {
+      "exit": 0,
+      "preview": "fornix: consolidated 40 notes \u2192 6 themes\nwrote vault/10-Mesh-Distillates/fornix-consolidation.json\n"
+    }
+  }
 }
