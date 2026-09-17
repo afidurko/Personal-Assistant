@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Propagate Cam .clinerules (+ Cursor/AGENTS bootstrap) into registered workspaces."""
+"""Propagate Cam .clinerules (+ Cursor/AGENTS bootstrap) into registered workspaces.
+
+Safe to re-run. Populated git submodules receive rule files in *their* working
+trees (not committed to Personal-Assistant). Empty submodule checkouts are skipped.
+"""
 
 from __future__ import annotations
 

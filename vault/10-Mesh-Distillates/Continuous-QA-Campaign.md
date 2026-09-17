@@ -6,6 +6,7 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 - `identity/BOUNDARIES.md`
 - `mesh/facts.continuous_qa = true`
 - Entrypoint: `python3 scripts/qa-loop.py --n 1000000000 --cycles 2`
+- CI gate: `bash scripts/ci-connectome.sh`
 
 ## Campaign results
 
@@ -16,7 +17,18 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 ### Pass 2 (1B, v2+audit, strict-edges) — DONE · green
 - File: `connectome-sim-1b-pass2.json`
 - 1,000,000,000 / 0 fail · **0 missing edges** · ~2.64M sims/s · ~379s · EXIT 0
-- Throughput up ~47% vs pass 1 after rewrite/simplify
+
+### Pass 3 (1B, Cline workspace runtime, strict-edges) — DONE · green
+- File: `connectome-sim-1b-cline-pass1.json`
+- 1,000,000,000 / 0 fail · 0 missing edges · ~2.61M sims/s · ~383s · EXIT 0
+- Includes `motor.cline` / `center.coding` / `sense.cline.result` pathways
+- Unit tests: `scripts/test_cline_workspaces.py` (16) OK
+
+### Pass 4 (1B, simulator v3 weighted+heartbeats) — in progress / see latest
+- Simulator: `v3-weighted-heartbeats`
+- Traffic-weighted senses (chat/vault/cline-heavy)
+- Heartbeats every 50M sims per worker
+- Mesh mirror: `identity/persistence/qa-mesh-latest.json`
 
 ## What was fixed this loop
 | Issue | Severity | Fix |
@@ -28,13 +40,19 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 | `motor.mesh` ignored kill | high | Added `switch.kill` |
 | Presence/vision/jarvis missing switches | high | Pathways include required switches |
 | No continuous QA automation | high | `scripts/qa-loop.py` |
+| No Cline workspace runtime tests | high | `scripts/test_cline_workspaces.py` + `ci-connectome.sh` |
+| Uniform sense sampling | med | Traffic-weighted sampling in simulator v3 |
+| Long campaigns silent | med | 50M heartbeats |
+| QA not mirrored to mesh | med | `mirror_mesh_qa` in qa-loop |
 
 ## Standing improvements (always watch)
-1. CI: `--n 1000000 --strict-edges` on push
-2. Heartbeats every 50M sims
-3. Traffic-weighted sense sampling
-4. Shared pathway validator module
-5. Mesh-mirror of QA dispatch events
+1. CI: `bash scripts/ci-connectome.sh` on push
+2. Heartbeats every 50M sims — **done (v3)**
+3. Traffic-weighted sense sampling — **done (v3)**
+4. Shared pathway validator module — keep using `build_tables` / connectome-check
+5. Mesh-mirror of QA dispatch events — **done**
+6. Live nulltickets PUT for Cline tickets when Null stack is up
+7. `cline mcp install cam` on each Aaron host after persist-import
 
 ## Loop status
-**Green.** Continuous QA remains always-on; next failure auto-dispatches a fix team and reruns.
+**Green through Cline integration.** Continuous QA remains always-on; next failure auto-dispatches a fix team and reruns.
