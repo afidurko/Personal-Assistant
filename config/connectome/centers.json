@@ -70,16 +70,84 @@
       "role": "nullboiler",
       "function": "policy neuropil — who runs what",
       "accepts": ["spike.task"],
-      "projects_to": ["center.research", "center.careers", "center.ops", "center.comms", "center.docs", "center.vision"]
+      "projects_to": [
+        "center.research",
+        "center.careers",
+        "center.ops",
+        "center.comms",
+        "center.docs",
+        "center.vision",
+        "center.agi_scan",
+        "center.enhance",
+        "center.capability",
+        "center.info",
+        "center.slm",
+        "center.dl"
+      ]
+    },
+    {
+      "id": "center.agi_scan",
+      "role": "agi-scout",
+      "function": "daily AI/AGI paper + findings scan; spawns analyst/synthesist team",
+      "accepts": ["spike.scan", "spike.paper", "spike.finding", "spike.schedule", "spike.task"],
+      "projects_to": ["center.enhance", "center.research", "center.qa", "center.dl", "switch.research_scan"],
+      "team": "team.agi-research-scan"
+    },
+    {
+      "id": "center.enhance",
+      "role": "capability-broker",
+      "function": "Cam enhancement proposals + gated apply; capability team lead",
+      "accepts": ["spike.task", "spike.paper", "spike.finding", "spike.tool_result"],
+      "projects_to": ["center.qa", "center.slm", "center.dl", "switch.cam_enhance", "switch.autonomy"],
+      "team": "team.capability"
+    },
+    {
+      "id": "center.capability",
+      "role": "capability-broker",
+      "function": "task decomposition + specialist/sLM/DL brokerage for completion",
+      "accepts": ["spike.task", "spike.question", "spike.tool_result"],
+      "projects_to": ["center.info", "center.slm", "center.dl", "center.ops", "center.research", "center.qa", "switch.autonomy"],
+      "team": "team.capability"
+    },
+    {
+      "id": "center.info",
+      "role": "info-retriever",
+      "function": "vault→mesh→web information gather with citations",
+      "accepts": ["spike.question", "spike.fact", "spike.note_ref", "spike.paper"],
+      "projects_to": ["center.research", "center.memory", "center.agi_scan", "center.slm", "center.qa"],
+      "team": "team.info"
+    },
+    {
+      "id": "center.slm",
+      "role": "slm-runtime",
+      "function": "small language model cortex — route/compress/draft assists",
+      "accepts": ["spike.task", "spike.question", "spike.speech", "spike.route_hint", "spike.tool_result"],
+      "projects_to": ["switch.slm_local", "center.chief", "center.memory", "center.capability"],
+      "enhancement": "config/enhancement/slm-dl.json"
+    },
+    {
+      "id": "center.dl",
+      "role": "dl-enhance",
+      "function": "deep learning cortex — embeddings, rerank, identity/paper vectors",
+      "accepts": ["spike.task", "spike.visual", "spike.paper", "spike.tool_result"],
+      "projects_to": ["switch.dl_local", "center.memory", "center.vision", "center.agi_scan", "center.enhance"],
+      "enhancement": "config/enhancement/slm-dl.json"
     }
+  ],
+  "teams": [
+    "team.agi-research-scan",
+    "team.capability",
+    "team.info"
   ],
   "recursion": {
     "max_delegate_depth": null,
     "max_subagents": null,
     "unlimited": true,
     "human_gate_to_spawn": false,
-    "analogy": "unbounded interneuron recruitment — Cam may spawn freely to finish work",
+    "all_teams_may_spawn_subagents": true,
+    "analogy": "unbounded interneuron recruitment — Cam and all teams may spawn freely to finish work",
     "authorized_by": "Aaron",
-    "authorized_at": "2026-09-16"
+    "authorized_at": "2026-09-16",
+    "reaffirmed_at": "2026-09-17"
   }
 }

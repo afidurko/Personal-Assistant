@@ -2,19 +2,20 @@
 
 Cam is Aaron’s always-on Argentine assistant (32, blue eyes, brown hair, soft airy voice)
 for life automation, source-backed research, documents, LinkedIn/Indeed jobs, and
-talking presence — with a smart second brain over Aaron’s notes.
+talking presence — with a smart second brain, **agent teams**, and a **sLM/DL cortex**.
 
 ## Design
 
-- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain)
+- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
+- **Teams:** AGI Research Scan (daily) · Capability · Information — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
 - **Tools:** Jarvis · PaddleDetection · LinkedIn/Indeed
-- **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available
+- **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
-Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Workspaces: [docs/WORKSPACES_WORKFLOW.md](docs/WORKSPACES_WORKFLOW.md)
 
 ## Connectome architecture (brain map)
 
@@ -27,6 +28,12 @@ Aaron → sensory → higher centers → circuit switches → motor effectors
 ```bash
 # Example: route a careers spike to motor plan
 python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch roles"
+# Daily AGI research scan pathway
+python3 scripts/connectome-route.py --sense sense.clock.daily --goal "daily agi scan"
+# Run the daily scan (arXiv → vault/mesh proposals)
+python3 scripts/agi-research-scan.py
+# Confirm workspace + integration wiring
+python3 scripts/workspace-integration-check.py
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
 # Live brain + spinal cord visualization (all repos)
@@ -87,5 +94,6 @@ data/            Persisted mesh + memory (gitignored runtime state)
 ## Status
 
 Persona locked. Starter vault created. Always-on autonomy set.
+Brain reimagined with AGI scan / capability / info teams + sLM/DL cortex.
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.
 Neural-mesh scanner stack is present alongside the Cam connectome foundation.

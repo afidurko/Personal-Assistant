@@ -1,0 +1,121 @@
+{
+  "id": "team.agi-research-scan",
+  "name": "AGI Research Scan Team",
+  "purpose": "Every day, scan the open internet for new AI/AGI research papers and findings that can enhance Cam — then propose connectome/capability upgrades for Aaron.",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "standing_goal": true,
+  "schedule": {
+    "cadence": "daily",
+    "timezone": "America/New_York",
+    "preferred_local_hour": 6,
+    "trigger_sense": "sense.clock.daily",
+    "may_run_on_demand": true
+  },
+  "human_ultimate_say": {
+    "scan_and_distill": "autonomous",
+    "propose_enhancements": "autonomous",
+    "apply_functionality_changes": "requires_aaron_via_switch.cam_enhance"
+  },
+  "lead_center": "center.agi_scan",
+  "lead_role": "agi-scout",
+  "members": [
+    {
+      "role": "agi-scout",
+      "job": "Crawl arXiv, OpenReview, ACL Anthology, HF papers, lab blogs; emit paper spikes",
+      "spawns_subagents": true
+    },
+    {
+      "role": "agi-analyst",
+      "job": "Read abstracts/full text; score Cam-relevance; extract methods transferable to Cam",
+      "spawns_subagents": true
+    },
+    {
+      "role": "agi-synthesist",
+      "job": "Map findings → connectome edges, role prompts, sLM/DL recipes, vault briefs",
+      "spawns_subagents": true
+    },
+    {
+      "role": "capability-broker",
+      "job": "Turn synthesis into enhancement tickets gated by Aaron for functionality changes",
+      "spawns_subagents": true
+    },
+    {
+      "role": "qa",
+      "job": "Cite-check, dedupe, reject hype without sources",
+      "spawns_subagents": true
+    },
+    {
+      "role": "memory-curator",
+      "job": "Archive distillates into mesh/research + vault/04-Research",
+      "spawns_subagents": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "arxiv",
+      "api": "https://export.arxiv.org/api/query",
+      "categories": ["cs.AI", "cs.LG", "cs.CL", "cs.MA", "cs.NE", "stat.ML"],
+      "sense": "sense.web.arxiv"
+    },
+    {
+      "id": "openreview",
+      "base": "https://openreview.net",
+      "topics": ["AGI", "agents", "multi-agent", "small language models", "tool use"],
+      "sense": "sense.web.agi_feed"
+    },
+    {
+      "id": "acl_anthology",
+      "base": "https://aclanthology.org",
+      "sense": "sense.web.agi_feed"
+    },
+    {
+      "id": "huggingface_papers",
+      "base": "https://huggingface.co/papers",
+      "sense": "sense.web.agi_feed"
+    },
+    {
+      "id": "lab_blogs",
+      "examples": ["openai.com/research", "deepmind.google/discover", "anthropic.com/research", "ai.meta.com/research"],
+      "sense": "sense.web.agi_feed"
+    }
+  ],
+  "queries": [
+    "artificial general intelligence",
+    "agentic AI multi-agent systems",
+    "small language models SLM on-device",
+    "tool-using agents planning memory",
+    "retrieval-augmented generation agents",
+    "connectome neural architecture AI",
+    "continual learning personal assistants",
+    "efficient fine-tuning LoRA QLoRA adapters"
+  ],
+  "relevance_rubric": {
+    "enhance_cam_routing": 3,
+    "enhance_memory_mesh": 3,
+    "enhance_presence_voice": 2,
+    "enhance_vision": 2,
+    "enhance_slm_local": 3,
+    "enhance_dl_embeddings": 3,
+    "general_agi_theory": 1,
+    "min_score_to_propose": 4
+  },
+  "outputs": {
+    "vault_dir": "vault/04-Research/agi-daily",
+    "mesh_namespace": "mesh/research/agi-scan",
+    "proposals_dir": "vault/02-Cam/enhancement-proposals",
+    "daily_index": "vault/04-Research/AGI-Daily-Scan.md"
+  },
+  "subagents": {
+    "unlimited": true,
+    "human_gate_to_spawn": false,
+    "typical_burst": [
+      "parallel source gatherers per feed",
+      "per-paper deep readers",
+      "citation verifiers",
+      "enhancement ticket writers"
+    ]
+  },
+  "pathway_hotspot": "hotspot.agi_daily_scan",
+  "script": "scripts/agi-research-scan.py"
+}

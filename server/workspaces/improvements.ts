@@ -2,6 +2,7 @@ import { WORKSPACE_META, STATUS_COLORS } from '../../shared/types.js';
 import type { Finding, WorkspaceKind, WorkspaceSnapshot } from '../../shared/types.js';
 import type { WorkspaceScanner } from './types.js';
 import { architectureScanner } from './architecture.js';
+import { agiResearchScanner } from './agi-research.js';
 import { healthScanner } from './health.js';
 import { updatesScanner } from './updates.js';
 import { vulnerabilityScanner } from './vulnerability.js';
@@ -29,6 +30,7 @@ async function lightRescan(rootDir: string): Promise<WorkspaceSnapshot[]> {
     architectureScanner.scan(rootDir),
     vulnerabilityScanner.scan(rootDir),
     updatesScanner.scan(rootDir),
+    agiResearchScanner.scan(rootDir),
   ]);
 }
 
@@ -48,6 +50,21 @@ function synthesize(prior: WorkspaceSnapshot[]): Finding[] {
   const arch = map.architecture;
   const vuln = map.vulnerability;
   const updates = map.updates;
+  const agi = map.agi_research;
+
+  if (agi && (agi.score < 50 || agi.status === 'critical')) {
+    findings.push(
+      makeFinding(ID, {
+        title: 'Repair AGI research scan wiring',
+        detail: `AGI research workspace score is ${agi.score} with ${agi.findings.length} finding(s).`,
+        severity: 'high',
+        category: 'priority',
+        suggestion:
+          'Restore team config / scripts / switch.cam_enhance hold before relying on daily enhancement proposals.',
+        relatedNodeIds: ['workspace-agi-research'],
+      }),
+    );
+  }
 
   if (vuln && (vuln.score < 50 || vuln.status === 'critical')) {
     findings.push(

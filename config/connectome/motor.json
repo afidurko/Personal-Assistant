@@ -55,6 +55,30 @@
       "channel": ["nulltickets_store"],
       "requires_switch": ["switch.autonomy", "switch.kill"],
       "notes": "Kill pauses new mesh claims; curator may flush logs only if Aaron allows"
+    },
+    {
+      "id": "motor.web_fetch",
+      "channel": ["http_fetch", "arxiv_api"],
+      "requires_switch": ["switch.research_scan", "switch.kill"],
+      "notes": "Fetch papers/findings for AGI scan and info team — no outbound messaging"
+    },
+    {
+      "id": "motor.enhance",
+      "channel": ["config_patch", "role_prompt", "connectome_edge", "slm_dl_recipe"],
+      "requires_switch": ["switch.cam_enhance", "switch.kill"],
+      "notes": "Apply Cam functionality changes only when Aaron flips switch.cam_enhance"
+    },
+    {
+      "id": "motor.slm",
+      "channel": ["local_slm"],
+      "requires_switch": ["switch.slm_local", "switch.kill"],
+      "notes": "Invoke Cam sLM cortex (classify/route/compress/draft assist)"
+    },
+    {
+      "id": "motor.dl",
+      "channel": ["local_dl", "embeddings", "rerank"],
+      "requires_switch": ["switch.dl_local", "switch.kill"],
+      "notes": "Invoke Cam DL cortex (embed/rerank/cluster/identity vectors)"
     }
   ],
   "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"

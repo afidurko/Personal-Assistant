@@ -43,6 +43,32 @@
       "role": "vision"
     },
     {
+      "id": "agi_research_scan_daily",
+      "title": "Daily AI/AGI research scan → Cam enhancement proposals",
+      "role": "agi-scout",
+      "team": "team.agi-research-scan",
+      "enabled": true
+    },
+    {
+      "id": "slm_dl_cortex",
+      "title": "Local sLM + DL cortex for Cam enhancement",
+      "role": "slm-runtime",
+      "enabled": true
+    },
+    {
+      "id": "capability_info_teams",
+      "title": "Capability + Information teams (unlimited subagents)",
+      "role": "capability-broker",
+      "enabled": true
+    },
+    {
+      "id": "workspace_integration_check",
+      "title": "Confirm workspace registry + submodule + persist wiring",
+      "role": "memory-curator",
+      "script": "scripts/workspace-integration-check.py",
+      "enabled": true
+    },
+    {
       "id": "ios_identity_camera_mic",
       "title": "iOS companion: Aaron face/voice + camera/mic",
       "role": "comms"

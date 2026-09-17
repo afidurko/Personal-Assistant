@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "title": "Cam unified workspace registry",
+  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts — so cloud agents and future checkouts share one workflow.",
+  "authorized_by": "Aaron",
+  "updated_at": "2026-09-17",
+  "docs": "docs/WORKSPACES_WORKFLOW.md",
+  "layers": {
+    "vault_areas": [
+      {"id": "vault.inbox", "path": "vault/00-Inbox"},
+      {"id": "vault.aaron", "path": "vault/01-Aaron"},
+      {"id": "vault.cam", "path": "vault/02-Cam"},
+      {"id": "vault.projects", "path": "vault/03-Projects"},
+      {"id": "vault.research", "path": "vault/04-Research"},
+      {"id": "vault.careers", "path": "vault/05-Careers"},
+      {"id": "vault.life_ops", "path": "vault/06-Life-Ops"},
+      {"id": "vault.docs", "path": "vault/07-Docs"},
+      {"id": "vault.people", "path": "vault/08-People"},
+      {"id": "vault.mesh_distillates", "path": "vault/10-Mesh-Distillates"}
+    ],
+    "scan_workspaces": [
+      {
+        "id": "scan.health",
+        "kind": "health",
+        "source_pr": 2,
+        "module": "server/workspaces/health.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.architecture",
+        "kind": "architecture",
+        "source_pr": 2,
+        "module": "server/workspaces/architecture.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.vulnerability",
+        "kind": "vulnerability",
+        "source_pr": 2,
+        "module": "server/workspaces/vulnerability.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.updates",
+        "kind": "updates",
+        "source_pr": 2,
+        "module": "server/workspaces/updates.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.improvements",
+        "kind": "improvements",
+        "source_pr": 2,
+        "module": "server/workspaces/improvements.ts",
+        "status": "merged_main",
+        "notes": "Synthesizes from core scanners"
+      },
+      {
+        "id": "scan.agi_research",
+        "kind": "agi_research",
+        "source_pr": 4,
+        "team": "team.agi-research-scan",
+        "module": "server/workspaces/agi-research.ts",
+        "script": "scripts/agi-research-scan.py",
+        "hotspot": "hotspot.agi_daily_scan",
+        "status": "active_this_branch",
+        "cadence": "daily",
+        "human_gate_for_apply": "switch.cam_enhance"
+      }
+    ],
+    "agent_teams": [
+      {"id": "team.agi-research-scan", "config": "config/teams/agi-research-scan.json"},
+      {"id": "team.capability", "config": "config/teams/capability.json"},
+      {"id": "team.info", "config": "config/teams/info.json"}
+    ],
+    "enhancement_cortex": {
+      "config": "config/enhancement/slm-dl.json",
+      "centers": ["center.slm", "center.dl"],
+      "switches": ["switch.slm_local", "switch.dl_local", "switch.cam_enhance"]
+    },
+    "integrations": [
+      {"id": "jarvis", "path": "integrations/jarvis", "policy": "config/integrations/jarvis.md"},
+      {
+        "id": "paddledetection",
+        "path": "integrations/paddledetection",
+        "policy": "config/integrations/paddledetection.md"
+      },
+      {
+        "id": "llmavatartalk",
+        "path": "integrations/llmavatartalk",
+        "policy": "config/integrations/llmavatartalk.md"
+      },
+      {
+        "id": "smart-second-brain",
+        "path": "integrations/smart-second-brain",
+        "policy": "config/integrations/smart-second-brain.md"
+      }
+    ],
+    "parallel_prs": [
+      {"number": 1, "role": "foundation", "state": "merged"},
+      {
+        "number": 2,
+        "role": "scan_workspaces_neural_mesh_ui",
+        "branch": "cursor/system-health-brain-scan-d12d",
+        "state": "merged"
+      },
+      {
+        "number": 3,
+        "role": "brodmann_3d_plasticity",
+        "branch": "cursor/swiftguide-brain-map-0f2c",
+        "state": "draft",
+        "merge_risk_with_pr4": "high"
+      },
+      {
+        "number": 4,
+        "role": "agi_teams_slm_dl",
+        "branch": "cursor/cam-brain-agi-scan-teams-bded",
+        "state": "draft"
+      },
+      {
+        "number": 5,
+        "role": "cline_shared_effector",
+        "branch": "cursor/integrate-cline-all-agents-91d1",
+        "state": "draft"
+      }
+    ]
+  },
+  "workflow": {
+    "boot": "config/priority-boot.json",
+    "persist_export": "scripts/persist-export.py",
+    "persist_import": "scripts/persist-import.py",
+    "integration_check": "scripts/workspace-integration-check.py",
+    "connectome_check": "scripts/connectome-check.py",
+    "daily_agi_scan": "scripts/agi-research-scan.py",
+    "enhance_gate": "scripts/cam-enhance-propose.py"
+  }
+}

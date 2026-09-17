@@ -5,7 +5,8 @@ export type WorkspaceKind =
   | 'architecture'
   | 'vulnerability'
   | 'updates'
-  | 'improvements';
+  | 'improvements'
+  | 'agi_research';
 
 export type ScanStatus = 'idle' | 'scanning' | 'healthy' | 'warning' | 'critical' | 'stale';
 
@@ -260,5 +261,11 @@ export const WORKSPACE_META: Record<
     description: 'Actionable suggestions synthesized from health, vulns, and architecture.',
     region: 'insula',
     defaultColor: '#4ecdc4',
+  },
+  agi_research: {
+    name: 'AGI Research Scan',
+    description: 'Daily AI/AGI paper scan → Cam enhancement proposals (Aaron gates apply).',
+    region: 'hippocampus',
+    defaultColor: '#9b59b6',
   },
 };

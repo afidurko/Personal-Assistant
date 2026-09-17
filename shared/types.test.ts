@@ -10,7 +10,14 @@ describe('shared status palette', () => {
 
   it('defines all workspace kinds with regions', () => {
     expect(Object.keys(WORKSPACE_META)).toEqual(
-      expect.arrayContaining(['health', 'architecture', 'vulnerability', 'updates', 'improvements']),
+      expect.arrayContaining([
+        'health',
+        'architecture',
+        'vulnerability',
+        'updates',
+        'improvements',
+        'agi_research',
+      ]),
     );
     for (const meta of Object.values(WORKSPACE_META)) {
       expect(meta.name.length).toBeGreaterThan(0);
