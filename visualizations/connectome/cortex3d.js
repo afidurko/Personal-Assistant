@@ -73,6 +73,13 @@ const controlsEl = document.getElementById("controls");
 const agentsEl = document.getElementById("agents");
 const liveChip = document.getElementById("chip-live");
 
+/** Resolve paths from this module so fetches work from any static-server root */
+function repoUrl(rel, query = "") {
+  const u = new URL(rel, import.meta.url);
+  if (query) u.search = query.startsWith("?") ? query.slice(1) : query;
+  return u.href;
+}
+
 let weights = Object.fromEntries(TRACTS.map((t) => [t.alias || t.id, 0.55]));
 let myelination = Object.fromEntries(TRACTS.map((t) => [t.alias || t.id, t.myelination || 0.7]));
 let events = [];
@@ -415,7 +422,7 @@ function reanchorAreasFromCortex() {
 
 async function bootAnatomy() {
   try {
-    cortexApi = await loadCamCortex(brain, { url: "./assets/cam-cortex.glb" });
+    cortexApi = await loadCamCortex(brain, { url: new URL("./assets/cam-cortex.glb", import.meta.url).href });
     reanchorAreasFromCortex();
     anatomyReady = true;
     log(`<span class="center">CORTEX</span> anatomical shell · ${Object.keys(cortexApi.parcels).length} parcels · CC BY-SA`);
@@ -737,7 +744,7 @@ async function fireSpike(spike, injectError = false) {
   if (spike.system) highlightSystem(spike.system);
   if (spike.health) {
     try {
-      const r = await fetch("../../vault/10-Mesh-Distillates/system-health.json").then((x) => x.json());
+      const r = await fetch(repoUrl("../../vault/10-Mesh-Distillates/system-health.json")).then((x) => x.json());
       (r.checks || []).forEach((c) => {
         healthStatus[c.neuron] = c.status;
         agentActivity[c.neuron] = c.status === "healthy" ? 0.5 : c.status === "idle" ? 0.2 : 0.95;
@@ -804,7 +811,7 @@ function applyLiveFeed(feed) {
 
 async function pollLiveActivity() {
   try {
-    const r = await fetch("../../vault/10-Mesh-Distillates/live-activity.json?t=" + Date.now()).then((x) => x.json());
+    const r = await fetch(repoUrl("../../vault/10-Mesh-Distillates/live-activity.json", `t=${Date.now()}`)).then((x) => x.json());
     applyLiveFeed(r);
   } catch (_) {
     /* offline */
@@ -941,12 +948,12 @@ scrub.addEventListener("input", () => {
 async function loadSeed() {
   try {
     const [w, t, c, n, h, live] = await Promise.all([
-      fetch("../../vault/10-Mesh-Distillates/tract-weights.json").then((r) => r.json()).catch(() => ({})),
-      fetch("../../vault/10-Mesh-Distillates/plasticity-timeline.json").then((r) => r.json()).catch(() => ({})),
-      fetch("../../vault/10-Mesh-Distillates/neurogenesis-columns.json").then((r) => r.json()).catch(() => ({})),
-      fetch("../../config/connectome/neurons.json").then((r) => r.json()),
-      fetch("../../vault/10-Mesh-Distillates/system-health.json").then((r) => r.json()).catch(() => null),
-      fetch("../../vault/10-Mesh-Distillates/live-activity.json").then((r) => r.json()).catch(() => null),
+      fetch(repoUrl("../../vault/10-Mesh-Distillates/tract-weights.json")).then((r) => r.json()).catch(() => ({})),
+      fetch(repoUrl("../../vault/10-Mesh-Distillates/plasticity-timeline.json")).then((r) => r.json()).catch(() => ({})),
+      fetch(repoUrl("../../vault/10-Mesh-Distillates/neurogenesis-columns.json")).then((r) => r.json()).catch(() => ({})),
+      fetch(repoUrl("../../config/connectome/neurons.json")).then((r) => r.json()),
+      fetch(repoUrl("../../vault/10-Mesh-Distillates/system-health.json")).then((r) => r.json()).catch(() => null),
+      fetch(repoUrl("../../vault/10-Mesh-Distillates/live-activity.json")).then((r) => r.json()).catch(() => null),
     ]);
     catalogNeurons = n.neurons || [];
     if (h?.checks) {
