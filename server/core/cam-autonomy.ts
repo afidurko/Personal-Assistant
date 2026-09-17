@@ -2,10 +2,10 @@
  * Cam background autonomy — self-improvement tasks she creates while listening.
  * Writes vault distillates so the 3D cortex live feed can light fibers.
  */
-import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
-import path from 'node:path';
+import { readFile, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import type { LoopJob, MemoryTrace, WorkspaceSnapshot } from '../../shared/types.js';
+import type { RuntimeStore } from './runtime-store.js';
 
 export interface CamSelfTask {
   id: string;
@@ -84,7 +84,7 @@ export class CamAutonomy {
   private lastImproveFingerprint = '';
   private lastLiveFingerprint = '';
 
-  constructor(private readonly rootDir: string) {}
+  constructor(private readonly runtime: RuntimeStore) {}
 
   getTasks(): CamSelfTask[] {
     return this.tasks.map((t) => ({ ...t }));
@@ -188,8 +188,6 @@ export class CamAutonomy {
 
   private async emitActivity(task: CamSelfTask, listening: boolean): Promise<number> {
     try {
-      const dir = path.join(this.rootDir, 'vault/10-Mesh-Distillates');
-      await mkdir(dir, { recursive: true });
       const tracts =
         task.area === 'area.broca' || task.neuron.includes('speak')
           ? ['tract.arcuate', 'tract.af_anterior', 'tract.fat']
@@ -206,7 +204,7 @@ export class CamAutonomy {
         reason: `cam_autonomy:${task.status}:${task.title}`,
         source: 'cam_autonomy',
       };
-      await appendFile(path.join(dir, 'activity-events.jsonl'), `${JSON.stringify(row)}\n`, 'utf8');
+      await this.runtime.appendLine('activity-events.jsonl', JSON.stringify(row));
       return 1;
     } catch {
       return 0;
@@ -215,8 +213,6 @@ export class CamAutonomy {
 
   private async persistImproveTasks(loopJobs: LoopJob[]): Promise<void> {
     try {
-      const dir = path.join(this.rootDir, 'vault/10-Mesh-Distillates');
-      await mkdir(dir, { recursive: true });
       const payload = {
         updatedAt: new Date().toISOString(),
         camSelfTasks: this.getTasks(),
@@ -229,7 +225,7 @@ export class CamAutonomy {
       });
       if (fingerprint === this.lastImproveFingerprint) return;
       this.lastImproveFingerprint = fingerprint;
-      await writeFile(path.join(dir, 'improve-tasks.json'), JSON.stringify(payload, null, 2), 'utf8');
+      await this.runtime.writeJson('improve-tasks.json', payload);
     } catch {
       /* best-effort */
     }
@@ -237,8 +233,7 @@ export class CamAutonomy {
 
   private async refreshLiveActivity(): Promise<void> {
     try {
-      const dir = path.join(this.rootDir, 'vault/10-Mesh-Distillates');
-      const eventsPath = path.join(dir, 'activity-events.jsonl');
+      const eventsPath = this.runtime.pathFor('activity-events.jsonl');
       let lines: string[] = [];
       try {
         const raw = await readFile(eventsPath, 'utf8');
@@ -307,7 +302,7 @@ export class CamAutonomy {
       });
       if (fingerprint === this.lastLiveFingerprint) return;
       this.lastLiveFingerprint = fingerprint;
-      await writeFile(path.join(dir, 'live-activity.json'), JSON.stringify(live, null, 2), 'utf8');
+      await this.runtime.writeJson('live-activity.json', live);
     } catch {
       /* best-effort */
     }
@@ -316,10 +311,7 @@ export class CamAutonomy {
   /** Keep activity-events.jsonl from growing without bound. */
   private async trimActivityLog(): Promise<void> {
     try {
-      const eventsPath = path.join(
-        this.rootDir,
-        'vault/10-Mesh-Distillates/activity-events.jsonl',
-      );
+      const eventsPath = this.runtime.pathFor('activity-events.jsonl');
       const raw = await readFile(eventsPath, 'utf8');
       const lines = raw.trim().split('\n').filter(Boolean);
       if (lines.length <= 120) return;

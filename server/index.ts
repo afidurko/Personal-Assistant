@@ -10,6 +10,7 @@ import { AGENT_LAYERS, MESH_AGENTS } from '../shared/agentLayers.js';
 import { ScanOrchestrator } from './core/scan-orchestrator.js';
 import { CamConverse } from './core/cam-converse.js';
 import { CamAutonomy } from './core/cam-autonomy.js';
+import { RuntimeStore } from './core/runtime-store.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -19,6 +20,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const runtime = new RuntimeStore(ROOT);
+await runtime.ensure();
+
 const orchestrator = new ScanOrchestrator({
   rootDir: ROOT,
   intervalMs: Number(process.env.SCAN_INTERVAL_MS ?? 25_000),
@@ -26,7 +30,7 @@ const orchestrator = new ScanOrchestrator({
 });
 
 const converse = new CamConverse(ROOT);
-const autonomy = new CamAutonomy(ROOT);
+const autonomy = new CamAutonomy(runtime);
 let micListeningHint = false;
 
 await orchestrator.init();
@@ -37,6 +41,21 @@ function fullState() {
     camSelfTasks: autonomy.getTasks(),
   };
 }
+
+/** Compact fingerprint so we can skip identical full-state broadcasts. */
+function stateFingerprint(state: ReturnType<typeof fullState>): string {
+  return JSON.stringify({
+    cycle: state.cycleCount,
+    scanning: state.scanning,
+    jobs: (state.loopJobs ?? []).map((j) => [j.id, j.status, j.attempts]),
+    tasks: (state.camSelfTasks ?? []).map((t) => [t.id, t.status]),
+    scores: (state.workspaces ?? []).map((w) => [w.id, w.score, w.status]),
+    guide: [state.activeConceptId, state.guideStep],
+    agentEff: state.lastAgentCycle?.efficiencyGain ?? null,
+  });
+}
+
+let lastStateFingerprint = '';
 
 app.get('/api/health', (_req, res) => {
   res.json({
@@ -225,6 +244,33 @@ app.post('/api/guide/concepts/:id', async (req, res) => {
   res.json(await orchestrator.openConcept(req.params.id));
 });
 
+
+const runtimeFiles = [
+  'live-activity',
+  'improve-tasks',
+  'system-health',
+  'tract-weights',
+  'plasticity-timeline',
+  'neurogenesis-columns',
+] as const;
+
+for (const name of runtimeFiles) {
+  app.get(`/api/runtime/${name}`, async (_req, res) => {
+    const data = await runtime.readJson(`${name}.json`, {});
+    res.json(data);
+  });
+}
+
+app.get('/api/runtime/activity-events', async (_req, res) => {
+  try {
+    const { readFile } = await import('node:fs/promises');
+    const raw = await readFile(runtime.pathFor('activity-events.jsonl'), 'utf8');
+    res.type('text/plain').send(raw);
+  } catch {
+    res.type('text/plain').send('');
+  }
+});
+
 // Static assets for Cam face, 3D cortex, and live-activity JSON the cortex polls
 app.use('/identity', express.static(path.join(ROOT, 'identity')));
 app.use('/vault', express.static(path.join(ROOT, 'vault')));
@@ -249,15 +295,36 @@ function broadcast(type: WsServerMessage['type'], payload: unknown) {
   for (const client of wss.clients) send(client, type, payload);
 }
 
+function broadcastState(force = false) {
+  const state = fullState();
+  const fp = stateFingerprint(state);
+  if (!force && fp === lastStateFingerprint) return false;
+  lastStateFingerprint = fp;
+  broadcast('state', state);
+  return true;
+}
+
 orchestrator.on('tick', (payload) => broadcast('scan_tick', payload));
-orchestrator.on('complete', (payload) => broadcast('scan_complete', payload));
-orchestrator.on('state', () => broadcast('state', fullState()));
+orchestrator.on('complete', (payload) => {
+  broadcast('scan_complete', payload);
+  broadcastState();
+});
+orchestrator.on('state', () => broadcastState());
 orchestrator.on('memory_update', (payload) => broadcast('memory_update', payload));
-orchestrator.on('agent_cycle', (payload) => broadcast('agent_cycle', payload));
-orchestrator.on('loop_update', (payload) => broadcast('loop_update', payload));
+orchestrator.on('agent_cycle', (payload) => {
+  broadcast('agent_cycle', payload);
+  // Prefer delta event; full state only when fingerprint changes
+  broadcastState();
+});
+orchestrator.on('loop_update', (payload) => {
+  broadcast('loop_update', payload);
+  broadcastState();
+});
 
 wss.on('connection', (socket) => {
-  send(socket, 'state', fullState());
+  const state = fullState();
+  lastStateFingerprint = stateFingerprint(state);
+  send(socket, 'state', state);
 
   socket.on('message', async (raw) => {
     let msg: WsClientMessage;
@@ -270,11 +337,11 @@ wss.on('connection', (socket) => {
     switch (msg.type) {
       case 'start_scan':
         orchestrator.start();
-        broadcast('state', fullState());
+        broadcastState();
         break;
       case 'stop_scan':
         orchestrator.stop();
-        broadcast('state', fullState());
+        broadcastState();
         break;
       case 'focus_node': {
         const payload = msg.payload as { id?: string; nodeId?: string } | undefined;
@@ -285,11 +352,11 @@ wss.on('connection', (socket) => {
             const focused = await orchestrator.openConcept(conceptId);
             send(socket, 'guide_focus', focused);
             send(socket, 'node_focus', focused);
-            broadcast('state', fullState());
+            broadcastState();
           } else {
             const focused = orchestrator.focusNode(id);
             send(socket, 'node_focus', focused);
-            broadcast('state', fullState());
+            broadcastState();
           }
         }
         break;
@@ -300,7 +367,7 @@ wss.on('connection', (socket) => {
         if (id) {
           const focused = orchestrator.focusWorkspace(id);
           send(socket, 'node_focus', focused);
-          broadcast('state', fullState());
+          broadcastState();
         }
         break;
       }
@@ -312,7 +379,7 @@ wss.on('connection', (socket) => {
           const focused = await orchestrator.openConcept(conceptId);
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', fullState());
+          broadcastState();
         }
         break;
       }
@@ -320,7 +387,7 @@ wss.on('connection', (socket) => {
         const focused = await orchestrator.guideStart();
         send(socket, 'guide_focus', focused);
         send(socket, 'node_focus', focused);
-        broadcast('state', fullState());
+        broadcastState();
         break;
       }
       case 'guide_next': {
@@ -328,7 +395,7 @@ wss.on('connection', (socket) => {
         if (focused) {
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', fullState());
+          broadcastState();
         }
         break;
       }
@@ -337,33 +404,33 @@ wss.on('connection', (socket) => {
         if (focused) {
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', fullState());
+          broadcastState();
         }
         break;
       }
       case 'run_agent_cycle': {
         const result = await orchestrator.runAgentCycle();
         send(socket, 'agent_cycle', result);
-        broadcast('state', fullState());
+        broadcastState();
         break;
       }
       case 'start_issue_loop': {
         orchestrator.setIssueLoopArmed(true);
         send(socket, 'loop_update', orchestrator.getLoopJobs());
-        broadcast('state', fullState());
+        broadcastState();
         break;
       }
       case 'stop_issue_loop': {
         orchestrator.setIssueLoopArmed(false);
         send(socket, 'loop_update', orchestrator.getLoopJobs());
-        broadcast('state', fullState());
+        broadcastState();
         break;
       }
       case 'reinforce': {
         const edge = msg.payload as { from?: string; to?: string; delta?: number } | undefined;
         if (edge?.from && edge?.to) {
           orchestrator.reinforce(edge.from, edge.to, edge.delta ?? 0.05);
-          broadcast('state', fullState());
+          broadcastState();
         }
         break;
       }

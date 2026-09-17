@@ -3,6 +3,7 @@ node_modules/
 dist/
 dist-server/
 data/*.json
+data/runtime/
 !data/.gitkeep
 .DS_Store
 *.log
@@ -19,6 +20,9 @@ __pycache__/
 identity/persistence/cam-persistence.zip
 identity/aaron/local/
 vault/10-Mesh-Distillates/converse/*.jsonl
+vault/10-Mesh-Distillates/activity-events.jsonl
+vault/10-Mesh-Distillates/live-activity.json
+vault/10-Mesh-Distillates/improve-tasks.json
 scripts/__pycache__/
 identity/persistence/tickets/pending/*.json
 identity/persistence/tickets/done/*.json

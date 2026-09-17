@@ -8,19 +8,19 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src'),
       '@shared': path.resolve(__dirname, 'shared'),
+      'three/addons': path.resolve(__dirname, 'node_modules/three/examples/jsm'),
     },
   },
-  // 3D cortex lives under visualizations/ and loads three via importmap from Express.
-  // Keep Vite out of that tree so it does not try to resolve CDN modules.
   optimizeDeps: {
-    entries: ['index.html', 'src/**/*.{ts,tsx}'],
+    include: ['three', 'three/addons/controls/OrbitControls.js', 'three/addons/renderers/CSS2DRenderer.js'],
+    entries: ['index.html', 'src/**/*.{ts,tsx,js}'],
   },
   server: {
     host: '127.0.0.1',
     port: 5173,
     fs: {
       allow: ['.'],
-      deny: ['visualizations/**', 'companions/**'],
+      deny: ['companions/**'],
     },
     proxy: {
       '/api': 'http://127.0.0.1:8787',
@@ -29,7 +29,7 @@ export default defineConfig({
         ws: true,
       },
       '/viz': 'http://127.0.0.1:8787',
-      '/vault': 'http://localhost:8787',
+      '/vault': 'http://127.0.0.1:8787',
       '/config': 'http://127.0.0.1:8787',
       '/identity': 'http://127.0.0.1:8787',
       '/companions': 'http://127.0.0.1:8787',

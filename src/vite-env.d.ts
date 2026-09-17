@@ -1,5 +1,17 @@
 /// <reference types="vite/client" />
 
+declare module '@/lib/cortex/engine.js' {
+  export function mountCortex(
+    container: HTMLElement,
+    options?: { embed?: boolean; liveActivityUrl?: string; pollMs?: number },
+  ): {
+    destroy: () => void;
+    pause: () => void;
+    resume: () => void;
+    setLodHigh: (high: boolean) => void;
+  };
+}
+
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;

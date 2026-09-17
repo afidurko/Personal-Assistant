@@ -9,12 +9,13 @@ talking presence — with a smart second brain, **agent teams**, and a **sLM/DL 
 ```bash
 npm install
 npm run dev
-# → http://127.0.0.1:5173  — Cam listens/speaks; 3D DTI cortex is interactive
+# → http://127.0.0.1:5173  — Cam listens/speaks; 3D DTI cortex mounts in-process (vendored three)
 # API/mesh  → http://127.0.0.1:8787
-# 3D alone  → http://127.0.0.1:8787/viz/connectome/
+# Standalone viz → http://127.0.0.1:8787/viz/connectome/
 ```
 
 Cam stays on in the background spawning self-improve tasks (spawn bay on the home page).
+Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache skips tree walks when sources are unchanged.
 
 ## Design
 

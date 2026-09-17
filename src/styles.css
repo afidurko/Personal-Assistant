@@ -1172,6 +1172,7 @@ h2,
   box-shadow: inset 0 0 0 1px rgba(61, 184, 168, 0.35);
 }
 
+.cortex-mount-host,
 .cortex-frame {
   position: absolute;
   inset: 0;
@@ -1179,6 +1180,70 @@ h2,
   height: 100%;
   border: 0;
   background: #000;
+}
+
+.cortex-mount-host {
+  overflow: hidden;
+}
+
+.cortex-mount-host .viz-panel-3d,
+.cortex-mount.embed,
+.cortex-mount-host .cortex-mount {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 0;
+}
+
+.cortex-mount-host canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.cortex-mount-host .hud-dti {
+  position: absolute;
+  left: 0.65rem;
+  bottom: 0.55rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--foam-dim);
+  font-size: 0.72rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cortex-mount-host .view-presets {
+  pointer-events: auto;
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.cortex-mount-host .view-presets button,
+.cortex-mount-host .chip {
+  pointer-events: auto;
+  background: rgba(6, 16, 20, 0.72);
+  border: 1px solid var(--border);
+  color: var(--foam);
+  font: inherit;
+  font-size: 0.68rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.cortex-mount-host .chrome-only {
+  display: none !important;
+}
+
+.cortex-mount-host .label3d {
+  color: var(--foam-dim);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px #000;
 }
 
 .cortex-hud {
