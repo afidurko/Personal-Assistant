@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SIM = ROOT / "scripts" / "connectome-simulate.py"
 CHECK = ROOT / "scripts" / "connectome-check.py"
+HEALTH = ROOT / "scripts" / "system-health-scan.py"
 CFG = ROOT / "config" / "connectome"
 CYCLES = ROOT / "vault" / "10-Mesh-Distillates" / "qa-cycles"
 
@@ -38,6 +39,22 @@ def run_static_check() -> dict:
         report = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
         report = {"ok": False, "parse_error": proc.stdout[:500]}
+    report["exit_code"] = proc.returncode
+    return report
+
+
+def run_health_scan() -> dict:
+    """Fire health_conductor — workspace vitals / drift / integrations."""
+    proc = subprocess.run(
+        [sys.executable, str(HEALTH), "--json"],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    try:
+        report = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        report = {"overall": "critical", "parse_error": (proc.stdout or "")[:500]}
     report["exit_code"] = proc.returncode
     return report
 
@@ -238,6 +255,7 @@ def write_suggestions(
         "",
         "## After green (standing improvements)",
         "- CI: `python3 scripts/connectome-check.py` + `--n 1000000 --strict-edges` on push",
+        "- Standing: `python3 scripts/system-health-scan.py` (health_conductor)",
         "- Nightly billion fuzz via `qa-loop.py --n 1000000000 --cycles 1`",
         "- Progress heartbeats every 50M sims for long campaigns",
         "- Traffic-weighted sense sampling (chat-heavy)",
@@ -270,6 +288,15 @@ def main() -> int:
         check = run_static_check()
         (cycle_dir / "static-check.json").write_text(
             json.dumps(check, indent=2) + "\n", encoding="utf-8"
+        )
+        health = run_health_scan()
+        (cycle_dir / "system-health.json").write_text(
+            json.dumps(health, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            f"[qa] health_conductor: {health.get('overall', '?')} "
+            f"({len(health.get('checks') or [])} neurons)",
+            flush=True,
         )
         if not check.get("ok"):
             print("[qa] static check FAIL — dispatching fix team", flush=True)

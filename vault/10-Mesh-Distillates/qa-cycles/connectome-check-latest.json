@@ -1,7 +1,7 @@
 {
   "senses": 16,
   "hotspot_options": 19,
-  "known_nodes": 84,
+  "known_nodes": 100,
   "motors": 10,
   "edges": 101,
   "hard_errors": [],

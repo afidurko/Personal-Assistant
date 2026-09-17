@@ -264,6 +264,80 @@
       ],
       "t": 24,
       "ts": "2026-09-16T23:54:44Z"
+    },
+    {
+      "t": 25,
+      "ts": "2026-09-17T00:09:45Z",
+      "type": "health_scan",
+      "status": "warn",
+      "overall": "warning",
+      "neurons": [
+        "neuron.vitals_loop",
+        "neuron.connectome_check",
+        "neuron.submodule_health",
+        "neuron.integration_pulse",
+        "neuron.persist_sync",
+        "neuron.secret_hygiene",
+        "neuron.drift_scan",
+        "neuron.converse_health"
+      ]
+    },
+    {
+      "t": 26,
+      "ts": "2026-09-17T00:12:25Z",
+      "type": "health_scan",
+      "status": "warn",
+      "overall": "warning",
+      "neurons": [
+        "neuron.vitals_loop",
+        "neuron.connectome_check",
+        "neuron.submodule_health",
+        "neuron.integration_pulse",
+        "neuron.persist_sync",
+        "neuron.secret_hygiene",
+        "neuron.drift_scan",
+        "neuron.converse_health"
+      ]
+    },
+    {
+      "t": 27,
+      "ts": "2026-09-17T00:14:02Z",
+      "type": "health_scan",
+      "status": "warn",
+      "overall": "warning",
+      "neurons": [
+        "neuron.vitals_loop",
+        "neuron.connectome_check",
+        "neuron.submodule_health",
+        "neuron.integration_pulse",
+        "neuron.persist_sync",
+        "neuron.secret_hygiene",
+        "neuron.drift_scan",
+        "neuron.converse_health",
+        "neuron.arch_scan",
+        "neuron.vuln_scan",
+        "neuron.priority_boot"
+      ]
+    },
+    {
+      "t": 28,
+      "ts": "2026-09-17T00:14:15Z",
+      "type": "health_scan",
+      "status": "warn",
+      "overall": "warning",
+      "neurons": [
+        "neuron.vitals_loop",
+        "neuron.connectome_check",
+        "neuron.submodule_health",
+        "neuron.integration_pulse",
+        "neuron.persist_sync",
+        "neuron.secret_hygiene",
+        "neuron.drift_scan",
+        "neuron.converse_health",
+        "neuron.arch_scan",
+        "neuron.vuln_scan",
+        "neuron.priority_boot"
+      ]
     }
   ],
   "rules": "config/connectome/plasticity.json"
