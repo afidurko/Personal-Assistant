@@ -51,10 +51,15 @@ def pick_hotspot(
             score += 3
         if ("job" in g or "career" in g) and "career" in blob:
             score += 3
-        if ("qa" in g or "conflict" in g or "loop" in g) and (
+        if ("qa" in g or "conflict" in g) and (
             "qa" in blob or "conflict" in blob or "cycle" in blob
         ):
             score += 4
+        # "loop" alone is too common in ordinary chat — require qa/conflict context
+        if "loop" in g and ("qa" in g or "conflict" in g) and (
+            "qa" in blob or "conflict" in blob or "cycle" in blob
+        ):
+            score += 2
         if ("ios" in g or "swift" in g or "stack" in g) and (
             "ios" in blob or "swift" in blob or "stack" in blob or "cartograph" in blob
         ):

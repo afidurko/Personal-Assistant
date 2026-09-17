@@ -44,7 +44,17 @@ def recent_event_rows(max_age_s: float = 120.0) -> list[dict]:
             row = json.loads(ln)
         except json.JSONDecodeError:
             continue
-        # keep recent-ish; if no parseable ts, keep last 40 anyway
+        ts = row.get("ts")
+        if ts:
+            try:
+                # Support Z and +00:00
+                iso = str(ts).replace("Z", "+00:00")
+                age = now - datetime.fromisoformat(iso).timestamp()
+                if age > max_age_s:
+                    continue
+            except ValueError:
+                # unparseable ts — keep only if among trailing handful
+                pass
         rows.append(row)
     return rows[-40:]
 

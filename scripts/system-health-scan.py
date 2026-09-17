@@ -258,40 +258,35 @@ def check_tailscale_reach() -> dict:
         }
 
     peer_map = data.get("Peer") or data.get("Peers") or {}
-    names = []
-    if isinstance(peer_map, dict):
-        for meta in peer_map.values():
-            if isinstance(meta, dict):
-                dn = meta.get("DNSName") or meta.get("HostName") or ""
-                names.append(dn.lower().rstrip("."))
-                if meta.get("Online"):
-                    names.append("online:" + (meta.get("HostName") or "").lower())
-    online = []
-    for want in peers_wanted:
-        w = want.lower()
-        if any(w in n for n in names):
-            # prefer Online flag when present
-            online.append(want)
-    # If JSON has Self + peers but Online flags exist, refine
-    online_precise = []
+    # Only count peers that are explicitly Online=True in Tailscale JSON.
+    online: list[str] = []
+    seen_wanted: list[str] = []
     if isinstance(peer_map, dict):
         for meta in peer_map.values():
             if not isinstance(meta, dict):
                 continue
-            host = (meta.get("HostName") or meta.get("DNSName") or "").lower()
+            host = (meta.get("HostName") or meta.get("DNSName") or "").lower().rstrip(".")
             for want in peers_wanted:
-                if want.lower() in host and meta.get("Online") is True:
-                    online_precise.append(want)
-    if online_precise:
-        online = sorted(set(online_precise))
+                if want.lower() not in host:
+                    continue
+                if want not in seen_wanted:
+                    seen_wanted.append(want)
+                if meta.get("Online") is True and want not in online:
+                    online.append(want)
     missing = [p for p in peers_wanted if p not in online]
-    # If we saw the names but couldn't confirm Online, treat as warning not critical
-    status = "healthy" if not missing else "warning"
+    # Presence without Online confirmation is still a warning (offline device).
+    if missing and seen_wanted and not online:
+        status = "warning"
+    elif missing:
+        status = "warning"
+    else:
+        status = "healthy"
     return {
         "neuron": "neuron.tailscale_reach",
         "status": status,
         "cli": True,
         "online": online,
+        "seen": seen_wanted,
         "missing": missing,
         "wanted": peers_wanted,
         "bus": "tract.forceps_minor",
@@ -307,13 +302,15 @@ def maybe_weekly_persist(overall: str) -> dict | None:
     if marker.exists() and now - marker.stat().st_mtime < 6 * 86400:
         return {"neuron": "neuron.persist_sync", "skipped": True, "reason": "recent"}
     code, out = run([sys.executable, str(ROOT / "scripts" / "persist-export.py"), "--seed-only"])
-    marker.write_text(utc() + "\n", encoding="utf-8")
+    if code == 0:
+        marker.write_text(utc() + "\n", encoding="utf-8")
     return {
         "neuron": "neuron.persist_sync",
         "ran": True,
         "exit": code,
         "out": out[:300],
         "status": "healthy" if code == 0 else "warning",
+        "marker_written": code == 0,
     }
 
 
