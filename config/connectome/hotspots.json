@@ -107,6 +107,34 @@
       "behavior": "absorb_tool_results"
     },
     {
+      "id": "hotspot.coding",
+      "center": "center.coding",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.coding",
+        "center.qa",
+        "switch.autonomy",
+        "motor.cline"
+      ],
+      "side_effects": ["motor.docs", "motor.vault", "motor.mesh"],
+      "behavior": "plan_act_code_across_workspaces"
+    },
+    {
+      "id": "hotspot.cline_result",
+      "center": "center.coding",
+      "pathway": [
+        "sense.cline.result",
+        "center.coding",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": ["motor.vault"],
+      "behavior": "absorb_cline_session_distillates"
+    },
+    {
       "id": "hotspot.vault_recall",
       "center": "center.memory",
       "pathway": [

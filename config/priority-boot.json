@@ -38,6 +38,11 @@
       "role": "docs"
     },
     {
+      "id": "cline_coding",
+      "title": "Cline coding effector for all agents/workspaces",
+      "role": "coding"
+    },
+    {
       "id": "vision_attached",
       "title": "Vision on attached media",
       "role": "vision"

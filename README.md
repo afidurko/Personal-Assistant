@@ -10,7 +10,7 @@ talking presence — with a smart second brain over Aaron’s notes.
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · PaddleDetection · LinkedIn/Indeed
+- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
@@ -54,4 +54,5 @@ python3 scripts/persist-export.py --seed-only
 ## Status
 
 Persona locked. Starter vault created. Always-on autonomy set.
+Cline wired as shared coding effector for all agents and future workspaces.
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.

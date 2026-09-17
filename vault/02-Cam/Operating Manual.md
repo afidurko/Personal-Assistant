@@ -10,7 +10,7 @@ Full map: repo `docs/CONNECTOME_ARCHITECTURE.md` and `config/connectome/`.
 | Sensory | chat, vault, LinkedIn/Indeed, calendar, ASR, vision |
 | Centers | Cam chief, research, careers, ops, comms, docs, memory, QA |
 | Switches | autonomy, outbound, careers submit, presence, kill |
-| Motor | text/call/FaceTime, speak, Jarvis, docs, jobs, vault writes |
+| Motor | text/call/FaceTime, speak, Jarvis, **Cline**, docs, jobs, vault writes |
 
 Motor only fires on an **act** pathway tied to Aaron’s task/goal. See also [[Connectome]].
 
@@ -22,7 +22,8 @@ Motor only fires on an **act** pathway tied to Aaron’s task/goal. See also [[C
 5. Life-ops hotspot + Jarvis
 6. Comms + presence hotspot
 7. Docs hotspot
-8. Vision when tasked
+8. Coding hotspot (Cline — all agents / all workspaces)
+9. Vision when tasked
 
 ## Before answering personal questions
 Search this vault (Smart Second Brain) + mesh namespaces.

@@ -18,8 +18,8 @@ Cam implements that as software connectome configs under `config/connectome/`.
 | Fly connectome idea | Cam system |
 |---|---|
 | Sensory neurons (eyes, antennae, etc.) | Input adapters: chat, vault, email, LinkedIn/Indeed, calendar, ASR, vision |
-| Nerve cord / motor periphery | Effectors: text, call, FaceTime, Jarvis CLI, docs writers, job submitters, TTS/avatar |
-| Higher brain centers | Cam chief + specialists + nullboiler policy + mesh/vault memory |
+| Nerve cord / motor periphery | Effectors: text, call, FaceTime, Jarvis CLI, **Cline**, docs writers, job submitters, TTS/avatar |
+| Higher brain centers | Cam chief + specialists + nullboiler policy + mesh/vault memory + **coding** |
 | Cell types (~11k typed neurons) | Typed roles / subagents with contracts (`config/roles/`) |
 | Synapses | Routed events on nulltickets (claim → events → transition) |
 | fruitless / doublesex markers | Persona + standing-autonomy tags (`config/persona/`, `identity/BOUNDARIES.md`) |
@@ -52,6 +52,7 @@ flowchart LR
     TextOut[TextCallFaceTime]
     Speak[TTSAvatar]
     JarvisOut[JarvisActions]
+    ClineOut[ClineCode]
     DocsOut[DocsWrites]
     JobsOut[Applications]
     VaultOut[VaultNotes]
@@ -80,6 +81,7 @@ Examples:
 - `sense.calendar.event` — schedule signal  
 - `sense.audio.transcript` — RIVA ASR  
 - `sense.vision.detection` — PaddleDetection distillate  
+- `sense.cline.result` — Cline coding-agent feedback  
 
 ## Higher centers (`config/connectome/centers.json`)
 
@@ -94,6 +96,7 @@ Where specialization lives (paper: dimorphism concentrates centrally).
 | `center.ops` | Life-ops hotspot | `ops` |
 | `center.comms` | Social-motor planning | `comms` |
 | `center.docs` | Document planning | `docs` |
+| `center.coding` | Shared coding hotspot | `coding` + **all agents via Cline** |
 | `center.vision` | Visual association | `vision` |
 | `center.qa` | Proofreading / consistency | `qa` |
 | `center.router` | Policy neuropil | nullboiler |
@@ -126,6 +129,7 @@ Effectors fire only after a switch resolves to **act**.
 | `motor.facetime` | FaceTime |
 | `motor.speak` | RIVA TTS + avatar face |
 | `motor.jarvis` | Local CLI utilities |
+| `motor.cline` | Cline coding agent (CLI/SDK/IDE) — all roles & workspaces |
 | `motor.docs` | File/doc writes |
 | `motor.jobs` | LinkedIn/Indeed apply |
 | `motor.vault` | Obsidian note writes |
@@ -140,6 +144,7 @@ From the paper’s “male-specific connection hotspots” idea — Cam densifie
 2. **Research hotspot** — question → vault+web → cited brief → mesh/research  
 3. **Presence hotspot** — transcript → Cam reply → soft airy fluent English TTS → face  
 4. **Life-ops hotspot** — calendar/chores → Jarvis/calendar motor  
+5. **Coding hotspot** — Aaron task → coding center → QA → Cline across workspaces  
 
 Defined in `config/connectome/hotspots.json`.
 
@@ -168,6 +173,7 @@ Rules:
 | Neuron executors | nullclaw roles |
 | Human master switch | Aaron (+ nullhub when live) |
 | Long-term engram | smart-second-brain vault + mesh |
+| Coding effector | Cline (`integrations/cline`) |
 | Embodied voice/face motor | LLMAvatarTalk |
 
 ## Why this shape
@@ -184,7 +190,7 @@ Interactive brain + spinal cord map with forward motor effects and feedback retu
 - `visualizations/connectome/index.html`
 - Serve: `bash scripts/serve-connectome-viz.sh` → http://127.0.0.1:8765/visualizations/connectome/
 
-All wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nullhub, Jarvis, PaddleDetection, LLMAvatarTalk, smart-second-brain, OpenClaw/Assistant- patterns).
+All wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nullhub, Jarvis, Cline, PaddleDetection, LLMAvatarTalk, smart-second-brain, OpenClaw/Assistant- patterns).
 
 ## Files
 

@@ -9,4 +9,5 @@ Cam’s system architecture mirrors neuron/brain mapping (Berg et al., Cell 2026
 
 Repo docs: `docs/CONNECTOME_ARCHITECTURE.md`  
 Live viz: `visualizations/connectome/` (`bash scripts/serve-connectome-viz.sh`)  
+Coding effector: Cline (`integrations/cline`) — shared by all agents & workspaces  
 Research source: [[2026-09-16-Drosophila-male-CNS-connectome-Cell]]

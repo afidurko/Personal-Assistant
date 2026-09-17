@@ -15,9 +15,13 @@
     "identity/BOUNDARIES.md",
     "identity/GOALS.md",
     "identity/persistence/mesh-seed.json",
+    "identity/persistence/cline-session-cache.json",
     "config/priority-boot.json",
     "config/connectors.md",
-    "config/roles/careers.md"
+    "config/integrations/cline.md",
+    "config/roles/careers.md",
+    "config/roles/coding.md",
+    ".clinerules"
   ],
   "scope": "this_workspace_and_future_workspaces",
   "timezone": "America/New_York"

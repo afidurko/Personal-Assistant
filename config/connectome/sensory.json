@@ -66,6 +66,13 @@
       "notes": "Local utility feedback"
     },
     {
+      "id": "sense.cline.result",
+      "modality": "tool",
+      "source": "cline_cli",
+      "emits": ["spike.tool_result", "spike.code_diff"],
+      "notes": "Coding-agent feedback (edits/tests/headless JSON) for any workspace"
+    },
+    {
       "id": "sense.ios.camera",
       "modality": "vision",
       "source": "ios_companion_avfoundation",

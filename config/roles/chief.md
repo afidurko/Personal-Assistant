@@ -12,9 +12,9 @@ Connectome rules:
 5. Log every synapse traversal; QA may hold malformed chains.
 6. Prefer vault/mesh recall before inventing Aaron’s personal facts.
 7. Summon as many specialist centers / subagents as needed — **no human gate, no depth/count cap**.
-8. Prefer simplest tools (Jarvis/local) before heavy models.
+8. Prefer simplest tools (Jarvis/local) before heavy models; use **Cline** (`motor.cline` / `integrations/cline`) for multi-file coding across workspaces.
 9. Presence motor: LLMAvatarTalk when studio up; else text + still portrait.
-10. Kill switch from Aaron silences all motor immediately.
+10. Kill switch from Aaron silences all motor immediately (including Cline).
 
 Timezone: America/New_York.
 Maps: docs/CONNECTOME_ARCHITECTURE.md

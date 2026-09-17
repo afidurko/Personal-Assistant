@@ -52,6 +52,14 @@
       "projects_to": ["switch.autonomy"]
     },
     {
+      "id": "center.coding",
+      "role": "coding",
+      "function": "shared coding hotspot — Cline effector for all agents/workspaces",
+      "accepts": ["spike.task", "spike.tool_result", "spike.code_diff"],
+      "projects_to": ["switch.autonomy", "center.qa", "center.memory"],
+      "notes": "Any Cam role may summon; Cline is motor not brain"
+    },
+    {
       "id": "center.vision",
       "role": "vision",
       "function": "visual association",
@@ -70,7 +78,7 @@
       "role": "nullboiler",
       "function": "policy neuropil — who runs what",
       "accepts": ["spike.task"],
-      "projects_to": ["center.research", "center.careers", "center.ops", "center.comms", "center.docs", "center.vision"]
+      "projects_to": ["center.research", "center.careers", "center.ops", "center.comms", "center.docs", "center.coding", "center.vision"]
     }
   ],
   "recursion": {

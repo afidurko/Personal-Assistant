@@ -11,7 +11,9 @@ Aaron required: store Session/memory for **this workspace and all future workspa
 | Boundaries | `identity/BOUNDARIES.md` | Hard gates |
 | Goals | `identity/GOALS.md` | Priorities |
 | Mesh seed | `identity/persistence/mesh-seed.json` | Prefs/facts for nulltickets |
+| Cline cache | `identity/persistence/cline-session-cache.json` | Coding sessions across workspaces |
 | Bundle manifest | `identity/persistence/manifest.json` | Versioned export metadata |
+| Cline rules | `.clinerules` | Policy for every Cline session / workspace |
 
 ## Guarantees
 
@@ -43,9 +45,10 @@ python3 scripts/persist-export.py --seed-only
 
 1. Clone/create the new workspace
 2. Copy or `persist-import` the bundle
-3. `git submodule update --init --recursive` if using this repo’s integrations
-4. Confirm `identity/PROFILE.md` still says Aaron / Cam / EST
-5. Re-attach secrets/connectors locally
+3. `git submodule update --init --recursive` (includes `integrations/cline`)
+4. Confirm `.clinerules` is present for Cline policy inheritance
+5. Confirm `identity/PROFILE.md` still says Aaron / Cam / EST
+6. Re-attach secrets/connectors locally (`cline auth` or provider env vars)
 
 ## Versioning
 

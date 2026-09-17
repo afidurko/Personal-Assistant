@@ -6,6 +6,7 @@
     { id: "nullboiler", label: "nullboiler", region: "brain" },
     { id: "nullhub", label: "nullhub", region: "brain" },
     { id: "jarvis", label: "Jarvis", region: "motor" },
+    { id: "cline", label: "Cline", region: "motor" },
     { id: "paddledetection", label: "PaddleDetection", region: "sense" },
     { id: "llmavatartalk", label: "LLMAvatarTalk", region: "motor" },
     { id: "smart-second-brain", label: "smart-second-brain", region: "brain" },
@@ -24,6 +25,7 @@
     "center.comms": { x: 570, y: 125, r: 18, label: "comms", kind: "center", repos: ["llmavatartalk", "openclaw"] },
     "center.ops": { x: 510, y: 235, r: 15, label: "ops", kind: "center", repos: ["jarvis"] },
     "center.docs": { x: 390, y: 235, r: 15, label: "docs", kind: "center", repos: ["nullclaw"] },
+    "center.coding": { x: 340, y: 255, r: 15, label: "coding", kind: "center", repos: ["cline"] },
     "center.vision": { x: 300, y: 175, r: 15, label: "vision", kind: "center", repos: ["paddledetection"] },
     "center.qa": { x: 450, y: 255, r: 14, label: "QA", kind: "center", repos: ["nullclaw"] },
     // Switches (mid brain/spine junction)
@@ -40,12 +42,14 @@
     "sense.audio.transcript": { x: 280, y: 240, r: 13, label: "ASR", kind: "sense", repos: ["llmavatartalk"] },
     "sense.vision.detection": { x: 200, y: 200, r: 13, label: "vision in", kind: "sense", repos: ["paddledetection"] },
     "sense.email.thread": { x: 230, y: 540, r: 12, label: "email", kind: "sense", repos: ["openclaw"] },
+    "sense.cline.result": { x: 200, y: 360, r: 12, label: "Cline result", kind: "sense", repos: ["cline"] },
     // Motor (right spinal roots)
     "motor.text": { x: 680, y: 340, r: 14, label: "text", kind: "motor", repos: ["openclaw", "assistant"] },
     "motor.call": { x: 700, y: 390, r: 13, label: "call", kind: "motor", repos: ["openclaw"] },
     "motor.facetime": { x: 690, y: 440, r: 13, label: "FaceTime", kind: "motor", repos: ["assistant"] },
     "motor.speak": { x: 670, y: 250, r: 16, label: "speak+face", kind: "motor", repos: ["llmavatartalk"] },
     "motor.jarvis": { x: 710, y: 490, r: 13, label: "Jarvis", kind: "motor", repos: ["jarvis"] },
+    "motor.cline": { x: 740, y: 460, r: 14, label: "Cline", kind: "motor", repos: ["cline"] },
     "motor.docs": { x: 660, y: 540, r: 12, label: "docs", kind: "motor", repos: ["nullclaw"] },
     "motor.jobs": { x: 720, y: 300, r: 14, label: "apply", kind: "motor", repos: ["nullclaw"] },
     "motor.vault": { x: 650, y: 190, r: 13, label: "vault write", kind: "motor", repos: ["smart-second-brain"] },
@@ -95,6 +99,12 @@
       feedback: ["motor.mesh", "sense.vault.hit", "center.memory"],
       behavior: "vault recall → mesh",
       repos: ["smart-second-brain", "nulltickets"],
+    },
+    "sense.cline.result": {
+      pathway: ["sense.cline.result", "center.coding", "center.memory", "switch.autonomy", "motor.mesh"],
+      feedback: ["motor.mesh", "sense.cline.result", "center.coding", "center.chief"],
+      behavior: "Cline result → mesh (all workspaces)",
+      repos: ["cline", "nulltickets"],
     },
   };
 

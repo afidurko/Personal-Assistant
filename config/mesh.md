@@ -14,6 +14,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/runs` | distilled run outcomes |
 | `mesh/open-questions` | unresolved questions for the team |
 | `mesh/jarvis` | synced Jarvis `memory.json` cache (local utilities) |
+| `mesh/cline` | Cline session distillates, workspaces touched, schedules (all agents) |
 | `mesh/vision` | distilled detection/pose results (no raw frames by default) |
 | `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
 | `mesh/vault` | smart-second-brain vault path + topic distillates |
@@ -26,6 +27,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 - Private never leaves local store / approved channels
 - Curator dedupes conflicting facts; Aaron resolves ties
 - Jarvis memory syncs via `scripts/sync-jarvis-memory.py`
+- Cline session syncs via `scripts/sync-cline-session.py` → `mesh/cline`
 - Vision results sync via `scripts/pack-vision-result.py`
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
 - Cross-workspace: `scripts/persist-export.py` / `persist-import.py`

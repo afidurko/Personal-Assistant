@@ -1,0 +1,30 @@
+{
+  "available_to": "all_roles_and_subagents",
+  "cross_workspace": true,
+  "effector": "cline",
+  "last_session": {
+    "at": "2026-09-17T00:52:47.020261+00:00",
+    "mode": "act",
+    "summary": "integration smoke",
+    "workspace": "."
+  },
+  "notes": [
+    {
+      "at": "2026-09-17T00:00:00+00:00",
+      "text": "Cline wired as shared coding motor for all Cam agents and future workspaces",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-17T00:52:47.020261+00:00",
+      "text": "cline wired",
+      "workspace": "."
+    }
+  ],
+  "rules": ".clinerules",
+  "schedules": [],
+  "source": "https://github.com/afidurko/cline",
+  "submodule": "integrations/cline",
+  "workspaces": [
+    "."
+  ]
+}
