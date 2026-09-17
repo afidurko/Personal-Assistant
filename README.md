@@ -51,7 +51,41 @@ bash scripts/cam-avatar-hint.sh
 python3 scripts/persist-export.py --seed-only
 ```
 
+## Neural mesh health scanner (TypeScript)
+
+Live workspace scanners visualized as an interactive brain map with persistent memory
+and Swift Guide concept tour. See also the connectome docs above — these stacks coexist
+and may need a deliberate product wiring decision.
+
+| Workspace | Role |
+| --- | --- |
+| **System Health** | Vitals: resources, readiness, process health |
+| **Architecture Map** | Structural topology and layering |
+| **Vulnerability Scan** | Threat surface and insecure patterns |
+| **Updates & Drift** | Freshness and tooling drift |
+| **Improvement Engine** | Cross-workspace actionable suggestions |
+
+```bash
+npm install
+npm run dev
+```
+
+- UI: http://localhost:5173
+- API / WS: http://localhost:8787 (`/api/state`, `/ws`)
+- One-shot: `npm run scan`
+
+```
+shared/          Domain types & color palette
+server/
+  workspaces/    Parallel health / arch / vuln / updates / improvements scanners
+  core/          Neural mesh, persistent memory, scan orchestrator
+  index.ts       Express + WebSocket fan-out
+src/             React brain map UI
+data/            Persisted mesh + memory (gitignored runtime state)
+```
+
 ## Status
 
 Persona locked. Starter vault created. Always-on autonomy set.
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.
+Neural-mesh scanner stack is present alongside the Cam connectome foundation.

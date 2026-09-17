@@ -18,6 +18,19 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
 | `mesh/vault` | smart-second-brain vault path + topic distillates |
 | `mesh/persona` | Cam identity/voice/availability prefs |
+| `mesh/agent-commute` | Task commute paths + efficiency rankings |
+| `mesh/agent-memory` | Agent-consolidated memory promotions |
+| `mesh/agent-persistence` | Sticky jobs until completion |
+| `mesh/agent-issue-loop` | Automated fix-loop attempts + escalations |
+
+## Deep agent layers (TypeScript neural mesh)
+
+Stacked on the interactive brain map (`server/core/agent-mesh.ts`):
+
+1. **Commute** — route tasks via high-confidence hops  
+2. **Memory** — consolidate + amplify recall  
+3. **Persistence** — keep jobs alive until done  
+4. **Issue-fix loop** — dedicated automated detect → fix → verify → escalate agents  
 
 ## Write rules
 
