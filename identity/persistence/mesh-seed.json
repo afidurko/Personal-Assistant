@@ -59,7 +59,13 @@
     "ios_on_device_converse": true,
     "ios_preferred_cam_host": "aaron-ipad",
     "ios_preferred_cam_host_when_mac_ready": "aaron-mac",
-    "ios_devices_config": "config/network/ios-devices.json"
+    "ios_devices_config": "config/network/ios-devices.json",
+    "daily_agi_research_scan": true,
+    "agi_scan_requires_human_each_day": false,
+    "cam_enhance_apply_requires_aaron": true,
+    "slm_cortex_enabled": true,
+    "dl_cortex_enabled": true,
+    "all_teams_may_spawn_subagents": true
   },
   "mesh/open-questions": {
     "riva_studio_uri": "set on Aaron machine",
@@ -87,7 +93,7 @@
     "always_on": true,
     "assistant_name": "Cam",
     "auto_archive_to_mesh": true,
-    "brain_enhancement": "smart-second-brain",
+    "brain_enhancement": "smart-second-brain+slm-dl",
     "cam_age": 32,
     "cam_english": "fluent",
     "cam_eyes": "blue",
@@ -99,6 +105,13 @@
     "complete_without_interference": true,
     "unlimited_subagents": true,
     "subagent_spawn_requires_human": false,
+    "max_delegate_depth": null,
+    "max_subagents": null,
+    "all_teams_may_spawn_subagents": true,
+    "daily_agi_research_scan": true,
+    "cam_enhance_apply_requires_aaron": true,
+    "slm_cortex_enabled": true,
+    "dl_cortex_enabled": true,
     "continuous_monitoring": false,
     "face_asset": "identity/persona/cam-face.jpg",
     "human_name": "Aaron",
@@ -107,7 +120,6 @@
       "indeed"
     ],
     "kill_switch_default": "pause_all",
-    "max_delegate_depth": 3,
     "named_specialists": true,
     "persistence_cross_workspace": true,
     "prefer_simplest_tool": true,
@@ -161,7 +173,24 @@
     "citations_required": true,
     "include_counterarguments": true,
     "save_to_mesh": true,
-    "use_smart_second_brain": true
+    "use_smart_second_brain": true,
+    "daily_agi_research_scan": true,
+    "agi_scan_team": "team.agi-research-scan",
+    "agi_scan_requires_human_each_day": false,
+    "cam_enhance_apply_requires_aaron": true,
+    "agi_scan_script": "scripts/agi-research-scan.py",
+    "agi_scan_pipeline": "config/pipelines/daily-agi-scan.json"
+  },
+  "mesh/enhance": {
+    "slm_dl_config": "config/enhancement/slm-dl.json",
+    "switch_slm_local": "standing_on",
+    "switch_dl_local": "standing_on",
+    "switch_cam_enhance": "hold",
+    "teams": [
+      "team.agi-research-scan",
+      "team.capability",
+      "team.info"
+    ]
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",

@@ -33,11 +33,13 @@ Aaron asked for Cam to be **available at all times** and to **complete functions
 ```text
 Full:  Aaron → RIVA ASR → Cam brain → RIVA TTS (soft/airy) → Audio2Face → optional Metahuman
 Simple: cam-face.jpg + light TTS when studio is offline
-Brain+: nullclaw + smart-second-brain (Obsidian vault intelligence)
+Brain+: nullclaw + smart-second-brain + sLM/DL cortex + agent teams (AGI scan / capability / info)
 ```
 
 - Presence I/O: `integrations/llmavatartalk`
 - Second brain: `integrations/smart-second-brain`
+- Enhancement cortex: `config/enhancement/slm-dl.json`
+- Teams: `config/teams/` · `docs/CAM_BRAIN.md` · `docs/AGI_RESEARCH_TEAM.md`
 - Details: `config/integrations/llmavatartalk.md`, `config/integrations/smart-second-brain.md`
 
 ## Voice defaults
