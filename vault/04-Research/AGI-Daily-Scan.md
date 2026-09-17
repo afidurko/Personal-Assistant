@@ -10,6 +10,5 @@ python3 scripts/agi-research-scan.py
 
 ## Days
 
-(Days appear here after each scan run.)
-- [[2026-09-17-AGI-scan|2026-09-17]] — scored 0, propose 0 → `agi-daily/2026-09-17/`
-
+- [[2026-09-17-AGI-scan|2026-09-17]] — scored 11, propose 5 → `agi-daily/2026-09-17/`
+- Related deep brief: [[2026-09-17-Cam-Function-Papers]] (memory / mesh / OCL / persona stack)
