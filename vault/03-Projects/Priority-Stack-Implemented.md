@@ -15,6 +15,7 @@
 | 10 | Fornix consolidation | done | `scripts/fornix-consolidate.py` |
 | 11 | Dual-stream router | done | `scripts/dual-stream-router.py` |
 | polish | Favicon + myelination persist | done | SVG data-URI · localStorage |
+| opt | Converse → live mesh | done | `/api/turn` + mic/camera → `activity-events.jsonl` |
 
 ## Run
 ```bash
@@ -23,5 +24,9 @@ python3 scripts/improve-engine.py
 python3 scripts/workspace-lease.py acquire --workspace demo
 python3 scripts/dual-stream-router.py speak
 python3 scripts/fornix-consolidate.py --force
+python3 scripts/cam-converse-server.py
+# other terminal:
+curl -s -X POST http://127.0.0.1:8787/api/turn -H 'content-type: application/json' \
+  -d '{"text":"hi cam","source":"text"}'
 bash scripts/serve-connectome-viz.sh
 ```

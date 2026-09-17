@@ -71,11 +71,6 @@
   ],
   "suggested_next_implementations": [
     {
-      "neuron": "neuron.converse_live_feed",
-      "why": "Push each converse turn into activity-events.jsonl",
-      "impl": "hook cam-converse-server.py emit on /api/turn"
-    },
-    {
       "neuron": "neuron.schematic_hud",
       "why": "Optional 2D circuit-board overlay synced to live feed",
       "impl": "flat.html neurotransmitter legend mode"

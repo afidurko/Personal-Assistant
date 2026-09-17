@@ -28,11 +28,111 @@ VOICE = json.loads((ROOT / "config" / "persona" / "voice.json").read_text(encodi
 VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
 TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
 
+sys.path.insert(0, str(ROOT / "scripts"))
+try:
+    import activity_emit
+except Exception:  # pragma: no cover
+    activity_emit = None  # type: ignore
+
 
 def load_tailscale() -> dict:
     if not TAILSCALE.exists():
         return {"enabled": False}
     return json.loads(TAILSCALE.read_text(encoding="utf-8"))
+
+
+def emit_converse_activity(
+    *,
+    kind: str,
+    source: str,
+    sense: str = "",
+    text: str = "",
+    refresh: bool = True,
+) -> list[dict]:
+    """Push converse turn/spike into activity-events for DTI live mesh."""
+    if activity_emit is None:
+        return []
+    rows = []
+    if kind == "turn":
+        stream = activity_emit.dual_stream("speak")
+        tracts = (stream.get("tracts") or [
+            "tract.arcuate",
+            "tract.af_anterior",
+            "tract.af_posterior",
+            "tract.fat",
+        ])[:5]
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.language_in",
+                kind="agent",
+                area="area.wernicke",
+                intensity=0.9,
+                tracts=tracts,
+                reason=f"converse_turn:{source}",
+                source="cam_converse",
+            )
+        )
+        if source in {"mic", "speech"}:
+            rows.append(
+                activity_emit.emit(
+                    neuron="neuron.asr",
+                    kind="agent",
+                    area="area.auditory",
+                    intensity=0.85,
+                    tracts=["tract.mdlf", "tract.arcuate"],
+                    reason="converse_mic",
+                    source="cam_converse",
+                )
+            )
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.speak_loop",
+                kind="loop",
+                area="area.broca",
+                intensity=0.95,
+                tracts=tracts,
+                reason=f"dual_stream:{stream.get('winner', 'dorsal')}:speak",
+                source="cam_converse",
+            )
+        )
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.comms",
+                kind="agent",
+                area="area.broca",
+                intensity=0.7,
+                tracts=["tract.arcuate", "tract.fat"],
+                reason="outbound_reply",
+                source="cam_converse",
+            )
+        )
+    elif kind == "mic_spike":
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.asr",
+                kind="agent",
+                area="area.auditory",
+                intensity=0.8,
+                tracts=["tract.mdlf", "tract.arcuate"],
+                reason="mic_spike",
+                source="cam_converse",
+            )
+        )
+    elif kind == "camera_spike":
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.vision",
+                kind="agent",
+                area="area.visual",
+                intensity=0.85,
+                tracts=["tract.ilf", "tract.vof", "tract.ifof"],
+                reason="camera_spike",
+                source="cam_converse",
+            )
+        )
+    if refresh and rows:
+        activity_emit.refresh_live_activity()
+    return rows
 
 
 def converse_urls(ts: dict) -> dict:
@@ -246,7 +346,8 @@ class Handler(BaseHTTPRequestHandler):
                 "route": route,
             }
             self._append_log("spikes", event)
-            self._json(200, {"accepted": True, "event": event})
+            mesh = emit_converse_activity(kind="mic_spike", source="mic")
+            self._json(200, {"accepted": True, "event": event, "mesh_activity": mesh})
             return
 
         if path == "/api/spike/camera":
@@ -259,7 +360,8 @@ class Handler(BaseHTTPRequestHandler):
                 "route": route,
             }
             self._append_log("spikes", event)
-            self._json(200, {"accepted": True, "event": event})
+            mesh = emit_converse_activity(kind="camera_spike", source="camera")
+            self._json(200, {"accepted": True, "event": event, "mesh_activity": mesh})
             return
 
         if path == "/api/turn":
@@ -268,6 +370,13 @@ class Handler(BaseHTTPRequestHandler):
             sense = "sense.ios.mic" if source in {"mic", "speech"} else "sense.chat.aaron"
             route = route_sense(sense, goal=text)
             reply = cam_reply(text, STATE.history)
+            mesh = emit_converse_activity(
+                kind="turn",
+                source=source,
+                sense=sense,
+                text=text,
+                refresh=True,
+            )
             turn = {
                 "id": str(uuid.uuid4()),
                 "at": utc_now(),
@@ -280,6 +389,10 @@ class Handler(BaseHTTPRequestHandler):
                     "motor_plan": route.get("motor_plan"),
                     "accepted": route.get("accepted", True),
                 },
+                "mesh_activity": [
+                    {"neuron": r.get("neuron"), "intensity": r.get("intensity"), "reason": r.get("reason")}
+                    for r in mesh
+                ],
                 "speak": {
                     "enabled": True,
                     "rate": 0.95,

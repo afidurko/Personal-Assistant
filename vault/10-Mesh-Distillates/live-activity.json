@@ -1,7 +1,37 @@
 {
-  "at": "2026-09-17T01:36:53Z",
-  "epoch": 1789609013,
+  "at": "2026-09-17T01:40:50Z",
+  "epoch": 1789609250,
   "firing": [
+    {
+      "neuron": "neuron.speak_loop",
+      "kind": "loop",
+      "area": "area.broca",
+      "intensity": 0.95,
+      "reason": "dual_stream:dorsal:speak",
+      "tracts": [
+        "tract.arcuate",
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf3",
+        "tract.fat"
+      ],
+      "source": "cam_converse"
+    },
+    {
+      "neuron": "neuron.language_in",
+      "kind": "agent",
+      "area": "area.wernicke",
+      "intensity": 0.9,
+      "reason": "converse_turn:text",
+      "tracts": [
+        "tract.arcuate",
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf3",
+        "tract.fat"
+      ],
+      "source": "cam_converse"
+    },
     {
       "neuron": "neuron.mesh_sync_loop",
       "kind": "loop",
@@ -16,18 +46,16 @@
       "source": "fornix_consolidate"
     },
     {
-      "neuron": "neuron.speak_loop",
-      "kind": "loop",
-      "area": "area.broca",
+      "neuron": "neuron.asr",
+      "kind": "agent",
+      "area": "area.auditory",
       "intensity": 0.8,
-      "reason": "dual_stream:dorsal:speak",
+      "reason": "mic_spike",
       "tracts": [
-        "tract.arcuate",
-        "tract.af_anterior",
-        "tract.af_posterior",
-        "tract.slf3"
+        "tract.mdlf",
+        "tract.arcuate"
       ],
-      "source": "dual_stream_router"
+      "source": "cam_converse"
     },
     {
       "neuron": "neuron.workspace_orchestrator",
@@ -42,15 +70,43 @@
       "source": "workspace_orchestrator"
     },
     {
-      "neuron": "neuron.priority_boot",
-      "kind": "loop",
-      "area": "area.dlpfc",
-      "intensity": 0.55,
-      "reason": "standing:boot",
+      "neuron": "neuron.comms",
+      "kind": "agent",
+      "area": "area.broca",
+      "intensity": 0.7,
+      "reason": "outbound_reply",
       "tracts": [
+        "tract.arcuate",
+        "tract.fat"
+      ],
+      "source": "cam_converse"
+    },
+    {
+      "neuron": "neuron.tailscale_reach",
+      "kind": "loop",
+      "area": "area.parietal",
+      "intensity": 0.55,
+      "reason": "standing:standing_scan",
+      "tracts": [
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf1",
         "tract.slf",
-        "tract.ifof",
+        "tract.slf3",
+        "tract.mdlf"
+      ]
+    },
+    {
+      "neuron": "neuron.qa_cycle",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "intensity": 0.55,
+      "reason": "standing:continuous",
+      "tracts": [
+        "tract.slf1",
+        "tract.fat",
         "tract.cingulum",
+        "tract.fornix",
         "tract.forceps_minor"
       ]
     },
@@ -126,6 +182,45 @@
       ]
     },
     {
+      "neuron": "neuron.chief",
+      "kind": "agent",
+      "area": "area.dlpfc",
+      "intensity": 0.4,
+      "reason": "standing:always_on",
+      "tracts": [
+        "tract.slf",
+        "tract.ifof",
+        "tract.cingulum",
+        "tract.forceps_minor"
+      ]
+    },
+    {
+      "neuron": "neuron.memory",
+      "kind": "agent",
+      "area": "area.mtl",
+      "intensity": 0.4,
+      "reason": "standing:standing",
+      "tracts": [
+        "tract.cingulum",
+        "tract.fornix"
+      ]
+    },
+    {
+      "neuron": "neuron.ops",
+      "kind": "agent",
+      "area": "area.parietal",
+      "intensity": 0.35,
+      "reason": "idle_ready",
+      "tracts": [
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf1",
+        "tract.slf",
+        "tract.slf3",
+        "tract.mdlf"
+      ]
+    },
+    {
       "neuron": "neuron.improve_engine",
       "kind": "loop",
       "area": "area.apfc",
@@ -141,11 +236,13 @@
   ],
   "active_areas": [
     "area.apfc",
+    "area.auditory",
     "area.broca",
     "area.cingulate",
     "area.dlpfc",
     "area.mtl",
-    "area.parietal"
+    "area.parietal",
+    "area.wernicke"
   ],
   "active_tracts": [
     "tract.af_anterior",
@@ -237,5 +334,5 @@
   "health_overall": "healthy",
   "improve_tasks": 0,
   "neuron_count": 42,
-  "firing_count": 10
+  "firing_count": 17
 }

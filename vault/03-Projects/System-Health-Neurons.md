@@ -35,6 +35,5 @@ Distillate: `vault/10-Mesh-Distillates/system-health.json`
 
 ## Suggested next
 
-1. Hook `cam-converse-server.py` to emit `activity-events.jsonl` on each turn
-2. Optional schematic 2D HUD (circuit-board legend) synced to live feed
-3. Confirm interim open-question defaults with Aaron (`Open-Questions-Fasciculus-AGI`)
+1. Optional schematic 2D HUD (circuit-board legend) synced to live feed
+2. Confirm interim open-question defaults with Aaron (`Open-Questions-Fasciculus-AGI`)
