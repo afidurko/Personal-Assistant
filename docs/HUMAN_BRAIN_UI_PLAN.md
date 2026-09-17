@@ -1,8 +1,18 @@
 # Cam Human Brain UI — Massive Visualization Update Plan
 
-**Status:** research + architecture plan (no implementation in this PR)  
+**Status:** Phase A + B implemented (anatomical GLB shell + live parcel heat on connectome 3D). Phase C partial (2D silhouette + layout anchors).  
 **Goal:** Make Cam’s live brain visualization read as a **human brain** — sulci/gyri silhouette, lobular anatomy, Brodmann areas, association tracts — while live agents/tasks still light activity in real time.  
 **Operator:** Aaron only · Connectome configs stay source of truth.
+
+### Implemented now
+
+- `visualizations/connectome/assets/cam-cortex.glb` — Cam-mapped DK cortical/subcortical shell (CC BY-SA 3.0)
+- `config/connectome/anatomy-region-map.json` + `anatomy-centroids.json`
+- `cortex-anatomy.js` + `cortex3d.js` — load shell, bilateral mirror, parcel heat, click-to-focus, agent fly-to
+- Tracts re-anchored to FreeSurfer-like RAS centroids matching the mesh
+- React `BrainMap` left-lateral silhouette + `brain-map-layout` anchors updated
+
+Regenerate mesh: `bash scripts/build-cam-cortex-glb.sh` (see `assets/NOTICE.md`).
 
 ---
 

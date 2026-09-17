@@ -1,23 +1,28 @@
-/* Cam Cortex — DTI tractography mesh driven by live agents/tasks */
+/* Cam Cortex — anatomical FreeSurfer shell + DTI tracts + live agents */
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+import { loadCamCortex, applyFsCameraUp } from "./cortex-anatomy.js";
 
+/** Positions are FreeSurfer-like RAS (X=R+, Y=A+, Z=S+) matching cam-cortex.glb */
 const AREAS = [
-  { id: "area.dlpfc", label: "DLPFC", ba: "BA9/46", p: [-1.35, 1.15, 0.85], r: 0.28, lobe: "frontal" },
-  { id: "area.apfc", label: "aPFC", ba: "BA10", p: [-1.95, 1.05, 0.55], r: 0.22, lobe: "frontal" },
-  { id: "area.ofc", label: "OFC", ba: "BA11", p: [-1.7, 0.15, 1.05], r: 0.2, lobe: "frontal" },
-  { id: "area.broca", label: "Broca", ba: "BA44/45", p: [-1.15, 0.35, 1.25], r: 0.22, lobe: "frontal" },
-  { id: "area.premotor", label: "PM/SMA", ba: "BA6", p: [-0.45, 1.2, 0.95], r: 0.16, lobe: "frontal" },
-  { id: "area.motor", label: "M1", ba: "BA4", p: [0.05, 1.25, 0.8], r: 0.18, lobe: "frontal" },
-  { id: "area.parietal", label: "Parietal", ba: "BA5/7", p: [0.95, 1.3, 0.25], r: 0.24, lobe: "parietal" },
-  { id: "area.wernicke", label: "Wernicke+", ba: "BA22+", p: [1.05, 0.35, 1.05], r: 0.22, lobe: "temporal" },
-  { id: "area.temporal", label: "Temporal", ba: "BA20/21", p: [0.55, -0.55, 1.35], r: 0.26, lobe: "temporal" },
-  { id: "area.auditory", label: "Auditory", ba: "BA41/42", p: [0.15, -0.25, 1.2], r: 0.16, lobe: "temporal" },
-  { id: "area.visual", label: "Visual", ba: "BA17–19", p: [0.15, 0.4, -1.45], r: 0.26, lobe: "occipital" },
-  { id: "area.mtl", label: "MTL", ba: "memory", p: [0.35, -0.85, 0.45], r: 0.22, lobe: "limbic" },
-  { id: "area.cingulate", label: "ACC", ba: "BA24/32", p: [-0.15, 1.45, 0.15], r: 0.2, lobe: "limbic" },
+  { id: "area.dlpfc", label: "DLPFC", ba: "BA9/46", p: [-0.526, 1.49, 0.235], r: 0.28, lobe: "frontal" },
+  { id: "area.apfc", label: "aPFC", ba: "BA10", p: [-0.234, 2.137, -0.834], r: 0.22, lobe: "frontal" },
+  { id: "area.ofc", label: "OFC", ba: "BA11", p: [-0.518, 1.209, -0.855], r: 0.2, lobe: "frontal" },
+  { id: "area.broca", label: "Broca", ba: "BA44/45", p: [-1.29, 1.139, -0.252], r: 0.22, lobe: "frontal" },
+  { id: "area.premotor", label: "PM/SMA", ba: "BA6", p: [-0.922, 0.905, 0.759], r: 0.16, lobe: "frontal" },
+  { id: "area.motor", label: "M1", ba: "BA4", p: [-0.91, 0.301, 0.787], r: 0.18, lobe: "frontal" },
+  { id: "area.parietal", label: "Parietal", ba: "BA5/7", p: [-0.771, -0.858, 0.796], r: 0.24, lobe: "parietal" },
+  { id: "area.wernicke", label: "Wernicke+", ba: "BA22+", p: [-1.41, -0.55, 0.474], r: 0.22, lobe: "temporoparietal" },
+  { id: "area.temporal", label: "Temporal", ba: "BA20/21", p: [-1.328, -0.58, -0.683], r: 0.26, lobe: "temporal" },
+  { id: "area.auditory", label: "Auditory", ba: "BA41/42", p: [-1.461, -0.007, -0.329], r: 0.16, lobe: "temporal" },
+  { id: "area.visual", label: "Visual", ba: "BA17–19", p: [-0.532, -1.758, -0.048], r: 0.26, lobe: "occipital" },
+  { id: "area.mtl", label: "MTL", ba: "memory", p: [-0.732, -0.308, -0.7], r: 0.22, lobe: "medial_temporal" },
+  { id: "area.cingulate", label: "ACC", ba: "BA24/32", p: [-0.16, 0.266, 0.168], r: 0.2, lobe: "medial" },
 ];
+
+let cortexApi = null;
+let anatomyReady = false;
 
 const TRACTS = [
   { id: "tract.arcuate", a: "area.wernicke", b: "area.broca", arch: "sylvian", fibers: 48, system: "arcuate_language", myelination: 0.82 },
@@ -110,7 +115,7 @@ const viewport = document.getElementById("viewport");
 const canvas = document.getElementById("c");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 1);
+renderer.setClearColor(0x05080a, 1);
 
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.domElement.style.position = "absolute";
@@ -119,22 +124,30 @@ labelRenderer.domElement.style.pointerEvents = "none";
 viewport.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.018);
+scene.fog = new THREE.FogExp2(0x05080a, 0.035);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-camera.position.set(0.2, 3.8, 6.2);
+applyFsCameraUp(camera);
+camera.position.set(2.8, 5.5, 2.2);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.target.set(0.05, 0.25, 0.15);
-controls.minDistance = 2.5;
-controls.maxDistance = 16;
+controls.target.set(0, 0.1, 0.15);
+controls.minDistance = 2.2;
+controls.maxDistance = 14;
+applyFsCameraUp(camera, controls);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-const key = new THREE.DirectionalLight(0xffffff, 0.25);
-key.position.set(3, 8, 2);
+scene.add(new THREE.AmbientLight(0xc8ddd8, 0.55));
+const key = new THREE.DirectionalLight(0xfff2e0, 0.65);
+key.position.set(3, 4, 6);
 scene.add(key);
+const fill = new THREE.DirectionalLight(0x88aacc, 0.25);
+fill.position.set(-4, -2, 2);
+scene.add(fill);
+const rim = new THREE.DirectionalLight(0x5fd4c4, 0.2);
+rim.position.set(0, -5, 3);
+scene.add(rim);
 
 const brain = new THREE.Group();
 scene.add(brain);
@@ -287,8 +300,8 @@ function buildAmbientConnectome(budget = 900) {
       }
     }
   }
-  // Projection spray toward brainstem
-  const stem = new THREE.Vector3(0, -1.7, -0.2);
+  // Projection spray toward brainstem (FS inferior-posterior)
+  const stem = new THREE.Vector3(0, -0.6, -1.5);
   AREAS.forEach((a) => {
     const A = new THREE.Vector3(...a.p);
     const copies = budget > 500 ? 8 : 3;
@@ -305,15 +318,15 @@ function buildAmbientConnectome(budget = 900) {
       }
     }
   });
-  // Dense random shell fibers for DTI hair volume
+  // Dense random shell fibers for DTI hair volume (FS-shaped ellipsoid)
   for (let i = 0; i < budget; i++) {
     const u = Math.random() * Math.PI * 2;
     const v = Math.acos(2 * Math.random() - 1);
-    const rr = 1.0 + Math.random() * 1.4;
-    const x = Math.sin(v) * Math.cos(u) * rr * 1.3;
-    const y = Math.cos(v) * rr * 0.8 + 0.2;
-    const z = Math.sin(v) * Math.sin(u) * rr * 1.15;
-    if (y < -1.8) continue;
+    const rr = 1.0 + Math.random() * 1.2;
+    const x = Math.sin(v) * Math.cos(u) * rr * 1.15;
+    const y = Math.sin(v) * Math.sin(u) * rr * 1.35;
+    const z = Math.cos(v) * rr * 0.85;
+    if (z < -1.6) continue;
     const len = 0.12 + Math.random() * 0.35;
     const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
     if (Math.abs(x) < 0.4) dir.set(Math.sign(Math.random() - 0.5) || 1, dir.y * 0.3, dir.z * 0.4).normalize();
@@ -341,24 +354,103 @@ function buildAmbientConnectome(budget = 900) {
 
 const isMobile = /Mobi|Android/i.test(navigator.userAgent) || Math.min(window.innerWidth, window.innerHeight) < 700;
 lodHigh = !isMobile;
-TRACTS.forEach(buildDtiFasciculus);
-buildAmbientConnectome(lodHigh ? 900 : 280);
 
+/** Area markers — subtle when anatomical shell is present */
+const areaLabels = {};
 AREAS.forEach((a) => {
   const mat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.15,
-    blending: THREE.AdditiveBlending,
+    opacity: 0.0,
     depthWrite: false,
   });
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(a.r * 0.35, 16, 12), mat);
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(a.r * 0.12, 12, 10), mat);
   mesh.position.set(...a.p);
+  mesh.visible = false;
   brain.add(mesh);
   const lab = makeLabel(`${a.label}`);
-  lab.position.set(a.p[0], a.p[1] + a.r * 0.5, a.p[2]);
+  lab.position.set(a.p[0], a.p[1] + a.r * 0.15, a.p[2] + a.r * 0.1);
   brain.add(lab);
   areaMeshes[a.id] = mesh;
+  areaLabels[a.id] = lab;
+});
+
+function clearTractsAndAmbient() {
+  Object.keys(tractLineGroups).forEach((id) => {
+    const g = tractLineGroups[id];
+    brain.remove(g);
+    g.traverse((o) => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) o.material.dispose();
+    });
+    delete tractLineGroups[id];
+  });
+  if (ambientLines) {
+    brain.remove(ambientLines);
+    ambientLines.geometry.dispose();
+    ambientLines.material.dispose();
+    ambientLines = null;
+  }
+}
+
+function rebuildConnectomeFibers() {
+  clearTractsAndAmbient();
+  TRACTS.forEach(buildDtiFasciculus);
+  buildAmbientConnectome(lodHigh ? 700 : 220);
+}
+
+function reanchorAreasFromCortex() {
+  if (!cortexApi?.centroids) return;
+  AREAS.forEach((a) => {
+    const c = cortexApi.centroids[a.id];
+    if (!c) return;
+    a.p = c;
+    areaById[a.id].p = c;
+    const m = areaMeshes[a.id];
+    if (m) m.position.set(...c);
+    const lab = areaLabels[a.id];
+    if (lab) lab.position.set(c[0], c[1] + a.r * 0.15, c[2] + a.r * 0.1);
+  });
+}
+
+async function bootAnatomy() {
+  try {
+    cortexApi = await loadCamCortex(brain, { url: "./assets/cam-cortex.glb" });
+    reanchorAreasFromCortex();
+    anatomyReady = true;
+    log(`<span class="center">CORTEX</span> anatomical shell · ${Object.keys(cortexApi.parcels).length} parcels · CC BY-SA`);
+  } catch (e) {
+    anatomyReady = false;
+    // Show fallback spheres if GLB missing
+    Object.values(areaMeshes).forEach((m) => {
+      m.visible = true;
+      m.material.opacity = 0.2;
+    });
+    log(`<span class="motor">CORTEX</span> shell missing — fiber fallback (${e.message || e})`);
+  }
+  rebuildConnectomeFibers();
+  refreshTracts();
+}
+
+bootAnatomy();
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+renderer.domElement.addEventListener("pointerdown", (ev) => {
+  if (!cortexApi) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const areaId = cortexApi.pickArea(raycaster);
+  if (!areaId) return;
+  const a = areaById[areaId];
+  setAreaLit(areaId, "lit");
+  areaActivity[areaId] = Math.max(areaActivity[areaId] || 0, 0.85);
+  controls.target.set(...(a?.p || [0, 0, 0]));
+  log(`<span class="center">AREA</span> ${a?.label || areaId} · ${a?.ba || ""}`);
+  // Pulse tracts touching this area
+  TRACTS.filter((t) => t.a === areaId || t.b === areaId).forEach((t) => pulseAlongTract(t.id));
 });
 
 function resize() {
@@ -374,22 +466,29 @@ resize();
 
 function setAreaLit(id, mode) {
   const m = areaMeshes[id];
-  if (!m) return;
-  if (mode === "lit") {
-    m.material.color.set("#5fd4ff");
-    m.material.opacity = 0.85;
-    areaActivity[id] = Math.max(areaActivity[id], 0.9);
-  } else if (mode === "error") {
-    m.material.color.set("#ff5533");
-    m.material.opacity = 0.9;
-  } else if (mode === "feedback") {
-    m.material.color.set("#ffe066");
-    m.material.opacity = 0.75;
-    areaActivity[id] = Math.max(areaActivity[id], 0.7);
-  } else {
-    const act = areaActivity[id] || 0;
-    m.material.color.setRGB(0.6 + act * 0.4, 0.7 + act * 0.3, 1);
-    m.material.opacity = 0.12 + act * 0.55;
+  const act = areaActivity[id] || 0;
+  if (m?.visible) {
+    if (mode === "lit") {
+      m.material.color.set("#5fd4ff");
+      m.material.opacity = 0.85;
+      areaActivity[id] = Math.max(act, 0.9);
+    } else if (mode === "error") {
+      m.material.color.set("#ff5533");
+      m.material.opacity = 0.9;
+    } else if (mode === "feedback") {
+      m.material.color.set("#ffe066");
+      m.material.opacity = 0.75;
+      areaActivity[id] = Math.max(act, 0.7);
+    } else {
+      m.material.color.setRGB(0.6 + act * 0.4, 0.7 + act * 0.3, 1);
+      m.material.opacity = 0.12 + act * 0.55;
+    }
+  }
+  if (mode === "lit") areaActivity[id] = Math.max(areaActivity[id] || 0, 0.9);
+  else if (mode === "feedback") areaActivity[id] = Math.max(areaActivity[id] || 0, 0.7);
+  if (cortexApi) {
+    const heat = areaActivity[id] || 0;
+    cortexApi.setParcelHeat(id, heat, mode === "off" ? "idle" : mode);
   }
 }
 
@@ -419,6 +518,7 @@ function decayActivity(dt) {
     areaActivity[id] = Math.max(0, (areaActivity[id] || 0) - dt * 0.2);
     setAreaLit(id, "off");
   });
+  if (cortexApi) cortexApi.decayHeats(areaActivity);
   Object.keys(agentActivity).forEach((id) => {
     agentActivity[id] = Math.max(0, (agentActivity[id] || 0) - dt * 0.15);
   });
@@ -482,6 +582,18 @@ function renderAgents() {
     const row = document.createElement("div");
     row.className = "agent-row on";
     row.innerHTML = `<b>${id.replace("neuron.", "")}</b><span>${n?.kind || "agent"} · ${(n?.area || "").replace("area.", "")}</span><i style="width:${Math.round(v * 100)}%"></i>`;
+    row.style.cursor = "pointer";
+    row.title = "Fly to cortical area";
+    row.addEventListener("click", () => {
+      const areaId = n?.area;
+      if (!areaId || !areaById[areaId]) return;
+      const p = areaById[areaId].p;
+      controls.target.set(...p);
+      setAreaLit(areaId, "lit");
+      areaActivity[areaId] = Math.max(areaActivity[areaId] || 0, 0.9);
+      TRACTS.filter((t) => t.a === areaId || t.b === areaId).forEach((t) => pulseAlongTract(t.id));
+      log(`<span class="center">AGENT</span> ${id} → ${areaId}`);
+    });
     agentsEl.appendChild(row);
   });
 }
@@ -677,7 +789,10 @@ function applyLiveFeed(feed) {
   }
   (feed.firing || []).forEach((f) => {
     agentActivity[f.neuron] = Math.max(agentActivity[f.neuron] || 0, f.intensity || 0.4);
-    if (f.area) areaActivity[f.area] = Math.max(areaActivity[f.area] || 0, f.intensity || 0.4);
+    if (f.area) {
+      areaActivity[f.area] = Math.max(areaActivity[f.area] || 0, f.intensity || 0.4);
+      setAreaLit(f.area, (f.intensity || 0) > 0.55 ? "lit" : "feedback");
+    }
     (f.tracts || []).forEach((tid) => {
       setTractGlow(tid, (f.intensity || 0.4) * 0.85);
       if ((f.intensity || 0) > 0.6 && Math.random() < 0.35) pulseAlongTract(tid);
@@ -709,16 +824,21 @@ function persistWeights() {
 }
 
 function setCameraView(mode) {
-  brain.rotation.y = 0;
+  brain.rotation.z = 0;
+  applyFsCameraUp(camera, controls);
+  // FreeSurfer axes: X=R+, Y=A+, Z=S+
   if (mode === "coronal") {
-    camera.position.set(0.1, 0.4, 7.2);
-    controls.target.set(0.05, 0.25, 0.1);
+    // from anterior
+    camera.position.set(0.15, 6.4, 0.85);
+    controls.target.set(0, 0.1, 0.1);
   } else if (mode === "axial") {
-    camera.position.set(0.1, 7.5, 0.2);
-    controls.target.set(0.05, 0.2, 0.1);
+    camera.up.set(0, 1, 0);
+    camera.position.set(0.1, 0.2, 6.8);
+    controls.target.set(0, 0.1, 0.05);
   } else if (mode === "sagittal") {
-    camera.position.set(6.8, 0.5, 0.3);
-    controls.target.set(0.05, 0.25, 0.15);
+    // from right (language lateral)
+    camera.position.set(6.2, 0.35, 0.9);
+    controls.target.set(-0.4, 0.15, 0.1);
   }
   controls.update();
   log(`<span class="center">VIEW</span> ${mode}`);
@@ -796,7 +916,7 @@ function renderControls() {
   document.getElementById("view-sagittal")?.addEventListener("click", () => setCameraView("sagittal"));
   document.getElementById("view-lod")?.addEventListener("click", () => {
     lodHigh = !lodHigh;
-    buildAmbientConnectome(lodHigh ? 900 : 280);
+    buildAmbientConnectome(lodHigh ? 700 : 220);
     log(`<span class="center">LOD</span> ${lodHigh ? "high" : "low"} ambient fibers`);
   });
 }
@@ -835,7 +955,7 @@ async function loadSeed() {
       });
       log(`<span class="center">HEALTH</span> overall=${h.overall}`);
     }
-    log(`<span class="center">DTI</span> ${TRACTS.length} fasciculi · RGB direction · live agents`);
+    log(`<span class="center">DTI</span> ${TRACTS.length} fasciculi · anatomical cortex · live agents`);
     try {
       const cached = JSON.parse(localStorage.getItem("cam.tractWeights") || "null");
       if (cached?.weights) weights = { ...weights, ...cached.weights };
@@ -871,7 +991,7 @@ function animate(now) {
   const dt = Math.min(0.05, (now - lastDecay) / 1000);
   lastDecay = now;
   controls.update();
-  brain.rotation.y += autoSim ? 0.0012 : 0.0004;
+  brain.rotation.z += autoSim ? 0.0009 : 0.0003;
   decayActivity(dt);
 
   if (playing && events.length && now - lastPlay > 450) {
