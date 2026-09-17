@@ -551,6 +551,25 @@
       "team": "team.info"
     },
     {
+      "id": "hotspot.google_scholar",
+      "center": "center.info",
+      "pathway": [
+        "sense.web.scholar",
+        "center.info",
+        "center.research",
+        "center.qa",
+        "switch.research_scan",
+        "motor.web_fetch"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "google_scholar_literature_and_citations",
+      "team": "team.info",
+      "integration": "config/integrations/google-scholar.json"
+    },
+    {
       "id": "hotspot.slm_assist",
       "center": "center.slm",
       "pathway": [

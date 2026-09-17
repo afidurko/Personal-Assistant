@@ -29,6 +29,8 @@ DEFAULT_INCLUDE = [
     "config/priority-boot.json",
     "config/connectors.md",
     "config/integrations/cline.md",
+    "config/integrations/google-scholar.json",
+    "config/integrations/google-scholar.md",
     "config/workspaces/registry.json",
     "config/workspaces/schedules.json",
     "config/memory/hmo-tiers.json",
@@ -58,6 +60,7 @@ DEFAULT_INCLUDE = [
     "config/roles/agi-scout.md",
     "config/roles/capability-broker.md",
     "config/roles/info-retriever.md",
+    "config/roles/researcher.md",
     "config/roles/slm-runtime.md",
     "config/roles/dl-enhance.md",
     "config/roles/tool-creator.md",
@@ -77,8 +80,11 @@ DEFAULT_INCLUDE = [
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
     "docs/HAAS_CAM_PATTERNS.md",
+    "scripts/scholar-search.py",
+    "scripts/pack-scholar-result.py",
     "vault/02-Cam/Brain.md",
     "vault/04-Research/AGI-Daily-Scan.md",
+    "vault/04-Research/scholar/README.md",
 ]
 
 

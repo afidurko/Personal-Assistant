@@ -114,6 +114,7 @@
     "sense.clock.daily": { x: 180, y: 260, r: 12, label: "daily clock", kind: "sense", repos: ["nullboiler"] },
     "sense.web.arxiv": { x: 170, y: 320, r: 12, label: "arXiv", kind: "sense", repos: ["smart-second-brain"] },
     "sense.web.agi_feed": { x: 165, y: 380, r: 12, label: "AGI feeds", kind: "sense", repos: ["smart-second-brain"] },
+    "sense.web.scholar": { x: 155, y: 350, r: 12, label: "Scholar", kind: "sense", repos: ["smart-second-brain"] },
     "sense.slm.inference": { x: 200, y: 160, r: 11, label: "sLM out", kind: "sense", repos: ["nullclaw"] },
     "sense.dl.embedding": { x: 190, y: 120, r: 11, label: "DL out", kind: "sense", repos: ["nullclaw"] },
     "sense.swarm.message": { x: 175, y: 450, r: 11, label: "swarm bus", kind: "sense", repos: ["nulltickets"] },
@@ -226,6 +227,12 @@
       feedback: ["motor.web_fetch", "area.mtl", "area.dlpfc"],
       behavior: "AGI feeds → distill",
       repos: ["smart-second-brain", "nullclaw"],
+    },
+    "sense.web.scholar": {
+      pathway: ["sense.web.scholar", "center.info", "center.research", "center.qa", "switch.research_scan", "motor.web_fetch", "motor.vault", "motor.mesh"],
+      feedback: ["motor.web_fetch", "center.memory", "center.chief"],
+      behavior: "Google Scholar → cited literature → vault/mesh",
+      repos: ["smart-second-brain", "nullclaw", "nulltickets"],
     },
     "sense.swarm.message": {
       pathway: ["sense.swarm.message", "center.tooling", "center.capability", "switch.autonomy", "motor.swarm"],

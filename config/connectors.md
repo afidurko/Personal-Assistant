@@ -78,6 +78,16 @@
 - Credentials stay in local secrets (never commit)
 - All opportunities logged to `mesh/careers` + tickets for cross-workspace persistence
 
+## Google Scholar (literature + citations)
+
+- Policy: `config/integrations/google-scholar.md`
+- Config: `config/integrations/google-scholar.json`
+- Sense: `sense.web.scholar` · Hotspot: `hotspot.google_scholar`
+- Bridge: **SerpAPI** (`SERPAPI_API_KEY` in local `.env` — never commit)
+- Used by Information + Research (+ AGI scout when AI/AGI-relevant)
+- Scripts: `scripts/scholar-search.py`, `scripts/pack-scholar-result.py`
+- Distills to `mesh/research` + `vault/04-Research/scholar/`
+
 ## Bridge later (OpenClaw-inspired external plugins)
 
 - SMS via phone companion
@@ -105,3 +115,5 @@ specialist tool or modern API — not the Java/Thrift stack.
 - [ ] Test message/call in dry-run mode
 - [ ] LinkedIn connected (careers watch)
 - [ ] Indeed connected (careers watch)
+- [ ] Google Scholar connected (SerpAPI key in local `.env`)
+- [ ] Optional: Scholar `profile.author_id` set for Aaron citation watch

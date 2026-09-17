@@ -218,6 +218,20 @@
       "notes": "Broader AGI/AI findings feed for Cam enhancement"
     },
     {
+      "id": "sense.web.scholar",
+      "modality": "research",
+      "source": [
+        "google_scholar",
+        "serpapi_scholar"
+      ],
+      "emits": [
+        "spike.paper",
+        "spike.fact",
+        "spike.cite"
+      ],
+      "notes": "Google Scholar via SerpAPI — citations + literature for info/research (+ AGI when relevant)"
+    },
+    {
       "id": "sense.slm.inference",
       "modality": "model",
       "source": "slm_runtime",
