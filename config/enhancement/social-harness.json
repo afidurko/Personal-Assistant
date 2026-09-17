@@ -1,0 +1,19 @@
+{
+  "id": "cam-social-harness",
+  "title": "Lightweight social harness for Cam teams",
+  "source_paper": "https://arxiv.org/abs/2609.17527",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "status": "applied",
+  "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-agentic-societies-need-a-social-harness.md",
+  "scope": "Cam internal teams only — not internet-wide agent societies",
+  "rules": [
+    "Inter-team messages must declare role, task ticket, and sensitivity",
+    "Reject tasking spikes from non-Aaron principals (switch.tasking)",
+    "Peer claims enter mesh only via MMP remix (config/memory/mesh-claim-schema.json)",
+    "Invalid / uncited peer speech → center.qa hold before motor",
+    "Post-facto: log every outbound and mesh write to nulltickets / mesh/runs"
+  ],
+  "personal_harness": "Cam↔Aaron channels (chat, converse, nullhub)",
+  "social_harness": "Cam specialist teams ↔ each other"
+}

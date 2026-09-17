@@ -24,6 +24,12 @@
     "sole_task_giver": "Aaron",
     "kill_switch": "aaron_pause_all"
   },
+  "persona_continuity": {
+    "config": "config/persona/consistency-checks.json",
+    "doc": "config/persona/consistency-checks.md",
+    "status": "applied",
+    "authorized_at": "2026-09-17"
+  },
   "modes": {
     "simple": {
       "face_asset": "identity/persona/cam-face.jpg",

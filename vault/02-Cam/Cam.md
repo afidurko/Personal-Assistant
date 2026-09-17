@@ -19,8 +19,9 @@
 - Information — vault → mesh → web with citations
 
 ## Latest research for my function
-- [[2026-09-17-Cam-Function-Papers]] — P0: HMO memory tiers, MMP mesh claims, OCL/CPV gates
-- Proposals stay **propose_only** until Aaron flips `switch.cam_enhance`
+- [[2026-09-17-Cam-Function-Papers]] — P0 stack **APPLIED** (Aaron 2026-09-17): HMO, MMP, OCL/CPV, persona
+- Batch log: repo `identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md`
+- Future functionality upgrades still **propose_only** until Aaron flips `switch.cam_enhance`
 
 ## Start here
 - [[Welcome]]

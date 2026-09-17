@@ -1,0 +1,65 @@
+{
+  "id": "cam-hmo-tiers",
+  "title": "Hierarchical Memory Orchestration for Cam",
+  "source_paper": "https://arxiv.org/abs/2604.01670",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "status": "applied",
+  "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-hmo-hierarchical-memory-for-cam.md",
+  "tiers": [
+    {
+      "id": "primary",
+      "role": "lean Aaron-facing context",
+      "substrates": [
+        "nullclaw_session_memory",
+        "mesh_hits_tagged_pivotal"
+      ],
+      "includes": [
+        "mesh/persona",
+        "mesh/prefs",
+        "open_tickets_summary",
+        "last_n_aaron_directives"
+      ],
+      "max_items_hint": 32,
+      "exclude": ["raw_media", "full_tool_logs", "peer_raw_dumps"]
+    },
+    {
+      "id": "secondary",
+      "role": "hot shared mesh — retrieve on demand",
+      "substrates": ["nulltickets_store"],
+      "includes": [
+        "mesh/facts",
+        "mesh/projects",
+        "mesh/research",
+        "mesh/careers",
+        "mesh/open-questions",
+        "mesh/cline",
+        "mesh/enhance",
+        "mesh/agent-memory"
+      ]
+    },
+    {
+      "id": "archive",
+      "role": "full history / vault / persistence",
+      "substrates": ["vault", "persistence_bundle", "mesh_distillates"],
+      "includes": [
+        "vault/",
+        "identity/persistence/",
+        "vault/10-Mesh-Distillates/",
+        "mesh/runs",
+        "mesh/vision"
+      ]
+    }
+  ],
+  "promotion_rules": [
+    "Aaron-confirmed prefs/facts → promote toward primary",
+    "Persona / sole-operator / kill-switch facts always primary-eligible",
+    "One-off tool noise and raw peer signals stay archive or secondary remix only",
+    "Private media never enters primary; distillates only"
+  ],
+  "curator_role": "memory-curator",
+  "scripts": {
+    "pack_claim": "scripts/pack-mesh-claim.py",
+    "tier_check": "scripts/memory-tier-check.py"
+  }
+}

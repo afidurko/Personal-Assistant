@@ -1,6 +1,6 @@
 # Enhancement proposal — Hierarchical Memory Orchestration (HMO) for Cam mesh
 
-**Status:** propose_only (awaiting Aaron / `switch.cam_enhance`)  
+**Status:** applied (Aaron approved 2026-09-17 · `switch.cam_enhance` for this batch)
 **Date:** 2026-09-17  
 **Source:** [Hierarchical Memory Orchestration for Personalized Persistent Agents](https://arxiv.org/abs/2604.01670)  
 **Priority:** P0 — directly improves Cam as Aaron’s persistent personal assistant  
@@ -39,3 +39,9 @@ Add curator rules: promote Aaron-bound preferences; demote one-off tool noise; n
 2. Aaron approve via `config/pipelines/cam-enhance-gate.json`  
 3. Implement as mesh-seed + curator prompt + optional `scripts/` tierer — **no new agent framework**  
 4. `python3 scripts/connectome-check.py`
+
+
+## Apply record
+
+- **BATCH APPLIED** by Aaron 2026-09-17 via `scripts/apply-cam-enhancements.py`
+- Implementer: Cam capability-broker (this checkout)

@@ -5,6 +5,12 @@
 **Method:** Live arXiv AGI daily scan (`scripts/agi-research-scan.py`) + targeted literature search (memory, mesh, persona, governance).  
 **Gate:** Distill + propose only. Functionality apply still needs Aaron (`switch.cam_enhance`).
 
+## Status — APPLIED
+
+Aaron approved **all** proposals and ordered implement-all on **2026-09-17**.  
+Batch log: `identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md`  
+Future enhancement batches still require Aaron (`switch.cam_enhance` defaults to hold).
+
 ## Summary
 
 Cam already has the right skeleton (connectome, teams, mesh, switches). The highest-leverage papers strengthen **four layers**:

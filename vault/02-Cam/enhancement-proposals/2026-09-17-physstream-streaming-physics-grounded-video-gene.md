@@ -1,6 +1,6 @@
 # Enhancement proposal — PhysStream: Streaming Physics-Grounded Video Generation with Structured Scene Memory and Fine-Grained Motion Control
 
-**Status:** propose_only (awaiting Aaron / `switch.cam_enhance`)
+**Status:** applied (Aaron approved 2026-09-17 · `switch.cam_enhance` for this batch)
 **Date:** 2026-09-17
 **Source:** [http://arxiv.org/abs/2609.17521v1](http://arxiv.org/abs/2609.17521v1)
 **Relevance:** 5 — {'enhance_cam_routing': 0, 'enhance_memory_mesh': 3, 'enhance_presence_voice': 0, 'enhance_vision': 2, 'enhance_slm_local': 0, 'enhance_dl_embeddings': 0, 'general_agi_theory': 0}
@@ -23,3 +23,9 @@ Interactive control for video generation is moving from coarse prompts toward fi
 2. Aaron approve via `config/pipelines/cam-enhance-gate.json`
 3. capability-broker applies with implementer subagents
 4. `python3 scripts/connectome-check.py`
+
+
+## Apply record
+
+- **BATCH APPLIED** by Aaron 2026-09-17 via `scripts/apply-cam-enhancements.py`
+- Implementer: Cam capability-broker (this checkout)

@@ -1,6 +1,6 @@
 # Enhancement proposal — Persona continuity metrics for Cam
 
-**Status:** propose_only (awaiting Aaron / `switch.cam_enhance`)  
+**Status:** applied (Aaron approved 2026-09-17 · `switch.cam_enhance` for this batch)
 **Date:** 2026-09-17  
 **Source:** [Consistently Simulating Human Personas…](https://arxiv.org/html/2511.00222v1) · [ARPM temporal memory governance](https://arxiv.org/html/2605.14802v1)  
 **Priority:** P2 — keeps Cam sounding like Cam across days  
@@ -31,3 +31,9 @@ Cam’s brand is locked (32, Argentine, soft airy fluent English, Aaron-only). D
 2. Aaron approve  
 3. Add `config/persona/consistency-checks.md` + qa role bullets  
 4. Smoke on Cam converse transcripts when available
+
+
+## Apply record
+
+- **BATCH APPLIED** by Aaron 2026-09-17 via `scripts/apply-cam-enhancements.py`
+- Implementer: Cam capability-broker (this checkout)

@@ -1,0 +1,34 @@
+{
+  "id": "cam-mesh-claim-schema",
+  "title": "Mesh Memory Protocol claim fields (CAT7-inspired)",
+  "source_paper": "https://arxiv.org/abs/2604.19540",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "status": "applied",
+  "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-mmp-mesh-memory-protocol-for-cam.md",
+  "required_fields": [
+    "claim",
+    "role",
+    "sources",
+    "confidence",
+    "parents",
+    "sensitivity",
+    "accessed"
+  ],
+  "field_notes": {
+    "claim": "Distilled assertion Cam is willing to store — not raw peer chat",
+    "role": "Writer role id (researcher, agi-scout, memory-curator, …)",
+    "sources": "List of {title,url,accessed} or mesh keys",
+    "confidence": "0..1 or low|medium|high",
+    "parents": "Content-hash or mesh keys this claim remixes (lineage)",
+    "sensitivity": "public|team|private",
+    "accessed": "ISO-8601 date the sources were accessed"
+  },
+  "remix_rules": [
+    "Receivers accept field-by-field (SVAF-style); never whole-blob peer dumps into mesh/facts",
+    "Store role-evaluated remix only — never raw peer signal as truth",
+    "center.qa may veto missing citations or lineage on non-trivial claims",
+    "AGI scan / vision / careers write distillates first; curator promotes to facts"
+  ],
+  "pack_script": "scripts/pack-mesh-claim.py"
+}

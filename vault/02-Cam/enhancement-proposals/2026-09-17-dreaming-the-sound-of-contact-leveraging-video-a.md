@@ -1,6 +1,6 @@
 # Enhancement proposal — Dreaming the Sound of Contact: Leveraging Video and Audio Generation for Zero-Shot Force-Aware Manipulation and Data Generation
 
-**Status:** propose_only (awaiting Aaron / `switch.cam_enhance`)
+**Status:** applied (Aaron approved 2026-09-17 · `switch.cam_enhance` for this batch)
 **Date:** 2026-09-17
 **Source:** [http://arxiv.org/abs/2609.19137v1](http://arxiv.org/abs/2609.19137v1)
 **Relevance:** 6 — {'enhance_cam_routing': 0, 'enhance_memory_mesh': 3, 'enhance_presence_voice': 0, 'enhance_vision': 2, 'enhance_slm_local': 0, 'enhance_dl_embeddings': 0, 'general_agi_theory': 1}
@@ -23,3 +23,9 @@ Recent advances in video generation allow robots to learn manipulation trajector
 2. Aaron approve via `config/pipelines/cam-enhance-gate.json`
 3. capability-broker applies with implementer subagents
 4. `python3 scripts/connectome-check.py`
+
+
+## Apply record
+
+- **BATCH APPLIED** by Aaron 2026-09-17 via `scripts/apply-cam-enhancements.py`
+- Implementer: Cam capability-broker (this checkout)

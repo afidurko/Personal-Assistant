@@ -33,6 +33,20 @@
     "tickets": "identity/persistence/tickets"
   },
   "mesh/enhance": {
+    "applied_configs": [
+      "config/memory/hmo-tiers.json",
+      "config/memory/mesh-claim-schema.json",
+      "config/connectome/trajectory-policies.json",
+      "config/enhancement/dual-process.json",
+      "config/persona/consistency-checks.json",
+      "config/enhancement/social-harness.json",
+      "config/enhancement/vision-grounding.json",
+      "config/enhancement/science-agent-env.json"
+    ],
+    "last_batch": "cam-function-papers-2026-09-17",
+    "last_batch_approved_at": "2026-09-17",
+    "last_batch_approved_by": "Aaron",
+    "note": "Batch applied; future functionality changes still require Aaron (switch.cam_enhance defaults to hold).",
     "slm_dl_config": "config/enhancement/slm-dl.json",
     "switch_cam_enhance": "hold",
     "switch_dl_local": "standing_on",
@@ -234,16 +248,18 @@
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,
-    "citations_required": true,
-    "include_counterarguments": true,
-    "save_to_mesh": true,
-    "use_smart_second_brain": true,
     "agi_scan_pipeline": "config/pipelines/daily-agi-scan.json",
     "agi_scan_requires_human_each_day": false,
     "agi_scan_script": "scripts/agi-research-scan.py",
     "agi_scan_team": "team.agi-research-scan",
     "cam_enhance_apply_requires_aaron": true,
-    "daily_agi_research_scan": true
+    "cam_function_batch_applied": true,
+    "cam_function_batch_at": "2026-09-17",
+    "citations_required": true,
+    "daily_agi_research_scan": true,
+    "include_counterarguments": true,
+    "save_to_mesh": true,
+    "use_smart_second_brain": true
   },
   "mesh/tools": {
     "registry": "config/tools/registry.json",

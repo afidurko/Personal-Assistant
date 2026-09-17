@@ -83,7 +83,7 @@
       "act": ["motor.enhance"],
       "hold": "propose_only",
       "flipped_by": ["Aaron", "switch.kill"],
-      "notes": "Aaron ultimate say over Cam functionality changes; scan/propose stays autonomous"
+      "notes": "Aaron ultimate say over Cam functionality changes; scan/propose stays autonomous. Batch cam-function-papers-2026-09-17 APPROVED+APPLIED; default remains hold for future batches."
     },
     {
       "id": "switch.slm_local",

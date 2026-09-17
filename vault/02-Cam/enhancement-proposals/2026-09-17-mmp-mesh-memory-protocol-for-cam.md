@@ -1,6 +1,6 @@
 # Enhancement proposal — Mesh Memory Protocol (MMP) for Cam teams
 
-**Status:** propose_only (awaiting Aaron / `switch.cam_enhance`)  
+**Status:** applied (Aaron approved 2026-09-17 · `switch.cam_enhance` for this batch)
 **Date:** 2026-09-17  
 **Source:** [Mesh Memory Protocol: Semantic Infrastructure for Multi-Agent LLM Systems](https://arxiv.org/abs/2604.19540)  
 **Priority:** P0 — namesake fit for Cam’s neural mesh + specialist teams  
@@ -36,3 +36,9 @@ Reject whole-blob peer dumps from AGI scan / vision / careers into `mesh/facts`.
 2. Aaron approve  
 3. Update `config/mesh.md` write rules + curator/researcher prompts; optional schema JSON  
 4. `python3 scripts/workspace-integration-check.py`
+
+
+## Apply record
+
+- **BATCH APPLIED** by Aaron 2026-09-17 via `scripts/apply-cam-enhancements.py`
+- Implementer: Cam capability-broker (this checkout)

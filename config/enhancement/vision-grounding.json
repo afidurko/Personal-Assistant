@@ -1,0 +1,25 @@
+{
+  "id": "cam-vision-grounding",
+  "title": "Grounded vision distillates for Cam",
+  "source_papers": [
+    "https://arxiv.org/abs/2609.19143",
+    "https://arxiv.org/abs/2609.17521",
+    "https://arxiv.org/abs/2609.19137"
+  ],
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "status": "applied",
+  "proposals": [
+    "vault/02-Cam/enhancement-proposals/2026-09-17-panorama-panoptic-grounded-captioning-via-mask-p.md",
+    "vault/02-Cam/enhancement-proposals/2026-09-17-physstream-streaming-physics-grounded-video-gene.md",
+    "vault/02-Cam/enhancement-proposals/2026-09-17-dreaming-the-sound-of-contact-leveraging-video-a.md"
+  ],
+  "rules": [
+    "Vision motors write distillates only (labels, scores, optional grounded captions) — no raw frames in mesh by default",
+    "Prefer spatially grounded captions when PaddleDetection boxes exist (PANORAMA-style)",
+    "Multimodal audio/video contact cues stay tasked capture under switch.ios_capture",
+    "Pack via scripts/pack-vision-result.py; promote facts only through MMP remix"
+  ],
+  "center": "center.vision",
+  "role": "vision"
+}

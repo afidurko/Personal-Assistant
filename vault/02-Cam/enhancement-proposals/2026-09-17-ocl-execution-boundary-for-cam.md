@@ -1,6 +1,6 @@
 # Enhancement proposal — Organizational Control Layer (OCL) at Cam motors
 
-**Status:** propose_only (awaiting Aaron / `switch.cam_enhance`)  
+**Status:** applied (Aaron approved 2026-09-17 · `switch.cam_enhance` for this batch)
 **Date:** 2026-09-17  
 **Source:** [Organizational Control Layer](https://arxiv.org/abs/2606.04306) · also [Compositional Policy Violations](https://arxiv.org/abs/2609.18820)  
 **Priority:** P0/P1 — hardens Aaron’s ultimate say at the execution boundary  
@@ -31,3 +31,9 @@ Separately, Compositional Policy Violations (CPV) show that **every step can loo
 2. Aaron approve  
 3. Extend `scripts/connectome-route.py` + `center.qa` prompts; add CPV fixtures to connectome-check  
 4. Re-run `python3 scripts/connectome-check.py`
+
+
+## Apply record
+
+- **BATCH APPLIED** by Aaron 2026-09-17 via `scripts/apply-cam-enhancements.py`
+- Implementer: Cam capability-broker (this checkout)

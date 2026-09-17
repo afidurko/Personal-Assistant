@@ -43,6 +43,8 @@ Recipe book: `config/enhancement/slm-dl.json`
 | Tool create/run under registry | Standing ON (`switch.tooling`) — enhance apply still Aaron-gated |
 | Kill / pause all | Aaron anytime |
 
+**Applied batch (Aaron 2026-09-17):** HMO memory tiers, MMP mesh claims, OCL/CPV trajectory policies, dual-process routing, persona continuity, social harness, vision grounding, science-agent env — see `identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md`. Future batches still require Aaron.
+
 ## Daily scan
 
 ```bash
