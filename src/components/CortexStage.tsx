@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { mountCortex } from '@/lib/cortex/engine.js';
 
 interface CortexStageProps {
   listening?: boolean;
@@ -13,7 +12,7 @@ type CortexHandle = {
 };
 
 /**
- * In-process Cam cortex (vendored three) — no iframe, shared heap + resize.
+ * In-process Cam cortex (vendored three) — lazy-loaded, no iframe.
  */
 export function CortexStage({ listening = false }: CortexStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -25,33 +24,63 @@ export function CortexStage({ listening = false }: CortexStageProps) {
     const stage = stageRef.current;
     if (!host || !stage) return;
 
-    const api = mountCortex(host, {
-      embed: true,
-      liveActivityUrl: '/api/runtime/live-activity',
-      pollMs: 5000,
-    }) as CortexHandle;
-    apiRef.current = api;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.some((e) => e.isIntersecting && e.intersectionRatio > 0.08);
-        if (visible) api.resume();
-        else api.pause();
-      },
-      { threshold: [0, 0.08, 0.25] },
-    );
-    io.observe(stage);
+    let cancelled = false;
+    let io: IntersectionObserver | null = null;
+    let ro: ResizeObserver | null = null;
 
     const onVis = () => {
+      const api = apiRef.current;
+      if (!api) return;
       if (document.hidden) api.pause();
       else api.resume();
     };
-    document.addEventListener('visibilitychange', onVis);
+
+    void import('@/lib/cortex/engine.js')
+      .then(({ mountCortex }) => {
+        if (cancelled || !mountRef.current || !stageRef.current) return;
+        const api = mountCortex(mountRef.current, {
+          embed: true,
+          liveActivityUrl: '/api/runtime/live-activity',
+          pollMs: 5000,
+        }) as CortexHandle;
+        if (cancelled) {
+          api.destroy();
+          return;
+        }
+        apiRef.current = api;
+
+        io = new IntersectionObserver(
+          (entries) => {
+            const visible = entries.some((e) => e.isIntersecting && e.intersectionRatio > 0.08);
+            if (visible) api.resume();
+            else api.pause();
+          },
+          { threshold: [0, 0.08, 0.25] },
+        );
+        io.observe(stageRef.current);
+
+        // Layout/settling often changes size without a window resize.
+        ro = new ResizeObserver(() => {
+          window.dispatchEvent(new Event('resize'));
+        });
+        ro.observe(mountRef.current);
+
+        document.addEventListener('visibilitychange', onVis);
+      })
+      .catch((err) => {
+        console.error('[cortex] failed to mount', err);
+        if (mountRef.current) {
+          mountRef.current.innerHTML =
+            '<p class="cortex-fallback">Cortex failed to load — refresh to retry.</p>';
+        }
+      });
 
     return () => {
-      io.disconnect();
+      cancelled = true;
+      io?.disconnect();
+      ro?.disconnect();
       document.removeEventListener('visibilitychange', onVis);
-      api.destroy();
+      apiRef.current?.destroy();
       apiRef.current = null;
     };
   }, []);

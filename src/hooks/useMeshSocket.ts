@@ -155,7 +155,14 @@ export function useMeshSocket() {
       });
 
       ws.addEventListener('error', () => {
-        ws.close();
+        // Let the close handler own reconnect backoff — avoid double close races.
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          try {
+            ws.close();
+          } catch {
+            /* ignore */
+          }
+        }
       });
     };
 

@@ -272,6 +272,7 @@ app.get('/api/runtime/activity-events', async (_req, res) => {
 });
 
 // Static assets for Cam face, 3D cortex, and live-activity JSON the cortex polls
+app.use(express.static(path.join(ROOT, 'public')));
 app.use('/identity', express.static(path.join(ROOT, 'identity')));
 app.use('/vault', express.static(path.join(ROOT, 'vault')));
 app.use('/config', express.static(path.join(ROOT, 'config')));
@@ -282,6 +283,17 @@ app.use('/visualizations', express.static(path.join(ROOT, 'visualizations')));
 
 const distWeb = path.join(ROOT, 'dist');
 app.use(express.static(distWeb));
+// SPA fallback for production builds (API routes already registered above)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/ws')) {
+    next();
+    return;
+  }
+  const index = path.join(distWeb, 'index.html');
+  res.sendFile(index, (err) => {
+    if (err) next();
+  });
+});
 
 const server = createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });

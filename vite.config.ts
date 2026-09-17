@@ -18,6 +18,12 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
     port: 5173,
+    hmr: {
+      host: '127.0.0.1',
+      port: 5173,
+      protocol: 'ws',
+      clientPort: 5173,
+    },
     fs: {
       allow: ['.'],
       deny: ['companions/**'],
@@ -27,6 +33,12 @@ export default defineConfig({
       '/ws': {
         target: 'ws://127.0.0.1:8787',
         ws: true,
+        // Avoid noisy ECONNRESET when the mesh server restarts under tsx watch
+        configure: (proxy) => {
+          proxy.on('error', () => {
+            /* mesh WS will reconnect from the client */
+          });
+        },
       },
       '/viz': 'http://127.0.0.1:8787',
       '/vault': 'http://127.0.0.1:8787',
@@ -35,5 +47,15 @@ export default defineConfig({
       '/companions': 'http://127.0.0.1:8787',
       '/visualizations': 'http://127.0.0.1:8787',
     },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          three: ['three'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 700,
   },
 });

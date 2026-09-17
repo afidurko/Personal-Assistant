@@ -162,8 +162,17 @@ function dtiColor(dir) {
 
 const viewport = root.querySelector("#viewport");
 const canvas = root.querySelector("#c");
+if (!viewport || !canvas) {
+  root.innerHTML = '<p class="cortex-fallback">Cortex viewport missing.</p>';
+  return {
+    destroy() {},
+    pause() {},
+    resume() {},
+    setLodHigh() {},
+  };
+}
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, 2));
 renderer.setClearColor(0x000000, 1);
 
 const labelRenderer = new CSS2DRenderer();
@@ -419,14 +428,20 @@ AREAS.forEach((a) => {
 });
 
 function resize() {
-  const w = viewport.clientWidth;
-  const h = viewport.clientHeight;
+  if (!viewport) return;
+  const w = Math.max(1, viewport.clientWidth);
+  const h = Math.max(1, viewport.clientHeight);
   renderer.setSize(w, h, false);
   labelRenderer.setSize(w, h);
-  camera.aspect = w / Math.max(h, 1);
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
 window.addEventListener("resize", resize);
+const resizeObs =
+  typeof ResizeObserver !== "undefined"
+    ? new ResizeObserver(() => resize())
+    : null;
+resizeObs?.observe(viewport);
 resize();
 
 function setAreaLit(id, mode) {
@@ -936,6 +951,10 @@ function setAnimating(on) {
     livePoll = setInterval(pollLiveActivity, POLL_MS);
   } else {
     clearInterval(livePoll);
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+    }
   }
 }
 
@@ -1025,10 +1044,38 @@ log(
   function destroy() {
     setAnimating(false);
     clearInterval(livePoll);
-    try { controls.dispose(); } catch (_) {}
+    window.removeEventListener("resize", resize);
     try {
+      resizeObs?.disconnect();
+    } catch (_) {}
+    try {
+      controls.dispose();
+    } catch (_) {}
+    try {
+      // Dispose tract + ambient GPU resources
+      Object.values(tractLineGroups).forEach((g) => {
+        g.traverse((obj) => {
+          if (obj.geometry) obj.geometry.dispose?.();
+          if (obj.material) {
+            if (Array.isArray(obj.material)) obj.material.forEach((m) => m.dispose?.());
+            else obj.material.dispose?.();
+          }
+        });
+        brain.remove(g);
+      });
+      if (ambientLines) {
+        ambientLines.geometry?.dispose?.();
+        ambientLines.material?.dispose?.();
+        brain.remove(ambientLines);
+      }
+      fiberPulses.splice(0).forEach((m) => {
+        m.geometry?.dispose?.();
+        m.material?.dispose?.();
+        brain.remove(m);
+      });
       renderer.dispose();
       labelRenderer.domElement.remove();
+      renderer.forceContextLoss?.();
     } catch (_) {}
     root.innerHTML = "";
   }
