@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-17T22:02:13.021834+00:00",
+    "at": "2026-09-17T22:30:30.156787+00:00",
     "mode": "act",
-    "summary": "Implemented anatomical Cam cortex GLB + live parcel heat in cortex3d; BrainMap silhouette; PR #11",
+    "summary": "Near-glass translucent Cam cortex shell with RoomEnvironment + Glass toggle",
     "workspace": "personal-assistant"
   },
   "notes": [
