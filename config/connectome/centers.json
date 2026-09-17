@@ -1,93 +1,308 @@
 {
   "version": 1,
-  "analogy": "Higher brain centers — specialization / dimorphic routing lives here",
+  "analogy": "Higher brain centers \u2014 specialization / dimorphic routing lives here",
   "centers": [
     {
       "id": "center.chief",
       "role": "chief",
       "function": "executive integration; Aaron-facing voice of Cam",
-      "accepts": ["spike.task", "spike.question", "spike.override", "spike.speech"],
-      "projects_to": ["center.router", "center.memory", "center.qa", "center.comms", "switch.identity", "switch.tasking"]
+      "accepts": [
+        "spike.task",
+        "spike.question",
+        "spike.override",
+        "spike.speech"
+      ],
+      "projects_to": [
+        "center.router",
+        "center.memory",
+        "center.qa",
+        "center.comms",
+        "switch.identity",
+        "switch.tasking"
+      ]
     },
     {
       "id": "center.memory",
       "role": "memory-curator",
       "function": "mesh + vault association / engrams",
-      "accepts": ["spike.fact", "spike.note_ref", "spike.pref", "spike.tool_result"],
-      "projects_to": ["center.chief", "switch.autonomy", "motor.mesh", "motor.vault"]
+      "accepts": [
+        "spike.fact",
+        "spike.note_ref",
+        "spike.pref",
+        "spike.tool_result"
+      ],
+      "projects_to": [
+        "center.chief",
+        "switch.autonomy",
+        "motor.mesh",
+        "motor.vault"
+      ]
     },
     {
       "id": "center.research",
       "role": "researcher",
       "function": "evidence hotspot; citations required",
-      "accepts": ["spike.question", "spike.fact", "spike.note_ref"],
-      "projects_to": ["center.qa", "sense.vault.hit"]
+      "accepts": [
+        "spike.question",
+        "spike.fact",
+        "spike.note_ref"
+      ],
+      "projects_to": [
+        "center.qa",
+        "sense.vault.hit"
+      ]
     },
     {
       "id": "center.careers",
       "role": "careers",
       "function": "LinkedIn/Indeed hotspot",
-      "accepts": ["spike.job", "spike.task"],
-      "projects_to": ["center.qa", "switch.careers_submit"]
+      "accepts": [
+        "spike.job",
+        "spike.task"
+      ],
+      "projects_to": [
+        "center.qa",
+        "switch.careers_submit"
+      ]
     },
     {
       "id": "center.ops",
       "role": "ops",
       "function": "life-ops hotspot",
-      "accepts": ["spike.schedule", "spike.task", "spike.tool_result"],
-      "projects_to": ["switch.autonomy", "center.memory"]
+      "accepts": [
+        "spike.schedule",
+        "spike.task",
+        "spike.tool_result"
+      ],
+      "projects_to": [
+        "switch.autonomy",
+        "center.memory"
+      ]
     },
     {
       "id": "center.comms",
       "role": "comms",
       "function": "social-motor planning + presence",
-      "accepts": ["spike.inbox", "spike.speech", "spike.task"],
-      "projects_to": ["switch.outbound", "switch.presence"]
+      "accepts": [
+        "spike.inbox",
+        "spike.speech",
+        "spike.task"
+      ],
+      "projects_to": [
+        "switch.outbound",
+        "switch.presence"
+      ]
     },
     {
       "id": "center.docs",
       "role": "docs",
       "function": "document planning",
-      "accepts": ["spike.task", "spike.note_ref"],
-      "projects_to": ["switch.autonomy"]
+      "accepts": [
+        "spike.task",
+        "spike.note_ref"
+      ],
+      "projects_to": [
+        "switch.autonomy"
+      ]
     },
     {
       "id": "center.coding",
       "role": "coding",
-      "function": "shared coding hotspot — Cline effector for all agents/workspaces",
-      "accepts": ["spike.task", "spike.tool_result", "spike.code_diff"],
-      "projects_to": ["switch.autonomy", "center.qa", "center.memory"],
+      "function": "shared coding hotspot \u2014 Cline effector for all agents/workspaces",
+      "accepts": [
+        "spike.task",
+        "spike.tool_result",
+        "spike.code_diff"
+      ],
+      "projects_to": [
+        "switch.autonomy",
+        "center.qa",
+        "center.memory"
+      ],
       "notes": "Any Cam role may summon; Cline is motor not brain"
     },
     {
       "id": "center.vision",
       "role": "vision",
       "function": "visual association",
-      "accepts": ["spike.visual", "spike.task"],
-      "projects_to": ["center.chief", "center.memory", "center.comms"]
+      "accepts": [
+        "spike.visual",
+        "spike.task"
+      ],
+      "projects_to": [
+        "center.chief",
+        "center.memory",
+        "center.comms"
+      ]
     },
     {
       "id": "center.qa",
       "role": "qa",
       "function": "proofreading / consistency before motor",
-      "accepts": ["spike.*"],
-      "projects_to": ["switch.autonomy", "switch.careers_submit", "center.chief"]
+      "accepts": [
+        "spike.*"
+      ],
+      "projects_to": [
+        "switch.autonomy",
+        "switch.careers_submit",
+        "center.chief"
+      ]
     },
     {
       "id": "center.router",
       "role": "nullboiler",
-      "function": "policy neuropil — who runs what",
-      "accepts": ["spike.task"],
-      "projects_to": ["center.research", "center.careers", "center.ops", "center.comms", "center.docs", "center.coding", "center.vision"]
+      "function": "policy neuropil \u2014 who runs what",
+      "accepts": [
+        "spike.task"
+      ],
+      "projects_to": [
+        "center.research",
+        "center.careers",
+        "center.ops",
+        "center.comms",
+        "center.docs",
+        "center.coding",
+        "center.vision",
+        "center.agi_scan",
+        "center.enhance",
+        "center.capability",
+        "center.info",
+        "center.slm",
+        "center.dl"
+      ]
+    },
+    {
+      "id": "center.agi_scan",
+      "role": "agi-scout",
+      "function": "daily AI/AGI paper + findings scan; spawns analyst/synthesist team",
+      "accepts": [
+        "spike.scan",
+        "spike.paper",
+        "spike.finding",
+        "spike.schedule",
+        "spike.task"
+      ],
+      "projects_to": [
+        "center.enhance",
+        "center.research",
+        "center.qa",
+        "center.dl",
+        "switch.research_scan"
+      ],
+      "team": "team.agi-research-scan"
+    },
+    {
+      "id": "center.enhance",
+      "role": "capability-broker",
+      "function": "Cam enhancement proposals + gated apply; capability team lead",
+      "accepts": [
+        "spike.task",
+        "spike.paper",
+        "spike.finding",
+        "spike.tool_result"
+      ],
+      "projects_to": [
+        "center.qa",
+        "center.slm",
+        "center.dl",
+        "switch.cam_enhance",
+        "switch.autonomy"
+      ],
+      "team": "team.capability"
+    },
+    {
+      "id": "center.capability",
+      "role": "capability-broker",
+      "function": "task decomposition + specialist/sLM/DL brokerage for completion",
+      "accepts": [
+        "spike.task",
+        "spike.question",
+        "spike.tool_result"
+      ],
+      "projects_to": [
+        "center.info",
+        "center.slm",
+        "center.dl",
+        "center.ops",
+        "center.research",
+        "center.qa",
+        "switch.autonomy",
+        "center.coding"
+      ],
+      "team": "team.capability"
+    },
+    {
+      "id": "center.info",
+      "role": "info-retriever",
+      "function": "vault\u2192mesh\u2192web information gather with citations",
+      "accepts": [
+        "spike.question",
+        "spike.fact",
+        "spike.note_ref",
+        "spike.paper"
+      ],
+      "projects_to": [
+        "center.research",
+        "center.memory",
+        "center.agi_scan",
+        "center.slm",
+        "center.qa"
+      ],
+      "team": "team.info"
+    },
+    {
+      "id": "center.slm",
+      "role": "slm-runtime",
+      "function": "small language model cortex \u2014 route/compress/draft assists",
+      "accepts": [
+        "spike.task",
+        "spike.question",
+        "spike.speech",
+        "spike.route_hint",
+        "spike.tool_result"
+      ],
+      "projects_to": [
+        "switch.slm_local",
+        "center.chief",
+        "center.memory",
+        "center.capability"
+      ],
+      "enhancement": "config/enhancement/slm-dl.json"
+    },
+    {
+      "id": "center.dl",
+      "role": "dl-enhance",
+      "function": "deep learning cortex \u2014 embeddings, rerank, identity/paper vectors",
+      "accepts": [
+        "spike.task",
+        "spike.visual",
+        "spike.paper",
+        "spike.tool_result"
+      ],
+      "projects_to": [
+        "switch.dl_local",
+        "center.memory",
+        "center.vision",
+        "center.agi_scan",
+        "center.enhance"
+      ],
+      "enhancement": "config/enhancement/slm-dl.json"
     }
+  ],
+  "teams": [
+    "team.agi-research-scan",
+    "team.capability",
+    "team.info"
   ],
   "recursion": {
     "max_delegate_depth": null,
     "max_subagents": null,
     "unlimited": true,
     "human_gate_to_spawn": false,
-    "analogy": "unbounded interneuron recruitment — Cam may spawn freely to finish work",
+    "all_teams_may_spawn_subagents": true,
+    "analogy": "unbounded interneuron recruitment \u2014 Cam and all teams may spawn freely to finish work",
     "authorized_by": "Aaron",
-    "authorized_at": "2026-09-16"
+    "authorized_at": "2026-09-16",
+    "reaffirmed_at": "2026-09-17"
   }
 }

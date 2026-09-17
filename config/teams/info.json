@@ -1,0 +1,47 @@
+{
+  "id": "team.info",
+  "name": "Information Team",
+  "purpose": "Get accurate, sourced information for Aaron and for Cam’s other teams — vault-first, then mesh, then web.",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "lead_center": "center.info",
+  "lead_role": "info-retriever",
+  "members": [
+    {
+      "role": "info-retriever",
+      "job": "Orchestrate recall + web gather; return cited briefs",
+      "spawns_subagents": true
+    },
+    {
+      "role": "researcher",
+      "job": "Deep source-backed research when info needs analysis",
+      "spawns_subagents": true
+    },
+    {
+      "role": "agi-scout",
+      "job": "When the question is AI/AGI frontier, join the scan feeds",
+      "spawns_subagents": true
+    },
+    {
+      "role": "memory-curator",
+      "job": "Keep answers coherent with mesh facts",
+      "spawns_subagents": true
+    },
+    {
+      "role": "slm-runtime",
+      "job": "Query rewrite / rerank / compress with local sLMs",
+      "spawns_subagents": true
+    }
+  ],
+  "order_of_lookup": [
+    "vault (smart-second-brain)",
+    "mesh namespaces",
+    "web + paper feeds",
+    "specialist hotspots"
+  ],
+  "subagents": {
+    "unlimited": true,
+    "human_gate_to_spawn": false
+  },
+  "pathway_hotspot": "hotspot.info_gather"
+}

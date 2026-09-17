@@ -90,11 +90,20 @@ You (human) ──override / kill──► nullhub / chat
 | `vision` | PaddleDetection on tasked media |
 | `qa` | Verifies outputs and logs |
 | `memory-curator` | Mesh + smart-second-brain coherence |
+| `agi-scout` | Daily AI/AGI paper scan lead (`team.agi-research-scan`) |
+| `agi-analyst` | Score papers for Cam relevance |
+| `agi-synthesist` | Map findings → Cam enhancement proposals |
+| `capability-broker` | Task decomposition + enhance gate brokerage |
+| `task-executor` | Concrete work units under standing autonomy |
+| `info-retriever` | Vault → mesh → web cited information |
+| `slm-runtime` | Local small-LM cortex assists |
+| `dl-enhance` | Embeddings / rerank / identity / paper vectors |
 
-Any role may **summon subagents**; subagents may summon more. Depth is
-capped in config (`max_delegate_depth`) so recursion stays bounded.
-Orchestration and leases stay in nulltickets/nullboiler — agents do not
-invent their own global schedule.
+Any role or team may **summon subagents**; subagents may summon more.
+Depth/count are **uncapped** (`unlimited_subagents`). Aaron retains ultimate say
+over Cam functionality apply (`switch.cam_enhance`).
+
+Teams: `config/teams/` · Brain: [docs/CAM_BRAIN.md](CAM_BRAIN.md) · AGI scan: [docs/AGI_RESEARCH_TEAM.md](AGI_RESEARCH_TEAM.md)
 
 ## Neural mesh (shared persistent memory)
 

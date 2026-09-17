@@ -1,4 +1,16 @@
+# Node / neural-mesh app
+node_modules/
+dist/
+dist-server/
+data/*.json
+!data/.gitkeep
+.DS_Store
+*.log
+.env
+.env.*
+coverage/
 
+# Python / Cam stack
 __pycache__/
 *.py[cod]
 *.egg-info/

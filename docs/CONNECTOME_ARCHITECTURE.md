@@ -100,8 +100,14 @@ Where specialization lives (paper: dimorphism concentrates centrally).
 | `center.vision` | Visual association | `vision` |
 | `center.qa` | Proofreading / consistency | `qa` |
 | `center.router` | Policy neuropil | nullboiler |
+| `center.agi_scan` | Daily AI/AGI scan team | `agi-scout` (+ analyst/synthesist) |
+| `center.enhance` | Enhancement proposals / gated apply | `capability-broker` |
+| `center.capability` | Task completion brokerage | `capability-broker` |
+| `center.info` | Cited information gather | `info-retriever` |
+| `center.slm` | Small-LM cortex | `slm-runtime` |
+| `center.dl` | Deep-learning cortex | `dl-enhance` |
 
-Recursive subagents = local interneuron bursts (depth ≤ 3).
+Recursive subagents = local interneuron bursts (**unlimited**; all teams may spawn).
 
 ## Circuit switches (`config/connectome/switches.json`)
 
@@ -114,9 +120,13 @@ Paper: isomorphic sensory paths diverge via switches into antagonistic circuits.
 | `switch.outbound` | autonomy | send/call/FaceTime | draft-only |
 | `switch.careers_submit` | autonomy | submit application | keep draft |
 | `switch.presence` | on-demand studio | ASR→Cam→TTS→Audio2Face | still portrait / text |
+| `switch.research_scan` | standing ON | web_fetch + vault/mesh distill | pause daily scan |
+| `switch.cam_enhance` | **hold** (Aaron) | apply Cam functionality | propose-only |
+| `switch.slm_local` | standing ON | motor.slm | no local sLM |
+| `switch.dl_local` | standing ON | motor.dl | no local DL |
 | `switch.kill` | armed | all motor silenced | — |
 
-Aaron flips switches; Cam does not accept other operators.
+Aaron flips switches; Cam does not accept other operators. Aaron has ultimate say on functionality apply.
 
 ## Motor periphery (`config/connectome/motor.json`)
 
@@ -135,6 +145,10 @@ Effectors fire only after a switch resolves to **act**.
 | `motor.vault` | Obsidian note writes |
 | `motor.calendar` | Calendar mutations |
 | `motor.mesh` | Mesh KV puts / archives |
+| `motor.web_fetch` | Fetch papers/findings (AGI scan / info) |
+| `motor.enhance` | Apply Cam config/role/connectome/sLM-DL changes (Aaron-gated) |
+| `motor.slm` | Local small-LM inference |
+| `motor.dl` | Local DL embed/rerank/cluster |
 
 ## Hotspots (dense specialized subgraphs)
 
@@ -145,8 +159,14 @@ From the paper’s “male-specific connection hotspots” idea — Cam densifie
 3. **Presence hotspot** — transcript → Cam reply → soft airy fluent English TTS → face  
 4. **Life-ops hotspot** — calendar/chores → Jarvis/calendar motor  
 5. **Coding hotspot** — Aaron task → coding center → QA → Cline across workspaces  
+3. **AGI daily scan hotspot** — clock/arxiv/feeds → agi_scan → enhance proposals → vault  
+4. **Capability hotspot** — Aaron task → capability team → specialists/sLM/DL → done  
+5. **Info hotspot** — question → vault→mesh→web → cited answer  
+6. **sLM / DL hotspots** — local model assists + feedback into mesh  
+7. **Presence hotspot** — transcript → Cam reply → soft airy fluent English TTS → face  
+8. **Life-ops hotspot** — calendar/chores → Jarvis/calendar motor  
 
-Defined in `config/connectome/hotspots.json`.
+Defined in `config/connectome/hotspots.json`. See also [CAM_BRAIN.md](CAM_BRAIN.md) and [AGI_RESEARCH_TEAM.md](AGI_RESEARCH_TEAM.md).
 
 ## Synapse protocol (implementation contract)
 

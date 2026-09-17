@@ -99,6 +99,74 @@
     {"from": "sense.files.media", "to": "center.vision", "weight": 1.0},
     {"from": "sense.files.media", "to": "center.comms", "weight": 0.9},
     {"from": "center.vision", "to": "center.comms", "weight": 0.6, "notes": "photo-face to video-voice bridge"},
-    {"from": "switch.identity", "to": "center.memory", "weight": 1.0}
+    {"from": "switch.identity", "to": "center.memory", "weight": 1.0},
+
+    {"from": "sense.clock.daily", "to": "center.agi_scan", "weight": 1.0},
+    {"from": "sense.web.arxiv", "to": "center.agi_scan", "weight": 1.0},
+    {"from": "sense.web.agi_feed", "to": "center.agi_scan", "weight": 1.0},
+    {"from": "sense.slm.inference", "to": "center.slm", "weight": 1.0},
+    {"from": "sense.dl.embedding", "to": "center.dl", "weight": 1.0},
+
+    {"from": "center.router", "to": "center.agi_scan", "weight": 1.0},
+    {"from": "center.router", "to": "center.enhance", "weight": 1.0},
+    {"from": "center.router", "to": "center.capability", "weight": 1.0},
+    {"from": "center.router", "to": "center.info", "weight": 1.0},
+    {"from": "center.router", "to": "center.slm", "weight": 1.0},
+    {"from": "center.router", "to": "center.dl", "weight": 1.0},
+
+    {"from": "center.agi_scan", "to": "center.enhance", "weight": 1.0},
+    {"from": "center.agi_scan", "to": "center.research", "weight": 0.8},
+    {"from": "center.agi_scan", "to": "center.qa", "weight": 0.9},
+    {"from": "center.agi_scan", "to": "center.dl", "weight": 0.7},
+    {"from": "center.agi_scan", "to": "switch.research_scan", "weight": 1.0},
+
+    {"from": "center.enhance", "to": "center.qa", "weight": 1.0},
+    {"from": "center.enhance", "to": "center.slm", "weight": 0.7},
+    {"from": "center.enhance", "to": "center.dl", "weight": 0.7},
+    {"from": "center.enhance", "to": "switch.cam_enhance", "weight": 1.0},
+    {"from": "center.enhance", "to": "switch.autonomy", "weight": 0.8},
+
+    {"from": "center.capability", "to": "center.info", "weight": 1.0},
+    {"from": "center.capability", "to": "center.slm", "weight": 0.9},
+    {"from": "center.capability", "to": "center.dl", "weight": 0.9},
+    {"from": "center.capability", "to": "center.ops", "weight": 0.8},
+    {"from": "center.capability", "to": "center.research", "weight": 0.8},
+    {"from": "center.capability", "to": "center.qa", "weight": 1.0},
+    {"from": "center.capability", "to": "switch.autonomy", "weight": 1.0},
+
+    {"from": "center.info", "to": "center.research", "weight": 0.9},
+    {"from": "center.info", "to": "center.memory", "weight": 0.9},
+    {"from": "center.info", "to": "center.agi_scan", "weight": 0.7},
+    {"from": "center.info", "to": "center.slm", "weight": 0.8},
+    {"from": "center.info", "to": "center.qa", "weight": 1.0},
+    {"from": "center.info", "to": "sense.vault.hit", "weight": 0.6, "notes": "retrieval drive"},
+
+    {"from": "center.slm", "to": "switch.slm_local", "weight": 1.0},
+    {"from": "center.slm", "to": "center.chief", "weight": 0.9},
+    {"from": "center.slm", "to": "center.memory", "weight": 0.8},
+    {"from": "center.slm", "to": "center.capability", "weight": 0.7},
+
+    {"from": "center.dl", "to": "switch.dl_local", "weight": 1.0},
+    {"from": "center.dl", "to": "center.memory", "weight": 0.9},
+    {"from": "center.dl", "to": "center.vision", "weight": 0.7},
+    {"from": "center.dl", "to": "center.agi_scan", "weight": 0.6},
+    {"from": "center.dl", "to": "center.enhance", "weight": 0.7},
+
+    {"from": "center.qa", "to": "switch.research_scan", "weight": 0.9},
+    {"from": "center.qa", "to": "switch.cam_enhance", "weight": 0.9},
+
+    {"from": "switch.research_scan", "to": "motor.web_fetch", "when": "act", "weight": 1.0},
+    {"from": "switch.research_scan", "to": "motor.vault", "when": "act", "weight": 0.8},
+    {"from": "switch.research_scan", "to": "motor.mesh", "when": "act", "weight": 0.8},
+    {"from": "switch.cam_enhance", "to": "motor.enhance", "when": "act", "weight": 1.0},
+    {"from": "switch.slm_local", "to": "motor.slm", "when": "act", "weight": 1.0},
+    {"from": "switch.dl_local", "to": "motor.dl", "when": "act", "weight": 1.0},
+
+    {"from": "motor.web_fetch", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
+    {"from": "motor.enhance", "to": "center.memory", "weight": 0.9, "notes": "feedback"},
+    {"from": "motor.slm", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
+    {"from": "motor.slm", "to": "sense.slm.inference", "weight": 0.5, "notes": "self-model loop"},
+    {"from": "motor.dl", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
+    {"from": "motor.dl", "to": "sense.dl.embedding", "weight": 0.5, "notes": "self-model loop"}
   ]
 }

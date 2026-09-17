@@ -20,6 +20,22 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/persistence` | export pointers / bundle version for cross-workspace restore |
 | `mesh/vault` | smart-second-brain vault path + topic distillates |
 | `mesh/persona` | Cam identity/voice/availability prefs |
+| `mesh/agent-commute` | Task commute paths + efficiency rankings |
+| `mesh/agent-memory` | Agent-consolidated memory promotions |
+| `mesh/agent-persistence` | Sticky jobs until completion |
+| `mesh/agent-issue-loop` | Automated fix-loop attempts + escalations |
+| `mesh/enhance` | sLM/DL cortex recipes + cam_enhance gate state |
+| `mesh/research/agi-scan` | daily AGI paper distillates (via vault mirror) |
+| `mesh/workspaces` | scan-workspace snapshots (health/arch/vuln/updates/improvements) |
+
+## Deep agent layers (TypeScript neural mesh)
+
+Stacked on the interactive brain map (`server/core/agent-mesh.ts`):
+
+1. **Commute** — route tasks via high-confidence hops  
+2. **Memory** — consolidate + amplify recall  
+3. **Persistence** — keep jobs alive until done  
+4. **Issue-fix loop** — dedicated automated detect → fix → verify → escalate agents  
 
 ## Write rules
 
@@ -34,7 +50,9 @@ Shared across every agent. Backed by nulltickets `/store`.
 - Workspace registry via `scripts/choose-workspace.py --mesh-projects`
 - Vision results sync via `scripts/pack-vision-result.py`
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
+- AGI daily scan archives via `scripts/agi-research-scan.py` → vault + mesh distillates
 - Cross-workspace: `scripts/persist-export.py` / `persist-import.py`
+- Integration confirmation: `scripts/workspace-integration-check.py` · `docs/WORKSPACES_WORKFLOW.md`
 
 ## Read rules
 

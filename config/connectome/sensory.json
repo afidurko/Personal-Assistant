@@ -113,6 +113,41 @@
       "source": ["local_files", "icloud_paths", "attachments"],
       "emits": ["spike.visual", "spike.audio", "spike.aaron_enroll"],
       "notes": "Aaron-granted file access — photos/videos/audio for look+sound enrollment"
+    },
+    {
+      "id": "sense.clock.daily",
+      "modality": "time",
+      "source": "standing_scheduler",
+      "emits": ["spike.schedule", "spike.scan"],
+      "notes": "Daily standing trigger for AGI research scan team (America/New_York)"
+    },
+    {
+      "id": "sense.web.arxiv",
+      "modality": "research",
+      "source": ["arxiv_api"],
+      "emits": ["spike.paper", "spike.fact"],
+      "notes": "New AI/AGI papers from arXiv categories cs.AI/LG/CL/MA/NE + stat.ML"
+    },
+    {
+      "id": "sense.web.agi_feed",
+      "modality": "research",
+      "source": ["openreview", "acl_anthology", "huggingface_papers", "lab_blogs"],
+      "emits": ["spike.paper", "spike.fact", "spike.finding"],
+      "notes": "Broader AGI/AI findings feed for Cam enhancement"
+    },
+    {
+      "id": "sense.slm.inference",
+      "modality": "model",
+      "source": "slm_runtime",
+      "emits": ["spike.tool_result", "spike.route_hint"],
+      "notes": "Local small-LM assist results back into higher centers"
+    },
+    {
+      "id": "sense.dl.embedding",
+      "modality": "model",
+      "source": "dl_enhance",
+      "emits": ["spike.tool_result", "spike.fact"],
+      "notes": "Embedding / rerank / cluster distillates"
     }
   ]
 }

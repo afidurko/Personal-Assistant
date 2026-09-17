@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "config" / "connectome"
+import sys
 sys.path.insert(0, str(ROOT / "scripts"))
 import cam_workspaces as cw  # noqa: E402
 
@@ -54,6 +54,20 @@ def pick_hotspot(
             score += 3
         if ("job" in g or "career" in g) and "career" in blob:
             score += 3
+        if ("agi" in g or "arxiv" in g or "paper" in g or "scan" in g) and (
+            "agi" in blob or "arxiv" in blob or "scan" in blob
+        ):
+            score += 4
+        if ("enhance" in g or "upgrade" in g) and "enhance" in blob:
+            score += 4
+        if ("slm" in g or "small language" in g) and "slm" in blob:
+            score += 4
+        if ("embed" in g or "deep learning" in g or " dl" in f" {g}") and "dl" in blob:
+            score += 4
+        if ("info" in g or "lookup" in g or "find out" in g) and "info" in blob:
+            score += 3
+        if ("capability" in g or "complete" in g or "team" in g) and "capability" in blob:
+            score += 3
         if any(
             tok in g
             for tok in (
@@ -75,18 +89,48 @@ def pick_hotspot(
     return scored[0][1]
 
 
-def resolve_switches(switches: dict, kill: bool, autonomy: bool) -> dict[str, str]:
+def resolve_switches(
+    switches: dict,
+    kill: bool,
+    autonomy: bool,
+    enhance: bool = False,
+    research_scan: bool = True,
+    slm: bool = True,
+    dl: bool = True,
+) -> dict[str, str]:
+    """Resolve circuit switches. cam_enhance stays hold unless Aaron enables it."""
     state = {}
+    hold_when_no_autonomy = {
+        "switch.autonomy",
+        "switch.outbound",
+        "switch.careers_submit",
+        "switch.research_scan",
+        "switch.slm_local",
+        "switch.dl_local",
+    }
     for s in switches["switches"]:
         sid = s["id"]
+        default = (s.get("default") or "").lower()
         if sid == "switch.kill":
             state[sid] = "act" if kill else "armed_allow_motor"
             continue
-        if not autonomy and sid in {
-            "switch.autonomy",
-            "switch.outbound",
-            "switch.careers_submit",
-        }:
+        if sid == "switch.cam_enhance":
+            # Aaron ultimate say — propose-only until explicitly enabled
+            state[sid] = "act" if enhance else "hold"
+            continue
+        if sid == "switch.research_scan" and not research_scan:
+            state[sid] = "hold"
+            continue
+        if sid == "switch.slm_local" and not slm:
+            state[sid] = "hold"
+            continue
+        if sid == "switch.dl_local" and not dl:
+            state[sid] = "hold"
+            continue
+        if not autonomy and sid in hold_when_no_autonomy:
+            state[sid] = "hold"
+            continue
+        if default == "hold" or default.startswith("hold"):
             state[sid] = "hold"
             continue
         state[sid] = "act"
@@ -142,6 +186,14 @@ def main() -> int:
     parser.add_argument("--hotspot", default="", help="explicit hotspot id when sense collides")
     parser.add_argument("--workspace-id", default="", help="force coding workspace id")
     parser.add_argument("--role", default="", help="Cam role for workspace allowlist")
+    parser.add_argument(
+        "--enhance",
+        action="store_true",
+        help="Aaron enables switch.cam_enhance (apply functionality changes)",
+    )
+    parser.add_argument("--no-research-scan", action="store_true")
+    parser.add_argument("--no-slm", action="store_true")
+    parser.add_argument("--no-dl", action="store_true")
     args = parser.parse_args()
 
     sensory = load("sensory.json")
@@ -168,7 +220,13 @@ def main() -> int:
         return 0
 
     switch_state = resolve_switches(
-        switches, kill=args.kill, autonomy=not args.no_autonomy
+        switches,
+        kill=args.kill,
+        autonomy=not args.no_autonomy,
+        enhance=args.enhance,
+        research_scan=not args.no_research_scan,
+        slm=not args.no_slm,
+        dl=not args.no_dl,
     )
     effector_reqs = {
         e["id"]: list(e.get("requires_switch") or []) for e in motor["effectors"]
@@ -226,7 +284,6 @@ def main() -> int:
             "sole_operator": "Aaron",
         },
     }
-
     # When coding motor is planned, attach workspace resolution for run-cline.py
     if "motor.cline" in planned_motors or (
         hotspot and hotspot.get("id") in {"hotspot.coding", "hotspot.cline_result"}

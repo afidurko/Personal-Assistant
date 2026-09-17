@@ -37,8 +37,24 @@ def expand_path(raw: str, base: Path | None = None) -> Path:
 
 def load_registry() -> dict[str, Any]:
     reg = load_json(REGISTRY_PATH)
-    if not reg.get("workspaces"):
-        raise FileNotFoundError(f"workspace registry missing or empty: {REGISTRY_PATH}")
+    # Prefer layered coding_workspaces (unified registry) then flat workspaces alias
+    workspaces = (
+        ((reg.get("layers") or {}).get("coding_workspaces"))
+        or reg.get("workspaces")
+        or ((reg.get("cline") or {}).get("workspaces"))
+    )
+    if not workspaces:
+        raise FileNotFoundError(f"workspace registry missing coding workspaces: {REGISTRY_PATH}")
+    # Normalize so callers can use reg["workspaces"]
+    reg = dict(reg)
+    reg["workspaces"] = list(workspaces)
+    cline = reg.get("cline") or {}
+    if cline.get("default_workspace_id") and not reg.get("default_workspace_id"):
+        reg["default_workspace_id"] = cline["default_workspace_id"]
+    if cline.get("chooser") and not reg.get("chooser"):
+        reg["chooser"] = cline["chooser"]
+    if cline.get("cline_data_root") and not reg.get("cline_data_root"):
+        reg["cline_data_root"] = cline["cline_data_root"]
     return reg
 
 

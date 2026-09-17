@@ -28,11 +28,21 @@
     "center.coding": { x: 340, y: 255, r: 15, label: "coding", kind: "center", repos: ["cline"] },
     "center.vision": { x: 300, y: 175, r: 15, label: "vision", kind: "center", repos: ["paddledetection"] },
     "center.qa": { x: 450, y: 255, r: 14, label: "QA", kind: "center", repos: ["nullclaw"] },
+    "center.agi_scan": { x: 280, y: 145, r: 16, label: "AGI scan", kind: "center", repos: ["smart-second-brain", "nullclaw"] },
+    "center.enhance": { x: 250, y: 210, r: 14, label: "enhance", kind: "center", repos: ["nullclaw"] },
+    "center.capability": { x: 620, y: 200, r: 15, label: "capability", kind: "center", repos: ["nullclaw", "nullboiler"] },
+    "center.info": { x: 340, y: 250, r: 14, label: "info", kind: "center", repos: ["smart-second-brain"] },
+    "center.slm": { x: 580, y: 175, r: 13, label: "sLM", kind: "center", repos: ["nullclaw"] },
+    "center.dl": { x: 270, y: 270, r: 13, label: "DL", kind: "center", repos: ["paddledetection", "nullclaw"] },
     // Switches (mid brain/spine junction)
     "switch.autonomy": { x: 450, y: 310, r: 12, label: "autonomy", kind: "switch", repos: ["nulltickets"] },
     "switch.outbound": { x: 520, y: 340, r: 11, label: "outbound", kind: "switch", repos: ["openclaw", "assistant"] },
     "switch.careers_submit": { x: 560, y: 300, r: 11, label: "submit", kind: "switch", repos: ["nulltickets"] },
     "switch.presence": { x: 580, y: 250, r: 11, label: "presence", kind: "switch", repos: ["llmavatartalk"] },
+    "switch.research_scan": { x: 380, y: 300, r: 11, label: "scan", kind: "switch", repos: ["nulltickets"] },
+    "switch.cam_enhance": { x: 320, y: 330, r: 11, label: "enhance", kind: "switch", repos: ["nullhub"] },
+    "switch.slm_local": { x: 600, y: 310, r: 10, label: "sLM on", kind: "switch", repos: ["nullclaw"] },
+    "switch.dl_local": { x: 280, y: 340, r: 10, label: "DL on", kind: "switch", repos: ["nullclaw"] },
     "switch.kill": { x: 450, y: 360, r: 13, label: "KILL", kind: "switch", repos: ["nullhub"] },
     // Sensory (left spinal roots)
     "sense.chat.aaron": { x: 250, y: 360, r: 14, label: "Aaron chat", kind: "sense", repos: ["nullclaw"] },
@@ -43,6 +53,11 @@
     "sense.vision.detection": { x: 200, y: 200, r: 13, label: "vision in", kind: "sense", repos: ["paddledetection"] },
     "sense.email.thread": { x: 230, y: 540, r: 12, label: "email", kind: "sense", repos: ["openclaw"] },
     "sense.cline.result": { x: 200, y: 360, r: 12, label: "Cline result", kind: "sense", repos: ["cline"] },
+    "sense.clock.daily": { x: 180, y: 260, r: 12, label: "daily clock", kind: "sense", repos: ["nullboiler"] },
+    "sense.web.arxiv": { x: 170, y: 320, r: 12, label: "arXiv", kind: "sense", repos: ["smart-second-brain"] },
+    "sense.web.agi_feed": { x: 165, y: 380, r: 12, label: "AGI feeds", kind: "sense", repos: ["smart-second-brain"] },
+    "sense.slm.inference": { x: 200, y: 160, r: 11, label: "sLM out", kind: "sense", repos: ["nullclaw"] },
+    "sense.dl.embedding": { x: 190, y: 120, r: 11, label: "DL out", kind: "sense", repos: ["nullclaw"] },
     // Motor (right spinal roots)
     "motor.text": { x: 680, y: 340, r: 14, label: "text", kind: "motor", repos: ["openclaw", "assistant"] },
     "motor.call": { x: 700, y: 390, r: 13, label: "call", kind: "motor", repos: ["openclaw"] },
@@ -55,6 +70,10 @@
     "motor.vault": { x: 650, y: 190, r: 13, label: "vault write", kind: "motor", repos: ["smart-second-brain"] },
     "motor.mesh": { x: 620, y: 150, r: 12, label: "mesh", kind: "motor", repos: ["nulltickets"] },
     "motor.calendar": { x: 730, y: 540, r: 12, label: "cal write", kind: "motor", repos: ["jarvis"] },
+    "motor.web_fetch": { x: 640, y: 280, r: 13, label: "web fetch", kind: "motor", repos: ["nullclaw"] },
+    "motor.enhance": { x: 630, y: 220, r: 12, label: "enhance", kind: "motor", repos: ["nullhub", "nullclaw"] },
+    "motor.slm": { x: 700, y: 220, r: 12, label: "sLM run", kind: "motor", repos: ["nullclaw"] },
+    "motor.dl": { x: 710, y: 170, r: 12, label: "DL run", kind: "motor", repos: ["nullclaw"] },
   };
 
   const HOTSPOTS = {
@@ -105,6 +124,24 @@
       feedback: ["motor.mesh", "sense.cline.result", "center.coding", "center.chief"],
       behavior: "Cline result → mesh (all workspaces)",
       repos: ["cline", "nulltickets"],
+    },
+    "sense.clock.daily": {
+      pathway: ["sense.clock.daily", "center.agi_scan", "center.enhance", "center.qa", "switch.research_scan", "motor.web_fetch", "motor.vault", "motor.mesh"],
+      feedback: ["motor.web_fetch", "center.memory", "center.chief"],
+      behavior: "daily AGI scan → propose Cam enhancements",
+      repos: ["nullclaw", "smart-second-brain", "nulltickets"],
+    },
+    "sense.web.arxiv": {
+      pathway: ["sense.web.arxiv", "center.agi_scan", "center.enhance", "center.qa", "switch.research_scan", "motor.web_fetch", "motor.vault"],
+      feedback: ["motor.vault", "center.memory", "center.chief"],
+      behavior: "arXiv papers → Cam relevance proposals",
+      repos: ["smart-second-brain", "nullclaw"],
+    },
+    "sense.web.agi_feed": {
+      pathway: ["sense.web.agi_feed", "center.agi_scan", "center.enhance", "center.qa", "switch.research_scan", "motor.web_fetch"],
+      feedback: ["motor.web_fetch", "center.memory", "center.chief"],
+      behavior: "AGI feeds → distill",
+      repos: ["smart-second-brain", "nullclaw"],
     },
   };
 
