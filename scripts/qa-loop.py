@@ -254,6 +254,34 @@ def metrics_from(summary: dict) -> dict:
     }
 
 
+def mirror_mesh_qa(cycle_dir: Path, record: dict) -> None:
+    """Mirror QA cycle distillate into persistence for cross-workspace recall."""
+    mesh_dir = ROOT / "identity" / "persistence"
+    mesh_dir.mkdir(parents=True, exist_ok=True)
+    path = mesh_dir / "qa-mesh-latest.json"
+    doc = {
+        "namespace": "mesh/runs",
+        "kind": "qa_cycle",
+        "cycle_dir": str(cycle_dir.relative_to(ROOT)),
+        "at": utc_now(),
+        "status": record.get("status"),
+        "metrics": record.get("metrics"),
+        "findings": record.get("findings"),
+        "await_human": False,
+        "continuous_qa": True,
+    }
+    path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    # Also drop under vault distillates
+    out = (
+        ROOT
+        / "vault"
+        / "10-Mesh-Distillates"
+        / "qa-cycles"
+        / "mesh-mirror-latest.json"
+    )
+    out.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+
+
 def write_suggestions(
     cycle_dir: Path, summary: dict, findings: list[dict], green: bool
 ) -> None:
@@ -275,13 +303,16 @@ def write_suggestions(
     lines += [
         "",
         "## After green (standing improvements)",
-        "- CI: `python3 scripts/connectome-check.py` + `--n 1000000 --strict-edges` on push",
+        "- CI: `bash scripts/ci-connectome.sh` (check + workspace unit tests + 1M strict)",
         "- Standing: `python3 scripts/system-health-scan.py` (health_conductor)",
         "- Nightly billion fuzz via `qa-loop.py --n 1000000000 --cycles 1`",
-        "- Progress heartbeats every 50M sims for long campaigns",
-        "- Traffic-weighted sense sampling (chat-heavy)",
-        "- Mirror QA cycle events into mesh persistence",
+        "- Progress heartbeats every 50M sims for long campaigns (simulator v3)",
+        "- Traffic-weighted sense sampling (chat/vault/cline-heavy)",
+        "- Mirror QA cycle events into `identity/persistence/qa-mesh-latest.json`",
+        "- Cline workspace runtime: `python3 scripts/test_cline_workspaces.py`",
         "- When Mac is available: flip Tailscale preferred host to aaron-mac",
+        "- Suggest: bind `run-cline.py` tickets into live nulltickets when stack is up",
+        "- Suggest: `cline mcp install cam` on each Aaron machine after persist-import",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
@@ -418,6 +449,7 @@ def main() -> int:
         (cycle_dir / "cycle.json").write_text(
             json.dumps(record, indent=2) + "\n", encoding="utf-8"
         )
+        mirror_mesh_qa(cycle_dir, record)
 
     print(f"[qa] done overall_exit={overall_exit}", flush=True)
     return overall_exit

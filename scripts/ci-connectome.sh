@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# CI gate for Cam connectome + Cline workspace runtime
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+echo "== connectome-check =="
+python3 scripts/connectome-check.py
+
+echo "== cline workspace unit tests =="
+python3 scripts/test_cline_workspaces.py
+
+echo "== connectome fuzz (1M strict) =="
+python3 scripts/connectome-simulate.py \
+  --n 1000000 \
+  --strict-edges \
+  --seed 7 \
+  --out vault/10-Mesh-Distillates/qa-cycles/ci-sim-1m.json
+
+echo "CI OK"

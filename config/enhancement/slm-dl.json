@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "title": "Cam deep learning + small language model cortex",
+  "purpose": "Local, efficient models that enhance Cam’s routing, memory, vision, and presence — without replacing Aaron’s control or the Null stack truth.",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "principles": [
+    "Prefer smallest model that works (sLM before large cloud LLM)",
+    "Nulltickets remains synaptic truth; models are helpers not schedulers",
+    "Enhancement proposals from research scan may suggest model swaps; applying them needs Aaron (switch.cam_enhance)",
+    "On-device / local first for privacy of Aaron media and vault",
+    "Unlimited subagents may wrap model calls for parallel batching"
+  ],
+  "centers": {
+    "center.slm": "slm-runtime",
+    "center.dl": "dl-enhance"
+  },
+  "slm": {
+    "role": "slm-runtime",
+    "motor": "motor.slm",
+    "switch": "switch.slm_local",
+    "default": "standing_on",
+    "jobs": [
+      "intent_classify",
+      "hotspot_route_suggest",
+      "query_rewrite",
+      "brief_compress",
+      "tool_arg_extract",
+      "presence_reply_draft_assist"
+    ],
+    "preferred_classes": [
+      "1B–8B instruct SLMs",
+      "quantized GGUF / ONNX for local",
+      "specialty routers / classifiers distilled from Cam logs"
+    ],
+    "candidates": [
+      {
+        "id": "cam-router-slm",
+        "use": "sense→hotspot classification",
+        "status": "planned"
+      },
+      {
+        "id": "cam-compress-slm",
+        "use": "mesh distillate compression",
+        "status": "planned"
+      },
+      {
+        "id": "cam-presence-slm",
+        "use": "soft airy English reply drafting when studio offline",
+        "status": "planned"
+      }
+    ],
+    "mesh_namespace": "mesh/enhance/slm"
+  },
+  "deep_learning": {
+    "role": "dl-enhance",
+    "motor": "motor.dl",
+    "switch": "switch.dl_local",
+    "default": "standing_on",
+    "jobs": [
+      "embedding_index_vault",
+      "embedding_index_mesh",
+      "rerank_retrieval",
+      "vision_distillate_encode",
+      "aaron_identity_embedding",
+      "paper_similarity_cluster"
+    ],
+    "preferred_classes": [
+      "sentence / document embedding models",
+      "cross-encoders for rerank",
+      "compact vision encoders (PaddleDet distillates already preferred)",
+      "LoRA adapters for Cam-specific tasks"
+    ],
+    "candidates": [
+      {
+        "id": "cam-vault-embed",
+        "use": "smart-second-brain retrieval boost",
+        "status": "planned"
+      },
+      {
+        "id": "cam-paper-embed",
+        "use": "AGI daily scan clustering / dedupe",
+        "status": "planned"
+      },
+      {
+        "id": "cam-identity-embed",
+        "use": "Aaron face/voice enrollment vectors",
+        "status": "planned"
+      }
+    ],
+    "mesh_namespace": "mesh/enhance/dl"
+  },
+  "feedback_loop": {
+    "from_team": "team.agi-research-scan",
+    "into": ["slm.candidates", "deep_learning.candidates", "config/roles", "config/connectome"],
+    "apply_gate": "switch.cam_enhance"
+  },
+  "non_goals": [
+    "Training unbounded foundation models in this repo",
+    "Letting models assign root tasks (Aaron only)",
+    "Bypassing kill switch or outbound gates"
+  ]
+}

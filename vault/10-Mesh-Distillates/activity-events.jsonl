@@ -6,3 +6,4 @@
 {"ts": "2026-09-17T01:40:33Z", "neuron": "neuron.speak_loop", "kind": "loop", "area": "area.broca", "intensity": 0.95, "tracts": ["tract.arcuate", "tract.af_anterior", "tract.af_posterior", "tract.slf3", "tract.fat"], "reason": "dual_stream:dorsal:speak", "source": "cam_converse"}
 {"ts": "2026-09-17T01:40:33Z", "neuron": "neuron.comms", "kind": "agent", "area": "area.broca", "intensity": 0.7, "tracts": ["tract.arcuate", "tract.fat"], "reason": "outbound_reply", "source": "cam_converse"}
 {"ts": "2026-09-17T01:40:50Z", "neuron": "neuron.asr", "kind": "agent", "area": "area.auditory", "intensity": 0.8, "tracts": ["tract.mdlf", "tract.arcuate"], "reason": "mic_spike", "source": "cam_converse"}
+{"ts": "2026-09-17T10:48:18Z", "neuron": "neuron.improve_engine", "kind": "loop", "area": "area.apfc", "intensity": 0.3, "tracts": ["tract.ifof", "tract.slf", "tract.cingulum"], "reason": "tasks:0", "source": "improve_engine"}

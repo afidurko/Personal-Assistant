@@ -1,0 +1,48 @@
+{
+  "name": "cam-enhance-gate",
+  "description": "Aaron has ultimate say over Cam functionality changes proposed by AGI scan / capability teams",
+  "definition": {
+    "initial": "propose",
+    "states": {
+      "propose": {
+        "agent_role": "agi-synthesist",
+        "description": "Draft enhancement proposal (roles, connectome, sLM/DL)"
+      },
+      "qa": {
+        "agent_role": "qa",
+        "description": "Safety + citation + simplicity check"
+      },
+      "awaiting_human": {
+        "agent_role": "chief",
+        "description": "Aaron reviews; switch.cam_enhance hold until approve",
+        "requires_human": true
+      },
+      "apply": {
+        "agent_role": "capability-broker",
+        "description": "Apply approved changes; spawn implementer subagents"
+      },
+      "verify": {
+        "agent_role": "qa",
+        "description": "connectome-check + smoke routes"
+      },
+      "done": {
+        "terminal": true,
+        "description": "Enhancement live and logged"
+      },
+      "cancelled": {
+        "terminal": true,
+        "description": "Rejected or killed by Aaron"
+      }
+    },
+    "transitions": [
+      { "from": "propose", "to": "qa", "trigger": "drafted" },
+      { "from": "qa", "to": "awaiting_human", "trigger": "pass" },
+      { "from": "qa", "to": "propose", "trigger": "rework" },
+      { "from": "awaiting_human", "to": "apply", "trigger": "human_approve" },
+      { "from": "awaiting_human", "to": "cancelled", "trigger": "human_reject" },
+      { "from": "apply", "to": "verify", "trigger": "applied" },
+      { "from": "verify", "to": "done", "trigger": "pass" },
+      { "from": "verify", "to": "apply", "trigger": "rework" }
+    ]
+  }
+}

@@ -66,6 +66,54 @@
       "enabled_by": "Aaron",
       "enabled_at": "2026-09-16",
       "notes": "ENABLED — Aaron authorized live mic/camera converse; kill switch still pauses"
+    },
+    {
+      "id": "switch.research_scan",
+      "default": "standing_on",
+      "act": ["motor.web_fetch", "motor.vault", "motor.mesh"],
+      "hold": "pause_daily_scan",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-17",
+      "notes": "ENABLED — daily AI/AGI research scan; human still gates functionality apply"
+    },
+    {
+      "id": "switch.cam_enhance",
+      "default": "hold",
+      "act": ["motor.enhance"],
+      "hold": "propose_only",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "notes": "Aaron ultimate say over Cam functionality changes; scan/propose stays autonomous"
+    },
+    {
+      "id": "switch.slm_local",
+      "default": "standing_on",
+      "act": ["motor.slm"],
+      "hold": "no_local_slm",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-17",
+      "notes": "Local sLM cortex assists routing/compress/draft"
+    },
+    {
+      "id": "switch.dl_local",
+      "default": "standing_on",
+      "act": ["motor.dl"],
+      "hold": "no_local_dl",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-17",
+      "notes": "Local DL embeddings/rerank/identity/paper vectors"
+    },
+    {
+      "id": "switch.tooling",
+      "default": "standing_on",
+      "act": ["motor.tool", "motor.swarm"],
+      "hold": "no_new_tools",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-17",
+      "notes": "ENABLED — tool-creator/tool-user + boss/worker synapse ops; cam_enhance still gates core Cam changes"
     }
   ],
   "antagonistic_pairs": [
@@ -74,6 +122,9 @@
     ["submit", "watch"],
     ["speak", "text_only"],
     ["run", "kill"],
-    ["aaron_match", "reject_identity"]
+    ["aaron_match", "reject_identity"],
+    ["scan", "pause_scan"],
+    ["apply_enhance", "propose_only"],
+    ["tool_run", "no_new_tools"]
   ]
 }

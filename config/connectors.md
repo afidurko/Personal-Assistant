@@ -12,6 +12,22 @@
 - Invoked by `ops` / subagents — not a second brain
 - Memory bridged to `mesh/jarvis` (see `config/integrations/jarvis.md`)
 
+## Coding agent (Cline) — all agents & workspaces
+
+- Submodule: `integrations/cline` ← [afidurko/cline](https://github.com/afidurko/cline)
+- Shared coding effector (`motor.cline`): CLI / SDK / IDE / headless
+- **Every** Cam role and subagent may invoke it for multi-file code work
+- Registry: `config/workspaces/registry.json`
+- Runner: `scripts/run-cline.py` (sandboxes, tickets, `--cwd`)
+- Chooser: `scripts/choose-workspace.py`
+- Rules install: `scripts/install-cline-rules.py`
+- MCP: `scripts/cam-mcp-server.py`
+- Schedules: `config/workspaces/schedules.json` + `scripts/sync-cline-schedules.py`
+- Policy: `.clinerules` · `AGENTS.md` · `.cursor/rules/cam-cline.mdc`
+- Mesh: `mesh/cline`, `mesh/projects`, `mesh/runs`
+- Details: `config/integrations/cline.md`
+- Not the brain — nullclaw remains executive; Cline executes code
+
 ## Vision (PaddleDetection)
 
 - Submodule: `integrations/paddledetection` @ `release/2.9`

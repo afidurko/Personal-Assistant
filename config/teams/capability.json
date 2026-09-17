@@ -1,0 +1,54 @@
+{
+  "id": "team.capability",
+  "name": "Capability Team",
+  "purpose": "Complete Aaron-assigned tasks by composing specialists, sLMs, DL helpers, and unlimited subagents — then distill outcomes into mesh/vault.",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "lead_center": "center.capability",
+  "lead_role": "capability-broker",
+  "members": [
+    {
+      "role": "capability-broker",
+      "job": "Decompose goals → tickets → specialists; broker sLM/DL assists",
+      "spawns_subagents": true
+    },
+    {
+      "role": "task-executor",
+      "job": "Run concrete work units end-to-end under standing autonomy",
+      "spawns_subagents": true
+    },
+    {
+      "role": "info-retriever",
+      "job": "Fetch facts from vault, mesh, and web with citations",
+      "spawns_subagents": true
+    },
+    {
+      "role": "slm-runtime",
+      "job": "Fast local classify/route/summarize via small language models",
+      "spawns_subagents": true
+    },
+    {
+      "role": "dl-enhance",
+      "job": "Embeddings, retrieval, vision distillates, ranking models",
+      "spawns_subagents": true
+    },
+    {
+      "role": "qa",
+      "job": "Verify outputs before motor",
+      "spawns_subagents": true
+    }
+  ],
+  "human_ultimate_say": {
+    "task_execution": "Aaron assigns; Cam finishes without mid-task interference",
+    "functionality_changes_to_cam": "requires_aaron_via_switch.cam_enhance",
+    "kill_switch": "Aaron anytime"
+  },
+  "subagents": {
+    "unlimited": true,
+    "human_gate_to_spawn": false,
+    "privilege_inheritance": true,
+    "lineage_terminate": true
+  },
+  "related_teams": ["team.tooling", "team.info"],
+  "pathway_hotspot": "hotspot.capability"
+}

@@ -1,4 +1,16 @@
+# Node / neural-mesh app
+node_modules/
+dist/
+dist-server/
+data/*.json
+!data/.gitkeep
+.DS_Store
+*.log
+.env
+.env.*
+coverage/
 
+# Python / Cam stack
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -9,3 +21,6 @@ identity/aaron/local/
 vault/10-Mesh-Distillates/converse/*.jsonl
 vault/10-Mesh-Distillates/.fornix-last-run
 vault/10-Mesh-Distillates/.persist-weekly
+scripts/__pycache__/
+identity/persistence/tickets/pending/*.json
+identity/persistence/tickets/done/*.json

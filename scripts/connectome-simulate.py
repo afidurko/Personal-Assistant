@@ -35,6 +35,10 @@ FEEDBACK_SINKS = frozenset(
         "center.comms",
         "center.vision",
         "center.qa",
+        "center.coding",
+        "center.docs",
+        "center.research",
+        "center.careers",
     }
 )
 DEFAULT_PATH = (
@@ -145,16 +149,37 @@ def build_tables():
 
 
 def run_batch(payload):
-    worker_id, count, seed, sense_ids, by_sense = payload
+    worker_id, count, seed, sense_ids, by_sense, sense_weights = payload
     rng = random.Random(seed)
     n_senses = len(sense_ids)
     passed = failed = kill_holds = non_aaron_holds = feedback_ok = 0
     first_error = None
     choice = rng.choice
     rand = rng.random
+    # Traffic-weighted sampling: chat-heavy when weights provided
+    if sense_weights and len(sense_weights) == n_senses:
+        cumulative = []
+        total = 0.0
+        for w in sense_weights:
+            total += w
+            cumulative.append(total)
+    else:
+        cumulative = None
+        total = 0.0
+
+    def pick_sense():
+        if not cumulative or total <= 0:
+            return sense_ids[int(rand() * n_senses)]
+        x = rand() * total
+        for i, c in enumerate(cumulative):
+            if x <= c:
+                return sense_ids[i]
+        return sense_ids[-1]
+
     t0 = time.perf_counter()
-    for _ in range(count):
-        sense = sense_ids[int(rand() * n_senses)]
+    heartbeat_every = max(1, min(50_000_000, count // 4 or 1))
+    for i in range(count):
+        sense = pick_sense()
         if sense == "sense.chat.aaron" and rand() < 0.001:
             non_aaron_holds += 1
             passed += 1
@@ -198,6 +223,15 @@ def run_batch(payload):
             failed += 1
             if first_error is None:
                 first_error = code
+
+        if (i + 1) % heartbeat_every == 0:
+            elapsed = time.perf_counter() - t0
+            rate = (i + 1) / elapsed if elapsed else 0
+            print(
+                f"  heartbeat w{worker_id}: {i+1:,}/{count:,} "
+                f"({rate:,.0f} sims/s) fail={failed}",
+                flush=True,
+            )
 
     return {
         "worker_id": worker_id,
@@ -244,6 +278,27 @@ def main() -> int:
         for s, opts in by_sense.items()
     }
 
+    # Traffic weights: Aaron chat / vault / careers heavier than rare sensors
+    weight_map = {
+        "sense.chat.aaron": 8.0,
+        "sense.vault.hit": 4.0,
+        "sense.mesh.hit": 3.0,
+        "sense.careers.listing": 3.0,
+        "sense.email.thread": 2.0,
+        "sense.calendar.event": 2.0,
+        "sense.cline.result": 2.5,
+        "sense.jarvis.result": 1.5,
+        "sense.audio.transcript": 1.5,
+        "sense.vision.detection": 1.0,
+        "sense.ios.camera": 1.0,
+        "sense.ios.mic": 1.0,
+        "sense.aaron.face": 1.0,
+        "sense.aaron.voice": 1.0,
+        "sense.photos.library": 0.8,
+        "sense.files.media": 0.8,
+    }
+    sense_weights = [weight_map.get(s, 1.0) for s in sense_ids]
+
     n = args.n
     workers = min(args.workers, n)
     base, rem = divmod(n, workers)
@@ -252,13 +307,20 @@ def main() -> int:
         count = base + (1 if w < rem else 0)
         if count:
             batches.append(
-                (w, count, args.seed + w * 1_000_003, sense_ids, by_sense_runtime)
+                (
+                    w,
+                    count,
+                    args.seed + w * 1_000_003,
+                    sense_ids,
+                    by_sense_runtime,
+                    sense_weights,
+                )
             )
 
     print(
         f"Cam connectome sims: n={n:,} workers={len(batches)} "
         f"senses={len(sense_ids)} missing_edges={len(missing)} "
-        f"soft_warnings={len(soft)}",
+        f"soft_warnings={len(soft)} weighted=True heartbeats=50M",
         flush=True,
     )
     t0 = time.perf_counter()
@@ -293,7 +355,8 @@ def main() -> int:
         "soft_warnings_sample": soft[:40],
         "unlimited_subagents": True,
         "continuous_qa": True,
-        "simulator": "v2-simplified",
+        "simulator": "v3-weighted-heartbeats",
+        "traffic_weighted": True,
         "workers_detail": results,
     }
     out = Path(args.out)

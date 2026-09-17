@@ -1,0 +1,199 @@
+{
+  "day": "2026-09-17",
+  "team": "team.agi-research-scan",
+  "trigger": "sense.clock.daily",
+  "hotspot": "hotspot.agi_daily_scan",
+  "human_gate_for_apply": "switch.cam_enhance",
+  "generated_at": "2026-09-17T00:23:36.072548+00:00",
+  "mode": "live",
+  "fetch_error": null,
+  "count": 5,
+  "propose_count": 3,
+  "papers": [
+    {
+      "id": "http://arxiv.org/abs/2609.17527v1",
+      "title": "Agentic Societies Need a Social Harness",
+      "summary": "An agentic society is a collection of AI agents that coordinate autonomously across trust boundaries, on behalf of different principals whose objectives may only partially align. We show experimentally that in agentic societies even honest, competent agents often fail to reach satisfactory outcomes with existing harnesses and messaging primitives, and that faulty or malicious agents can stall collaboration, influence outcomes, and pursue other harmful goals by exploiting vulnerabilities in communication (``speech''). We argue that agentic societies need a \\emph{social harness} for inter-agent interactions, in addition to each agent's \\emph{personal harness}, which manages its private context and communication with its principal. We propose a layered architecture for social harnesses which (i) prevents classes of failures outright, (ii) enables agents to detect invalid messages at runtime, and (iii) supports post-facto investigation and consequences, and highlight directions for future research to realize these capabilities.",
+      "published": "2026-09-15T17:57:27Z",
+      "authors": [
+        "Tapan Chugh",
+        "Vidushi Singh",
+        "Krish Jain",
+        "Arvind Krishnamurthy",
+        "Ratul Mahajan"
+      ],
+      "categories": [
+        "cs.AI",
+        "cs.MA",
+        "cs.NI"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.17527v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 3,
+        "enhance_memory_mesh": 0,
+        "enhance_presence_voice": 2,
+        "enhance_vision": 2,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 1
+      },
+      "relevance_total": 8,
+      "propose": true,
+      "cam_touchpoints": [
+        "center.capability",
+        "center.comms",
+        "center.dl",
+        "center.router",
+        "center.vision",
+        "config/roles",
+        "motor.speak"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.17523v1",
+      "title": "ScienceBuddy: Recursive-in-Recursive Self-Improvement for Interactive Scientific Agents",
+      "summary": "We introduce and release ScienceBuddy, an interactive scientific research workspace that brings continually improving scientific agents into researchers' everyday workflows. ScienceBuddy supports researchers in carrying out scientific tasks while transforming their requests, feedback, and execution evidence into tasks and evaluation rubrics for continual learning. At its core is recursive-in-recursive self-improvement, a paradigm that couples harness evolution with model reinforcement learning: the inner recursion improves the harness with the model fixed, while the outer recursion trains the model under the improved harness. Harness evolution shapes training experience, and model learning creates new opportunities for harness adaptation. We present case studies of researcher interaction, harness refinement, and model learning, with the benchmark cases spanning four scientific task families. By releasing ScienceBuddy as a research product, we make this paradigm available to the scientific community and take a step toward discovery intelligence: scientific AI that advances through sustained collaboration with researchers and evolves alongside the research it supports. Website: http:",
+      "published": "2026-09-15T17:55:28Z",
+      "authors": [
+        "Shuhan Xue",
+        "Jianyuan Zhong",
+        "Ziyuan Nan",
+        "Wenbin Li",
+        "Zhaochen Yu",
+        "Jinchao Ding",
+        "Qiang Gao",
+        "Pengyu Zhan",
+        "Yuntong Zhang",
+        "Tian Cheng",
+        "Zhenfei Yin",
+        "Yingcheng Wu"
+      ],
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.17523v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 3,
+        "enhance_memory_mesh": 3,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 6,
+      "propose": true,
+      "cam_touchpoints": [
+        "center.capability",
+        "center.info",
+        "center.memory",
+        "center.router",
+        "config/roles",
+        "smart-second-brain"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.17521v1",
+      "title": "PhysStream: Streaming Physics-Grounded Video Generation with Structured Scene Memory and Fine-Grained Motion Control",
+      "summary": "Interactive control for video generation is moving from coarse prompts toward fine-grained, physically meaningful manipulation of dynamic scenes. Yet existing controllable methods either require the full control schedule before generation starts, or use pixel-space signals that dictate object positions rather than physical dynamics. To address these limitations, we propose PhysStream, an autoregressive model for physics-grounded image-to-video synthesis that incorporates structured scene memory---positional maps and object tracking maps derived online from previously generated frames---and supports fine-grained motion control via sparse velocity-increment signals that encode physical quantities, letting the model learn the underlying dynamics. We train our model in two stages: a bidirectional model is first finetuned with motion-control conditioning, then a causal autoregressive model is trained with additional structured scene memory, further improving physical consistency. PhysStream enables interactive, mid-generation control over multi-object tabletop rigid-body scenes---a capability not supported by prior methods---reducing motion distribution distance (FVMD) by 33% and trajec",
+      "published": "2026-09-15T17:55:13Z",
+      "authors": [
+        "Chuhao Chen",
+        "Peter Wonka",
+        "Chaoyang Wang",
+        "Chen Wang",
+        "Qiao Feng",
+        "Sergey Tulyakov",
+        "Lingjie Liu"
+      ],
+      "categories": [
+        "cs.AI",
+        "cs.CV",
+        "cs.GR"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.17521v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 0,
+        "enhance_memory_mesh": 3,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 2,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 5,
+      "propose": true,
+      "cam_touchpoints": [
+        "center.dl",
+        "center.info",
+        "center.memory",
+        "center.vision",
+        "smart-second-brain"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.17516v1",
+      "title": "When Should LLMs Abstain? Chain-of-Self-Questioning for Selective Risk Control",
+      "summary": "Large language models can produce fluent answers when their factual support is weak. This paper introduces Chain-of-Self-Questioning (CoSQ), a prompt-only framework that makes answer commitment conditional on an explicit assessment of the information required to answer a question. We evaluate three CoSQ variants under seventeen conditions on the 817-item TruthfulQA multiple-choice validation set using eleven open-weight and hosted model families. In the final balanced-option protocol, Grounded-CoSQ at \u03c4=0.90 reduces the mean unconditional wrong-commitment rate from 13.1% under chain-of-thought prompting to 8.9%, a 32.1% relative reduction, while increasing answered accuracy from 86.9% to 89.7% and answering 87.6% of questions. Both improvements hold for all eleven models and at every evaluated threshold. Critical-CoSQ and Adaptive-CoSQ provide neighboring operating points with 88.6% and 86.5% coverage, respectively, while remaining more reliable than the baseline. A secondary Natural Questions Short-Answer evaluation provides convergent open-form evidence. These findings show that self-assessment can support explicit, tunable answer-or-abstain decisions when an unsupported commitme",
+      "published": "2026-09-15T17:52:24Z",
+      "authors": [
+        "Ali \u015eenol"
+      ],
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.17516v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 0,
+        "enhance_memory_mesh": 3,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 3,
+      "propose": false,
+      "cam_touchpoints": [
+        "center.info",
+        "center.memory",
+        "smart-second-brain"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.17515v1",
+      "title": "What Breaks Under Pruning in Smart Homes, and When? Evaluating LLM Degradation Across Architectures and Task Complexity",
+      "summary": "Pruning can reduce the deployment cost of large language models (LLMs), but its impact on context-grounded tool calling remains poorly understood. We systematically study pruning-induced degradation in smart-home tool calling across four LLMs spanning dense Transformer, dense hybrid, and mixture-of-experts (MoE) architectures, together with depth, width, hybrid, and expert pruning methods. After post-pruning supervised fine-tuning (SFT), we evaluate more than 19,500 instances from three smart-home datasets. Beyond aggregate task accuracy, we characterize degradation along two dimensions: action components (i.e., operation, device, argument, and value) and task complexity. Our results show that dense models have narrow safe pruning regions followed by sharp degradation, while MoE models tolerate substantially more pruning. Pruning degrades grounded specificity before schema-level intent, and aggressive dense pruning can induce systematic over-refusal. These findings highlight the importance of evaluating pruning beyond aggregate accuracy when selecting pruned LLMs for reliable tool execution.",
+      "published": "2026-09-15T17:51:48Z",
+      "authors": [
+        "Congjing Zhang",
+        "Vashishtha Patil",
+        "Henning Lange",
+        "Usman Aleem"
+      ],
+      "categories": [
+        "cs.CL"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.17515v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 0,
+        "enhance_memory_mesh": 0,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 0,
+      "propose": false,
+      "cam_touchpoints": []
+    }
+  ]
+}

@@ -1,118 +1,261 @@
 {
   "version": 1,
-  "analogy": "Drosophila sensory periphery — shared receptors, little policy",
+  "analogy": "Drosophila sensory periphery \u2014 shared receptors, little policy",
   "neurons": [
     {
       "id": "sense.chat.aaron",
       "modality": "language",
       "source": "aaron_chat",
-      "emits": ["spike.task", "spike.question", "spike.override"],
+      "emits": [
+        "spike.task",
+        "spike.question",
+        "spike.override"
+      ],
       "notes": "Only Aaron spikes are authoritative tasking signals"
     },
     {
       "id": "sense.vault.hit",
       "modality": "memory",
       "source": "smart_second_brain",
-      "emits": ["spike.fact", "spike.note_ref"],
-      "notes": "Vault retrieval — isomorphic knowledge periphery"
+      "emits": [
+        "spike.fact",
+        "spike.note_ref"
+      ],
+      "notes": "Vault retrieval \u2014 isomorphic knowledge periphery"
     },
     {
       "id": "sense.mesh.hit",
       "modality": "memory",
       "source": "nulltickets_store",
-      "emits": ["spike.fact", "spike.pref"],
+      "emits": [
+        "spike.fact",
+        "spike.pref"
+      ],
       "notes": "Cross-agent mesh recall"
     },
     {
       "id": "sense.careers.listing",
       "modality": "opportunity",
-      "source": ["linkedin", "indeed"],
-      "emits": ["spike.job"],
+      "source": [
+        "linkedin",
+        "indeed"
+      ],
+      "emits": [
+        "spike.job"
+      ],
       "notes": "Job board periphery"
     },
     {
       "id": "sense.email.thread",
       "modality": "language",
       "source": "email",
-      "emits": ["spike.inbox"],
+      "emits": [
+        "spike.inbox"
+      ],
       "notes": "Email triage input"
     },
     {
       "id": "sense.calendar.event",
       "modality": "time",
       "source": "calendar",
-      "emits": ["spike.schedule"],
+      "emits": [
+        "spike.schedule"
+      ],
       "notes": "Schedule periphery"
     },
     {
       "id": "sense.audio.transcript",
       "modality": "audio",
       "source": "nvidia_riva_asr",
-      "emits": ["spike.speech"],
+      "emits": [
+        "spike.speech"
+      ],
       "notes": "Presence hearing via LLMAvatarTalk/RIVA"
     },
     {
       "id": "sense.vision.detection",
       "modality": "vision",
       "source": "paddledetection",
-      "emits": ["spike.visual"],
+      "emits": [
+        "spike.visual"
+      ],
       "notes": "Distilled detections only"
     },
     {
       "id": "sense.jarvis.result",
       "modality": "tool",
       "source": "jarvis_cli",
-      "emits": ["spike.tool_result"],
+      "emits": [
+        "spike.tool_result"
+      ],
       "notes": "Local utility feedback"
     },
     {
       "id": "sense.ios.camera",
       "modality": "vision",
       "source": "ios_companion_avfoundation",
-      "emits": ["spike.visual", "spike.frame"],
-      "notes": "iPhone camera — tasked capture; not always-on unless Aaron enables monitor"
+      "emits": [
+        "spike.visual",
+        "spike.frame"
+      ],
+      "notes": "iPhone camera \u2014 tasked capture; not always-on unless Aaron enables monitor"
     },
     {
       "id": "sense.ios.mic",
       "modality": "audio",
       "source": "ios_companion_avaudio",
-      "emits": ["spike.speech", "spike.audio"],
-      "notes": "iPhone microphone — tasked listen / ASR feed"
+      "emits": [
+        "spike.speech",
+        "spike.audio"
+      ],
+      "notes": "iPhone microphone \u2014 tasked listen / ASR feed"
     },
     {
       "id": "sense.aaron.face",
       "modality": "identity",
       "source": "ios_companion_face_match",
-      "emits": ["spike.aaron_present", "spike.identity"],
-      "notes": "Aaron face match score — strengthens switch.tasking / switch.identity"
+      "emits": [
+        "spike.aaron_present",
+        "spike.identity"
+      ],
+      "notes": "Aaron face match score \u2014 strengthens switch.tasking / switch.identity"
     },
     {
       "id": "sense.aaron.voice",
       "modality": "identity",
       "source": "ios_companion_speaker_id",
-      "emits": ["spike.aaron_present", "spike.identity"],
-      "notes": "Aaron voice/speaker-ID score — not the same as ASR transcript"
+      "emits": [
+        "spike.aaron_present",
+        "spike.identity"
+      ],
+      "notes": "Aaron voice/speaker-ID score \u2014 not the same as ASR transcript"
     },
     {
       "id": "sense.photos.library",
       "modality": "vision",
-      "source": ["ios_photos", "local_files"],
-      "emits": ["spike.visual", "spike.aaron_enroll"],
+      "source": [
+        "ios_photos",
+        "local_files"
+      ],
+      "emits": [
+        "spike.visual",
+        "spike.aaron_enroll"
+      ],
       "notes": "Aaron-granted full photo access for identity learning"
     },
     {
       "id": "sense.files.media",
       "modality": "multimodal",
-      "source": ["local_files", "icloud_paths", "attachments"],
-      "emits": ["spike.visual", "spike.audio", "spike.aaron_enroll"],
-      "notes": "Aaron-granted file access — photos/videos/audio for look+sound enrollment"
+      "source": [
+        "local_files",
+        "icloud_paths",
+        "attachments"
+      ],
+      "emits": [
+        "spike.visual",
+        "spike.audio",
+        "spike.aaron_enroll"
+      ],
+      "notes": "Aaron-granted file access \u2014 photos/videos/audio for look+sound enrollment"
     },
     {
       "id": "sense.swiftguide.map",
       "modality": "knowledge_map",
       "source": "swiftguide",
-      "emits": ["spike.note_ref", "spike.fact", "spike.stack"],
-      "notes": "SwiftGuide hierarchical mind-map hit — classification / architecture / 2026 stack"
+      "emits": [
+        "spike.note_ref",
+        "spike.fact",
+        "spike.stack"
+      ],
+      "notes": "SwiftGuide hierarchical mind-map hit \u2014 classification / architecture / 2026 stack"
+    },
+    {
+      "id": "sense.cline.result",
+      "modality": "tool",
+      "source": "cline_cli",
+      "emits": [
+        "spike.tool_result",
+        "spike.code_diff"
+      ],
+      "notes": "Coding-agent feedback (edits/tests/headless JSON) for any workspace"
+    },
+    {
+      "id": "sense.clock.daily",
+      "modality": "time",
+      "source": "standing_scheduler",
+      "emits": [
+        "spike.schedule",
+        "spike.scan"
+      ],
+      "notes": "Daily standing trigger for AGI research scan team (America/New_York)"
+    },
+    {
+      "id": "sense.web.arxiv",
+      "modality": "research",
+      "source": [
+        "arxiv_api"
+      ],
+      "emits": [
+        "spike.paper",
+        "spike.fact"
+      ],
+      "notes": "New AI/AGI papers from arXiv categories cs.AI/LG/CL/MA/NE + stat.ML"
+    },
+    {
+      "id": "sense.web.agi_feed",
+      "modality": "research",
+      "source": [
+        "openreview",
+        "acl_anthology",
+        "huggingface_papers",
+        "lab_blogs"
+      ],
+      "emits": [
+        "spike.paper",
+        "spike.fact",
+        "spike.finding"
+      ],
+      "notes": "Broader AGI/AI findings feed for Cam enhancement"
+    },
+    {
+      "id": "sense.slm.inference",
+      "modality": "model",
+      "source": "slm_runtime",
+      "emits": [
+        "spike.tool_result",
+        "spike.route_hint"
+      ],
+      "notes": "Local small-LM assist results back into higher centers"
+    },
+    {
+      "id": "sense.dl.embedding",
+      "modality": "model",
+      "source": "dl_enhance",
+      "emits": [
+        "spike.tool_result",
+        "spike.fact"
+      ],
+      "notes": "Embedding / rerank / cluster distillates"
+    },
+    {
+      "id": "sense.swarm.message",
+      "modality": "agent_bus",
+      "source": "mesh_agent_commute",
+      "emits": [
+        "spike.swarm",
+        "spike.task",
+        "spike.tool_result"
+      ],
+      "notes": "Internal boss/worker messages (assign/broadcast/resolve) \u2014 not human outbound"
+    },
+    {
+      "id": "sense.tool.result",
+      "modality": "tool",
+      "source": "tool_user",
+      "emits": [
+        "spike.tool_result"
+      ],
+      "notes": "Registered tool execution results from team.tooling"
     }
   ]
 }

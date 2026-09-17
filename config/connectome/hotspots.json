@@ -418,6 +418,266 @@
         "motor.vault"
       ],
       "behavior": "continuous_conflict_monitoring_qa_loop"
+    },
+    {
+      "id": "hotspot.coding",
+      "center": "center.coding",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.coding",
+        "center.qa",
+        "switch.autonomy",
+        "motor.cline"
+      ],
+      "side_effects": [
+        "motor.docs",
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "plan_act_code_across_workspaces"
+    },
+    {
+      "id": "hotspot.cline_result",
+      "center": "center.coding",
+      "pathway": [
+        "sense.cline.result",
+        "center.coding",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "absorb_cline_session_distillates"
+    },
+    {
+      "id": "hotspot.agi_daily_scan",
+      "center": "center.agi_scan",
+      "pathway": [
+        "sense.clock.daily",
+        "center.agi_scan",
+        "center.enhance",
+        "center.qa",
+        "switch.research_scan",
+        "motor.web_fetch"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh",
+        "motor.dl"
+      ],
+      "behavior": "daily_scan_ai_agi_papers_propose_cam_enhancements",
+      "team": "team.agi-research-scan"
+    },
+    {
+      "id": "hotspot.agi_arxiv",
+      "center": "center.agi_scan",
+      "pathway": [
+        "sense.web.arxiv",
+        "center.agi_scan",
+        "center.enhance",
+        "center.qa",
+        "switch.research_scan",
+        "motor.web_fetch"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh",
+        "motor.dl"
+      ],
+      "behavior": "ingest_arxiv_ai_agi_papers",
+      "team": "team.agi-research-scan"
+    },
+    {
+      "id": "hotspot.agi_feed",
+      "center": "center.agi_scan",
+      "pathway": [
+        "sense.web.agi_feed",
+        "center.agi_scan",
+        "center.enhance",
+        "center.qa",
+        "switch.research_scan",
+        "motor.web_fetch"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "ingest_open_agi_findings_feeds",
+      "team": "team.agi-research-scan"
+    },
+    {
+      "id": "hotspot.capability",
+      "center": "center.capability",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.capability",
+        "center.qa",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.slm",
+        "motor.dl"
+      ],
+      "behavior": "decompose_task_spawn_team_complete_work",
+      "team": "team.capability"
+    },
+    {
+      "id": "hotspot.info_gather",
+      "center": "center.info",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.info",
+        "sense.vault.hit",
+        "center.qa",
+        "switch.autonomy",
+        "motor.vault"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.web_fetch",
+        "motor.slm"
+      ],
+      "behavior": "vault_mesh_web_cited_information",
+      "team": "team.info"
+    },
+    {
+      "id": "hotspot.slm_assist",
+      "center": "center.slm",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.slm",
+        "switch.slm_local",
+        "motor.slm"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "local_slm_route_compress_draft_assist"
+    },
+    {
+      "id": "hotspot.slm_feedback",
+      "center": "center.slm",
+      "pathway": [
+        "sense.slm.inference",
+        "center.slm",
+        "center.chief",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "absorb_slm_inference_into_mesh"
+    },
+    {
+      "id": "hotspot.dl_assist",
+      "center": "center.dl",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.dl",
+        "switch.dl_local",
+        "motor.dl"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "local_dl_embed_rerank_cluster_assist"
+    },
+    {
+      "id": "hotspot.dl_feedback",
+      "center": "center.dl",
+      "pathway": [
+        "sense.dl.embedding",
+        "center.dl",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "absorb_dl_vectors_into_mesh"
+    },
+    {
+      "id": "hotspot.cam_enhance",
+      "center": "center.enhance",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.enhance",
+        "center.qa",
+        "switch.cam_enhance",
+        "motor.enhance"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "aaron_gated_apply_cam_functionality_enhancement",
+      "team": "team.capability"
+    },
+    {
+      "id": "hotspot.tooling",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.tooling",
+        "center.qa",
+        "switch.tooling",
+        "motor.tool"
+      ],
+      "side_effects": [
+        "motor.swarm",
+        "motor.mesh",
+        "motor.jarvis"
+      ],
+      "behavior": "create_or_run_registered_tool_under_privileges",
+      "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.swarm_bus",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.swarm.message",
+        "center.tooling",
+        "center.capability",
+        "switch.autonomy",
+        "motor.swarm"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "boss_worker_assign_broadcast_resolve",
+      "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.tool_result",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.tool.result",
+        "center.tooling",
+        "center.qa",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "absorb_tool_result_into_mesh",
+      "team": "team.tooling"
     }
   ]
 }

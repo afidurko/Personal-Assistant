@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "hard_errors": [],
+  "soft_warnings": [
+    "submodule empty: integrations/jarvis (run git submodule update --init --recursive)",
+    "submodule empty: integrations/paddledetection (run git submodule update --init --recursive)",
+    "submodule empty: integrations/llmavatartalk (run git submodule update --init --recursive)",
+    "submodule empty: integrations/smart-second-brain (run git submodule update --init --recursive)",
+    "submodule empty: integrations/cline (run git submodule update --init --recursive)"
+  ],
+  "mesh_flags": {
+    "daily_agi_research_scan": true,
+    "cam_enhance_apply_requires_aaron": true,
+    "unlimited_subagents": true,
+    "slm_cortex_enabled": true,
+    "dl_cortex_enabled": true,
+    "persistence_cross_workspace": true
+  },
+  "integrations": [
+    {
+      "id": "jarvis",
+      "path": "integrations/jarvis",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "paddledetection",
+      "path": "integrations/paddledetection",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "llmavatartalk",
+      "path": "integrations/llmavatartalk",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "smart-second-brain",
+      "path": "integrations/smart-second-brain",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "cline",
+      "path": "integrations/cline",
+      "populated": false,
+      "policy_exists": true
+    }
+  ],
+  "pr2_scan_workspaces_present": true,
+  "connectome": {
+    "ok": true,
+    "detail": "senses=23 edges=165"
+  },
+  "routes_ok": true,
+  "registry": "config/workspaces/registry.json",
+  "suggested_merge_order": [
+    "PR#4 (this)",
+    "PR#2 scan workspaces",
+    "PR#3 Brodmann viz rebase"
+  ]
+}

@@ -19,8 +19,9 @@ and outbound contact (text / FaceTime / call) when needed.
 | [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); not a second brain |
 | [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
 | [SwiftGuide](https://github.com/afidurko/SwiftGuide) | **Knowledge cartography** | Hierarchical mind maps + 2026 Swift stack guide for iOS companion |
+| [cline](https://github.com/afidurko/cline) | **Coding effector** | CLI/SDK/IDE agent — shared by all roles & workspaces; not the brain |
 
-**Rule:** Null stack owns execution truth. Jarvis, PaddleDetection, LLMAvatarTalk,
+**Rule:** Null stack owns execution truth. Jarvis, Cline, PaddleDetection, LLMAvatarTalk,
 smart-second-brain, and SwiftGuide are tools Cam uses. Only Aaron assigns work; Cam finishes granted
 work without mid-task interference.
 
@@ -66,10 +67,10 @@ You (human) ──override / kill──► nullhub / chat
               (nullclaw)       (research, jobs,   (interneurons)
                                ops, comms…)
                                       │
-                    ┌─────────────────┴─────────────────┐
-                    ▼         ▼          ▼              ▼
-                 Jarvis   PaddleDet   LLMAvatarTalk   smart-second-brain   SwiftGuide
-                 motor     sense       face/voice      memory cortex       mind-map cartography
+                    ┌──────────────────┴──────────────────────────────────────┐
+                    ▼      ▼       ▼         ▼            ▼                   ▼
+                 Jarvis  Cline  PaddleDet  AvatarTalk  smart-second-brain   SwiftGuide
+                 motor   code    sense     face/voice   memory cortex       mind-map cartography
 ```
 
 - **Tracker = synaptic truth** (nulltickets)
@@ -85,16 +86,43 @@ You (human) ──override / kill──► nullhub / chat
 | `researcher` | Source-backed research; uses vault + web |
 | `ops` | Life automation; Jarvis |
 | `docs` | Draft/fix documents |
+| `coding` | Cline-powered code edits (also invokable by every role) |
 | `careers` | LinkedIn + Indeed |
 | `comms` | Text / call / FaceTime + avatar presence |
 | `vision` | PaddleDetection on tasked media |
 | `qa` | Verifies outputs and logs |
 | `memory-curator` | Mesh + smart-second-brain coherence |
+| `agi-scout` | Daily AI/AGI paper scan lead (`team.agi-research-scan`) |
+| `agi-analyst` | Score papers for Cam relevance |
+| `agi-synthesist` | Map findings → Cam enhancement proposals |
+| `capability-broker` | Task decomposition + enhance gate brokerage |
+| `task-executor` | Concrete work units under standing autonomy |
+| `info-retriever` | Vault → mesh → web cited information |
+| `slm-runtime` | Local small-LM cortex assists |
+| `dl-enhance` | Embeddings / rerank / identity / paper vectors |
+| `tool-creator` | Design/register tools (`team.tooling`) |
+| `tool-user` | Run registered tools under switches |
 
-Any role may **summon subagents**; subagents may summon more. Depth is
-capped in config (`max_delegate_depth`) so recursion stays bounded.
-Orchestration and leases stay in nulltickets/nullboiler — agents do not
-invent their own global schedule.
+Any role or team may **summon subagents**; subagents may summon more.
+Depth/count are **uncapped** (`unlimited_subagents`). Privileges **inherit as a
+subset** of the parent (`config/swarm/privileges.json`); aaron_only privileges
+never transfer. Ancestors may terminate lineage. Aaron retains ultimate say
+over Cam functionality apply (`switch.cam_enhance`).
+
+Teams: `config/teams/` · Brain: [docs/CAM_BRAIN.md](CAM_BRAIN.md) · AGI scan: [docs/AGI_RESEARCH_TEAM.md](AGI_RESEARCH_TEAM.md) · HAAS patterns: [docs/HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md)
+
+## HAAS → Cam (patterns only)
+
+Upstream: [OpenAI_Agent_Swarm](https://github.com/afidurko/OpenAI_Agent_Swarm) — **inspiration**, not runtime.
+
+| Keep | Skip |
+|---|---|
+| Privilege inheritance, lineage terminate | Assistants API HAAS Python stack |
+| Boss/worker synapse primitives | Supreme Oversight Board of archetypes |
+| Tool-creator → tool-user team | Unsupervised root goal invention |
+| Autonomy triad under Aaron gates | Heuristic imperatives as tasking |
+
+Validate: `python3 scripts/swarm-check.py`
 
 ## Neural mesh (shared persistent memory)
 
@@ -103,9 +131,10 @@ All agents share one mesh, not private silos:
 1. **Durable facts** → nulltickets `store` namespaces (`mesh/facts`, `mesh/people`, `mesh/prefs`, `mesh/projects`)
 2. **Session recall** → each nullclaw instance’s memory engine (default SQLite hybrid)
 3. **Jarvis local memory** → `integrations/jarvis` `memory.json` is a *cache*; sync into `mesh/jarvis` via `scripts/sync-jarvis-memory.py`
-4. **Vision distillates** → PaddleDetection outputs summarized into `mesh/vision` (no raw frames by default)
-5. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
-6. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
+4. **Cline sessions** → coding distillates across workspaces in `mesh/cline` via `scripts/sync-cline-session.py`
+5. **Vision distillates** → PaddleDetection outputs summarized into `mesh/vision` (no raw frames by default)
+6. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
+7. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
 
 This is the “neural meshing network”: a shared, searchable, versioned memory
 plus a durable work graph — not a separate ML training stack.
@@ -144,11 +173,13 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
 5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
 5b. Keep SwiftGuide for mind-map cartography + iOS stack picks (`integrations/swiftguide`) — **added**
-6. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
-7. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
-8. Wire mesh + vault sync
-9. Bridge AvatarTalk I/O to Cam on Aaron’s studio machine
-10. Add connectors; expand specialists
+6. Keep Cline as shared coding effector for all agents/workspaces (`integrations/cline`) — **added**
+7. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
+8. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
+9. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
+10. Wire mesh + vault + Cline session/ticket sync into live nulltickets
+11. Bridge AvatarTalk I/O to Cam on Aaron’s studio machine
+12. Add connectors; expand specialists
 
 ## Non-goals (v1)
 

@@ -64,9 +64,27 @@ Aaron authorized (2026-09-16): Cam may **create as many subagents as needed** to
 
 - No cap on subagent count
 - No cap on recursive depth for task completion
+- Applies to **all teams and agents** (AGI scan, capability, info, tooling, specialists) — they may spawn subagents freely
 - Subagents inherit Cam boundaries (Aaron-only tasking; kill switch still honored)
+- **Privilege inheritance** (2026-09-17): child privileges are a subset of the parent; agents never receive aaron_only privileges
+- **Lineage terminate**: creators/ancestors may cancel descendants; Aaron kill pauses all
 - Spawning subagents is an internal motor — not a human approval event
 - Logged in mesh under `mesh/prefs.unlimited_subagents = true`
+- Swarm configs: `config/swarm/` · `docs/HAAS_CAM_PATTERNS.md`
+
+## HAAS → Cam patterns (persistent grant)
+
+Aaron authorized (2026-09-17): Cam may use HAAS-inspired privilege inheritance, boss/worker synapse primitives, and tool-creator → tool-user — without adopting the HAAS Assistants runtime or a multi-agent oversight board.
+
+- Details: `identity/persistence/HAAS_CAM_PATTERNS.md`
+
+## Daily AGI research scan (persistent grant)
+
+Aaron authorized (2026-09-17): Cam’s AGI Research Scan Team may **every day** scan open AI/AGI research and draft Cam enhancement proposals.
+
+- Standing autonomy for scan + distill + propose
+- **Aaron ultimate say** for applying functionality (`switch.cam_enhance`)
+- Details: `identity/persistence/DAILY_AGI_SCAN.md` · `docs/AGI_RESEARCH_TEAM.md`
 
 ## Standing autonomy (enabled)
 
@@ -78,6 +96,8 @@ Aaron previously YES’d Session 1 capabilities. Cam may execute them end-to-end
 - Calendar writes, email send, LinkedIn/Indeed apply when the assigned task requires it
 - Docs in-place edits, vision on attached media / camera when the task requires it
 - Vault note updates via smart-second-brain when the task requires it
+- Daily AGI/AI research scan + enhancement proposals (apply still Aaron-gated)
+- Local sLM / DL assists for routing, memory, and retrieval when useful
 
 All consequential actions are **logged** to tickets/mesh. Aaron can revoke autonomy or pause Cam at any time.
 

@@ -1,13 +1,13 @@
 {
-  "at": "2026-09-17T01:36:13Z",
+  "at": "2026-09-17T10:54:09Z",
   "overall": "healthy",
   "checks": [
     {
       "neuron": "neuron.vitals_loop",
       "loadavg": [
-        4.5380859375,
-        4.58740234375,
-        4.77734375
+        4.97802734375,
+        4.66845703125,
+        4.607421875
       ],
       "cwd": "/workspace",
       "status": "healthy"
@@ -70,9 +70,9 @@
     },
     {
       "neuron": "neuron.converse_health",
-      "reachable": false,
-      "body": "",
-      "status": "idle",
+      "reachable": true,
+      "body": "{\n  \"ok\": true,\n  \"assistant\": \"Cam\",\n  \"session_id\": \"b80640e3-a9be-485b-9cdf-b9a10aba1262\",\n  \"started\": \"2026-09-17T01:40:32.728318+00:00\",\n  \"capabilities\": {\n    \"mic\": true,\n    \"camera\": true,\n",
+      "status": "healthy",
       "notes": "idle if converse server not running \u2014 not critical"
     },
     {
@@ -118,20 +118,14 @@
   ],
   "workspace": "/workspace",
   "hooks": {
-    "improve_engine": {
-      "exit": 0,
-      "preview": "{\n  \"at\": \"2026-09-17T01:36:13Z\",\n  \"health_overall\": \"healthy\",\n  \"task_count\": 0,\n  \"tasks\": [],\n  \"neuron\": \"neuron.improve_engine\"\n}\n"
-    },
     "persist_weekly": {
       "neuron": "neuron.persist_sync",
-      "ran": true,
-      "exit": 0,
-      "out": "refreshed identity/persistence/mesh-seed.json\n",
-      "status": "healthy"
+      "skipped": true,
+      "reason": "recent"
     },
     "fornix": {
       "exit": 0,
-      "preview": "fornix: consolidated 40 notes \u2192 6 themes\nwrote vault/10-Mesh-Distillates/fornix-consolidation.json\n"
+      "preview": "fornix: skipped (recent)\n"
     }
   }
 }

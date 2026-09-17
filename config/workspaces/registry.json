@@ -1,0 +1,609 @@
+{
+  "version": 1,
+  "title": "Cam unified workspace registry",
+  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
+  "authorized_by": "Aaron",
+  "updated_at": "2026-09-17",
+  "docs": "docs/WORKSPACES_WORKFLOW.md",
+  "layers": {
+    "vault_areas": [
+      {
+        "id": "vault.inbox",
+        "path": "vault/00-Inbox"
+      },
+      {
+        "id": "vault.aaron",
+        "path": "vault/01-Aaron"
+      },
+      {
+        "id": "vault.cam",
+        "path": "vault/02-Cam"
+      },
+      {
+        "id": "vault.projects",
+        "path": "vault/03-Projects"
+      },
+      {
+        "id": "vault.research",
+        "path": "vault/04-Research"
+      },
+      {
+        "id": "vault.careers",
+        "path": "vault/05-Careers"
+      },
+      {
+        "id": "vault.life_ops",
+        "path": "vault/06-Life-Ops"
+      },
+      {
+        "id": "vault.docs",
+        "path": "vault/07-Docs"
+      },
+      {
+        "id": "vault.people",
+        "path": "vault/08-People"
+      },
+      {
+        "id": "vault.mesh_distillates",
+        "path": "vault/10-Mesh-Distillates"
+      }
+    ],
+    "scan_workspaces": [
+      {
+        "id": "scan.health",
+        "kind": "health",
+        "source_pr": 2,
+        "module": "server/workspaces/health.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.architecture",
+        "kind": "architecture",
+        "source_pr": 2,
+        "module": "server/workspaces/architecture.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.vulnerability",
+        "kind": "vulnerability",
+        "source_pr": 2,
+        "module": "server/workspaces/vulnerability.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.updates",
+        "kind": "updates",
+        "source_pr": 2,
+        "module": "server/workspaces/updates.ts",
+        "status": "merged_main"
+      },
+      {
+        "id": "scan.improvements",
+        "kind": "improvements",
+        "source_pr": 2,
+        "module": "server/workspaces/improvements.ts",
+        "status": "merged_main",
+        "notes": "Synthesizes from core scanners"
+      },
+      {
+        "id": "scan.agi_research",
+        "kind": "agi_research",
+        "source_pr": 4,
+        "team": "team.agi-research-scan",
+        "module": "server/workspaces/agi-research.ts",
+        "script": "scripts/agi-research-scan.py",
+        "hotspot": "hotspot.agi_daily_scan",
+        "status": "active_this_branch",
+        "cadence": "daily",
+        "human_gate_for_apply": "switch.cam_enhance"
+      },
+      {
+        "id": "scan.swarm",
+        "kind": "swarm",
+        "source_pr": 6,
+        "team": "team.tooling",
+        "module": "server/workspaces/swarm.ts",
+        "script": "scripts/swarm-check.py",
+        "runtime": "server/core/swarm-runtime.ts",
+        "hotspot": "hotspot.tooling",
+        "status": "active_this_branch",
+        "notes": "Privilege inheritance + lineage + boss/worker bus across all agents/workspaces"
+      }
+    ],
+    "agent_teams": [
+      {
+        "id": "team.agi-research-scan",
+        "config": "config/teams/agi-research-scan.json"
+      },
+      {
+        "id": "team.capability",
+        "config": "config/teams/capability.json"
+      },
+      {
+        "id": "team.info",
+        "config": "config/teams/info.json"
+      },
+      {
+        "id": "team.tooling",
+        "config": "config/teams/tooling.json"
+      }
+    ],
+    "swarm_contracts": {
+      "config": "config/swarm/",
+      "privileges": "config/swarm/privileges.json",
+      "primitives": "config/swarm/primitives.json",
+      "runtime": "server/core/swarm-runtime.ts",
+      "mesh_namespaces": [
+        "mesh/agent-lineage",
+        "mesh/tools",
+        "mesh/swarm/bus",
+        "mesh/swarm/privileges"
+      ],
+      "persistence": [
+        "data/swarm-lineage.json",
+        "data/mesh-namespaces.json"
+      ],
+      "cross_workspace": true,
+      "all_agents": true
+    },
+    "enhancement_cortex": {
+      "config": "config/enhancement/slm-dl.json",
+      "centers": [
+        "center.slm",
+        "center.dl"
+      ],
+      "switches": [
+        "switch.slm_local",
+        "switch.dl_local",
+        "switch.cam_enhance"
+      ]
+    },
+    "integrations": [
+      {
+        "id": "jarvis",
+        "path": "integrations/jarvis",
+        "policy": "config/integrations/jarvis.md"
+      },
+      {
+        "id": "paddledetection",
+        "path": "integrations/paddledetection",
+        "policy": "config/integrations/paddledetection.md"
+      },
+      {
+        "id": "llmavatartalk",
+        "path": "integrations/llmavatartalk",
+        "policy": "config/integrations/llmavatartalk.md"
+      },
+      {
+        "id": "smart-second-brain",
+        "path": "integrations/smart-second-brain",
+        "policy": "config/integrations/smart-second-brain.md"
+      },
+      {
+        "id": "cline",
+        "path": "integrations/cline",
+        "policy": "config/integrations/cline.md",
+        "remote": "github.com/afidurko/cline",
+        "effector": "motor.cline"
+      }
+    ],
+    "parallel_prs": [
+      {
+        "number": 1,
+        "role": "foundation",
+        "state": "merged"
+      },
+      {
+        "number": 2,
+        "role": "scan_workspaces_neural_mesh_ui",
+        "branch": "cursor/system-health-brain-scan-d12d",
+        "state": "merged"
+      },
+      {
+        "number": 3,
+        "role": "brodmann_3d_plasticity",
+        "branch": "cursor/swiftguide-brain-map-0f2c",
+        "state": "draft",
+        "merge_risk_with_pr4": "high"
+      },
+      {
+        "number": 4,
+        "role": "agi_teams_slm_dl",
+        "branch": "cursor/cam-brain-agi-scan-teams-bded",
+        "state": "draft"
+      },
+      {
+        "number": 5,
+        "role": "cline_shared_effector",
+        "branch": "cursor/integrate-cline-all-agents-91d1",
+        "state": "merged",
+        "notes": "Cline coding workspaces merged into layers.coding_workspaces"
+      },
+      {
+        "number": 6,
+        "role": "haas_cam_swarm_patterns",
+        "branch": "cursor/haas-cam-patterns-d308",
+        "state": "open"
+      }
+    ],
+    "coding_workspaces": [
+      {
+        "id": "personal-assistant",
+        "label": "Personal-Assistant (Cam)",
+        "path": ".",
+        "remote": "github.com/afidurko/Personal-Assistant",
+        "default_branch": "main",
+        "roles_allowed": [
+          "*"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/personal-assistant",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "primary": true
+      },
+      {
+        "id": "cline",
+        "label": "Cline coding agent",
+        "path": "integrations/cline",
+        "remote": "github.com/afidurko/cline",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "docs",
+          "ops",
+          "chief",
+          "qa",
+          "researcher"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/cline",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Prefer standalone clone if submodule is empty"
+      },
+      {
+        "id": "smart-second-brain",
+        "label": "Smart Second Brain",
+        "path": "integrations/smart-second-brain",
+        "remote": "github.com/afidurko/smart-second-brain",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "memory-curator",
+          "docs",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/smart-second-brain",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true
+      },
+      {
+        "id": "jarvis",
+        "label": "Jarvis CLI utilities",
+        "path": "integrations/jarvis",
+        "remote": "github.com/afidurko/Jarvis",
+        "default_branch": "master",
+        "roles_allowed": [
+          "coding",
+          "ops",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/jarvis",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true
+      },
+      {
+        "id": "paddledetection",
+        "label": "PaddleDetection vision",
+        "path": "integrations/paddledetection",
+        "remote": "github.com/afidurko/PaddleDetection",
+        "default_branch": "release/2.9",
+        "roles_allowed": [
+          "coding",
+          "vision",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/paddledetection",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true
+      },
+      {
+        "id": "llmavatartalk",
+        "label": "LLMAvatarTalk presence",
+        "path": "integrations/llmavatartalk",
+        "remote": "github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "comms",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/llmavatartalk",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true
+      }
+    ]
+  },
+  "workflow": {
+    "boot": "config/priority-boot.json",
+    "persist_export": "scripts/persist-export.py",
+    "persist_import": "scripts/persist-import.py",
+    "integration_check": "scripts/workspace-integration-check.py",
+    "connectome_check": "scripts/connectome-check.py",
+    "daily_agi_scan": "scripts/agi-research-scan.py",
+    "enhance_gate": "scripts/cam-enhance-propose.py",
+    "cline_runner": "scripts/run-cline.py",
+    "cline_choose_workspace": "scripts/choose-workspace.py",
+    "cline_install_rules": "scripts/install-cline-rules.py",
+    "cline_mcp": "scripts/cam-mcp-server.py",
+    "cline_schedules": "scripts/sync-cline-schedules.py",
+    "ci_connectome": "scripts/ci-connectome.sh",
+    "swarm_check": "scripts/swarm-check.py"
+  },
+  "cline": {
+    "default_workspace_id": "personal-assistant",
+    "cline_data_root": "~/.cline/data/workspaces",
+    "rules_source": ".clinerules",
+    "chooser": {
+      "signals": [
+        {
+          "id": "personal-assistant",
+          "match_any": [
+            "connectome",
+            "cam ",
+            "persona",
+            "vault",
+            "mesh",
+            "nullclaw",
+            "nulltickets",
+            "personal-assistant",
+            "persist"
+          ]
+        },
+        {
+          "id": "cline",
+          "match_any": [
+            "cline sdk",
+            "cline cli",
+            "integrations/cline",
+            "@cline/",
+            "cline hub",
+            "cline extension"
+          ]
+        },
+        {
+          "id": "smart-second-brain",
+          "match_any": [
+            "smart-second-brain",
+            "obsidian plugin",
+            "second brain plugin"
+          ]
+        },
+        {
+          "id": "jarvis",
+          "match_any": [
+            "jarvis plugin",
+            "integrations/jarvis",
+            "jarviscli"
+          ]
+        },
+        {
+          "id": "paddledetection",
+          "match_any": [
+            "paddledetection",
+            "paddle detection",
+            "integrations/paddledetection"
+          ]
+        },
+        {
+          "id": "llmavatartalk",
+          "match_any": [
+            "llmavatartalk",
+            "audio2face",
+            "riva",
+            "metahuman"
+          ]
+        }
+      ]
+    },
+    "runner": "scripts/run-cline.py",
+    "mcp": "scripts/cam-mcp-server.py",
+    "schedules": "config/workspaces/schedules.json"
+  },
+  "default_workspace_id": "personal-assistant",
+  "workspaces": [
+    {
+      "id": "personal-assistant",
+      "label": "Personal-Assistant (Cam)",
+      "path": ".",
+      "remote": "github.com/afidurko/Personal-Assistant",
+      "default_branch": "main",
+      "roles_allowed": [
+        "*"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/personal-assistant",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "primary": true
+    },
+    {
+      "id": "cline",
+      "label": "Cline coding agent",
+      "path": "integrations/cline",
+      "remote": "github.com/afidurko/cline",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "docs",
+        "ops",
+        "chief",
+        "qa",
+        "researcher"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/cline",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Prefer standalone clone if submodule is empty"
+    },
+    {
+      "id": "smart-second-brain",
+      "label": "Smart Second Brain",
+      "path": "integrations/smart-second-brain",
+      "remote": "github.com/afidurko/smart-second-brain",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "memory-curator",
+        "docs",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/smart-second-brain",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true
+    },
+    {
+      "id": "jarvis",
+      "label": "Jarvis CLI utilities",
+      "path": "integrations/jarvis",
+      "remote": "github.com/afidurko/Jarvis",
+      "default_branch": "master",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/jarvis",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true
+    },
+    {
+      "id": "paddledetection",
+      "label": "PaddleDetection vision",
+      "path": "integrations/paddledetection",
+      "remote": "github.com/afidurko/PaddleDetection",
+      "default_branch": "release/2.9",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/paddledetection",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true
+    },
+    {
+      "id": "llmavatartalk",
+      "label": "LLMAvatarTalk presence",
+      "path": "integrations/llmavatartalk",
+      "remote": "github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/llmavatartalk",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true
+    }
+  ],
+  "chooser": {
+    "signals": [
+      {
+        "id": "personal-assistant",
+        "match_any": [
+          "connectome",
+          "cam ",
+          "persona",
+          "vault",
+          "mesh",
+          "nullclaw",
+          "nulltickets",
+          "personal-assistant",
+          "persist"
+        ]
+      },
+      {
+        "id": "cline",
+        "match_any": [
+          "cline sdk",
+          "cline cli",
+          "integrations/cline",
+          "@cline/",
+          "cline hub",
+          "cline extension"
+        ]
+      },
+      {
+        "id": "smart-second-brain",
+        "match_any": [
+          "smart-second-brain",
+          "obsidian plugin",
+          "second brain plugin"
+        ]
+      },
+      {
+        "id": "jarvis",
+        "match_any": [
+          "jarvis plugin",
+          "integrations/jarvis",
+          "jarviscli"
+        ]
+      },
+      {
+        "id": "paddledetection",
+        "match_any": [
+          "paddledetection",
+          "paddle detection",
+          "integrations/paddledetection"
+        ]
+      },
+      {
+        "id": "llmavatartalk",
+        "match_any": [
+          "llmavatartalk",
+          "audio2face",
+          "riva",
+          "metahuman"
+        ]
+      }
+    ]
+  },
+  "cline_data_root": "~/.cline/data/workspaces",
+  "rules_source": ".clinerules"
+}

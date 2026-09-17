@@ -1,0 +1,73 @@
+{
+  "name": "daily-agi-research-scan",
+  "description": "Standing daily pipeline: scan AI/AGI papers → analyze → synthesize Cam enhancements → propose (Aaron gates functionality apply)",
+  "standing": true,
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "schedule": {
+    "cadence": "daily",
+    "timezone": "America/New_York",
+    "trigger": "sense.clock.daily"
+  },
+  "team": "team.agi-research-scan",
+  "definition": {
+    "initial": "scout",
+    "states": {
+      "scout": {
+        "agent_role": "agi-scout",
+        "description": "Fetch new papers/findings from configured sources; spawn gatherer subagents"
+      },
+      "analyze": {
+        "agent_role": "agi-analyst",
+        "description": "Score Cam-relevance; extract transferable methods; spawn per-paper readers"
+      },
+      "synthesize": {
+        "agent_role": "agi-synthesist",
+        "description": "Map to connectome/role/sLM/DL proposals; write vault briefs"
+      },
+      "broker": {
+        "agent_role": "capability-broker",
+        "description": "Open enhancement proposal tickets; do not apply functionality yet"
+      },
+      "qa": {
+        "agent_role": "qa",
+        "description": "Cite-check, dedupe, reject unsourced hype"
+      },
+      "archive": {
+        "agent_role": "memory-curator",
+        "description": "Write mesh/research/agi-scan + vault daily index"
+      },
+      "awaiting_aaron_enhance": {
+        "agent_role": "capability-broker",
+        "description": "Functionality changes blocked until Aaron flips switch.cam_enhance / approves",
+        "requires_human": true
+      },
+      "apply": {
+        "agent_role": "capability-broker",
+        "description": "Apply approved Cam enhancements (config/roles/connectome/sLM-DL)"
+      },
+      "done": {
+        "terminal": true,
+        "description": "Daily scan archived; proposals ready for Aaron"
+      },
+      "cancelled": {
+        "terminal": true,
+        "description": "Cancelled by Aaron kill/hold"
+      }
+    },
+    "transitions": [
+      { "from": "scout", "to": "analyze", "trigger": "papers_collected" },
+      { "from": "analyze", "to": "synthesize", "trigger": "scored" },
+      { "from": "synthesize", "to": "broker", "trigger": "proposals_drafted" },
+      { "from": "broker", "to": "qa", "trigger": "tickets_ready" },
+      { "from": "qa", "to": "archive", "trigger": "pass" },
+      { "from": "qa", "to": "analyze", "trigger": "rework" },
+      { "from": "archive", "to": "done", "trigger": "no_functionality_apply" },
+      { "from": "archive", "to": "awaiting_aaron_enhance", "trigger": "functionality_change_proposed" },
+      { "from": "awaiting_aaron_enhance", "to": "apply", "trigger": "human_approve" },
+      { "from": "awaiting_aaron_enhance", "to": "done", "trigger": "human_defer" },
+      { "from": "awaiting_aaron_enhance", "to": "cancelled", "trigger": "human_reject" },
+      { "from": "apply", "to": "done", "trigger": "applied" }
+    ]
+  }
+}
