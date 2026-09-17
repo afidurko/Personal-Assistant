@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23000' width='32' height='32'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%235fd4ff' stroke-width='2'/%3E%3Cpath d='M8 16h16M16 8v16' stroke='%236bff8a' stroke-width='1.5'/%3E%3C/svg%3E" />
-  <title>Cam Cortex — DTI Live Tractography</title>
+  <title>Cam Cortex — Human Brain · Live Tractography</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -25,7 +25,7 @@
         <img src="../../identity/persona/cam-face.jpg" alt="Cam" />
         <div>
           <h1>Cam</h1>
-          <p>DTI tractography · live agents · RGB fibers</p>
+          <p>Glass cortex · live agents · DTI fibers</p>
         </div>
       </div>
       <div class="header-right">
@@ -43,12 +43,13 @@
       <div class="viz-panel viz-panel-3d" id="viewport">
         <canvas id="c"></canvas>
         <div class="hud hud-dti">
-          <span>Orbit · zoom · fibers brighten with running agents/tasks</span>
+          <span>Orbit · click a parcel · glass shell · fibers glow through</span>
           <div class="view-presets">
             <button type="button" id="view-coronal" title="Coronal">Cor</button>
             <button type="button" id="view-axial" title="Axial">Ax</button>
             <button type="button" id="view-sagittal" title="Sagittal">Sag</button>
             <button type="button" id="view-lod" title="Toggle fiber density">LOD</button>
+            <button type="button" id="view-glass" title="Toggle shell translucency" class="on">Glass</button>
           </div>
           <span class="chip on" id="chip-live">0 agents</span>
         </div>
@@ -94,8 +95,8 @@
     </div>
 
     <footer>
-      <span>DTI RGB · Catani AF · Yeh systems · live-activity feed · Aaron sole task-giver</span>
-      <span>visualizations/connectome · 3D</span>
+      <span>Near-glass DK shell · DTI RGB · live-activity · Aaron sole task-giver</span>
+      <span>visualizations/connectome · human cortex</span>
     </footer>
   </div>
   <script type="module" src="cortex3d.js"></script>

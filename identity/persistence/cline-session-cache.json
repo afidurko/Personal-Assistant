@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-17T00:52:47.020261+00:00",
+    "at": "2026-09-17T22:30:30.156787+00:00",
     "mode": "act",
-    "summary": "integration smoke",
-    "workspace": "."
+    "summary": "Near-glass translucent Cam cortex shell with RoomEnvironment + Glass toggle",
+    "workspace": "personal-assistant"
   },
   "notes": [
     {
@@ -75,6 +75,7 @@
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
-    "."
+    ".",
+    "personal-assistant"
   ]
 }
