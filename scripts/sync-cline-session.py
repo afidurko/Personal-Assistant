@@ -26,6 +26,12 @@ def write_json(path: Path, data: dict) -> None:
 
 def export_payload(state: dict) -> dict:
     now = datetime.now(timezone.utc).isoformat()
+    try:
+        import cam_workspaces as cw
+
+        registry_ws = cw.mesh_cline_workspaces_doc().get("workspaces") or []
+    except Exception:  # noqa: BLE001
+        registry_ws = state.get("workspaces", [])
     return {
         MESH_KEY: {
             "effector": "cline",
@@ -35,10 +41,12 @@ def export_payload(state: dict) -> dict:
             "available_to": "all_roles_and_subagents",
             "cross_workspace": True,
             "last_export_at": now,
-            "workspaces": state.get("workspaces", []),
+            "workspaces": registry_ws or state.get("workspaces", []),
             "last_session": state.get("last_session"),
             "schedules": state.get("schedules", []),
             "notes": state.get("notes", []),
+            "registry": "config/workspaces/registry.json",
+            "runner": "scripts/run-cline.py",
         }
     }
 

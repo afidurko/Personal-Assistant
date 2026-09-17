@@ -17,8 +17,14 @@
 - Submodule: `integrations/cline` ← [afidurko/cline](https://github.com/afidurko/cline)
 - Shared coding effector (`motor.cline`): CLI / SDK / IDE / headless
 - **Every** Cam role and subagent may invoke it for multi-file code work
-- Policy file: `.clinerules` (travels with persistence across workspaces)
-- Mesh: `mesh/cline` via `scripts/sync-cline-session.py`
+- Registry: `config/workspaces/registry.json`
+- Runner: `scripts/run-cline.py` (sandboxes, tickets, `--cwd`)
+- Chooser: `scripts/choose-workspace.py`
+- Rules install: `scripts/install-cline-rules.py`
+- MCP: `scripts/cam-mcp-server.py`
+- Schedules: `config/workspaces/schedules.json` + `scripts/sync-cline-schedules.py`
+- Policy: `.clinerules` · `AGENTS.md` · `.cursor/rules/cam-cline.mdc`
+- Mesh: `mesh/cline`, `mesh/projects`, `mesh/runs`
 - Details: `config/integrations/cline.md`
 - Not the brain — nullclaw remains executive; Cline executes code
 

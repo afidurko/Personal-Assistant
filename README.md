@@ -54,5 +54,6 @@ python3 scripts/persist-export.py --seed-only
 ## Status
 
 Persona locked. Starter vault created. Always-on autonomy set.
-Cline wired as shared coding effector for all agents and future workspaces.
+Cline wired as shared coding effector for all agents and future workspaces
+(registry, runner, MCP, schedules, tickets).
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.

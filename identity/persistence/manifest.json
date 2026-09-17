@@ -16,12 +16,17 @@
     "identity/GOALS.md",
     "identity/persistence/mesh-seed.json",
     "identity/persistence/cline-session-cache.json",
+    "identity/persistence/cline-schedules.export.json",
     "config/priority-boot.json",
     "config/connectors.md",
     "config/integrations/cline.md",
+    "config/workspaces/registry.json",
+    "config/workspaces/schedules.json",
     "config/roles/careers.md",
     "config/roles/coding.md",
-    ".clinerules"
+    ".clinerules",
+    "AGENTS.md",
+    ".cursor/rules/cam-cline.mdc"
   ],
   "scope": "this_workspace_and_future_workspaces",
   "timezone": "America/New_York"

@@ -145,11 +145,12 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
 5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
 6. Keep Cline as shared coding effector for all agents/workspaces (`integrations/cline`) — **added**
-7. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
-8. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
-9. Wire mesh + vault + Cline session sync
-10. Bridge AvatarTalk I/O to Cam on Aaron’s studio machine
-11. Add connectors; expand specialists
+7. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
+8. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
+9. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
+10. Wire mesh + vault + Cline session/ticket sync into live nulltickets
+11. Bridge AvatarTalk I/O to Cam on Aaron’s studio machine
+12. Add connectors; expand specialists
 
 ## Non-goals (v1)
 

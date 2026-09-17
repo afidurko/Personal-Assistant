@@ -12,8 +12,11 @@ Aaron required: store Session/memory for **this workspace and all future workspa
 | Goals | `identity/GOALS.md` | Priorities |
 | Mesh seed | `identity/persistence/mesh-seed.json` | Prefs/facts for nulltickets |
 | Cline cache | `identity/persistence/cline-session-cache.json` | Coding sessions across workspaces |
+| Cline schedules | `identity/persistence/cline-schedules.export.json` | Standing cron mirrors |
+| Cline tickets | `identity/persistence/tickets/` | nulltickets-shaped run bindings |
+| Workspace registry | `config/workspaces/registry.json` | Active coding workspaces |
 | Bundle manifest | `identity/persistence/manifest.json` | Versioned export metadata |
-| Cline rules | `.clinerules` | Policy for every Cline session / workspace |
+| Cline rules | `.clinerules` · `AGENTS.md` · `.cursor/rules/cam-cline.mdc` | Policy for every Cline session / workspace |
 
 ## Guarantees
 
@@ -44,11 +47,15 @@ python3 scripts/persist-export.py --seed-only
 ## New workspace checklist
 
 1. Clone/create the new workspace
-2. Copy or `persist-import` the bundle
+2. Copy or `persist-import` the bundle (auto-installs Cline rules + schedule sync)
 3. `git submodule update --init --recursive` (includes `integrations/cline`)
-4. Confirm `.clinerules` is present for Cline policy inheritance
+4. Confirm `.clinerules` / `AGENTS.md` / `.cursor/rules/cam-cline.mdc`
 5. Confirm `identity/PROFILE.md` still says Aaron / Cam / EST
 6. Re-attach secrets/connectors locally (`cline auth` or provider env vars)
+7. `python3 scripts/choose-workspace.py --list`
+8. `python3 scripts/run-cline.py --doctor --dry-run`
+9. Optional: `python3 scripts/sync-cline-schedules.py --print-commands` then run after auth
+10. Optional: `cline mcp install cam -- python3 "$PWD/scripts/cam-mcp-server.py"`
 
 ## Versioning
 

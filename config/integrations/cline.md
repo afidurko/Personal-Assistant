@@ -16,84 +16,116 @@ teams, schedules, and headless CI. It is **not** the brain.
 | Scheduling (team-level) | nullboiler |
 | Human override | Aaron via nullhub / kill switch |
 | Code edit / repo agent sessions | **Cline** (CLI / SDK / IDE) |
+| Workspace path resolution | `config/workspaces/registry.json` + `scripts/choose-workspace.py` |
+| Motor fire | `scripts/run-cline.py` |
 
 **All Cam roles and subagents** may invoke `motor.cline` when the work needs
 repo edits, tests, or multi-file coding — not only a dedicated coding role.
-Jarvis stays the deterministic CLI utility belt; Cline owns agentic code work.
 
-## Surfaces (pick simplest that fits)
+## Runtime surface (implemented)
 
-| Surface | When |
+| Piece | Path |
 |---|---|
-| CLI (`cline` / `bun run cli`) | Headless, CI, scripts, Cam motor fire |
-| `@cline/sdk` | Programmatic tools / multi-agent teams from Cam glue |
-| VS Code / JetBrains / Desktop | Aaron-facing IDE sessions |
-| Messaging connectors | Slack/Telegram/etc. only if Aaron wires credentials |
+| Workspace registry | `config/workspaces/registry.json` |
+| Standing schedules | `config/workspaces/schedules.json` |
+| Chooser | `scripts/choose-workspace.py` / `scripts/cam_workspaces.py` |
+| Motor runner | `scripts/run-cline.py` |
+| Rules propagator | `scripts/install-cline-rules.py` |
+| MCP bridge | `scripts/cam-mcp-server.py` |
+| Schedule sync | `scripts/sync-cline-schedules.py` |
+| Ticket export | `scripts/export-cline-tickets.py` |
+| Session distillate | `scripts/sync-cline-session.py` |
+| Cam policy | `.clinerules` · `AGENTS.md` · `.cursor/rules/cam-cline.mdc` |
 
 ## Install (on Aaron’s machine / any workspace)
 
 ```bash
 git submodule update --init --recursive
-# Option A — published CLI
-npm i -g cline
-# Option B — from this submodule (Bun 1.3+ / Node ≥22)
-cd integrations/cline && bun install && bun run build:sdk
-# Auth (required for live turns)
-cline auth   # or set ANTHROPIC_API_KEY / OPENROUTER_API_KEY / CLINE_API_KEY
-cline doctor
+npm i -g cline   # or build integrations/cline with Bun
+cline auth       # or provider env vars
+python3 scripts/install-cline-rules.py --force
+python3 scripts/sync-cline-schedules.py --apply-cache --print-commands
+# optional MCP
+cline mcp install cam -- python3 "$PWD/scripts/cam-mcp-server.py"
+python3 scripts/run-cline.py --doctor --dry-run
 ```
-
-Repo rules for Cline live at [`.clinerules`](../../.clinerules) so every Cline
-session in this checkout (and imported workspaces) inherits Cam policy.
 
 ## How every agent uses it
 
 1. Aaron tasks Cam (or a standing goal fires).
-2. Any center may route coding through `hotspot.coding` → `switch.autonomy` → `motor.cline`.
-3. Cline runs in the **target workspace path** (this repo or another Aaron-opened folder).
-4. Distill outcomes into `mesh/cline` + tickets; vault notes when the work is durable.
+2. `connectome-route.py` may select `hotspot.coding` and attach a **workspace** choice.
+3. Cam fires `motor.cline` via:
 
 ```bash
-# Headless one-shot in a workspace
-cline --workspace /path/to/repo "Implement X and run tests"
-
-# JSON for Cam/nullclaw parsers
-cline --json --workspace /path/to/repo "List failing tests"
-
-# From this submodule after build
-cd integrations/cline && bun run cli -- --workspace "$PWD/../.." "doctor"
+python3 scripts/run-cline.py --goal "implement feature" --yolo "Implement X and run tests"
+# or force a registry id / path
+python3 scripts/run-cline.py --workspace-id cline --yolo "bun run cli doctor"
+python3 scripts/run-cline.py --path /other/repo --yolo "fix tests"
 ```
 
-Bridge session distillates:
+4. Runner sets per-workspace `CLINE_DATA_DIR`, binds a ticket under
+   `identity/persistence/tickets/`, streams `--json`, records `mesh/cline`.
+5. Curator exports tickets: `python3 scripts/export-cline-tickets.py`.
+
+### CLI flags note
+
+One-shot Cline uses `--cwd` (Cam runner passes it). Cron schedules use
+`cline schedule ... --workspace <path>` (see schedule sync).
+
+### Multi-workspace teams
 
 ```bash
-python3 scripts/sync-cline-session.py export
-python3 scripts/sync-cline-session.py import --from path/to/mesh-cline.json --dry-run
+python3 scripts/run-cline.py \
+  --team-name cam-mesh \
+  --workspace-id personal-assistant \
+  --secondary cline,smart-second-brain \
+  --yolo "Coordinate the change; keep Cam policy"
+```
+
+## Workspace chooser (task → repo)
+
+| Signal examples | Workspace id |
+|---|---|
+| connectome, vault, mesh, cam | `personal-assistant` |
+| cline sdk/cli, @cline/ | `cline` |
+| obsidian plugin, second brain | `smart-second-brain` |
+| jarviscli | `jarvis` |
+| paddledetection | `paddledetection` |
+| audio2face, riva | `llmavatartalk` |
+| Explicit Aaron path | that path wins |
+
+```bash
+python3 scripts/choose-workspace.py --goal "refactor cline cli auth"
+python3 scripts/choose-workspace.py --list
 ```
 
 ## Mesh bridge
 
 | Namespace | Content |
 |---|---|
-| `mesh/cline` | last workspace, mode (plan/act), session ids, distillates, schedule pointers |
-| `mesh/runs` | run outcomes that involved Cline |
-| `mesh/projects` | repos Cline has touched across workspaces |
+| `mesh/projects` | registry projects (`choose-workspace.py --mesh-projects`) |
+| `mesh/cline` | sessions, workspaces, schedules |
+| `mesh/cline.schedules` | standing cron mirrors (`sync-cline-schedules.py`) |
+| `mesh/runs` | ticket distillates / cline-runs |
 
-Persistence export includes the Cline integration policy + mesh seed so **future
-workspaces** restore the same coding effector without re-wiring.
+## MCP tools (Cam → Cline)
+
+`list_workspaces`, `choose_workspace`, `mesh_search`, `mesh_put`, `vault_search`,
+`connectome_route`, `kill_switch_status`, `ticket_list`
 
 ## Boundaries
 
 - Only Aaron may assign the original task; Cam/Cline finish under standing autonomy
-- Kill switch silences `motor.cline` with all other motors
-- No outbound messaging / job submit / spend via Cline — those stay on gated motors
+- Kill switch: `run-cline.py --kill` refuses motor
+- No outbound messaging / job submit / spend via Cline
 - Provider API keys stay in local secrets / env — never commit
 - Prefer Jarvis for trivial deterministic chores; prefer Cline for multi-file code
 
 ## Cross-workspace checklist
 
-1. `persist-import` (or clone this repo) in the new workspace
-2. `git submodule update --init integrations/cline`
-3. Confirm `.clinerules` present at workspace root
-4. Re-attach LLM provider credentials locally
-5. `cline doctor` then a dry headless prompt
+1. `persist-import` (auto-runs rules install + schedule sync)
+2. `git submodule update --init --recursive`
+3. Confirm `.clinerules` / `AGENTS.md` / `.cursor/rules/cam-cline.mdc`
+4. Re-attach LLM provider credentials (`cline auth`)
+5. `python3 scripts/run-cline.py --doctor --dry-run` then a live doctor when ready
+6. Optional: pipe `sync-cline-schedules.py --print-commands` into a shell after auth

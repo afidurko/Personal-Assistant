@@ -1,26 +1,6 @@
 {
-  "available_to": "all_roles_and_subagents",
-  "cross_workspace": true,
-  "effector": "cline",
-  "last_session": {
-    "at": "2026-09-17T00:52:47.020261+00:00",
-    "mode": "act",
-    "summary": "integration smoke",
-    "workspace": "."
-  },
-  "notes": [
-    {
-      "at": "2026-09-17T00:00:00+00:00",
-      "text": "Cline wired as shared coding motor for all Cam agents and future workspaces",
-      "workspace": "."
-    },
-    {
-      "at": "2026-09-17T00:52:47.020261+00:00",
-      "text": "cline wired",
-      "workspace": "."
-    }
-  ],
-  "rules": ".clinerules",
+  "namespace": "mesh/cline.schedules",
+  "nullboiler_note": "Cam standing goals mirrored as Cline cron schedules; nullboiler remains team orchestrator",
   "schedules": [
     {
       "cron": "0 7 * * *",
@@ -71,10 +51,6 @@
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-17T01:15:32.541428+00:00",
-  "source": "https://github.com/afidurko/cline",
-  "submodule": "integrations/cline",
-  "workspaces": [
-    "."
-  ]
+  "source": "config/workspaces/schedules.json",
+  "synced_at": "2026-09-17T01:15:32.541428+00:00"
 }

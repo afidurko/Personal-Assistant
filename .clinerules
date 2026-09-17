@@ -37,8 +37,10 @@ work to tickets/mesh when the Null stack is live.
 ## Cross-workspace
 
 - Before claiming personal facts, search vault + mesh.
+- Resolve coding targets with `scripts/choose-workspace.py` / registry.
+- Launch coding via `scripts/run-cline.py` (tickets + per-workspace `CLINE_DATA_DIR`).
 - After meaningful runs, distill into `mesh/cline` / `mesh/runs` (see
-  `scripts/sync-cline-session.py`).
+  `scripts/sync-cline-session.py` and `scripts/export-cline-tickets.py`).
 - Never commit secrets, OAuth tokens, phone numbers, or raw PII.
 
 ## Style

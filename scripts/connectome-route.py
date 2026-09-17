@@ -9,10 +9,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "config" / "connectome"
+sys.path.insert(0, str(ROOT / "scripts"))
+import cam_workspaces as cw  # noqa: E402
 
 
 def load(name: str):
@@ -51,6 +54,22 @@ def pick_hotspot(
             score += 3
         if ("job" in g or "career" in g) and "career" in blob:
             score += 3
+        if any(
+            tok in g
+            for tok in (
+                "code",
+                "coding",
+                "cline",
+                "refactor",
+                "implement",
+                "pr ",
+                "pull request",
+                "test suite",
+                "typescript",
+                "python script",
+            )
+        ) and ("coding" in blob or "cline" in blob):
+            score += 5
         scored.append((score, h))
     scored.sort(key=lambda x: x[0], reverse=True)
     return scored[0][1]
@@ -121,6 +140,8 @@ def main() -> int:
     parser.add_argument("--no-autonomy", action="store_true")
     parser.add_argument("--goal", default="", help="optional Aaron goal text")
     parser.add_argument("--hotspot", default="", help="explicit hotspot id when sense collides")
+    parser.add_argument("--workspace-id", default="", help="force coding workspace id")
+    parser.add_argument("--role", default="", help="Cam role for workspace allowlist")
     args = parser.parse_args()
 
     sensory = load("sensory.json")
@@ -205,6 +226,31 @@ def main() -> int:
             "sole_operator": "Aaron",
         },
     }
+
+    # When coding motor is planned, attach workspace resolution for run-cline.py
+    if "motor.cline" in planned_motors or (
+        hotspot and hotspot.get("id") in {"hotspot.coding", "hotspot.cline_result"}
+    ):
+        try:
+            choice = cw.choose_workspace(
+                goal=args.goal,
+                workspace_id=args.workspace_id or None,
+                role=args.role or None,
+            )
+            result["workspace"] = {
+                "id": choice["workspace"].get("id"),
+                "path": choice["path"],
+                "reason": choice.get("reason"),
+                "score": choice.get("score"),
+                "alternates": choice.get("alternates"),
+                "runner": (
+                    f"python3 scripts/run-cline.py --workspace-id {choice['workspace'].get('id')} "
+                    f"--goal {json.dumps(args.goal)} \"...\""
+                ),
+            }
+        except Exception as exc:  # noqa: BLE001
+            result["workspace_error"] = str(exc)
+
     if args.kill:
         result["accepted"] = False
         result["reason"] = "switch.kill act — all motor silenced"

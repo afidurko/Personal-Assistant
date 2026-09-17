@@ -12,13 +12,19 @@
   },
   "mesh/cline": {
     "available_to": "all_roles_and_subagents",
+    "chooser": "scripts/choose-workspace.py",
     "cross_workspace": true,
     "effector": "cline",
+    "mcp": "scripts/cam-mcp-server.py",
+    "registry": "config/workspaces/registry.json",
     "rules": ".clinerules",
+    "runner": "scripts/run-cline.py",
+    "schedules": "config/workspaces/schedules.json",
     "source": "https://github.com/afidurko/cline",
-    "status": "wired",
+    "status": "runtime_wired",
     "submodule": "integrations/cline",
-    "sync_script": "scripts/sync-cline-session.py"
+    "sync_script": "scripts/sync-cline-session.py",
+    "tickets": "identity/persistence/tickets"
   },
   "mesh/facts": {
     "aaron_face_photo_to_video_match": true,
@@ -175,6 +181,11 @@
     "timezone": "America/New_York",
     "unlimited_subagents": true,
     "weekly_review": true
+  },
+  "mesh/projects": {
+    "default_workspace_id": "personal-assistant",
+    "source": "config/workspaces/registry.json",
+    "status": "registry_wired"
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,
