@@ -272,6 +272,9 @@ app.get('/api/runtime/activity-events', async (_req, res) => {
 });
 
 // Static assets for Cam face, 3D cortex, and live-activity JSON the cortex polls
+app.get('/favicon.ico', (_req, res) => {
+  res.redirect(302, '/favicon.svg');
+});
 app.use(express.static(path.join(ROOT, 'public')));
 app.use('/identity', express.static(path.join(ROOT, 'identity')));
 app.use('/vault', express.static(path.join(ROOT, 'vault')));
