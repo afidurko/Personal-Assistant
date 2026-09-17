@@ -65,6 +65,9 @@ Config (not a second runtime): `config/swarm/`
 ## Write rules
 
 - Distill; do not dump raw chat transcripts
+- **MMP claims** for non-trivial writes — `config/memory/mesh-claim-schema.json` · `scripts/pack-mesh-claim.py`  
+  Required: claim, role, sources, confidence, parents, sensitivity, accessed. Remix only — no raw peer dumps into `mesh/facts`.
+- **HMO tiers** — `config/memory/hmo-tiers.json` (primary lean → secondary hot mesh → archive vault/persistence)
 - Tag sensitivity: `public` | `team` | `private`
 - Private never leaves local store / approved channels
 - Curator dedupes conflicting facts; Aaron resolves ties
@@ -73,7 +76,7 @@ Config (not a second runtime): `config/swarm/`
 - Cline schedules via `scripts/sync-cline-schedules.py` → `mesh/cline.schedules`
 - Cline tickets via `scripts/export-cline-tickets.py` → `mesh/runs`
 - Workspace registry via `scripts/choose-workspace.py --mesh-projects`
-- Vision results sync via `scripts/pack-vision-result.py`
+- Vision results sync via `scripts/pack-vision-result.py` (+ `config/enhancement/vision-grounding.json`)
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
 - Knowledge maps via SwiftGuide; sync stack/taxonomy distillates to `mesh/cartography`
 - AGI daily scan archives via `scripts/agi-research-scan.py` → vault + mesh distillates
@@ -81,9 +84,10 @@ Config (not a second runtime): `config/swarm/`
 - Cross-workspace: `scripts/persist-export.py` / `persist-import.py`
 - Integration confirmation: `scripts/workspace-integration-check.py` · `docs/WORKSPACES_WORKFLOW.md`
 - Swarm contracts: `scripts/swarm-check.py` · `docs/HAAS_CAM_PATTERNS.md`
+- Trajectory / OCL: `config/connectome/trajectory-policies.json` · `scripts/trajectory-policy-check.py`
 
 ## Read rules
 
-- Before claiming work, search mesh + vault
+- Before claiming work, search **HMO primary** (persona/prefs/pivotal), then secondary mesh, then vault archive
 - Cite mesh keys / vault notes used
 - Prefer vault knowledge before inventing Aaron’s personal facts

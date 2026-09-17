@@ -1,6 +1,6 @@
 {
   "assistant": "Cam",
-  "bundle_version": 8,
+  "bundle_version": 9,
   "created_at": "2026-09-17T00:44:07.028390+00:00",
   "excludes": [
     "secrets",
@@ -14,8 +14,17 @@
     ".cursor/rules/cam-cline.mdc",
     "AGENTS.md",
     "config/connectors.md",
+    "config/connectome/trajectory-policies.json",
+    "config/enhancement/dual-process.json",
+    "config/enhancement/science-agent-env.json",
     "config/enhancement/slm-dl.json",
+    "config/enhancement/social-harness.json",
+    "config/enhancement/vision-grounding.json",
     "config/integrations/cline.md",
+    "config/memory/hmo-tiers.json",
+    "config/memory/mesh-claim-schema.json",
+    "config/persona/consistency-checks.json",
+    "config/persona/consistency-checks.md",
     "config/pipelines/cam-enhance-gate.json",
     "config/pipelines/daily-agi-scan.json",
     "config/priority-boot.json",
@@ -27,6 +36,8 @@
     "config/roles/coding.md",
     "config/roles/dl-enhance.md",
     "config/roles/info-retriever.md",
+    "config/roles/memory-curator.md",
+    "config/roles/qa.md",
     "config/roles/slm-runtime.md",
     "config/roles/tool-creator.md",
     "config/roles/tool-user.md",
@@ -49,6 +60,7 @@
     "identity/BOUNDARIES.md",
     "identity/GOALS.md",
     "identity/PROFILE.md",
+    "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
     "identity/persistence/CONTINUOUS_QA.md",
     "identity/persistence/DAILY_AGI_SCAN.md",
     "identity/persistence/HAAS_CAM_PATTERNS.md",
@@ -59,5 +71,5 @@
   ],
   "scope": "this_workspace_and_future_workspaces",
   "timezone": "America/New_York",
-  "updated_at": "2026-09-17T10:50:00.000000+00:00"
+  "updated_at": "2026-09-17T11:03:00.000000+00:00"
 }

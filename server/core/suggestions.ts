@@ -262,6 +262,40 @@ function fromAgentContext(
     });
   }
 
+  const agiWs = workspaces.find((w) => w.kind === 'agi_research');
+  if (agiWs) {
+    out.push({
+      id: 'suggest-cam-hmo-mmp',
+      kind: 'research-memory',
+      title: 'Keep HMO tiers + MMP claims hot during research scans',
+      rationale:
+        'AGI / Cam-function research writes must stay lean in primary memory and remix via claim schema.',
+      implementation:
+        'Pack distillates with scripts/pack-mesh-claim.py; verify tiers via scripts/memory-tier-check.py before promoting to mesh/facts.',
+      sketch:
+        'python3 scripts/pack-mesh-claim.py --claim "…" --role agi-scout --source "title|url"\npython3 scripts/memory-tier-check.py',
+      priority: agiWs.score < 85 ? 74 : 52,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['simple-values'],
+      sourceFindingIds: agiWs.findings.map((f) => f.id).slice(0, 3),
+    });
+    out.push({
+      id: 'suggest-cam-trajectory-gate',
+      kind: 'cam-enhance',
+      title: 'Re-verify OCL/CPV trajectory gates after enhance batches',
+      rationale:
+        'Enhancement applies must not leak motor.enhance without Aaron or compose with jobs.',
+      implementation:
+        'Run trajectory-policy-check and trajectory-billion-fuzz before merge; keep switch.cam_enhance default hold.',
+      sketch:
+        'python3 scripts/trajectory-policy-check.py\npython3 scripts/trajectory-billion-fuzz.py --n 1000000000',
+      priority: 70,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['error-handling', 'protocols-extensions'],
+      sourceFindingIds: [],
+    });
+  }
+
   const critical = workspaces.flatMap((w) => w.findings.filter((f) => f.severity === 'critical'));
   if (critical.length > 0) {
     const fixer = MESH_AGENTS.find((a) => a.id === 'issue-fix-loop')!;

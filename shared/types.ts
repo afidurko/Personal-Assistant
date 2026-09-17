@@ -183,7 +183,9 @@ export type SuggestionKind =
   | 'agent-repair'
   | 'swarm-privilege'
   | 'swarm-lineage'
-  | 'swarm-tooling';
+  | 'swarm-tooling'
+  | 'cam-enhance'
+  | 'research-memory';
 
 export interface SuggestiveImplementation {
   id: string;

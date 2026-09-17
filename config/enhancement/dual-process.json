@@ -1,0 +1,43 @@
+{
+  "id": "cam-dual-process",
+  "title": "Dual-process routing: fast sLM proposer + slow capability planner",
+  "source_paper": "https://arxiv.org/abs/2609.19128",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "status": "applied",
+  "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-cognitive-extensions-for-dual-process-language-a.md",
+  "fast_path": {
+    "center": "center.slm",
+    "motor": "motor.slm",
+    "jobs": [
+      "intent_classify",
+      "hotspot_route_suggest",
+      "query_rewrite",
+      "brief_compress"
+    ],
+    "analogy": "System-1 action proposer"
+  },
+  "slow_path": {
+    "centers": ["center.capability", "center.chief", "center.qa"],
+    "jobs": [
+      "plan",
+      "spawn_teams",
+      "trajectory_policy_check",
+      "cite_check"
+    ],
+    "analogy": "System-2 planner + reflection"
+  },
+  "adaptive_memory": {
+    "config": "config/memory/hmo-tiers.json",
+    "salience_gated": true,
+    "trigger_retrieval_on": ["aaron_question", "open_ticket", "persona_check"]
+  },
+  "self_reflection": {
+    "center": "center.qa",
+    "checks": [
+      "trajectory_policies",
+      "mesh_claim_schema",
+      "persona_consistency"
+    ]
+  }
+}

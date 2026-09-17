@@ -21,4 +21,5 @@
 | smart-second-brain starter vault | memory-curator | **created** at `vault/` — open in Obsidian |
 | Persistence | memory-curator | done |
 | LinkedIn + Indeed | careers | enabled |
+| Cam-function paper batch (HMO/MMP/OCL/persona) | capability | **applied** 2026-09-17 |
 | Avatar studio | comms | awaiting RIVA/Audio2Face on Aaron machine |

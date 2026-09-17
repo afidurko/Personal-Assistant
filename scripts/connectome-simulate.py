@@ -278,7 +278,7 @@ def main() -> int:
         for s, opts in by_sense.items()
     }
 
-    # Traffic weights: Aaron chat / vault / careers heavier than rare sensors
+    # Traffic weights: Aaron chat / vault / careers / research heavier than rare sensors
     weight_map = {
         "sense.chat.aaron": 8.0,
         "sense.vault.hit": 4.0,
@@ -296,6 +296,14 @@ def main() -> int:
         "sense.aaron.voice": 1.0,
         "sense.photos.library": 0.8,
         "sense.files.media": 0.8,
+        # Cam-function / AGI research periphery (Aaron-approved batch)
+        "sense.clock.daily": 2.0,
+        "sense.web.arxiv": 2.5,
+        "sense.web.agi_feed": 2.0,
+        "sense.web.scholar": 2.5,
+        "sense.slm.inference": 1.5,
+        "sense.dl.embedding": 1.5,
+        "sense.swarm.message": 1.2,
     }
     sense_weights = [weight_map.get(s, 1.0) for s in sense_ids]
 

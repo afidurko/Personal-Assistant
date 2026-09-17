@@ -51,7 +51,7 @@
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=23 edges=165"
+    "detail": "senses=24 edges=257"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

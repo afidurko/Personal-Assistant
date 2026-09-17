@@ -1,0 +1,54 @@
+{
+  "namespace": "mesh/research",
+  "sensitivity": "team",
+  "kind": "cam_function_paper_brief",
+  "created_at": "2026-09-17T10:49:00Z",
+  "accessed": "2026-09-17",
+  "title": "Papers to help Cam function",
+  "vault_brief": "vault/04-Research/2026-09-17-Cam-Function-Papers.md",
+  "live_agi_scan": "vault/04-Research/agi-daily/2026-09-17/2026-09-17-AGI-scan.md",
+  "human_gate_for_apply": "switch.cam_enhance",
+  "priority": [
+    {
+      "id": "hmo",
+      "title": "Hierarchical Memory Orchestration",
+      "url": "https://arxiv.org/abs/2604.01670",
+      "cam_layer": "memory",
+      "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-hmo-hierarchical-memory-for-cam.md"
+    },
+    {
+      "id": "mmp",
+      "title": "Mesh Memory Protocol",
+      "url": "https://arxiv.org/abs/2604.19540",
+      "cam_layer": "mesh_semantics",
+      "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-mmp-mesh-memory-protocol-for-cam.md"
+    },
+    {
+      "id": "ocl",
+      "title": "Organizational Control Layer + CPV",
+      "url": "https://arxiv.org/abs/2606.04306",
+      "related": ["https://arxiv.org/abs/2609.18820"],
+      "cam_layer": "execution_boundary",
+      "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-ocl-execution-boundary-for-cam.md"
+    },
+    {
+      "id": "dual_process",
+      "title": "Cognitive Extensions for Dual-Process Language Agents",
+      "url": "http://arxiv.org/abs/2609.19128v1",
+      "cam_layer": "routing",
+      "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-cognitive-extensions-for-dual-process-language-a.md"
+    },
+    {
+      "id": "persona",
+      "title": "Persona continuity (multi-turn RL + ARPM)",
+      "urls": [
+        "https://arxiv.org/html/2511.00222v1",
+        "https://arxiv.org/html/2605.14802v1"
+      ],
+      "cam_layer": "presence",
+      "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-persona-continuity-for-cam.md"
+    }
+  ],
+  "recommendation": "Config-first: HMO tiers + MMP claim fields + OCL/CPV trajectory checks; hold model fine-tunes until Aaron approves.",
+  "citations_required": true
+}
