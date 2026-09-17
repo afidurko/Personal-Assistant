@@ -321,6 +321,7 @@
       ["sense.vision.detection", "Vision", ""],
       ["sense.email.thread", "Email", ""],
       ["sense.vault.hit", "Vault recall", ""],
+      ["sense.cline.result", "Cline result", ""],
       ["__demo__", "Auto demo", "gold"],
       ["__kill__", "Kill switch", "danger"],
       ["__reset__", "Reset", ""],
