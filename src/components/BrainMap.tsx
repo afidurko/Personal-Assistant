@@ -31,6 +31,15 @@ function toSvg(node: BrainNode): { cx: number; cy: number; r: number } {
   };
 }
 
+function hexPoints(r: number): string {
+  const pts: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 180) * (60 * i - 30);
+    pts.push(`${(Math.cos(a) * r).toFixed(2)},${(Math.sin(a) * r).toFixed(2)}`);
+  }
+  return pts.join(' ');
+}
+
 function curvePath(
   x1: number,
   y1: number,
@@ -186,9 +195,11 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
         {nodes.map((node) => {
           const { cx, cy, r } = toSvg(node);
           const isConcept = node.kind === 'concept' || Boolean(node.conceptId);
-          const color = isConcept
-            ? (node.color || STATUS_COLORS.idle)
-            : (STATUS_COLORS[node.status] ?? node.color ?? STATUS_COLORS.idle);
+          const isAgent = node.kind === 'agent' || node.kind === 'layer';
+          const color =
+            isConcept || isAgent
+              ? (node.color || STATUS_COLORS.idle)
+              : (STATUS_COLORS[node.status] ?? node.color ?? STATUS_COLORS.idle);
           const selected = selectedNodeId === node.id;
           const dimmed = linkedIds !== null && !linkedIds.has(node.id);
           const glowClass =
@@ -201,11 +212,12 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
             r *
             (node.status === 'critical' ? 2.8 : node.status === 'warning' ? 2.3 : 1.8);
           const diamond = r * 1.15;
+          const hex = r * 1.05;
 
           return (
             <g
               key={node.id}
-              className={`brain-node${selected ? ' selected' : ''}${isConcept ? ' concept' : ''}${node.status === 'scanning' || (scanning && node.workspaceId) ? ' scanning' : ''}${dimmed ? ' dimmed' : ''}`}
+              className={`brain-node${selected ? ' selected' : ''}${isConcept ? ' concept' : ''}${isAgent ? ` agent${node.kind === 'layer' ? ' layer' : ''}` : ''}${node.status === 'scanning' || (scanning && node.workspaceId) ? ' scanning' : ''}${dimmed ? ' dimmed' : ''}`}
               transform={`translate(${cx} ${cy})`}
               onClick={() => handleNodeClick(node)}
               onMouseEnter={(e) => {
@@ -215,10 +227,17 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
                 const ws = node.workspaceId
                   ? workspaces.find((w) => w.id === node.workspaceId)
                   : undefined;
+                const prefix = isConcept
+                  ? 'Swift · '
+                  : node.kind === 'layer'
+                    ? 'Layer · '
+                    : node.kind === 'agent'
+                      ? 'Agent · '
+                      : '';
                 setTooltip({
                   x: e.clientX - rect.left,
                   y: e.clientY - rect.top,
-                  label: isConcept ? `Swift · ${node.label}` : node.label,
+                  label: `${prefix}${node.label}`,
                   status: node.status,
                   score: ws?.score,
                 });
@@ -228,7 +247,8 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
               {(node.status === 'critical' ||
                 node.status === 'warning' ||
                 selected ||
-                isConcept) && (
+                isConcept ||
+                isAgent) && (
                 <circle
                   className={`node-glow ${glowClass}`}
                   r={glowR}
@@ -257,6 +277,21 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
                     height={r * 1.7}
                     rx={1.5}
                     transform="rotate(45)"
+                    fill={color}
+                    opacity={0.9}
+                  />
+                </>
+              ) : isAgent ? (
+                <>
+                  <polygon
+                    className="node-ring"
+                    points={hexPoints(hex + 3)}
+                    stroke={color}
+                    fill="none"
+                  />
+                  <polygon
+                    className="node-core"
+                    points={hexPoints(selected ? hex * 1.15 : hex)}
                     fill={color}
                     opacity={0.9}
                   />
@@ -308,6 +343,10 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
         <div className="legend-item">
           <span className="legend-swatch diamond" style={{ background: '#9adbc8' }} />
           Swift concept
+        </div>
+        <div className="legend-item">
+          <span className="legend-swatch hex" style={{ background: '#ff8a65' }} />
+          Agent / layer
         </div>
       </div>
     </div>

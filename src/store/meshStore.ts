@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type {
+  AgentCycleResult,
   BrainNode,
+  LoopJob,
   MemoryTrace,
   MeshEdge,
   NeuralMeshState,
@@ -20,6 +22,8 @@ const emptyState: NeuralMeshState = {
   activeConceptId: null,
   guideStep: 0,
   suggestions: [],
+  loopJobs: [],
+  lastAgentCycle: null,
 };
 
 export interface MeshStore extends NeuralMeshState {
@@ -102,6 +106,11 @@ export const useMeshStore = create<MeshStore>((set, get) => ({
       guideStep: typeof next.guideStep === 'number' ? next.guideStep : prev.guideStep,
       suggestions:
         (next.suggestions as SuggestiveImplementation[] | undefined) ?? prev.suggestions,
+      loopJobs: (next.loopJobs as LoopJob[] | undefined) ?? prev.loopJobs,
+      lastAgentCycle:
+        next.lastAgentCycle !== undefined
+          ? (next.lastAgentCycle as AgentCycleResult | null)
+          : prev.lastAgentCycle,
     });
   },
 

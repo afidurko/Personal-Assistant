@@ -19,9 +19,17 @@ import {
   buildSuggestiveImplementations,
   type SuggestiveImplementation,
 } from './suggestions.js';
+import { AgentMeshRuntime } from './agent-mesh.js';
 import { runAllScans } from '../workspaces/index.js';
+import type { AgentCycleResult, LoopJob } from '../../shared/types.js';
 
-export type ScanOrchestratorEvent = 'tick' | 'complete' | 'state' | 'memory_update';
+export type ScanOrchestratorEvent =
+  | 'tick'
+  | 'complete'
+  | 'state'
+  | 'memory_update'
+  | 'agent_cycle'
+  | 'loop_update';
 
 export interface ScanOrchestratorOptions {
   /** Project root passed to workspace scanners. */
@@ -55,6 +63,8 @@ export class ScanOrchestrator extends EventEmitter {
   private activeConceptId: string | null = null;
   private guideStep = 0;
   private suggestions: SuggestiveImplementation[] = [];
+  private agents: AgentMeshRuntime | null = null;
+  private lastAgentCycle: AgentCycleResult | null = null;
 
   constructor(options: ScanOrchestratorOptions = {}) {
     super();
@@ -70,6 +80,7 @@ export class ScanOrchestrator extends EventEmitter {
   async init(): Promise<void> {
     await this.mesh.load();
     await this.memory.load();
+    this.agents = new AgentMeshRuntime(this.mesh, this.memory);
     this.ready = true;
     this.emitState();
   }
@@ -116,6 +127,15 @@ export class ScanOrchestrator extends EventEmitter {
     this.workspaces = snapshots;
     const activationDeltas = this.mesh.applyScanResults(snapshots);
     this.suggestions = buildSuggestiveImplementations(snapshots);
+
+    const agentRuntime = this.agents ?? new AgentMeshRuntime(this.mesh, this.memory);
+    this.agents = agentRuntime;
+    this.lastAgentCycle = await agentRuntime.runCycle({
+      workspaces: snapshots,
+      suggestions: this.suggestions,
+    });
+    this.emit('agent_cycle', this.lastAgentCycle);
+    this.emit('loop_update', agentRuntime.getJobs());
 
     const { nodes } = this.mesh.getState();
     const colorMap: Record<string, string> = {};
@@ -197,6 +217,8 @@ export class ScanOrchestrator extends EventEmitter {
       activeConceptId: this.activeConceptId,
       guideStep: this.guideStep,
       suggestions: this.suggestions,
+      loopJobs: this.agents?.getJobs() ?? [],
+      lastAgentCycle: this.lastAgentCycle,
     };
   }
 
@@ -207,6 +229,33 @@ export class ScanOrchestrator extends EventEmitter {
       relatedConceptIds: [...s.relatedConceptIds],
       sourceFindingIds: [...s.sourceFindingIds],
     }));
+  }
+
+  getLoopJobs(): LoopJob[] {
+    return this.agents?.getJobs() ?? [];
+  }
+
+  async runAgentCycle(): Promise<AgentCycleResult | null> {
+    await this.ensureReady();
+    if (!this.agents) this.agents = new AgentMeshRuntime(this.mesh, this.memory);
+    this.lastAgentCycle = await this.agents.runCycle({
+      workspaces: this.workspaces,
+      suggestions: this.suggestions,
+    });
+    this.emit('agent_cycle', this.lastAgentCycle);
+    this.emit('loop_update', this.agents.getJobs());
+    this.emitState();
+    return this.lastAgentCycle;
+  }
+
+  setIssueLoopArmed(armed: boolean): void {
+    if (!this.agents) this.agents = new AgentMeshRuntime(this.mesh, this.memory);
+    this.agents.setLoopArmed(armed);
+    this.emitState();
+  }
+
+  isIssueLoopArmed(): boolean {
+    return this.agents?.isLoopArmed() ?? true;
   }
 
   getWorkspaces(): WorkspaceSnapshot[] {

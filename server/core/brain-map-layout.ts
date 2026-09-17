@@ -9,6 +9,9 @@ const REGION_ANCHORS: Record<BrainRegion, { x: number; y: number }> = {
   amygdala: { x: 0.72, y: 0.68 },
   insula: { x: 0.68, y: 0.42 },
   cerebellum: { x: 0.5, y: 0.82 },
+  basal_ganglia: { x: 0.38, y: 0.4 },
+  striatum: { x: 0.58, y: 0.55 },
+  repair_loop: { x: 0.78, y: 0.36 },
 };
 
 /**

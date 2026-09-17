@@ -17,6 +17,14 @@ import {
   conceptNodeId,
   type SwiftConceptId,
 } from '../../shared/swiftGuide.js';
+import {
+  AGENT_LAYERS,
+  MESH_AGENTS,
+  agentNodeId,
+  layerHubId,
+  type AgentLayerId,
+  type AgentRoleId,
+} from '../../shared/agentLayers.js';
 import { layoutForRegion } from './brain-map-layout.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -62,6 +70,7 @@ export class NeuralMesh {
     }
     if (this.nodes.length === 0) this.seedDefaultTopology();
     this.ensureSwiftGuideLayer();
+    this.ensureAgentMeshLayer();
     this.loaded = true;
   }
 
@@ -484,6 +493,139 @@ export class NeuralMesh {
       cortex.color = STATUS_COLORS.scanning;
       cortex.activation = Math.max(cortex.activation, 0.55);
     }
+  }
+
+  /** Deep agent + layer hubs for commute / memory / persistence / issue-loop. */
+  ensureAgentMeshLayer(): void {
+    const haveAgents = this.nodes.some((n) => n.kind === 'agent' || n.kind === 'layer');
+    if (haveAgents) return;
+
+    const regionCounts = new Map<BrainRegion, number>();
+    for (const n of this.nodes) {
+      regionCounts.set(n.region, (regionCounts.get(n.region) ?? 0) + 1);
+    }
+    for (const layer of AGENT_LAYERS) {
+      regionCounts.set(layer.region, (regionCounts.get(layer.region) ?? 0) + 1);
+    }
+    for (const agent of MESH_AGENTS) {
+      regionCounts.set(agent.region, (regionCounts.get(agent.region) ?? 0) + 1);
+    }
+
+    const regionIndex = new Map<BrainRegion, number>();
+    for (const n of this.nodes) {
+      regionIndex.set(n.region, (regionIndex.get(n.region) ?? 0) + 1);
+    }
+
+    for (const layer of AGENT_LAYERS) {
+      const total = regionCounts.get(layer.region) ?? 1;
+      const idx = regionIndex.get(layer.region) ?? 0;
+      regionIndex.set(layer.region, idx + 1);
+      const { x, y } = layoutForRegion(layer.region, idx, total);
+      this.nodes.push({
+        id: layerHubId(layer.id),
+        label: layer.name,
+        workspaceId: null,
+        conceptId: null,
+        agentId: null,
+        layerId: layer.id,
+        kind: 'layer',
+        region: layer.region,
+        x,
+        y,
+        activation: 0.18,
+        status: 'idle',
+        color: layer.color,
+        radius: 0.05,
+        tags: ['agent-layer', layer.id, `depth-${layer.depth}`],
+        interactive: true,
+      });
+    }
+
+    for (const agent of MESH_AGENTS) {
+      const total = regionCounts.get(agent.region) ?? 1;
+      const idx = regionIndex.get(agent.region) ?? 0;
+      regionIndex.set(agent.region, idx + 1);
+      const { x, y } = layoutForRegion(agent.region, idx, total);
+      this.nodes.push({
+        id: agentNodeId(agent.id),
+        label: agent.name,
+        workspaceId: null,
+        conceptId: null,
+        agentId: agent.id,
+        layerId: agent.layer,
+        kind: 'agent',
+        region: agent.region,
+        x,
+        y,
+        activation: 0.14,
+        status: 'idle',
+        color: agent.color,
+        radius: 0.028,
+        tags: ['agent', agent.layer, ...agent.enhances],
+        interactive: true,
+      });
+    }
+
+    // Layer stack: commute → memory → persistence → issue-loop
+    for (let i = 0; i < AGENT_LAYERS.length - 1; i++) {
+      const from = layerHubId(AGENT_LAYERS[i].id);
+      const to = layerHubId(AGENT_LAYERS[i + 1].id);
+      this.edges.push(edge(from, to, 'feeds', 0.55, 'deeper layer'));
+    }
+
+    for (const agent of MESH_AGENTS) {
+      const agentId = agentNodeId(agent.id);
+      this.edges.push(edge(agentId, layerHubId(agent.layer), 'depends_on', 0.6, 'in layer'));
+      this.edges.push(edge(agentId, 'hub-cortex', 'feeds', 0.25, 'agent → cortex'));
+      this.edges.push(edge(agentId, 'hub-hippocampus', 'feeds', 0.35, 'agent → memory'));
+      for (const kind of agent.relatedWorkspaceKinds) {
+        this.edges.push(
+          edge(agentId, `ws-${kind}`, 'correlates', 0.45, `${agent.name} ↔ ${kind}`),
+        );
+      }
+      if (agent.layer === 'issue-loop') {
+        this.edges.push(edge(agentId, layerHubId('persistence'), 'loops', 0.5, 'loop ↔ persist'));
+      }
+      if (agent.layer === 'commute') {
+        this.edges.push(edge(agentId, layerHubId('memory'), 'commutes', 0.4, 'commute ↔ memory'));
+      }
+    }
+  }
+
+  pulseAgent(agentId: AgentRoleId, amount: number): void {
+    const node = this.nodes.find((n) => n.id === agentNodeId(agentId));
+    if (!node) return;
+    node.activation = clamp01(node.activation + amount);
+    node.status = 'scanning';
+    const def = MESH_AGENTS.find((a) => a.id === agentId);
+    if (def) node.color = def.color;
+  }
+
+  pulseLayer(layerId: AgentLayerId, amount: number): void {
+    const node = this.nodes.find((n) => n.id === layerHubId(layerId));
+    if (!node) return;
+    node.activation = clamp01(node.activation + amount);
+    node.status = amount > 0.7 ? 'scanning' : node.status === 'idle' ? 'healthy' : node.status;
+    const def = AGENT_LAYERS.find((l) => l.id === layerId);
+    if (def) node.color = def.color;
+  }
+
+  ensureEdge(
+    from: string,
+    to: string,
+    kind: MeshEdgeKind,
+    weight: number,
+    label?: string,
+  ): void {
+    const existing = this.edges.find(
+      (e) => e.from === from && e.to === to && e.kind === kind,
+    );
+    if (existing) {
+      existing.weight = clamp01(Math.max(existing.weight, weight));
+      if (label) existing.label = label;
+      return;
+    }
+    this.edges.push(edge(from, to, kind, weight, label));
   }
 
   colorForStatus(status: ScanStatus): string {

@@ -14,6 +14,9 @@ const REGIONS: BrainRegion[] = [
   'prefrontal',
   'cerebellum',
   'insula',
+  'basal_ganglia',
+  'striatum',
+  'repair_loop',
 ];
 
 describe('billion-scale round 1', () => {

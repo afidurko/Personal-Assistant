@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type {
+  AgentCycleResult,
+  LoopJob,
   MemoryTrace,
   NeuralMeshState,
   ScanCycleResult,
@@ -96,6 +98,16 @@ export function useMeshSocket() {
           }
           break;
         }
+        case 'agent_cycle': {
+          const payload = msg.payload as AgentCycleResult;
+          setStateFromServer({ lastAgentCycle: payload });
+          break;
+        }
+        case 'loop_update': {
+          const jobs = msg.payload as LoopJob[];
+          if (Array.isArray(jobs)) setStateFromServer({ loopJobs: jobs });
+          break;
+        }
         default:
           break;
       }
@@ -178,6 +190,9 @@ export function useMeshSocket() {
     guideStart: () => send({ type: 'guide_start' }),
     guideNext: () => send({ type: 'guide_next' }),
     guidePrev: () => send({ type: 'guide_prev' }),
+    runAgentCycle: () => send({ type: 'run_agent_cycle' }),
+    startIssueLoop: () => send({ type: 'start_issue_loop' }),
+    stopIssueLoop: () => send({ type: 'stop_issue_loop' }),
   };
 }
 

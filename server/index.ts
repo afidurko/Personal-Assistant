@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { WsClientMessage, WsServerMessage } from '../shared/types.js';
 import { SWIFT_GUIDE_CONCEPTS, isSwiftConceptNodeId } from '../shared/swiftGuide.js';
+import { AGENT_LAYERS, MESH_AGENTS } from '../shared/agentLayers.js';
 import { ScanOrchestrator } from './core/scan-orchestrator.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -73,6 +74,32 @@ app.get('/api/suggestions', (_req, res) => {
   res.json(orchestrator.getSuggestions());
 });
 
+app.get('/api/agents', (_req, res) => {
+  res.json({
+    layers: AGENT_LAYERS,
+    agents: MESH_AGENTS,
+    loopArmed: orchestrator.isIssueLoopArmed(),
+    jobs: orchestrator.getLoopJobs(),
+    lastCycle: orchestrator.getFullState().lastAgentCycle ?? null,
+  });
+});
+
+app.post('/api/agents/cycle', async (_req, res) => {
+  const result = await orchestrator.runAgentCycle();
+  res.json(result);
+});
+
+app.post('/api/agents/issue-loop/start', (_req, res) => {
+  orchestrator.setIssueLoopArmed(true);
+  res.json({ loopArmed: true, jobs: orchestrator.getLoopJobs() });
+});
+
+app.post('/api/agents/issue-loop/stop', (_req, res) => {
+  orchestrator.setIssueLoopArmed(false);
+  res.json({ loopArmed: false });
+});
+
+
 app.post('/api/nodes/:id/focus', async (req, res) => {
   const id = req.params.id;
   if (isSwiftConceptNodeId(id)) {
@@ -126,6 +153,8 @@ orchestrator.on('tick', (payload) => broadcast('scan_tick', payload));
 orchestrator.on('complete', (payload) => broadcast('scan_complete', payload));
 orchestrator.on('state', (payload) => broadcast('state', payload));
 orchestrator.on('memory_update', (payload) => broadcast('memory_update', payload));
+orchestrator.on('agent_cycle', (payload) => broadcast('agent_cycle', payload));
+orchestrator.on('loop_update', (payload) => broadcast('loop_update', payload));
 
 wss.on('connection', (socket) => {
   send(socket, 'state', orchestrator.getFullState());
@@ -210,6 +239,24 @@ wss.on('connection', (socket) => {
           send(socket, 'node_focus', focused);
           broadcast('state', orchestrator.getFullState());
         }
+        break;
+      }
+      case 'run_agent_cycle': {
+        const result = await orchestrator.runAgentCycle();
+        send(socket, 'agent_cycle', result);
+        broadcast('state', orchestrator.getFullState());
+        break;
+      }
+      case 'start_issue_loop': {
+        orchestrator.setIssueLoopArmed(true);
+        send(socket, 'loop_update', orchestrator.getLoopJobs());
+        broadcast('state', orchestrator.getFullState());
+        break;
+      }
+      case 'stop_issue_loop': {
+        orchestrator.setIssueLoopArmed(false);
+        send(socket, 'loop_update', orchestrator.getLoopJobs());
+        broadcast('state', orchestrator.getFullState());
         break;
       }
       case 'reinforce': {

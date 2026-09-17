@@ -4,6 +4,7 @@ import { MemoryRail } from '@/components/MemoryRail';
 import { ScanControls } from '@/components/ScanControls';
 import { SwiftGuidePanel } from '@/components/SwiftGuidePanel';
 import { SuggestionsPanel } from '@/components/SuggestionsPanel';
+import { AgentLayersPanel } from '@/components/AgentLayersPanel';
 import { useMeshSocket } from '@/hooks/useMeshSocket';
 import { useMeshStore } from '@/store/meshStore';
 
@@ -17,6 +18,9 @@ export default function App() {
     guideStart,
     guideNext,
     guidePrev,
+    runAgentCycle,
+    startIssueLoop,
+    stopIssueLoop,
   } = useMeshSocket();
   const scanning = useMeshStore((s) => s.scanning);
   const cycleCount = useMeshStore((s) => s.cycleCount);
@@ -30,8 +34,8 @@ export default function App() {
           <p className="brand">Personal Assistant</p>
           <h1 className="headline">Neural mesh for continuous system health</h1>
           <p className="lede">
-            Scan workspaces light the brain; Swift Guide diamonds walk concepts that
-            mesh into those same regions. Suggestions surface concrete next implementations.
+            Deep agent layers commute work, enhance memory, persist jobs, and loop
+            automatically to fix issues as they arise.
           </p>
           <div className="hero-cta">
             <ScanControls
@@ -44,6 +48,9 @@ export default function App() {
             />
             <button type="button" className="btn" onClick={() => guideStart()}>
               Swift Guide tour
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={() => runAgentCycle()}>
+              Agent cycle
             </button>
             <span
               className={`connection-dot${connected ? ' online' : ''}`}
@@ -68,7 +75,12 @@ export default function App() {
           onGuidePrev={() => guidePrev()}
           onOpenWorkspace={(id) => openWorkspace(id)}
         />
-        <MemoryRail />
+        <AgentLayersPanel
+          onFocusNode={(id) => focusNode(id)}
+          onRunAgentCycle={() => runAgentCycle()}
+          onStartIssueLoop={() => startIssueLoop()}
+          onStopIssueLoop={() => stopIssueLoop()}
+        />
       </div>
 
       <div className="detail-grid">
@@ -76,6 +88,7 @@ export default function App() {
           onOpenWorkspace={(id) => openWorkspace(id)}
           onOpenConcept={(id) => openConcept(id)}
         />
+        <MemoryRail />
       </div>
     </div>
   );

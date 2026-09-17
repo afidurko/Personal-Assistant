@@ -17,7 +17,11 @@ export type MeshEdgeKind =
   | 'correlates'
   | 'suggests'
   | 'monitors'
-  | 'hebbian';
+  | 'hebbian'
+  | 'commutes'
+  | 'repairs'
+  | 'persists'
+  | 'loops';
 
 export interface Finding {
   id: string;
@@ -51,6 +55,9 @@ export interface BrainNode {
   workspaceId: string | null;
   /** Optional Swift Guide concept id when this node is a tour concept */
   conceptId?: string | null;
+  /** Optional agent / layer id */
+  agentId?: string | null;
+  layerId?: string | null;
   region: BrainRegion;
   x: number; // 0–1 normalized
   y: number;
@@ -60,8 +67,8 @@ export interface BrainNode {
   radius: number;
   tags: string[];
   interactive: boolean;
-  /** Distinguishes workspace/hub vs Swift Guide concept nodes */
-  kind?: 'workspace' | 'hub' | 'concept';
+  /** Distinguishes workspace/hub vs Swift Guide concept / agent nodes */
+  kind?: 'workspace' | 'hub' | 'concept' | 'agent' | 'layer';
 }
 
 export type BrainRegion =
@@ -71,7 +78,10 @@ export type BrainRegion =
   | 'thalamus'
   | 'prefrontal'
   | 'cerebellum'
-  | 'insula';
+  | 'insula'
+  | 'basal_ganglia'
+  | 'striatum'
+  | 'repair_loop';
 
 export interface MeshEdge {
   id: string;
@@ -85,7 +95,7 @@ export interface MeshEdge {
 
 export interface MemoryTrace {
   id: string;
-  kind: 'episodic' | 'semantic' | 'procedural' | 'scan';
+  kind: 'episodic' | 'semantic' | 'procedural' | 'scan' | 'agent' | 'loop';
   content: string;
   workspaceIds: string[];
   nodeIds: string[];
@@ -94,6 +104,33 @@ export interface MemoryTrace {
   lastAccessedAt: string;
   decay: number;
   tags: string[];
+}
+
+export type LoopJobStatus = 'queued' | 'running' | 'verifying' | 'fixed' | 'escalated' | 'blocked';
+
+export interface LoopJob {
+  id: string;
+  title: string;
+  detail: string;
+  severity: Severity;
+  status: LoopJobStatus;
+  attempts: number;
+  maxAttempts: number;
+  sourceFindingId?: string;
+  sourceWorkspaceId?: string;
+  assignedAgentId: string;
+  fixSketch?: string;
+  lastError?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentCycleResult {
+  commutePaths: Array<{ from: string; to: string; weight: number; label: string }>;
+  memoryWrites: number;
+  persistedJobs: number;
+  loopActions: LoopJob[];
+  efficiencyGain: number;
 }
 
 export interface NeuralMeshState {
@@ -109,6 +146,10 @@ export interface NeuralMeshState {
   guideStep?: number;
   /** Ranked actionable suggestions derived from latest scans */
   suggestions?: SuggestiveImplementation[];
+  /** Open/looping jobs owned by persistence + issue-loop agents */
+  loopJobs?: LoopJob[];
+  /** Last agent-mesh cycle summary */
+  lastAgentCycle?: AgentCycleResult | null;
 }
 
 export type SuggestionKind =
@@ -147,7 +188,9 @@ export interface WsServerMessage {
     | 'scan_complete'
     | 'memory_update'
     | 'node_focus'
-    | 'guide_focus';
+    | 'guide_focus'
+    | 'agent_cycle'
+    | 'loop_update';
   payload: unknown;
   at: string;
 }
@@ -163,7 +206,10 @@ export interface WsClientMessage {
     | 'open_concept'
     | 'guide_next'
     | 'guide_prev'
-    | 'guide_start';
+    | 'guide_start'
+    | 'run_agent_cycle'
+    | 'start_issue_loop'
+    | 'stop_issue_loop';
   payload?: unknown;
 }
 
