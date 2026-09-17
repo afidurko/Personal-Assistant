@@ -18,6 +18,10 @@
 - Capability — complete tasks; broker sLM/DL
 - Information — vault → mesh → web with citations
 
+## Latest research for my function
+- [[2026-09-17-Cam-Function-Papers]] — P0: HMO memory tiers, MMP mesh claims, OCL/CPV gates
+- Proposals stay **propose_only** until Aaron flips `switch.cam_enhance`
+
 ## Start here
 - [[Welcome]]
 - [[Aaron]]
