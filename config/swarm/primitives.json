@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "source": "HAAS boss/worker messaging adapted as Cam synapse ops on nulltickets/mesh",
+  "docs": "docs/HAAS_CAM_PATTERNS.md",
+  "runtime": "nulltickets events + mesh/agent-commute (not OpenAI Assistants queues)",
+  "primitives": [
+    {
+      "id": "synapse.assign_task",
+      "haas_analog": "assign_task",
+      "privilege": "assign_task",
+      "args": {
+        "assignee": "agent_id | role",
+        "task": "string",
+        "parent_action_id": "optional string",
+        "privileges_grant": "optional subset of caller privileges"
+      },
+      "effect": [
+        "Create child ticket / mesh job",
+        "Queue message on assignee",
+        "Log synapse to mesh/runs"
+      ],
+      "requires_switch": ["switch.autonomy", "switch.kill"]
+    },
+    {
+      "id": "synapse.broadcast",
+      "haas_analog": "broadcast",
+      "privilege": "broadcast",
+      "args": {
+        "channel": "team id or mesh channel name",
+        "message": "string"
+      },
+      "effect": [
+        "Fan-out message to all agents on channel except sender",
+        "Log to mesh/agent-commute"
+      ],
+      "channels": [
+        "team.capability",
+        "team.info",
+        "team.agi-research-scan",
+        "team.tooling",
+        "mesh.all"
+      ],
+      "requires_switch": ["switch.autonomy", "switch.kill"]
+    },
+    {
+      "id": "synapse.resolve_task",
+      "haas_analog": "resolve_task",
+      "privilege": "resolve_task",
+      "args": {
+        "action_id": "string",
+        "status": "done | failed | blocked | cancelled",
+        "distillate": "optional summary for mesh"
+      },
+      "effect": [
+        "Close or transition ticket",
+        "Write distillate to mesh/runs",
+        "Notify parent via send_message if present"
+      ],
+      "requires_switch": ["switch.autonomy", "switch.kill"]
+    },
+    {
+      "id": "synapse.send_message",
+      "haas_analog": "send_message",
+      "privilege": "send_message",
+      "args": {
+        "to": "agent_id | role",
+        "message": "string",
+        "action_id": "optional"
+      },
+      "effect": [
+        "Point-to-point agent message (internal — not outbound motor.text)",
+        "Log to mesh/agent-commute"
+      ],
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Internal agent bus only; human-facing outbound uses motor.text after switch.outbound"
+    },
+    {
+      "id": "synapse.spawn",
+      "haas_analog": "instantiate_agent",
+      "privilege": "spawn_subagents",
+      "args": {
+        "role": "role id or ephemeral mandate",
+        "privileges": "subset of caller privileges",
+        "parent_id": "caller agent id"
+      },
+      "effect": [
+        "Create child at parent.level + 1",
+        "Register in mesh/agent-lineage",
+        "Inherit boundaries (Aaron-only tasking, kill switch)"
+      ],
+      "requires_switch": ["switch.kill"],
+      "human_gate": false,
+      "unlimited": true
+    },
+    {
+      "id": "synapse.terminate_lineage",
+      "haas_analog": "terminate_descendant",
+      "privilege": "terminate_lineage",
+      "args": {
+        "target_id": "descendant agent id",
+        "reason": "string"
+      },
+      "effect": [
+        "Verify caller is ancestor or Aaron",
+        "Cancel descendant tree",
+        "Log termination in mesh/agent-lineage"
+      ],
+      "requires_switch": ["switch.kill"],
+      "notes": "Aaron kill_master terminates everyone without privilege check"
+    }
+  ],
+  "ticket_mapping": {
+    "assign_task": "nulltickets.create + claim lease for assignee",
+    "resolve_task": "nulltickets.transition",
+    "broadcast": "nulltickets.store append mesh/agent-commute",
+    "send_message": "nulltickets.store append mesh/agent-commute",
+    "spawn": "nulltickets.store put mesh/agent-lineage/{id}",
+    "terminate_lineage": "nulltickets.cancel descendants + lineage update"
+  }
+}

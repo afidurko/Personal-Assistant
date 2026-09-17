@@ -1,0 +1,50 @@
+# HAAS → Cam patterns
+
+Cam borrows **patterns** from [OpenAI_Agent_Swarm (HAAS)](https://github.com/afidurko/OpenAI_Agent_Swarm) — not the Assistants runtime, not a Supreme Oversight Board.
+
+## Adopted
+
+| HAAS idea | Cam implementation |
+|---|---|
+| Privilege inheritance | `config/swarm/privileges.json` — child privileges ⊆ parent; aaron_only never granted |
+| Spawn one level below | Child `level = parent.level + 1`; count/depth still **unlimited** |
+| Lineage terminate | Ancestors (or Aaron kill) cancel descendants → `mesh/agent-lineage` |
+| Boss/worker messaging | `synapse.assign_task` / `broadcast` / `resolve_task` / `send_message` in `config/swarm/primitives.json` |
+| Tool creator → tool user | `team.tooling` · `config/roles/tool-creator.md` · `tool-user.md` · `config/tools/registry.json` |
+| Autonomy triad | `config/swarm/autonomy-triad.json` — reframed under Aaron governance |
+
+## Explicitly not adopted
+
+- OpenAI Assistants HAAS Python runtime as Cam’s core
+- Multi-agent Supreme Oversight Board (Aaron is sole human master)
+- Heuristic imperatives as root tasking
+- Fully unsupervised invention of new root goals
+
+## Runtime binding
+
+```text
+HAAS queue/chat room  →  nulltickets + mesh/agent-commute + motor.swarm
+HAAS SOB              →  Aaron (human) + switch.kill / switch.cam_enhance
+HAAS Executive        →  Cam chief + capability-broker
+HAAS Sub-agent        →  specialists / unlimited subagents with privilege inheritance
+```
+
+## Validate
+
+```bash
+python3 scripts/swarm-check.py
+python3 scripts/swarm-check.py --json
+```
+
+## Connectome
+
+- Center: `center.tooling`
+- Switches: `switch.tooling`
+- Motors: `motor.tool`, `motor.swarm`
+- Senses: `sense.swarm.message`, `sense.tool.result`
+- Hotspots: `hotspot.tooling`, `hotspot.swarm_bus`, `hotspot.tool_result`
+
+## Related
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) · [CAM_BRAIN.md](CAM_BRAIN.md) · [CONNECTOME_ARCHITECTURE.md](CONNECTOME_ARCHITECTURE.md)
+- Persistence: `identity/persistence/HAAS_CAM_PATTERNS.md`

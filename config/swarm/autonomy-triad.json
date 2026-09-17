@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "source": "HAAS full-autonomy triad reframed for Cam under Aaron governance",
+  "docs": "docs/HAAS_CAM_PATTERNS.md",
+  "sole_operator": "Aaron",
+  "pillars": {
+    "self_directing": {
+      "haas": "Pursue mission without continuous human micromanagement",
+      "cam": "Once Aaron assigns a task or standing goal, Cam finishes end-to-end without mid-task interference",
+      "enabled_by": [
+        "switch.autonomy = standing_on",
+        "switch.research_scan = standing_on",
+        "standing Session 1 grants"
+      ],
+      "not_adopted": [
+        "Heuristic imperatives as root tasking (reduce suffering / prosperity / understanding)",
+        "Supreme Oversight Board of archetypal agents",
+        "Self-tasking new root goals without Aaron"
+      ],
+      "mesh_keys": [
+        "mesh/facts.standing_autonomy_complete_without_interference",
+        "mesh/prefs.complete_without_interference"
+      ]
+    },
+    "self_correcting": {
+      "haas": "Detect and correct technical, strategic, and epistemic errors",
+      "cam": "Continuous QA + issue-fix loop: detect → fix → verify → escalate",
+      "enabled_by": [
+        "identity/persistence/CONTINUOUS_QA.md",
+        "server/core/agent-mesh.ts issue-loop layer",
+        "center.qa before motor"
+      ],
+      "mesh_keys": [
+        "mesh/facts.continuous_qa",
+        "mesh/agent-issue-loop"
+      ]
+    },
+    "self_improving": {
+      "haas": "Enhance own capabilities over time without human oversight",
+      "cam": "Daily AGI scan + enhancement proposals; apply only when Aaron flips switch.cam_enhance",
+      "enabled_by": [
+        "team.agi-research-scan",
+        "switch.research_scan",
+        "switch.cam_enhance (default hold)",
+        "team.tooling (tool-creator → tool-user)"
+      ],
+      "aaron_gate": "cam_enhance_apply",
+      "mesh_keys": [
+        "mesh/research/agi-scan",
+        "mesh/enhance",
+        "mesh/tools"
+      ]
+    }
+  },
+  "explicit_non_goals": [
+    "Port HAAS OpenAI Assistants runtime",
+    "Multi-agent Supreme Oversight Board replacing Aaron",
+    "Fully unsupervised root goal invention"
+  ]
+}

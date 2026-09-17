@@ -154,6 +154,8 @@
 
     {"from": "center.qa", "to": "switch.research_scan", "weight": 0.9},
     {"from": "center.qa", "to": "switch.cam_enhance", "weight": 0.9},
+    {"from": "center.qa", "to": "center.memory", "weight": 0.8, "notes": "proofread distillates into mesh/memory"},
+    {"from": "center.qa", "to": "switch.tooling", "weight": 0.9},
 
     {"from": "switch.research_scan", "to": "motor.web_fetch", "when": "act", "weight": 1.0},
     {"from": "switch.research_scan", "to": "motor.vault", "when": "act", "weight": 0.8},
@@ -167,6 +169,32 @@
     {"from": "motor.slm", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
     {"from": "motor.slm", "to": "sense.slm.inference", "weight": 0.5, "notes": "self-model loop"},
     {"from": "motor.dl", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
-    {"from": "motor.dl", "to": "sense.dl.embedding", "weight": 0.5, "notes": "self-model loop"}
+    {"from": "motor.dl", "to": "sense.dl.embedding", "weight": 0.5, "notes": "self-model loop"},
+
+    {"from": "sense.swarm.message", "to": "center.tooling", "weight": 1.0},
+    {"from": "sense.swarm.message", "to": "center.capability", "weight": 0.8},
+    {"from": "sense.swarm.message", "to": "center.chief", "weight": 0.7},
+    {"from": "sense.tool.result", "to": "center.tooling", "weight": 1.0},
+    {"from": "sense.tool.result", "to": "center.ops", "weight": 0.8},
+    {"from": "sense.tool.result", "to": "center.qa", "weight": 0.9},
+
+    {"from": "center.router", "to": "center.tooling", "weight": 1.0},
+    {"from": "center.capability", "to": "center.tooling", "weight": 0.9},
+    {"from": "center.tooling", "to": "center.capability", "weight": 0.8},
+    {"from": "center.tooling", "to": "center.ops", "weight": 0.9},
+    {"from": "center.tooling", "to": "center.qa", "weight": 1.0},
+    {"from": "center.tooling", "to": "center.slm", "weight": 0.6},
+    {"from": "center.tooling", "to": "switch.tooling", "weight": 1.0},
+    {"from": "center.tooling", "to": "switch.autonomy", "weight": 0.8},
+
+    {"from": "switch.tooling", "to": "motor.tool", "when": "act", "weight": 1.0},
+    {"from": "switch.tooling", "to": "motor.swarm", "when": "act", "weight": 1.0},
+    {"from": "switch.tooling", "to": "motor.mesh", "when": "act", "weight": 0.8},
+    {"from": "switch.autonomy", "to": "motor.swarm", "when": "act", "weight": 0.9},
+
+    {"from": "motor.tool", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
+    {"from": "motor.tool", "to": "sense.tool.result", "weight": 0.7, "notes": "tool result loop"},
+    {"from": "motor.swarm", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
+    {"from": "motor.swarm", "to": "sense.swarm.message", "weight": 0.9, "notes": "agent bus loop"}
   ]
 }

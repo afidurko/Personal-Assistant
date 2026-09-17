@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "namespace": "mesh/tools",
+  "docs": "docs/HAAS_CAM_PATTERNS.md",
+  "tools": [
+    {
+      "id": "tool.jarvis.echo",
+      "purpose": "Smoke-test Jarvis CLI availability from tool-user",
+      "created_by_role": "tool-creator",
+      "entrypoint": "integrations/jarvis",
+      "kind": "jarvis_cli",
+      "inputs": {
+        "args": "string[]"
+      },
+      "outputs": {
+        "stdout": "string",
+        "exit_code": "number"
+      },
+      "required_privileges": ["use_jarvis", "use_tool"],
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "risk": "low",
+      "status": "template"
+    },
+    {
+      "id": "tool.connectome.route",
+      "purpose": "Dry-run a sense→motor plan via connectome-route.py",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/connectome-route.py",
+      "kind": "local_script",
+      "inputs": {
+        "sense": "string",
+        "goal": "string",
+        "kill": "boolean"
+      },
+      "outputs": {
+        "motor_plan": "object"
+      },
+      "required_privileges": ["use_tool", "read_mesh"],
+      "requires_switch": ["switch.kill"],
+      "risk": "low",
+      "status": "template"
+    },
+    {
+      "id": "tool.swarm.check",
+      "purpose": "Validate privilege inheritance + boss/worker primitives",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/swarm-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "report": "object"
+      },
+      "required_privileges": ["use_tool", "read_mesh"],
+      "requires_switch": ["switch.kill"],
+      "risk": "low",
+      "status": "active"
+    }
+  ]
+}

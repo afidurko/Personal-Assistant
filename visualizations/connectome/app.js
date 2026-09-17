@@ -34,6 +34,7 @@
     "center.info": { x: 340, y: 250, r: 14, label: "info", kind: "center", repos: ["smart-second-brain"] },
     "center.slm": { x: 580, y: 175, r: 13, label: "sLM", kind: "center", repos: ["nullclaw"] },
     "center.dl": { x: 270, y: 270, r: 13, label: "DL", kind: "center", repos: ["paddledetection", "nullclaw"] },
+    "center.tooling": { x: 600, y: 240, r: 14, label: "tooling", kind: "center", repos: ["jarvis", "nullclaw"] },
     // Switches (mid brain/spine junction)
     "switch.autonomy": { x: 450, y: 310, r: 12, label: "autonomy", kind: "switch", repos: ["nulltickets"] },
     "switch.outbound": { x: 520, y: 340, r: 11, label: "outbound", kind: "switch", repos: ["openclaw", "assistant"] },
@@ -43,6 +44,7 @@
     "switch.cam_enhance": { x: 320, y: 330, r: 11, label: "enhance", kind: "switch", repos: ["nullhub"] },
     "switch.slm_local": { x: 600, y: 310, r: 10, label: "sLM on", kind: "switch", repos: ["nullclaw"] },
     "switch.dl_local": { x: 280, y: 340, r: 10, label: "DL on", kind: "switch", repos: ["nullclaw"] },
+    "switch.tooling": { x: 540, y: 360, r: 11, label: "tools", kind: "switch", repos: ["jarvis", "nulltickets"] },
     "switch.kill": { x: 450, y: 360, r: 13, label: "KILL", kind: "switch", repos: ["nullhub"] },
     // Sensory (left spinal roots)
     "sense.chat.aaron": { x: 250, y: 360, r: 14, label: "Aaron chat", kind: "sense", repos: ["nullclaw"] },
@@ -58,6 +60,8 @@
     "sense.web.agi_feed": { x: 165, y: 380, r: 12, label: "AGI feeds", kind: "sense", repos: ["smart-second-brain"] },
     "sense.slm.inference": { x: 200, y: 160, r: 11, label: "sLM out", kind: "sense", repos: ["nullclaw"] },
     "sense.dl.embedding": { x: 190, y: 120, r: 11, label: "DL out", kind: "sense", repos: ["nullclaw"] },
+    "sense.swarm.message": { x: 175, y: 450, r: 11, label: "swarm bus", kind: "sense", repos: ["nulltickets"] },
+    "sense.tool.result": { x: 185, y: 500, r: 11, label: "tool result", kind: "sense", repos: ["jarvis"] },
     // Motor (right spinal roots)
     "motor.text": { x: 680, y: 340, r: 14, label: "text", kind: "motor", repos: ["openclaw", "assistant"] },
     "motor.call": { x: 700, y: 390, r: 13, label: "call", kind: "motor", repos: ["openclaw"] },
@@ -74,6 +78,8 @@
     "motor.enhance": { x: 630, y: 220, r: 12, label: "enhance", kind: "motor", repos: ["nullhub", "nullclaw"] },
     "motor.slm": { x: 700, y: 220, r: 12, label: "sLM run", kind: "motor", repos: ["nullclaw"] },
     "motor.dl": { x: 710, y: 170, r: 12, label: "DL run", kind: "motor", repos: ["nullclaw"] },
+    "motor.tool": { x: 735, y: 250, r: 12, label: "tool run", kind: "motor", repos: ["jarvis", "nullclaw"] },
+    "motor.swarm": { x: 740, y: 330, r: 12, label: "swarm ops", kind: "motor", repos: ["nulltickets"] },
   };
 
   const HOTSPOTS = {
@@ -142,6 +148,18 @@
       feedback: ["motor.web_fetch", "center.memory", "center.chief"],
       behavior: "AGI feeds → distill",
       repos: ["smart-second-brain", "nullclaw"],
+    },
+    "sense.swarm.message": {
+      pathway: ["sense.swarm.message", "center.tooling", "center.capability", "switch.autonomy", "motor.swarm"],
+      feedback: ["motor.swarm", "sense.swarm.message", "center.memory", "center.chief"],
+      behavior: "boss/worker assign → broadcast → resolve",
+      repos: ["nulltickets", "nullclaw", "jarvis"],
+    },
+    "sense.tool.result": {
+      pathway: ["sense.tool.result", "center.tooling", "center.qa", "center.memory", "switch.autonomy", "motor.mesh"],
+      feedback: ["motor.mesh", "sense.tool.result", "center.tooling"],
+      behavior: "tool result → QA → mesh",
+      repos: ["jarvis", "nulltickets", "nullclaw"],
     },
   };
 

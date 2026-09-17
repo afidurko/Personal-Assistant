@@ -170,7 +170,7 @@ export const agiResearchScanner: WorkspaceScanner = {
     }
 
     const score = scoreFromFindings(findings);
-    const status = statusFromScore(score, findings);
+    const status = statusFromScore(score);
     return {
       id: ID,
       kind: KIND,

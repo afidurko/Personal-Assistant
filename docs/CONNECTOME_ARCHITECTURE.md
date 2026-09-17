@@ -106,8 +106,9 @@ Where specialization lives (paper: dimorphism concentrates centrally).
 | `center.info` | Cited information gather | `info-retriever` |
 | `center.slm` | Small-LM cortex | `slm-runtime` |
 | `center.dl` | Deep-learning cortex | `dl-enhance` |
+| `center.tooling` | Tool create/run + agent bus | `tool-creator` / `tool-user` |
 
-Recursive subagents = local interneuron bursts (**unlimited**; all teams may spawn).
+Recursive subagents = local interneuron bursts (**unlimited** count/depth; **privilege inheritance** — child ⊆ parent; all teams may spawn).
 
 ## Circuit switches (`config/connectome/switches.json`)
 
@@ -124,6 +125,7 @@ Paper: isomorphic sensory paths diverge via switches into antagonistic circuits.
 | `switch.cam_enhance` | **hold** (Aaron) | apply Cam functionality | propose-only |
 | `switch.slm_local` | standing ON | motor.slm | no local sLM |
 | `switch.dl_local` | standing ON | motor.dl | no local DL |
+| `switch.tooling` | standing ON | motor.tool + motor.swarm | no new tools |
 | `switch.kill` | armed | all motor silenced | — |
 
 Aaron flips switches; Cam does not accept other operators. Aaron has ultimate say on functionality apply.
@@ -149,6 +151,8 @@ Effectors fire only after a switch resolves to **act**.
 | `motor.enhance` | Apply Cam config/role/connectome/sLM-DL changes (Aaron-gated) |
 | `motor.slm` | Local small-LM inference |
 | `motor.dl` | Local DL embed/rerank/cluster |
+| `motor.tool` | Run registered tool (team.tooling) |
+| `motor.swarm` | Boss/worker synapse ops (assign/broadcast/resolve/spawn/terminate) |
 
 ## Hotspots (dense specialized subgraphs)
 
@@ -163,10 +167,11 @@ From the paper’s “male-specific connection hotspots” idea — Cam densifie
 4. **Capability hotspot** — Aaron task → capability team → specialists/sLM/DL → done  
 5. **Info hotspot** — question → vault→mesh→web → cited answer  
 6. **sLM / DL hotspots** — local model assists + feedback into mesh  
-7. **Presence hotspot** — transcript → Cam reply → soft airy fluent English TTS → face  
-8. **Life-ops hotspot** — calendar/chores → Jarvis/calendar motor  
+7. **Tooling / swarm bus hotspots** — tool-creator→tool-user + privilege-aware agent messaging  
+8. **Presence hotspot** — transcript → Cam reply → soft airy fluent English TTS → face  
+9. **Life-ops hotspot** — calendar/chores → Jarvis/calendar motor  
 
-Defined in `config/connectome/hotspots.json`. See also [CAM_BRAIN.md](CAM_BRAIN.md) and [AGI_RESEARCH_TEAM.md](AGI_RESEARCH_TEAM.md).
+Defined in `config/connectome/hotspots.json`. See also [CAM_BRAIN.md](CAM_BRAIN.md), [AGI_RESEARCH_TEAM.md](AGI_RESEARCH_TEAM.md), and [HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md).
 
 ## Synapse protocol (implementation contract)
 

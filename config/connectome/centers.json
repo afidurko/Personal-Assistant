@@ -145,7 +145,9 @@
       "projects_to": [
         "switch.autonomy",
         "switch.careers_submit",
-        "center.chief"
+        "center.chief",
+        "center.memory",
+        "switch.tooling"
       ]
     },
     {
@@ -168,7 +170,8 @@
         "center.capability",
         "center.info",
         "center.slm",
-        "center.dl"
+        "center.dl",
+        "center.tooling"
       ]
     },
     {
@@ -287,12 +290,22 @@
         "center.enhance"
       ],
       "enhancement": "config/enhancement/slm-dl.json"
+    },
+    {
+      "id": "center.tooling",
+      "role": "tool-creator",
+      "function": "tool-creator → tool-user; privilege-aware tool registry for motors",
+      "accepts": ["spike.task", "spike.tool_result", "spike.swarm", "spike.question"],
+      "projects_to": ["center.capability", "center.ops", "center.qa", "center.slm", "switch.autonomy", "switch.tooling"],
+      "team": "team.tooling",
+      "swarm": "config/swarm/privileges.json"
     }
   ],
   "teams": [
     "team.agi-research-scan",
     "team.capability",
-    "team.info"
+    "team.info",
+    "team.tooling"
   ],
   "recursion": {
     "max_delegate_depth": null,
@@ -300,9 +313,13 @@
     "unlimited": true,
     "human_gate_to_spawn": false,
     "all_teams_may_spawn_subagents": true,
-    "analogy": "unbounded interneuron recruitment \u2014 Cam and all teams may spawn freely to finish work",
+    "privilege_inheritance": true,
+    "lineage_terminate": true,
+    "spawn_one_level_below_only": true,
+    "analogy": "unbounded interneuron recruitment with privilege inheritance — count/depth uncapped; privileges never escalate",
     "authorized_by": "Aaron",
     "authorized_at": "2026-09-16",
-    "reaffirmed_at": "2026-09-17"
+    "reaffirmed_at": "2026-09-17",
+    "swarm_config": "config/swarm/privileges.json"
   }
 }
