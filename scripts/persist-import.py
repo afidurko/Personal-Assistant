@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import subprocess
+import sys
 import tempfile
 import zipfile
 from pathlib import Path
@@ -20,6 +22,24 @@ def main() -> int:
         action="store_true",
         help="do not overwrite files that already exist",
     )
+    parser.add_argument(
+        "--install-cline-rules",
+        action="store_true",
+        default=True,
+        help="propagate .clinerules into registered workspaces after import (default on)",
+    )
+    parser.add_argument(
+        "--no-install-cline-rules",
+        action="store_true",
+        help="skip rules propagation",
+    )
+    parser.add_argument(
+        "--sync-schedules",
+        action="store_true",
+        default=True,
+        help="refresh cline schedule export into cache (default on)",
+    )
+    parser.add_argument("--no-sync-schedules", action="store_true")
     args = parser.parse_args()
 
     src = Path(args.src)
@@ -41,7 +61,22 @@ def main() -> int:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, dest)
             print(f"restored {rel}")
+
+    if args.install_cline_rules and not args.no_install_cline_rules:
+        script = ROOT / "scripts" / "install-cline-rules.py"
+        if script.exists():
+            subprocess.run([sys.executable, str(script), "--force"], check=False)
+
+    if args.sync_schedules and not args.no_sync_schedules:
+        script = ROOT / "scripts" / "sync-cline-schedules.py"
+        if script.exists():
+            subprocess.run(
+                [sys.executable, str(script), "--apply-cache"],
+                check=False,
+            )
+
     print("import complete — re-attach secrets locally; verify identity/PROFILE.md")
+    print("next: git submodule update --init --recursive && cline auth && python3 scripts/run-cline.py --doctor --dry-run")
     return 0
 
 

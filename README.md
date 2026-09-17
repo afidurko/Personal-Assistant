@@ -11,7 +11,7 @@ talking presence — with a smart second brain, **agent teams**, and a **sLM/DL 
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · PaddleDetection · LinkedIn/Indeed
+- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
@@ -95,5 +95,7 @@ data/            Persisted mesh + memory (gitignored runtime state)
 
 Persona locked. Starter vault created. Always-on autonomy set.
 Brain reimagined with AGI scan / capability / info teams + sLM/DL cortex.
+Cline wired as shared coding effector for all agents and future workspaces
+(registry, runner, MCP, schedules, tickets).
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.
 Neural-mesh scanner stack is present alongside the Cam connectome foundation.

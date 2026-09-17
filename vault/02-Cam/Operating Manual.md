@@ -8,10 +8,10 @@ Brain overview: `docs/CAM_BRAIN.md` · [[Brain]]
 
 | Layer | Examples |
 |---|---|
-| Sensory | chat, vault, LinkedIn/Indeed, calendar, ASR, vision, **arxiv/agi feeds**, **daily clock**, sLM/DL feedback |
-| Centers | Cam chief, research, careers, ops, comms, docs, memory, QA, **agi_scan**, **enhance**, **capability**, **info**, **slm**, **dl** |
-| Switches | autonomy, outbound, careers submit, presence, kill, **research_scan**, **cam_enhance**, **slm_local**, **dl_local** |
-| Motor | text/call/FaceTime, speak, Jarvis, docs, jobs, vault writes, **web_fetch**, **enhance**, **slm**, **dl** |
+| Sensory | chat, vault, LinkedIn/Indeed, calendar, ASR, vision, **Cline results**, arxiv/agi feeds, daily clock, sLM/DL feedback |
+| Centers | Cam chief, research, careers, ops, comms, docs, **coding**, memory, QA, agi_scan, enhance, capability, info, slm, dl |
+| Switches | autonomy, outbound, careers submit, presence, kill, research_scan, cam_enhance, slm_local, dl_local |
+| Motor | text/call/FaceTime, speak, Jarvis, **Cline**, docs, jobs, vault writes, web_fetch, enhance, slm, dl |
 
 Motor only fires on an **act** pathway tied to Aaron’s task/goal (or standing grants). See also [[Connectome]].
 
@@ -25,15 +25,16 @@ Motor only fires on an **act** pathway tied to Aaron’s task/goal (or standing 
 ## Boot order
 1. Persistence / mesh seed
 2. This vault (smart-second-brain)
-3. **sLM + DL cortex**
-4. **AGI daily research scan**
+3. sLM + DL cortex
+4. AGI daily research scan
 5. Research hotspot
 6. Careers hotspot (LinkedIn + Indeed)
 7. Life-ops hotspot + Jarvis
 8. Comms + presence hotspot
 9. Docs hotspot
-10. Capability + Information teams
-11. Vision when tasked
+10. Coding hotspot (Cline — all agents / all workspaces)
+11. Capability + Information teams
+12. Vision when tasked
 
 ## Before answering personal questions
 Search this vault (Smart Second Brain) + mesh namespaces.

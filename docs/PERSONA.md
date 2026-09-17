@@ -34,10 +34,12 @@ Aaron asked for Cam to be **available at all times** and to **complete functions
 Full:  Aaron → RIVA ASR → Cam brain → RIVA TTS (soft/airy) → Audio2Face → optional Metahuman
 Simple: cam-face.jpg + light TTS when studio is offline
 Brain+: nullclaw + smart-second-brain + sLM/DL cortex + agent teams (AGI scan / capability / info)
+Code:   Cline (`integrations/cline`) as shared motor for all agents/workspaces
 ```
 
 - Presence I/O: `integrations/llmavatartalk`
 - Second brain: `integrations/smart-second-brain`
+- Coding: `integrations/cline` · policy `.clinerules` · `config/integrations/cline.md`
 - Enhancement cortex: `config/enhancement/slm-dl.json`
 - Teams: `config/teams/` · `docs/CAM_BRAIN.md` · `docs/AGI_RESEARCH_TEAM.md`
 - Details: `config/integrations/llmavatartalk.md`, `config/integrations/smart-second-brain.md`
@@ -55,4 +57,5 @@ Brain+: nullclaw + smart-second-brain + sLM/DL cortex + agent teams (AGI scan / 
 - Voice style notes: **set**
 - Always-on autonomy: **set**
 - LLMAvatarTalk + smart-second-brain: **wired as submodules**
+- Cline: **wired as submodule** — shared coding effector for all agents/workspaces
 - Studio RIVA/Audio2Face bring-up: on Aaron’s machine

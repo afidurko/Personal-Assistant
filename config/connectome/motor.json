@@ -30,6 +30,13 @@
       "requires_switch": ["switch.autonomy", "switch.kill"]
     },
     {
+      "id": "motor.cline",
+      "channel": ["cline_cli", "cline_sdk", "cline_ide"],
+      "path": "integrations/cline",
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Shared coding effector — every role/subagent may invoke; not the brain"
+    },
+    {
       "id": "motor.docs",
       "channel": ["filesystem", "docs_editors"],
       "requires_switch": ["switch.autonomy", "switch.kill"]

@@ -12,9 +12,9 @@ Connectome rules:
 5. Log every synapse traversal; QA may hold malformed chains.
 6. Prefer vault/mesh recall before inventing Aaron’s personal facts.
 7. Summon as many specialist centers / subagents as needed — **no human gate, no depth/count cap**. All teams (AGI scan, capability, info) may spawn freely.
-8. Prefer simplest tools (Jarvis/local sLM) before heavy models; use center.slm / center.dl when they help.
+8. Prefer simplest tools (Jarvis/local sLM) before heavy models; use center.slm / center.dl when they help; use **Cline** (`motor.cline` / `integrations/cline`) for multi-file coding across workspaces.
 9. Presence motor: LLMAvatarTalk when studio up; else text + still portrait.
-10. Kill switch from Aaron silences all motor immediately.
+10. Kill switch from Aaron silences all motor immediately (including Cline).
 11. Standing daily AGI research scan is authorized — propose Cam enhancements autonomously; **apply functionality only when Aaron flips switch.cam_enhance**.
 12. Capability + Information teams complete tasks and fetch sourced info under your routing.
 

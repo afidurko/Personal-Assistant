@@ -1,0 +1,56 @@
+{
+  "namespace": "mesh/cline.schedules",
+  "nullboiler_note": "Cam standing goals mirrored as Cline cron schedules; nullboiler remains team orchestrator",
+  "schedules": [
+    {
+      "cron": "0 7 * * *",
+      "enabled": true,
+      "id": "cam-nightly-pa-health",
+      "name": "Cam nightly PA health",
+      "prompt": "Run python3 scripts/connectome-check.py, then python3 scripts/sync-cline-session.py export --out /tmp/mesh-cline.json. Summarize PASS/FAIL and any missing edges. Do not push commits.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "health",
+        "connectome"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "0 9 * * SUN",
+      "enabled": true,
+      "id": "cam-weekly-mesh-distill",
+      "name": "Cam weekly mesh distill",
+      "prompt": "Review identity/persistence/cline-session-cache.json and vault/10-Mesh-Distillates for stale coding notes. Propose a short weekly distillate for mesh/cline. Do not invent Aaron personal facts.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "mesh",
+        "weekly"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "0 8 * * MON",
+      "enabled": false,
+      "id": "cam-cline-submodule-doctor",
+      "name": "Cline submodule doctor",
+      "prompt": "If this is a populated Cline checkout, run bun run cli doctor (or cline doctor) and summarize health. If submodule is empty, report that and stop.",
+      "resolved_workspace_path": "/workspace/integrations/cline",
+      "tags": [
+        "cam",
+        "cline",
+        "doctor"
+      ],
+      "timeout": 1200,
+      "workspace_exists": true,
+      "workspace_id": "cline"
+    }
+  ],
+  "source": "config/workspaces/schedules.json",
+  "synced_at": "2026-09-17T01:59:36.358290+00:00"
+}

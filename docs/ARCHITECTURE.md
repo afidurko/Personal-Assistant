@@ -18,8 +18,9 @@ and outbound contact (text / FaceTime / call) when needed.
 | [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection on approved media; submodule — not always-on camera |
 | [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); not a second brain |
 | [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
+| [cline](https://github.com/afidurko/cline) | **Coding effector** | CLI/SDK/IDE agent — shared by all roles & workspaces; not the brain |
 
-**Rule:** Null stack owns execution truth. Jarvis, PaddleDetection, LLMAvatarTalk, and
+**Rule:** Null stack owns execution truth. Jarvis, Cline, PaddleDetection, LLMAvatarTalk, and
 smart-second-brain are tools Cam uses. Only Aaron assigns work; Cam finishes granted
 work without mid-task interference.
 
@@ -64,10 +65,10 @@ You (human) ──override / kill──► nullhub / chat
               (nullclaw)       (research, jobs,   (interneurons)
                                ops, comms…)
                                       │
-                    ┌─────────────────┴─────────────────┐
-                    ▼         ▼          ▼              ▼
-                 Jarvis   PaddleDet   LLMAvatarTalk   smart-second-brain
-                 motor     sense       face/voice      memory cortex
+                    ┌──────────────────┴──────────────────┐
+                    ▼      ▼       ▼         ▼            ▼
+                 Jarvis  Cline  PaddleDet  AvatarTalk  smart-second-brain
+                 motor   code    sense     face/voice   memory cortex
 ```
 
 - **Tracker = synaptic truth** (nulltickets)
@@ -83,6 +84,7 @@ You (human) ──override / kill──► nullhub / chat
 | `researcher` | Source-backed research; uses vault + web |
 | `ops` | Life automation; Jarvis |
 | `docs` | Draft/fix documents |
+| `coding` | Cline-powered code edits (also invokable by every role) |
 | `careers` | LinkedIn + Indeed |
 | `comms` | Text / call / FaceTime + avatar presence |
 | `vision` | PaddleDetection on tasked media |
@@ -110,9 +112,10 @@ All agents share one mesh, not private silos:
 1. **Durable facts** → nulltickets `store` namespaces (`mesh/facts`, `mesh/people`, `mesh/prefs`, `mesh/projects`)
 2. **Session recall** → each nullclaw instance’s memory engine (default SQLite hybrid)
 3. **Jarvis local memory** → `integrations/jarvis` `memory.json` is a *cache*; sync into `mesh/jarvis` via `scripts/sync-jarvis-memory.py`
-4. **Vision distillates** → PaddleDetection outputs summarized into `mesh/vision` (no raw frames by default)
-5. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
-6. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
+4. **Cline sessions** → coding distillates across workspaces in `mesh/cline` via `scripts/sync-cline-session.py`
+5. **Vision distillates** → PaddleDetection outputs summarized into `mesh/vision` (no raw frames by default)
+6. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
+7. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
 
 This is the “neural meshing network”: a shared, searchable, versioned memory
 plus a durable work graph — not a separate ML training stack.
@@ -150,11 +153,13 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 3. Keep PaddleDetection for vision (`integrations/paddledetection` @ `release/2.9`) — **added**
 4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
 5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
-6. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
-7. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
-8. Wire mesh + vault sync
-9. Bridge AvatarTalk I/O to Cam on Aaron’s studio machine
-10. Add connectors; expand specialists
+6. Keep Cline as shared coding effector for all agents/workspaces (`integrations/cline`) — **added**
+7. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
+8. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
+9. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
+10. Wire mesh + vault + Cline session/ticket sync into live nulltickets
+11. Bridge AvatarTalk I/O to Cam on Aaron’s studio machine
+12. Add connectors; expand specialists
 
 ## Non-goals (v1)
 

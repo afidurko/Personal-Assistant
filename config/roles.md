@@ -6,6 +6,7 @@
 | Researcher | `researcher` | yes | — | citations; uses vault |
 | Life Ops | `ops` | yes | — | Jarvis |
 | Documents | `docs` | yes | — | drafts/fixes |
+| Coding | `coding` | yes | — | Cline effector — shared by all agents |
 | Careers | `careers` | yes | — | LinkedIn + Indeed |
 | Comms | `comms` | yes | — | text/call/FaceTime + avatar |
 | Vision | `vision` | yes | — | PaddleDetection when tasked |
@@ -34,6 +35,7 @@
 - No `max_delegate_depth` / no `max_subagents` cap (persistent grant 2026-09-16; reaffirmed 2026-09-17)
 - Subagents inherit boundaries and mesh/vault access
 - Child work is still tracked as nulltickets tasks when the runtime is live
+- **Any role may invoke Cline** (`motor.cline`) for coding — not siloed to `coding`
 
 ## Enhancement cortex (DL + sLMs)
 
@@ -44,6 +46,7 @@
 ## Local tools
 
 - Jarvis: `integrations/jarvis`
+- Cline: `integrations/cline` (all agents / all workspaces)
 - Vision: `integrations/paddledetection`
 - Presence: `integrations/llmavatartalk`
 - Second brain: `integrations/smart-second-brain`

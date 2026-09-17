@@ -13,7 +13,7 @@ Aaron runs Cam across **repo checkouts**, **scan workspaces**, **integration sub
 | **Scan workspaces (PR #2)** | health · architecture · vulnerability · updates · improvements · **agi_research** | **Merged to main** + AGI scanner on this branch |
 | **Brodmann / 3D cortex (PR #3)** | Plasticity + human brain viz + health conductor | Lives on `cursor/swiftguide-brain-map-0f2c` — overlaps connectome viz |
 | **Agent teams (PR #4 / this)** | AGI Research Scan · Capability · Information + sLM/DL | This branch |
-| **Cline effector (PR #5)** | Shared coding effector | Parallel draft — rebase after #4 |
+| **Cline effector (PR #5)** | Shared coding effector + `layers.coding_workspaces` | Merging into this branch — registry unified |
 
 ## Parallel cloud-agent branches (same environment)
 

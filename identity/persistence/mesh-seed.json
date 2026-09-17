@@ -10,6 +10,22 @@
     "track_in_tickets": true,
     "watch_enabled": true
   },
+  "mesh/cline": {
+    "available_to": "all_roles_and_subagents",
+    "chooser": "scripts/choose-workspace.py",
+    "cross_workspace": true,
+    "effector": "cline",
+    "mcp": "scripts/cam-mcp-server.py",
+    "registry": "config/workspaces/registry.json",
+    "rules": ".clinerules",
+    "runner": "scripts/run-cline.py",
+    "schedules": "config/workspaces/schedules.json",
+    "source": "https://github.com/afidurko/cline",
+    "status": "runtime_wired",
+    "submodule": "integrations/cline",
+    "sync_script": "scripts/sync-cline-session.py",
+    "tickets": "identity/persistence/tickets"
+  },
   "mesh/enhance": {
     "slm_dl_config": "config/enhancement/slm-dl.json",
     "switch_cam_enhance": "hold",
@@ -41,6 +57,11 @@
     "cam_live_converse_enabled": true,
     "cam_live_mic": true,
     "cam_live_mic_enabled": true,
+    "cline_available_to_all_agents": true,
+    "cline_coding_effector": true,
+    "cline_cross_workspace": true,
+    "cline_rules": ".clinerules",
+    "cline_submodule": "integrations/cline",
     "continuous_qa": true,
     "daily_agi_research_scan": true,
     "dl_cortex_enabled": true,
@@ -130,6 +151,11 @@
     "cam_primary_language": "en",
     "cam_voice": "soft airy fluent English",
     "chief_voice": "Cam",
+    "cline_available_to_all_agents": true,
+    "cline_coding_effector": true,
+    "cline_cross_workspace": true,
+    "cline_rules": ".clinerules",
+    "cline_submodule": "integrations/cline",
     "complete_without_interference": true,
     "continuous_monitoring": false,
     "continuous_qa": true,
@@ -159,7 +185,7 @@
       "indeed"
     ],
     "kill_switch_default": "pause_all",
-    "max_delegate_depth": null,
+    "max_delegate_depth": 3,
     "max_subagents": null,
     "named_specialists": true,
     "persistence_cross_workspace": true,
@@ -178,6 +204,11 @@
     "timezone": "America/New_York",
     "unlimited_subagents": true,
     "weekly_review": true
+  },
+  "mesh/projects": {
+    "default_workspace_id": "personal-assistant",
+    "source": "config/workspaces/registry.json",
+    "status": "registry_wired"
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,

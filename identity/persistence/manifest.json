@@ -38,7 +38,15 @@
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
-    "docs/PERSISTENCE.md"
+    "docs/PERSISTENCE.md",
+    "identity/persistence/cline-session-cache.json",
+    "identity/persistence/cline-schedules.export.json",
+    "config/integrations/cline.md",
+    "config/workspaces/schedules.json",
+    "config/roles/coding.md",
+    ".clinerules",
+    "AGENTS.md",
+    ".cursor/rules/cam-cline.mdc"
   ],
   "scope": "this_workspace_and_future_workspaces",
   "timezone": "America/New_York",

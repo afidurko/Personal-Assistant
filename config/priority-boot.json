@@ -38,6 +38,16 @@
       "role": "docs"
     },
     {
+      "id": "cline_coding",
+      "title": "Cline coding effector for all agents/workspaces",
+      "role": "coding"
+    },
+    {
+      "id": "cline_workspace_runtime",
+      "title": "Install Cline rules + sync schedules + doctor dry-run",
+      "role": "coding"
+    },
+    {
       "id": "vision_attached",
       "title": "Vision on attached media",
       "role": "vision"
