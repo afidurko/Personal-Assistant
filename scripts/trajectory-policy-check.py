@@ -77,13 +77,13 @@ def main() -> int:
         errors.append("cpv_jobs_should_remain")
     demos.append({"case": "enhance_plus_jobs", "motor_plan": plan4, "violations": v4})
 
-    # outbound hold
+    # outbound hold (legacy text + Inkbox agent identity)
     hold_state = dict(r1.get("switch_state") or {})
     hold_state["switch.outbound"] = "hold"
     plan5, v5 = tp.apply_policies(
-        ["motor.text", "motor.mesh"], hold_state
+        ["motor.text", "motor.inkbox", "motor.mesh"], hold_state
     )
-    if "motor.text" in plan5:
+    if "motor.text" in plan5 or "motor.inkbox" in plan5:
         errors.append("outbound_not_stripped_on_hold")
     if "motor.mesh" not in plan5:
         errors.append("mesh_should_remain_when_outbound_held")
