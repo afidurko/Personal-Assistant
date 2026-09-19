@@ -31,6 +31,19 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 - Simulator: `v3-weighted-heartbeats` (traffic-weighted + 50M heartbeats)
 - Mesh mirror: `identity/persistence/qa-mesh-latest.json`
 
+### Pass 5 (1B, VoiceStudio wiring, strict-edges) — DONE · green
+- File: `connectome-sim-1b-voicestudio-pass1.json`
+- QA cycle: `qa-cycles/20260919T183400Z-cycle-01/`
+- 1,000,000,000 / 0 fail · 0 missing edges · ~2.46M sims/s · ~407s · EXIT 0
+- Includes `motor.voicestudio` / `sense.voicestudio.*` pathways
+
+### Pass 6 (1B, VoiceStudio + suggestive bridges, strict-edges) — DONE · green
+- File: `connectome-sim-1b-voicestudio-pass2.json`
+- QA cycle: `qa-cycles/20260919T184117Z-cycle-01/`
+- 1,000,000,000 / 0 fail · 0 missing edges · ~1.93M sims/s · ~518s · EXIT 0
+- Trajectory: `trajectory-1b-voicestudio-pass2.json` — 1e9 / 0 fail · ~3.96M checks/s
+- Merge readiness: `MERGE_READINESS_VOICESTUDIO.md`
+
 ## What was fixed this loop
 | Issue | Severity | Fix |
 |---|---|---|
@@ -45,15 +58,18 @@ Aaron authorized continuous QA: detect → dispatch team → fix → rerun, alwa
 | Uniform sense sampling | med | Traffic-weighted sampling in simulator v3 |
 | Long campaigns silent | med | 50M heartbeats |
 | QA not mirrored to mesh | med | `mirror_mesh_qa` in qa-loop |
+| VoiceStudio not in Cam | high | Submodule + connectome + chooser + bridges |
+| Audible speak vs file TTS conflation | high | OCL `voicestudio_api_not_outbound_speak` |
 
 ## Standing improvements (always watch)
 1. CI: `bash scripts/ci-connectome.sh` on push
 2. Heartbeats every 50M sims — **done (v3)**
-3. Traffic-weighted sense sampling — **done (v3)**
+3. Traffic-weighted sense sampling — **done (v3)** + VoiceStudio weights
 4. Shared pathway validator module — keep using `build_tables` / connectome-check
 5. Mesh-mirror of QA dispatch events — **done**
 6. Live nulltickets PUT for Cline tickets when Null stack is up
 7. `cline mcp install cam` on each Aaron host after persist-import
+8. Start VoiceStudio Electron on Aaron host; bind Cam soft-airy profile; MCP files mode
 
 ## Loop status
-**Green through Cline integration.** Continuous QA remains always-on; next failure auto-dispatches a fix team and reruns.
+**Green through VoiceStudio integration.** Continuous QA remains always-on; next failure auto-dispatches a fix team and reruns.

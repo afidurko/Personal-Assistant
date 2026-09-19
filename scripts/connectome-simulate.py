@@ -288,12 +288,12 @@ def main() -> int:
         "sense.calendar.event": 2.0,
         "sense.cline.result": 2.5,
         "sense.jarvis.result": 1.5,
-        "sense.audio.transcript": 1.5,
+        "sense.audio.transcript": 2.0,
         "sense.vision.detection": 1.0,
         "sense.ios.camera": 1.0,
-        "sense.ios.mic": 1.0,
-        "sense.aaron.face": 1.0,
-        "sense.aaron.voice": 1.0,
+        "sense.ios.mic": 2.5,
+        "sense.aaron.face": 2.0,
+        "sense.aaron.voice": 3.0,
         "sense.photos.library": 0.8,
         "sense.files.media": 0.8,
         # Cam-function / AGI research periphery (Aaron-approved batch)
@@ -306,6 +306,10 @@ def main() -> int:
         "sense.slm.inference": 1.5,
         "sense.dl.embedding": 1.5,
         "sense.swarm.message": 1.2,
+        "sense.tool.result": 1.0,
+        "sense.voicestudio.health": 1.5,
+        "sense.voicestudio.result": 1.8,
+        "sense.swiftguide.map": 1.2,
     }
     sense_weights = [weight_map.get(s, 1.0) for s in sense_ids]
 

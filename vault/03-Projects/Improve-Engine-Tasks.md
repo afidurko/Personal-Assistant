@@ -1,9 +1,9 @@
 # Improve Engine Tasks
 
-Generated `2026-09-19T18:42:55Z` from health overall **warning**.
+Generated `2026-09-19T19:48:20Z` from health overall **healthy**.
 
 | Severity | Task | Neuron | Cmd |
 |---|---|---|---|
-| medium | Init/sync git submodules | `neuron.submodule_health` | `git submodule update --init --depth 1` |
+| — | none — mesh green | — | — |
 
 Machine copy: `vault/10-Mesh-Distillates/improve-tasks.json`

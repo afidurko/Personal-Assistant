@@ -316,6 +316,56 @@ function fromAgentContext(
     });
   }
 
+  // VoiceStudio local speech — always suggest when health/comms workspaces are present
+  const healthWs = workspaces.find((w) => w.kind === 'health');
+  const voiceRelatedIds = [healthWs?.id].filter(Boolean) as string[];
+  out.push({
+    id: 'suggest-voicestudio-local-speech',
+    kind: 'presence-voice',
+    title: 'Keep VoiceStudio local TTS/ASR wired for Cam',
+    rationale:
+      'Local-first speech fallback when RIVA/Audio2Face is offline; brain stays nullclaw.',
+    implementation:
+      'Init submodule, start VoiceStudio backend, bind soft-airy Cam profile, verify /health + MCP /mcp, pack results via pack-voicestudio-result.py.',
+    sketch:
+      'git submodule update --init integrations/voicestudio\npython3 scripts/voicestudio-health.py\npython3 scripts/voicestudio-speak.py --text "Hello Aaron" --dry-run',
+    priority: 58,
+    relatedWorkspaceIds: voiceRelatedIds,
+    relatedConceptIds: ['concurrency', 'error-handling'],
+    sourceFindingIds: [],
+  });
+  out.push({
+    id: 'suggest-voicestudio-mcp-files-mode',
+    kind: 'presence-voice',
+    title: 'Prefer VoiceStudio MCP files mode for agents',
+    rationale:
+      'Base64 WAV blows LLM context; files mode keeps renders on disk under OMNIVOICE_MCP_BASE_PATH.',
+    implementation:
+      'Set OMNIVOICE_MCP_OUTPUT_MODE=files on the backend; point Cam/Cline MCP at http://localhost:3900/mcp with X-VoiceStudio-Client-Id: cam (config/mcp/voicestudio.json).',
+    sketch:
+      'export OMNIVOICE_MCP_OUTPUT_MODE=files\n# MCP URL: http://localhost:3900/mcp',
+    priority: 54,
+    relatedWorkspaceIds: voiceRelatedIds,
+    relatedConceptIds: ['protocols-extensions'],
+    sourceFindingIds: [],
+  });
+
+  out.push({
+    id: 'suggest-aaron-voice-only-gate',
+    kind: 'identity',
+    title: 'Keep Aaron-only voice gate enrolled before live mic',
+    rationale:
+      'Surrounding speakers must not create Cam turns — enroll FunASR CAM++ templates and fail closed until ready.',
+    implementation:
+      'Record Aaron-only WAVs, run aaron-voice-enroll.py, verify with aaron-voice-verify.py and aaron-voice-billion-fuzz before merging presence changes.',
+    sketch:
+      'python3 scripts/aaron-voice-enroll.py identity/aaron/local/voice/samples/*.wav\npython3 scripts/aaron-voice-billion-fuzz.py --n 1000000000\npython3 scripts/cam-converse-server.py',
+    priority: 82,
+    relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+    relatedConceptIds: ['error-handling', 'protocols-extensions'],
+    sourceFindingIds: [],
+  });
+
   const critical = workspaces.flatMap((w) => w.findings.filter((f) => f.severity === 'critical'));
   if (critical.length > 0) {
     const fixer = MESH_AGENTS.find((a) => a.id === 'issue-fix-loop')!;

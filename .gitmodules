@@ -17,6 +17,9 @@
 [submodule "integrations/cline"]
 	path = integrations/cline
 	url = https://github.com/afidurko/cline.git
+[submodule "integrations/voicestudio"]
+	path = integrations/voicestudio
+	url = https://github.com/afidurko/VoiceStudio.git
 [submodule "integrations/public-apis"]
 	path = integrations/public-apis
 	url = https://github.com/afidurko/public-apis.git

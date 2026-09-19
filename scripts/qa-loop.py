@@ -307,8 +307,9 @@ def write_suggestions(
         "- Standing: `python3 scripts/system-health-scan.py` (health_conductor)",
         "- Nightly billion fuzz via `qa-loop.py --n 1000000000 --cycles 1`",
         "- Trajectory OCL/CPV billion: `python3 scripts/trajectory-billion-fuzz.py --n 1000000000`",
+        "- Aaron-only voice gate billion: `python3 scripts/aaron-voice-billion-fuzz.py --n 1000000000`",
         "- Progress heartbeats every 50M sims for long campaigns (simulator v3)",
-        "- Traffic-weighted sense sampling (chat/vault/cline/scholar/arxiv/public-apis/inkbox-heavy)",
+        "- Traffic-weighted sense sampling (chat/vault/cline/scholar/arxiv/aaron.voice/public-apis/inkbox-heavy)",
         "- Mirror QA cycle events into `identity/persistence/qa-mesh-latest.json`",
         "- Cline workspace runtime: `python3 scripts/test_cline_workspaces.py`",
         "- Public APIs catalog: `python3 scripts/public-apis-check.py` + `test_public_apis.py`",
@@ -321,6 +322,11 @@ def write_suggestions(
         "- Suggest: before inventing HTTP helpers, run `scripts/public-apis-search.py`",
         "- Suggest: Inkbox live send only under switch.outbound — never free-send from Cline",
         "- Suggest: before merge run `trajectory-policy-check` + dual billion campaigns",
+        "- Suggest: VoiceStudio local speech — `python3 scripts/voicestudio-health.py` + MCP files mode (`config/mcp/voicestudio.json`)",
+        "- Suggest: pack voice jobs with `scripts/pack-voicestudio-result.py` (no raw WAV in git)",
+        "- Suggest: `voicestudio-speak.py` for motor.voicestudio file renders; audible still uses motor.speak gates",
+        "- Suggest: enroll Aaron voice (`aaron-voice-enroll.py`) before live mic; keep fail-closed",
+        "- Suggest: `speak_requires_aaron_identity` — motor.speak stripped when switch.identity holds",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")

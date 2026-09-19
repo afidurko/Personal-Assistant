@@ -1,45 +1,48 @@
 {
-  "at": "2026-09-19T18:42:55Z",
-  "epoch": 1789843375,
+  "at": "2026-09-19T19:48:20Z",
+  "epoch": 1789847300,
   "firing": [
     {
-      "neuron": "neuron.improve_engine",
+      "neuron": "neuron.tailscale_reach",
       "kind": "loop",
-      "area": "area.apfc",
-      "intensity": 0.9,
-      "reason": "tasks:1",
+      "area": "area.parietal",
+      "intensity": 0.55,
+      "reason": "standing:standing_scan",
       "tracts": [
-        "tract.ifof",
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf1",
         "tract.slf",
-        "tract.cingulum"
-      ],
-      "source": "improve_engine"
+        "tract.slf3",
+        "tract.mdlf"
+      ]
     },
     {
       "neuron": "neuron.qa_cycle",
       "kind": "loop",
       "area": "area.cingulate",
-      "intensity": 0.85,
-      "reason": "cycle_start:1",
-      "tracts": [
-        "tract.cingulum",
-        "tract.slf",
-        "tract.fornix"
-      ],
-      "source": "qa_loop"
-    },
-    {
-      "neuron": "neuron.submodule_health",
-      "kind": "loop",
-      "area": "area.cingulate",
-      "intensity": 0.75,
-      "reason": "health:warning",
+      "intensity": 0.55,
+      "reason": "standing:continuous",
       "tracts": [
         "tract.slf1",
         "tract.fat",
         "tract.cingulum",
         "tract.fornix",
         "tract.forceps_minor"
+      ]
+    },
+    {
+      "neuron": "neuron.converse_health",
+      "kind": "loop",
+      "area": "area.broca",
+      "intensity": 0.45,
+      "reason": "health:healthy",
+      "tracts": [
+        "tract.arcuate",
+        "tract.af_anterior",
+        "tract.slf3",
+        "tract.fat",
+        "tract.emc"
       ]
     },
     {
@@ -100,30 +103,71 @@
       ]
     },
     {
-      "neuron": "neuron.ops",
-      "kind": "agent",
-      "area": "area.parietal",
-      "intensity": 0.35,
-      "reason": "idle_ready",
+      "neuron": "neuron.submodule_health",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "intensity": 0.45,
+      "reason": "health:healthy",
       "tracts": [
-        "tract.af_anterior",
-        "tract.af_posterior",
         "tract.slf1",
-        "tract.slf",
-        "tract.slf3",
-        "tract.mdlf"
+        "tract.fat",
+        "tract.cingulum",
+        "tract.fornix",
+        "tract.forceps_minor"
       ]
+    },
+    {
+      "neuron": "neuron.chief",
+      "kind": "agent",
+      "area": "area.dlpfc",
+      "intensity": 0.4,
+      "reason": "standing:always_on",
+      "tracts": [
+        "tract.slf",
+        "tract.ifof",
+        "tract.cingulum",
+        "tract.forceps_minor"
+      ]
+    },
+    {
+      "neuron": "neuron.memory",
+      "kind": "agent",
+      "area": "area.mtl",
+      "intensity": 0.4,
+      "reason": "standing:standing",
+      "tracts": [
+        "tract.cingulum",
+        "tract.fornix"
+      ]
+    },
+    {
+      "neuron": "neuron.improve_engine",
+      "kind": "loop",
+      "area": "area.apfc",
+      "intensity": 0.3,
+      "reason": "tasks:0",
+      "tracts": [
+        "tract.ifof",
+        "tract.slf",
+        "tract.cingulum"
+      ],
+      "source": "improve_engine"
     }
   ],
   "active_areas": [
     "area.apfc",
+    "area.broca",
     "area.cingulate",
+    "area.dlpfc",
+    "area.mtl",
     "area.parietal"
   ],
   "active_tracts": [
     "tract.af_anterior",
     "tract.af_posterior",
+    "tract.arcuate",
     "tract.cingulum",
+    "tract.emc",
     "tract.fat",
     "tract.forceps_minor",
     "tract.fornix",
@@ -134,12 +178,6 @@
     "tract.slf3"
   ],
   "recent_tasks": [
-    {
-      "type": "synapse",
-      "tracts": [],
-      "overall": null,
-      "t": 21
-    },
     {
       "type": "synapse",
       "tracts": [],
@@ -208,10 +246,16 @@
       "tracts": [],
       "overall": "warning",
       "t": 32
+    },
+    {
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "healthy",
+      "t": 33
     }
   ],
-  "health_overall": "warning",
-  "improve_tasks": 1,
+  "health_overall": "healthy",
+  "improve_tasks": 0,
   "neuron_count": 42,
-  "firing_count": 8
+  "firing_count": 11
 }

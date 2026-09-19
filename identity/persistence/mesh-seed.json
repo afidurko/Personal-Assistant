@@ -178,6 +178,7 @@
     "boss_worker_primitives": true,
     "brain_enhancement": "smart-second-brain",
     "cam_age": 32,
+    "cam_converse_local": true,
     "cam_converse_port": 8787,
     "cam_converse_url_config": "config/network/tailscale.json",
     "cam_converse_via": "tailscale",
@@ -254,14 +255,24 @@
     "timezone": "America/New_York",
     "tool_creator_user": true,
     "unlimited_subagents": true,
+    "voicestudio_config": "config/integrations/voicestudio.json",
+    "voicestudio_connected": true,
+    "voicestudio_local_speech": true,
+    "voicestudio_models_installed": true,
     "weekly_review": true,
     "inkbox": true,
     "inkbox_outbound_gated": true
+
   },
   "mesh/projects": {
     "default_workspace_id": "personal-assistant",
     "source": "config/workspaces/registry.json",
-    "status": "registry_wired"
+    "status": "registry_wired",
+    "voicestudio": {
+      "remote": "github.com/afidurko/VoiceStudio",
+      "vault": "vault/03-Projects/VoiceStudio-Local-Speech.md",
+      "workspace_id": "voicestudio"
+    }
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,
@@ -308,5 +319,36 @@
     "status": "starter_vault_created",
     "vault_path": "vault",
     "welcome": "vault/Welcome.md"
+  },
+  "mesh/voice": {
+    "aaron_only": [
+      "SERPAPI_API_KEY",
+      "Slack MCP OAuth",
+      "Tailscale MagicDNS on daily host",
+      "NVIDIA RIVA + Audio2Face desk studio",
+      "Bind soft-airy Cam VoiceStudio profile_id"
+    ],
+    "backend_default": "http://localhost:3900",
+    "backend_live": "http://localhost:3900",
+    "config": "config/integrations/voicestudio.json",
+    "connected_at": "2026-09-19T19:08:54.198456+00:00",
+    "connection_doc": "vault/10-Mesh-Distillates/CONNECTION_STATUS.md",
+    "device": "cpu",
+    "health_script": "scripts/voicestudio-health.py",
+    "integration": "integrations/voicestudio",
+    "mcp_mounted": true,
+    "mcp_path": "/mcp",
+    "model_weights": "not_downloaded_awaiting_aaron",
+    "models_installed": [
+      "k2-fsa/OmniVoice",
+      "Systran/faster-whisper-base"
+    ],
+    "notes": "Local TTS/ASR/clone/dub; not the brain",
+    "policy": "config/integrations/voicestudio.md",
+    "presence_face_still": "integrations/llmavatartalk",
+    "smoke_transcript": "Hello, Aaron. Cam is connected on Local Voice Studio.",
+    "smoke_tts": "data/voicestudio/cam-smoke-20260919T190824Z.wav",
+    "status": "connected_cpu_models_installed",
+    "version": "0.5.4"
   }
 }

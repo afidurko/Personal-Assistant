@@ -382,7 +382,7 @@
     },
     {
       "t": 31,
-      "ts": "2026-09-19T18:34:34Z",
+      "ts": "2026-09-19T18:33:13Z",
       "type": "health_scan",
       "status": "warn",
       "overall": "warning",
@@ -402,11 +402,11 @@
       ]
     },
     {
-      "t": 32,
-      "ts": "2026-09-19T18:42:55Z",
+      "t": 33,
+      "ts": "2026-09-19T19:48:20Z",
       "type": "health_scan",
-      "status": "warn",
-      "overall": "warning",
+      "status": "ok",
+      "overall": "healthy",
       "neurons": [
         "neuron.vitals_loop",
         "neuron.connectome_check",

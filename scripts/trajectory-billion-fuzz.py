@@ -36,7 +36,12 @@ MOTORS = (
 )
 
 
-def base_switch(enhance: bool = False, outbound: bool = True, kill: bool = False) -> dict[str, str]:
+def base_switch(
+    enhance: bool = False,
+    outbound: bool = True,
+    kill: bool = False,
+    identity: bool = True,
+) -> dict[str, str]:
     return {
         "switch.autonomy": "act",
         "switch.outbound": "act" if outbound else "hold",
@@ -48,6 +53,7 @@ def base_switch(enhance: bool = False, outbound: bool = True, kill: bool = False
         "switch.kill": "act" if kill else "armed_allow_motor",
         "switch.presence": "act",
         "switch.tooling": "act",
+        "switch.identity": "act" if identity else "hold",
     }
 
 
@@ -62,7 +68,7 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
     _ = tp.load_policies()
 
     for i in range(count):
-        mode = (i + seed) % 5
+        mode = (i + seed) % 6
         # Inline modular invariants (match OCL/CPV policy intent)
         if mode == 0:
             # enhance without Aaron → enhance stripped
@@ -90,12 +96,18 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
             if False:  # plan empty
                 failed += 1
                 first_error = first_error or "kill_left_motors"
-            else:
-                # outbound hold → text/inkbox stripped, mesh kept
-                kept_text, kept_mesh = False, True
-                if kept_text or not kept_mesh:
-                    failed += 1
-                    first_error = first_error or "outbound_hold"
+        elif mode == 4:
+            # outbound hold → text/inkbox stripped, mesh kept
+            kept_text, kept_mesh = False, True
+            if kept_text or not kept_mesh:
+                failed += 1
+                first_error = first_error or "outbound_hold"
+        else:
+            # identity hold → speak stripped, mesh kept
+            kept_speak, kept_mesh = False, True
+            if kept_speak or not kept_mesh:
+                failed += 1
+                first_error = first_error or "identity_hold_speak"
 
         # Full apply_policies sample (~1%)
         if (i + seed) % 100 == 0:
@@ -103,6 +115,7 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
                 enhance=((i + seed) % 2 == 0),
                 outbound=((i + seed) % 3 != 0),
                 kill=((i + seed) % 997 == 0),
+                identity=((i + seed) % 5 != 0),
             )
             if mode == 0:
                 plan, _ = apply(["motor.enhance", "motor.mesh"], base_switch(False))
@@ -129,7 +142,7 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
                 if plan:
                     failed += 1
                     first_error = first_error or "apply_kill_left_motors"
-            else:
+            elif mode == 4:
                 plan, _ = apply(
                     ["motor.text", "motor.inkbox", "motor.mesh"],
                     base_switch(outbound=False),
@@ -141,6 +154,13 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
                 ):
                     failed += 1
                     first_error = first_error or "apply_outbound_hold"
+            else:
+                plan, _ = apply(
+                    ["motor.speak", "motor.mesh"], base_switch(identity=False)
+                )
+                if "motor.speak" in plan or "motor.mesh" not in plan:
+                    failed += 1
+                    first_error = first_error or "apply_identity_hold_speak"
 
             k = 1 + ((i + seed) % len(MOTORS))
             sample = [MOTORS[(i + j) % len(MOTORS)] for j in range(k)]
@@ -156,6 +176,9 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
             ):
                 failed += 1
                 first_error = first_error or "random_outbound_leak"
+            if st["switch.identity"] != "act" and "motor.speak" in plan:
+                failed += 1
+                first_error = first_error or "random_identity_speak_leak"
 
         if (i + 1) % heartbeat == 0:
             elapsed = time.perf_counter() - t0

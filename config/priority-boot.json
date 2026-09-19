@@ -44,7 +44,12 @@
     },
     {
       "id": "comms_presence",
-      "title": "Comms + Cam presence (LLMAvatarTalk)",
+      "title": "Comms + Cam presence (LLMAvatarTalk + VoiceStudio local speech)",
+      "role": "comms"
+    },
+    {
+      "id": "voicestudio_local",
+      "title": "VoiceStudio local TTS/ASR/clone (submodule + localhost:3900)",
       "role": "comms"
     },
     {

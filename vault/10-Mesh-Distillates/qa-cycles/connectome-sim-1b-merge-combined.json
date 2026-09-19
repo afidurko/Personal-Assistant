@@ -1,0 +1,18 @@
+{
+  "n": 2000000000,
+  "parts": 2,
+  "parallel_wall_s_approx": 397.8764801839998,
+  "sum_cpu_s": 792.6120161289996,
+  "passed": 2000000000,
+  "failed": 0,
+  "kill_holds": 3996809,
+  "non_aaron_holds": 379526,
+  "feedback_ok": 1995623665,
+  "first_errors": [],
+  "unlimited_subagents": true,
+  "part_files": [
+    "vault/10-Mesh-Distillates/connectome-sim-1b-merge-pass-a.json",
+    "vault/10-Mesh-Distillates/connectome-sim-1b-merge-pass-b.json"
+  ],
+  "pass_rate": 1.0
+}

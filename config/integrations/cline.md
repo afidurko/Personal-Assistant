@@ -92,6 +92,7 @@ python3 scripts/run-cline.py \
 | jarviscli | `jarvis` |
 | paddledetection | `paddledetection` |
 | audio2face, riva | `llmavatartalk` |
+| voicestudio, omnivoice, voice cloning, local tts | `voicestudio` |
 | Explicit Aaron path | that path wins |
 
 ```bash
