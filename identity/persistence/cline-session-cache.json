@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T18:32:00.888313+00:00",
+    "at": "2026-09-19T18:33:50.072966+00:00",
     "mode": "plan",
-    "summary": "Adopted afidurko/sgr-agent-core as Cam System-2 SGR substrate; submodule + CAM_REASONING update; PR #16",
+    "summary": "Adopted afidurko/LitServe as Cam sLM/DL inference host; wired into CAM_REASONING + registry; PR #16",
     "workspace": "/workspace"
   },
   "notes": [
