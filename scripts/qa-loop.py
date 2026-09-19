@@ -317,6 +317,9 @@ def write_suggestions(
         "- Suggest: pack research mesh writes with `scripts/pack-mesh-claim.py` (MMP)",
         "- Suggest: keep HMO primary lean — persona/prefs only; archive vault distillates",
         "- Suggest: before merge run `trajectory-policy-check` + dual billion campaigns",
+        "- Suggest: Aaron-only voice — `python3 scripts/aaron-voice-gate-check.py` + enroll in Cam UI",
+        "- Suggest: bump traffic weight on `sense.aaron.voice` / `sense.ios.mic` for noisy-room campaigns",
+        "- Suggest: after converse edits, vitest `aaron-voice-gate` + dual billion connectome",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")

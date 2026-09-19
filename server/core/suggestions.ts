@@ -296,6 +296,38 @@ function fromAgentContext(
     });
   }
 
+  // Aaron-only voice gate — always suggest when identity / converse surfaces are present
+  out.push({
+    id: 'suggest-aaron-voice-enroll',
+    kind: 'identity-voice',
+    title: 'Keep Aaron voice enrolled for noisy-room filtering',
+    rationale:
+      'Cam must accept only Aaron on the mic. Without enrollment, surrounding conversation leaks into turns.',
+    implementation:
+      'Open Cam presence → Enroll my voice (~10s quiet). Verify config/identity/aaron-voice-gate.json and hotspot.aaron_voice_noise.',
+    sketch:
+      'python3 scripts/aaron-voice-gate-check.py\n# UI: Enroll my voice → Enable mic & talk',
+    priority: 78,
+    relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+    relatedConceptIds: ['error-handling'],
+    sourceFindingIds: [],
+  });
+  out.push({
+    id: 'suggest-aaron-voice-noisy-gate',
+    kind: 'identity-voice',
+    title: 'Re-run Aaron-only gate after converse changes',
+    rationale:
+      'Mic ASR hears the room; voiceprint + server /api/turn must keep rejecting non-Aaron speech.',
+    implementation:
+      'Exercise enrollment, then speak with background noise / a second talker; confirm Gate ignores. Keep match_threshold 0.85 / noisy_threshold 0.88.',
+    sketch:
+      'npx vitest run server/core/aaron-voice-gate.test.ts src/lib/aaronVoiceGate.test.ts\npython3 scripts/aaron-voice-gate-check.py',
+    priority: 74,
+    relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+    relatedConceptIds: ['protocols-extensions'],
+    sourceFindingIds: [],
+  });
+
   const critical = workspaces.flatMap((w) => w.findings.filter((f) => f.severity === 'critical'));
   if (critical.length > 0) {
     const fixer = MESH_AGENTS.find((a) => a.id === 'issue-fix-loop')!;

@@ -13,6 +13,9 @@ python3 scripts/trajectory-policy-check.py
 echo "== memory-tier-check =="
 python3 scripts/memory-tier-check.py
 
+echo "== aaron-voice-gate-check =="
+python3 scripts/aaron-voice-gate-check.py
+
 echo "== cline workspace unit tests =="
 python3 scripts/test_cline_workspaces.py
 
