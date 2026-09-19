@@ -33,8 +33,10 @@
   "scripts": {
     "search": "scripts/public-apis-search.py",
     "pack": "scripts/pack-public-apis-result.py",
-    "check": "scripts/public-apis-check.py"
+    "check": "scripts/public-apis-check.py",
+    "addon": "scripts/public-apis-addon.py"
   },
+  "addons": "config/integrations/public-apis-addons.json",
   "teams": [
     "team.agi-research-scan",
     "team.capability",

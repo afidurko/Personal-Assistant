@@ -16,3 +16,11 @@
 - Init remaining empty submodules on Aaron machines (`git submodule update --init --recursive`) — expected soft warning in cloud.
 - Live Null stack ticket binding for Cline runs.
 - Tailscale preferred host → aaron-mac when Mac available.
+
+## Add-ons shipped (follow-up)
+
+Allowlisted thin wrappers in `config/integrations/public-apis-addons.json` +
+`scripts/public-apis-addon.py` / MCP `public_apis_addon`:
+
+- `weather.open_meteo` · `geo.open_meteo` · `ip.ipify`
+- `facts.catfact` · `dogs.ceo` · `crypto.coingecko_simple`

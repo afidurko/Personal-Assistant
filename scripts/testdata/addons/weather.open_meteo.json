@@ -1,0 +1,21 @@
+{
+  "latitude": 40.71,
+  "longitude": -74.01,
+  "generationtime_ms": 0.1,
+  "utc_offset_seconds": -14400,
+  "timezone": "America/New_York",
+  "timezone_abbreviation": "EDT",
+  "elevation": 10.0,
+  "current": {
+    "time": "2026-09-19T14:00",
+    "temperature_2m": 22.5,
+    "weather_code": 1,
+    "wind_speed_10m": 12.3
+  },
+  "daily": {
+    "time": ["2026-09-19", "2026-09-20", "2026-09-21"],
+    "temperature_2m_max": [24.0, 25.1, 23.2],
+    "temperature_2m_min": [16.0, 17.2, 15.8]
+  },
+  "_fixture": true
+}

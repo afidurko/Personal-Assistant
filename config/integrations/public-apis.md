@@ -39,9 +39,10 @@ Hotspot: `hotspot.public_apis`
 | Integration config | `config/integrations/public-apis.json` |
 | Search CLI | `scripts/public-apis-search.py` |
 | Mesh packer | `scripts/pack-public-apis-result.py` |
+| Thin-wrapper add-ons | `scripts/public-apis-addon.py` · `config/integrations/public-apis-addons.json` |
 | Wiring check | `scripts/public-apis-check.py` |
-| MCP (Cam) | `scripts/cam-mcp-server.py` → `public_apis_search` |
-| Mesh namespace | `mesh/tools` (catalog hits) + optional vault notes |
+| MCP (Cam) | `scripts/cam-mcp-server.py` → `public_apis_search` / `public_apis_addon` |
+| Mesh namespace | `mesh/tools` (catalog hits + addon results) + optional vault notes |
 | Vault distillates | `vault/04-Research/public-apis/` |
 
 ## Enable
@@ -65,15 +66,38 @@ python3 scripts/public-apis-search.py --list-categories
 
 # Pack results into a mesh/tools document
 python3 scripts/pack-public-apis-result.py --results path/to/results.json
+
+# Thin-wrapper add-ons (allowlisted only — no free-form URLs)
+python3 scripts/public-apis-addon.py --list
+python3 scripts/public-apis-addon.py call weather.open_meteo --latitude 40.7 --longitude -74.0 --offline
+python3 scripts/public-apis-addon.py call geo.open_meteo --name "New York"
 ```
+
+## Thin-wrapper add-ons
+
+First-wave allowlist lives in [`public-apis-addons.json`](public-apis-addons.json):
+
+| Id | Purpose |
+|---|---|
+| `weather.open_meteo` | Forecast by lat/lon |
+| `geo.open_meteo` | Place name → coordinates |
+| `ip.ipify` | Public IP |
+| `facts.catfact` | Smoke / presence demo |
+| `dogs.ceo` | Random dog image URL |
+| `crypto.coingecko_simple` | Simple crypto USD prices |
+
+Rules: only allowlisted endpoints; prefer Auth=No HTTPS; kill switch pauses live calls; fixtures for CI/`--offline`.
 
 ## How every agent uses it
 
 1. Aaron tasks Cam (or a standing goal needs an external data source).
 2. `connectome-route.py` may select `hotspot.public_apis`.
-3. Agents run `scripts/public-apis-search.py` or Cam MCP `public_apis_search`.
-4. Tooling may register a thin wrapper under `config/tools/` when reuse is likely.
-5. Cite the catalog entry URL + date accessed; do not invent endpoints.
+3. Agents run `scripts/public-apis-search.py` or Cam MCP tools.
+4. When reuse is likely, call an allowlisted add-on via `scripts/public-apis-addon.py`
+   (or MCP `public_apis_addon`) — never invent free-form fetch URLs.
+5. Tooling may register additional allowlisted wrappers under
+   `config/integrations/public-apis-addons.json` after Aaron-aligned standing goals.
+6. Cite the catalog entry URL + date accessed; do not invent endpoints.
 
 ## Mesh bridge
 

@@ -274,7 +274,7 @@ function fromAgentContext(
       implementation:
         'Search scripts/public-apis-search.py (or MCP public_apis_search), pack into mesh/tools, then register a thin tool if reuse is likely.',
       sketch:
-        'python3 scripts/public-apis-search.py --query weather --num 8\npython3 scripts/pack-public-apis-result.py --results /tmp/apis.json',
+        'python3 scripts/public-apis-search.py --query weather --num 8\npython3 scripts/public-apis-addon.py call weather.open_meteo --latitude 40.7 --longitude -74.0 --offline',
       priority: toolingRelated.score < 85 ? 66 : 48,
       relatedWorkspaceIds: [toolingRelated.id],
       relatedConceptIds: ['protocols-extensions'],

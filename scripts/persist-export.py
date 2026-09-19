@@ -34,6 +34,7 @@ DEFAULT_INCLUDE = [
     "config/integrations/google-scholar.md",
     "config/integrations/public-apis.json",
     "config/integrations/public-apis.md",
+    "config/integrations/public-apis-addons.json",
     "config/workspaces/registry.json",
     "config/workspaces/schedules.json",
     "config/memory/hmo-tiers.json",

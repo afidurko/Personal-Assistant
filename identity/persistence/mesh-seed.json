@@ -263,6 +263,9 @@
     "public_apis": true,
     "public_apis_config": "config/integrations/public-apis.json",
     "public_apis_script": "scripts/public-apis-search.py",
+    "public_apis_addons": true,
+    "public_apis_addons_config": "config/integrations/public-apis-addons.json",
+    "public_apis_addon_script": "scripts/public-apis-addon.py",
     "include_counterarguments": true,
     "save_to_mesh": true,
     "use_smart_second_brain": true
@@ -274,6 +277,9 @@
     "public_apis": true,
     "public_apis_config": "config/integrations/public-apis.json",
     "public_apis_script": "scripts/public-apis-search.py",
+    "public_apis_addons": true,
+    "public_apis_addons_config": "config/integrations/public-apis-addons.json",
+    "public_apis_addon_script": "scripts/public-apis-addon.py",
     "public_apis_available_to": "all_roles_and_subagents"
   },
   "mesh/vault": {

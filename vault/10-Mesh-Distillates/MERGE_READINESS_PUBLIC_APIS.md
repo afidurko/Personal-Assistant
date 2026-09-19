@@ -27,6 +27,7 @@ Both billion connectome campaigns green (0 failures). Trajectory OCL/CPV billion
 3. Suggestive kind `api-catalog` for improvements/swarm workspaces  
 4. CI gate: `test_public_apis.py` + `public-apis-check.py`  
 5. QA standing suggestions document public-apis pre-merge steps  
+6. **Add-ons** — allowlisted thin wrappers (`public-apis-addons.json` + `public-apis-addon.py` + MCP)  
 
 ## Pre-merge checklist (verified)
 

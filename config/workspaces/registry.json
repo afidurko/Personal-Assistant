@@ -396,7 +396,8 @@
     "swarm_check": "scripts/swarm-check.py",
     "scholar_search": "scripts/scholar-search.py",
     "public_apis_search": "scripts/public-apis-search.py",
-    "public_apis_check": "scripts/public-apis-check.py"
+    "public_apis_check": "scripts/public-apis-check.py",
+    "public_apis_addon": "scripts/public-apis-addon.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",

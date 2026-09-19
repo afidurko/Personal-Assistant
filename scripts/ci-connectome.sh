@@ -18,7 +18,9 @@ python3 scripts/test_cline_workspaces.py
 
 echo "== public-apis unit + wiring =="
 python3 scripts/test_public_apis.py
+python3 scripts/test_public_apis_addons.py
 python3 scripts/public-apis-check.py
+python3 scripts/public-apis-addon.py doctor
 
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \

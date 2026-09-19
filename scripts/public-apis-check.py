@@ -77,6 +77,27 @@ def main() -> int:
     tool_ids = [t.get("id") for t in tools.get("tools") or []]
     if "tool.public_apis.search" not in tool_ids:
         errors.append("tools registry missing tool.public_apis.search")
+    if "tool.public_apis.addon" not in tool_ids:
+        errors.append("tools registry missing tool.public_apis.addon")
+
+    addons_path = ROOT / "config/integrations/public-apis-addons.json"
+    if not addons_path.exists():
+        errors.append("missing config/integrations/public-apis-addons.json")
+    else:
+        addons = load(addons_path)
+        if not addons.get("addons"):
+            errors.append("public-apis-addons.json has empty addons list")
+        try:
+            doctor = json.loads(
+                subprocess.check_output(
+                    [sys.executable, str(ROOT / "scripts/public-apis-addon.py"), "doctor"],
+                    text=True,
+                )
+            )
+            if not doctor.get("ok"):
+                errors.append(f"addon_doctor:{doctor}")
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"addon_doctor:{exc}")
 
     for team in ("info", "tooling", "capability", "agi-research-scan"):
         tpath = ROOT / f"config/teams/{team}.json"

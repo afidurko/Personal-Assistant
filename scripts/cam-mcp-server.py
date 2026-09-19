@@ -7,7 +7,7 @@ Implements a small JSON-RPC MCP subset over stdin/stdout:
 Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
   vault_search, connectome_route, kill_switch_status, ticket_list,
-  public_apis_search
+  public_apis_search, public_apis_addon
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -135,6 +135,29 @@ def tool_defs() -> list[dict]:
                     "num": {"type": "integer"},
                     "offline": {"type": "boolean"},
                     "list_categories": {"type": "boolean"},
+                },
+            },
+        },
+        {
+            "name": "public_apis_addon",
+            "description": (
+                "Call an allowlisted public-apis thin-wrapper add-on "
+                "(weather, geocode, ip, cat facts, dogs, coingecko). "
+                "No free-form URLs — only curated add-on ids."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "addon_id": {"type": "string"},
+                    "list": {"type": "boolean"},
+                    "offline": {"type": "boolean"},
+                    "latitude": {"type": "number"},
+                    "longitude": {"type": "number"},
+                    "days": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "count": {"type": "integer"},
+                    "ids": {"type": "string"},
+                    "vs": {"type": "string"},
                 },
             },
         },
@@ -271,6 +294,33 @@ def public_apis_search(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def public_apis_addon(arguments: dict) -> Any:
+    cmd = [sys.executable, str(ROOT / "scripts/public-apis-addon.py")]
+    if arguments.get("list"):
+        cmd.append("list")
+        out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+        return json.loads(out)
+    addon_id = arguments.get("addon_id")
+    if not addon_id:
+        raise ValueError("addon_id required unless list=true")
+    cmd.extend(["call", str(addon_id)])
+    for flag, key in (
+        ("--latitude", "latitude"),
+        ("--longitude", "longitude"),
+        ("--days", "days"),
+        ("--name", "name"),
+        ("--count", "count"),
+        ("--ids", "ids"),
+        ("--vs", "vs"),
+    ):
+        if arguments.get(key) is not None:
+            cmd.extend([flag, str(arguments[key])])
+    if arguments.get("offline") is True:
+        cmd.append("--offline")
+    out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+    return json.loads(out)
+
+
 def call_tool(name: str, arguments: dict) -> Any:
     if name == "list_workspaces":
         return cw.mesh_projects_doc()
@@ -299,6 +349,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return ticket_list(arguments.get("status", "all"), int(arguments.get("limit") or 20))
     if name == "public_apis_search":
         return public_apis_search(arguments)
+    if name == "public_apis_addon":
+        return public_apis_addon(arguments)
     raise ValueError(f"unknown tool: {name}")
 
 

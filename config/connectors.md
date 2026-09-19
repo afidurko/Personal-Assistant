@@ -96,10 +96,12 @@
 - Path: `integrations/public-apis` (git submodule)
 - Sense: `sense.catalog.public_apis` · Hotspot: `hotspot.public_apis` · Motor: `motor.public_apis`
 - **Available to all roles and subagents** — discover free/public HTTP APIs before inventing endpoints
-- Scripts: `scripts/public-apis-search.py`, `scripts/pack-public-apis-result.py`, `scripts/public-apis-check.py`
-- MCP: `public_apis_search` via `scripts/cam-mcp-server.py`
+- Scripts: `scripts/public-apis-search.py`, `scripts/pack-public-apis-result.py`, `scripts/public-apis-check.py`, `scripts/public-apis-addon.py`
+- MCP: `public_apis_search` · `public_apis_addon` via `scripts/cam-mcp-server.py`
+- Add-ons: `config/integrations/public-apis-addons.json` (allowlisted thin wrappers)
 - Distills to `mesh/tools` + `vault/04-Research/public-apis/`
 - No catalog API key; individual listed APIs may need their own local secrets
+- Free-form URL fetch from catalog hits is forbidden — only allowlisted add-ons may call HTTP
 
 ## Bridge later (OpenClaw-inspired external plugins)
 
