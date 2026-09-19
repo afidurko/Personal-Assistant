@@ -1,0 +1,63 @@
+{
+  "pass_id": "A",
+  "checks": 3000000000000,
+  "target_checks": 3000000000000,
+  "indices": 30000000000,
+  "checks_per_index": 100,
+  "suites": [
+    "connectome_holds",
+    "trajectory_ocl_cpv",
+    "cam_reason_escalate"
+  ],
+  "workers": 4,
+  "failed": 0,
+  "first_error": null,
+  "full_samples": 6000,
+  "elapsed_s": 2238.062377536,
+  "checks_per_sec": 1340445212.8375692,
+  "seed": 1001,
+  "ok": true,
+  "sampler": "numpy_vectorized_3suite_plus_sparse_real",
+  "workers_detail": [
+    {
+      "worker_id": 2,
+      "indices": 7500000000,
+      "checks": 750000000000,
+      "passed_checks": 750000000000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 1500,
+      "elapsed_s": 2125.5854520619987
+    },
+    {
+      "worker_id": 1,
+      "indices": 7500000000,
+      "checks": 750000000000,
+      "passed_checks": 750000000000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 1500,
+      "elapsed_s": 2182.6372305040013
+    },
+    {
+      "worker_id": 0,
+      "indices": 7500000000,
+      "checks": 750000000000,
+      "passed_checks": 750000000000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 1500,
+      "elapsed_s": 2229.2625028719995
+    },
+    {
+      "worker_id": 3,
+      "indices": 7500000000,
+      "checks": 750000000000,
+      "passed_checks": 750000000000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 1500,
+      "elapsed_s": 2238.0435137019995
+    }
+  ]
+}

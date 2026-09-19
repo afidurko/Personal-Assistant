@@ -58,3 +58,11 @@ python3 scripts/cam-reason-billion-fuzz.py \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-cam-reason-1m.json
 
 echo "CI OK"
+
+echo "== cam-trillion smoke (3e8 checks) =="
+python3 scripts/cam-trillion-campaign.py \
+  --checks 300000000 \
+  --seed 3 \
+  --sample-every 0 \
+  --pass-id ci \
+  --out vault/10-Mesh-Distillates/qa-cycles/ci-trillion-smoke.json
