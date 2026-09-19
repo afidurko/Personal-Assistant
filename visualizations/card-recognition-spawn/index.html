@@ -1,197 +1,119 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Card Recognition → 3D Spawn • A-Frame</title>
-    <meta name="description" content="Detect a 2D card, resolve catalog metadata, spawn a 3D character + spatial UI.">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="vendor/aframe.min.js"></script>
-    <script src="components/card-catalog.js"></script>
-    <script src="components/card-detector.js"></script>
-    <script src="components/procedural-creature.js"></script>
-    <script src="components/character-spawner.js"></script>
-    <script src="components/battle-arena.js"></script>
-    <script src="components/recognition-pipeline.js"></script>
-    <script src="html-lab-fallback.js"></script>
-    <style>
-      html, body { margin: 0; height: 100%; background: #0b1220; }
-      .hud {
-        position: fixed; z-index: 10; left: 16px; right: 16px; top: 12px;
-        display: flex; gap: 12px; justify-content: space-between; pointer-events: none;
-        font-family: "IBM Plex Mono", ui-monospace, monospace; color: #e8eef8;
-      }
-      .panel {
-        background: rgba(12, 18, 32, 0.72); border: 1px solid rgba(124, 255, 240, 0.25);
-        backdrop-filter: blur(8px); padding: 10px 12px; max-width: 340px;
-      }
-      .panel h1 {
-        margin: 0 0 6px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
-        color: #7CFFF0; font-weight: 600;
-      }
-      .panel p, #detect-status, #pipeline-log { margin: 0; font-size: 12px; line-height: 1.45; opacity: 0.92; }
-      #pipeline-log div { margin-bottom: 4px; opacity: 0.85; }
-      #action-banner {
-        position: fixed; z-index: 10; left: 0; right: 0; bottom: 28px;
-        text-align: center; font-family: "Sora", system-ui, sans-serif;
-        font-size: clamp(18px, 3vw, 28px); font-weight: 700; letter-spacing: 0.04em;
-        color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,0.55); pointer-events: none;
-      }
-      .links { pointer-events: auto; margin-top: 8px; }
-      .links a { color: #9BE8FF; margin-right: 10px; font-size: 11px; }
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>AR Card Battle — detect → 3D spawn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="ar-scene.css" />
+</head>
+<body>
+  <!-- Phone AR viewport: camera desk + world-anchored overlays -->
+  <div id="ar-view" class="ar-view mode-setup">
+    <img class="ar-camera" src="assets/ar/ar-desk-bg.png" alt="" />
 
-      /* HTML lab fallback (software WebGL / no GL) */
-      .html-lab {
-        position: fixed; z-index: 12; left: 16px; right: 16px; bottom: 72px;
-        pointer-events: auto;
-        font-family: "IBM Plex Mono", ui-monospace, monospace; color: #e8eef8;
-      }
-      .html-lab-title {
-        font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-        color: #7CFFF0; margin-bottom: 8px;
-      }
-      .html-cards { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-      .html-card {
-        border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
-        color: #fff; min-width: 140px; padding: 12px 14px; cursor: pointer;
-        display: flex; flex-direction: column; gap: 4px; text-align: left;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-        transition: transform 160ms ease, filter 160ms ease;
-      }
-      .html-card:hover { transform: translateY(-3px) scale(1.02); filter: brightness(1.08); }
-      .html-card strong { font-size: 14px; }
-      .html-card span { font-size: 11px; opacity: 0.85; }
-      .html-stage {
-        position: relative; min-height: 210px; border-radius: 14px;
-        background:
-          radial-gradient(circle at 50% 60%, rgba(31,174,90,0.35), transparent 55%),
-          linear-gradient(180deg, rgba(20,28,44,0.92), rgba(10,14,24,0.95));
-        border: 1px solid rgba(124,255,240,0.2);
-        padding: 16px; overflow: hidden;
-      }
-      .html-arena {
-        position: absolute; left: 50%; top: 58%; width: 220px; height: 70px;
-        transform: translate(-50%, -50%);
-        border: 2px solid rgba(124,255,240,0.55); border-radius: 50%;
-        box-shadow: 0 0 24px rgba(31,174,90,0.35) inset;
-        animation: arenaPulse 1.6s ease-in-out infinite alternate;
-      }
-      @keyframes arenaPulse { from { transform: translate(-50%, -50%) scale(0.96); } to { transform: translate(-50%, -50%) scale(1.04); } }
-      .html-spawns { position: relative; z-index: 1; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
-      .html-spawn {
-        width: 180px; background: rgba(0,0,0,0.35); border: 1px solid color-mix(in srgb, var(--c) 60%, #fff);
-        border-radius: 12px; padding: 12px; animation: spawnIn 420ms ease-out;
-      }
-      @keyframes spawnIn { from { opacity: 0; transform: translateY(12px) scale(0.9); } to { opacity: 1; transform: none; } }
-      .html-creature {
-        width: 72px; height: 72px; margin: 0 auto 10px; border-radius: 50%;
-        background: radial-gradient(circle at 30% 30%, #fff8, transparent 40%), var(--c);
-        box-shadow: 0 0 24px color-mix(in srgb, var(--c) 70%, transparent);
-        position: relative;
-      }
-      .html-creature.shape-drake { border-radius: 40% 40% 20% 20%; }
-      .html-creature.shape-finch { border-radius: 45% 45% 40% 40%; }
-      .html-creature.punch { animation: punch 280ms ease; }
-      @keyframes punch { 0% { transform: scale(1); } 50% { transform: scale(1.18) translateY(-6px); } 100% { transform: scale(1); } }
-      .html-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-      .html-hp { font-size: 11px; color: #5DDB7A; margin-bottom: 8px; }
-      .html-moves { display: flex; flex-direction: column; gap: 6px; }
-      .html-move {
-        background: #2A3340; color: #F4F7FB; border: 0; border-radius: 6px;
-        padding: 7px 8px; cursor: pointer; font: inherit; font-size: 11px;
-      }
-      .html-move:hover { background: #3A4558; }
-    </style>
-  </head>
-  <body>
-    <div class="hud">
-      <div class="panel">
-        <h1>Pipeline</h1>
-        <p id="detect-status">Booting…</p>
-        <div id="pipeline-log" style="margin-top:8px"></div>
-        <div class="links">
-          <a href="mindar.html">MindAR camera mode</a>
-          <a href="README.md">Architecture</a>
+    <!-- Green battle arena on the table (like the reference stadium disk) -->
+    <div class="arena" id="arena" aria-hidden="true">
+      <img src="assets/ar/arena-disk.png" alt="" />
+    </div>
+
+    <!-- Team strip (You / Opponent) — frosted panel like reference -->
+    <aside class="panel panel-team" id="panel-team">
+      <div class="team-row">
+        <span>You</span>
+        <div class="pips" data-team="you">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i>
         </div>
       </div>
-      <div class="panel">
-        <h1>Lab table</h1>
-        <p>Tap a card → detect → catalog → spawn 3D creature, HP bar, and moves. Same events work with MindAR or an external CV detector.</p>
+      <div class="team-row">
+        <span>Opponent</span>
+        <div class="pips" data-team="opp">
+          <i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Turn / history log -->
+    <aside class="panel panel-log" id="panel-log">
+      <div class="log-title" id="log-title">WAITING FOR FIRST TURN</div>
+      <div class="log-body" id="log-body">Actions will appear here.</div>
+    </aside>
+
+    <!-- Setup instructions -->
+    <aside class="panel panel-setup" id="panel-setup">
+      <div class="setup-step">SETUP <b id="setup-step">1 / 3</b></div>
+      <div id="setup-copy">Place a Basic creature in Active. Press + to scan.</div>
+    </aside>
+
+    <aside class="panel panel-wait" id="panel-wait" hidden>Waiting…</aside>
+
+    <!-- Table zones with corner brackets -->
+    <div class="zone zone-active" id="zone-active" data-slot="active">
+      <div class="brackets" aria-hidden="true">
+        <span class="c tl"></span><span class="c tr"></span>
+        <span class="c bl"></span><span class="c br"></span>
+      </div>
+      <div class="zone-label">ACTIVE</div>
+      <img class="physical-card" id="card-active" src="assets/ar/physical-card-volt.png" alt="Active card" />
+      <div class="holo-card" id="holo-active" hidden>
+        <img src="assets/ar/physical-card-volt.png" alt="" />
+      </div>
+      <div class="active-hp" id="active-hp" hidden>ACTIVE · <b>90 / 90 HP</b></div>
+    </div>
+
+    <div class="zone zone-deck" id="zone-deck">
+      <div class="brackets dim" aria-hidden="true">
+        <span class="c tl"></span><span class="c tr"></span>
+        <span class="c bl"></span><span class="c br"></span>
+      </div>
+      <div class="zone-label">DECK</div>
+      <div class="deck-stack"></div>
+    </div>
+
+    <div class="zone zone-opp" id="zone-opp" data-slot="opponent">
+      <div class="brackets dim" aria-hidden="true">
+        <span class="c tl"></span><span class="c tr"></span>
+        <span class="c bl"></span><span class="c br"></span>
+      </div>
+      <div class="zone-label">OPPONENT</div>
+      <img class="physical-card" id="card-opp" src="assets/ar/physical-card-ember.png" alt="Opponent card" hidden />
+      <div class="holo-card" id="holo-opp" hidden>
+        <img src="assets/ar/physical-card-ember.png" alt="" />
       </div>
     </div>
-    <div id="action-banner">SCAN A CARD TO BEGIN</div>
 
-    <a-scene
-      card-catalog="src: catalog.json"
-      card-detector="mode: lab"
-      character-spawner="spawnRoot: #spawn-root"
-      recognition-pipeline
-      background="color: #0b1220"
-      cursor="rayOrigin: mouse"
-      raycaster="objects: .detectable-card, .move-btn"
-      renderer="antialias: true; colorManagement: true"
-      shadow="type: pcf">
+    <!-- 3D creatures standing on arena -->
+    <div class="fighter fighter-you" id="fighter-you" hidden>
+      <img src="assets/ar/creature-volt-wisp.png" alt="Volt Wisp" />
+      <div class="hp-bar">
+        <div class="hp-fill" id="hp-you-fill"></div>
+        <span id="hp-you-text">HP 90 / 90</span>
+      </div>
+    </div>
+    <div class="fighter fighter-opp" id="fighter-opp" hidden>
+      <img src="assets/ar/creature-ember-drake.png" alt="Ember Drake" />
+      <div class="hp-bar">
+        <div class="hp-fill" id="hp-opp-fill"></div>
+        <span id="hp-opp-text">HP 80 / 80</span>
+      </div>
+    </div>
 
-      <a-assets timeout="10000">
-        <img id="card-volt" src="assets/card-volt-wisp.svg" crossorigin="anonymous">
-        <img id="card-ember" src="assets/card-ember-drake.svg" crossorigin="anonymous">
-        <img id="card-tide" src="assets/card-tide-finch.svg" crossorigin="anonymous">
-        <img id="wood" src="assets/table.svg" crossorigin="anonymous">
-      </a-assets>
+    <!-- Floating move buttons (right of active card) -->
+    <div class="moves" id="moves" hidden>
+      <button type="button" data-move="spark-jab">Spark Jab</button>
+      <button type="button" data-move="arc-combo">Arc Combo</button>
+      <button type="button" data-move="retreat">Retreat</button>
+    </div>
 
-      <a-entity light="type: ambient; intensity: 0.55"></a-entity>
-      <a-entity light="type: directional; intensity: 1.1; castShadow: true" position="2 4 1"></a-entity>
+    <!-- + scan control -->
+    <button type="button" class="scan-btn" id="scan-btn" aria-label="Scan card">+</button>
 
-      <!-- Desk surface -->
-      <a-plane
-        src="#wood"
-        width="3.2" height="2.0" rotation="-90 0 0" position="0 0 -1.1"
-        material="repeat: 1 1" shadow="receive: true"></a-plane>
+    <!-- Bottom action banner -->
+    <div class="action-banner" id="action-banner"></div>
+  </div>
 
-      <a-entity id="arena" battle-arena position="0 0.01 -1.1" visible="false"></a-entity>
-      <a-entity id="spawn-root"></a-entity>
-
-      <!-- Physical card proxies (stand-ins for printed targets) -->
-      <a-plane
-        class="detectable-card"
-        data-card-id="volt-wisp"
-        src="#card-volt"
-        width="0.42" height="0.58"
-        position="-0.55 0.01 -0.75"
-        rotation="-90 12 0"
-        material="side: double"
-        shadow="cast: true">
-        <a-text value="ACTIVE" align="center" width="1.2" color="#7CFFF0" position="0 0.36 0.01" rotation="90 0 0"></a-text>
-      </a-plane>
-
-      <a-plane
-        class="detectable-card"
-        data-card-id="ember-drake"
-        src="#card-ember"
-        width="0.42" height="0.58"
-        position="0.55 0.01 -0.75"
-        rotation="-90 -10 0"
-        material="side: double"
-        shadow="cast: true">
-        <a-text value="OPPONENT" align="center" width="1.2" color="#FFB3A0" position="0 0.36 0.01" rotation="90 0 0"></a-text>
-      </a-plane>
-
-      <a-plane
-        class="detectable-card"
-        data-card-id="tide-finch"
-        src="#card-tide"
-        width="0.42" height="0.58"
-        position="0 0.01 -1.55"
-        rotation="-90 0 0"
-        material="side: double"
-        shadow="cast: true">
-        <a-text value="BENCH" align="center" width="1.2" color="#9BE8FF" position="0 0.36 0.01" rotation="90 0 0"></a-text>
-      </a-plane>
-
-      <a-entity id="rig" position="0 1.35 0.55">
-        <a-camera look-controls wasd-controls="acceleration: 18"></a-camera>
-      </a-entity>
-
-      <a-sky color="#152033"></a-sky>
-    </a-scene>
-  </body>
+  <script src="ar-battle.js"></script>
+</body>
 </html>
