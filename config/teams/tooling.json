@@ -49,5 +49,11 @@
     "synapse.terminate_lineage"
   ],
   "tool_registry": "config/tools/registry.json",
-  "pathway_hotspot": "hotspot.tooling"
+  "pathway_hotspot": "hotspot.tooling",
+  "connectors": [
+    "public-apis",
+    "jarvis"
+  ],
+  "public_apis_hotspot": "hotspot.public_apis",
+  "notes": "public-apis catalog is shared discovery for all Cam agents; tooling owns thin wrappers"
 }

@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "voicestudio": {
+      "url": "http://localhost:3900/mcp",
+      "headers": {
+        "X-VoiceStudio-Client-Id": "cam"
+      },
+      "notes": "Requires VoiceStudio backend running. Prefer OMNIVOICE_MCP_OUTPUT_MODE=files on the backend. For stdio-only clients use integrations/voicestudio python -m backend.mcp_shim."
+    }
+  },
+  "cam_bridge": {
+    "health": "python3 scripts/voicestudio-health.py",
+    "speak": "python3 scripts/voicestudio-speak.py --text '…'",
+    "pack": "python3 scripts/pack-voicestudio-result.py --job path/to/job.json",
+    "config": "config/integrations/voicestudio.json"
+  }
+}

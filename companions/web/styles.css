@@ -119,12 +119,19 @@ html, body {
 }
 .bubble.aaron { border-color: var(--accent); }
 .bubble.cam { border-color: var(--ok); }
+.bubble.system { border-color: #c4a35a; opacity: 0.9; }
 .bubble .who {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--mute);
   margin-bottom: 0.25rem;
+}
+
+.voice-score {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--mute);
 }
 
 .controls {

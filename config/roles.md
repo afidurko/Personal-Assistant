@@ -8,8 +8,8 @@
 | Documents | `docs` | yes | — | drafts/fixes |
 | Coding | `coding` | yes | — | Cline effector — shared by all agents |
 | Careers | `careers` | yes | — | LinkedIn + Indeed |
-| Comms | `comms` | yes | — | text/call/FaceTime + avatar |
-| Vision | `vision` | yes | — | PaddleDetection when tasked |
+| Comms | `comms` | yes | — | text/call/FaceTime + avatar + **Inkbox** identity |
+| Vision | `vision` | yes | — | PaddleDetection + Pupil (Cam can see) |
 | QA | `qa` | yes | — | verifies + logs |
 | Memory Curator | `memory-curator` | yes | — | mesh + smart-second-brain |
 | AGI Scout | `agi-scout` | yes | `team.agi-research-scan` | daily AI/AGI paper scan lead |
@@ -17,7 +17,7 @@
 | AGI Synthesist | `agi-synthesist` | yes | `team.agi-research-scan` | map findings → Cam proposals |
 | Capability Broker | `capability-broker` | yes | `team.capability` | task + enhance brokerage |
 | Task Executor | `task-executor` | yes | `team.capability` | concrete work units |
-| Info Retriever | `info-retriever` | yes | `team.info` | vault→mesh→**Scholar**→web facts |
+| Info Retriever | `info-retriever` | yes | `team.info` | vault→mesh→**Scholar**→**public-apis**→web facts |
 | SLM Runtime | `slm-runtime` | yes | — | local small-LM cortex |
 | DL Enhance | `dl-enhance` | yes | — | embeddings / rerank / vectors |
 | Tool Creator | `tool-creator` | yes | `team.tooling` | design/register tools (HAAS pattern) |
@@ -42,6 +42,8 @@
 - Child work is still tracked as nulltickets tasks when the runtime is live
 - Boss/worker primitives: `config/swarm/primitives.json`
 - **Any role may invoke Cline** (`motor.cline`) for coding — not siloed to `coding`
+- **Any role may invoke public-apis** (`motor.public_apis`) for free API discovery — not siloed to tooling
+- **Outbound Inkbox** (`motor.inkbox`) is gated by `switch.outbound` — prefer `comms`; do not free-send from Cline
 
 ## Enhancement cortex (DL + sLMs)
 
@@ -59,8 +61,12 @@
 
 - Jarvis: `integrations/jarvis`
 - Cline: `integrations/cline` (all agents / all workspaces)
+- Public APIs: `integrations/public-apis` (all agents — free API catalog)
+- Inkbox: `integrations/inkbox` (agent identity — email/phone/vault/tunnels; outbound gated)
 - Vision: `integrations/paddledetection`
+- Gaze / eye tracking: `integrations/pupil`
 - Presence: `integrations/llmavatartalk`
+- Local speech: `integrations/voicestudio`
 - Second brain: `integrations/smart-second-brain`
 - Google Scholar: `config/integrations/google-scholar.md` (SerpAPI bridge)
 - Cartography: `integrations/swiftguide` (mind maps + iOS stack)

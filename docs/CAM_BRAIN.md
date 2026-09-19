@@ -6,11 +6,11 @@ Cam’s brain is a **connectome** plus standing **agent teams**, a **DL + sLM co
 
 ```text
 Aaron
-  └─ sensory periphery (chat, vault, web/arxiv, Google Scholar, clock, ASR, vision, sLM/DL feedback, swarm bus)
+  └─ sensory periphery (chat, vault, web/arxiv, Google Scholar, public-apis catalog, clock, ASR, vision, sLM/DL feedback, swarm bus)
        └─ higher centers (chief, router, specialists, AGI scan, enhance, info, capability, tooling, slm, dl)
             └─ reasoning loop (fast **LitServe** sLM → escalate → recall → **SGR Reason→Select→Act** → dual-stream → reflect → switches)
             └─ circuit switches (autonomy, research_scan, cam_enhance, tooling, slm_local, dl_local, kill, …)
-                 └─ motor (vault, mesh, web_fetch, enhance, tool, swarm, slm, dl, speak, jobs, …)
+                 └─ motor (vault, mesh, web_fetch, public_apis, enhance, tool, swarm, slm, dl, speak, jobs, …)
 ```
 
 **Reasoning contract (plan):** [CAM_REASONING.md](CAM_REASONING.md) · SGR: [`integrations/sgr-agent-core`](../integrations/sgr-agent-core) · LitServe: [`integrations/litserve`](../integrations/litserve) · proposed `config/enhancement/reasoning-logic.json`
@@ -21,8 +21,8 @@ Aaron
 |---|---|---|
 | **AGI Research Scan** | `center.agi_scan` | Everyday internet scan for AI/AGI papers/findings that can enhance Cam |
 | **Capability** | `center.capability` / `center.enhance` | Complete tasks; broker specialists + models; gate Cam upgrades |
-| **Information** | `center.info` | Vault → mesh → **Google Scholar** → web cited answers |
-| **Tooling** | `center.tooling` | Tool-creator → tool-user; boss/worker synapse ops |
+| **Information** | `center.info` | Vault → mesh → **Google Scholar** → **public-apis** → web cited answers |
+| **Tooling** | `center.tooling` | Tool-creator → tool-user; boss/worker synapse ops; owns public-apis catalog motor |
 
 Configs: `config/teams/*.json` · Swarm: `config/swarm/` · Runtime: `server/core/swarm-runtime.ts` · Docs: [HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md)
 

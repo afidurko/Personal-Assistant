@@ -1,0 +1,68 @@
+{
+  "id": "aaron-voice-gate",
+  "title": "Aaron-only voice gate (noisy environments)",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "status": "enabled",
+  "purpose": "Cam listens to Aaron’s voice only — reject surrounding conversation and other speakers in noisy rooms",
+  "policy": "config/integrations/ios-companion.md",
+  "sense": "sense.aaron.voice",
+  "switch": "switch.identity",
+  "hotspot": "hotspot.aaron_voice",
+  "hotspot_noise": "hotspot.aaron_voice_noise",
+  "aaron_only": true,
+  "noisy_environment_mode": true,
+  "reject_non_aaron_asr": true,
+  "require_enrollment_for_mic": true,
+  "text_bypass": true,
+  "match_threshold": 0.85,
+  "noisy_threshold": 0.88,
+  "enroll_seconds": 10,
+  "min_voiced_frames": 10,
+  "voiced_rms_min": 0.02,
+  "bands": 32,
+  "f_low_hz": 80,
+  "f_high_hz": 4000,
+  "storage_key": "cam.aaron.voice.profile.v1",
+  "addons": {
+    "adaptive_noise": {
+      "enabled": true,
+      "streak_to_raise": 2,
+      "raised_threshold": 0.91,
+      "cooldown_accepts": 3,
+      "notes": "After repeated multi-speaker rejects, temporarily raise threshold"
+    },
+    "profile_export": {
+      "enabled": true,
+      "vault_path": "identity/aaron/voice-profile.json",
+      "pack_script": "scripts/pack-aaron-voice-profile.py"
+    },
+    "reject_stats": {
+      "enabled": true,
+      "mesh_namespace": "mesh/identity",
+      "runtime_file": "data/runtime/aaron-voice-rejects.jsonl",
+      "endpoint": "/api/voice/gate/reject"
+    },
+    "health_pulse": {
+      "enabled": true,
+      "neuron": "neuron.aaron_voice_gate"
+    },
+    "ios_speaker_id": {
+      "enabled": true,
+      "status": "contract_scaffold",
+      "contract": "companions/ios/CamVoiceGate.swift",
+      "score_field": "aaron_voice_score",
+      "notes": "Native SpeakerRecognition / embedding can replace spectral print; same /api/turn fields"
+    }
+  },
+  "scripts": {
+    "check": "scripts/aaron-voice-gate-check.py",
+    "pack_profile": "scripts/pack-aaron-voice-profile.py"
+  },
+  "notes": [
+    "Browser/on-device spectral voiceprint — enroll Aaron in a quiet moment first",
+    "Server rejects mic/speech turns below threshold when aaron_only is true",
+    "Typing still reaches Cam (text_bypass) without a voice score",
+    "Add-ons: adaptive noise, profile export/import, reject stats, health pulse, iOS speaker-ID contract"
+  ]
+}

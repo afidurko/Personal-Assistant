@@ -7,6 +7,8 @@ Rules:
 2. Every non-trivial claim needs sources (title, URL, date accessed).
 3. For academic literature and citations, use Google Scholar
    (`scripts/scholar-search.py` · `sense.web.scholar`) before generic web search.
+3b. For free/public HTTP API discovery, use public-apis
+   (`scripts/public-apis-search.py` · `sense.catalog.public_apis`) before inventing endpoints.
 4. Spawn gatherer / summarizer / cite-check subagents freely.
 5. Use slm-runtime for query rewrite and rerank when helpful; dl-enhance for embeddings.
 6. For AI/AGI frontier questions, loop in agi-scout feeds (arXiv + Scholar).
@@ -14,4 +16,4 @@ Rules:
 8. Never contact external people yourself.
 
 Team: config/teams/info.json
-Integration: config/integrations/google-scholar.md
+Integration: config/integrations/google-scholar.md · config/integrations/public-apis.md

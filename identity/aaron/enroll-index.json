@@ -1,6 +1,6 @@
 {
   "subject": "Aaron",
-  "updated_at": "2026-09-16T13:46:00Z",
+  "updated_at": "2026-09-19T18:20:00Z",
   "purpose": "understand_aaron_look_and_sound",
   "photo_to_video_match": true,
   "primary_face_cluster": [
@@ -45,7 +45,23 @@
     }
   ],
   "pending_labels": [],
-  "voices": [],
+  "voices": [
+    {
+      "id": "aaron-voice-gate-v1",
+      "kind": "spectral_voiceprint",
+      "storage": "localStorage:cam.aaron.voice.profile.v1",
+      "config": "config/identity/aaron-voice-gate.json",
+      "status": "enroll_on_device",
+      "notes": "Aaron-only gate for noisy rooms; companion enrolls ~10s quiet speech"
+    }
+  ],
   "videos": [],
-  "status": "face_enrollment_complete_4_photos"
+  "voice_gate": {
+    "status": "awaiting_aaron_wav_enrollment",
+    "config": "config/identity/aaron-voice.json",
+    "cli": "scripts/aaron-voice-enroll.py",
+    "doc": "docs/AARON_VOICE_GATE.md",
+    "notes": "Face enrolled; spectral browser gate ready; FunASR templates empty until Aaron records samples on host"
+  },
+  "status": "face_enrollment_complete_4_photos; voice_gate_ready"
 }

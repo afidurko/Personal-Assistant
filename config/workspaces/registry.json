@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-19",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -170,6 +170,23 @@
         "policy": "config/integrations/paddledetection.md"
       },
       {
+        "id": "pupil",
+        "path": "integrations/pupil",
+        "policy": "config/integrations/pupil.md",
+        "remote": "github.com/afidurko/pupil",
+        "sense": "sense.vision.world",
+        "sense_gaze": "sense.vision.gaze",
+        "hotspot": "hotspot.pupil_see",
+        "motor": "motor.pupil",
+        "switch": "switch.pupil_vision",
+        "mesh_ns": [
+          "mesh/vision",
+          "mesh/gaze"
+        ],
+        "bridge": "scripts/pupil-see.py",
+        "enabled": "identity/persistence/CAM_PUPIL_VISION_ENABLED.md"
+      },
+      {
         "id": "llmavatartalk",
         "path": "integrations/llmavatartalk",
         "policy": "config/integrations/llmavatartalk.md"
@@ -189,11 +206,62 @@
         "credential_env": "SERPAPI_API_KEY"
       },
       {
+        "id": "public-apis",
+        "path": "integrations/public-apis",
+        "policy": "config/integrations/public-apis.md",
+        "config": "config/integrations/public-apis.json",
+        "script": "scripts/public-apis-search.py",
+        "sense": "sense.catalog.public_apis",
+        "hotspot": "hotspot.public_apis",
+        "motor": "motor.public_apis",
+        "remote": "github.com/afidurko/public-apis",
+        "available_to": "all_roles_and_subagents"
+      },
+      {
         "id": "cline",
         "path": "integrations/cline",
         "policy": "config/integrations/cline.md",
         "remote": "github.com/afidurko/cline",
         "effector": "motor.cline"
+      },
+      {
+        "id": "inkbox",
+        "path": "integrations/inkbox",
+        "policy": "config/integrations/inkbox.md",
+        "config": "config/integrations/inkbox.json",
+        "script": "scripts/inkbox-check.py",
+        "sense": "sense.inkbox.event",
+        "hotspot": "hotspot.inkbox",
+        "motor": "motor.inkbox",
+        "remote": "github.com/afidurko/inkbox",
+        "credential_env": "INKBOX_API_KEY",
+        "available_to": "comms_and_gated_outbound"
+      },
+      {
+        "id": "voicestudio",
+        "path": "integrations/voicestudio",
+        "policy": "config/integrations/voicestudio.md",
+        "config": "config/integrations/voicestudio.json",
+        "remote": "github.com/afidurko/VoiceStudio",
+        "sense": [
+          "sense.voicestudio.health",
+          "sense.voicestudio.result"
+        ],
+        "hotspot": "hotspot.voicestudio",
+        "motor": "motor.voicestudio",
+        "health_script": "scripts/voicestudio-health.py"
+      },
+      {
+        "id": "funasr",
+        "path": "https://github.com/afidurko/FunASR",
+        "policy": "config/integrations/funasr.md",
+        "script": "scripts/aaron-voice-enroll.py",
+        "sense": [
+          "sense.aaron.voice",
+          "sense.audio.transcript"
+        ],
+        "doc": "docs/AARON_VOICE_GATE.md",
+        "notes": "Aaron-only voice gate embeddings (CAM++); not a git submodule yet"
       },
       {
         "id": "sgr-agent-core",
@@ -211,7 +279,11 @@
         "policy": "config/integrations/litserve.md",
         "remote": "github.com/afidurko/LitServe",
         "role": "local_inference_host",
-        "serves": ["motor.slm", "motor.dl", "sgr_openai_compatible"],
+        "serves": [
+          "motor.slm",
+          "motor.dl",
+          "sgr_openai_compatible"
+        ],
         "plan": "docs/CAM_REASONING.md",
         "status": "proposed"
       }
@@ -351,6 +423,25 @@
         "cursor_bootstrap": true
       },
       {
+        "id": "pupil",
+        "label": "Pupil eye tracking",
+        "path": "integrations/pupil",
+        "remote": "github.com/afidurko/pupil",
+        "default_branch": "master",
+        "roles_allowed": [
+          "coding",
+          "vision",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/pupil",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
+      },
+      {
         "id": "llmavatartalk",
         "label": "LLMAvatarTalk presence",
         "path": "integrations/llmavatartalk",
@@ -367,6 +458,66 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true
+      },
+      {
+        "id": "public-apis",
+        "label": "Public APIs catalog",
+        "path": "integrations/public-apis",
+        "remote": "github.com/afidurko/public-apis",
+        "default_branch": "master",
+        "roles_allowed": [
+          "*"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/public-apis",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+      },
+      {
+        "id": "inkbox",
+        "label": "Inkbox agent identity",
+        "path": "integrations/inkbox",
+        "remote": "github.com/afidurko/inkbox",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "comms",
+          "ops",
+          "docs",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/inkbox",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+      },
+      {
+        "id": "voicestudio",
+        "label": "VoiceStudio local speech",
+        "path": "integrations/voicestudio",
+        "remote": "github.com/afidurko/VoiceStudio",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "comms",
+          "ops",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/voicestudio",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
       }
     ]
   },
@@ -385,7 +536,11 @@
     "cline_schedules": "scripts/sync-cline-schedules.py",
     "ci_connectome": "scripts/ci-connectome.sh",
     "swarm_check": "scripts/swarm-check.py",
-    "scholar_search": "scripts/scholar-search.py"
+    "scholar_search": "scripts/scholar-search.py",
+    "public_apis_search": "scripts/public-apis-search.py",
+    "public_apis_check": "scripts/public-apis-check.py",
+    "public_apis_addon": "scripts/public-apis-addon.py",
+    "inkbox_check": "scripts/inkbox-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -443,12 +598,71 @@
           ]
         },
         {
+          "id": "pupil",
+          "match_any": [
+            "pupil",
+            "eye tracking",
+            "eye-tracking",
+            "gaze tracking",
+            "integrations/pupil",
+            "pupil labs",
+            "pupil capture"
+          ]
+        },
+        {
           "id": "llmavatartalk",
           "match_any": [
             "llmavatartalk",
             "audio2face",
             "riva",
             "metahuman"
+          ]
+        },
+        {
+          "id": "public-apis",
+          "match_any": [
+            "public-apis",
+            "public apis",
+            "free api catalog",
+            "integrations/public-apis",
+            "apilayer public-apis"
+          ]
+        },
+        {
+          "id": "inkbox",
+          "match_any": [
+            "inkbox",
+            "inkbox sdk",
+            "inkbox cli",
+            "@inkbox/",
+            "agent identity",
+            "integrations/inkbox",
+            "inkbox.ai"
+          ]
+        },
+        {
+          "id": "voicestudio",
+          "match_any": [
+            "voicestudio",
+            "voice studio",
+            "omnivoice",
+            "voice cloning",
+            "voice clone",
+            "video dubbing",
+            "audiobook",
+            "elevenlabs local",
+            "local tts"
+          ]
+        },
+        {
+          "id": "funasr",
+          "match_any": [
+            "funasr",
+            "aaron voice",
+            "aaron-only",
+            "speaker id",
+            "voice gate",
+            "campplus"
           ]
         },
         {
@@ -573,6 +787,25 @@
       "cursor_bootstrap": true
     },
     {
+      "id": "pupil",
+      "label": "Pupil eye tracking",
+      "path": "integrations/pupil",
+      "remote": "github.com/afidurko/pupil",
+      "default_branch": "master",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/pupil",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
+    },
+    {
       "id": "llmavatartalk",
       "label": "LLMAvatarTalk presence",
       "path": "integrations/llmavatartalk",
@@ -589,6 +822,66 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true
+    },
+    {
+      "id": "public-apis",
+      "label": "Public APIs catalog",
+      "path": "integrations/public-apis",
+      "remote": "github.com/afidurko/public-apis",
+      "default_branch": "master",
+      "roles_allowed": [
+        "*"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/public-apis",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+    },
+    {
+      "id": "inkbox",
+      "label": "Inkbox agent identity",
+      "path": "integrations/inkbox",
+      "remote": "github.com/afidurko/inkbox",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "ops",
+        "docs",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/inkbox",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+    },
+    {
+      "id": "voicestudio",
+      "label": "VoiceStudio local speech",
+      "path": "integrations/voicestudio",
+      "remote": "github.com/afidurko/VoiceStudio",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "ops",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/voicestudio",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
     },
     {
       "id": "sgr-agent-core",
@@ -609,7 +902,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Cam slow-path reasoner — see docs/CAM_REASONING.md"
+      "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
     },
     {
       "id": "litserve",
@@ -685,12 +978,71 @@
         ]
       },
       {
+        "id": "pupil",
+        "match_any": [
+          "pupil",
+          "eye tracking",
+          "eye-tracking",
+          "gaze tracking",
+          "integrations/pupil",
+          "pupil labs",
+          "pupil capture"
+        ]
+      },
+      {
         "id": "llmavatartalk",
         "match_any": [
           "llmavatartalk",
           "audio2face",
           "riva",
           "metahuman"
+        ]
+      },
+      {
+        "id": "public-apis",
+        "match_any": [
+          "public-apis",
+          "public apis",
+          "free api catalog",
+          "integrations/public-apis",
+          "apilayer public-apis"
+        ]
+      },
+      {
+        "id": "inkbox",
+        "match_any": [
+          "inkbox",
+          "inkbox sdk",
+          "inkbox cli",
+          "@inkbox/",
+          "agent identity",
+          "integrations/inkbox",
+          "inkbox.ai"
+        ]
+      },
+      {
+        "id": "voicestudio",
+        "match_any": [
+          "voicestudio",
+          "voice studio",
+          "omnivoice",
+          "voice cloning",
+          "voice clone",
+          "video dubbing",
+          "audiobook",
+          "elevenlabs local",
+          "local tts"
+        ]
+      },
+      {
+        "id": "funasr",
+        "match_any": [
+          "funasr",
+          "aaron voice",
+          "aaron-only",
+          "speaker id",
+          "voice gate",
+          "campplus"
         ]
       },
       {
