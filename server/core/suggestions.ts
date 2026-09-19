@@ -262,6 +262,26 @@ function fromAgentContext(
     });
   }
 
+  const improvementsWs = workspaces.find((w) => w.kind === 'improvements');
+  const toolingRelated = swarmWs ?? improvementsWs;
+  if (toolingRelated) {
+    out.push({
+      id: 'suggest-public-apis-catalog',
+      kind: 'api-catalog',
+      title: 'Discover free APIs via public-apis before inventing endpoints',
+      rationale:
+        'All Cam agents share motor.public_apis — catalog hits beat ad-hoc URL invention for thin wrappers.',
+      implementation:
+        'Search scripts/public-apis-search.py (or MCP public_apis_search), pack into mesh/tools, then register a thin tool if reuse is likely.',
+      sketch:
+        'python3 scripts/public-apis-search.py --query weather --num 8\npython3 scripts/pack-public-apis-result.py --results /tmp/apis.json',
+      priority: toolingRelated.score < 85 ? 66 : 48,
+      relatedWorkspaceIds: [toolingRelated.id],
+      relatedConceptIds: ['protocols-extensions'],
+      sourceFindingIds: toolingRelated.findings.map((f) => f.id).slice(0, 3),
+    });
+  }
+
   const agiWs = workspaces.find((w) => w.kind === 'agi_research');
   if (agiWs) {
     out.push({
