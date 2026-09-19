@@ -36,8 +36,8 @@ AFRAME.registerComponent('character-spawner', {
     group.classList.add('spawned-character');
 
     if (anchorEl && anchorEl.object3D) {
-      var pos = new THREE.Vector3();
-      var quat = new THREE.Quaternion();
+      var pos = new AFRAME.THREE.Vector3();
+      var quat = new AFRAME.THREE.Quaternion();
       anchorEl.object3D.getWorldPosition(pos);
       anchorEl.object3D.getWorldQuaternion(quat);
       // Lift off the table card into the play space above it.
@@ -159,7 +159,7 @@ AFRAME.registerComponent('character-spawner', {
     root.appendChild(group);
     // Ensure object3D pose applied if we set it manually before attach.
     if (anchorEl && anchorEl.object3D && group.object3D) {
-      var p = new THREE.Vector3();
+      var p = new AFRAME.THREE.Vector3();
       anchorEl.object3D.getWorldPosition(p);
       p.y += 0.02;
       group.object3D.position.copy(p);
