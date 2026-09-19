@@ -430,10 +430,12 @@ function reanchorAreasFromCortex() {
 }
 
 async function bootAnatomy() {
-  // Suggestive: keep AREAS centroids aligned with config before shell load
+  // Suggestive: keep AREAS centroids + lobe colors aligned with config before shell load
+  let lobeColors = null;
   try {
     const cdoc = await fetch(repoUrl("../../config/connectome/anatomy-centroids.json")).then((r) => r.json());
     const cents = cdoc.centroids || {};
+    lobeColors = cdoc.lobe_colors || null;
     AREAS.forEach((a) => {
       if (cents[a.id]) {
         a.p = cents[a.id];
@@ -444,7 +446,10 @@ async function bootAnatomy() {
     /* offline — hardcoded AREAS remain */
   }
   try {
-    cortexApi = await loadCamCortex(brain, { url: new URL("./assets/cam-cortex.glb", import.meta.url).href });
+    cortexApi = await loadCamCortex(brain, {
+      url: new URL("./assets/cam-cortex.glb", import.meta.url).href,
+      lobeColors: lobeColors || undefined,
+    });
     reanchorAreasFromCortex();
     anatomyReady = true;
     cortexApi.setTranslucency(0.82);

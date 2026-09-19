@@ -216,5 +216,19 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("installGlassEnvironment", body)
 
 
+    def test_merge_prep_script_exists(self):
+        p = ROOT / "scripts" / "merge-prep-billion.sh"
+        self.assertTrue(p.is_file())
+        body = p.read_text(encoding="utf-8")
+        self.assertIn("1000000000", body)
+        self.assertIn("connectome-anatomy-check", body)
+
+    def test_serve_viz_repo_root(self):
+        body = (ROOT / "scripts" / "serve-connectome-viz.sh").read_text(encoding="utf-8")
+        self.assertIn("visualizations/connectome", body)
+        self.assertIn("live-activity.json", body)
+        self.assertIn("repo-root", body)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
