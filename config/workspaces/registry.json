@@ -206,6 +206,13 @@
         "policy": "config/integrations/cline.md",
         "remote": "github.com/afidurko/cline",
         "effector": "motor.cline"
+      },
+      {
+        "id": "joshinator-analyzer",
+        "path": "integrations/joshinator-analyzer",
+        "policy": "config/integrations/joshinator-analyzer.md",
+        "remote": "github.com/afidurko/joshinator-analyzer",
+        "notes": "Vendored mirror with IP-safe procedural 3D embodiment; push upstream when write access granted"
       }
     ],
     "parallel_prs": [
@@ -376,6 +383,26 @@
         "install_rules": true,
         "cursor_bootstrap": true,
         "notes": "Curated free API index — shared by all agents via motor.public_apis"
+      },
+      {
+        "id": "joshinator-analyzer",
+        "label": "Joshinator card analyzer + 3D embodiment",
+        "path": "integrations/joshinator-analyzer",
+        "remote": "github.com/afidurko/joshinator-analyzer",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "vision",
+          "ops",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/joshinator-analyzer",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "IP-safe procedural embodiment; vendored until upstream push works"
       }
     ]
   },
@@ -471,6 +498,16 @@
             "free api catalog",
             "integrations/public-apis",
             "apilayer public-apis"
+          ]
+        },
+        {
+          "id": "joshinator-analyzer",
+          "match_any": [
+            "joshinator",
+            "card analyzer",
+            "card embodiment",
+            "sports card",
+            "integrations/joshinator-analyzer"
           ]
         }
       ]
@@ -609,6 +646,26 @@
       "install_rules": true,
       "cursor_bootstrap": true,
       "notes": "Curated free API index — shared by all agents via motor.public_apis"
+    },
+    {
+      "id": "joshinator-analyzer",
+      "label": "Joshinator card analyzer + 3D embodiment",
+      "path": "integrations/joshinator-analyzer",
+      "remote": "github.com/afidurko/joshinator-analyzer",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "ops",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/joshinator-analyzer",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "IP-safe procedural embodiment; vendored until upstream push works"
     }
   ],
   "chooser": {
@@ -679,6 +736,16 @@
           "free api catalog",
           "integrations/public-apis",
           "apilayer public-apis"
+        ]
+      },
+      {
+        "id": "joshinator-analyzer",
+        "match_any": [
+          "joshinator",
+          "card analyzer",
+          "card embodiment",
+          "sports card",
+          "integrations/joshinator-analyzer"
         ]
       }
     ]
