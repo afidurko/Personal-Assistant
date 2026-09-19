@@ -34,6 +34,124 @@ try:
 except Exception:  # pragma: no cover
     activity_emit = None  # type: ignore
 
+try:
+    from aaron_voice_gate import AaronVoiceGate, load_config as load_voice_config
+except Exception:  # pragma: no cover
+    AaronVoiceGate = None  # type: ignore
+    load_voice_config = None  # type: ignore
+
+
+VOICE_GATE = None
+VOICE_CFG: dict = {}
+if AaronVoiceGate is not None and load_voice_config is not None:
+    try:
+        VOICE_CFG = load_voice_config()
+        # Prefer FunASR; fall back only when explicitly allowed for bring-up.
+        VOICE_GATE = AaronVoiceGate(VOICE_CFG)
+    except Exception as exc:  # pragma: no cover
+        VOICE_GATE = None
+        VOICE_CFG = {"_init_error": str(exc)}
+
+
+def voice_gate_status() -> dict:
+    if VOICE_GATE is None:
+        return {
+            "enabled": False,
+            "enrolled": False,
+            "ready": False,
+            "error": VOICE_CFG.get("_init_error", "voice_gate_unavailable"),
+        }
+    st = VOICE_GATE.status()
+    st["ready"] = bool(st.get("enrolled")) and bool(VOICE_CFG.get("enabled", True))
+    return st
+
+
+def gate_mic_turn(payload: dict) -> dict:
+    """Require Aaron voice match for mic turns when configured.
+
+    Accepts either:
+      - audio_wav_b64: WAV bytes (preferred — server-side segment + match)
+      - aaron_voice_score: precomputed score from companion (legacy / offline)
+    """
+    require = bool(VOICE_CFG.get("converse_require_voice_match_for_mic", True))
+    source = payload.get("source", "text")
+    if source not in {"mic", "speech"}:
+        return {"required": False, "accepted": True, "reason": "text_bypass"}
+    if not require:
+        return {"required": False, "accepted": True, "reason": "gate_not_required"}
+
+    status = voice_gate_status()
+    if not status.get("enrolled"):
+        return {
+            "required": True,
+            "accepted": False,
+            "reason": "not_enrolled",
+            "aaron_score": 0.0,
+            "status": status,
+        }
+
+    audio_b64 = payload.get("audio_wav_b64") or payload.get("audio_b64")
+    if audio_b64 and VOICE_GATE is not None:
+        import base64
+
+        try:
+            raw = base64.b64decode(audio_b64)
+        except Exception as exc:
+            return {
+                "required": True,
+                "accepted": False,
+                "reason": f"bad_audio_b64:{exc}",
+                "aaron_score": 0.0,
+            }
+        result = VOICE_GATE.gate_wav_bytes(
+            raw, device_id=str(payload.get("device_id") or "")
+        )
+        return {
+            "required": True,
+            "accepted": result.accepted,
+            "reason": result.reason,
+            "aaron_score": result.aaron_score,
+            "segments": [s.__dict__ for s in result.segments],
+            "aaron_speech_ms": result.aaron_speech_ms,
+            "backend": result.backend,
+            "spike": {
+                "sense": "sense.aaron.voice",
+                "score": result.aaron_score,
+                "enrolled": True,
+                "device_id": payload.get("device_id"),
+            },
+        }
+
+    # Score-only path (companion already matched)
+    if "aaron_voice_score" in payload:
+        try:
+            score = float(payload.get("aaron_voice_score"))
+        except (TypeError, ValueError):
+            score = 0.0
+        thr = float(VOICE_CFG.get("threshold", 0.85))
+        ok = score >= thr
+        return {
+            "required": True,
+            "accepted": ok,
+            "reason": "aaron_score_threshold" if ok else "score_below_threshold",
+            "aaron_score": score,
+            "threshold": thr,
+            "spike": {
+                "sense": "sense.aaron.voice",
+                "score": score,
+                "enrolled": True,
+                "device_id": payload.get("device_id"),
+            },
+        }
+
+    return {
+        "required": True,
+        "accepted": False,
+        "reason": "mic_turn_missing_audio_or_score",
+        "aaron_score": 0.0,
+        "hint": "Send audio_wav_b64 (preferred) or aaron_voice_score with mic turns",
+    }
+
 
 def load_tailscale() -> dict:
     if not TAILSCALE.exists():
@@ -203,6 +321,12 @@ def cam_reply(aaron_text: str, history: list[dict]) -> str:
             "I already have your face enrollment from the photos you shared. "
             "Keep the lens on you and I'll treat that as Aaron present."
         )
+    if "voice" in low or "recognize me" in low or "only me" in low or "surrounding" in low:
+        return (
+            "I'm set up to listen for your voice only. "
+            "Enroll a few clean clips with aaron-voice-enroll.py on your host, "
+            "and I'll ignore surrounding conversation before I take a turn."
+        )
     if "who are you" in low or "your name" in low:
         return (
             "I'm Cam — thirty-two, from Argentina, soft airy English. "
@@ -282,6 +406,7 @@ class Handler(BaseHTTPRequestHandler):
                         "enabled_by": "Aaron",
                         "ios_capture_mode": "standing_on",
                         "aaron_face_enrolled": VISUAL.exists(),
+                        "aaron_voice_gate": voice_gate_status(),
                         "host_has_local_mic": False,  # browser supplies mic
                         "tailscale": bool(ts.get("enabled")),
                     },
@@ -292,9 +417,14 @@ class Handler(BaseHTTPRequestHandler):
                     "voice": {
                         "character": VOICE["identity"]["voice_character"],
                         "tts_browser_hint": "speechSynthesis; soft rate 0.95",
+                        "stt": VOICE.get("stt"),
+                        "aaron_only_listen": True,
                     },
                 },
             )
+            return
+        if path == "/api/voice/status":
+            self._json(200, voice_gate_status())
             return
         if path == "/api/session":
             self._json(
@@ -350,6 +480,33 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {"accepted": True, "event": event, "mesh_activity": mesh})
             return
 
+        if path == "/api/spike/aaron.voice":
+            gate = gate_mic_turn({**payload, "source": "mic"})
+            route = route_sense(
+                "sense.aaron.voice",
+                goal=payload.get("purpose", "verify_aaron_voice"),
+            )
+            event = {
+                "at": utc_now(),
+                "type": "aaron_voice_spike",
+                "gate": gate,
+                "route": route,
+            }
+            self._append_log("spikes", event)
+            code = 200 if gate.get("accepted") else 403
+            self._json(code, {"accepted": bool(gate.get("accepted")), "event": event})
+            return
+
+        if path == "/api/voice/gate":
+            # Explicit audio gate — surrounding speakers dropped before converse
+            gate_payload = {**payload, "source": "mic"}
+            gate = gate_mic_turn(gate_payload)
+            event = {"at": utc_now(), "type": "voice_gate", "gate": gate}
+            self._append_log("spikes", event)
+            code = 200 if gate.get("accepted") else 403
+            self._json(code, gate)
+            return
+
         if path == "/api/spike/camera":
             route = route_sense("sense.ios.camera", goal=payload.get("purpose", "see"))
             event = {
@@ -367,6 +524,23 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/turn":
             text = (payload.get("text") or payload.get("transcript") or "").strip()
             source = payload.get("source", "text")
+            gate = gate_mic_turn(payload)
+            if source in {"mic", "speech"} and gate.get("required") and not gate.get("accepted"):
+                denied = {
+                    "id": str(uuid.uuid4()),
+                    "at": utc_now(),
+                    "source": source,
+                    "aaron": text,
+                    "cam": None,
+                    "accepted": False,
+                    "voice_gate": gate,
+                    "reason": gate.get("reason", "non_aaron_voice"),
+                    "speak": {"enabled": False},
+                }
+                self._append_log("turns", denied)
+                self._json(403, denied)
+                return
+
             sense = "sense.ios.mic" if source in {"mic", "speech"} else "sense.chat.aaron"
             route = route_sense(sense, goal=text)
             reply = cam_reply(text, STATE.history)
@@ -383,6 +557,8 @@ class Handler(BaseHTTPRequestHandler):
                 "source": source,
                 "aaron": text,
                 "cam": reply,
+                "accepted": True,
+                "voice_gate": gate,
                 "route": {
                     "sense": sense,
                     "hotspot_id": route.get("hotspot_id"),
