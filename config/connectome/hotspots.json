@@ -717,7 +717,7 @@
       "integration": "config/integrations/google-scholar.json"
     },
     {
-"id": "hotspot.voicestudio_result",
+      "id": "hotspot.voicestudio_result",
       "center": "center.comms",
       "pathway": [
         "sense.voicestudio.result",
@@ -942,6 +942,34 @@
       ],
       "behavior": "absorb_tool_result_into_mesh",
       "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.loop_engineering",
+      "center": "center.qa",
+      "area": "area.cingulate",
+      "columns": [
+        "neuron.loop_triage",
+        "neuron.qa_cycle",
+        "neuron.qa"
+      ],
+      "tracts": [
+        "tract.cingulum",
+        "tract.mesh_callosal"
+      ],
+      "pathway": [
+        "sense.loop.tick",
+        "area.cingulate",
+        "switch.autonomy",
+        "motor.loop"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault",
+        "motor.cline"
+      ],
+      "behavior": "design_and_run_agent_loops_l1_report",
+      "available_to": "all_roles_and_subagents",
+      "integration": "config/integrations/loop-engineering.json"
     }
   ]
 }

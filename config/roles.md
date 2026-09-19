@@ -43,6 +43,7 @@
 - Boss/worker primitives: `config/swarm/primitives.json`
 - **Any role may invoke Cline** (`motor.cline`) for coding — not siloed to `coding`
 - **Any role may invoke public-apis** (`motor.public_apis`) for free API discovery — not siloed to tooling
+- **Any role may invoke loop-engineering** (`motor.loop`) for L1 standing triage/audit — not siloed to QA
 - **Outbound Inkbox** (`motor.inkbox`) is gated by `switch.outbound` — prefer `comms`; do not free-send from Cline
 
 ## Enhancement cortex (DL + sLMs)
@@ -63,6 +64,7 @@
 - Cline: `integrations/cline` (all agents / all workspaces)
 - Public APIs: `integrations/public-apis` (all agents — free API catalog)
 - Inkbox: `integrations/inkbox` (agent identity — email/phone/vault/tunnels; outbound gated)
+- Loop Engineering: `integrations/loop-engineering` (standing agent loops — L1 report-only week one)
 - Vision: `integrations/paddledetection`
 - Gaze / eye tracking: `integrations/pupil`
 - Presence: `integrations/llmavatartalk`

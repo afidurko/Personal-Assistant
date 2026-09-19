@@ -1,7 +1,7 @@
 {
   "version": 3,
   "architecture": "brodmann_cortical_functional_map",
-  "analogy": "Human Brodmann cytoarchitectonic areas as Cam functional cortex \u2014 agents/loops are cortical columns; association tracts are the neural mesh",
+  "analogy": "Human Brodmann cytoarchitectonic areas as Cam functional cortex — agents/loops are cortical columns; association tracts are the neural mesh",
   "literature": [
     {
       "cite": "Brodmann (1909) cytoarchitectonic cortical map; Radiopaedia / Kenhub functional summaries",
@@ -9,10 +9,10 @@
     },
     {
       "cite": "Yeo et al. / association-cortex specialization (PMC4598819)",
-      "use": "flexible frontal\u2013parietal binding across specialized networks"
+      "use": "flexible frontal–parietal binding across specialized networks"
     },
     {
-      "cite": "Jung et al. Brain Struct Funct \u2014 structural connectivity of association cortices (PMC5726605)",
+      "cite": "Jung et al. Brain Struct Funct — structural connectivity of association cortices (PMC5726605)",
       "use": "intra-lobe dense graded links vs discrete inter-lobe tracts mirroring functional networks"
     },
     {
@@ -136,7 +136,7 @@
         "BA4"
       ],
       "lobe": "frontal",
-      "function": "primary motor cortex \u2014 effector fire",
+      "function": "primary motor cortex — effector fire",
       "cam_roles": [],
       "legacy_centers": [],
       "columns": [
@@ -256,7 +256,7 @@
         "hippocampal-adjacent"
       ],
       "lobe": "medial_temporal",
-      "function": "engrams \u2014 mesh + vault + MemoryBear long-term cognitive memory",
+      "function": "engrams — mesh + vault + MemoryBear long-term cognitive memory",
       "cam_roles": [
         "memory-curator"
       ],
@@ -293,9 +293,13 @@
         "neuron.vuln_scan",
         "neuron.drift_scan",
         "neuron.submodule_health",
-        "neuron.health_conductor"
+        "neuron.health_conductor",
+        "neuron.loop_triage",
+        "neuron.loop_pr_babysitter",
+        "neuron.loop_post_merge",
+        "neuron.loop_issue_triage"
       ]
     }
   ],
-  "routing_rule": "Spikes enter primary/association cortex \u2192 DLPFC/aPFC bind flexible networks \u2192 OFC/cingulate gate \u2192 premotor \u2192 motor. Columns (agents/loops) recur locally; tracts carry inter-area mesh."
+  "routing_rule": "Spikes enter primary/association cortex → DLPFC/aPFC bind flexible networks → OFC/cingulate gate → premotor → motor. Columns (agents/loops) recur locally; tracts carry inter-area mesh."
 }

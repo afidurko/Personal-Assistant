@@ -9,7 +9,11 @@
       "cron": "0 7 * * *",
       "prompt": "Run python3 scripts/connectome-check.py, then python3 scripts/sync-cline-session.py export --out /tmp/mesh-cline.json. Summarize PASS/FAIL and any missing edges. Do not push commits.",
       "timeout": 1800,
-      "tags": ["cam", "health", "connectome"],
+      "tags": [
+        "cam",
+        "health",
+        "connectome"
+      ],
       "enabled": true
     },
     {
@@ -19,7 +23,11 @@
       "cron": "0 9 * * SUN",
       "prompt": "Review identity/persistence/cline-session-cache.json and vault/10-Mesh-Distillates for stale coding notes. Propose a short weekly distillate for mesh/cline. Do not invent Aaron personal facts.",
       "timeout": 1800,
-      "tags": ["cam", "mesh", "weekly"],
+      "tags": [
+        "cam",
+        "mesh",
+        "weekly"
+      ],
       "enabled": true
     },
     {
@@ -29,7 +37,11 @@
       "cron": "30 7 * * *",
       "prompt": "Run python3 scripts/memorybear-check.py and python3 scripts/memorybear.py --doctor --offline. Summarize PASS/FAIL. If MEMORYBEAR_API_KEY is set, also run a live --doctor without --offline. Do not invent Aaron personal facts or push commits.",
       "timeout": 1200,
-      "tags": ["cam", "memory", "memorybear"],
+      "tags": [
+        "cam",
+        "memory",
+        "memorybear"
+      ],
       "enabled": true
     },
     {
@@ -39,7 +51,56 @@
       "cron": "0 8 * * MON",
       "prompt": "If this is a populated Cline checkout, run bun run cli doctor (or cline doctor) and summarize health. If submodule is empty, report that and stop.",
       "timeout": 1200,
-      "tags": ["cam", "cline", "doctor"],
+      "tags": [
+        "cam",
+        "cline",
+        "doctor"
+      ],
+      "enabled": false
+    },
+    {
+      "id": "cam-daily-loop-triage",
+      "name": "Cam daily loop triage (L1)",
+      "workspace_id": "personal-assistant",
+      "cron": "0 6 * * *",
+      "prompt": "Run python3 scripts/loop-run.py --pattern daily-triage --level L1. Summarize STATE.md High Priority and any connectome/health failures. Do not auto-fix or push commits. L1 report-only.",
+      "timeout": 1800,
+      "tags": [
+        "cam",
+        "loop",
+        "triage",
+        "l1"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "cam-weekly-loop-post-merge",
+      "name": "Cam weekly loop post-merge cleanup (L1)",
+      "workspace_id": "personal-assistant",
+      "cron": "30 9 * * SUN",
+      "prompt": "Run python3 scripts/loop-run.py --pattern post-merge-cleanup --level L1. List suggested cleanup items only. Do not edit code or push.",
+      "timeout": 1800,
+      "tags": [
+        "cam",
+        "loop",
+        "post-merge",
+        "l1"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "cam-loop-pr-babysitter",
+      "name": "Cam PR babysitter (L1 report — opt-in)",
+      "workspace_id": "personal-assistant",
+      "cron": "*/30 * * * *",
+      "prompt": "Run python3 scripts/loop-run.py --pattern pr-babysitter --level L1. Report open PRs/CI only. Never merge. Never push.",
+      "timeout": 1200,
+      "tags": [
+        "cam",
+        "loop",
+        "pr",
+        "l1"
+      ],
       "enabled": false
     }
   ]

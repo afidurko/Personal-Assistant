@@ -61,6 +61,14 @@ HARD_PATHS = [
     "config/system/pieces.json",
     "config/integrations/inkbox.json",
     "config/integrations/inkbox.md",
+    "config/integrations/loop-engineering.json",
+    "config/integrations/loop-engineering.md",
+    "config/loops/patterns.json",
+    "LOOP.md",
+    "STATE.md",
+    "loop-budget.md",
+    "loop-run-log.md",
+
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
@@ -84,7 +92,12 @@ HARD_PATHS = [
     "scripts/cam-system.py",
     "scripts/flight-envelope.py",
     "scripts/inkbox-check.py",
+    "scripts/loop-check.py",
+    "scripts/loop-audit.py",
+    "scripts/loop-run.py",
+    "scripts/pack-loop-result.py",
     "scripts/swarm-check.py",
+
     "scripts/persist-export.py",
     "scripts/persist-import.py",
     "scripts/trajectory-policy-check.py",
@@ -107,6 +120,7 @@ PERSIST_MUST_INCLUDE = [
     "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
     "identity/persistence/MEMORYBEAR.md",
     "identity/persistence/INKBOX.md",
+    "identity/persistence/LOOP_ENGINEERING.md",
     "config/teams/agi-research-scan.json",
     "config/teams/capability.json",
     "config/teams/info.json",
@@ -184,6 +198,12 @@ def mesh_flags(seed: dict) -> dict:
             or facts.get("inkbox")
             or (seed.get("mesh/tools") or {}).get("inkbox")
             or (seed.get("mesh/comms") or {}).get("inkbox")
+        ),
+        "loop_engineering": bool(
+            (seed.get("mesh/loops") or {}).get("enabled")
+            or prefs.get("loop_engineering")
+            or facts.get("loop_engineering")
+            or (seed.get("mesh/tools") or {}).get("loop_engineering")
         ),
         "unlimited_subagents": bool(prefs.get("unlimited_subagents") or facts.get("unlimited_subagents")),
         "slm_cortex_enabled": bool(prefs.get("slm_cortex_enabled")),
@@ -368,6 +388,25 @@ def main() -> int:
         if inkbox.get("hotspot_id") != "hotspot.inkbox":
             route_ok = False
             route_notes.append("inkbox sense should hit hotspot.inkbox")
+        loop = json.loads(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/connectome-route.py"),
+                    "--sense",
+                    "sense.loop.tick",
+                    "--goal",
+                    "daily triage loop engineering",
+                ],
+                text=True,
+            )
+        )
+        if "motor.loop" not in loop.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("loop-engineering pathway missing motor.loop")
+        if loop.get("hotspot_id") != "hotspot.loop_engineering":
+            route_ok = False
+            route_notes.append("loop tick sense should hit hotspot.loop_engineering")
     except Exception as exc:  # noqa: BLE001
         route_ok = False
         route_notes.append(str(exc))

@@ -25,7 +25,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · Cline · PaddleDetection · Pupil (gaze) · LinkedIn/Indeed · **Google Scholar** · **Google Trends data** · **public-apis** · **Inkbox** · `config/tools/registry.json`
+- **Tools:** Jarvis · Cline · PaddleDetection · Pupil (gaze) · LinkedIn/Indeed · **Google Scholar** · **Google Trends data** · **public-apis** · **Inkbox** · **loop-engineering** · `config/tools/registry.json`
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents (privilege inheritance, no escalation)
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
@@ -63,6 +63,10 @@ python3 scripts/google-trends-search.py --query election --offline
 python3 scripts/agi-research-scan.py
 # Confirm workspace + integration wiring
 python3 scripts/workspace-integration-check.py
+# Loop Engineering (L1 standing triage / audit)
+python3 scripts/connectome-route.py --sense sense.loop.tick --goal "daily triage loop engineering"
+python3 scripts/loop-check.py
+python3 scripts/loop-run.py --pattern daily-triage --level L1
 # MemoryBear cognitive memory (offline doctor)
 python3 scripts/memorybear.py --doctor --offline
 python3 scripts/memorybear-check.py

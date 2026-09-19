@@ -35,6 +35,22 @@
       "workspace_id": "personal-assistant"
     },
     {
+      "cron": "30 7 * * *",
+      "enabled": true,
+      "id": "cam-nightly-memorybear-doctor",
+      "name": "Cam nightly MemoryBear doctor",
+      "prompt": "Run python3 scripts/memorybear-check.py and python3 scripts/memorybear.py --doctor --offline. Summarize PASS/FAIL. If MEMORYBEAR_API_KEY is set, also run a live --doctor without --offline. Do not invent Aaron personal facts or push commits.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "memory",
+        "memorybear"
+      ],
+      "timeout": 1200,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
       "cron": "0 8 * * MON",
       "enabled": false,
       "id": "cam-cline-submodule-doctor",
@@ -49,8 +65,59 @@
       "timeout": 1200,
       "workspace_exists": false,
       "workspace_id": "cline"
+    },
+    {
+      "cron": "0 6 * * *",
+      "enabled": true,
+      "id": "cam-daily-loop-triage",
+      "name": "Cam daily loop triage (L1)",
+      "prompt": "Run python3 scripts/loop-run.py --pattern daily-triage --level L1. Summarize STATE.md High Priority and any connectome/health failures. Do not auto-fix or push commits. L1 report-only.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "loop",
+        "triage",
+        "l1"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "30 9 * * SUN",
+      "enabled": true,
+      "id": "cam-weekly-loop-post-merge",
+      "name": "Cam weekly loop post-merge cleanup (L1)",
+      "prompt": "Run python3 scripts/loop-run.py --pattern post-merge-cleanup --level L1. List suggested cleanup items only. Do not edit code or push.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "loop",
+        "post-merge",
+        "l1"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "*/30 * * * *",
+      "enabled": false,
+      "id": "cam-loop-pr-babysitter",
+      "name": "Cam PR babysitter (L1 report \u2014 opt-in)",
+      "prompt": "Run python3 scripts/loop-run.py --pattern pr-babysitter --level L1. Report open PRs/CI only. Never merge. Never push.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "loop",
+        "pr",
+        "l1"
+      ],
+      "timeout": 1200,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
     }
   ],
   "source": "config/workspaces/schedules.json",
-  "synced_at": "2026-09-19T20:17:35.487118+00:00"
+  "synced_at": "2026-09-19T21:56:44.980039+00:00"
 }

@@ -9,6 +9,7 @@ Tools:
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
+  loop_check, loop_audit, loop_run,
   voicestudio_health
 
 Install into Cline (example):
@@ -236,6 +237,44 @@ def tool_defs() -> list[dict]:
                 "Live outbound uses motor.inkbox under switch.outbound."
             ),
             "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "loop_check",
+            "description": (
+                "Confirm Loop Engineering wiring (connectome, spine files, submodule). "
+                "No network required."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "loop_audit",
+            "description": (
+                "Run loop-audit against Personal-Assistant and return Loop Ready output. "
+                "Prefer local submodule CLI."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "suggest": {"type": "boolean"},
+                    "badge": {"type": "boolean"},
+                },
+            },
+        },
+        {
+            "name": "loop_run",
+            "description": (
+                "Run a Cam L1 loop pattern (daily-triage, qa-cycle, post-merge-cleanup, "
+                "issue-triage). Week-one report-only — no auto-fix/merge."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string"},
+                    "level": {"type": "string"},
+                    "list": {"type": "boolean"},
+                    "dry_run": {"type": "boolean"},
+                },
+            },
         },
         {
             "name": "voicestudio_health",
@@ -497,6 +536,58 @@ def inkbox_check(_arguments: dict | None = None) -> Any:
     return json.loads(out)
 
 
+def loop_check(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/loop-check.py")],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
+def loop_audit(arguments: dict | None = None) -> Any:
+    arguments = arguments or {}
+    cmd = [sys.executable, str(ROOT / "scripts/loop-audit.py"), "--json"]
+    if arguments.get("suggest"):
+        cmd.append("--suggest")
+    if arguments.get("badge"):
+        cmd.append("--badge")
+    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+            "exit_code": proc.returncode,
+        }
+
+
+def loop_run(arguments: dict | None = None) -> Any:
+    arguments = arguments or {}
+    cmd = [sys.executable, str(ROOT / "scripts/loop-run.py")]
+    if arguments.get("list"):
+        cmd.append("--list")
+    else:
+        pattern = arguments.get("pattern") or "daily-triage"
+        cmd.extend(["--pattern", str(pattern)])
+        if arguments.get("level"):
+            cmd.extend(["--level", str(arguments["level"])])
+        if arguments.get("dry_run"):
+            cmd.append("--dry-run")
+    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+            "exit_code": proc.returncode,
+        }
+
+
 def voicestudio_health(base_url: str | None = None, timeout: float = 5.0) -> dict:
     cmd = [sys.executable, str(ROOT / "scripts" / "voicestudio-health.py"), "--json"]
     if base_url:
@@ -563,6 +654,12 @@ def call_tool(name: str, arguments: dict) -> Any:
         return google_trends_addon(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
+    if name == "loop_check":
+        return loop_check(arguments)
+    if name == "loop_audit":
+        return loop_audit(arguments)
+    if name == "loop_run":
+        return loop_run(arguments)
     if name == "voicestudio_health":
         return voicestudio_health(
             base_url=arguments.get("base_url"),

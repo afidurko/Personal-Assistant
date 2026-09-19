@@ -56,6 +56,10 @@ python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
 echo "== inkbox wiring =="
 python3 scripts/inkbox-check.py
 
+echo "== loop-engineering wiring =="
+python3 scripts/loop-check.py
+python3 scripts/loop-run.py --pattern daily-triage --level L1 --dry-run
+
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \
   --n 1000000 \

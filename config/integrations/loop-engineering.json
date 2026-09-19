@@ -1,0 +1,74 @@
+{
+  "id": "loop-engineering",
+  "name": "Loop Engineering",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "role": "Agent loop patterns, readiness audit, budget/state spine, and Cam standing automations (daily triage, QA bridge, PR babysitter L1)",
+  "policy": "config/integrations/loop-engineering.md",
+  "remote": "github.com/afidurko/loop-engineering",
+  "homepage": "https://github.com/afidurko/loop-engineering",
+  "upstream": "github.com/cobusgreyling/loop-engineering",
+  "path": "integrations/loop-engineering",
+  "sense": "sense.loop.tick",
+  "hotspot": "hotspot.loop_engineering",
+  "motor": "motor.loop",
+  "switch": "switch.autonomy",
+  "center": "center.qa",
+  "area": "area.cingulate",
+  "mesh_namespace": "mesh/loops",
+  "vault_dir": "vault/03-Projects/loop-engineering",
+  "week_one_mode": "L1",
+  "defaults": {
+    "level": "L1",
+    "auto_fix": false,
+    "auto_merge": false,
+    "save_to_mesh": true,
+    "save_to_vault": true,
+    "append_run_log": true,
+    "update_state": true
+  },
+  "cam_spine": {
+    "loop_md": "LOOP.md",
+    "state_md": "STATE.md",
+    "budget_md": "loop-budget.md",
+    "run_log_md": "loop-run-log.md",
+    "patterns": "config/loops/patterns.json"
+  },
+  "tools": {
+    "audit": "integrations/loop-engineering/tools/loop-audit/dist/cli.js",
+    "cost": "integrations/loop-engineering/tools/loop-cost/dist/cli.js",
+    "sync": "integrations/loop-engineering/tools/loop-sync/dist/cli.js",
+    "context": "integrations/loop-engineering/tools/loop-context/dist/cli.js",
+    "init": "integrations/loop-engineering/tools/loop-init/dist/cli.js"
+  },
+  "scripts": {
+    "check": "scripts/loop-check.py",
+    "audit": "scripts/loop-audit.py",
+    "run": "scripts/loop-run.py",
+    "pack": "scripts/pack-loop-result.py"
+  },
+  "patterns_enabled": [
+    "daily-triage",
+    "qa-cycle",
+    "pr-babysitter",
+    "post-merge-cleanup",
+    "issue-triage"
+  ],
+  "teams": [
+    "team.capability",
+    "team.tooling",
+    "team.info",
+    "team.agi-research-scan"
+  ],
+  "roles": [
+    "qa",
+    "ops",
+    "coding",
+    "chief",
+    "tool-user",
+    "task-executor"
+  ],
+  "available_to": "all_roles_and_subagents",
+  "notes": "Week-one default is L1 report-only. Code-changing loops require verifier + worktree and stay gated unless Aaron raises the level."
+}

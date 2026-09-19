@@ -24,6 +24,8 @@ persistence bundle (`.clinerules` travels with the repo).
 - **LLMAvatarTalk / iOS companion:** presence only — not a second brain.
 - **Inkbox:** agent email/phone/identity/vault/tunnels — live send via
   `motor.inkbox` under `switch.outbound` (not from Cline).
+- **Loop Engineering:** standing agent loops (`motor.loop`) — L1 report triage /
+  audit / QA bridge via `scripts/loop-run.py` (no auto-merge from Cline).
 
 ## Connectome discipline
 
@@ -42,6 +44,10 @@ work to tickets/mesh when the Null stack is live.
 Any Cam role or subagent may invoke `motor.public_apis`
 (`scripts/public-apis-search.py` / MCP `public_apis_search`) to discover
 curated free/public APIs before inventing endpoints.
+
+Any Cam role or subagent may invoke `motor.loop`
+(`scripts/loop-run.py` / MCP `loop_run`) for L1 standing triage and audit.
+Week-one default is report-only — no auto-fix/merge from loops.
 
 Outbound Inkbox send/call/SMS requires `switch.outbound` act — prefer `comms`
 and `scripts/inkbox-check.py` wiring; never free-send from Cline.
