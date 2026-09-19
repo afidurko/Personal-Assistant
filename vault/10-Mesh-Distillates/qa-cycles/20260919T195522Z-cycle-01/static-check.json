@@ -7,5 +7,6 @@
   "hard_errors": [],
   "missing_edges": [],
   "soft_warnings": [],
-  "ok": true
+  "ok": true,
+  "exit_code": 0
 }
