@@ -62,6 +62,13 @@ python main.py capture   # or player / service
 Prefer the network real-time API when Capture/Service is already running
 ([developer docs](https://docs.pupil-labs.com/core/developer/)).
 
+Browser AR viz gaze bridge (for `visualizations/card-recognition-spawn/`):
+
+```bash
+python3 scripts/pupil-gaze-bridge.py
+# GET http://127.0.0.1:8766/gaze  → { ok, norm_pos, confidence }
+```
+
 ## Mesh bridge
 
 ```bash

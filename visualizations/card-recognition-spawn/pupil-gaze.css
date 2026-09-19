@@ -50,10 +50,15 @@
   background: #7dfff0;
   color: #102018;
 }
-.gate-secondary {
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: transparent;
-  color: #f3f5f8;
+.gaze-gate-hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(243, 245, 248, 0.55);
+}
+.gaze-gate-hint code {
+  font-size: 11px;
+  color: #7dfff0;
 }
 
 .gaze-calib {

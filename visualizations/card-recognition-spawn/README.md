@@ -1,29 +1,40 @@
 # AR card battle + pupil control
 
-Phone-AR card battle (desk camera look) with **iris / pupil gaze** control.
+Phone-AR card battle with gaze control wired for Cam’s Pupil stack (`sense.vision.gaze` / `motor.pupil`).
 
 ## Controls
 
-1. **Enable pupil tracking** — webcam + MediaPipe Face Landmarker (iris landmarks 468 / 473)
-2. Calibrate by looking at 5 dots (dwell or Space / click)
-3. **Dwell ~0.9s** on `+` or a move to select
+1. **Cam Pupil gaze** — `python3 scripts/pupil-gaze-bridge.py` then choose this in the gate  
+2. **Webcam iris (MediaPipe)** — on-device iris landmarks when no Pupil Capture  
+3. **Pointer as gaze** — dwell demo without camera  
 
-If the camera is blocked, use **pointer as gaze** (same dwell UX).
+Look / point to aim. **Dwell ~0.75s** on `+` or a move to select.
 
 ## Run
 
 ```bash
+# terminal A — Pupil gaze bridge (fixture by default)
+python3 scripts/pupil-gaze-bridge.py
+
+# terminal B — viz
 npx --yes serve -l 5179 visualizations/card-recognition-spawn
 ```
 
-Open http://localhost:5179/ — allow camera — calibrate — dwell on **+** twice — dwell on a move.
+Open http://localhost:5179/ → **Use Cam Pupil gaze** → calibrate → dwell on **+** twice → dwell on a move.
+
+Live Capture export file:
+
+```bash
+python3 scripts/pupil-gaze-bridge.py --file /path/to/gaze.json
+```
 
 ## Stack
 
 | Layer | Role |
 |---|---|
-| `pupil-gaze.js` | Iris UV → calibrated screen point → dwell click |
+| `scripts/pupil-gaze-bridge.py` | Serves `GET /gaze` from Pupil fixture/file for the browser |
+| `pupil-gaze.js` | norm_pos / iris → calibrated screen point → dwell click |
 | `ar-battle.js` | Detect → spawn → battle |
-| MediaPipe Face Landmarker | On-device pupil/iris tracking |
+| `integrations/pupil` + `scripts/pupil-see.py` | Cam see mesh bridge (`mesh/gaze`) |
 
-Gaze targets use `data-gaze-target` on `#scan-btn`, `#zone-active`, and move buttons.
+See `config/integrations/pupil.md` and `identity/persistence/CAM_PUPIL_VISION_ENABLED.md`.
