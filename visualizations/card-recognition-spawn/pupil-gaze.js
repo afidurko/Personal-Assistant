@@ -44,22 +44,36 @@
   }
 
   function hitTest() {
-    var stack = document.elementsFromPoint(state.x, state.y) || [];
-    for (var i = 0; i < stack.length; i++) {
-      var el = stack[i];
-      if (!el || !el.closest) continue;
-      if (el.closest('.gaze-cursor, .gaze-hud, .gaze-gate, .gaze-calib, .gaze-status')) continue;
-      var target = el.closest('[data-gaze-target]');
-      if (!target) continue;
+    var targets = document.querySelectorAll('[data-gaze-target]');
+    var best = null;
+    var bestDist = Infinity;
+    var pad = 12;
+    for (var i = 0; i < targets.length; i++) {
+      var target = targets[i];
       if (target.hasAttribute('hidden')) continue;
       var host = target.closest('#moves');
       if (host && host.hidden) continue;
-      if (target.id === 'scan-btn' && target.closest('.mode-battle')) continue;
+      var view = document.getElementById('ar-view');
+      if (target.id === 'scan-btn' && view && view.classList.contains('mode-battle')) continue;
       var style = window.getComputedStyle(target);
-      if (style.display === 'none' || style.visibility === 'hidden') continue;
-      return target;
+      if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') continue;
+      var r = target.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) continue;
+      var inside =
+        state.x >= r.left - pad &&
+        state.x <= r.right + pad &&
+        state.y >= r.top - pad &&
+        state.y <= r.bottom + pad;
+      if (!inside) continue;
+      var cx = (r.left + r.right) / 2;
+      var cy = (r.top + r.bottom) / 2;
+      var d = (state.x - cx) * (state.x - cx) + (state.y - cy) * (state.y - cy);
+      if (d < bestDist) {
+        bestDist = d;
+        best = target;
+      }
     }
-    return null;
+    return best;
   }
 
   function activate(el) {
@@ -361,7 +375,15 @@
         };
       }
       if (state.mode === 'tracking' || state.mode === 'idle') {
-        smoothTo(evt.clientX, evt.clientY);
+        // Snap for pointer demo so dwell hit-tests stay aligned with the cursor.
+        state.sx = evt.clientX;
+        state.sy = evt.clientY;
+        state.x = evt.clientX;
+        state.y = evt.clientY;
+        if (cursor) {
+          cursor.style.transform = 'translate(' + state.x + 'px, ' + state.y + 'px)';
+          cursor.classList.add('on');
+        }
         if (state.mode === 'idle') state.mode = 'tracking';
       }
     }, { passive: true });
