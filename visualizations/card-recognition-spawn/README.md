@@ -1,10 +1,14 @@
-# AR card battle (phone composite)
+# AR card battle + pupil control
 
-Visual recreation of the Instagram AR TCG flow for A-Frame / Cam:
+Phone-AR card battle (desk camera look) with **iris / pupil gaze** control.
 
-**camera desk → corner brackets → + scan → holographic card → 3D creature on green arena → floating moves / HP / turn panels**
+## Controls
 
-This is the look of the reference clips (wooden table, ACTIVE brackets, frosted HUD, stadium disk, fighters with HP bars, bottom action line). Creature IP is original Arcana Cards—not Pokémon.
+1. **Enable pupil tracking** — webcam + MediaPipe Face Landmarker (iris landmarks 468 / 473)
+2. Calibrate by looking at 5 dots (dwell or Space / click)
+3. **Dwell ~0.9s** on `+` or a move to select
+
+If the camera is blocked, use **pointer as gaze** (same dwell UX).
 
 ## Run
 
@@ -12,12 +16,14 @@ This is the look of the reference clips (wooden table, ACTIVE brackets, frosted 
 npx --yes serve -l 5179 visualizations/card-recognition-spawn
 ```
 
-Open http://localhost:5179/
+Open http://localhost:5179/ — allow camera — calibrate — dwell on **+** twice — dwell on a move.
 
-1. Press **+** (or tap the ACTIVE card) — detects Volt Wisp, lifts a hologram, spawns the 3D fighter on the arena  
-2. Press **+** again — opponent joins  
-3. Tap **Spark Jab** / **Arc Combo** — action banner + HP update (same beat as “ELECTABUZZ USED LIGHT PUNCH!”)
+## Stack
 
-## A-Frame wiring
+| Layer | Role |
+|---|---|
+| `pupil-gaze.js` | Iris UV → calibrated screen point → dwell click |
+| `ar-battle.js` | Detect → spawn → battle |
+| MediaPipe Face Landmarker | On-device pupil/iris tracking |
 
-Same pipeline events as before (`card-detected` → catalog → spawn). MindAR / WebXR / PaddleDetection should call into this UI shell or the earlier `components/*` spawner once GPU AR is available. Cherry-pick into [afidurko/aframe](https://github.com/afidurko/aframe) under `examples/showcase/card-recognition-spawn/`.
+Gaze targets use `data-gaze-target` on `#scan-btn`, `#zone-active`, and move buttons.

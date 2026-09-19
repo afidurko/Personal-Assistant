@@ -103,7 +103,7 @@
 
       window.setTimeout(function () {
         setupStep.textContent = '3 / 3';
-        setupCopy.textContent = 'Opponent card found. Press + to start battle.';
+        setupCopy.textContent = 'Opponent card found. Dwell on + to start battle.';
         document.getElementById('card-opp').hidden = false;
         document.getElementById('zone-opp').style.opacity = '1';
         state.step = 3;
