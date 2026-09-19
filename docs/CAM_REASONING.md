@@ -224,14 +224,20 @@ Do **not** pull these into the first implementation pass:
 
 ### Phase B — Thin CLI (no LitServe farm, no converse rewrite)
 
-- [ ] `scripts/cam-reason.py` — **dry-run first**, then optional live  
-  - Fast gate (heuristics OK; LitServe classify later)  
-  - Escalate bar → stub/real SGR one iteration  
+- [x] `scripts/cam-reason.py` / `scripts/cam_reason.py` — **dry-run first**  
+  - Fast gate (heuristics; LitServe classify later)  
+  - Escalate bar → stub SGR one iteration (`CamReasoningTool`)  
   - Cam tools **only**: MeshRecall, ConnectomeRoute, TrajectoryCheck, FinalAnswer  
   - Emit `reasoning_trace` JSONL under `vault/10-Mesh-Distillates/reasoning/`  
-- [ ] Cam `ReasoningTool` subclass with hotspot / switch_risks / stream  
-- [ ] Tests: greeting→fast, enhance→slow+strip, kill→empty, weak facts→recall before invent  
-- [ ] Explicitly **out of B:** `cam-litserve.py`, converse wire, Cline/Scholar tools, cortex HUD  
+- [x] Cam `ReasoningTool` fields: `hotspot_id`, `switch_risks[]`, `stream`  
+- [x] Tests: `scripts/test_cam_reason.py` (greeting→fast, enhance→slow+strip, kill→empty, weak facts→recall)  
+- [x] Explicitly **out of B:** `cam-litserve.py`, converse wire, Cline/Scholar tools, cortex HUD  
+
+```bash
+python3 scripts/cam-reason.py --goal "hi cam" --no-write
+python3 scripts/cam-reason.py --goal "enhance Cam functionality please" --no-write
+python3 scripts/test_cam_reason.py
+```
 
 ### Phase C — Converse (barred only) + LitServe thin host
 

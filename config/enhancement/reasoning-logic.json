@@ -20,7 +20,11 @@
     "path": "integrations/litserve",
     "policy": "config/integrations/litserve.md",
     "wrapper": "scripts/cam-litserve.py",
-    "serves": ["motor.slm", "motor.dl", "sgr_chat_completions"],
+    "serves": [
+      "motor.slm",
+      "motor.dl",
+      "sgr_chat_completions"
+    ],
     "default_host": "127.0.0.1",
     "default_port": 8080
   },
@@ -34,7 +38,7 @@
     "integrations/sgr-agent-core",
     "integrations/litserve"
   ],
-  "version": 4,
+  "version": 5,
   "phase_b_scope": {
     "include": [
       "cam-reason.py dry-run",
@@ -71,14 +75,24 @@
     "center": "center.slm",
     "motor": "motor.slm",
     "inference_host": "litserve",
-    "skip_stages": ["sgr"],
+    "skip_stages": [
+      "sgr"
+    ],
     "light_plan": true,
     "analogy": "System-1"
   },
   "slow_path": {
-    "centers": ["center.capability", "center.chief", "center.qa"],
+    "centers": [
+      "center.capability",
+      "center.chief",
+      "center.qa"
+    ],
     "engine": "sgr",
-    "require_stages": ["recall", "sgr", "reflect"],
+    "require_stages": [
+      "recall",
+      "sgr",
+      "reflect"
+    ],
     "analogy": "System-2 Schema-Guided Reasoning"
   },
   "escalation": {
@@ -147,8 +161,16 @@
   },
   "memory_gate": {
     "hmo": "config/memory/hmo-tiers.json",
-    "order": ["primary", "secondary", "archive"],
-    "amm_triggers": ["aaron_question", "open_ticket", "persona_check"],
+    "order": [
+      "primary",
+      "secondary",
+      "archive"
+    ],
+    "amm_triggers": [
+      "aaron_question",
+      "open_ticket",
+      "persona_check"
+    ],
     "never_invent_aaron_facts": true,
     "prefer_before_web": "MeshRecallTool"
   },
@@ -175,12 +197,12 @@
     "agent_definitions": "config/sgr/cam-agents.yaml",
     "server_module": "server/core/cam-reason.ts",
     "proposed_motor": "motor.sgr",
-    "note": "Phase B = Python dry-run CLI + min toolkit only. LitServe / converse / TS / motor.sgr deferred."
+    "note": "Phase B dry-run CLI shipped (scripts/cam-reason.py). LitServe/converse deferred."
   },
   "open_questions_for_aaron": [
     {
       "id": "q.confidence",
-      "ask": "Fast→SGR confidence threshold?",
+      "ask": "Fast\u2192SGR confidence threshold?",
       "answer": 0.65,
       "interim": true
     },
@@ -194,7 +216,10 @@
     {
       "id": "q.max_burst",
       "ask": "Max SGR iterations / MAP subagent burst per turn?",
-      "answer": {"dry_run_max_iterations": 4, "ceiling": "inherit_asi"},
+      "answer": {
+        "dry_run_max_iterations": 4,
+        "ceiling": "inherit_asi"
+      },
       "interim": true
     },
     {
@@ -213,7 +238,11 @@
     {
       "id": "q.litserve_bind",
       "ask": "LitServe default bind for home vs Tailscale peers?",
-      "answer": {"host": "127.0.0.1", "port": 8080, "tailscale": "later"},
+      "answer": {
+        "host": "127.0.0.1",
+        "port": 8080,
+        "tailscale": "later"
+      },
       "interim": true
     },
     {
@@ -223,5 +252,6 @@
       "interim": true,
       "note": "Only remaining open question that blocks live (non-dry-run) SGR"
     }
-  ]
+  ],
+  "phase_b_status": "implemented_dry_run"
 }
