@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-17T22:30:30.156787+00:00",
+    "at": "2026-09-19T18:20:54.766979+00:00",
     "mode": "act",
-    "summary": "Near-glass translucent Cam cortex shell with RoomEnvironment + Glass toggle",
+    "summary": "2x1B connectome sims green (seeds 401/501); anatomy CI gate + tests; merge-ready glass cortex PR #11",
     "workspace": "personal-assistant"
   },
   "notes": [
@@ -67,11 +67,11 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": true,
+      "workspace_exists": false,
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-17T01:59:36.358290+00:00",
+  "schedules_synced_at": "2026-09-19T18:20:28.812400+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

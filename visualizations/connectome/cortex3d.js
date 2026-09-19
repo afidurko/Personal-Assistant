@@ -430,6 +430,19 @@ function reanchorAreasFromCortex() {
 }
 
 async function bootAnatomy() {
+  // Suggestive: keep AREAS centroids aligned with config before shell load
+  try {
+    const cdoc = await fetch(repoUrl("../../config/connectome/anatomy-centroids.json")).then((r) => r.json());
+    const cents = cdoc.centroids || {};
+    AREAS.forEach((a) => {
+      if (cents[a.id]) {
+        a.p = cents[a.id];
+        areaById[a.id].p = cents[a.id];
+      }
+    });
+  } catch (_) {
+    /* offline — hardcoded AREAS remain */
+  }
   try {
     cortexApi = await loadCamCortex(brain, { url: new URL("./assets/cam-cortex.glb", import.meta.url).href });
     reanchorAreasFromCortex();

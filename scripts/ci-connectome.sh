@@ -7,6 +7,9 @@ cd "$ROOT"
 echo "== connectome-check =="
 python3 scripts/connectome-check.py
 
+echo "== connectome-anatomy-check (glass cortex asset) =="
+python3 scripts/connectome-anatomy-check.py
+
 echo "== cline workspace unit tests =="
 python3 scripts/test_cline_workspaces.py
 
