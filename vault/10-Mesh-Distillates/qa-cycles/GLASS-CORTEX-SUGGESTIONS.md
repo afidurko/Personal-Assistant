@@ -17,9 +17,16 @@
 7. **Lobe color sync** — `anatomy-centroids.json` `lobe_colors` passed into glass materials at boot  
 8. **Tests** — merge-prep script + serve-viz contract coverage (21 unit tests)
 
+## Applied (round 3 — Phase C)
+
+9. **React hero `CortexStage`** — full-bleed glass cortex in `App.tsx` with Glass toggle + 2D map fallback  
+10. **`src/lib/cortexGlass.ts`** — shared Three.js glass loader + hero tracts  
+11. **`public/cortex/`** — Vite-served GLB / centroids / live-activity mirror; anatomy check enforces mirror  
+12. **Brand-first hero** — Cam name as primary signal over the organ
+
 ## Still suggested (not blocking merge)
 
-- Embed glass cortex into React `App` hero (Phase C of HUMAN_BRAIN_UI_PLAN)  
 - Optional inflate morph / subcortical explode for pedagogy  
 - Compress `cam-cortex.glb` with Draco if asset budget tightens  
-- Nightly: `qa-loop.py --n 1000000000 --cycles 1`
+- Nightly: `qa-loop.py --n 1000000000 --cycles 1`  
+- Wire live-activity.json copy into standing scan so React hero stays fresh without manual cp

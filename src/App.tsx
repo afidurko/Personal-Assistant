@@ -1,4 +1,6 @@
+import { useCallback, useState } from 'react';
 import { BrainMap } from '@/components/BrainMap';
+import { CortexStage } from '@/components/CortexStage';
 import { WorkspacePanel } from '@/components/WorkspacePanel';
 import { MemoryRail } from '@/components/MemoryRail';
 import { ScanControls } from '@/components/ScanControls';
@@ -26,16 +28,27 @@ export default function App() {
   const cycleCount = useMeshStore((s) => s.cycleCount);
   const lastCycleAt = useMeshStore((s) => s.lastCycleAt);
   const connected = useMeshStore((s) => s.connected);
+  const [flatMap, setFlatMap] = useState(false);
+
+  const onFocusArea = useCallback(
+    (areaId: string) => {
+      // Prefer matching mesh nodes by label/id substring when present
+      const nodes = useMeshStore.getState().nodes;
+      const hit =
+        nodes.find((n) => n.id.includes(areaId.replace('area.', ''))) ||
+        nodes.find((n) => n.label.toLowerCase().includes(areaId.replace('area.', '')));
+      if (hit) focusNode(hit.id);
+    },
+    [focusNode],
+  );
 
   return (
     <div className="app-atmosphere">
-      <header className="hero">
-        <div className="hero-copy">
-          <p className="brand">Personal Assistant</p>
-          <h1 className="headline">Neural mesh for continuous system health</h1>
-          <p className="lede">
-            Deep agent layers commute work, enhance memory, persist jobs, and loop
-            automatically to fix issues as they arise.
+      <header className="hero hero-cortex">
+        <div className="hero-overlay">
+          <p className="brand">Cam</p>
+          <p className="lede hero-lede">
+            Glass cortex · live agents · continuous system health
           </p>
           <div className="hero-cta">
             <ScanControls
@@ -52,6 +65,14 @@ export default function App() {
             <button type="button" className="btn btn-ghost" onClick={() => runAgentCycle()}>
               Agent cycle
             </button>
+            <button
+              type="button"
+              className={`btn btn-ghost${flatMap ? ' active' : ''}`}
+              onClick={() => setFlatMap((v) => !v)}
+              aria-pressed={flatMap}
+            >
+              {flatMap ? '3D cortex' : '2D map'}
+            </button>
             <span
               className={`connection-dot${connected ? ' online' : ''}`}
               title={connected ? 'Connected' : 'Reconnecting'}
@@ -63,7 +84,11 @@ export default function App() {
           </div>
         </div>
 
-        <BrainMap onFocusNode={(id) => focusNode(id)} />
+        {flatMap ? (
+          <BrainMap onFocusNode={(id) => focusNode(id)} />
+        ) : (
+          <CortexStage onFocusArea={onFocusArea} />
+        )}
       </header>
 
       <div className="detail-grid three">

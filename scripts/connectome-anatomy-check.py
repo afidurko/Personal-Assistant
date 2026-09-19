@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "config" / "connectome"
 ASSET = ROOT / "visualizations" / "connectome" / "assets" / "cam-cortex.glb"
 NOTICE = ROOT / "visualizations" / "connectome" / "assets" / "NOTICE.md"
+PUBLIC_GLB = ROOT / "public" / "cortex" / "cam-cortex.glb"
 
 
 def main() -> int:
@@ -48,6 +49,7 @@ def main() -> int:
 
     glb_ok = ASSET.is_file() and ASSET.stat().st_size > 100_000
     notice_ok = NOTICE.is_file()
+    public_ok = PUBLIC_GLB.is_file() and PUBLIC_GLB.stat().st_size > 100_000
 
     errors: list[str] = []
     if missing_map:
@@ -60,6 +62,8 @@ def main() -> int:
         errors.append("missing_or_tiny_cam_cortex_glb")
     if not notice_ok:
         errors.append("missing_asset_notice")
+    if not public_ok:
+        errors.append("missing_public_cortex_glb_mirror")
 
     report = {
         "areas": len(area_ids),
@@ -69,6 +73,7 @@ def main() -> int:
         "extra_map": extra_map,
         "missing_centroids": missing_centroids,
         "glb_bytes": ASSET.stat().st_size if ASSET.is_file() else 0,
+        "public_glb_bytes": PUBLIC_GLB.stat().st_size if PUBLIC_GLB.is_file() else 0,
         "notice": notice_ok,
         "ok": not errors,
         "errors": errors,
@@ -76,6 +81,7 @@ def main() -> int:
             "Keep anatomy-region-map.json in lockstep with areas.json when adding Brodmann hubs",
             "Regenerate cam-cortex.glb via scripts/build-cam-cortex-glb.sh after map edits",
             "Serve viz from repo root so live-activity.json resolves beside the glass shell",
+            "React hero loads /cortex/cam-cortex.glb — keep public/cortex mirrored",
         ],
     }
 

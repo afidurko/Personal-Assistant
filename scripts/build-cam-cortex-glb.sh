@@ -15,3 +15,10 @@ npx --yes freesurfer-to-glb@0.1.0 \
 
 echo "Wrote $OUT ($(du -h "$OUT" | awk '{print $1}'))"
 echo "See visualizations/connectome/assets/NOTICE.md for attribution."
+
+# Mirror into Vite public for React hero
+mkdir -p "$ROOT/public/cortex"
+cp -f "$OUT" "$ROOT/public/cortex/cam-cortex.glb"
+cp -f "$ROOT/config/connectome/anatomy-centroids.json" "$ROOT/public/cortex/anatomy-centroids.json"
+cp -f "$ROOT/visualizations/connectome/assets/NOTICE.md" "$ROOT/public/cortex/NOTICE.md"
+echo "Mirrored to public/cortex/"

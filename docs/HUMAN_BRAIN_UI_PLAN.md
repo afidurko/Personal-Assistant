@@ -11,6 +11,7 @@
 - `cortex-anatomy.js` + `cortex3d.js` — load shell, bilateral mirror, parcel heat, click-to-focus, agent fly-to
 - Tracts re-anchored to FreeSurfer-like RAS centroids matching the mesh
 - React `BrainMap` left-lateral silhouette + `brain-map-layout` anchors updated
+- **Phase C:** React hero `CortexStage` (`src/components/CortexStage.tsx`) — full-bleed glass cortex with Glass toggle + 2D map fallback; assets under `public/cortex/`
 
 Regenerate mesh: `bash scripts/build-cam-cortex-glb.sh` (see `assets/NOTICE.md`).
 
