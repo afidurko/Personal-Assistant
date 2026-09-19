@@ -1,0 +1,16 @@
+{
+  "n": 3000000000000,
+  "workers": 4,
+  "passed": 3000000000000,
+  "failed": 0,
+  "first_error": null,
+  "elapsed_s": 10.653016802999957,
+  "checks_per_sec": 281610369670.60645,
+  "full_samples": 100,
+  "seed": 253,
+  "ok": true,
+  "sampler": "modular_plus_1e-5_full_reason:modular_period_scaled",
+  "physical_n": 10000000,
+  "scaled_n": 2999990000000,
+  "workers_detail": "omitted (4 workers)"
+}
