@@ -41,3 +41,7 @@
 	path = integrations/pupil
 	url = https://github.com/afidurko/pupil.git
 	branch = master
+[submodule "integrations/higgsfield"]
+	path = integrations/higgsfield
+	url = https://github.com/afidurko/higgsfield.git
+	branch = main

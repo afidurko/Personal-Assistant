@@ -8,6 +8,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Free API catalog: **public-apis** via `motor.public_apis` (`integrations/public-apis`) — all agents
 - Google Trends open datasets: **google-trends** via `motor.google_trends` — all agents
 - Agent identity / outbound channels: **Inkbox** via `motor.inkbox` (`integrations/inkbox`) — gated by `switch.outbound`
+- Multi-node GPU training: **higgsfield** via `motor.higgsfield` (`integrations/higgsfield`) — gated by `switch.cam_enhance`
 - Policy: [`.clinerules`](.clinerules)
 - Workspace registry: [`config/workspaces/registry.json`](config/workspaces/registry.json)
 - Runner: `python3 scripts/run-cline.py --goal "..." "prompt"`

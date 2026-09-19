@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-19",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -319,6 +319,21 @@
         ],
         "plan": "docs/CAM_REASONING.md",
         "status": "proposed"
+      },
+      {
+        "id": "higgsfield",
+        "path": "integrations/higgsfield",
+        "policy": "config/integrations/higgsfield.md",
+        "config": "config/integrations/higgsfield.json",
+        "remote": "github.com/afidurko/higgsfield",
+        "role": "multi_node_gpu_training",
+        "motor": "motor.higgsfield",
+        "serves": [
+          "motor.dl"
+        ],
+        "plan": "config/enhancement/slm-dl.json",
+        "status": "proposed",
+        "notes": "Multi-node GPU train/fine-tune orchestrator; not the brain"
       }
     ],
     "parallel_prs": [
@@ -594,6 +609,27 @@
         "install_rules": true,
         "cursor_bootstrap": true,
         "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
+      },
+      {
+        "id": "higgsfield",
+        "label": "Higgsfield multi-node training",
+        "path": "integrations/higgsfield",
+        "remote": "github.com/afidurko/higgsfield",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "ops",
+          "chief",
+          "researcher",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/higgsfield",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Fault-tolerant GPU orchestration for large-model training"
       }
     ]
   },
@@ -621,7 +657,8 @@
     "inkbox_check": "scripts/inkbox-check.py",
     "memorybear_client": "scripts/memorybear.py",
     "memorybear_check": "scripts/memorybear-check.py",
-    "memorybear_pack": "scripts/pack-memorybear-result.py"
+    "memorybear_pack": "scripts/pack-memorybear-result.py",
+    "higgsfield_check": "scripts/higgsfield-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -785,6 +822,18 @@
             "lit serve",
             "integrations/litserve",
             "lightning litserve"
+          ]
+        },
+        {
+          "id": "higgsfield",
+          "match_any": [
+            "higgsfield",
+            "multi-node training",
+            "multi node training",
+            "zero-3",
+            "zeRO-3",
+            "integrations/higgsfield",
+            "gpu orchestration"
           ]
         }
       ]
@@ -1070,6 +1119,27 @@
       "install_rules": true,
       "cursor_bootstrap": true,
       "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
+    },
+    {
+      "id": "higgsfield",
+      "label": "Higgsfield multi-node training",
+      "path": "integrations/higgsfield",
+      "remote": "github.com/afidurko/higgsfield",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "chief",
+        "researcher",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/higgsfield",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Fault-tolerant GPU orchestration for large-model training"
     }
   ],
   "chooser": {
@@ -1230,6 +1300,18 @@
           "lit serve",
           "integrations/litserve",
           "lightning litserve"
+        ]
+      },
+      {
+        "id": "higgsfield",
+        "match_any": [
+          "higgsfield",
+          "multi-node training",
+          "multi node training",
+          "zero-3",
+          "zeRO-3",
+          "integrations/higgsfield",
+          "gpu orchestration"
         ]
       }
     ]
