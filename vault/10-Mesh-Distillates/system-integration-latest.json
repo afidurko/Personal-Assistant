@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-19T19:46:33Z",
+  "at": "2026-09-19T20:06:17Z",
   "overall": "warning",
   "ok": true,
   "assistant": "Cam",
@@ -35,7 +35,8 @@
       "paths": {
         "config/connectome/": "ok",
         "scripts/connectome-route.py": "ok",
-        "scripts/connectome-check.py": "ok"
+        "scripts/connectome-check.py": "ok",
+        "server/core/connectome-kernel.ts": "ok"
       }
     },
     {
@@ -86,6 +87,8 @@
       "status": "healthy",
       "paths": {
         "server/core/system-bridge.ts": "ok",
+        "server/core/connectome-kernel.ts": "ok",
+        "server/core/motor-executor.ts": "ok",
         "scripts/cam-system.py": "ok",
         "config/system/pieces.json": "ok"
       }

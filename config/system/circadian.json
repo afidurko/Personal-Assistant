@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "cam-circadian",
+  "title": "Circadian Cam + quiet-hours nervous system",
+  "authorized_by": "Aaron",
+  "status": "enabled",
+  "source": "config/persona/voice.json availability.quiet_hours",
+  "effects": {
+    "converse_intensity_scale": 0.35,
+    "autonomy_spawn_scale": 0.4,
+    "agi_scan_prefer_off_peak": true,
+    "kill_still_instant": true
+  },
+  "notes": [
+    "Quiet hours throttle metabolically; they never disable Aaron tasking or kill",
+    "ConnectomeKernel stamps circadian.quiet + intensity on every route"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "at": "2026-09-19T20:06:14Z",
+  "ok": true,
+  "envelope": "pass",
+  "steps": [
+    {
+      "id": "python_route_chat",
+      "ok": true,
+      "detail": "connectome-route accepted"
+    },
+    {
+      "id": "cam_system_inventory",
+      "ok": true,
+      "detail": "pieces inventory"
+    },
+    {
+      "id": "api_rehearse",
+      "ok": true,
+      "detail": "[{\"id\": \"turn_text\", \"ok\": true, \"detail\": \"motors=motor.vault,motor.mesh\"}, {\"id\": \"identity_reject\", \"ok\": true, \"detail\": \"switch.identity hold \\u2014 Aaron voice required (threshold 0.85)\"}, {\"id\": \"kill_silence\", \"ok\": true, \"detail\": "
+    },
+    {
+      "id": "turn_kernel",
+      "ok": true,
+      "detail": "kernel=in_process motors=['motor.vault', 'motor.mesh']"
+    },
+    {
+      "id": "mic_without_score_blocked",
+      "ok": true,
+      "detail": "status=403"
+    },
+    {
+      "id": "system_status",
+      "ok": true,
+      "detail": "overall=warning pieces=19"
+    }
+  ],
+  "note": "Integration flight envelope \u2014 Aaron-only, kernel, kill, safe motors"
+}

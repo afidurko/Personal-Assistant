@@ -79,9 +79,13 @@ app.get('/api/health', async (_req, res) => {
       cortex3d: true,
       autonomy: true,
       system_bridge: true,
+      connectome_kernel: true,
+      trajectory_physics: true,
       enabled: true,
     },
     session_id: converse.sessionId,
+    circadian: system.circadian,
+    blockers: system.blockers?.length ?? 0,
   });
 });
 
@@ -196,13 +200,34 @@ app.get('/api/session', (_req, res) => {
 });
 
 app.post('/api/turn', async (req, res) => {
-  const body = req.body as { text?: string; transcript?: string; source?: string };
+  const body = req.body as {
+    text?: string;
+    transcript?: string;
+    source?: string;
+    aaron_voice_score?: number;
+    aaronVoiceScore?: number;
+  };
   const text = String(body.text ?? body.transcript ?? '');
   const source = String(body.source ?? 'text');
+  const scoreRaw = body.aaron_voice_score ?? body.aaronVoiceScore;
+  const aaronVoiceScore =
+    source === 'mic' || source === 'speech'
+      ? typeof scoreRaw === 'number'
+        ? scoreRaw
+        : null
+      : undefined;
+
+  // Identity physics: mic without score is rejected by kernel
+  if ((source === 'mic' || source === 'speech') && aaronVoiceScore == null) {
+    res.status(403).json({
+      error: 'aaron_voice_required',
+      detail: 'Mic turns require aaron_voice_score ≥ identity threshold (or use text)',
+    });
+    return;
+  }
+
   const reply = await converse.turn(text, source);
-  // Bridge: light cortex + route connectome so home, mesh, and motors share one bus
-  const bridged = await bridge.onTurn(text, source);
-  // Pulse autonomy when Aaron talks so Cam keeps self-tasks warm
+  const bridged = await bridge.onTurn(text, source, { aaronVoiceScore });
   void autonomy.tick({
     workspaces: orchestrator.getWorkspaces(),
     loopJobs: orchestrator.getLoopJobs(),
@@ -213,6 +238,8 @@ app.post('/api/turn', async (req, res) => {
     bridge: {
       route: bridged.route,
       activities: bridged.activities.length,
+      execution: bridged.execution,
+      memory: bridged.memory,
     },
   });
 });
@@ -229,6 +256,7 @@ app.post('/api/spike/mic', async (req, res) => {
     accepted: bridged.route.accepted !== false,
     route: bridged.route,
     activities: bridged.activities.length,
+    execution: bridged.execution,
   });
 });
 
@@ -248,7 +276,35 @@ app.post('/api/spike/camera', async (req, res) => {
     accepted: bridged.route.accepted !== false,
     route: bridged.route,
     activities: bridged.activities.length,
+    execution: bridged.execution,
   });
+});
+
+app.post('/api/system/rehearse', async (_req, res) => {
+  const steps: Array<{ id: string; ok: boolean; detail: string }> = [];
+  const chat = await bridge.onTurn('system rehearsal ping', 'text');
+  steps.push({
+    id: 'turn_text',
+    ok: chat.route.accepted,
+    detail: `motors=${chat.route.motor_plan.join(',')}`,
+  });
+  const reject = await bridge.routeSense('sense.ios.mic', 'adversarial', {
+    source: 'mic',
+    aaronVoiceScore: 0.1,
+  });
+  steps.push({
+    id: 'identity_reject',
+    ok: !reject.accepted,
+    detail: reject.reason || 'rejected',
+  });
+  const kill = await bridge.routeSense('sense.chat.aaron', 'kill test', { kill: true });
+  steps.push({
+    id: 'kill_silence',
+    ok: !kill.accepted && kill.motor_plan.length === 0,
+    detail: kill.reason || 'silenced',
+  });
+  const ok = steps.every((s) => s.ok);
+  res.json({ ok, at: new Date().toISOString(), steps, envelope: ok ? 'pass' : 'fail' });
 });
 
 app.post('/api/nodes/:id/focus', async (req, res) => {
@@ -353,6 +409,11 @@ function send(ws: WebSocket, type: WsServerMessage['type'], payload: unknown) {
 function broadcast(type: WsServerMessage['type'], payload: unknown) {
   for (const client of wss.clients) send(client, type, payload);
 }
+
+// Cortex push: activity fires on the bus the instant converse/motors settle
+bridge.onActivity(({ live, activities, route }) => {
+  broadcast('activity_update', { live, activities, route });
+});
 
 function broadcastState(force = false) {
   const state = fullState();

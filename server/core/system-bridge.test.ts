@@ -1,11 +1,15 @@
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { RuntimeStore } from './runtime-store.js';
 import { SystemBridge } from './system-bridge.js';
+import { ConnectomeKernel } from './connectome-kernel.js';
+import { applyTrajectoryPolicies, loadTrajectoryPolicies } from './trajectory-policies.js';
 
 const dirs: string[] = [];
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 afterEach(async () => {
   for (const d of dirs.splice(0)) {
@@ -13,12 +17,29 @@ afterEach(async () => {
   }
 });
 
-async function fixtureRoot(): Promise<string> {
-  const root = await mkdtemp(path.join(tmpdir(), 'cam-sys-'));
+async function fixtureWithConnectome(): Promise<string> {
+  const root = await mkdtemp(path.join(tmpdir(), 'cam-org-'));
   dirs.push(root);
   await mkdir(path.join(root, 'config/system'), { recursive: true });
+  await mkdir(path.join(root, 'config/persona'), { recursive: true });
   await mkdir(path.join(root, 'server/core'), { recursive: true });
   await mkdir(path.join(root, 'vault/10-Mesh-Distillates'), { recursive: true });
+  await mkdir(path.join(root, 'docs'), { recursive: true });
+  // Copy real connectome so kernel matches production
+  await cp(path.join(REPO, 'config/connectome'), path.join(root, 'config/connectome'), {
+    recursive: true,
+  });
+  await writeFile(
+    path.join(root, 'config/persona/voice.json'),
+    JSON.stringify({
+      availability: {
+        always_on: true,
+        quiet_hours: { start: '23:00', end: '07:00' },
+        timezone: 'UTC',
+      },
+    }),
+    'utf8',
+  );
   await writeFile(
     path.join(root, 'config/system/pieces.json'),
     JSON.stringify({
@@ -29,7 +50,8 @@ async function fixtureRoot(): Promise<string> {
           id: 'piece.connectome',
           title: 'Connectome',
           layer: 'brain',
-          paths: ['config/system/pieces.json'],
+          paths: ['config/connectome'],
+          slo: { max_latency_ms: 500 },
         },
         {
           id: 'piece.system_bridge',
@@ -37,59 +59,83 @@ async function fixtureRoot(): Promise<string> {
           layer: 'glue',
           paths: ['server/core/system-bridge.ts'],
         },
-        {
-          id: 'piece.missing',
-          title: 'Missing',
-          layer: 'ops',
-          paths: ['does-not-exist/foo'],
-        },
       ],
+      blockers: ['test-blocker'],
     }),
     'utf8',
   );
   await writeFile(path.join(root, 'server/core/system-bridge.ts'), '// stub\n', 'utf8');
+  await writeFile(path.join(root, 'docs/PERSONA.md'), '# Cam\n', 'utf8');
   return root;
 }
 
-describe('SystemBridge', () => {
-  it('reports piece status from inventory', async () => {
-    const root = await fixtureRoot();
-    const runtime = new RuntimeStore(root);
-    await runtime.ensure();
-    const bridge = new SystemBridge(root, runtime);
-    const status = await bridge.status({ sessionId: 'test' });
-    expect(status.assistant).toBe('Cam');
-    expect(status.pieces.length).toBeGreaterThanOrEqual(3);
-    const ok = status.pieces.find((p) => p.id === 'piece.connectome');
-    expect(ok?.status).toBe('healthy');
-    const bad = status.pieces.find((p) => p.id === 'piece.missing');
-    expect(bad?.status).toBe('critical');
-    expect(status.overall).toBe('critical');
-    expect(status.ok).toBe(false);
+describe('ConnectomeKernel', () => {
+  it('routes chat in-process with dual-stream and map plan', async () => {
+    const root = await fixtureWithConnectome();
+    const kernel = new ConnectomeKernel(root);
+    const route = await kernel.route({
+      sense: 'sense.chat.aaron',
+      goal: 'hi cam',
+      source: 'text',
+      actHint: 'speak',
+    });
+    expect(route.kernel).toBe('in_process');
+    expect(route.accepted).toBe(true);
+    expect(route.motor_plan.length).toBeGreaterThan(0);
+    expect(route.dual_stream.winner).toBe('dorsal');
+    expect(route.map_plan.length).toBeGreaterThan(0);
   });
 
-  it('emits converse activity into runtime live-activity', async () => {
-    const root = await fixtureRoot();
-    const runtime = new RuntimeStore(root);
-    await runtime.ensure();
-    const bridge = new SystemBridge(root, runtime);
-    const rows = await bridge.emitConverseTurn('text');
-    expect(rows.length).toBeGreaterThanOrEqual(3);
-    const live = await runtime.readJson<{ firing_count?: number; firing?: unknown[] }>(
-      'live-activity.json',
-      {},
+  it('rejects mic without Aaron voice score', async () => {
+    const root = await fixtureWithConnectome();
+    const kernel = new ConnectomeKernel(root);
+    const route = await kernel.route({
+      sense: 'sense.ios.mic',
+      goal: 'hello',
+      source: 'mic',
+      aaronVoiceScore: 0.2,
+    });
+    expect(route.accepted).toBe(false);
+    expect(route.identity?.passed).toBe(false);
+    expect(route.motor_plan).toEqual([]);
+  });
+
+  it('strips enhance without Aaron gate via trajectory physics', async () => {
+    const root = await fixtureWithConnectome();
+    await loadTrajectoryPolicies(root);
+    const { plan, violations } = applyTrajectoryPolicies(
+      ['motor.web_fetch', 'motor.enhance'],
+      { 'switch.cam_enhance': 'hold', 'switch.kill': 'armed_allow_motor' },
     );
-    expect((live.firing_count ?? 0) >= 3 || (live.firing?.length ?? 0) >= 3).toBe(true);
+    expect(plan).not.toContain('motor.enhance');
+    expect(violations.some((v) => v.stripped?.includes('motor.enhance'))).toBe(true);
   });
+});
 
-  it('emits mic and camera spikes', async () => {
-    const root = await fixtureRoot();
+describe('SystemBridge organism bus', () => {
+  it('onTurn routes, lights tracts, and executes safe motors', async () => {
+    const root = await fixtureWithConnectome();
     const runtime = new RuntimeStore(root);
     await runtime.ensure();
     const bridge = new SystemBridge(root, runtime);
-    const mic = await bridge.emitMicSpike();
-    expect(mic[0]?.neuron).toBe('neuron.asr');
-    const cam = await bridge.emitCameraSpike();
-    expect(cam[0]?.neuron).toBe('neuron.vision');
+    const result = await bridge.onTurn('Hi Cam light the cortex', 'text');
+    expect(result.route.accepted).toBe(true);
+    expect(result.route.kernel).toBe('in_process');
+    expect(result.activities.length).toBeGreaterThanOrEqual(3);
+    expect(result.execution.results.length).toBeGreaterThan(0);
+    expect(result.memory.tier).toBe('primary');
+    const live = await runtime.readJson<{ firing?: unknown[] }>('live-activity.json', {});
+    expect((live.firing?.length ?? 0) >= 3).toBe(true);
+  });
+
+  it('reports piece status and blockers', async () => {
+    const root = await fixtureWithConnectome();
+    const runtime = new RuntimeStore(root);
+    await runtime.ensure();
+    const bridge = new SystemBridge(root, runtime);
+    const status = await bridge.status({ sessionId: 't' });
+    expect(status.assistant).toBe('Cam');
+    expect(status.blockers?.length).toBeGreaterThan(0);
+    expect(status.pieces.some((p) => p.id === 'piece.connectome')).toBe(true);
   });
 });

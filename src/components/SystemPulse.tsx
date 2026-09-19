@@ -50,13 +50,16 @@ export function SystemPulse() {
 
   const overall = status?.overall ?? (error ? 'critical' : 'unknown');
   const pieces = status?.pieces ?? [];
+  const blockers = (status as SystemStatusPayload & { blockers?: string[] })?.blockers ?? [];
+  const circadian = (status as SystemStatusPayload & { circadian?: { quiet?: boolean } })?.circadian;
 
   return (
     <section className="system-pulse" aria-label="Cam system pulse">
       <header className="system-pulse-head">
         <h2>System pulse</h2>
         <p>
-          Every Cam piece on one bus — converse, connectome, mesh, and motors.
+          Organism bus — kernel, dual-stream, trajectory physics, causal motors.
+          {circadian?.quiet ? ' Quiet hours: intensity throttled.' : ''}
         </p>
         <span className={`system-overall status-${overall}`}>{overall}</span>
       </header>
@@ -70,6 +73,16 @@ export function SystemPulse() {
           </li>
         ))}
       </ul>
+      {Array.isArray(blockers) && blockers.length > 0 ? (
+        <details className="system-blockers">
+          <summary>External blockers ({blockers.length})</summary>
+          <ul>
+            {blockers.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
     </section>
   );
 }

@@ -150,18 +150,18 @@
       "available_to": "all_roles_and_subagents"
     },
     {
-      "id": "tool.system.status",
-      "purpose": "Report Cam overall system piece inventory + optional smoke checks",
+      "id": "tool.system.envelope",
+      "purpose": "Run Cam integration flight envelope (Aaron-only, kernel, kill, safe motors)",
       "created_by_role": "tool-creator",
-      "entrypoint": "scripts/cam-system.py",
+      "entrypoint": "scripts/flight-envelope.py",
       "kind": "local_script",
       "inputs": {
-        "smoke": "boolean"
+        "offline_only": "boolean"
       },
       "outputs": {
-        "overall": "string",
-        "pieces": "object[]",
-        "ok": "boolean"
+        "envelope": "string",
+        "ok": "boolean",
+        "steps": "object[]"
       },
       "required_privileges": ["use_tool", "read_mesh"],
       "requires_switch": ["switch.kill"],

@@ -1669,6 +1669,25 @@ h2,
   text-transform: uppercase;
 }
 
+.system-blockers {
+  margin-top: 1rem;
+  max-width: 52rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.system-blockers summary {
+  cursor: pointer;
+  color: var(--amber);
+  letter-spacing: 0.02em;
+}
+
+.system-blockers ul {
+  margin: 0.5rem 0 0 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
 @keyframes system-dot-breathe {
   0%,
   100% {

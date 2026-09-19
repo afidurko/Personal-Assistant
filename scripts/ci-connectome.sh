@@ -7,6 +7,7 @@ cd "$ROOT"
 echo "== cam system integration =="
 python3 scripts/cam-system.py --smoke
 python3 scripts/test_cam_system.py
+python3 scripts/flight-envelope.py --offline-only
 
 echo "== connectome-check =="
 python3 scripts/connectome-check.py
