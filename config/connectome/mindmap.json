@@ -28,7 +28,9 @@
           { "id": "sense.audio.transcript", "label": "ASR" },
           { "id": "sense.voicestudio.health", "label": "VoiceStudio health" },
           { "id": "sense.ios.camera", "label": "iPhone camera" },
-          { "id": "sense.ios.mic", "label": "iPhone mic" }
+          { "id": "sense.ios.mic", "label": "iPhone mic" },
+          { "id": "sense.vision.detection", "label": "PaddleDetection" },
+          { "id": "sense.vision.gaze", "label": "Pupil gaze" }
         ]
       },
       {

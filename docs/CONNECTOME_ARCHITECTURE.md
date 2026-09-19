@@ -160,6 +160,7 @@ Examples:
 - `sense.calendar.event` — schedule signal  
 - `sense.audio.transcript` — RIVA ASR  
 - `sense.vision.detection` — PaddleDetection distillate  
+- `sense.vision.gaze` — Pupil gaze / pupil distillate  
 - `sense.cline.result` — Cline coding-agent feedback  
 - `sense.web.arxiv` / `sense.web.agi_feed` — AGI paper feeds  
 - `sense.web.scholar` — Google Scholar literature + citations (SerpAPI)  

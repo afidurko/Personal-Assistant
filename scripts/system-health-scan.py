@@ -67,6 +67,7 @@ def check_integrations() -> dict:
     expected = [
         "integrations/jarvis",
         "integrations/paddledetection",
+        "integrations/pupil",
         "integrations/llmavatartalk",
         "integrations/voicestudio",
         "integrations/smart-second-brain",

@@ -35,6 +35,15 @@
 - Results distilled to `mesh/vision` (see `config/integrations/paddledetection.md`)
 - Live iPhone camera is via **iOS companion** (below), not PaddleDetection directly
 
+## Eye tracking (Pupil)
+
+- Submodule: `integrations/pupil` @ `master` ← [afidurko/pupil](https://github.com/afidurko/pupil)
+- Invoked by `vision` / subagents when Aaron tasks gaze / pupil work
+- Sense: `sense.vision.gaze` · Hotspot: `hotspot.gaze`
+- Results distilled to `mesh/gaze` via `scripts/pack-gaze-result.py`
+- Policy: `config/integrations/pupil.md`
+- Not always-on; no background eye monitoring without Aaron’s task
+
 ## iOS companion (Aaron face/voice + camera/mic)
 
 - Scaffold: `companions/ios/` · policy: `config/integrations/ios-companion.md`

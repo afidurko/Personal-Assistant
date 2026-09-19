@@ -9,7 +9,7 @@ Aaron runs Cam across **repo checkouts**, **scan workspaces**, **integration sub
 | **Personal-Assistant repo** | Cam identity, connectome, vault, teams | Active (`cursor/cam-brain-agi-scan-teams-bded`) |
 | **Persistence bundle** | Cross-checkout Cam memory (`persist-export` / `persist-import`) | Present; must include teams + AGI grants |
 | **Vault areas** | Obsidian second brain (`vault/01`…`10`) | Wired via smart-second-brain config |
-| **Integration submodules** | Jarvis · PaddleDetection · LLMAvatarTalk · VoiceStudio · smart-second-brain | **Declared but empty until `git submodule update --init --recursive`** |
+| **Integration submodules** | Jarvis · PaddleDetection · Pupil · LLMAvatarTalk · VoiceStudio · smart-second-brain · Cline | **Declared but empty until `git submodule update --init --recursive`** |
 | **Scan workspaces (PR #2)** | health · architecture · vulnerability · updates · improvements · **agi_research** · **swarm** | **Merged to main** + AGI + swarm scanners on this branch |
 | **Brodmann / 3D cortex (PR #3)** | Plasticity + human brain viz + health conductor | Lives on `cursor/swiftguide-brain-map-0f2c` — overlaps connectome viz |
 | **Agent teams (PR #4 / this)** | AGI Research Scan · Capability · Information + sLM/DL | This branch |
@@ -77,6 +77,7 @@ Aaron (sole task-giver / kill / enhance-approve)
 |---|---|---|---|
 | Jarvis | `config/integrations/jarvis.md` | empty submodule | needs init |
 | PaddleDetection | `config/integrations/paddledetection.md` | empty submodule | needs init |
+| Pupil | `config/integrations/pupil.md` | submodule @ master | needs init on fresh clones |
 | LLMAvatarTalk | `config/integrations/llmavatartalk.md` | empty submodule | needs init |
 | VoiceStudio | `config/integrations/voicestudio.md` + `.json` | empty submodule | needs init + local backend |
 | smart-second-brain | `config/integrations/smart-second-brain.md` | empty submodule | needs Obsidian enable |

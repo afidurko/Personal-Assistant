@@ -157,6 +157,29 @@
       "behavior": "ingest_visual_spikes"
     },
     {
+      "id": "hotspot.gaze",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.vision.gaze",
+        "area.visual",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "ingest_gaze_spikes",
+      "integration": "pupil",
+      "mesh_ns": "mesh/gaze"
+    },
+    {
       "id": "hotspot.jarvis",
       "area": "area.parietal",
       "columns": [

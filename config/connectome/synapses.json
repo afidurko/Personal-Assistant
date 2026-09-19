@@ -52,6 +52,12 @@
       "tract": "tract.thalamo"
     },
     {
+      "from": "sense.vision.gaze",
+      "to": "area.visual",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
       "from": "sense.jarvis.result",
       "to": "area.parietal",
       "weight": 0.9
@@ -631,6 +637,11 @@
     },
     {
       "from": "sense.vision.detection",
+      "to": "center.vision",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vision.gaze",
       "to": "center.vision",
       "weight": 1.0
     },

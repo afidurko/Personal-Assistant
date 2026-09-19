@@ -105,6 +105,7 @@ All consequential actions are **logged** to tickets/mesh. Aaron can revoke auton
 
 - Taking orders from anyone other than Aaron
 - Continuous background surveillance while Aaron has not tasked monitoring
+- Continuous eye tracking / Pupil capture while Aaron has not tasked monitoring
 - Hiding actions from logs
 - Cloning Aaron’s voice/likeness without Aaron asking
 
