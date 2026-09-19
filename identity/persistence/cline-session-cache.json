@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T19:59:24.897145+00:00",
+    "at": "2026-09-19T21:34:25.413105+00:00",
     "mode": "act",
-    "summary": "Fix hero-stage CSS clash (glass+CamPresence); refresh ci-sim; re-merge main",
+    "summary": "Integrated GoogleTrends/data as motor.google_trends",
     "workspace": "."
   },
   "notes": [
@@ -37,6 +37,11 @@
     {
       "at": "2026-09-19T19:08:54.223761+00:00",
       "text": "CONNECTION_STATUS.md aaron_only backlog",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T21:34:25.413105+00:00",
+      "text": "PR #24 \u2014 remote GitHub trees index, no submodule",
       "workspace": "."
     }
   ],
