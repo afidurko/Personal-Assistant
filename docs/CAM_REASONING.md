@@ -187,6 +187,30 @@ Cortex live feed may pulse tracts named in the active stages (same activity-even
 - Not replacing Cline plan/act for code; coding still `motor.cline` after Cam’s route + workspace choose  
 - Upstream Tavily DeepSearch stack is optional; Cam order stays vault → mesh → Scholar → web  
 
+## Cut list — slow or does not make sense
+
+Do **not** pull these into the first implementation pass:
+
+| Cut | Why |
+|---|---|
+| SGR / full reasoner on **every mic turn** | Slow, expensive, breaks soft presence chatter; use intent/length bar |
+| TypeScript `server/core` reasoner **before** Python CLI | SGR is Python; dual runtimes double work for no gain |
+| Full LitServe **model host** (weights, vLLM, multi-GPU, batching) | Slow to stand up; premature until dry-run loop + escalate rules work |
+| LitServe **MCP + batch classify + streaming TTS** in Phase B | Perf/polish; not required for inspectable Reason→Select→Act |
+| SGR **Skills / ACP slash commands** as Cam roles | Extra abstraction before Cam toolkit + gates exist |
+| First toolkit includes **ClineTool + Scholar + Jarvis** | Wide surface; first pass only MeshRecall / ConnectomeRoute / TrajectoryCheck / FinalAnswer |
+| Formal **`motor.sgr` + hotspot** before CLI proves the loop | Config churn; add in apply batch (Phase E) |
+| Cortex **MAP HUD** animation of stages | UX polish; distill JSONL traces first |
+| Bare **`ToolCallingAgent`** on gated paths | No inspectable reason schema — unsafe for enhance/outbound |
+| Upstream **Tavily DeepSearch** as default research | Conflicts with vault → mesh → Scholar → web |
+
+## Thin slice (do this)
+
+1. `scripts/cam-reason.py --dry-run` — accept → fast heuristics → escalate? → stub recall → stub SGR reason schema → trajectory strip → trace JSON  
+2. Cam `ReasoningTool` fields: `hotspot_id`, `switch_risks[]`, `stream`  
+3. Escalate **bar only** (not every converse turn)  
+4. LitServe **deferred** until dry-run green; then thin classify **stub** or OpenAI-compatible **proxy**, not a full local LLM farm  
+
 ## Implementation phases
 
 ### Phase A — Spec + SGR + LitServe checkout (this PR)
@@ -196,35 +220,35 @@ Cortex live feed may pulse tracts named in the active stages (same activity-even
 - [x] `config/integrations/sgr-agent-core.md` + submodule `integrations/sgr-agent-core`  
 - [x] `config/integrations/litserve.md` + submodule `integrations/litserve`  
 - [x] Registry + cross-links (brain, chief, Operating Manual)  
+- [x] Cut list: slow / nonsensical upgrades deferred  
 
-### Phase B — CLI orchestrator + Cam toolkit + LitAPI
+### Phase B — Thin CLI (no LitServe farm, no converse rewrite)
 
-- [ ] `scripts/cam-reason.py` — dry-run + live modes  
-  - Fast gate → recall stubs → escalate to SGR agent with Cam toolkit  
-  - Reuse `connectome-route.py` for pathway / motor_plan baseline  
-  - Emit reasoning_trace JSON  
-- [ ] `scripts/cam-litserve.py` — LitAPI endpoints for sLM/DL + OpenAI-compatible chat  
-- [ ] `config/sgr/cam-agents.yaml` — Cam AgentDefinition(s) pointing LLM base_url at LitServe  
-- [ ] Cam tools: MeshRecall, ConnectomeRoute, TrajectoryCheck, Cline, Scholar  
-- [ ] Tests: escalate rules, kill silence, enhance strip, speak→dorsal, SGR reason schema present, LitServe health
+- [ ] `scripts/cam-reason.py` — **dry-run first**, then optional live  
+  - Fast gate (heuristics OK; LitServe classify later)  
+  - Escalate bar → stub/real SGR one iteration  
+  - Cam tools **only**: MeshRecall, ConnectomeRoute, TrajectoryCheck, FinalAnswer  
+  - Emit `reasoning_trace` JSONL under `vault/10-Mesh-Distillates/reasoning/`  
+- [ ] Cam `ReasoningTool` subclass with hotspot / switch_risks / stream  
+- [ ] Tests: greeting→fast, enhance→slow+strip, kill→empty, weak facts→recall before invent  
+- [ ] Explicitly **out of B:** `cam-litserve.py`, converse wire, Cline/Scholar tools, cortex HUD  
 
-### Phase C — Wire home converse + chief
+### Phase C — Converse (barred only) + LitServe thin host
 
-- [ ] Replace / wrap `camReply` for non-trivial turns → `cam-reason` / SGR  
-- [ ] Fast path keeps soft airy short replies; slow path may spawn capability/info teams via SGR  
-- [ ] Chief rule 17 stays authoritative  
+- [ ] Wrap `camReply` **only** when intent/length bar trips; greetings stay pattern-fast  
+- [ ] `scripts/cam-litserve.py` — classify stub + optional `/v1/chat/completions` **proxy** (not vLLM)  
+- [ ] Point SGR AgentDefinition `base_url` at LitServe when local switch act  
 
-### Phase D — Mesh + cortex UX
+### Phase D — Mesh polish (after B/C useful)
 
-- [ ] Persist traces to `vault/10-Mesh-Distillates/reasoning/`  
 - [ ] Live-activity `reason:sgr:*` pulses  
-- [ ] Optional cortex HUD: highlight MAP columns as SGR iterations advance  
+- [ ] Optional cortex HUD (last)  
 
 ### Phase E — Aaron apply batch
 
 - [ ] Enhancement proposal under `vault/02-Cam/enhancement-proposals/`  
 - [ ] Flip `reasoning-logic.json` → `status: applied` only with `switch.cam_enhance`  
-- [ ] Optional `motor.sgr` in `config/connectome/motor.json` + hotspot wiring  
+- [ ] Then optional `motor.sgr` + hotspot + Cline/Scholar toolkit expansion  
 - [ ] Persistence manifest entry  
 
 ## Acceptance checks
@@ -233,24 +257,28 @@ Cortex live feed may pulse tracts named in the active stages (same activity-even
 |---|---|
 | Submodule present | `integrations/sgr-agent-core/` · `integrations/litserve/` |
 | Config validates | load `reasoning-logic.json` in `cam-reason.py` |
-| Kill still wins | `--kill` → empty motor_plan; LitServe refuses |
+| Kill still wins | `--kill` → empty motor_plan |
 | Enhance held | plan never includes `motor.enhance` without `--enhance` |
-| Personal facts | dry-run shows recall / MeshRecall before invent |
-| Dual-process | greeting → LitServe fast; “propose Cam change” → SGR slow |
-| SGR schema | slow path logs `ReasoningTool` fields |
-| LitServe health | `/health` (or Cam wrapper) green when slm/dl switches act |
-| Trace written | distill JSONL line per turn |
+| Personal facts | dry-run shows recall before invent |
+| Dual-process | greeting → fast; “propose Cam change” → SGR slow |
+| SGR schema | slow path logs Cam `ReasoningTool` fields |
+| No mic spam | converse bar skips SGR on greetings / short ack |
+| Trace written | distill JSONL line per dry-run |
 
-## Open questions for Aaron
+## Open questions for Aaron (narrowed)
 
-1. Confidence threshold for fast→SGR (default `0.65`)?  
-2. Should home converse always run SGR on every mic turn, or only when text length / intent score exceeds a bar?  
-3. Max SGR iterations / MAP subagent burst per turn (default inherit ASI ceiling `max_neuro_columns: 24`)?  
-4. Confirm default agent: `SGRToolCallingAgent` vs `SGRAgent` for local sLM?  
-5. Prefer Python CLI first (Phase B) or TypeScript bridge in `server/core` next to converse?  
-6. LitServe bind address / port defaults for home vs Tailscale peers?
+Interim answers locked unless you override:
 
-Interim defaults ship in the proposed JSON so implementation can proceed once Aaron answers or accepts interim.
+| # | Question | Interim (locked) |
+|---|---|---|
+| 1 | Fast→SGR confidence | `0.65` |
+| 2 | Every mic turn vs bar | **bar only** (cut every-turn) |
+| 3 | Max SGR iterations / burst | inherit ASI ceiling; start **max 4 iterations** dry-run |
+| 4 | Agent class | **`SGRToolCallingAgent`**; `SGRAgent` only if local model can't FC |
+| 5 | Python CLI vs TS first | **Python CLI first** (cut TS-first) |
+| 6 | LitServe bind | `127.0.0.1:8080`; Tailscale later |
+
+Still useful to confirm: whether Phase B may call a **cloud** OpenAI-compatible endpoint for live SGR, or dry-run stubs only until LitServe proxy exists.
 
 ## Related
 

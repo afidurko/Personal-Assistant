@@ -28,17 +28,17 @@ assign tasks.
 - OpenAI-compatible surface lets SGR keep its `AsyncOpenAI` client pointed at localhost  
 - Streaming supports converse / presence without a second stack  
 
-## Endpoint map (planned)
+## Planned endpoints (Phase C+, not Phase B)
+
+Phase B does **not** stand up LitServe. First LitServe pass is a **thin** classify stub + optional OpenAI-compatible **proxy** — not weights/vLLM/multi-GPU/batching/MCP/TTS streaming.
 
 | LitAPI | Cam job | Switch |
 |---|---|---|
 | `/v1/slm/classify` | intent + hotspot route hint | `switch.slm_local` |
-| `/v1/slm/compress` | brief / mesh distill compress | `switch.slm_local` |
-| `/v1/dl/embed` | vault/mesh embeddings | `switch.dl_local` |
-| `/v1/dl/rerank` | retrieval rerank | `switch.dl_local` |
-| `/v1/chat/completions` | OpenAI-compatible for SGR / converse assist | slm_local (+ kill) |
+| `/v1/dl/embed` | vault/mesh embeddings (later) | `switch.dl_local` |
+| `/v1/chat/completions` | OpenAI-compatible **proxy** for SGR | slm_local (+ kill) |
 
-All endpoints refuse work when `switch.kill` is act. Enhance/outbound never bypass connectome via LitServe.
+Deferred until proven need: batch classify, LitServe MCP, streaming TTS, vLLM backend, multi-GPU.
 
 ## Runtime surface (planned)
 

@@ -1,23 +1,20 @@
 # Cam Reasoning Logic
 
-Plan to unify **Schema-Guided Reasoning (SGR)** + **LitServe** inference with dual-process, MAP PFC modules, HMO recall, dual-stream language, and QA/trajectory reflection into one inspectable turn loop.
+Plan: **SGR** (System-2) + **LitServe** (deferred host) + dual-process / MAP / HMO / QA.
 
-- **Repo plan:** `docs/CAM_REASONING.md`
-- **SGR fork:** https://github.com/afidurko/sgr-agent-core → `integrations/sgr-agent-core`
-- **LitServe fork:** https://github.com/afidurko/LitServe → `integrations/litserve`
-- **Integration policies:** `config/integrations/sgr-agent-core.md` · `config/integrations/litserve.md`
-- **Proposed config:** `config/enhancement/reasoning-logic.json` (`status: proposed` — not applied)
-- **Apply:** future enhancement proposal + `switch.cam_enhance` (Aaron only)
+- **Repo plan:** `docs/CAM_REASONING.md` (includes **cut list**)
+- **SGR:** `integrations/sgr-agent-core`
+- **LitServe:** `integrations/litserve` (submodule present; **not** Phase B)
+- **Config:** `config/enhancement/reasoning-logic.json` (`proposed`)
 
-## Loop (abbrev.)
+## Thin slice (Phase B)
 
-Accept → Fast (**LitServe** sLM) → Escalate? → Recall → **SGR (Reason → Select → Act)** → Dual-stream → Reflect → Switches → Motor → Distill
+`cam-reason.py --dry-run` → escalate bar → MeshRecall / ConnectomeRoute / TrajectoryCheck / FinalAnswer → `reasoning_trace`
 
-Default slow-path agent: `SGRToolCallingAgent` (LLM via LitServe OpenAI-compatible when local).
+## Cut (slow / nonsense)
+
+Every-mic SGR · TS-first · full LitServe/vLLM farm · skills/ACP · wide toolkit · motor.sgr early · cortex HUD · Tavily default
 
 ## Next
 
-1. Aaron answers open questions in the plan (or accept interim defaults)
-2. Phase B: `scripts/cam-reason.py` + `scripts/cam-litserve.py` + Cam toolkit
-3. Phase C: wire home converse / chief
-4. Phase E: apply batch (+ optional `motor.sgr`)
+Implement Phase B dry-run when Aaron says go. Only open live question: cloud LLM vs stubs until LitServe proxy.

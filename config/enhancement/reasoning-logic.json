@@ -34,7 +34,27 @@
     "integrations/sgr-agent-core",
     "integrations/litserve"
   ],
-  "version": 3,
+  "version": 4,
+  "phase_b_scope": {
+    "include": [
+      "cam-reason.py dry-run",
+      "Cam ReasoningTool subclass fields",
+      "escalate bar only",
+      "toolkit: MeshRecall ConnectomeRoute TrajectoryCheck FinalAnswer",
+      "reasoning_trace JSONL"
+    ],
+    "exclude": [
+      "cam-litserve.py",
+      "full local LLM / vLLM farm",
+      "converse every-turn SGR",
+      "TypeScript reasoner first",
+      "SGR skills / ACP",
+      "ClineTool Scholar Jarvis in first toolkit",
+      "motor.sgr hotspot",
+      "cortex MAP HUD",
+      "LitServe MCP batch streaming TTS"
+    ]
+  },
   "stages": [
     "accept",
     "fast",
@@ -107,17 +127,24 @@
   },
   "cam_toolkit": [
     "ReasoningTool",
-    "GeneratePlanTool",
-    "AdaptPlanTool",
     "ClarificationTool",
     "FinalAnswerTool",
     "MeshRecallTool",
     "ConnectomeRouteTool",
-    "TrajectoryCheckTool",
+    "TrajectoryCheckTool"
+  ],
+  "cam_toolkit_later": [
+    "GeneratePlanTool",
+    "AdaptPlanTool",
     "ScholarFetchTool",
     "ClineTool",
     "JarvisTool"
   ],
+  "sgr_limits": {
+    "max_iterations_dry_run": 4,
+    "converse_policy": "bar_on_intent_or_length",
+    "never_every_mic_turn": true
+  },
   "memory_gate": {
     "hmo": "config/memory/hmo-tiers.json",
     "order": ["primary", "secondary", "archive"],
@@ -148,38 +175,53 @@
     "agent_definitions": "config/sgr/cam-agents.yaml",
     "server_module": "server/core/cam-reason.ts",
     "proposed_motor": "motor.sgr",
-    "note": "CLI + LitServe + Cam toolkit first (Phase B); server wire in Phase C — neither applied until Aaron approves"
+    "note": "Phase B = Python dry-run CLI + min toolkit only. LitServe / converse / TS / motor.sgr deferred."
   },
   "open_questions_for_aaron": [
     {
       "id": "q.confidence",
       "ask": "Fast→SGR confidence threshold?",
-      "interim": 0.65
+      "answer": 0.65,
+      "interim": true
     },
     {
       "id": "q.converse_always",
       "ask": "Run SGR on every mic turn or only above intent/length bar?",
-      "interim": "bar_on_intent_or_length"
+      "answer": "bar_on_intent_or_length",
+      "interim": false,
+      "cut": "every_mic_turn_sgr"
     },
     {
       "id": "q.max_burst",
       "ask": "Max SGR iterations / MAP subagent burst per turn?",
-      "interim": "inherit_asi_ceiling"
+      "answer": {"dry_run_max_iterations": 4, "ceiling": "inherit_asi"},
+      "interim": true
     },
     {
       "id": "q.agent_class",
       "ask": "Default SGRToolCallingAgent vs SGRAgent for local sLM?",
-      "interim": "sgr_tool_calling_agent"
+      "answer": "sgr_tool_calling_agent",
+      "interim": false
     },
     {
       "id": "q.impl_surface",
       "ask": "Prefer Python CLI (Phase B) or TypeScript server module first?",
-      "interim": "python_cli_first"
+      "answer": "python_cli_first",
+      "interim": false,
+      "cut": "typescript_first"
     },
     {
       "id": "q.litserve_bind",
       "ask": "LitServe default bind for home vs Tailscale peers?",
-      "interim": {"host": "127.0.0.1", "port": 8080, "tailscale": "forceps_optional_later"}
+      "answer": {"host": "127.0.0.1", "port": 8080, "tailscale": "later"},
+      "interim": true
+    },
+    {
+      "id": "q.live_llm",
+      "ask": "Phase B live SGR may use cloud OpenAI-compatible, or dry-run stubs only until LitServe proxy?",
+      "answer": null,
+      "interim": true,
+      "note": "Only remaining open question that blocks live (non-dry-run) SGR"
     }
   ]
 }
