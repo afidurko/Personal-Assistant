@@ -1,13 +1,13 @@
 {
-  "at": "2026-09-19T18:41:17Z",
+  "at": "2026-09-19T18:34:00Z",
   "overall": "warning",
   "checks": [
     {
       "neuron": "neuron.vitals_loop",
       "loadavg": [
-        2.1875,
-        2.69140625,
-        1.4111328125
+        0.0,
+        0.0,
+        0.0
       ],
       "cwd": "/workspace",
       "status": "healthy"
@@ -37,7 +37,7 @@
         "-b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection",
         "-baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain",
         "-64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide",
-        " 7ec803afa7c94ccf96973edcda58debe9b145693 integrations/voicestudio (v0.5.3-360-g7ec803af)"
+        " 7ec803afa7c94ccf96973edcda58debe9b145693 integrations/voicestudio ()"
       ]
     },
     {
@@ -123,12 +123,13 @@
   "hooks": {
     "improve_engine": {
       "exit": 0,
-      "preview": "{\n  \"at\": \"2026-09-19T18:41:17Z\",\n  \"health_overall\": \"warning\",\n  \"task_count\": 1,\n  \"tasks\": [\n    {\n      \"id\": \"improve.submodule_health.warning\",\n      \"title\": \"Init/sync git submodules\",\n      \"severity\": \"medium\",\n      \"status\": \"warning\",\n      \"neuron\": \"neuron.submodule_health\",\n      \"area\": \"area.apfc\",\n      \"detail\": {\n        \"count\": 7,\n        \"uninitialized\": 6,\n        \"status"
+      "preview": "{\n  \"at\": \"2026-09-19T18:34:00Z\",\n  \"health_overall\": \"warning\",\n  \"task_count\": 1,\n  \"tasks\": [\n    {\n      \"id\": \"improve.submodule_health.warning\",\n      \"title\": \"Init/sync git submodules\",\n      \"severity\": \"medium\",\n      \"status\": \"warning\",\n      \"neuron\": \"neuron.submodule_health\",\n      \"area\": \"area.apfc\",\n      \"detail\": {\n        \"count\": 7,\n        \"uninitialized\": 6,\n        \"status"
     },
     "persist_weekly": null,
     "fornix": {
       "exit": 0,
-      "preview": "fornix: skipped (recent)\n"
+      "preview": "fornix: consolidated 40 notes \u2192 6 themes\nwrote vault/10-Mesh-Distillates/fornix-consolidation.json\n"
     }
-  }
+  },
+  "exit_code": 0
 }

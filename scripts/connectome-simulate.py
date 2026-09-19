@@ -304,6 +304,10 @@ def main() -> int:
         "sense.slm.inference": 1.5,
         "sense.dl.embedding": 1.5,
         "sense.swarm.message": 1.2,
+        "sense.tool.result": 1.0,
+        "sense.voicestudio.health": 1.5,
+        "sense.voicestudio.result": 1.8,
+        "sense.swiftguide.map": 1.2,
     }
     sense_weights = [weight_map.get(s, 1.0) for s in sense_ids]
 

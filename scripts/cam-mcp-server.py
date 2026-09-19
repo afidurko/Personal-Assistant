@@ -6,7 +6,8 @@ Implements a small JSON-RPC MCP subset over stdin/stdout:
 
 Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
-  vault_search, connectome_route, kill_switch_status, ticket_list
+  vault_search, connectome_route, kill_switch_status, ticket_list,
+  voicestudio_health
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -114,6 +115,17 @@ def tool_defs() -> list[dict]:
                 "properties": {
                     "status": {"type": "string", "enum": ["pending", "done", "all"]},
                     "limit": {"type": "integer"},
+                },
+            },
+        },
+        {
+            "name": "voicestudio_health",
+            "description": "Probe Cam's VoiceStudio local backend /health (default http://localhost:3900).",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "base_url": {"type": "string"},
+                    "timeout": {"type": "number"},
                 },
             },
         },
@@ -230,6 +242,27 @@ def ticket_list(status: str = "all", limit: int = 20) -> dict:
     return {"tickets": items}
 
 
+def voicestudio_health(base_url: str | None = None, timeout: float = 5.0) -> dict:
+    import subprocess
+
+    cmd = [sys.executable, str(ROOT / "scripts" / "voicestudio-health.py"), "--json"]
+    if base_url:
+        cmd.extend(["--base-url", base_url])
+    if timeout:
+        cmd.extend(["--timeout", str(timeout)])
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "error": "health_probe_failed",
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+            "exit_code": proc.returncode,
+        }
+
+
 def call_tool(name: str, arguments: dict) -> Any:
     if name == "list_workspaces":
         return cw.mesh_projects_doc()
@@ -256,6 +289,11 @@ def call_tool(name: str, arguments: dict) -> Any:
         return kill_switch_status()
     if name == "ticket_list":
         return ticket_list(arguments.get("status", "all"), int(arguments.get("limit") or 20))
+    if name == "voicestudio_health":
+        return voicestudio_health(
+            base_url=arguments.get("base_url"),
+            timeout=float(arguments.get("timeout") or 5.0),
+        )
     raise ValueError(f"unknown tool: {name}")
 
 

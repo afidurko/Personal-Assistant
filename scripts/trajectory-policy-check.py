@@ -89,6 +89,21 @@ def main() -> int:
         errors.append("mesh_should_remain_when_outbound_held")
     demos.append({"case": "outbound_hold", "motor_plan": plan5, "violations": v5})
 
+    # VoiceStudio file render alone is OK; audible speak still needs outbound+presence
+    vs_state = dict(r1.get("switch_state") or {})
+    vs_state["switch.outbound"] = "hold"
+    vs_state["switch.presence"] = "hold"
+    plan6, v6 = tp.apply_policies(
+        ["motor.voicestudio", "motor.speak", "motor.mesh"], vs_state
+    )
+    if "motor.speak" in plan6:
+        errors.append("voicestudio_audible_not_stripped_when_outbound_held")
+    if "motor.voicestudio" not in plan6:
+        errors.append("voicestudio_api_should_remain_for_file_render")
+    if "motor.mesh" not in plan6:
+        errors.append("mesh_should_remain_with_voicestudio")
+    demos.append({"case": "voicestudio_file_only", "motor_plan": plan6, "violations": v6})
+
     if cfg.get("status") != "applied":
         errors.append("policies_not_applied")
 

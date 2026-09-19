@@ -33,6 +33,7 @@ DEFAULT_INCLUDE = [
     "config/integrations/google-scholar.md",
     "config/integrations/voicestudio.json",
     "config/integrations/voicestudio.md",
+    "config/mcp/voicestudio.json",
     "config/workspaces/registry.json",
     "config/workspaces/schedules.json",
     "config/memory/hmo-tiers.json",

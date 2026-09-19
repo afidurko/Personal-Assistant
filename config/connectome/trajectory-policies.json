@@ -52,6 +52,16 @@
       "on_violate": "strip",
       "strip_motors": ["motor.text", "motor.call", "motor.facetime", "motor.speak"],
       "revise_to": "draft_only"
+    },
+    {
+      "id": "voicestudio_api_not_outbound_speak",
+      "description": "motor.voicestudio may write files via local API; audible speak still needs motor.speak + outbound",
+      "if_any_motors": ["motor.voicestudio"],
+      "if_any_motors_extra": ["motor.speak"],
+      "require_switch_act": ["switch.outbound", "switch.presence"],
+      "on_violate": "strip",
+      "strip_motors": ["motor.speak"],
+      "revise_to": "file_render_only_hold_audible"
     }
   ]
 }

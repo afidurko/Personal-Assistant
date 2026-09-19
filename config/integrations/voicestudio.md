@@ -43,6 +43,7 @@ Mirror Cam prefs before binding a voice:
 - Bind agents with `X-VoiceStudio-Client-Id: cam` (or per-role ids)
 - Prefer `OMNIVOICE_MCP_OUTPUT_MODE=files` + a shared base path so WAV bytes stay out of LLM context
 - Never commit reference audio, cloned profiles, or API tokens
+- MCP client template: `config/mcp/voicestudio.json`
 
 ```bash
 git submodule update --init --recursive
@@ -50,6 +51,9 @@ cd integrations/voicestudio
 # Prefer installed Electron app; or from source:
 # bun install && bun run dev
 python3 ../../scripts/voicestudio-health.py
+python3 ../../scripts/voicestudio-speak.py --text "Hello Aaron" --dry-run
+# After a real job JSON exists:
+# python3 ../../scripts/pack-voicestudio-result.py --job /path/to/job.json
 ```
 
 ## Connectome / motors
@@ -60,6 +64,8 @@ python3 ../../scripts/voicestudio-health.py
 | Hotspot | `hotspot.voicestudio` |
 | Motors | `motor.speak` (channel `voicestudio_local_tts`), `motor.voicestudio` |
 | Switch | `switch.presence` + `switch.outbound` for audible output |
+| Scripts | `voicestudio-health.py`, `voicestudio-speak.py`, `pack-voicestudio-result.py` |
+| Cam MCP | `voicestudio_health` tool on `scripts/cam-mcp-server.py` |
 
 Coding work on the fork routes via `motor.cline` → workspace id `voicestudio`.
 

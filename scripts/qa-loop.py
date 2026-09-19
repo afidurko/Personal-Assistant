@@ -317,6 +317,9 @@ def write_suggestions(
         "- Suggest: pack research mesh writes with `scripts/pack-mesh-claim.py` (MMP)",
         "- Suggest: keep HMO primary lean — persona/prefs only; archive vault distillates",
         "- Suggest: before merge run `trajectory-policy-check` + dual billion campaigns",
+        "- Suggest: VoiceStudio local speech — `python3 scripts/voicestudio-health.py` + MCP files mode (`config/mcp/voicestudio.json`)",
+        "- Suggest: pack voice jobs with `scripts/pack-voicestudio-result.py` (no raw WAV in git)",
+        "- Suggest: `voicestudio-speak.py` for motor.voicestudio file renders; audible still uses motor.speak gates",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")

@@ -106,6 +106,15 @@ describe('suggestive implementations', () => {
       true,
     );
   });
+
+  it('includes presence-voice suggestions for VoiceStudio local speech', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({ id: 'workspace-health', kind: 'health', score: 92, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'presence-voice')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('voicestudio'))).toBe(true);
+  });
 });
 
 describe('billion-scale round 2', () => {
