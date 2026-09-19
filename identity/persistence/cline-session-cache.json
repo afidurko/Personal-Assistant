@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T18:32:13.769941+00:00",
+    "at": "2026-09-19T18:53:23.134814+00:00",
     "mode": "act",
-    "summary": "Wired afidurko/VoiceStudio into Cam: submodule, coding workspace, connectome motor.voicestudio, persona local TTS fallback, health probe. PR #17.",
+    "summary": "Dual 1B connectome green + trajectory 1B green for VoiceStudio; bridges+suggestive presence-voice; CI OK; merge-ready PR #17.",
     "workspace": "."
   },
   "notes": [
@@ -22,6 +22,11 @@
     {
       "at": "2026-09-19T18:32:13.769941+00:00",
       "text": "mesh/voice + vault/03-Projects/VoiceStudio-Local-Speech.md",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T18:53:23.134814+00:00",
+      "text": "MERGE_READINESS_VOICESTUDIO.md",
       "workspace": "."
     }
   ],
@@ -72,11 +77,11 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": true,
+      "workspace_exists": false,
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-17T01:59:36.358290+00:00",
+  "schedules_synced_at": "2026-09-19T18:53:10.386610+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

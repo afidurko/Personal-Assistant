@@ -21,3 +21,10 @@ Local TTS / ASR / clone / dub for Cam when NVIDIA RIVA studio is offline. Brain 
 2. Install or run VoiceStudio (Electron preferred)
 3. Confirm `http://localhost:3900/health`
 4. Bind a soft-airy Cam voice profile; keep analytics/cloud opt-in
+
+
+## Connected (2026-09-19 cloud)
+
+- Submodule initialized at `7ec803a`
+- Dual billion QA green — see `vault/10-Mesh-Distillates/MERGE_READINESS_VOICESTUDIO.md`
+- Live backend still needs Aaron host Electron + optional model consent
