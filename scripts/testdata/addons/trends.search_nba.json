@@ -1,0 +1,66 @@
+{
+  "_fixture": true,
+  "addon_id": "trends.search_nba",
+  "kind": "catalog_search",
+  "query": "nba",
+  "returned": 4,
+  "results": [
+    {
+      "path": "20150607_nbafinalsgame2.csv",
+      "name": "20150607_nbafinalsgame2.csv",
+      "stem": "20150607_nbafinalsgame2",
+      "topic": "nbafinalsgame2",
+      "ext": "csv",
+      "size": 6990,
+      "folder": null,
+      "year": "2015",
+      "sha": "16107faecfedfac73414ba7e1e36714c732303c4",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150607_nbafinalsgame2.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150607_nbafinalsgame2.csv",
+      "score": 22
+    },
+    {
+      "path": "20150615_NBAFinalsGame5.csv",
+      "name": "20150615_NBAFinalsGame5.csv",
+      "stem": "20150615_NBAFinalsGame5",
+      "topic": "NBAFinalsGame5",
+      "ext": "csv",
+      "size": 6013,
+      "folder": null,
+      "year": "2015",
+      "sha": "a70ad71dd879735587e141ed3277760273e8c3b5",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150615_NBAFinalsGame5.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150615_NBAFinalsGame5.csv",
+      "score": 22
+    },
+    {
+      "path": "20150617_NBAFinalsPlayers.csv",
+      "name": "20150617_NBAFinalsPlayers.csv",
+      "stem": "20150617_NBAFinalsPlayers",
+      "topic": "NBAFinalsPlayers",
+      "ext": "csv",
+      "size": 684,
+      "folder": null,
+      "year": "2015",
+      "sha": "20bbee62aec64bd5359ad875c977648723e1c339",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150617_NBAFinalsPlayers.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150617_NBAFinalsPlayers.csv",
+      "score": 22
+    },
+    {
+      "path": "20150624_NBADraft.csv",
+      "name": "20150624_NBADraft.csv",
+      "stem": "20150624_NBADraft",
+      "topic": "NBADraft",
+      "ext": "csv",
+      "size": 2097,
+      "folder": null,
+      "year": "2015",
+      "sha": "0b3a17decf261fd24ee98e00a1c6bf12c1d2aeb3",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150624_NBADraft.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150624_NBADraft.csv",
+      "score": 22
+    }
+  ],
+  "source_repo": "github.com/GoogleTrends/data"
+}

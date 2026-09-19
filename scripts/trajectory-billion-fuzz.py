@@ -31,6 +31,7 @@ MOTORS = (
     "motor.speak",
     "motor.inkbox",
     "motor.public_apis",
+    "motor.google_trends",
     "motor.slm",
     "motor.dl",
 )

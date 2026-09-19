@@ -37,6 +37,7 @@
     "vault (smart-second-brain)",
     "mesh namespaces",
     "google scholar (literature + citations)",
+    "google-trends open datasets (public interest series)",
     "public-apis catalog (free HTTP APIs)",
     "web + paper feeds",
     "specialist hotspots"
@@ -48,8 +49,10 @@
   "pathway_hotspot": "hotspot.info_gather",
   "connectors": [
     "google-scholar",
+    "google-trends",
     "public-apis"
   ],
   "scholar_hotspot": "hotspot.google_scholar",
+  "google_trends_hotspot": "hotspot.google_trends",
   "public_apis_hotspot": "hotspot.public_apis"
 }

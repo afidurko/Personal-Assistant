@@ -1,0 +1,90 @@
+{
+  "id": "google-trends-addons",
+  "name": "Google Trends curated dataset add-ons",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "parent": "config/integrations/google-trends.json",
+  "role": "Allowlisted curated searches + small dataset previews from GoogleTrends/data — no free-form paths beyond this list",
+  "policy": "config/integrations/google-trends.md",
+  "available_to": "all_roles_and_subagents",
+  "motor": "motor.google_trends",
+  "tool": "tool.google_trends.addon",
+  "script": "scripts/google-trends-addon.py",
+  "mesh_namespace": "mesh/research",
+  "vault_dir": "vault/04-Research/google-trends/addons",
+  "defaults": {
+    "num_results": 5,
+    "offline_ok": true,
+    "save_to_mesh": true,
+    "user_agent": "Cam-GoogleTrends-Addon/1.0"
+  },
+  "rules": [
+    "Only call add-ons listed here — never free-form GitHub path fetch outside allowlist",
+    "Prefer --offline / fixtures in CI",
+    "Kill switch / switch.autonomy hold pauses live catalog refresh and fetches",
+    "Offline fixtures required for every add-on"
+  ],
+  "addons": [
+    {
+      "id": "trends.search_election",
+      "name": "Election / primary Trends datasets",
+      "kind": "catalog_search",
+      "query": "election",
+      "purpose": "Find published Google Trends CSVs about elections and primaries",
+      "params": {
+        "num": {"type": "integer", "default": 5, "min": 1, "max": 20}
+      },
+      "fixture": "scripts/testdata/addons/trends.search_election.json",
+      "roles": ["info-retriever", "researcher", "agi-scout", "tool-user"]
+    },
+    {
+      "id": "trends.search_nba",
+      "name": "NBA Trends datasets",
+      "kind": "catalog_search",
+      "query": "nba",
+      "purpose": "Find NBA finals / draft / player Trends CSVs",
+      "params": {
+        "num": {"type": "integer", "default": 5, "min": 1, "max": 20}
+      },
+      "fixture": "scripts/testdata/addons/trends.search_nba.json",
+      "roles": ["info-retriever", "researcher", "tool-user"]
+    },
+    {
+      "id": "trends.search_storm",
+      "name": "Storm / weather-event Trends datasets",
+      "kind": "catalog_search",
+      "query": "storm",
+      "purpose": "Find storm and weather-event Trends CSVs for ops/research context",
+      "params": {
+        "num": {"type": "integer", "default": 5, "min": 1, "max": 20}
+      },
+      "fixture": "scripts/testdata/addons/trends.search_storm.json",
+      "roles": ["info-retriever", "ops", "researcher", "tool-user"]
+    },
+    {
+      "id": "trends.dataset_game_theory",
+      "name": "Game Theory Trends CSV (tiny)",
+      "kind": "dataset_preview",
+      "path": "20150526_GameTheory.csv",
+      "purpose": "Smoke-test dataset preview path with a tiny published CSV",
+      "params": {
+        "preview_lines": {"type": "integer", "default": 20, "min": 1, "max": 50}
+      },
+      "fixture": "scripts/testdata/addons/trends.dataset_game_theory.json",
+      "roles": ["info-retriever", "qa", "tool-user"]
+    },
+    {
+      "id": "trends.dataset_same_sex_marriage",
+      "name": "Same-sex marriage Trends CSV",
+      "kind": "dataset_preview",
+      "path": "20150626_SameSexMarriage.csv",
+      "purpose": "Curated fetch/preview of a well-known Trends graphic dataset",
+      "params": {
+        "preview_lines": {"type": "integer", "default": 20, "min": 1, "max": 50}
+      },
+      "fixture": "scripts/testdata/addons/trends.dataset_same_sex_marriage.json",
+      "roles": ["info-retriever", "researcher", "tool-user"]
+    }
+  ]
+}

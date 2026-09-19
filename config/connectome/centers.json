@@ -271,7 +271,7 @@
     {
       "id": "center.info",
       "role": "info-retriever",
-      "function": "vault\u2192mesh\u2192Scholar\u2192public-apis\u2192web information gather with citations",
+      "function": "vault\u2192mesh\u2192Scholar\u2192Trends-data\u2192public-apis\u2192web information gather with citations",
       "accepts": [
         "spike.question",
         "spike.fact",

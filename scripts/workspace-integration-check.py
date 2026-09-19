@@ -44,6 +44,9 @@ HARD_PATHS = [
     "config/pipelines/cam-enhance-gate.json",
     "config/integrations/google-scholar.json",
     "config/integrations/google-scholar.md",
+    "config/integrations/google-trends.json",
+    "config/integrations/google-trends.md",
+    "config/integrations/google-trends-addons.json",
     "config/integrations/memorybear.json",
     "config/integrations/memorybear.md",
     "config/integrations/voicestudio.json",
@@ -67,6 +70,10 @@ HARD_PATHS = [
     "scripts/cam-enhance-propose.py",
     "scripts/scholar-search.py",
     "scripts/pack-scholar-result.py",
+    "scripts/google-trends-search.py",
+    "scripts/pack-google-trends-result.py",
+    "scripts/google-trends-check.py",
+    "scripts/google-trends-addon.py",
     "scripts/memorybear.py",
     "scripts/pack-memorybear-result.py",
     "scripts/memorybear-check.py",
@@ -158,6 +165,10 @@ def mesh_flags(seed: dict) -> dict:
             or research.get("cam_enhance_apply_requires_aaron")
         ),
         "google_scholar": bool(research.get("google_scholar")),
+        "google_trends": bool(
+            research.get("google_trends")
+            or (seed.get("mesh/research") or {}).get("google_trends")
+        ),
         "memorybear": bool(
             (seed.get("mesh/memorybear") or {}).get("enabled")
             or (seed.get("mesh/facts") or {}).get("memorybear_cognitive_memory")
@@ -319,6 +330,25 @@ def main() -> int:
         if public_apis.get("hotspot_id") != "hotspot.public_apis":
             route_ok = False
             route_notes.append("public-apis sense should hit hotspot.public_apis")
+        google_trends = json.loads(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/connectome-route.py"),
+                    "--sense",
+                    "sense.catalog.google_trends",
+                    "--goal",
+                    "google trends election dataset",
+                ],
+                text=True,
+            )
+        )
+        if "motor.google_trends" not in google_trends.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("google-trends pathway missing motor.google_trends")
+        if google_trends.get("hotspot_id") != "hotspot.google_trends":
+            route_ok = False
+            route_notes.append("google-trends sense should hit hotspot.google_trends")
         inkbox = json.loads(
             subprocess.check_output(
                 [

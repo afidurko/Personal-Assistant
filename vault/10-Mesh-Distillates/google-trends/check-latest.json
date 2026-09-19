@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "hard_errors": [],
+  "soft_warnings": [],
+  "integration": "google-trends",
+  "available_to": "all_roles_and_subagents",
+  "teams": [
+    "team.info",
+    "team.capability",
+    "team.agi-research-scan",
+    "team.tooling"
+  ],
+  "source_repo": "github.com/GoogleTrends/data"
+}

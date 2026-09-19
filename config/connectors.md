@@ -134,6 +134,20 @@
 - Scripts: `scripts/scholar-search.py`, `scripts/pack-scholar-result.py`
 - Distills to `mesh/research` + `vault/04-Research/scholar/`
 
+## Google Trends data (open datasets)
+
+- Source: [GoogleTrends/data](https://github.com/GoogleTrends/data)
+- Policy: `config/integrations/google-trends.md`
+- Config: `config/integrations/google-trends.json`
+- Sense: `sense.catalog.google_trends` · Hotspot: `hotspot.google_trends` · Motor: `motor.google_trends`
+- **Available to all roles and subagents** — index/fetch published Trends CSVs (no full-repo clone; ~382MB upstream)
+- Scripts: `scripts/google-trends-search.py`, `scripts/pack-google-trends-result.py`, `scripts/google-trends-check.py`, `scripts/google-trends-addon.py`
+- MCP: `google_trends_search` · `google_trends_addon` via `scripts/cam-mcp-server.py`
+- Add-ons: `config/integrations/google-trends-addons.json` (allowlisted searches + dataset previews)
+- Distills to `mesh/research` + `vault/04-Research/google-trends/`
+- No API key; live mode uses GitHub trees API + raw file fetch
+- Free-form path fetch outside allowlisted add-ons is forbidden for the addon motor
+
 ## Public APIs (free API catalog — all agents)
 
 - Source: [afidurko/public-apis](https://github.com/afidurko/public-apis)
@@ -191,5 +205,6 @@ specialist tool or modern API — not the Java/Thrift stack.
 - [ ] Indeed connected (careers watch)
 - [ ] Google Scholar connected (SerpAPI key in local `.env`)
 - [ ] Optional: Scholar `profile.author_id` set for Aaron citation watch
+- [ ] Google Trends data connected (`python3 scripts/google-trends-check.py`)
 - [ ] MemoryBear connected (`MEMORYBEAR_API_KEY` + `MEMORYBEAR_END_USER_ID` in local `.env`)
 - [ ] Optional: MemoryBear API running locally (`MEMORYBEAR_API_BASE`, default `http://127.0.0.1:8002`)

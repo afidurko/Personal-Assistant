@@ -17,7 +17,7 @@
 | AGI Synthesist | `agi-synthesist` | yes | `team.agi-research-scan` | map findings → Cam proposals |
 | Capability Broker | `capability-broker` | yes | `team.capability` | task + enhance brokerage |
 | Task Executor | `task-executor` | yes | `team.capability` | concrete work units |
-| Info Retriever | `info-retriever` | yes | `team.info` | vault→mesh→**Scholar**→**public-apis**→web facts |
+| Info Retriever | `info-retriever` | yes | `team.info` | vault→mesh→**Scholar**→**Trends data**→**public-apis**→web facts |
 | SLM Runtime | `slm-runtime` | yes | — | local small-LM cortex |
 | DL Enhance | `dl-enhance` | yes | — | embeddings / rerank / vectors |
 | Tool Creator | `tool-creator` | yes | `team.tooling` | design/register tools (HAAS pattern) |
@@ -69,6 +69,7 @@
 - Local speech: `integrations/voicestudio`
 - Second brain: `integrations/smart-second-brain`
 - Google Scholar: `config/integrations/google-scholar.md` (SerpAPI bridge)
+- Google Trends data: `config/integrations/google-trends.md` (open datasets; GitHub index)
 - Cartography: `integrations/swiftguide` (mind maps + iOS stack)
 - Tool registry: `config/tools/registry.json`
 

@@ -8,7 +8,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/facts` | durable facts about you / world |
 | `mesh/people` | people graph notes |
 | `mesh/projects` | active projects |
-| `mesh/research` | research briefs + source lists (+ Scholar distillates) |
+| `mesh/research` | research briefs + source lists (+ Scholar + Google Trends distillates) |
 | `mesh/careers` | job search state |
 | `mesh/docs` | document index / templates |
 | `mesh/runs` | distilled run outcomes |

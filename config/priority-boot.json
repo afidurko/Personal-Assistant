@@ -23,6 +23,11 @@
       "role": "info-retriever"
     },
     {
+      "id": "google_trends",
+      "title": "Google Trends open datasets (GoogleTrends/data)",
+      "role": "info-retriever"
+    },
+    {
       "id": "public_apis",
       "title": "Public APIs free-API catalog (all agents)",
       "role": "tool-user"

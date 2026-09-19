@@ -8,7 +8,7 @@ Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
-  public_apis_search, public_apis_addon, inkbox_check,
+  public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   voicestudio_health
 
 Install into Cline (example):
@@ -188,6 +188,43 @@ def tool_defs() -> list[dict]:
                     "count": {"type": "integer"},
                     "ids": {"type": "string"},
                     "vs": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "google_trends_search",
+            "description": (
+                "Search Google Trends open datasets (github.com/GoogleTrends/data). "
+                "Offline fixture available; live mode uses GitHub git trees API."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "year": {"type": "string"},
+                    "ext": {"type": "string"},
+                    "num": {"type": "integer"},
+                    "offline": {"type": "boolean"},
+                    "list_years": {"type": "boolean"},
+                    "fetch": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "google_trends_addon",
+            "description": (
+                "Call an allowlisted Google Trends curated search or dataset preview "
+                "(election/nba/storm searches; game_theory / same_sex_marriage previews). "
+                "No free-form paths — only curated add-on ids."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "addon_id": {"type": "string"},
+                    "list": {"type": "boolean"},
+                    "offline": {"type": "boolean"},
+                    "num": {"type": "integer"},
+                    "preview_lines": {"type": "integer"},
                 },
             },
         },
@@ -411,6 +448,46 @@ def public_apis_addon(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def google_trends_search(arguments: dict) -> Any:
+    cmd = [sys.executable, str(ROOT / "scripts/google-trends-search.py")]
+    if arguments.get("list_years"):
+        cmd.append("--list-years")
+    if arguments.get("query"):
+        cmd.extend(["--query", str(arguments["query"])])
+    if arguments.get("year"):
+        cmd.extend(["--year", str(arguments["year"])])
+    if arguments.get("ext"):
+        cmd.extend(["--ext", str(arguments["ext"])])
+    if arguments.get("num") is not None:
+        cmd.extend(["--num", str(int(arguments["num"]))])
+    if arguments.get("fetch"):
+        cmd.extend(["--fetch", str(arguments["fetch"])])
+    if arguments.get("offline") is True:
+        cmd.append("--offline")
+    out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+    return json.loads(out)
+
+
+def google_trends_addon(arguments: dict) -> Any:
+    cmd = [sys.executable, str(ROOT / "scripts/google-trends-addon.py")]
+    if arguments.get("list"):
+        cmd.append("list")
+        out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+        return json.loads(out)
+    addon_id = arguments.get("addon_id")
+    if not addon_id:
+        raise ValueError("addon_id required unless list=true")
+    cmd.extend(["call", str(addon_id)])
+    if arguments.get("num") is not None:
+        cmd.extend(["--num", str(int(arguments["num"]))])
+    if arguments.get("preview_lines") is not None:
+        cmd.extend(["--preview-lines", str(int(arguments["preview_lines"]))])
+    if arguments.get("offline") is True:
+        cmd.append("--offline")
+    out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+    return json.loads(out)
+
+
 def inkbox_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
@@ -480,6 +557,10 @@ def call_tool(name: str, arguments: dict) -> Any:
         return public_apis_search(arguments)
     if name == "public_apis_addon":
         return public_apis_addon(arguments)
+    if name == "google_trends_search":
+        return google_trends_search(arguments)
+    if name == "google_trends_addon":
+        return google_trends_addon(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
     if name == "voicestudio_health":

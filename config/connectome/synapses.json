@@ -555,6 +555,13 @@
       "notes": "shared free-API catalog for all agents"
     },
     {
+      "from": "switch.autonomy",
+      "to": "motor.google_trends",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Google Trends open dataset catalog"
+    },
+    {
       "from": "motor.text",
       "to": "area.mtl",
       "weight": 0.7,
@@ -1095,6 +1102,28 @@
       "notes": "when AGI scan needs free API tooling ideas"
     },
     {
+      "from": "sense.catalog.google_trends",
+      "to": "center.info",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.catalog.google_trends",
+      "to": "center.research",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.catalog.google_trends",
+      "to": "center.agi_scan",
+      "weight": 0.55,
+      "notes": "when AGI/info work needs public interest time-series context"
+    },
+    {
+      "from": "center.research",
+      "to": "switch.autonomy",
+      "weight": 0.75,
+      "notes": "open dataset / catalog motors that do not need research_scan"
+    },
+    {
       "from": "sense.inkbox.event",
       "to": "center.comms",
       "weight": 1.0
@@ -1543,6 +1572,24 @@
       "to": "sense.tool.result",
       "weight": 0.7,
       "notes": "catalog search result loop"
+    },
+    {
+      "from": "motor.google_trends",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — Trends dataset hits into memory periphery"
+    },
+    {
+      "from": "motor.google_trends",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.google_trends",
+      "to": "sense.tool.result",
+      "weight": 0.7,
+      "notes": "Trends catalog search/fetch result loop"
     },
     {
       "from": "motor.inkbox",
