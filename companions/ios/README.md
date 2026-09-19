@@ -22,6 +22,11 @@ Use **a-Shell** on iPad to run `scripts/cam-converse-server.py`, then open `http
 ## Native Xcode app
 Still needs a Mac — scaffold/API only for now (`CamAPI` talks to same `/api/turn`).
 
+Aaron-only voice gate contract: `companions/ios/CamVoiceGate.swift`
+- Same fields as web: `aaron_voice_score`, `enrolled`, `multi_speaker_hint`
+- Adaptive noise threshold bump mirrors `addons.adaptive_noise`
+- Native SpeakerRecognition can replace spectral scoring later without changing `/api/turn`
+
 Stack guidance distilled from SwiftGuide: `vault/03-Projects/iOS-Companion-SwiftGuide-Stack.md`
 and `config/connectome/mindmap.json` (`ios_companion_stack_picks`). Prefer SwiftUI + TCA,
 local-first (SwiftData/GRDB), minimal deps.

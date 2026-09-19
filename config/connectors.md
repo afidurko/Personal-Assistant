@@ -44,11 +44,24 @@
 - Results distilled to `mesh/vision` (see `config/integrations/paddledetection.md`)
 - Live iPhone camera is via **iOS companion** (below), not PaddleDetection directly
 
+## Eye tracking (Pupil) — Cam can see
+
+- Submodule: `integrations/pupil` @ `master` ← [afidurko/pupil](https://github.com/afidurko/pupil)
+- **ENABLED** so Cam can see: `identity/persistence/CAM_PUPIL_VISION_ENABLED.md`
+- Switch: `switch.pupil_vision` · Motor: `motor.pupil`
+- Senses: `sense.vision.world` (scene) + `sense.vision.gaze`
+- Hotspot: `hotspot.pupil_see`
+- Bridge: `scripts/pupil-see.py` · Converse spike: `POST /api/spike/pupil`
+- Results distilled to `mesh/vision` + `mesh/gaze`
+- Policy: `config/integrations/pupil.md`
+- Not continuous surveillance of third parties without Aaron’s task
+
 ## iOS companion (Aaron face/voice + camera/mic)
 
 - Scaffold: `companions/ios/` · policy: `config/integrations/ios-companion.md`
 - Full design: `docs/IOS_IDENTITY.md`
 - **Granted:** Aaron face recognition, Aaron voice recognition, iPhone camera, iPhone mic
+- **Granted:** Aaron-only voice in noisy rooms (`config/identity/aaron-voice-gate.json`) — surrounding conversation ignored
 - **Granted:** full photos + files access to learn Aaron’s look/sound and photo↔video same-person match (`identity/persistence/AARON_MEDIA_ACCESS.md`)
 - **Live converse:** **ENABLED** by Aaron — `identity/persistence/CAM_CONVERSE_ENABLED.md`
 - Network: **Tailscale** — `docs/TAILSCALE.md`
@@ -63,6 +76,17 @@
 - Portrait: `identity/persona/cam-face.jpg`
 - Soft airy Argentine voice style in `config/persona/voice.json`
 - Brain stays Cam/nullclaw + smart-second-brain
+
+## Local speech engine (VoiceStudio)
+
+- Submodule: `integrations/voicestudio` ← [afidurko/VoiceStudio](https://github.com/afidurko/VoiceStudio)
+- Local TTS / ASR / clone / dub (open-source ElevenLabs alternative)
+- Backend default `http://localhost:3900` · MCP `/mcp`
+- Policy: `config/integrations/voicestudio.md` · config: `config/integrations/voicestudio.json`
+- Health: `python3 scripts/voicestudio-health.py`
+- Coding workspace id: `voicestudio` (chooser signals: voicestudio, omnivoice, voice cloning, …)
+- Prefer for simple/local speak when RIVA studio is offline; full face presence still LLMAvatarTalk
+- Not a second brain — nullclaw remains executive
 
 ## Knowledge cortex (smart-second-brain)
 
@@ -111,6 +135,19 @@
 - Distills to `mesh/tools` + `vault/04-Research/public-apis/`
 - No catalog API key; individual listed APIs may need their own local secrets
 - Free-form URL fetch from catalog hits is forbidden — only allowlisted add-ons may call HTTP
+
+## Inkbox (agent identity + outbound channels)
+
+- Source: [afidurko/inkbox](https://github.com/afidurko/inkbox) · [inkbox.ai](https://inkbox.ai)
+- Policy: `config/integrations/inkbox.md`
+- Config: `config/integrations/inkbox.json`
+- Path: `integrations/inkbox` (git submodule)
+- Sense: `sense.inkbox.event` · Hotspot: `hotspot.inkbox` · Motor: `motor.inkbox`
+- Gate: `switch.outbound` (live email/SMS/call) — not free-send from Cline
+- Credential: `INKBOX_API_KEY` in local `.env` only
+- Scripts: `scripts/inkbox-check.py`
+- Coding workspace id: `inkbox` (SDK/CLI work via Cline)
+- Distills to `mesh/comms` + `vault/06-Life-Ops/inkbox/`
 
 ## Bridge later (OpenClaw-inspired external plugins)
 

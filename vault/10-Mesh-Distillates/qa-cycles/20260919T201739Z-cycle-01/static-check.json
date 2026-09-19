@@ -1,0 +1,12 @@
+{
+  "senses": 31,
+  "hotspot_options": 41,
+  "known_nodes": 140,
+  "motors": 21,
+  "edges": 304,
+  "hard_errors": [],
+  "missing_edges": [],
+  "soft_warnings": [],
+  "ok": true,
+  "exit_code": 0
+}

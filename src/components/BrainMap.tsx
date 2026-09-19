@@ -5,14 +5,21 @@ import { useMeshStore } from '@/store/meshStore';
 const VIEW_W = 1000;
 const VIEW_H = 620;
 
-/** Soft brain silhouette — top-down-ish lateral outline */
+/** Left-lateral human brain silhouette (anterior left, superior top) */
 const BRAIN_PATH =
-  'M 220 310 C 210 180, 280 90, 400 70 C 480 55, 540 70, 580 95 ' +
-  'C 620 70, 700 55, 780 85 C 870 125, 910 210, 900 300 ' +
-  'C 895 380, 860 450, 800 490 C 740 530, 660 545, 580 530 ' +
-  'C 540 555, 470 560, 410 535 C 340 555, 270 520, 235 450 ' +
-  'C 210 395, 225 350, 220 310 Z ' +
-  'M 500 95 C 490 180, 505 280, 500 380 C 495 450, 505 500, 510 530';
+  'M 160 300 ' +
+  'C 155 220, 175 140, 230 95 ' +
+  'C 290 50, 370 40, 450 55 ' +
+  'C 520 38, 600 45, 670 80 ' +
+  'C 740 115, 800 170, 835 240 ' +
+  'C 860 300, 855 370, 820 430 ' +
+  'C 780 500, 700 545, 610 560 ' +
+  'C 540 575, 470 565, 420 530 ' +
+  'C 380 560, 320 555, 270 510 ' +
+  'C 220 470, 175 400, 160 300 Z';
+
+const SYLVIAN_PATH = 'M 280 280 C 360 300, 450 310, 540 280';
+const MIDLINE_PATH = 'M 500 90 C 505 180, 510 280, 500 400';
 
 const LEGEND: { status: ScanStatus; label: string }[] = [
   { status: 'idle', label: 'Idle' },
@@ -167,6 +174,20 @@ export function BrainMap({ onFocusNode }: BrainMapProps) {
         </defs>
 
         <path className="brain-silhouette" d={BRAIN_PATH} fill="url(#brain-fill)" />
+        <path
+          className="brain-fissure"
+          d={SYLVIAN_PATH}
+          fill="none"
+          stroke="rgba(230,213,184,0.22)"
+          strokeWidth="1.5"
+        />
+        <path
+          className="brain-fissure"
+          d={MIDLINE_PATH}
+          fill="none"
+          stroke="rgba(230,213,184,0.16)"
+          strokeWidth="1.2"
+        />
 
         {edges.map((edge) => {
           const from = nodeMap.get(edge.from);

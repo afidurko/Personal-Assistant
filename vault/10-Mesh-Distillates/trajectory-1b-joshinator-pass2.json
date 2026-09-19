@@ -1,0 +1,14 @@
+{
+  "n": 1000000000,
+  "workers": 4,
+  "passed": 1000000000,
+  "failed": 0,
+  "first_error": null,
+  "elapsed_s": 146.1608893550001,
+  "checks_per_sec": 6841775.555779282,
+  "policy_count": 5,
+  "seed": 77,
+  "ok": true,
+  "sampler": "inline_modular_plus_1pct_full_apply",
+  "workers_detail_omitted": true
+}

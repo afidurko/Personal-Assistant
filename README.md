@@ -25,7 +25,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed · **Google Scholar** · **public-apis** · `config/tools/registry.json`
+- **Tools:** Jarvis · Cline · PaddleDetection · Pupil (gaze) · LinkedIn/Indeed · **Google Scholar** · **public-apis** · **Inkbox** · `config/tools/registry.json`
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents (privilege inheritance, no escalation)
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  

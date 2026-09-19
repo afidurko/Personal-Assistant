@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { BrainMap } from '@/components/BrainMap';
 import { CortexStage } from '@/components/CortexStage';
 import { CamPresence } from '@/components/CamPresence';
 import { WorkspacePanel } from '@/components/WorkspacePanel';
@@ -30,7 +31,20 @@ export default function App() {
   const lastCycleAt = useMeshStore((s) => s.lastCycleAt);
   const connected = useMeshStore((s) => s.connected);
   const [listening, setListening] = useState(false);
+  const [flatMap, setFlatMap] = useState(false);
   const onListeningChange = useCallback((v: boolean) => setListening(v), []);
+
+  const onFocusArea = useCallback(
+    (areaId: string) => {
+      const nodes = useMeshStore.getState().nodes;
+      const key = areaId.replace('area.', '');
+      const hit =
+        nodes.find((n) => n.id.includes(key)) ||
+        nodes.find((n) => n.label.toLowerCase().includes(key));
+      if (hit) focusNode(hit.id);
+    },
+    [focusNode],
+  );
 
   return (
     <div className="app-atmosphere cam-home">
@@ -46,10 +60,10 @@ export default function App() {
             {connected ? 'Live mesh' : 'Connecting…'}
           </span>
         </div>
-        <h1 className="headline">Your always-on assistant — cortex lit, listening when you ask.</h1>
+        <h1 className="headline">Glass cortex lit — she listens when you open the mic.</h1>
         <p className="lede">
-          Speak and Cam answers. Behind her, the 3D brain stays live while she and her agents
-          keep spawning improve work in the background.
+          Speak and Cam answers. The near-clear brain stays live while she and her agents spawn
+          improve work in the background.
         </p>
         <div className="hero-cta">
           <ScanControls
@@ -63,10 +77,22 @@ export default function App() {
           <button type="button" className="btn btn-ghost" onClick={() => guideStart()}>
             Swift Guide tour
           </button>
+          <button
+            type="button"
+            className={`btn btn-ghost${flatMap ? ' active' : ''}`}
+            onClick={() => setFlatMap((v) => !v)}
+            aria-pressed={flatMap}
+          >
+            {flatMap ? '3D cortex' : '2D map'}
+          </button>
         </div>
 
         <div className="hero-stage">
-          <CortexStage listening={listening} />
+          {flatMap ? (
+            <BrainMap onFocusNode={(id) => focusNode(id)} />
+          ) : (
+            <CortexStage listening={listening} onFocusArea={onFocusArea} />
+          )}
           <CamPresence onListeningChange={onListeningChange} />
         </div>
       </header>

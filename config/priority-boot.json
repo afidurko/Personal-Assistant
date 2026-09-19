@@ -28,6 +28,11 @@
       "role": "tool-user"
     },
     {
+      "id": "inkbox",
+      "title": "Inkbox agent identity (email/phone/vault — outbound gated)",
+      "role": "comms"
+    },
+    {
       "id": "careers_linkedin_indeed",
       "title": "Job watch on LinkedIn + Indeed",
       "role": "careers"
@@ -39,7 +44,12 @@
     },
     {
       "id": "comms_presence",
-      "title": "Comms + Cam presence (LLMAvatarTalk)",
+      "title": "Comms + Cam presence (LLMAvatarTalk + VoiceStudio local speech)",
+      "role": "comms"
+    },
+    {
+      "id": "voicestudio_local",
+      "title": "VoiceStudio local TTS/ASR/clone (submodule + localhost:3900)",
       "role": "comms"
     },
     {

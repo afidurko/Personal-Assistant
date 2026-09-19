@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "analogy": "Allowed synapses \u2014 Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
+  "analogy": "Allowed synapses — Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
   "rules": [
     "Every motor fire needs an Aaron-rooted task or standing goal spike",
     "Non-Aaron tasking spikes die at switch.tasking (OFC identity gate)",
@@ -50,6 +50,28 @@
       "to": "area.visual",
       "weight": 1.0,
       "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.vision.gaze",
+      "to": "area.visual",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.vision.world",
+      "to": "area.visual",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.vision.gaze",
+      "to": "switch.pupil_vision",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vision.world",
+      "to": "switch.pupil_vision",
+      "weight": 1.0
     },
     {
       "from": "sense.jarvis.result",
@@ -156,7 +178,7 @@
       "from": "area.visual",
       "to": "area.auditory",
       "weight": 0.6,
-      "notes": "photo\u2194voice enrollment bridge"
+      "notes": "photo↔voice enrollment bridge"
     },
     {
       "from": "area.visual",
@@ -404,6 +426,24 @@
       "weight": 1.0
     },
     {
+      "from": "switch.pupil_vision",
+      "to": "area.visual",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.pupil_vision",
+      "to": "center.vision",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.pupil_vision",
+      "to": "motor.pupil",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
       "from": "switch.ios_capture",
       "to": "area.auditory",
       "when": "act",
@@ -440,6 +480,13 @@
     },
     {
       "from": "switch.outbound",
+      "to": "motor.inkbox",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Inkbox agent identity send/call/SMS/vault/tunnel"
+    },
+    {
+      "from": "switch.outbound",
       "to": "motor.speak",
       "when": "act",
       "weight": 0.8
@@ -449,6 +496,20 @@
       "to": "motor.speak",
       "when": "act",
       "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "switch.identity",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Aaron-only speak gate — identity after outbound for presence path"
+    },
+    {
+      "from": "switch.identity",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Strip speak when Aaron voice/face match fails"
     },
     {
       "from": "switch.careers_submit",
@@ -617,6 +678,16 @@
     },
     {
       "from": "sense.vision.detection",
+      "to": "center.vision",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vision.gaze",
+      "to": "center.vision",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vision.world",
       "to": "center.vision",
       "weight": 1.0
     },
@@ -826,6 +897,30 @@
       "weight": 1.0
     },
     {
+      "from": "switch.autonomy",
+      "to": "motor.pupil",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "motor.pupil",
+      "to": "area.mtl",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.pupil",
+      "to": "center.vision",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.pupil",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
       "from": "motor.text",
       "to": "center.memory",
       "weight": 0.7,
@@ -1005,6 +1100,26 @@
       "to": "center.agi_scan",
       "weight": 0.6,
       "notes": "when AGI scan needs free API tooling ideas"
+    },
+    {
+      "from": "sense.inkbox.event",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.inkbox.event",
+      "to": "area.broca",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.inkbox.event",
+      "to": "area.wernicke",
+      "weight": 0.85
+    },
+    {
+      "from": "sense.inkbox.event",
+      "to": "center.capability",
+      "weight": 0.7
     },
     {
       "from": "sense.slm.inference",
@@ -1437,6 +1552,24 @@
       "notes": "catalog search result loop"
     },
     {
+      "from": "motor.inkbox",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — identity/outbound events into memory"
+    },
+    {
+      "from": "motor.inkbox",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.inkbox",
+      "to": "center.comms",
+      "weight": 0.75,
+      "notes": "feedback — outbound result to comms"
+    },
+    {
       "from": "motor.tool",
       "to": "sense.tool.result",
       "weight": 0.7,
@@ -1494,6 +1627,86 @@
       "from": "motor.swarm",
       "to": "area.mtl",
       "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "sense.aaron.voice",
+      "to": "area.ofc",
+      "weight": 1.0,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "switch.tasking",
+      "to": "area.auditory",
+      "weight": 0.8,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "area.auditory",
+      "to": "switch.ios_capture",
+      "weight": 0.8,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "motor.mesh",
+      "weight": 0.7,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "sense.voicestudio.health",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.voicestudio.result",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.voicestudio.result",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "center.comms",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "voicestudio local api path"
+    },
+    {
+      "from": "center.comms",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.voicestudio",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "motor.voicestudio",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.voicestudio",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.voicestudio",
+      "to": "center.comms",
+      "weight": 0.7,
       "notes": "feedback"
     }
   ]

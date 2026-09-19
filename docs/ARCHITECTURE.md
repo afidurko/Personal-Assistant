@@ -16,13 +16,14 @@ and outbound contact (text / FaceTime / call) when needed.
 | [lucida](https://github.com/claritylab/lucida) | **Role ideas only** | Speech/vision “service team” concept; Java/Thrift stack rejected for simplicity |
 | [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools; submodule — not the brain |
 | [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection on approved media; submodule — not always-on camera |
+| [pupil](https://github.com/afidurko/pupil) (`master`) | **Eye-tracking / gaze layer** | Pupil Capture/Player/Service; submodule — not always-on eye camera |
 | [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); not a second brain |
 | [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
 | [SwiftGuide](https://github.com/afidurko/SwiftGuide) | **Knowledge cartography** | Hierarchical mind maps + 2026 Swift stack guide for iOS companion |
 | [cline](https://github.com/afidurko/cline) | **Coding effector** | CLI/SDK/IDE agent — shared by all roles & workspaces; not the brain |
 | [public-apis](https://github.com/afidurko/public-apis) | **Free API catalog** | Curated public/free HTTP APIs — shared discovery for all agents |
 
-**Rule:** Null stack owns execution truth. Jarvis, Cline, PaddleDetection, LLMAvatarTalk,
+**Rule:** Null stack owns execution truth. Jarvis, Cline, PaddleDetection, Pupil, LLMAvatarTalk,
 smart-second-brain, SwiftGuide, and public-apis are tools Cam uses. Only Aaron assigns work; Cam finishes granted
 work without mid-task interference.
 
@@ -90,7 +91,7 @@ You (human) ──override / kill──► nullhub / chat
 | `coding` | Cline-powered code edits (also invokable by every role) |
 | `careers` | LinkedIn + Indeed |
 | `comms` | Text / call / FaceTime + avatar presence |
-| `vision` | PaddleDetection on tasked media |
+| `vision` | PaddleDetection + Pupil (Cam can see via world/gaze) |
 | `qa` | Verifies outputs and logs |
 | `memory-curator` | Mesh + smart-second-brain coherence |
 | `agi-scout` | Daily AI/AGI paper scan lead (`team.agi-research-scan`) |
@@ -133,7 +134,7 @@ All agents share one mesh, not private silos:
 2. **Session recall** → each nullclaw instance’s memory engine (default SQLite hybrid)
 3. **Jarvis local memory** → `integrations/jarvis` `memory.json` is a *cache*; sync into `mesh/jarvis` via `scripts/sync-jarvis-memory.py`
 4. **Cline sessions** → coding distillates across workspaces in `mesh/cline` via `scripts/sync-cline-session.py`
-5. **Vision distillates** → PaddleDetection outputs summarized into `mesh/vision` (no raw frames by default)
+5. **Vision distillates** → PaddleDetection outputs summarized into `mesh/vision` (no raw frames by default); Pupil gaze into `mesh/gaze`
 6. **Sync rule** → after every completed run, agents `PUT` distilled notes into the mesh; before claim, they `GET` / `search` relevant namespaces
 7. **Persistence of pursuit** → unfinished work stays as tasks with retries / dead-letter stages; agents may not “forget” open tickets
 
@@ -171,7 +172,9 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 1. Capture who you are (`identity/`) — **in progress**
 2. Keep Jarvis available as local CLI utilities (`integrations/jarvis`) — **added**
 3. Keep PaddleDetection for vision (`integrations/paddledetection` @ `release/2.9`) — **added**
+3b. Keep Pupil for eye tracking (`integrations/pupil` @ `master`) — **added**
 4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
+4b. Keep VoiceStudio for local TTS/ASR/clone/dub (`integrations/voicestudio`) — **added**
 5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
 5b. Keep SwiftGuide for mind-map cartography + iOS stack picks (`integrations/swiftguide`) — **added**
 6. Keep Cline as shared coding effector for all agents/workspaces (`integrations/cline`) — **added**

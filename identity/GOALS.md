@@ -25,3 +25,4 @@
 | Google Scholar | info / researcher | enabled (needs `SERPAPI_API_KEY` locally) |
 | Cam-function paper batch (HMO/MMP/OCL/persona) | capability | **applied** 2026-09-17 |
 | Avatar studio | comms | awaiting RIVA/Audio2Face on Aaron machine |
+| Aaron-only voice gate | identity / comms | **scaffold shipped** — enroll WAVs on host (`docs/AARON_VOICE_GATE.md`) |

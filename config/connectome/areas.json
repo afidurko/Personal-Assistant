@@ -245,7 +245,8 @@
       ],
       "legacy_centers": [],
       "columns": [
-        "neuron.asr"
+        "neuron.asr",
+        "neuron.aaron_voice_gate"
       ]
     },
     {
