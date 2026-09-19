@@ -59,9 +59,11 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "",
         "## Fixes applied this cycle",
         "- CI: install pydantic before joshinator embodiment unit tests",
+        "- 3T campaign auto-installs `integrations/joshinator-analyzer/backend/requirements-ci.txt` before embodiment fuzz",
         "- connectome-simulate v4-exhaustive-scaled for N≥1e11",
         "- Companion fuzzers: modular_period_scaled via trillion_scale.py",
         "- Codified Aaron test protocol (this entrypoint + CONTINUOUS_QA)",
+        "- Google Trends: `scripts/google-trends-check.py` + curated add-ons (`trends.search_*`)",
         "",
         "## Standing suggestions",
         "- Keep `bash scripts/ci-connectome.sh` as the push gate",
@@ -70,6 +72,7 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Raise `--physical 1000000000` when you want a full 1B physical stress under 3T",
         "- Slim CI deps: `integrations/joshinator-analyzer/backend/requirements-ci.txt`",
         "- After registry edits: `python3 scripts/test_cline_workspaces.py`",
+        "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
         "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
         "",
     ]
@@ -128,6 +131,23 @@ def one_pass(
         ("scripts/embodiment-billion-fuzz.py", "embodiment-3t", 31),
         ("scripts/cam-reason-billion-fuzz.py", "cam-reason-3t", 11),
     ):
+        if name == "embodiment-3t":
+            req = ROOT / "integrations/joshinator-analyzer/backend/requirements-ci.txt"
+            if req.exists():
+                results.append(
+                    run(
+                        [
+                            sys.executable,
+                            "-m",
+                            "pip",
+                            "install",
+                            "-q",
+                            "-r",
+                            str(req),
+                        ],
+                        "embodiment-deps",
+                    )
+                )
         out = CYCLES / f"{name}-{out_tag}.json"
         results.append(
             run(
