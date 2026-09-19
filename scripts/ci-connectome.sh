@@ -16,11 +16,20 @@ python3 scripts/memory-tier-check.py
 echo "== cline workspace unit tests =="
 python3 scripts/test_cline_workspaces.py
 
+echo "== cam-reason unit tests =="
+python3 scripts/test_cam_reason.py
+
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \
   --n 1000000 \
   --strict-edges \
   --seed 7 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-sim-1m.json
+
+echo "== cam-reason fuzz (1M modular) =="
+python3 scripts/cam-reason-billion-fuzz.py \
+  --n 1000000 \
+  --seed 11 \
+  --out vault/10-Mesh-Distillates/qa-cycles/ci-cam-reason-1m.json
 
 echo "CI OK"

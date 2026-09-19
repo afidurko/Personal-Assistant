@@ -231,6 +231,7 @@ Do **not** pull these into the first implementation pass:
   - Emit `reasoning_trace` JSONL under `vault/10-Mesh-Distillates/reasoning/`  
 - [x] Cam `ReasoningTool` fields: `hotspot_id`, `switch_risks[]`, `stream`  
 - [x] Tests: `scripts/test_cam_reason.py` (greeting→fast, enhance→slow+strip, kill→empty, weak facts→recall)  
+- [x] Dual billion campaigns (connectome + trajectory + cam-reason) — see `MERGE_READINESS_REASONING.md`  
 - [x] Explicitly **out of B:** `cam-litserve.py`, converse wire, Cline/Scholar tools, cortex HUD  
 
 ```bash

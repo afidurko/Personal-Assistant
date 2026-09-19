@@ -26,22 +26,29 @@ REASONING_CFG = ROOT / "config" / "enhancement" / "reasoning-logic.json"
 HMO_CFG = ROOT / "config" / "memory" / "hmo-tiers.json"
 DISTILL_DIR = ROOT / "vault" / "10-Mesh-Distillates" / "reasoning"
 
+_CACHE: dict[str, Any] = {}
+
 
 def utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def load_reasoning_config() -> dict:
-    return json.loads(REASONING_CFG.read_text(encoding="utf-8"))
+    if "reasoning" not in _CACHE:
+        _CACHE["reasoning"] = json.loads(REASONING_CFG.read_text(encoding="utf-8"))
+    return _CACHE["reasoning"]
 
 
 def _load_hyphen_module(name: str, filename: str):
+    if name in _CACHE:
+        return _CACHE[name]
     path = ROOT / "scripts" / filename
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
         raise ImportError(f"cannot load {filename}")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    _CACHE[name] = mod
     return mod
 
 
@@ -52,6 +59,12 @@ def connectome_route():
 def dual_stream_router():
     return _load_hyphen_module("dual_stream_router", "dual-stream-router.py")
 
+
+def _connectome_json(name: str) -> dict:
+    key = f"cj:{name}"
+    if key not in _CACHE:
+        _CACHE[key] = connectome_route().load(name)
+    return _CACHE[key]
 
 # --- intent / escalate -------------------------------------------------------
 
@@ -142,7 +155,9 @@ def bar_allows_converse(goal: str, cfg: dict) -> bool:
 # --- toolkit stubs -----------------------------------------------------------
 
 def mesh_recall(goal: str, personal_fact: bool) -> dict[str, Any]:
-    hmo = json.loads(HMO_CFG.read_text(encoding="utf-8")) if HMO_CFG.exists() else {}
+    if "hmo" not in _CACHE:
+        _CACHE["hmo"] = json.loads(HMO_CFG.read_text(encoding="utf-8")) if HMO_CFG.exists() else {}
+    hmo = _CACHE["hmo"]
     tiers = [t.get("id") for t in (hmo.get("tiers") or [])]
     hits = {
         "primary": [
@@ -175,10 +190,10 @@ def connectome_route_tool(
     hotspot_id: str | None = None,
 ) -> dict[str, Any]:
     cr = connectome_route()
-    sensory = cr.load("sensory.json")
-    switches = cr.load("switches.json")
-    motor = cr.load("motor.json")
-    hotspots = cr.load("hotspots.json")
+    sensory = _connectome_json("sensory.json")
+    switches = _connectome_json("switches.json")
+    motor = _connectome_json("motor.json")
+    hotspots = _connectome_json("hotspots.json")
 
     sense_ids = {n["id"] for n in sensory["neurons"]}
     if sense not in sense_ids:

@@ -1,0 +1,47 @@
+{
+  "n": 1000000000,
+  "workers": 4,
+  "passed": 1000000000,
+  "failed": 0,
+  "first_error": null,
+  "elapsed_s": 226.32619295299992,
+  "checks_per_sec": 4418401.542271624,
+  "policy_count": 5,
+  "seed": 7,
+  "ok": true,
+  "sampler": "inline_modular_plus_1pct_full_apply",
+  "workers_detail": [
+    {
+      "worker_id": 2,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 224.21431186400014
+    },
+    {
+      "worker_id": 1,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 225.93555897499982
+    },
+    {
+      "worker_id": 0,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 226.0778396349997
+    },
+    {
+      "worker_id": 3,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 226.30409911100014
+    }
+  ]
+}
