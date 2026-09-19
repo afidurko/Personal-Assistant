@@ -36,3 +36,9 @@ Local TTS / ASR / clone / dub for Cam when NVIDIA RIVA studio is offline. Brain 
 - MCP mounted at `/mcp` · Cam tool `voicestudio_health` OK
 - OmniVoice weights **not** downloaded (await Aaron consent ~2.3GB)
 - See `vault/10-Mesh-Distillates/CONNECTION_STATUS.md`
+
+## Smoke (cloud)
+
+- OmniVoice + faster-whisper-base installed
+- Speak+transcribe round-trip OK
+- Aaron-only backlog in CONNECTION_STATUS.md
