@@ -312,6 +312,7 @@ def write_suggestions(
         "- Mirror QA cycle events into `identity/persistence/qa-mesh-latest.json`",
         "- Cline workspace runtime: `python3 scripts/test_cline_workspaces.py`",
         "- Public APIs catalog: `python3 scripts/public-apis-check.py` + `test_public_apis.py`",
+        "- Joshinator embodiment: `unittest backend.test_embodiment` + `embodiment-billion-fuzz.py`",
         "- When Mac is available: flip Tailscale preferred host to aaron-mac",
         "- Suggest: bind `run-cline.py` tickets into live nulltickets when stack is up",
         "- Suggest: `cline mcp install cam` on each Aaron machine after persist-import",
@@ -319,6 +320,8 @@ def write_suggestions(
         "- Suggest: keep HMO primary lean — persona/prefs only; archive vault distillates",
         "- Suggest: before inventing HTTP helpers, run `scripts/public-apis-search.py`",
         "- Suggest: before merge run `trajectory-policy-check` + dual billion campaigns",
+        "- Suggest: keep card 3D spawns procedural — never load franchise GLTF/character packs",
+        "- Suggest: push joshinator embodiment upstream when Cursor has write access",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")

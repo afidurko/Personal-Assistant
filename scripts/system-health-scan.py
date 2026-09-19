@@ -72,6 +72,7 @@ def check_integrations() -> dict:
         "integrations/swiftguide",
         "integrations/public-apis",
         "integrations/cline",
+        "integrations/joshinator-analyzer",
     ]
     present = [p for p in expected if (ROOT / p).exists()]
     missing = [p for p in expected if p not in present]
@@ -79,6 +80,13 @@ def check_integrations() -> dict:
     config_ok = {
         "integrations/public-apis": (ROOT / "config/integrations/public-apis.json").exists(),
         "integrations/cline": (ROOT / "config/integrations/cline.md").exists(),
+        "integrations/joshinator-analyzer": (
+            ROOT / "config/integrations/joshinator-analyzer.md"
+        ).exists()
+        and (
+            ROOT
+            / "integrations/joshinator-analyzer/backend/app/services/embodiment_service.py"
+        ).exists(),
     }
     for path, ok in config_ok.items():
         if path in missing and ok:

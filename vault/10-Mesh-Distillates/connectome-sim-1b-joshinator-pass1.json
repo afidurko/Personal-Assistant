@@ -1,0 +1,20 @@
+{
+  "n": 1000000000,
+  "workers": 4,
+  "elapsed_s": 496.74326248400007,
+  "sims_per_sec": 2013112.3570744146,
+  "passed": 1000000000,
+  "failed": 0,
+  "kill_holds": 2000948,
+  "non_aaron_holds": 156020,
+  "feedback_ok": 997843032,
+  "first_errors": [],
+  "missing_edges_count": 0,
+  "missing_edges_sample": [],
+  "soft_warnings_sample": [],
+  "unlimited_subagents": true,
+  "continuous_qa": true,
+  "simulator": "v3-weighted-heartbeats",
+  "traffic_weighted": true,
+  "workers_detail_omitted": true
+}

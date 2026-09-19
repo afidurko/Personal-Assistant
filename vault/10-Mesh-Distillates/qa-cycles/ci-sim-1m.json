@@ -1,13 +1,13 @@
 {
   "n": 1000000,
   "workers": 4,
-  "elapsed_s": 0.4013257270003123,
-  "sims_per_sec": 2491741.577282988,
+  "elapsed_s": 0.6543774810002105,
+  "sims_per_sec": 1528169.9462999678,
   "passed": 1000000,
   "failed": 0,
-  "kill_holds": 2002,
-  "non_aaron_holds": 143,
-  "feedback_ok": 997855,
+  "kill_holds": 2044,
+  "non_aaron_holds": 155,
+  "feedback_ok": 997801,
   "first_errors": [],
   "missing_edges_count": 0,
   "missing_edges_sample": [],
@@ -18,48 +18,48 @@
   "traffic_weighted": true,
   "workers_detail": [
     {
+      "worker_id": 1,
+      "attempted": 250000,
+      "passed": 250000,
+      "failed": 0,
+      "kill_holds": 516,
+      "non_aaron_holds": 38,
+      "feedback_ok": 249446,
+      "first_error": null,
+      "elapsed_s": 0.43276951600000757
+    },
+    {
       "worker_id": 0,
       "attempted": 250000,
       "passed": 250000,
       "failed": 0,
-      "kill_holds": 475,
-      "non_aaron_holds": 32,
-      "feedback_ok": 249493,
+      "kill_holds": 486,
+      "non_aaron_holds": 36,
+      "feedback_ok": 249478,
       "first_error": null,
-      "elapsed_s": 0.3886379139999008
-    },
-    {
-      "worker_id": 2,
-      "attempted": 250000,
-      "passed": 250000,
-      "failed": 0,
-      "kill_holds": 491,
-      "non_aaron_holds": 37,
-      "feedback_ok": 249472,
-      "first_error": null,
-      "elapsed_s": 0.38894661499989525
+      "elapsed_s": 0.491620783000144
     },
     {
       "worker_id": 3,
       "attempted": 250000,
       "passed": 250000,
       "failed": 0,
-      "kill_holds": 546,
-      "non_aaron_holds": 37,
+      "kill_holds": 542,
+      "non_aaron_holds": 41,
       "feedback_ok": 249417,
       "first_error": null,
-      "elapsed_s": 0.3894640970002001
+      "elapsed_s": 0.5157311699999809
     },
     {
-      "worker_id": 1,
+      "worker_id": 2,
       "attempted": 250000,
       "passed": 250000,
       "failed": 0,
-      "kill_holds": 490,
-      "non_aaron_holds": 37,
-      "feedback_ok": 249473,
+      "kill_holds": 500,
+      "non_aaron_holds": 40,
+      "feedback_ok": 249460,
       "first_error": null,
-      "elapsed_s": 0.3943708990000232
+      "elapsed_s": 0.6443096799998784
     }
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "n": 1000000000,
+  "workers": 4,
+  "passed": 1000000000,
+  "failed": 0,
+  "spawned": 980468750,
+  "skipped": 19531250,
+  "full_checks": 1000000,
+  "first_error": null,
+  "elapsed_s": 306.7556914219999,
+  "checks_per_sec": 3259923.2156521347,
+  "seed": 91,
+  "ok": true,
+  "sampler": "modular_plus_0.1pct_full_resolve",
+  "ip_policy": "original_procedural_only",
+  "catalog_size": 6,
+  "workers_detail_omitted": true
+}

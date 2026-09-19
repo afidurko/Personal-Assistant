@@ -289,8 +289,8 @@ def main() -> int:
         "sense.cline.result": 2.5,
         "sense.jarvis.result": 1.5,
         "sense.audio.transcript": 1.5,
-        "sense.vision.detection": 1.0,
-        "sense.ios.camera": 1.0,
+        "sense.vision.detection": 2.0,  # card-analyze → embodiment path
+        "sense.ios.camera": 1.2,
         "sense.ios.mic": 1.0,
         "sense.aaron.face": 1.0,
         "sense.aaron.voice": 1.0,
