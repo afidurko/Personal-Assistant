@@ -21,12 +21,19 @@
         "last_n_aaron_directives"
       ],
       "max_items_hint": 32,
-      "exclude": ["raw_media", "full_tool_logs", "peer_raw_dumps"]
+      "exclude": [
+        "raw_media",
+        "full_tool_logs",
+        "peer_raw_dumps"
+      ]
     },
     {
       "id": "secondary",
       "role": "hot shared mesh — retrieve on demand",
-      "substrates": ["nulltickets_store"],
+      "substrates": [
+        "nulltickets_store",
+        "memorybear"
+      ],
       "includes": [
         "mesh/facts",
         "mesh/projects",
@@ -35,19 +42,26 @@
         "mesh/open-questions",
         "mesh/cline",
         "mesh/enhance",
-        "mesh/agent-memory"
+        "mesh/agent-memory",
+        "mesh/memorybear"
       ]
     },
     {
       "id": "archive",
       "role": "full history / vault / persistence",
-      "substrates": ["vault", "persistence_bundle", "mesh_distillates"],
+      "substrates": [
+        "vault",
+        "persistence_bundle",
+        "mesh_distillates",
+        "memorybear_distillates"
+      ],
       "includes": [
         "vault/",
         "identity/persistence/",
         "vault/10-Mesh-Distillates/",
         "mesh/runs",
-        "mesh/vision"
+        "mesh/vision",
+        "vault/10-Mesh-Distillates/memorybear/"
       ]
     }
   ],
@@ -60,6 +74,8 @@
   "curator_role": "memory-curator",
   "scripts": {
     "pack_claim": "scripts/pack-mesh-claim.py",
-    "tier_check": "scripts/memory-tier-check.py"
+    "tier_check": "scripts/memory-tier-check.py",
+    "memorybear": "scripts/memorybear.py",
+    "memorybear_pack": "scripts/pack-memorybear-result.py"
   }
 }

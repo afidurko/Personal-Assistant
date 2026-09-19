@@ -4,6 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+echo "== cam system integration =="
+python3 scripts/cam-system.py --smoke
+python3 scripts/test_cam_system.py
+python3 scripts/flight-envelope.py --offline-only
+
 echo "== connectome-check =="
 python3 scripts/connectome-check.py
 
@@ -22,6 +27,9 @@ python3 scripts/aaron-voice-gate-check.py
 echo "== cline workspace unit tests =="
 python3 scripts/test_cline_workspaces.py
 
+echo "== cam-reason unit tests =="
+python3 scripts/test_cam_reason.py
+
 echo "== aaron voice gate unit tests =="
 AARON_VOICE_TEST=1 AARON_VOICE_ALLOW_DEV_BACKEND=1 python3 scripts/test_aaron_voice_gate.py
 AARON_VOICE_TEST=1 AARON_VOICE_ALLOW_DEV_BACKEND=1 python3 scripts/test_cam_converse_voice_gate.py
@@ -36,6 +44,13 @@ echo "== google-trends unit + wiring =="
 python3 scripts/test_google_trends.py
 python3 scripts/google-trends-check.py
 
+echo "== joshinator IP-safe embodiment =="
+python3 -m pip install -q -r integrations/joshinator-analyzer/backend/requirements-ci.txt
+PYTHONPATH=integrations/joshinator-analyzer/backend \
+  python3 -m unittest discover -s integrations/joshinator-analyzer/backend -p 'test_embodiment.py' -v
+python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
+  --out vault/10-Mesh-Distillates/qa-cycles/ci-embodiment-1m.json
+
 echo "== inkbox wiring =="
 python3 scripts/inkbox-check.py
 
@@ -45,5 +60,11 @@ python3 scripts/connectome-simulate.py \
   --strict-edges \
   --seed 7 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-sim-1m.json
+
+echo "== cam-reason fuzz (1M modular) =="
+python3 scripts/cam-reason-billion-fuzz.py \
+  --n 1000000 \
+  --seed 11 \
+  --out vault/10-Mesh-Distillates/qa-cycles/ci-cam-reason-1m.json
 
 echo "CI OK"

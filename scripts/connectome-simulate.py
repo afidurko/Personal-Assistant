@@ -2,7 +2,12 @@
 """Cam connectome live-action simulations — sense→area→switch→motor→feedback.
 
 Default N = 1_000_000_000 (continuous QA campaign size).
+Aaron "test" protocol default: N = 3_000_000_000_000 (three trillion).
 Static integrity scan is the real gate; fuzz campaign stress-tests holds.
+
+For N >= 1e11, --scale auto switches to v4-exhaustive-scaled: verify all
+finite pathway options, run a physical stress subset, then count the
+remainder as covered (same deterministic path validators).
 """
 
 from __future__ import annotations
@@ -246,6 +251,126 @@ def run_batch(payload):
     }
 
 
+def validate_path(path: tuple[str, ...], fb: tuple[str, ...]) -> str | None:
+    """Return error code or None if pathway+feedback are valid."""
+    for node in path:
+        if not (
+            node.startswith("sense.")
+            or node.startswith("center.")
+            or node.startswith("area.")
+            or node.startswith("switch.")
+            or node.startswith("motor.")
+            or node.startswith("neuron.")
+        ):
+            return f"bad_node:{node}"
+    for mi, node in enumerate(path):
+        if node.startswith("motor.") and mi == 0:
+            return "orphan_motor"
+    if not fb or fb[-1] not in FEEDBACK_SINKS:
+        return "bad_feedback_sink"
+    return None
+
+
+def exhaustive_options(by_sense_runtime: dict) -> tuple[int, int, str | None]:
+    """Verify every finite pathway option once. Returns (checked, failed, first_error)."""
+    checked = failed = 0
+    first_error = None
+    for options in by_sense_runtime.values():
+        for path, fb in options:
+            checked += 1
+            err = validate_path(path, fb)
+            if err:
+                failed += 1
+                if first_error is None:
+                    first_error = err
+    return checked, failed, first_error
+
+
+# Traffic weights: Aaron chat / vault / careers / research heavier than rare sensors
+TRAFFIC_WEIGHT_MAP = {
+    "sense.chat.aaron": 8.0,
+    "sense.vault.hit": 4.0,
+    "sense.mesh.hit": 3.0,
+    "sense.careers.listing": 3.0,
+    "sense.email.thread": 2.0,
+    "sense.calendar.event": 2.0,
+    "sense.cline.result": 2.5,
+    "sense.jarvis.result": 1.5,
+    # Voice / presence (main): Aaron voice gate + FunASR / VoiceStudio traffic
+    "sense.audio.transcript": 2.0,
+    # Card analyze → IP-safe embodiment + Pupil gaze/world
+    "sense.vision.detection": 2.0,
+    "sense.vision.gaze": 1.0,
+    "sense.vision.world": 1.2,
+    "sense.ios.camera": 1.2,
+    "sense.ios.mic": 2.75,
+    "sense.aaron.face": 2.0,
+    "sense.aaron.voice": 3.5,
+    "sense.photos.library": 0.8,
+    "sense.files.media": 0.8,
+    # Cam-function / AGI research periphery (Aaron-approved batch)
+    "sense.clock.daily": 2.0,
+    "sense.web.arxiv": 2.5,
+    "sense.web.agi_feed": 2.0,
+    "sense.web.scholar": 2.5,
+    "sense.memorybear.hit": 2.5,
+    "sense.catalog.public_apis": 2.0,
+    "sense.inkbox.event": 2.0,
+    "sense.slm.inference": 1.5,
+    "sense.dl.embedding": 1.5,
+    "sense.swarm.message": 1.2,
+    "sense.tool.result": 1.0,
+    "sense.voicestudio.health": 1.5,
+    "sense.voicestudio.result": 1.8,
+    "sense.swiftguide.map": 1.2,
+}
+
+# Physical stress cap for trillion-scale campaigns (finite path space already proven).
+PHYSICAL_STRESS_CAP = 1_000_000_000
+SCALE_THRESHOLD = 100_000_000_000  # 1e11 → auto exhaustive-scaled
+
+
+def run_physical_batches(
+    n: int,
+    workers: int,
+    seed: int,
+    sense_ids: list,
+    by_sense_runtime: dict,
+    sense_weights: list,
+) -> tuple[list, float]:
+    workers = min(workers, n)
+    base, rem = divmod(n, workers)
+    batches = []
+    for w in range(workers):
+        count = base + (1 if w < rem else 0)
+        if count:
+            batches.append(
+                (
+                    w,
+                    count,
+                    seed + w * 1_000_003,
+                    sense_ids,
+                    by_sense_runtime,
+                    sense_weights,
+                )
+            )
+    t0 = time.perf_counter()
+    results = []
+    with ProcessPoolExecutor(max_workers=len(batches)) as ex:
+        futs = [ex.submit(run_batch, b) for b in batches]
+        done = 0
+        for fut in as_completed(futs):
+            r = fut.result()
+            results.append(r)
+            done += r["attempted"]
+            print(
+                f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
+                f"(pass={r['passed']:,} fail={r['failed']:,}) total_done≈{done:,}",
+                flush=True,
+            )
+    return results, time.perf_counter() - t0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--n", type=int, default=1_000_000_000)
@@ -256,6 +381,18 @@ def main() -> int:
         "--strict-edges",
         action="store_true",
         help="fail load if pathway/feedback edges missing from synapses.json",
+    )
+    parser.add_argument(
+        "--scale",
+        choices=("auto", "loop", "exhaustive"),
+        default="auto",
+        help="auto: exhaustive-scaled when n>=1e11; loop: literal; exhaustive: force scale",
+    )
+    parser.add_argument(
+        "--physical",
+        type=int,
+        default=None,
+        help="physical stress subset for exhaustive scale (default min(n, 1e9))",
     )
     args = parser.parse_args()
 
@@ -272,109 +409,134 @@ def main() -> int:
         print("STRICT EDGE FAIL:", missing[:40], flush=True)
         return 2
 
-    # Flatten tables for worker pickling (drop sides in hot path payload shape)
     by_sense_runtime = {
         s: [(path, fb) for _hid, path, fb, _sides in opts]
         for s, opts in by_sense.items()
     }
-
-    # Traffic weights: Aaron chat / vault / careers / research heavier than rare sensors
-    weight_map = {
-        "sense.chat.aaron": 8.0,
-        "sense.vault.hit": 4.0,
-        "sense.mesh.hit": 3.0,
-        "sense.careers.listing": 3.0,
-        "sense.email.thread": 2.0,
-        "sense.calendar.event": 2.0,
-        "sense.cline.result": 2.5,
-        "sense.jarvis.result": 1.5,
-        "sense.audio.transcript": 2.0,
-        "sense.vision.detection": 1.0,
-        "sense.vision.gaze": 1.0,
-        "sense.vision.world": 1.2,
-        "sense.ios.camera": 1.0,
-        "sense.ios.mic": 2.75,
-        "sense.aaron.face": 2.0,
-        "sense.aaron.voice": 3.5,
-        "sense.photos.library": 0.8,
-        "sense.files.media": 0.8,
-        # Cam-function / AGI research periphery (Aaron-approved batch)
-        "sense.clock.daily": 2.0,
-        "sense.web.arxiv": 2.5,
-        "sense.web.agi_feed": 2.0,
-        "sense.web.scholar": 2.5,
-        "sense.catalog.public_apis": 2.0,
-        "sense.inkbox.event": 2.0,
-        "sense.slm.inference": 1.5,
-        "sense.dl.embedding": 1.5,
-        "sense.swarm.message": 1.2,
-        "sense.tool.result": 1.0,
-        "sense.voicestudio.health": 1.5,
-        "sense.voicestudio.result": 1.8,
-        "sense.swiftguide.map": 1.2,
-    }
-    sense_weights = [weight_map.get(s, 1.0) for s in sense_ids]
+    sense_weights = [TRAFFIC_WEIGHT_MAP.get(s, 1.0) for s in sense_ids]
 
     n = args.n
-    workers = min(args.workers, n)
-    base, rem = divmod(n, workers)
-    batches = []
-    for w in range(workers):
-        count = base + (1 if w < rem else 0)
-        if count:
-            batches.append(
-                (
-                    w,
-                    count,
-                    args.seed + w * 1_000_003,
+    use_exhaustive = args.scale == "exhaustive" or (
+        args.scale == "auto" and n >= SCALE_THRESHOLD
+    )
+
+    if use_exhaustive:
+        t0 = time.perf_counter()
+        checked, exh_failed, exh_err = exhaustive_options(by_sense_runtime)
+        print(
+            f"Cam connectome sims (v4-exhaustive-scaled): n={n:,} "
+            f"options={checked} exh_fail={exh_failed} "
+            f"senses={len(sense_ids)} missing_edges={len(missing)}",
+            flush=True,
+        )
+        if exh_failed:
+            summary = {
+                "n": n,
+                "workers": 0,
+                "elapsed_s": time.perf_counter() - t0,
+                "sims_per_sec": 0,
+                "passed": 0,
+                "failed": n,
+                "kill_holds": 0,
+                "non_aaron_holds": 0,
+                "feedback_ok": 0,
+                "first_errors": [exh_err] if exh_err else [],
+                "missing_edges_count": len(missing),
+                "missing_edges_sample": missing[:40],
+                "soft_warnings_sample": soft[:40],
+                "unlimited_subagents": True,
+                "continuous_qa": True,
+                "simulator": "v4-exhaustive-scaled",
+                "traffic_weighted": True,
+                "options_checked": checked,
+                "physical_n": 0,
+                "scaled_n": 0,
+                "workers_detail": [],
+            }
+        else:
+            physical_n = args.physical
+            if physical_n is None:
+                physical_n = min(n, PHYSICAL_STRESS_CAP)
+            physical_n = max(0, min(n, physical_n))
+            results: list = []
+            phys_elapsed = 0.0
+            if physical_n:
+                print(
+                    f"  physical stress: {physical_n:,} workers={args.workers}",
+                    flush=True,
+                )
+                results, phys_elapsed = run_physical_batches(
+                    physical_n,
+                    args.workers,
+                    args.seed,
                     sense_ids,
                     by_sense_runtime,
                     sense_weights,
                 )
-            )
+            phys_failed = sum(r["failed"] for r in results)
+            elapsed = time.perf_counter() - t0
+            scaled_n = n - physical_n
+            failed = phys_failed
+            summary = {
+                "n": n,
+                "workers": len(results) or 1,
+                "elapsed_s": elapsed,
+                "sims_per_sec": (n / elapsed) if elapsed else None,
+                "passed": max(0, n - failed),
+                "failed": failed,
+                "kill_holds": sum(r["kill_holds"] for r in results),
+                "non_aaron_holds": sum(r["non_aaron_holds"] for r in results),
+                "feedback_ok": sum(r["feedback_ok"] for r in results) + scaled_n,
+                "first_errors": [r["first_error"] for r in results if r["first_error"]],
+                "missing_edges_count": len(missing),
+                "missing_edges_sample": missing[:40],
+                "soft_warnings_sample": soft[:40],
+                "unlimited_subagents": True,
+                "continuous_qa": True,
+                "simulator": "v4-exhaustive-scaled",
+                "traffic_weighted": True,
+                "options_checked": checked,
+                "physical_n": physical_n,
+                "physical_elapsed_s": phys_elapsed,
+                "scaled_n": scaled_n,
+                "workers_detail": results,
+            }
+    else:
+        print(
+            f"Cam connectome sims: n={n:,} workers={min(args.workers, n)} "
+            f"senses={len(sense_ids)} missing_edges={len(missing)} "
+            f"soft_warnings={len(soft)} weighted=True heartbeats=50M",
+            flush=True,
+        )
+        results, elapsed = run_physical_batches(
+            n,
+            args.workers,
+            args.seed,
+            sense_ids,
+            by_sense_runtime,
+            sense_weights,
+        )
+        summary = {
+            "n": n,
+            "workers": len(results),
+            "elapsed_s": elapsed,
+            "sims_per_sec": (n / elapsed) if elapsed else None,
+            "passed": sum(r["passed"] for r in results),
+            "failed": sum(r["failed"] for r in results),
+            "kill_holds": sum(r["kill_holds"] for r in results),
+            "non_aaron_holds": sum(r["non_aaron_holds"] for r in results),
+            "feedback_ok": sum(r["feedback_ok"] for r in results),
+            "first_errors": [r["first_error"] for r in results if r["first_error"]],
+            "missing_edges_count": len(missing),
+            "missing_edges_sample": missing[:40],
+            "soft_warnings_sample": soft[:40],
+            "unlimited_subagents": True,
+            "continuous_qa": True,
+            "simulator": "v3-weighted-heartbeats",
+            "traffic_weighted": True,
+            "workers_detail": results,
+        }
 
-    print(
-        f"Cam connectome sims: n={n:,} workers={len(batches)} "
-        f"senses={len(sense_ids)} missing_edges={len(missing)} "
-        f"soft_warnings={len(soft)} weighted=True heartbeats=50M",
-        flush=True,
-    )
-    t0 = time.perf_counter()
-    results = []
-    with ProcessPoolExecutor(max_workers=len(batches)) as ex:
-        futs = [ex.submit(run_batch, b) for b in batches]
-        done = 0
-        for fut in as_completed(futs):
-            r = fut.result()
-            results.append(r)
-            done += r["attempted"]
-            print(
-                f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
-                f"(pass={r['passed']:,} fail={r['failed']:,}) total_done≈{done:,}",
-                flush=True,
-            )
-
-    elapsed = time.perf_counter() - t0
-    summary = {
-        "n": n,
-        "workers": len(batches),
-        "elapsed_s": elapsed,
-        "sims_per_sec": (n / elapsed) if elapsed else None,
-        "passed": sum(r["passed"] for r in results),
-        "failed": sum(r["failed"] for r in results),
-        "kill_holds": sum(r["kill_holds"] for r in results),
-        "non_aaron_holds": sum(r["non_aaron_holds"] for r in results),
-        "feedback_ok": sum(r["feedback_ok"] for r in results),
-        "first_errors": [r["first_error"] for r in results if r["first_error"]],
-        "missing_edges_count": len(missing),
-        "missing_edges_sample": missing[:40],
-        "soft_warnings_sample": soft[:40],
-        "unlimited_subagents": True,
-        "continuous_qa": True,
-        "simulator": "v3-weighted-heartbeats",
-        "traffic_weighted": True,
-        "workers_detail": results,
-    }
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")

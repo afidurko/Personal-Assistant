@@ -34,7 +34,7 @@ Aaron asked for Cam to be **available at all times** and to **complete functions
 Full:  Aaron → RIVA ASR → Cam brain → RIVA TTS (soft/airy) → Audio2Face → optional Metahuman
 Local: VoiceStudio TTS/ASR (cloned Cam voice) + cam-face.jpg when studio is offline
 Simple: cam-face.jpg + light TTS when neither studio nor VoiceStudio is up
-Brain+: nullclaw + smart-second-brain + sLM/DL cortex + agent teams (AGI scan / capability / info)
+Brain+: nullclaw + smart-second-brain + MemoryBear + sLM/DL cortex + agent teams (AGI scan / capability / info)
 Code:   Cline (`integrations/cline`) as shared motor for all agents/workspaces
 APIs:   public-apis (`integrations/public-apis`) as shared free-API catalog for all agents
 ```
@@ -42,10 +42,11 @@ APIs:   public-apis (`integrations/public-apis`) as shared free-API catalog for 
 - Presence I/O: `integrations/llmavatartalk`
 - Local speech: `integrations/voicestudio` · `config/integrations/voicestudio.md`
 - Second brain: `integrations/smart-second-brain`
+- Cognitive memory: `integrations/memorybear` (`motor.memorybear`)
 - Coding: `integrations/cline` · policy `.clinerules` · `config/integrations/cline.md`
 - Enhancement cortex: `config/enhancement/slm-dl.json`
 - Teams: `config/teams/` · `docs/CAM_BRAIN.md` · `docs/AGI_RESEARCH_TEAM.md`
-- Details: `config/integrations/llmavatartalk.md`, `config/integrations/voicestudio.md`, `config/integrations/smart-second-brain.md`
+- Details: `config/integrations/llmavatartalk.md`, `config/integrations/voicestudio.md`, `config/integrations/smart-second-brain.md`, `config/integrations/memorybear.md`
 
 ## Voice defaults
 
@@ -60,7 +61,7 @@ APIs:   public-apis (`integrations/public-apis`) as shared free-API catalog for 
 - Face asset: **created** (`identity/persona/cam-face.jpg`)
 - Voice style notes: **set**
 - Always-on autonomy: **set**
-- LLMAvatarTalk + smart-second-brain: **wired as submodules**
+- LLMAvatarTalk + smart-second-brain + MemoryBear: **wired as submodules**
 - VoiceStudio: **wired as submodule** — local TTS/ASR/clone/dub + MCP
 - Cline: **wired as submodule** — shared coding effector for all agents/workspaces
 - Public APIs: **wired as submodule** — shared free-API catalog for all agents/workspaces

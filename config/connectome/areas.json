@@ -256,7 +256,7 @@
         "hippocampal-adjacent"
       ],
       "lobe": "medial_temporal",
-      "function": "engrams \u2014 mesh + vault long-term memory",
+      "function": "engrams \u2014 mesh + vault + MemoryBear long-term cognitive memory",
       "cam_roles": [
         "memory-curator"
       ],

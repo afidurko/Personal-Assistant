@@ -18,7 +18,11 @@
   "status": "persona_locked_always_on_autonomy",
   "availability": {
     "always_on": true,
-    "quiet_hours": null,
+    "quiet_hours": {
+      "start": "23:30",
+      "end": "07:00",
+      "note": "Throttle standing loops + speak intensity; kill still instant"
+    },
     "timezone": "America/New_York"
   },
   "autonomy": {

@@ -5,7 +5,7 @@
   "last_session": {
     "at": "2026-09-19T21:34:25.413105+00:00",
     "mode": "act",
-    "summary": "Integrated GoogleTrends/data as motor.google_trends",
+    "summary": "Integrated GoogleTrends/data as motor.google_trends (merged main 3T protocol)",
     "workspace": "."
   },
   "notes": [
@@ -40,8 +40,13 @@
       "workspace": "."
     },
     {
+      "at": "2026-09-19T20:06:34.245777+00:00",
+      "text": "Organism bus upgrade: in-process kernel, causal motors, identity gate, HMO, WS cortex, dual-stream/MAP, trajectory physics, circadian, flight envelope PASS. Blockers: FunASR/VoiceStudio, MemoryBear, P",
+      "workspace": "."
+    },
+    {
       "at": "2026-09-19T21:34:25.413105+00:00",
-      "text": "PR #24 \u2014 remote GitHub trees index, no submodule",
+      "text": "PR #24 — remote GitHub trees index, no submodule",
       "workspace": "."
     }
   ],
@@ -96,11 +101,12 @@
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-19T20:17:35.487118+00:00",
+  "schedules_synced_at": "2026-09-19T21:02:04.579864+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
     ".",
-    "personal-assistant"
+    "personal-assistant",
+    "/workspace"
   ]
 }

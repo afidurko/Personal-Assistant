@@ -2,13 +2,15 @@
 
 Reimagined cortex on top of the connectome:
 
-1. **Higher centers** — chief, specialists, AGI scan, enhance, capability, info, tooling
+1. **Higher centers** — chief, specialists, memory, AGI scan, enhance, capability, info, tooling
 2. **sLM cortex** — fast local language assists (`center.slm`)
 3. **DL cortex** — embeddings / rerank / vectors (`center.dl`)
-4. **Teams** — AGI Research Scan, Capability, Information, Tooling (all spawn subagents freely)
-5. **Swarm contracts** — privilege inheritance, lineage terminate, boss/worker synapse ops (HAAS patterns only)
-6. **Neural mesh runtime** — `swarm` layer agents write `mesh/agent-lineage` + `mesh/swarm/*` across every workspace on each scan cycle
+4. **MemoryBear** — cognitive extract / associate / forget (`motor.memorybear`) for all agents
+5. **Teams** — AGI Research Scan, Capability, Information, Tooling (all spawn subagents freely)
+6. **Swarm contracts** — privilege inheritance, lineage terminate, boss/worker synapse ops (HAAS patterns only)
+7. **Neural mesh runtime** — `swarm` layer agents write `mesh/agent-lineage` + `mesh/swarm/*` across every workspace on each scan cycle
+8. **Reasoning loop (planned)** — dual-process + **SGR** + **LitServe** + MAP + recall + SRM — `docs/CAM_REASONING.md` · `integrations/sgr-agent-core` · `integrations/litserve`
 
 Aaron has ultimate say over functionality apply (`switch.cam_enhance`).
 
-Repo: `docs/CAM_BRAIN.md` · `docs/HAAS_CAM_PATTERNS.md` · `server/core/swarm-runtime.ts` · `config/swarm/` · `config/teams/`
+Repo: `docs/CAM_BRAIN.md` · `docs/CAM_REASONING.md` · `docs/HAAS_CAM_PATTERNS.md` · `config/integrations/memorybear.md` · `config/integrations/sgr-agent-core.md` · `config/integrations/litserve.md` · `server/core/swarm-runtime.ts` · `config/swarm/` · `config/teams/`

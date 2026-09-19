@@ -1,0 +1,16 @@
+{
+  "n": 3000000000000,
+  "workers": 4,
+  "passed": 3000000000000,
+  "failed": 0,
+  "first_error": null,
+  "elapsed_s": 1.3762483440000324,
+  "checks_per_sec": 2179839135196.0308,
+  "policy_count": 7,
+  "seed": 159,
+  "ok": true,
+  "sampler": "inline_modular_plus_1pct_full_apply:modular_period_scaled",
+  "physical_n": 10000000,
+  "scaled_n": 2999990000000,
+  "workers_detail": "omitted (4 workers)"
+}

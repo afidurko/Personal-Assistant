@@ -98,7 +98,7 @@ describe('suggestive implementations', () => {
     expect(suggestions.some((s) => s.kind === 'agent-repair')).toBe(true);
     expect(suggestions.some((s) => s.kind === 'learning')).toBe(true);
   });
-  it('includes cam-enhance and research-memory suggestions for AGI workspace', () => {
+  it('includes cam-enhance, research-memory, and cam-reason suggestions for AGI workspace', () => {
     const suggestions = buildSuggestiveImplementations([
       snap({
         id: 'workspace-agi_research',
@@ -112,10 +112,12 @@ describe('suggestive implementations', () => {
 
     expect(suggestions.some((s) => s.kind === 'cam-enhance')).toBe(true);
     expect(suggestions.some((s) => s.kind === 'research-memory')).toBe(true);
-    expect(suggestions.some((s) => s.kind === 'identity')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'cam-reason')).toBe(true);
     expect(suggestions.some((s) => s.id.includes('trajectory') || s.id.includes('hmo'))).toBe(
       true,
     );
+    expect(suggestions.some((s) => s.id.includes('cam-reason'))).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'identity')).toBe(true);
     expect(suggestions.some((s) => s.id.includes('aaron-voice'))).toBe(true);
   });
 
@@ -142,6 +144,8 @@ describe('suggestive implementations', () => {
 
     expect(suggestions.some((s) => s.kind === 'api-catalog')).toBe(true);
     expect(suggestions.some((s) => s.id.includes('public-apis'))).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'card-embodiment')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('card-embodiment'))).toBe(true);
   });
 });
 

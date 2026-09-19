@@ -1,7 +1,4 @@
 {
-  "version": 1,
-  "namespace": "mesh/tools",
-  "docs": "docs/HAAS_CAM_PATTERNS.md",
   "tools": [
     {
       "id": "tool.jarvis.echo",
@@ -52,51 +49,25 @@
       "status": "template"
     },
     {
-      "id": "tool.pupil.see",
-      "purpose": "Ingest Pupil world camera + gaze so Cam can see (mesh/vision + mesh/gaze)",
+      "id": "tool.swarm.check",
+      "purpose": "Validate privilege inheritance + boss/worker primitives",
       "created_by_role": "tool-creator",
-      "entrypoint": "scripts/pupil-see.py",
+      "entrypoint": "scripts/swarm-check.py",
       "kind": "local_script",
-      "inputs": {
-        "gaze": "string?",
-        "world": "string?",
-        "probe": "boolean?",
-        "dry_run": "boolean?"
-      },
-      "outputs": {
-        "accepted": "boolean",
-        "mesh_vision": "object",
-        "mesh_gaze": "object",
-        "route": "object"
-      },
-      "required_privileges": ["use_tool", "read_mesh", "write_mesh"],
-      "requires_switch": ["switch.pupil_vision", "switch.kill"],
-      "risk": "medium",
-      "status": "active"
-    },
-    {
-      "id": "tool.voicestudio.health",
-      "purpose": "Probe VoiceStudio local backend /health for Cam speech readiness",
-      "created_by_role": "tool-creator",
-      "entrypoint": "scripts/voicestudio-health.py",
-      "kind": "local_script",
-      "inputs": {
-        "base_url": "string?",
-        "timeout": "number?"
-      },
+      "inputs": {},
       "outputs": {
         "ok": "boolean",
         "report": "object"
       },
       "required_privileges": [
-        "use_tool"
+        "use_tool",
+        "read_mesh"
       ],
       "requires_switch": [
         "switch.kill"
       ],
       "risk": "low",
-      "status": "active",
-      "integration": "config/integrations/voicestudio.json"
+      "status": "active"
     },
     {
       "id": "tool.public_apis.search",
@@ -275,6 +246,85 @@
       "available_to": "all_roles_and_subagents"
     },
     {
+      "id": "tool.system.envelope",
+      "purpose": "Run Cam integration flight envelope (Aaron-only, kernel, kill, safe motors)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/flight-envelope.py",
+      "kind": "local_script",
+      "inputs": {
+        "offline_only": "boolean"
+      },
+      "outputs": {
+        "envelope": "string",
+        "ok": "boolean",
+        "steps": "object[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.pupil.see",
+      "purpose": "Ingest Pupil world camera + gaze so Cam can see (mesh/vision + mesh/gaze)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/pupil-see.py",
+      "kind": "local_script",
+      "inputs": {
+        "gaze": "string?",
+        "world": "string?",
+        "probe": "boolean?",
+        "dry_run": "boolean?"
+      },
+      "outputs": {
+        "accepted": "boolean",
+        "mesh_vision": "object",
+        "mesh_gaze": "object",
+        "route": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.pupil_vision",
+        "switch.kill"
+      ],
+      "risk": "medium",
+      "status": "active"
+    },
+    {
+      "id": "tool.voicestudio.health",
+      "purpose": "Probe VoiceStudio local backend /health for Cam speech readiness",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/voicestudio-health.py",
+      "kind": "local_script",
+      "inputs": {
+        "base_url": "string?",
+        "timeout": "number?"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "report": "object"
+      },
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/voicestudio.json"
+    },
+    {
       "id": "tool.inkbox.check",
       "purpose": "Confirm Inkbox connectome + submodule wiring (no API key required)",
       "created_by_role": "tool-creator",
@@ -285,12 +335,68 @@
         "ok": "boolean",
         "errors": "string[]"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "active",
       "integration": "config/integrations/inkbox.json",
       "motor": "motor.inkbox"
+    },
+    {
+      "id": "tool.memorybear.read",
+      "purpose": "Recall cognitive memory via MemoryBear (offline fixture or live API)",
+      "created_by_role": "memory-curator",
+      "entrypoint": "scripts/memorybear.py",
+      "kind": "local_script",
+      "inputs": {
+        "query": "string",
+        "offline": "boolean",
+        "search_switch": "string"
+      },
+      "outputs": {
+        "answer": "string",
+        "memories": "object[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active"
+    },
+    {
+      "id": "tool.memorybear.write",
+      "purpose": "Persist a cognitive memory via MemoryBear extract pipeline",
+      "created_by_role": "memory-curator",
+      "entrypoint": "scripts/memorybear.py",
+      "kind": "local_script",
+      "inputs": {
+        "message": "string",
+        "offline": "boolean"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "msg_id": "string"
+      },
+      "required_privileges": [
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "medium",
+      "status": "active"
     }
   ]
 }

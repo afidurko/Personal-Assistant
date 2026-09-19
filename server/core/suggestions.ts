@@ -280,6 +280,21 @@ function fromAgentContext(
       relatedConceptIds: ['protocols-extensions'],
       sourceFindingIds: toolingRelated.findings.map((f) => f.id).slice(0, 3),
     });
+    out.push({
+      id: 'suggest-card-embodiment-ip-safe',
+      kind: 'card-embodiment',
+      title: 'Spawn IP-safe procedural 3D champions after card detect',
+      rationale:
+        'Joshinator embodiment must stay original/procedural — never ship franchise character meshes or logos.',
+      implementation:
+        'Resolve via integrations/joshinator-analyzer embodiment_service; fuzz with scripts/embodiment-billion-fuzz.py before merge.',
+      sketch:
+        'PYTHONPATH=integrations/joshinator-analyzer/backend python3 -m unittest backend.test_embodiment -v\npython3 scripts/embodiment-billion-fuzz.py --n 1000000',
+      priority: toolingRelated.score < 85 ? 64 : 50,
+      relatedWorkspaceIds: [toolingRelated.id],
+      relatedConceptIds: ['error-handling'],
+      sourceFindingIds: toolingRelated.findings.map((f) => f.id).slice(0, 2),
+    });
   }
 
   const agiWs = workspaces.find((w) => w.kind === 'agi_research');
@@ -310,6 +325,21 @@ function fromAgentContext(
       sketch:
         'python3 scripts/trajectory-policy-check.py\npython3 scripts/trajectory-billion-fuzz.py --n 1000000000',
       priority: 70,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['error-handling', 'protocols-extensions'],
+      sourceFindingIds: [],
+    });
+    out.push({
+      id: 'suggest-cam-reason-dry-run',
+      kind: 'cam-reason',
+      title: 'Keep Phase B cam-reason dry-run + billion fuzz green before Phase C',
+      rationale:
+        'SGR slow-path must stay bar-gated; every-mic SGR and LitServe farms are cut until dry-run proofs hold.',
+      implementation:
+        'Run test_cam_reason + cam-reason-billion-fuzz; converse only above intent/length bar; LitServe thin proxy later.',
+      sketch:
+        'python3 scripts/test_cam_reason.py\npython3 scripts/cam-reason-billion-fuzz.py --n 1000000000\nbash scripts/ci-connectome.sh',
+      priority: 73,
       relatedWorkspaceIds: [agiWs.id],
       relatedConceptIds: ['error-handling', 'protocols-extensions'],
       sourceFindingIds: [],

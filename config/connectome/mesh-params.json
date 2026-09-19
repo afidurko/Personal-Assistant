@@ -16,7 +16,8 @@
     "fornix_consolidation": "nightly_enabled",
     "dual_stream_conflict": "dorsal_wins_speak_ventral_wins_docs",
     "asi_ceiling": {"max_neuro_columns": 24, "myelination_cap": 0.98},
-    "tailscale_as_callosum": "forceps_terminals"
+    "tailscale_as_callosum": "forceps_terminals",
+    "memorybear_bridge": "enabled"
   },
   "memory_tiers": {
     "working": {
@@ -30,12 +31,12 @@
       "areas": ["area.mtl", "area.cingulate"],
       "tracts": ["tract.fornix", "tract.cingulum"],
       "capacity_engrams_analog": 10000,
-      "cam_store": "vault/ + mesh/runs + plasticity timeline"
+      "cam_store": "vault/ + mesh/runs + plasticity timeline + MemoryBear"
     },
     "semantic": {
       "areas": ["area.temporal", "area.wernicke", "area.visual"],
       "tracts": ["tract.ilf", "tract.mdlf", "tract.ifof", "tract.emc"],
-      "cam_store": "vault distillates + SwiftGuide maps + identity"
+      "cam_store": "vault distillates + SwiftGuide maps + identity + MemoryBear"
     }
   },
   "planning_modules_map": {

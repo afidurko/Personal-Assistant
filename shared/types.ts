@@ -195,11 +195,12 @@ export type SuggestionKind =
   | 'swarm-tooling'
   | 'cam-enhance'
   | 'research-memory'
+  | 'cam-reason'
+  | 'api-catalog'
+  | 'card-embodiment'
   | 'identity-voice'
   | 'presence-voice'
-  | 'identity'
-  | 'api-catalog';
-
+  | 'identity';
 export interface SuggestiveImplementation {
   id: string;
   kind: SuggestionKind;
@@ -231,7 +232,8 @@ export interface WsServerMessage {
     | 'guide_focus'
     | 'agent_cycle'
     | 'loop_update'
-    | 'autonomy_update';
+    | 'autonomy_update'
+    | 'activity_update';
   payload: unknown;
   at: string;
 }

@@ -1,0 +1,53 @@
+{
+  "n": 1000000,
+  "workers": 4,
+  "passed": 1000000,
+  "failed": 0,
+  "first_error": null,
+  "elapsed_s": 1.0832008749999886,
+  "checks_per_sec": 923189.8007837286,
+  "full_samples": 8,
+  "seed": 11,
+  "ok": true,
+  "sampler": "modular_plus_1e-5_full_reason:literal_loop",
+  "physical_n": 1000000,
+  "scaled_n": 0,
+  "workers_detail": [
+    {
+      "worker_id": 1,
+      "attempted": 250000,
+      "passed": 250000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 2,
+      "elapsed_s": 1.0678442150000365
+    },
+    {
+      "worker_id": 0,
+      "attempted": 250000,
+      "passed": 250000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 2,
+      "elapsed_s": 1.068597404000002
+    },
+    {
+      "worker_id": 2,
+      "attempted": 250000,
+      "passed": 250000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 2,
+      "elapsed_s": 1.0731546650000041
+    },
+    {
+      "worker_id": 3,
+      "attempted": 250000,
+      "passed": 250000,
+      "failed": 0,
+      "first_error": null,
+      "full_samples": 2,
+      "elapsed_s": 1.0712771850000422
+    }
+  ]
+}

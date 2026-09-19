@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>AR Card Battle — pupil control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="ar-scene.css" />
+  <link rel="stylesheet" href="pupil-gaze.css" />
+</head>
+<body>
+  <!-- Gate: camera pupil tracking or pointer-as-gaze demo -->
+  <div id="gaze-gate" class="gaze-gate">
+    <div class="gaze-gate-card">
+      <h1>Pupil control</h1>
+      <p>Look to aim. Dwell ~0.75s to select scan / moves. Prefer Cam Pupil gaze when Capture is up; webcam iris works without hardware.</p>
+      <div class="gaze-gate-actions">
+        <button type="button" id="gaze-pupil" class="gate-primary">Use Cam Pupil gaze</button>
+        <button type="button" id="gaze-start" class="gate-secondary">Webcam iris (MediaPipe)</button>
+        <button type="button" id="gaze-pointer" class="gate-secondary">Use pointer as gaze</button>
+      </div>
+      <p class="gaze-gate-hint">Pupil Labs / Cam: run <code>python3 scripts/pupil-gaze-bridge.py</code> then choose Cam Pupil gaze.</p>
+    </div>
+  </div>
+
+  <div id="gaze-calib" class="gaze-calib" hidden>
+    <div id="calib-dot" class="calib-dot" aria-label="Calibration point"></div>
+    <p id="calib-hint" class="calib-hint">Look at the dot</p>
+  </div>
+
+  <div class="gaze-hud" aria-live="polite">
+    <video id="gaze-preview" class="gaze-preview" playsinline muted></video>
+    <div id="gaze-status" class="gaze-status">Pupil tracking standby</div>
+  </div>
+
+  <div id="gaze-cursor" class="gaze-cursor" aria-hidden="true">
+    <svg viewBox="0 0 40 40" width="52" height="52">
+      <circle cx="20" cy="20" r="15" class="gaze-ring-bg" />
+      <circle id="gaze-dwell" cx="20" cy="20" r="15" class="gaze-ring" style="stroke-dasharray:94;stroke-dashoffset:94" />
+      <circle cx="20" cy="20" r="4" class="gaze-core" />
+    </svg>
+  </div>
+
+  <!-- Phone AR viewport -->
+  <div id="ar-view" class="ar-view mode-setup">
+    <img class="ar-camera" src="assets/ar/ar-desk-bg.png" alt="" />
+
+    <div class="arena" id="arena" aria-hidden="true">
+      <img src="assets/ar/arena-disk.png" alt="" />
+    </div>
+
+    <aside class="panel panel-team" id="panel-team">
+      <div class="team-row">
+        <span>You</span>
+        <div class="pips" data-team="you">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i>
+        </div>
+      </div>
+      <div class="team-row">
+        <span>Opponent</span>
+        <div class="pips" data-team="opp">
+          <i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+    </aside>
+
+    <aside class="panel panel-log" id="panel-log">
+      <div class="log-title" id="log-title">WAITING FOR FIRST TURN</div>
+      <div class="log-body" id="log-body">Actions will appear here.</div>
+    </aside>
+
+    <aside class="panel panel-setup" id="panel-setup">
+      <div class="setup-step">SETUP <b id="setup-step">1 / 3</b></div>
+      <div id="setup-copy">Place a Basic creature in Active. Dwell on + to scan.</div>
+    </aside>
+
+    <aside class="panel panel-wait" id="panel-wait" hidden>Waiting…</aside>
+
+    <div class="zone zone-active" id="zone-active" data-slot="active" data-gaze-target aria-label="Active card zone">
+      <div class="brackets" aria-hidden="true">
+        <span class="c tl"></span><span class="c tr"></span>
+        <span class="c bl"></span><span class="c br"></span>
+      </div>
+      <div class="zone-label">ACTIVE</div>
+      <img class="physical-card" id="card-active" src="assets/ar/physical-card-volt.png" alt="Active card" />
+      <div class="holo-card" id="holo-active" hidden>
+        <img src="assets/ar/physical-card-volt.png" alt="" />
+      </div>
+      <div class="active-hp" id="active-hp" hidden>ACTIVE · <b>90 / 90 HP</b></div>
+    </div>
+
+    <div class="zone zone-deck" id="zone-deck">
+      <div class="brackets dim" aria-hidden="true">
+        <span class="c tl"></span><span class="c tr"></span>
+        <span class="c bl"></span><span class="c br"></span>
+      </div>
+      <div class="zone-label">DECK</div>
+      <div class="deck-stack"></div>
+    </div>
+
+    <div class="zone zone-opp" id="zone-opp" data-slot="opponent">
+      <div class="brackets dim" aria-hidden="true">
+        <span class="c tl"></span><span class="c tr"></span>
+        <span class="c bl"></span><span class="c br"></span>
+      </div>
+      <div class="zone-label">OPPONENT</div>
+      <img class="physical-card" id="card-opp" src="assets/ar/physical-card-ember.png" alt="Opponent card" hidden />
+      <div class="holo-card" id="holo-opp" hidden>
+        <img src="assets/ar/physical-card-ember.png" alt="" />
+      </div>
+    </div>
+
+    <div class="fighter fighter-you" id="fighter-you" hidden>
+      <img src="assets/ar/creature-volt-wisp.png" alt="Volt Wisp" />
+      <div class="hp-bar">
+        <div class="hp-fill" id="hp-you-fill"></div>
+        <span id="hp-you-text">HP 90 / 90</span>
+      </div>
+    </div>
+    <div class="fighter fighter-opp" id="fighter-opp" hidden>
+      <img src="assets/ar/creature-ember-drake.png" alt="Ember Drake" />
+      <div class="hp-bar">
+        <div class="hp-fill" id="hp-opp-fill"></div>
+        <span id="hp-opp-text">HP 80 / 80</span>
+      </div>
+    </div>
+
+    <div class="moves" id="moves" hidden>
+      <button type="button" data-move="spark-jab" data-gaze-target>Spark Jab</button>
+      <button type="button" data-move="arc-combo" data-gaze-target>Arc Combo</button>
+      <button type="button" data-move="retreat" data-gaze-target>Retreat</button>
+    </div>
+
+    <button type="button" class="scan-btn" id="scan-btn" data-gaze-target aria-label="Scan card">+</button>
+
+    <div class="action-banner" id="action-banner"></div>
+  </div>
+
+  <script src="ar-battle.js"></script>
+  <script src="pupil-gaze.js"></script>
+</body>
+</html>

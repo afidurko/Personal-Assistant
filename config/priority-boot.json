@@ -113,6 +113,13 @@
       "title": "Cam live mic/camera converse (ENABLED)",
       "role": "comms",
       "enabled": true
+    },
+    {
+      "id": "system_integration",
+      "title": "Overall system bridge — pieces on one bus",
+      "role": "memory-curator",
+      "script": "scripts/cam-system.py",
+      "enabled": true
     }
   ]
 }
