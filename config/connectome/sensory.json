@@ -274,6 +274,20 @@
       "notes": "Curated free/public API catalog — shared discovery for all agents (integrations/public-apis)"
     },
     {
+      "id": "sense.catalog.google_trends",
+      "modality": "research",
+      "source": [
+        "google_trends_data",
+        "googletrends_github"
+      ],
+      "emits": [
+        "spike.fact",
+        "spike.finding",
+        "spike.tool_result"
+      ],
+      "notes": "Google Trends open datasets (GoogleTrends/data) — CSV/XLSX behind Trends graphics; indexed via GitHub, no submodule"
+    },
+    {
       "id": "sense.inkbox.event",
       "modality": "comms",
       "source": [

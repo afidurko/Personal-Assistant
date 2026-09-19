@@ -120,8 +120,10 @@
   "script": "scripts/agi-research-scan.py",
   "connectors": [
     "google-scholar",
+    "google-trends",
     "public-apis"
   ],
   "public_apis_hotspot": "hotspot.public_apis",
-  "notes": "When findings imply new free API tooling for Cam, consult public-apis catalog before inventing endpoints"
+  "google_trends_hotspot": "hotspot.google_trends",
+  "notes": "When findings imply new free API tooling for Cam, consult public-apis catalog before inventing endpoints; use google-trends for public-interest series context"
 }

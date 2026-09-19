@@ -54,8 +54,10 @@
   "connectors": [
     "public-apis",
     "cline",
-    "google-scholar"
+    "google-scholar",
+    "google-trends"
   ],
   "public_apis_hotspot": "hotspot.public_apis",
-  "notes": "Any capability work unit may discover free APIs via motor.public_apis"
+  "google_trends_hotspot": "hotspot.google_trends",
+  "notes": "Any capability work unit may discover free APIs via motor.public_apis or Trends datasets via motor.google_trends"
 }

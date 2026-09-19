@@ -25,7 +25,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · Cline · PaddleDetection · Pupil (gaze) · LinkedIn/Indeed · **Google Scholar** · **public-apis** · **Inkbox** · `config/tools/registry.json`
+- **Tools:** Jarvis · Cline · PaddleDetection · Pupil (gaze) · LinkedIn/Indeed · **Google Scholar** · **Google Trends data** · **public-apis** · **Inkbox** · `config/tools/registry.json`
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents (privilege inheritance, no escalation)
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
@@ -56,6 +56,9 @@ python3 scripts/connectome-route.py --sense sense.clock.daily --goal "daily agi 
 # Google Scholar literature search (fixture / live)
 python3 scripts/connectome-route.py --sense sense.web.scholar --goal "scholar search"
 python3 scripts/scholar-search.py --query "connectome mapping" --offline
+# Google Trends open datasets (fixture / live GitHub index)
+python3 scripts/connectome-route.py --sense sense.catalog.google_trends --goal "google trends election dataset"
+python3 scripts/google-trends-search.py --query election --offline
 # Run the daily scan (arXiv → vault/mesh proposals)
 python3 scripts/agi-research-scan.py
 # Confirm workspace + integration wiring

@@ -32,6 +32,10 @@ python3 scripts/test_public_apis_addons.py
 python3 scripts/public-apis-check.py
 python3 scripts/public-apis-addon.py doctor
 
+echo "== google-trends unit + wiring =="
+python3 scripts/test_google_trends.py
+python3 scripts/google-trends-check.py
+
 echo "== inkbox wiring =="
 python3 scripts/inkbox-check.py
 

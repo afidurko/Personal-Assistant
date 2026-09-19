@@ -9,6 +9,7 @@
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
     "integration empty: integrations/public-apis (submodule init or create config)",
     "integration empty: integrations/cline (submodule init or create config)",
+    "integration empty: integrations/inkbox (submodule init or create config)",
     "integration empty: integrations/voicestudio (submodule init or create config)",
     "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)"
   ],
@@ -16,6 +17,7 @@
     "daily_agi_research_scan": true,
     "cam_enhance_apply_requires_aaron": true,
     "google_scholar": true,
+    "google_trends": true,
     "public_apis": true,
     "inkbox": true,
     "unlimited_subagents": true,
@@ -61,6 +63,12 @@
       "policy_exists": true
     },
     {
+      "id": "google-trends",
+      "path": "config/integrations/google-trends.json",
+      "populated": true,
+      "policy_exists": true
+    },
+    {
       "id": "public-apis",
       "path": "integrations/public-apis",
       "populated": false,
@@ -75,7 +83,7 @@
     {
       "id": "inkbox",
       "path": "integrations/inkbox",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {
@@ -94,7 +102,7 @@
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=31 edges=304"
+    "detail": "senses=32 edges=317"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

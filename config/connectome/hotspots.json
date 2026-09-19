@@ -709,6 +709,25 @@
       "integration": "config/integrations/public-apis.json"
     },
     {
+      "id": "hotspot.google_trends",
+      "center": "center.info",
+      "pathway": [
+        "sense.catalog.google_trends",
+        "center.info",
+        "center.research",
+        "switch.autonomy",
+        "motor.google_trends"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "discover_google_trends_open_datasets",
+      "team": "team.info",
+      "available_to": "all_roles_and_subagents",
+      "integration": "config/integrations/google-trends.json"
+    },
+    {
       "id": "hotspot.inkbox",
       "center": "center.comms",
       "area": "area.broca",

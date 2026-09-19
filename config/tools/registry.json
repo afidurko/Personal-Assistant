@@ -132,6 +132,66 @@
       "available_to": "all_roles_and_subagents"
     },
     {
+      "id": "tool.google_trends.search",
+      "purpose": "Search Google Trends open datasets (GoogleTrends/data) for any Cam agent",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/google-trends-search.py",
+      "kind": "local_script",
+      "inputs": {
+        "query": "string",
+        "year": "string",
+        "ext": "string",
+        "num": "number",
+        "offline": "boolean",
+        "fetch": "string"
+      },
+      "outputs": {
+        "results": "object[]",
+        "returned": "number",
+        "total_catalog": "number"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/google-trends.json",
+      "motor": "motor.google_trends",
+      "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.google_trends.pack",
+      "purpose": "Pack google-trends search JSON into a mesh/research distillate",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/pack-google-trends-result.py",
+      "kind": "local_script",
+      "inputs": {
+        "results": "string",
+        "query": "string?",
+        "out": "string?"
+      },
+      "outputs": {
+        "mesh_doc": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/google-trends.json",
+      "motor": "motor.google_trends"
+    },
+    {
       "id": "tool.public_apis.pack",
       "purpose": "Pack public-apis search JSON into a mesh/tools distillate",
       "created_by_role": "tool-creator",

@@ -229,6 +229,19 @@
       "notes": "Search afidurko/public-apis catalog (scripts/public-apis-search.py) \u2014 shared by all agents; no spend"
     },
     {
+      "id": "motor.google_trends",
+      "channel": [
+        "google_trends_data",
+        "github_git_trees",
+        "local_script"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "notes": "Search/fetch GoogleTrends/data open datasets (scripts/google-trends-search.py) \u2014 no spend; no full-repo clone"
+    },
+    {
       "id": "motor.inkbox",
       "channel": ["inkbox_sdk", "inkbox_cli", "email", "sms", "phone", "vault", "tunnel"],
       "path": "integrations/inkbox",

@@ -203,6 +203,19 @@
         "credential_env": "SERPAPI_API_KEY"
       },
       {
+        "id": "google-trends",
+        "path": "config/integrations/google-trends.json",
+        "policy": "config/integrations/google-trends.md",
+        "config": "config/integrations/google-trends.json",
+        "script": "scripts/google-trends-search.py",
+        "sense": "sense.catalog.google_trends",
+        "hotspot": "hotspot.google_trends",
+        "motor": "motor.google_trends",
+        "remote": "github.com/GoogleTrends/data",
+        "available_to": "all_roles_and_subagents",
+        "notes": "Open Trends datasets via GitHub trees API — do not submodule (~382MB)"
+      },
+      {
         "id": "public-apis",
         "path": "integrations/public-apis",
         "policy": "config/integrations/public-apis.md",
@@ -510,6 +523,8 @@
     "ci_connectome": "scripts/ci-connectome.sh",
     "swarm_check": "scripts/swarm-check.py",
     "scholar_search": "scripts/scholar-search.py",
+    "google_trends_search": "scripts/google-trends-search.py",
+    "google_trends_check": "scripts/google-trends-check.py",
     "public_apis_search": "scripts/public-apis-search.py",
     "public_apis_check": "scripts/public-apis-check.py",
     "public_apis_addon": "scripts/public-apis-addon.py",
