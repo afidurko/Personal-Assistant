@@ -295,9 +295,9 @@ def main() -> int:
         "sense.vision.gaze": 1.0,
         "sense.vision.world": 1.2,
         "sense.ios.camera": 1.2,
-        "sense.ios.mic": 2.5,
+        "sense.ios.mic": 2.75,
         "sense.aaron.face": 2.0,
-        "sense.aaron.voice": 3.0,
+        "sense.aaron.voice": 3.5,
         "sense.photos.library": 0.8,
         "sense.files.media": 0.8,
         # Cam-function / AGI research periphery (Aaron-approved batch)

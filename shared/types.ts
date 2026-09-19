@@ -197,6 +197,7 @@ export type SuggestionKind =
   | 'research-memory'
   | 'api-catalog'
   | 'card-embodiment'
+  | 'identity-voice'
   | 'presence-voice'
   | 'identity';
 export interface SuggestiveImplementation {

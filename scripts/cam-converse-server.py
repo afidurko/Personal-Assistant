@@ -25,6 +25,10 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "companions" / "web"
 LOG_DIR = ROOT / "vault" / "10-Mesh-Distillates" / "converse"
 VOICE = json.loads((ROOT / "config" / "persona" / "voice.json").read_text(encoding="utf-8"))
+VOICE_GATE_PATH = ROOT / "config" / "identity" / "aaron-voice-gate.json"
+VOICE_PROFILE_PATH = ROOT / "identity" / "aaron" / "voice-profile.json"
+VOICE_REJECTS_PATH = ROOT / "data" / "runtime" / "aaron-voice-rejects.jsonl"
+VOICE_STATS_PATH = ROOT / "data" / "runtime" / "aaron-voice-stats.json"
 VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
 TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
 
@@ -151,6 +155,194 @@ def gate_mic_turn(payload: dict) -> dict:
         "aaron_score": 0.0,
         "hint": "Send audio_wav_b64 (preferred) or aaron_voice_score with mic turns",
     }
+
+
+def load_voice_gate() -> dict:
+    if not VOICE_GATE_PATH.exists():
+        return {
+            "aaron_only": True,
+            "noisy_environment_mode": True,
+            "reject_non_aaron_asr": True,
+            "require_enrollment_for_mic": True,
+            "text_bypass": True,
+            "match_threshold": 0.85,
+            "noisy_threshold": 0.88,
+            "addons": {},
+        }
+    return json.loads(VOICE_GATE_PATH.read_text(encoding="utf-8"))
+
+
+class VoiceGateAddonsState:
+    """Adaptive noise + reject stats for the Python converse server."""
+
+    def __init__(self) -> None:
+        self.rejects = 0
+        self.accepts = 0
+        self.last_reject_at: str | None = None
+        self.last_reason: str | None = None
+        self.adaptive_raised = False
+        self.multi_speaker_streak = 0
+        self.accepts_since_raise = 0
+
+    def as_dict(self) -> dict:
+        return {
+            "rejects": self.rejects,
+            "accepts": self.accepts,
+            "last_reject_at": self.last_reject_at,
+            "last_reason": self.last_reason,
+            "adaptive_raised": self.adaptive_raised,
+            "multi_speaker_streak": self.multi_speaker_streak,
+        }
+
+
+VOICE_ADDONS = VoiceGateAddonsState()
+
+
+def evaluate_voice_gate(payload: dict, source: str, *, note: bool = True) -> dict:
+    """Server-side Aaron-only gate for mic turns (scores come from companion)."""
+    policy = load_voice_gate()
+    score = payload.get("aaron_voice_score")
+    score_f = float(score) if isinstance(score, (int, float)) else 0.0
+    enrolled = payload.get("enrolled")
+    multi = bool(payload.get("multi_speaker_hint"))
+    addons = policy.get("addons") or {}
+    adaptive = addons.get("adaptive_noise") or {}
+
+    if source == "text" and policy.get("text_bypass", True):
+        if note:
+            VOICE_ADDONS.accepts += 1
+        return {"accept": True, "reason": "text_bypass", "score": 1.0, "threshold": 0.0}
+    if not policy.get("aaron_only", True) or not policy.get("reject_non_aaron_asr", True):
+        if note:
+            VOICE_ADDONS.accepts += 1
+        return {"accept": True, "reason": "aaron_only_disabled", "score": score_f, "threshold": 0.0}
+    if source not in {"mic", "speech"}:
+        if note:
+            VOICE_ADDONS.accepts += 1
+        return {"accept": True, "reason": "non_mic_source", "score": score_f, "threshold": 0.0}
+    if policy.get("require_enrollment_for_mic", True) and enrolled is False:
+        gate = {
+            "accept": False,
+            "reason": "enrollment_required",
+            "score": 0.0,
+            "threshold": float(policy.get("match_threshold", 0.85)),
+        }
+        if note:
+            _note_reject(gate, source, multi, payload.get("device_id"))
+        return gate
+
+    noisy_threshold = float(policy.get("noisy_threshold", 0.88))
+    match_threshold = float(policy.get("match_threshold", 0.85))
+    raised = False
+    if adaptive.get("enabled", True):
+        streak_need = int(adaptive.get("streak_to_raise", 2))
+        raised = VOICE_ADDONS.adaptive_raised or (
+            VOICE_ADDONS.multi_speaker_streak >= streak_need and multi
+        )
+        if raised:
+            noisy_threshold = float(adaptive.get("raised_threshold", 0.91))
+
+    threshold = (
+        noisy_threshold
+        if policy.get("noisy_environment_mode", True) or multi or raised
+        else match_threshold
+    )
+    if score_f >= threshold:
+        if note:
+            VOICE_ADDONS.accepts += 1
+            VOICE_ADDONS.accepts_since_raise += 1
+            cooldown = int(adaptive.get("cooldown_accepts", 3))
+            if VOICE_ADDONS.adaptive_raised and VOICE_ADDONS.accepts_since_raise >= cooldown:
+                VOICE_ADDONS.adaptive_raised = False
+                VOICE_ADDONS.multi_speaker_streak = 0
+                VOICE_ADDONS.accepts_since_raise = 0
+            if not multi:
+                VOICE_ADDONS.multi_speaker_streak = 0
+        return {
+            "accept": True,
+            "reason": "aaron_voice_match",
+            "score": score_f,
+            "threshold": threshold,
+            "adaptive": raised,
+        }
+
+    gate = {
+        "accept": False,
+        "reason": "rejected_surrounding_speech" if multi else "below_threshold",
+        "score": score_f,
+        "threshold": threshold,
+        "adaptive": raised,
+    }
+    if note:
+        _note_reject(gate, source, multi, payload.get("device_id"))
+    return gate
+
+
+def _note_reject(gate: dict, source: str, multi: bool, device_id: object = None) -> None:
+    VOICE_ADDONS.rejects += 1
+    VOICE_ADDONS.last_reject_at = utc_now()
+    VOICE_ADDONS.last_reason = gate.get("reason")
+    VOICE_ADDONS.accepts_since_raise = 0
+    if multi or gate.get("reason") == "rejected_surrounding_speech":
+        VOICE_ADDONS.multi_speaker_streak += 1
+    if gate.get("adaptive") or VOICE_ADDONS.multi_speaker_streak >= 2:
+        VOICE_ADDONS.adaptive_raised = True
+    try:
+        VOICE_REJECTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        event = {
+            "at": VOICE_ADDONS.last_reject_at,
+            "source": source,
+            "score": gate.get("score"),
+            "threshold": gate.get("threshold"),
+            "reason": gate.get("reason"),
+            "multi_speaker_hint": multi,
+            "device_id": device_id,
+        }
+        with VOICE_REJECTS_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(event) + "\n")
+        VOICE_STATS_PATH.write_text(
+            json.dumps(VOICE_ADDONS.as_dict(), indent=2) + "\n", encoding="utf-8"
+        )
+    except OSError:
+        pass
+
+
+def record_client_reject(payload: dict) -> dict:
+    gate = {
+        "accept": False,
+        "reason": payload.get("reason") or "client_reject",
+        "score": float(payload.get("score") or 0),
+        "threshold": float(payload.get("threshold") or 0.88),
+        "adaptive": VOICE_ADDONS.adaptive_raised,
+    }
+    _note_reject(
+        gate,
+        str(payload.get("source") or "mic"),
+        bool(payload.get("multi_speaker_hint")),
+        payload.get("device_id"),
+    )
+    return VOICE_ADDONS.as_dict()
+
+
+def save_voice_profile(profile: object) -> str:
+    VOICE_PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    doc = {
+        "subject": "Aaron",
+        "saved_at": utc_now(),
+        "source": "cam_voice_gate_addon",
+        "profile": profile,
+    }
+    VOICE_PROFILE_PATH.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    return str(VOICE_PROFILE_PATH.relative_to(ROOT))
+
+
+def load_voice_profile() -> dict | None:
+    if not VOICE_PROFILE_PATH.exists():
+        return None
+    try:
+        return json.loads(VOICE_PROFILE_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
 
 
 def load_tailscale() -> dict:
@@ -324,8 +516,16 @@ def cam_reply(aaron_text: str, history: list[dict]) -> str:
         )
     if "mic" in low or "microphone" in low or "hear me" in low or "working" in low:
         return (
-            "If you can read this after speaking, the listen path is up. "
-            "I'm Cam — soft voice, always here for you. Say what you need."
+            "Yes — I'm listening for your voice only. "
+            "Surrounding conversation is filtered out once you're enrolled."
+        )
+    if "only my voice" in low or "my voice only" in low or (
+        "ignore" in low
+        and any(w in low for w in ("other", "people", "room", "noise", "surround"))
+    ):
+        return (
+            "Aaron-only mode is on. Enroll once if you haven't, "
+            "then I'll ignore other speakers in noisy places."
         )
     if "camera" in low or "face" in low or "see me" in low:
         return (
@@ -424,6 +624,7 @@ class Handler(BaseHTTPRequestHandler):
                         "enabled_by": "Aaron",
                         "ios_capture_mode": "standing_on",
                         "aaron_face_enrolled": VISUAL.exists(),
+                        "aaron_voice_only": True,
                         "aaron_voice_gate": voice_gate_status(),
                         "host_has_local_mic": False,  # browser supplies mic
                         "tailscale": bool(ts.get("enabled")),
@@ -438,6 +639,8 @@ class Handler(BaseHTTPRequestHandler):
                         "stt": VOICE.get("stt"),
                         "aaron_only_listen": True,
                     },
+                    "voice_gate": load_voice_gate(),
+                    "voice_gate_stats": VOICE_ADDONS.as_dict(),
                 },
             )
             return
@@ -454,8 +657,28 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
             return
+        if path == "/api/voice/profile":
+            self._json(200, {"ok": True, "profile": load_voice_profile()})
+            return
 
         # static companion (relative paths for iOS PWA / on-device)
+        if path.startswith("/config/"):
+            file_path = (ROOT / path.lstrip("/")).resolve()
+            if not str(file_path).startswith(str((ROOT / "config").resolve())):
+                self.send_error(403)
+                return
+            if not file_path.is_file():
+                self.send_error(404)
+                return
+            data = file_path.read_bytes()
+            self.send_response(200)
+            self._cors()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
         rel = "index.html" if path in ("/", "") else path.lstrip("/")
         if rel in {"assets/cam-face.jpg", "face.jpg"}:
             file_path = WEB / "face.jpg"
@@ -499,20 +722,53 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/spike/aaron.voice":
-            gate = gate_mic_turn({**payload, "source": "mic"})
+            # Prefer FunASR WAV gate; also accept companion spectral scores (addons)
+            funasr = gate_mic_turn({**payload, "source": "mic"})
+            score = payload.get("score", payload.get("aaron_voice_score"))
+            spectral = None
+            if score is not None or "enrolled" in payload or "multi_speaker_hint" in payload:
+                score_f = float(score) if isinstance(score, (int, float)) else 0.0
+                spectral = evaluate_voice_gate(
+                    {
+                        "aaron_voice_score": score_f,
+                        "enrolled": payload.get("enrolled", True),
+                        "multi_speaker_hint": payload.get("multi_speaker_hint"),
+                        "device_id": payload.get("device_id"),
+                    },
+                    "mic",
+                    note=False,
+                )
             route = route_sense(
                 "sense.aaron.voice",
                 goal=payload.get("purpose", "verify_aaron_voice"),
             )
+            accepted = bool(funasr.get("accepted"))
+            if spectral is not None:
+                accepted = accepted and bool(spectral.get("accept"))
             event = {
                 "at": utc_now(),
                 "type": "aaron_voice_spike",
-                "gate": gate,
+                "score": score,
+                "enrolled": payload.get("enrolled"),
+                "multi_speaker_hint": payload.get("multi_speaker_hint"),
+                "device_id": payload.get("device_id"),
+                "gate": spectral or funasr,
+                "voice_gate": funasr,
                 "route": route,
             }
             self._append_log("spikes", event)
-            code = 200 if gate.get("accepted") else 403
-            self._json(code, {"accepted": bool(gate.get("accepted")), "event": event})
+            code = 200 if accepted else 403
+            self._json(
+                code,
+                {
+                    "accepted": accepted,
+                    "sense": "sense.aaron.voice",
+                    "gate": spectral or funasr,
+                    "voice_gate": funasr,
+                    "voice_stats": VOICE_ADDONS.as_dict(),
+                    "event": event,
+                },
+            )
             return
 
         if path == "/api/voice/gate":
@@ -566,11 +822,66 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
 
+        if path == "/api/voice/gate/reject":
+            stats = record_client_reject(payload)
+            self._json(200, {"ok": True, "stats": stats})
+            return
+
+        if path == "/api/voice/profile":
+            profile = payload.get("profile")
+            if profile is None:
+                self._json(400, {"ok": False, "error": "profile_required"})
+                return
+            path_written = save_voice_profile(profile)
+            self._json(200, {"ok": True, "path": path_written})
+            return
+
         if path == "/api/turn":
             text = (payload.get("text") or payload.get("transcript") or "").strip()
             source = payload.get("source", "text")
-            gate = gate_mic_turn(payload)
-            if source in {"mic", "speech"} and gate.get("required") and not gate.get("accepted"):
+            # Spectral / adaptive add-ons (companion scores)
+            spectral = evaluate_voice_gate(payload, source)
+            # FunASR CAM++ / WAV gate (host enrollment)
+            funasr = gate_mic_turn(payload)
+            if not spectral.get("accept"):
+                msg = (
+                    "I only take Aaron’s voice on the mic. Enroll your voice once, then try again."
+                    if spectral.get("reason") == "enrollment_required"
+                    else "I heard other voices nearby and ignored them. Speak again when it’s you, Aaron."
+                    if spectral.get("reason") == "rejected_surrounding_speech"
+                    else f"I didn’t match that as your voice (score {round(spectral.get('score', 0) * 100)}%). Filtered."
+                )
+                turn = {
+                    "id": str(uuid.uuid4()),
+                    "at": utc_now(),
+                    "source": source,
+                    "aaron": text,
+                    "cam": msg,
+                    "rejected": True,
+                    "accepted": False,
+                    "gate": spectral,
+                    "voice_gate": funasr,
+                    "reason": spectral.get("reason", "non_aaron_voice"),
+                    "voice_stats": VOICE_ADDONS.as_dict(),
+                    "speak": {
+                        "enabled": True,
+                        "rate": 0.95,
+                        "pitch": 1.05,
+                        "lang": "en-US",
+                        "style": "soft airy fluent English",
+                    },
+                }
+                self._append_log("turns", turn)
+                self._json(403, turn)
+                return
+            # FunASR layer: enforce when enrolled or when companion sent WAV; otherwise spectral add-ons suffice
+            funasr_enforce = (
+                source in {"mic", "speech"}
+                and funasr.get("required")
+                and not funasr.get("accepted")
+                and funasr.get("reason") != "not_enrolled"
+            )
+            if funasr_enforce:
                 denied = {
                     "id": str(uuid.uuid4()),
                     "at": utc_now(),
@@ -578,8 +889,11 @@ class Handler(BaseHTTPRequestHandler):
                     "aaron": text,
                     "cam": None,
                     "accepted": False,
-                    "voice_gate": gate,
-                    "reason": gate.get("reason", "non_aaron_voice"),
+                    "rejected": True,
+                    "gate": spectral,
+                    "voice_gate": funasr,
+                    "reason": funasr.get("reason", "non_aaron_voice"),
+                    "voice_stats": VOICE_ADDONS.as_dict(),
                     "speak": {"enabled": False},
                 }
                 self._append_log("turns", denied)
@@ -602,8 +916,10 @@ class Handler(BaseHTTPRequestHandler):
                 "source": source,
                 "aaron": text,
                 "cam": reply,
+                "gate": spectral,
+                "voice_stats": VOICE_ADDONS.as_dict(),
                 "accepted": True,
-                "voice_gate": gate,
+                "voice_gate": funasr,
                 "route": {
                     "sense": sense,
                     "hotspot_id": route.get("hotspot_id"),

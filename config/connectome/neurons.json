@@ -54,6 +54,7 @@
     {"id": "neuron.enroll_loop", "kind": "loop", "area": "area.visual", "recurrence": "until_enrolled"},
 
     {"id": "neuron.asr", "kind": "agent", "area": "area.auditory", "recurrence": "streaming"},
+    {"id": "neuron.aaron_voice_gate", "kind": "loop", "area": "area.auditory", "recurrence": "standing_scan", "script": "scripts/aaron-voice-gate-check.py", "config": "config/identity/aaron-voice-gate.json", "notes": "Aaron-only voice gate health pulse — adaptive noise, profile, reject stats"},
 
     {"id": "neuron.memory", "kind": "agent", "area": "area.mtl", "role": "memory-curator", "recurrence": "standing"},
     {"id": "neuron.mesh_sync_loop", "kind": "loop", "area": "area.mtl", "recurrence": "after_run"},

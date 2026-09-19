@@ -7,15 +7,44 @@
 | Capability | Have it today? | Notes |
 |---|---|---|
 | Recognize **Aaron’s** face | **Enrollment started** | Photos enrolled; live matcher still companion-side |
-| Recognize **Aaron’s** voice | **Gate implemented** | Enroll WAVs on host (`scripts/aaron-voice-enroll.py`); FunASR CAM++ for production |
+| Recognize **Aaron’s** voice | **Aaron-only gate enabled** | Spectral browser enroll (~10s) + host FunASR CAM++ (`scripts/aaron-voice-enroll.py`); noisy rooms reject other speakers |
 | iPhone **camera** access | **Yes via web companion** | Native iOS app still scaffold; browser camera works on device |
 | iPhone **microphone** access | **Yes via web companion** | Open `docs/CAM_CONVERSE.md` — run server on Aaron’s Mac/phone browser |
-| Live converse with Cam | **Yes via web companion** | Mic → transcript → Cam reply → soft TTS |
+| Live converse with Cam | **Yes via web companion** | Mic → transcript → Cam reply · Aaron-only filter |
 | Cam’s face / soft voice (assistant persona) | Yes | Portrait + browser TTS / RIVA plan |
-| Speech-to-text (ASR) | Browser Speech API now; FunASR/RIVA later | Runs **after** Aaron voice gate on server |
+| Speech-to-text (ASR) | Browser Speech API now; FunASR/RIVA later | Transcribes words; spectral + FunASR gates run before replies |
 | Object/person detection | PaddleDetection on media | Plus Aaron photo enrollment |
 
-**Important:** Cloud Agent VMs have no mic. Live talk requires running `cam-converse-server.py` on Aaron’s machine.
+**Important:** Cloud Agent VMs have no mic. Live talk requires running Cam on Aaron’s machine (`npm run dev` or `cam-converse-server.py`).
+
+## Aaron-only voice (noisy environments)
+
+Authorized by Aaron 2026-09-19.
+
+```text
+Room audio → mic
+  ├─ ASR may hear everyone
+  └─ Aaron voiceprint score (on-device)
+           │
+           ▼
+  score ≥ noisy_threshold (0.88) AND enrolled
+           │ yes                         │ no
+           ▼                             ▼
+     Cam replies / tasking         Ignore (surrounding speech)
+```
+
+- Config: `config/identity/aaron-voice-gate.json` (spectral browser / adaptive add-ons)
+- Host FunASR CAM++: `config/identity/aaron-voice.json` · `docs/AARON_VOICE_GATE.md` (complementary server gate)
+- React: `src/hooks/useCamVoice.ts` + `src/lib/aaronVoiceGate.ts`
+- Web companion: `companions/web/voice-gate.js`
+- Server: `server/core/aaron-voice-gate.ts` + `/api/turn` reject · FunASR via `scripts/aaron_voice_gate.py`
+- Connectome: `hotspot.aaron_voice_noise`
+
+### Rules (voice)
+- Biometrics enroll **Aaron only**
+- Fail closed below threshold — do not answer other people in the room
+- Typing still reaches Cam without a voice score
+- Upgrade path: native iOS speaker-ID / ML embeddings can replace the spectral print
 
 ## What Aaron asked for
 

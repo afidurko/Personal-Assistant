@@ -1,9 +1,9 @@
 {
   "senses": 31,
-  "hotspot_options": 41,
-  "known_nodes": 140,
+  "hotspot_options": 42,
+  "known_nodes": 141,
   "motors": 21,
-  "edges": 304,
+  "edges": 309,
   "hard_errors": [],
   "missing_edges": [],
   "soft_warnings": [],
