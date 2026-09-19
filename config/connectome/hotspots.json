@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "analogy": "Short-path hotspots \u2014 small-world efficiency: local columns, sparse tracts, fewer hops",
+  "analogy": "Short-path hotspots — small-world efficiency: local columns, sparse tracts, fewer hops",
   "hotspots": [
     {
       "id": "hotspot.careers",
@@ -252,7 +252,10 @@
         "switch.autonomy",
         "motor.mesh"
       ],
-      "behavior": "vault_engram_recall"
+      "behavior": "vault_engram_recall",
+      "side_effects": [
+        "motor.memorybear"
+      ]
     },
     {
       "id": "hotspot.mesh_recall",
@@ -270,7 +273,60 @@
         "switch.autonomy",
         "motor.mesh"
       ],
-      "behavior": "mesh_engram_recall"
+      "behavior": "mesh_engram_recall",
+      "side_effects": [
+        "motor.memorybear"
+      ]
+    },
+    {
+      "id": "hotspot.memorybear_recall",
+      "area": "area.mtl",
+      "center": "center.memory",
+      "columns": [
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.fornix",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.memorybear.hit",
+        "center.memory",
+        "switch.autonomy",
+        "motor.memorybear"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "memorybear_cognitive_recall",
+      "integration": "config/integrations/memorybear.json"
+    },
+    {
+      "id": "hotspot.memorybear_write",
+      "area": "area.mtl",
+      "center": "center.memory",
+      "columns": [
+        "neuron.memory",
+        "neuron.persist_sync"
+      ],
+      "tracts": [
+        "tract.fornix"
+      ],
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.memory",
+        "switch.autonomy",
+        "motor.memorybear"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "memorybear_cognitive_write_extract",
+      "integration": "config/integrations/memorybear.json"
     },
     {
       "id": "hotspot.aaron_face",
@@ -536,7 +592,8 @@
         "motor.mesh"
       ],
       "side_effects": [
-        "motor.vault"
+        "motor.vault",
+        "motor.memorybear"
       ],
       "behavior": "absorb_cline_session_distillates"
     },
@@ -554,7 +611,8 @@
       "side_effects": [
         "motor.vault",
         "motor.mesh",
-        "motor.dl"
+        "motor.dl",
+        "motor.memorybear"
       ],
       "behavior": "daily_scan_ai_agi_papers_propose_cam_enhancements",
       "team": "team.agi-research-scan"
@@ -632,7 +690,8 @@
       "side_effects": [
         "motor.mesh",
         "motor.web_fetch",
-        "motor.slm"
+        "motor.slm",
+        "motor.memorybear"
       ],
       "behavior": "vault_mesh_web_cited_information",
       "team": "team.info"
@@ -650,7 +709,8 @@
       ],
       "side_effects": [
         "motor.vault",
-        "motor.mesh"
+        "motor.mesh",
+        "motor.memorybear"
       ],
       "behavior": "google_scholar_literature_and_citations",
       "team": "team.info",

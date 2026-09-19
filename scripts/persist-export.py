@@ -22,6 +22,7 @@ DEFAULT_INCLUDE = [
     "identity/persistence/CONTINUOUS_QA.md",
     "identity/persistence/HAAS_CAM_PATTERNS.md",
     "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
+    "identity/persistence/MEMORYBEAR.md",
     "identity/persistence/PUBLIC_APIS.md",
     "identity/persistence/INKBOX.md",
     "identity/persistence/CAM_PUPIL_VISION_ENABLED.md",
@@ -36,6 +37,8 @@ DEFAULT_INCLUDE = [
     "config/integrations/pupil.md",
     "config/integrations/google-scholar.json",
     "config/integrations/google-scholar.md",
+    "config/integrations/memorybear.json",
+    "config/integrations/memorybear.md",
     "config/integrations/voicestudio.json",
     "config/integrations/voicestudio.md",
     "config/mcp/voicestudio.json",
@@ -96,12 +99,16 @@ DEFAULT_INCLUDE = [
     "docs/HAAS_CAM_PATTERNS.md",
     "scripts/scholar-search.py",
     "scripts/pack-scholar-result.py",
+    "scripts/memorybear.py",
+    "scripts/pack-memorybear-result.py",
+    "scripts/memorybear-check.py",
     "scripts/cam-system.py",
     "scripts/pupil-see.py",
     "scripts/pack-gaze-result.py",
     "vault/02-Cam/Brain.md",
     "vault/04-Research/AGI-Daily-Scan.md",
     "vault/04-Research/scholar/README.md",
+    "vault/10-Mesh-Distillates/memorybear/README.md",
 ]
 
 

@@ -14,6 +14,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - System: `python3 scripts/cam-system.py --smoke` — all pieces on one bus
 - MCP: `python3 scripts/cam-mcp-server.py` (stdio) — install with `cline mcp install cam -- ...`
 - Schedules: `python3 scripts/sync-cline-schedules.py --apply-cache --print-commands`
+- Cognitive memory: `python3 scripts/memorybear.py --doctor --offline` · `python3 scripts/memorybear-check.py`
 - Public APIs: `python3 scripts/public-apis-search.py --query "weather"`
 - Inkbox: `python3 scripts/inkbox-check.py`
 

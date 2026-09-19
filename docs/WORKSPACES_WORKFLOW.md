@@ -9,7 +9,7 @@ Aaron runs Cam across **repo checkouts**, **scan workspaces**, **integration sub
 | **Personal-Assistant repo** | Cam identity, connectome, vault, teams | Active (`cursor/cam-brain-agi-scan-teams-bded`) |
 | **Persistence bundle** | Cross-checkout Cam memory (`persist-export` / `persist-import`) | Present; must include teams + AGI grants |
 | **Vault areas** | Obsidian second brain (`vault/01`…`10`) | Wired via smart-second-brain config |
-| **Integration submodules** | Jarvis · PaddleDetection · Pupil · LLMAvatarTalk · VoiceStudio · smart-second-brain · public-apis · Cline · **Inkbox** | **Declared; init with `git submodule update --init --recursive`** |
+| **Integration submodules** | Jarvis · PaddleDetection · Pupil · LLMAvatarTalk · VoiceStudio · smart-second-brain · MemoryBear · public-apis · Cline · **Inkbox** · SwiftGuide | **Declared; init with `git submodule update --init --recursive`** |
 | **Scan workspaces (PR #2)** | health · architecture · vulnerability · updates · improvements · **agi_research** · **swarm** | **Merged to main** + AGI + swarm scanners on this branch |
 | **Brodmann / 3D cortex (PR #3)** | Plasticity + human brain viz + health conductor | Lives on `cursor/swiftguide-brain-map-0f2c` — overlaps connectome viz |
 | **Agent teams (PR #4 / this)** | AGI Research Scan · Capability · Information + sLM/DL | This branch |
@@ -81,6 +81,7 @@ Aaron (sole task-giver / kill / enhance-approve)
 | LLMAvatarTalk | `config/integrations/llmavatartalk.md` | empty submodule | needs init |
 | VoiceStudio | `config/integrations/voicestudio.md` + `.json` | empty submodule | needs init + local backend |
 | smart-second-brain | `config/integrations/smart-second-brain.md` | empty submodule | needs Obsidian enable |
+| MemoryBear | `config/integrations/memorybear.md` + `.json` | empty submodule | offline CLI wired; live needs `MEMORYBEAR_*` env + API |
 | public-apis | `config/integrations/public-apis.md` | submodule + search scripts | shared by all agents |
 | Inkbox | `config/integrations/inkbox.md` | submodule + `inkbox-check.py` | outbound gated (`switch.outbound`) |
 | iOS / Tailscale converse | docs + companions | companions present | machine-local |

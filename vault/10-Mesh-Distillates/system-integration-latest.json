@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-19T20:06:17Z",
+  "at": "2026-09-19T21:36:19Z",
   "overall": "warning",
   "ok": true,
   "assistant": "Cam",
@@ -223,7 +223,7 @@
       "id": "connectome-check",
       "ok": true,
       "exit": 0,
-      "preview": "connectome-check: PASS\n  senses=26 options=36 edges=272 hard=0 missing=0"
+      "preview": "connectome-check: PASS\n  senses=32 options=44 edges=315 hard=0 missing=0"
     },
     {
       "id": "swarm-check",

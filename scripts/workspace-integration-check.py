@@ -44,6 +44,8 @@ HARD_PATHS = [
     "config/pipelines/cam-enhance-gate.json",
     "config/integrations/google-scholar.json",
     "config/integrations/google-scholar.md",
+    "config/integrations/memorybear.json",
+    "config/integrations/memorybear.md",
     "config/integrations/voicestudio.json",
     "config/integrations/voicestudio.md",
     "config/mcp/voicestudio.json",
@@ -65,6 +67,9 @@ HARD_PATHS = [
     "scripts/cam-enhance-propose.py",
     "scripts/scholar-search.py",
     "scripts/pack-scholar-result.py",
+    "scripts/memorybear.py",
+    "scripts/pack-memorybear-result.py",
+    "scripts/memorybear-check.py",
     "scripts/public-apis-search.py",
     "scripts/pack-public-apis-result.py",
     "scripts/public-apis-check.py",
@@ -93,6 +98,7 @@ PERSIST_MUST_INCLUDE = [
     "identity/persistence/DAILY_AGI_SCAN.md",
     "identity/persistence/HAAS_CAM_PATTERNS.md",
     "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
+    "identity/persistence/MEMORYBEAR.md",
     "identity/persistence/INKBOX.md",
     "config/teams/agi-research-scan.json",
     "config/teams/capability.json",
@@ -106,6 +112,8 @@ PERSIST_MUST_INCLUDE = [
     "config/connectome/trajectory-policies.json",
     "config/persona/consistency-checks.json",
     "config/workspaces/registry.json",
+    "config/integrations/memorybear.json",
+    "config/integrations/memorybear.md",
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
@@ -150,6 +158,11 @@ def mesh_flags(seed: dict) -> dict:
             or research.get("cam_enhance_apply_requires_aaron")
         ),
         "google_scholar": bool(research.get("google_scholar")),
+        "memorybear": bool(
+            (seed.get("mesh/memorybear") or {}).get("enabled")
+            or (seed.get("mesh/facts") or {}).get("memorybear_cognitive_memory")
+            or (seed.get("mesh/prefs") or {}).get("memorybear_enabled")
+        ),
         "public_apis": bool(
             research.get("public_apis")
             or prefs.get("public_apis")
@@ -268,6 +281,25 @@ def main() -> int:
         if scholar.get("hotspot_id") != "hotspot.google_scholar":
             route_ok = False
             route_notes.append("scholar sense should hit hotspot.google_scholar")
+        mb = json.loads(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/connectome-route.py"),
+                    "--sense",
+                    "sense.memorybear.hit",
+                    "--goal",
+                    "memorybear recall",
+                ],
+                text=True,
+            )
+        )
+        if "motor.memorybear" not in mb.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("memorybear pathway missing motor.memorybear")
+        if mb.get("hotspot_id") != "hotspot.memorybear_recall":
+            route_ok = False
+            route_notes.append("memorybear sense should hit hotspot.memorybear_recall")
         public_apis = json.loads(
             subprocess.check_output(
                 [

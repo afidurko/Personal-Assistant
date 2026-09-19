@@ -305,6 +305,7 @@ def main() -> int:
         "sense.web.arxiv": 2.5,
         "sense.web.agi_feed": 2.0,
         "sense.web.scholar": 2.5,
+        "sense.memorybear.hit": 2.5,
         "sense.catalog.public_apis": 2.0,
         "sense.inkbox.event": 2.0,
         "sense.slm.inference": 1.5,

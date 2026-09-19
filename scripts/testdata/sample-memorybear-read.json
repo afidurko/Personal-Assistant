@@ -1,0 +1,30 @@
+{
+  "provider": "fixture",
+  "offline": true,
+  "ok": true,
+  "operation": "read",
+  "query": "Aaron preferences",
+  "search_switch": "express",
+  "answer": "Aaron is the sole operator. Cam speaks soft airy Argentine English. Prefer vault + mesh facts over invention. Standing autonomy once tasked; kill switch always wins.",
+  "intermediate_outputs": [
+    {
+      "id": "mem-fixture-1",
+      "content": "Sole operator: Aaron",
+      "type": "preference",
+      "strength": 0.95
+    },
+    {
+      "id": "mem-fixture-2",
+      "content": "Cam voice: soft airy Argentine English",
+      "type": "preference",
+      "strength": 0.9
+    },
+    {
+      "id": "mem-fixture-3",
+      "content": "Memory stack: vault notes + nulltickets mesh + MemoryBear cognitive store",
+      "type": "fact",
+      "strength": 0.85
+    }
+  ],
+  "count": 3
+}

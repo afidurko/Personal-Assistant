@@ -1,7 +1,4 @@
 {
-  "version": 1,
-  "namespace": "mesh/tools",
-  "docs": "docs/HAAS_CAM_PATTERNS.md",
   "tools": [
     {
       "id": "tool.jarvis.echo",
@@ -289,6 +286,57 @@
       "status": "active",
       "integration": "config/integrations/inkbox.json",
       "motor": "motor.inkbox"
+    },
+    {
+      "id": "tool.memorybear.read",
+      "purpose": "Recall cognitive memory via MemoryBear (offline fixture or live API)",
+      "created_by_role": "memory-curator",
+      "entrypoint": "scripts/memorybear.py",
+      "kind": "local_script",
+      "inputs": {
+        "query": "string",
+        "offline": "boolean",
+        "search_switch": "string"
+      },
+      "outputs": {
+        "answer": "string",
+        "memories": "object[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active"
+    },
+    {
+      "id": "tool.memorybear.write",
+      "purpose": "Persist a cognitive memory via MemoryBear extract pipeline",
+      "created_by_role": "memory-curator",
+      "entrypoint": "scripts/memorybear.py",
+      "kind": "local_script",
+      "inputs": {
+        "message": "string",
+        "offline": "boolean"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "msg_id": "string"
+      },
+      "required_privileges": [
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "medium",
+      "status": "active"
     }
   ]
 }

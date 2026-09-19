@@ -25,7 +25,7 @@
     {
       "id": "center.memory",
       "role": "memory-curator",
-      "function": "mesh + vault association / engrams",
+      "function": "mesh + vault + MemoryBear association / engrams",
       "maps_to": "area.mtl",
       "accepts": [
         "spike.fact",
@@ -37,7 +37,8 @@
         "center.chief",
         "switch.autonomy",
         "motor.mesh",
-        "motor.vault"
+        "motor.vault",
+        "motor.memorybear"
       ]
     },
     {

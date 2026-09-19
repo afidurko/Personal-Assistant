@@ -19,6 +19,7 @@ and outbound contact (text / FaceTime / call) when needed.
 | [pupil](https://github.com/afidurko/pupil) (`master`) | **Eye-tracking / gaze layer** | Pupil Capture/Player/Service; submodule — not always-on eye camera |
 | [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); not a second brain |
 | [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
+| [MemoryBear](https://github.com/afidurko/MemoryBear) | **Cognitive memory engine** | Perceive → extract → associate → forget — hybrid search + graph + reflection for all agents |
 | [SwiftGuide](https://github.com/afidurko/SwiftGuide) | **Knowledge cartography** | Hierarchical mind maps + 2026 Swift stack guide for iOS companion |
 | [cline](https://github.com/afidurko/cline) | **Coding effector** | CLI/SDK/IDE agent — shared by all roles & workspaces; not the brain |
 | [public-apis](https://github.com/afidurko/public-apis) | **Free API catalog** | Curated public/free HTTP APIs — shared discovery for all agents |
@@ -71,8 +72,10 @@ You (human) ──override / kill──► nullhub / chat
                                       │
                     ┌──────────────────┴──────────────────────────────────────┐
                     ▼      ▼       ▼         ▼            ▼                   ▼
-                 Jarvis  Cline  PaddleDet  AvatarTalk  smart-second-brain   SwiftGuide
-                 motor   code    sense     face/voice   memory cortex       mind-map cartography
+                 Jarvis  Cline  PaddleDet  AvatarTalk  smart-second-brain  MemoryBear  SwiftGuide
+                 motor   code    sense     face/voice   vault cortex       cognitive   mind-map cartography
+                                                                         memory
+                                                                         (all agents)
 ```
 
 - **Tracker = synaptic truth** (nulltickets)
@@ -93,7 +96,7 @@ You (human) ──override / kill──► nullhub / chat
 | `comms` | Text / call / FaceTime + avatar presence |
 | `vision` | PaddleDetection + Pupil (Cam can see via world/gaze) |
 | `qa` | Verifies outputs and logs |
-| `memory-curator` | Mesh + smart-second-brain coherence |
+| `memory-curator` | Mesh + vault + MemoryBear coherence |
 | `agi-scout` | Daily AI/AGI paper scan lead (`team.agi-research-scan`) |
 | `agi-analyst` | Score papers for Cam relevance |
 | `agi-synthesist` | Map findings → Cam enhancement proposals |

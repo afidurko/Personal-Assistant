@@ -154,14 +154,17 @@
     "aaron_voice_gate_addons": true,
     "aaron_voice_adaptive_noise": true,
     "inkbox": true,
-    "inkbox_submodule": "integrations/inkbox"
+    "inkbox_submodule": "integrations/inkbox",
+    "memorybear_cognitive_memory": true,
+    "memorybear_available_to_all_agents": true,
+    "memorybear_submodule": "integrations/memorybear"
   },
   "mesh/open-questions": {
     "ios_companion_pair_code": "generate on first launch",
     "ios_host_uri": "set on Aaron machine (Cam host reachable from iPhone)",
     "riva_studio_uri": "set on Aaron machine",
     "standing_approval_rules": "standing autonomy ON for session_01 grants",
-    "vault_path": "set — starter at repo vault/"
+    "vault_path": "set \u2014 starter at repo vault/"
   },
   "mesh/persona": {
     "age": 32,
@@ -286,7 +289,9 @@
     "aaron_voice_only": true,
     "aaron_voice_gate_config": "config/identity/aaron-voice-gate.json",
     "inkbox": true,
-    "inkbox_outbound_gated": true
+    "inkbox_outbound_gated": true,
+    "memorybear_enabled": true,
+    "memorybear_offline_ok": true
   },
   "mesh/projects": {
     "default_workspace_id": "personal-assistant",
@@ -387,5 +392,40 @@
     "smoke_tts": "data/voicestudio/cam-smoke-20260919T190824Z.wav",
     "status": "connected_cpu_models_installed",
     "version": "0.5.4"
+  },
+  "mesh/memorybear": {
+    "enabled": true,
+    "available_to": "all_roles_and_subagents",
+    "cross_workspace": true,
+    "effector": "memorybear",
+    "motor": "motor.memorybear",
+    "sense": "sense.memorybear.hit",
+    "hotspots": [
+      "hotspot.memorybear_recall",
+      "hotspot.memorybear_write"
+    ],
+    "config": "config/integrations/memorybear.json",
+    "policy": "config/integrations/memorybear.md",
+    "client": "scripts/memorybear.py",
+    "pack": "scripts/pack-memorybear-result.py",
+    "check": "scripts/memorybear-check.py",
+    "source": "https://github.com/afidurko/MemoryBear",
+    "homepage": "https://www.memorybear.ai/",
+    "submodule": "integrations/memorybear",
+    "status": "runtime_wired",
+    "complements": [
+      "smart-second-brain",
+      "nulltickets",
+      "hmo-tiers"
+    ],
+    "credential_env": [
+      "MEMORYBEAR_API_KEY",
+      "MEMORYBEAR_END_USER_ID",
+      "MEMORYBEAR_API_BASE"
+    ]
+  },
+  "mesh/memory": {
+    "memorybear": true,
+    "memorybear_config": "config/integrations/memorybear.json"
   }
 }

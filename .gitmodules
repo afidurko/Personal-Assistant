@@ -17,6 +17,9 @@
 [submodule "integrations/cline"]
 	path = integrations/cline
 	url = https://github.com/afidurko/cline.git
+[submodule "integrations/memorybear"]
+	path = integrations/memorybear
+	url = https://github.com/afidurko/MemoryBear.git
 [submodule "integrations/sgr-agent-core"]
 	path = integrations/sgr-agent-core
 	url = https://github.com/afidurko/sgr-agent-core.git

@@ -1,0 +1,73 @@
+{
+  "id": "memorybear",
+  "name": "MemoryBear",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "role": "Human-like cognitive memory engine (perceive → extract → associate → forget) for all Cam agents and workspaces",
+  "policy": "config/integrations/memorybear.md",
+  "remote": "github.com/afidurko/MemoryBear",
+  "homepage": "https://www.memorybear.ai/",
+  "path": "integrations/memorybear",
+  "sense": "sense.memorybear.hit",
+  "hotspots": [
+    "hotspot.memorybear_recall",
+    "hotspot.memorybear_write"
+  ],
+  "motor": "motor.memorybear",
+  "switch": "switch.autonomy",
+  "center": "center.memory",
+  "area": "area.mtl",
+  "mesh_namespace": "mesh/memorybear",
+  "vault_dir": "vault/10-Mesh-Distillates/memorybear",
+  "provider": {
+    "primary": "memorybear_v1",
+    "api_base_env": "MEMORYBEAR_API_BASE",
+    "api_base_default": "http://127.0.0.1:8002",
+    "credential_env": "MEMORYBEAR_API_KEY",
+    "end_user_env": "MEMORYBEAR_END_USER_ID",
+    "mcp_path": "/memory",
+    "service_prefix": "/v1/memory",
+    "notes": "Service API uses API Key (Authorization: Bearer). MCP tools use the same key plus X-End-User-Other-Id. Keys stay in local .env — never commit."
+  },
+  "endpoints": {
+    "read_sync": "/v1/memory/read/sync",
+    "write": "/v1/memory/write",
+    "analytics_summary": "/v1/memory/analytics/user_summary",
+    "analytics_graph": "/v1/memory/analytics/graph_data",
+    "mcp": "/memory"
+  },
+  "defaults": {
+    "search_switch": "express",
+    "save_to_mesh": true,
+    "save_to_vault": true,
+    "offline_ok": true
+  },
+  "scripts": {
+    "client": "scripts/memorybear.py",
+    "pack": "scripts/pack-memorybear-result.py",
+    "check": "scripts/memorybear-check.py"
+  },
+  "complements": [
+    "smart-second-brain (vault notes)",
+    "nulltickets mesh (task/KV truth)",
+    "HMO tiers (primary/secondary/archive)"
+  ],
+  "teams": [
+    "team.agi-research-scan",
+    "team.capability",
+    "team.info",
+    "team.tooling"
+  ],
+  "roles": [
+    "memory-curator",
+    "chief",
+    "researcher",
+    "info-retriever",
+    "agi-scout",
+    "ops",
+    "coding",
+    "qa"
+  ],
+  "available_to": "all_roles_and_subagents"
+}

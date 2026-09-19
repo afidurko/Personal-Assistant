@@ -157,6 +157,8 @@ Examples:
 
 - `sense.chat.aaron` — Aaron message / task  
 - `sense.vault.hit` — smart-second-brain retrieval  
+- `sense.memorybear.hit` — MemoryBear cognitive recall  
+- `sense.mesh.hit` — nulltickets mesh recall 
 - `sense.careers.listing` — LinkedIn/Indeed item  
 - `sense.calendar.event` — schedule signal  
 - `sense.audio.transcript` — RIVA ASR  
@@ -231,6 +233,7 @@ Effectors fire only after a switch resolves to **act**.
 | `motor.speak` | RIVA TTS + avatar face |
 | `motor.jarvis` | Local CLI utilities |
 | `motor.cline` | Cline coding agent (CLI/SDK/IDE) — all roles & workspaces |
+| `motor.memorybear` | MemoryBear cognitive memory (read/write/forget) — all roles & workspaces |
 | `motor.docs` | File/doc writes |
 | `motor.jobs` | LinkedIn/Indeed apply |
 | `motor.vault` | Obsidian note writes |
@@ -288,7 +291,7 @@ Rules:
 | Routing policy | nullboiler |
 | Neuron executors | nullclaw roles |
 | Human master switch | Aaron (+ nullhub when live) |
-| Long-term engram | smart-second-brain vault + mesh |
+| Long-term engram | smart-second-brain vault + mesh + MemoryBear cognitive store |
 | Coding effector | Cline (`integrations/cline`) |
 | Free API catalog | public-apis (`integrations/public-apis`) — all agents |
 | Knowledge cartography | SwiftGuide (`integrations/swiftguide`) |
@@ -310,7 +313,7 @@ Rules:
 - Rewindable plasticity tape (scrubber) to inspect tract mesh errors
 - LTP / LTD / prune weights + MTL neurogenesis columns
 - Flat 2D fallback: `visualizations/connectome/flat.html`
-- All wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nullhub, Jarvis, Cline, PaddleDetection, LLMAvatarTalk, smart-second-brain, SwiftGuide, OpenClaw/Assistant- patterns).
+- All wired repos light up as pathways fire (nullclaw, nulltickets, nullboiler, nullhub, Jarvis, Cline, PaddleDetection, LLMAvatarTalk, smart-second-brain, MemoryBear, SwiftGuide, OpenClaw/Assistant- patterns).
 
 ```bash
 bash scripts/serve-connectome-viz.sh
