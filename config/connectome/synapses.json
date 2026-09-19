@@ -440,6 +440,13 @@
     },
     {
       "from": "switch.outbound",
+      "to": "motor.inkbox",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Inkbox agent identity send/call/SMS/vault/tunnel"
+    },
+    {
+      "from": "switch.outbound",
       "to": "motor.speak",
       "when": "act",
       "weight": 0.8
@@ -1007,6 +1014,26 @@
       "notes": "when AGI scan needs free API tooling ideas"
     },
     {
+      "from": "sense.inkbox.event",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.inkbox.event",
+      "to": "area.broca",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.inkbox.event",
+      "to": "area.wernicke",
+      "weight": 0.85
+    },
+    {
+      "from": "sense.inkbox.event",
+      "to": "center.capability",
+      "weight": 0.7
+    },
+    {
       "from": "sense.slm.inference",
       "to": "center.slm",
       "weight": 1.0
@@ -1435,6 +1462,24 @@
       "to": "sense.tool.result",
       "weight": 0.7,
       "notes": "catalog search result loop"
+    },
+    {
+      "from": "motor.inkbox",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — identity/outbound events into memory"
+    },
+    {
+      "from": "motor.inkbox",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.inkbox",
+      "to": "center.comms",
+      "weight": 0.75,
+      "notes": "feedback — outbound result to comms"
     },
     {
       "from": "motor.tool",

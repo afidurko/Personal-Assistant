@@ -132,6 +132,10 @@
         "switch.outbound",
         "motor.text"
       ],
+      "side_effects": [
+        "motor.inkbox",
+        "motor.mesh"
+      ],
       "behavior": "triage_and_reply_email"
     },
     {
@@ -589,6 +593,33 @@
       "team": "team.tooling",
       "available_to": "all_roles_and_subagents",
       "integration": "config/integrations/public-apis.json"
+    },
+    {
+      "id": "hotspot.inkbox",
+      "center": "center.comms",
+      "area": "area.broca",
+      "columns": [
+        "neuron.comms",
+        "neuron.language_in"
+      ],
+      "tracts": [
+        "tract.arcuate",
+        "tract.corticospinal"
+      ],
+      "pathway": [
+        "sense.inkbox.event",
+        "center.comms",
+        "switch.outbound",
+        "motor.inkbox"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "agent_identity_email_phone_vault_tunnels",
+      "team": "team.capability",
+      "available_to": "comms_and_gated_outbound",
+      "integration": "config/integrations/inkbox.json"
     },
     {
       "id": "hotspot.slm_assist",

@@ -103,6 +103,19 @@
 - No catalog API key; individual listed APIs may need their own local secrets
 - Free-form URL fetch from catalog hits is forbidden — only allowlisted add-ons may call HTTP
 
+## Inkbox (agent identity + outbound channels)
+
+- Source: [afidurko/inkbox](https://github.com/afidurko/inkbox) · [inkbox.ai](https://inkbox.ai)
+- Policy: `config/integrations/inkbox.md`
+- Config: `config/integrations/inkbox.json`
+- Path: `integrations/inkbox` (git submodule)
+- Sense: `sense.inkbox.event` · Hotspot: `hotspot.inkbox` · Motor: `motor.inkbox`
+- Gate: `switch.outbound` (live email/SMS/call) — not free-send from Cline
+- Credential: `INKBOX_API_KEY` in local `.env` only
+- Scripts: `scripts/inkbox-check.py`
+- Coding workspace id: `inkbox` (SDK/CLI work via Cline)
+- Distills to `mesh/comms` + `vault/06-Life-Ops/inkbox/`
+
 ## Bridge later (OpenClaw-inspired external plugins)
 
 - SMS via phone companion

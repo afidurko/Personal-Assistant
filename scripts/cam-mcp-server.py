@@ -7,7 +7,7 @@ Implements a small JSON-RPC MCP subset over stdin/stdout:
 Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
   vault_search, connectome_route, kill_switch_status, ticket_list,
-  public_apis_search, public_apis_addon
+  public_apis_search, public_apis_addon, inkbox_check
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -160,6 +160,15 @@ def tool_defs() -> list[dict]:
                     "vs": {"type": "string"},
                 },
             },
+        },
+        {
+            "name": "inkbox_check",
+            "description": (
+                "Confirm Inkbox wiring (connectome, registry, submodule). "
+                "Does not send email/SMS or require INKBOX_API_KEY. "
+                "Live outbound uses motor.inkbox under switch.outbound."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
         },
     ]
 
@@ -321,6 +330,15 @@ def public_apis_addon(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def inkbox_check(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
 def call_tool(name: str, arguments: dict) -> Any:
     if name == "list_workspaces":
         return cw.mesh_projects_doc()
@@ -351,6 +369,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return public_apis_search(arguments)
     if name == "public_apis_addon":
         return public_apis_addon(arguments)
+    if name == "inkbox_check":
+        return inkbox_check(arguments)
     raise ValueError(f"unknown tool: {name}")
 
 

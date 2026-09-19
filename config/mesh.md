@@ -34,6 +34,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/workspaces` | scan-workspace snapshots (health/arch/vuln/updates/improvements) |
 | `mesh/agent-lineage` | spawn tree, privilege grants, lineage terminations |
 | `mesh/tools` | registered tool specs + run distillates (team.tooling) + **public-apis** catalog hits |
+| `mesh/comms` | **Inkbox** identity + outbound channel distillates (email/phone/vault/tunnels) |
 
 ## Deep agent layers (TypeScript neural mesh)
 
@@ -82,6 +83,7 @@ Config (not a second runtime): `config/swarm/`
 - Knowledge maps via SwiftGuide; sync stack/taxonomy distillates to `mesh/cartography`
 - AGI daily scan archives via `scripts/agi-research-scan.py` → vault + mesh distillates
 - Tool specs/runs via team.tooling → `mesh/tools`
+- Inkbox identity/outbound via `motor.inkbox` → `mesh/comms` (gated by `switch.outbound`)
 - Cross-workspace: `scripts/persist-export.py` / `persist-import.py`
 - Integration confirmation: `scripts/workspace-integration-check.py` · `docs/WORKSPACES_WORKFLOW.md`
 - Swarm contracts: `scripts/swarm-check.py` · `docs/HAAS_CAM_PATTERNS.md`

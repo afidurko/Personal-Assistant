@@ -47,6 +47,8 @@ HARD_PATHS = [
     "config/integrations/public-apis.json",
     "config/integrations/public-apis.md",
     "config/integrations/public-apis-addons.json",
+    "config/integrations/inkbox.json",
+    "config/integrations/inkbox.md",
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
@@ -59,6 +61,7 @@ HARD_PATHS = [
     "scripts/pack-public-apis-result.py",
     "scripts/public-apis-check.py",
     "scripts/public-apis-addon.py",
+    "scripts/inkbox-check.py",
     "scripts/swarm-check.py",
     "scripts/persist-export.py",
     "scripts/persist-import.py",
@@ -76,6 +79,7 @@ PERSIST_MUST_INCLUDE = [
     "identity/persistence/DAILY_AGI_SCAN.md",
     "identity/persistence/HAAS_CAM_PATTERNS.md",
     "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
+    "identity/persistence/INKBOX.md",
     "config/teams/agi-research-scan.json",
     "config/teams/capability.json",
     "config/teams/info.json",
@@ -134,6 +138,12 @@ def mesh_flags(seed: dict) -> dict:
             research.get("public_apis")
             or prefs.get("public_apis")
             or (seed.get("mesh/tools") or {}).get("public_apis")
+        ),
+        "inkbox": bool(
+            prefs.get("inkbox")
+            or facts.get("inkbox")
+            or (seed.get("mesh/tools") or {}).get("inkbox")
+            or (seed.get("mesh/comms") or {}).get("inkbox")
         ),
         "unlimited_subagents": bool(prefs.get("unlimited_subagents") or facts.get("unlimited_subagents")),
         "slm_cortex_enabled": bool(prefs.get("slm_cortex_enabled")),
@@ -261,6 +271,25 @@ def main() -> int:
         if public_apis.get("hotspot_id") != "hotspot.public_apis":
             route_ok = False
             route_notes.append("public-apis sense should hit hotspot.public_apis")
+        inkbox = json.loads(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/connectome-route.py"),
+                    "--sense",
+                    "sense.inkbox.event",
+                    "--goal",
+                    "inkbox agent identity email",
+                ],
+                text=True,
+            )
+        )
+        if "motor.inkbox" not in inkbox.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("inkbox pathway missing motor.inkbox")
+        if inkbox.get("hotspot_id") != "hotspot.inkbox":
+            route_ok = False
+            route_notes.append("inkbox sense should hit hotspot.inkbox")
     except Exception as exc:  # noqa: BLE001
         route_ok = False
         route_notes.append(str(exc))

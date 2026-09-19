@@ -100,6 +100,13 @@
       "notes": "Search afidurko/public-apis catalog (scripts/public-apis-search.py) — shared by all agents; no spend"
     },
     {
+      "id": "motor.inkbox",
+      "channel": ["inkbox_sdk", "inkbox_cli", "email", "sms", "phone", "vault", "tunnel"],
+      "path": "integrations/inkbox",
+      "requires_switch": ["switch.outbound", "switch.kill"],
+      "notes": "Inkbox agent identity — email/phone/SMS/vault/tunnels; gated outbound; not free-send from Cline"
+    },
+    {
       "id": "motor.swarm",
       "channel": ["nulltickets_store", "agent_bus"],
       "requires_switch": ["switch.autonomy", "switch.kill"],

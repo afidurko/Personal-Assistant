@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-19",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -206,6 +206,19 @@
         "policy": "config/integrations/cline.md",
         "remote": "github.com/afidurko/cline",
         "effector": "motor.cline"
+      },
+      {
+        "id": "inkbox",
+        "path": "integrations/inkbox",
+        "policy": "config/integrations/inkbox.md",
+        "config": "config/integrations/inkbox.json",
+        "script": "scripts/inkbox-check.py",
+        "sense": "sense.inkbox.event",
+        "hotspot": "hotspot.inkbox",
+        "motor": "motor.inkbox",
+        "remote": "github.com/afidurko/inkbox",
+        "credential_env": "INKBOX_API_KEY",
+        "available_to": "comms_and_gated_outbound"
       }
     ],
     "parallel_prs": [
@@ -375,7 +388,29 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Curated free API index — shared by all agents via motor.public_apis"
+        "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+      },
+      {
+        "id": "inkbox",
+        "label": "Inkbox agent identity",
+        "path": "integrations/inkbox",
+        "remote": "github.com/afidurko/inkbox",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "comms",
+          "ops",
+          "docs",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/inkbox",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
       }
     ]
   },
@@ -397,7 +432,8 @@
     "scholar_search": "scripts/scholar-search.py",
     "public_apis_search": "scripts/public-apis-search.py",
     "public_apis_check": "scripts/public-apis-check.py",
-    "public_apis_addon": "scripts/public-apis-addon.py"
+    "public_apis_addon": "scripts/public-apis-addon.py",
+    "inkbox_check": "scripts/inkbox-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -471,6 +507,18 @@
             "free api catalog",
             "integrations/public-apis",
             "apilayer public-apis"
+          ]
+        },
+        {
+          "id": "inkbox",
+          "match_any": [
+            "inkbox",
+            "inkbox sdk",
+            "inkbox cli",
+            "@inkbox/",
+            "agent identity",
+            "integrations/inkbox",
+            "inkbox.ai"
           ]
         }
       ]
@@ -608,7 +656,29 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Curated free API index — shared by all agents via motor.public_apis"
+      "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+    },
+    {
+      "id": "inkbox",
+      "label": "Inkbox agent identity",
+      "path": "integrations/inkbox",
+      "remote": "github.com/afidurko/inkbox",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "ops",
+        "docs",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/inkbox",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
     }
   ],
   "chooser": {
@@ -679,6 +749,18 @@
           "free api catalog",
           "integrations/public-apis",
           "apilayer public-apis"
+        ]
+      },
+      {
+        "id": "inkbox",
+        "match_any": [
+          "inkbox",
+          "inkbox sdk",
+          "inkbox cli",
+          "@inkbox/",
+          "agent identity",
+          "integrations/inkbox",
+          "inkbox.ai"
         ]
       }
     ]

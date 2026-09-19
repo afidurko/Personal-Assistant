@@ -33,6 +33,10 @@ class WorkspaceRegistryTests(unittest.TestCase):
         c = cw.choose_workspace(goal="paddledetection model export")
         self.assertEqual(c["workspace"]["id"], "paddledetection")
 
+    def test_choose_inkbox(self):
+        c = cw.choose_workspace(goal="inkbox sdk identity email")
+        self.assertEqual(c["workspace"]["id"], "inkbox")
+
     def test_explicit_id_wins(self):
         c = cw.choose_workspace(goal="cline sdk", workspace_id="jarvis")
         self.assertEqual(c["workspace"]["id"], "jarvis")
@@ -139,6 +143,7 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertIn("choose_workspace", tools)
         self.assertIn("mesh_search", tools)
         self.assertIn("connectome_route", tools)
+        self.assertIn("inkbox_check", tools)
 
     def test_sync_schedules(self):
         proc = self._run("scripts/sync-cline-schedules.py", "--apply-cache")

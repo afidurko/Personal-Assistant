@@ -22,6 +22,9 @@ python3 scripts/test_public_apis_addons.py
 python3 scripts/public-apis-check.py
 python3 scripts/public-apis-addon.py doctor
 
+echo "== inkbox wiring =="
+python3 scripts/inkbox-check.py
+
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \
   --n 1000000 \
