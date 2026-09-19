@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-19",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -173,6 +173,20 @@
         "id": "llmavatartalk",
         "path": "integrations/llmavatartalk",
         "policy": "config/integrations/llmavatartalk.md"
+      },
+      {
+        "id": "voicestudio",
+        "path": "integrations/voicestudio",
+        "policy": "config/integrations/voicestudio.md",
+        "config": "config/integrations/voicestudio.json",
+        "remote": "github.com/afidurko/VoiceStudio",
+        "sense": [
+          "sense.voicestudio.health",
+          "sense.voicestudio.result"
+        ],
+        "hotspot": "hotspot.voicestudio",
+        "motor": "motor.voicestudio",
+        "health_script": "scripts/voicestudio-health.py"
       },
       {
         "id": "smart-second-brain",
@@ -347,6 +361,27 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true
+      },
+      {
+        "id": "voicestudio",
+        "label": "VoiceStudio local speech",
+        "path": "integrations/voicestudio",
+        "remote": "github.com/afidurko/VoiceStudio",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "comms",
+          "ops",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/voicestudio",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
       }
     ]
   },
@@ -429,6 +464,20 @@
             "audio2face",
             "riva",
             "metahuman"
+          ]
+        },
+        {
+          "id": "voicestudio",
+          "match_any": [
+            "voicestudio",
+            "voice studio",
+            "omnivoice",
+            "voice cloning",
+            "voice clone",
+            "video dubbing",
+            "audiobook",
+            "elevenlabs local",
+            "local tts"
           ]
         }
       ]
@@ -550,6 +599,27 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true
+    },
+    {
+      "id": "voicestudio",
+      "label": "VoiceStudio local speech",
+      "path": "integrations/voicestudio",
+      "remote": "github.com/afidurko/VoiceStudio",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "ops",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/voicestudio",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
     }
   ],
   "chooser": {
@@ -610,6 +680,20 @@
           "audio2face",
           "riva",
           "metahuman"
+        ]
+      },
+      {
+        "id": "voicestudio",
+        "match_any": [
+          "voicestudio",
+          "voice studio",
+          "omnivoice",
+          "voice cloning",
+          "voice clone",
+          "video dubbing",
+          "audiobook",
+          "elevenlabs local",
+          "local tts"
         ]
       }
     ]

@@ -171,6 +171,7 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 2. Keep Jarvis available as local CLI utilities (`integrations/jarvis`) — **added**
 3. Keep PaddleDetection for vision (`integrations/paddledetection` @ `release/2.9`) — **added**
 4. Keep LLMAvatarTalk for Cam face/voice presence (`integrations/llmavatartalk`) — **added**
+4b. Keep VoiceStudio for local TTS/ASR/clone/dub (`integrations/voicestudio`) — **added**
 5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
 5b. Keep SwiftGuide for mind-map cartography + iOS stack picks (`integrations/swiftguide`) — **added**
 6. Keep Cline as shared coding effector for all agents/workspaces (`integrations/cline`) — **added**

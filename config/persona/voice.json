@@ -33,7 +33,17 @@
   "modes": {
     "simple": {
       "face_asset": "identity/persona/cam-face.jpg",
-      "tts_provider": "light_fallback_or_riva"
+      "tts_provider": "voicestudio_local_or_light_fallback",
+      "tts_integration": "integrations/voicestudio"
+    },
+    "local_voicestudio": {
+      "integration": "integrations/voicestudio",
+      "asr": "voicestudio_local",
+      "tts": "voicestudio_local",
+      "face": "identity/persona/cam-face.jpg",
+      "mcp": "http://localhost:3900/mcp",
+      "brain": "nullclaw_cam_plus_smart_second_brain",
+      "notes": "Prefer when RIVA/Audio2Face studio is offline; clone Cam soft-airy voice locally"
     },
     "full_presence": {
       "integration": "integrations/llmavatartalk",
@@ -41,7 +51,8 @@
       "tts": "nvidia_riva",
       "face": "nvidia_audio2face",
       "optional_body": "unreal_metahuman",
-      "brain": "nullclaw_cam_plus_smart_second_brain"
+      "brain": "nullclaw_cam_plus_smart_second_brain",
+      "optional_local_tts_fallback": "integrations/voicestudio"
     }
   },
   "tts": {
@@ -51,12 +62,25 @@
     "speaking_rate": 0.95,
     "pitch_bias": "soft",
     "style_notes": "soft, airy, calm; fluent natural English; 32-year-old Argentine woman; never harsh; Spanish only if Aaron uses Spanish or asks",
-    "riva_uri_config": "integrations/llmavatartalk/config.py URI"
+    "riva_uri_config": "integrations/llmavatartalk/config.py URI",
+    "local_fallback": {
+      "provider": "voicestudio",
+      "integration": "integrations/voicestudio",
+      "config": "config/integrations/voicestudio.json",
+      "backend": "http://localhost:3900",
+      "mcp_client_id": "cam",
+      "profile_id": null,
+      "notes": "Bind a soft-airy Cam clone in VoiceStudio; set profile_id when ready"
+    }
   },
   "stt": {
     "provider": "nvidia_riva",
     "locale": "en-US",
-    "also_accept": ["es-US", "es-AR"]
+    "also_accept": ["es-US", "es-AR"],
+    "local_fallback": {
+      "provider": "voicestudio",
+      "integration": "integrations/voicestudio"
+    }
   },
   "live": {
     "text": true,

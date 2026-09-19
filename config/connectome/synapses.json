@@ -1437,6 +1437,56 @@
       "to": "area.mtl",
       "weight": 0.9,
       "notes": "feedback"
+    },
+    {
+      "from": "sense.voicestudio.health",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.voicestudio.result",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.voicestudio.result",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "center.comms",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "voicestudio local api path"
+    },
+    {
+      "from": "center.comms",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.voicestudio",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "motor.voicestudio",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.voicestudio",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.voicestudio",
+      "to": "center.comms",
+      "weight": 0.7,
+      "notes": "feedback"
     }
   ]
 }

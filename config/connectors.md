@@ -55,6 +55,17 @@
 - Soft airy Argentine voice style in `config/persona/voice.json`
 - Brain stays Cam/nullclaw + smart-second-brain
 
+## Local speech engine (VoiceStudio)
+
+- Submodule: `integrations/voicestudio` ← [afidurko/VoiceStudio](https://github.com/afidurko/VoiceStudio)
+- Local TTS / ASR / clone / dub (open-source ElevenLabs alternative)
+- Backend default `http://localhost:3900` · MCP `/mcp`
+- Policy: `config/integrations/voicestudio.md` · config: `config/integrations/voicestudio.json`
+- Health: `python3 scripts/voicestudio-health.py`
+- Coding workspace id: `voicestudio` (chooser signals: voicestudio, omnivoice, voice cloning, …)
+- Prefer for simple/local speak when RIVA studio is offline; full face presence still LLMAvatarTalk
+- Not a second brain — nullclaw remains executive
+
 ## Knowledge cortex (smart-second-brain)
 
 - Submodule: `integrations/smart-second-brain`

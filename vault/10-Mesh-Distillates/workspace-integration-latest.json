@@ -5,6 +5,7 @@
     "integration empty: integrations/jarvis (submodule init or create config)",
     "integration empty: integrations/paddledetection (submodule init or create config)",
     "integration empty: integrations/llmavatartalk (submodule init or create config)",
+    "integration empty: integrations/voicestudio (submodule init or create config)",
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
     "integration empty: integrations/cline (submodule init or create config)"
   ],
@@ -37,6 +38,12 @@
       "policy_exists": true
     },
     {
+      "id": "voicestudio",
+      "path": "integrations/voicestudio",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
       "id": "smart-second-brain",
       "path": "integrations/smart-second-brain",
       "populated": false,
@@ -58,7 +65,7 @@
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=25 edges=262"
+    "detail": "senses=27 edges=271"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

@@ -31,6 +31,8 @@ DEFAULT_INCLUDE = [
     "config/integrations/cline.md",
     "config/integrations/google-scholar.json",
     "config/integrations/google-scholar.md",
+    "config/integrations/voicestudio.json",
+    "config/integrations/voicestudio.md",
     "config/workspaces/registry.json",
     "config/workspaces/schedules.json",
     "config/memory/hmo-tiers.json",

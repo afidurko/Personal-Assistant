@@ -239,12 +239,19 @@
     "timezone": "America/New_York",
     "tool_creator_user": true,
     "unlimited_subagents": true,
+    "voicestudio_config": "config/integrations/voicestudio.json",
+    "voicestudio_local_speech": true,
     "weekly_review": true
   },
   "mesh/projects": {
     "default_workspace_id": "personal-assistant",
     "source": "config/workspaces/registry.json",
-    "status": "registry_wired"
+    "status": "registry_wired",
+    "voicestudio": {
+      "remote": "github.com/afidurko/VoiceStudio",
+      "vault": "vault/03-Projects/VoiceStudio-Local-Speech.md",
+      "workspace_id": "voicestudio"
+    }
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,
@@ -274,5 +281,16 @@
     "status": "starter_vault_created",
     "vault_path": "vault",
     "welcome": "vault/Welcome.md"
+  },
+  "mesh/voice": {
+    "backend_default": "http://localhost:3900",
+    "config": "config/integrations/voicestudio.json",
+    "health_script": "scripts/voicestudio-health.py",
+    "integration": "integrations/voicestudio",
+    "mcp_path": "/mcp",
+    "notes": "Local TTS/ASR/clone/dub; not the brain",
+    "policy": "config/integrations/voicestudio.md",
+    "presence_face_still": "integrations/llmavatartalk",
+    "status": "wired_submodule"
   }
 }

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "voicestudio",
+  "label": "VoiceStudio local speech",
+  "remote": "github.com/afidurko/VoiceStudio",
+  "upstream": "github.com/debpalash/VoiceStudio",
+  "path": "integrations/voicestudio",
+  "policy": "config/integrations/voicestudio.md",
+  "default_branch": "main",
+  "backend": {
+    "base_url": "http://localhost:3900",
+    "health_path": "/health",
+    "openapi_path": "/openapi.json",
+    "mcp_path": "/mcp",
+    "speech_path": "/v1/audio/speech",
+    "transcribe_path": "/v1/audio/transcriptions",
+    "voices_path": "/v1/audio/voices"
+  },
+  "mcp": {
+    "client_id_header": "X-VoiceStudio-Client-Id",
+    "default_client_id": "cam",
+    "preferred_output_mode": "files",
+    "tools": [
+      "generate_speech",
+      "clone_voice",
+      "transcribe",
+      "list_voices",
+      "list_personalities",
+      "list_languages",
+      "check_health"
+    ]
+  },
+  "sense": ["sense.voicestudio.health", "sense.voicestudio.result"],
+  "hotspot": "hotspot.voicestudio",
+  "motor": "motor.voicestudio",
+  "speak_channel": "voicestudio_local_tts",
+  "persona_voice": "config/persona/voice.json",
+  "health_script": "scripts/voicestudio-health.py",
+  "notes": "Local-first ElevenLabs alternative. Brain stays nullclaw/Cam. Face stay LLMAvatarTalk when full presence is on."
+}

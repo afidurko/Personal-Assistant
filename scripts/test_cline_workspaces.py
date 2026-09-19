@@ -33,6 +33,10 @@ class WorkspaceRegistryTests(unittest.TestCase):
         c = cw.choose_workspace(goal="paddledetection model export")
         self.assertEqual(c["workspace"]["id"], "paddledetection")
 
+    def test_choose_voicestudio(self):
+        c = cw.choose_workspace(goal="voicestudio voice cloning local tts")
+        self.assertEqual(c["workspace"]["id"], "voicestudio")
+
     def test_explicit_id_wins(self):
         c = cw.choose_workspace(goal="cline sdk", workspace_id="jarvis")
         self.assertEqual(c["workspace"]["id"], "jarvis")

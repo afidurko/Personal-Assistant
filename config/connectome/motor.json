@@ -20,9 +20,18 @@
     },
     {
       "id": "motor.speak",
-      "channel": ["riva_tts", "audio2face", "metahuman_optional"],
+      "channel": ["riva_tts", "audio2face", "metahuman_optional", "voicestudio_local_tts"],
       "requires_switch": ["switch.presence", "switch.outbound", "switch.kill"],
-      "voice_profile": "config/persona/voice.json"
+      "voice_profile": "config/persona/voice.json",
+      "notes": "RIVA/Audio2Face for full presence; VoiceStudio for local-first TTS when studio offline"
+    },
+    {
+      "id": "motor.voicestudio",
+      "channel": ["voicestudio_rest", "voicestudio_mcp"],
+      "path": "integrations/voicestudio",
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "config": "config/integrations/voicestudio.json",
+      "notes": "Local VoiceStudio API/MCP (health, list voices, generate/transcribe to files). Audible playback still uses motor.speak."
     },
     {
       "id": "motor.jarvis",
