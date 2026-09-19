@@ -248,6 +248,18 @@ def emit_converse_activity(
                 source="cam_converse",
             )
         )
+    elif kind == "pupil_spike":
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.vision",
+                kind="agent",
+                area="area.visual",
+                intensity=0.9,
+                tracts=["tract.ilf", "tract.ifof", "tract.cingulum"],
+                reason="pupil_see",
+                source="pupil",
+            )
+        )
     if refresh and rows:
         activity_emit.refresh_live_activity()
     return rows
@@ -320,6 +332,12 @@ def cam_reply(aaron_text: str, history: list[dict]) -> str:
             "Camera is wired through the companion too. "
             "I already have your face enrollment from the photos you shared. "
             "Keep the lens on you and I'll treat that as Aaron present."
+        )
+    if "can you see" in low or "pupil" in low or "eye tracking" in low or "what do you see" in low:
+        return (
+            "Yes — Pupil is wired so I can see. "
+            "World camera plus gaze feed sense.vision.world when you open my eyes. "
+            "I'm not watching continuously unless you ask me to."
         )
     if "voice" in low or "recognize me" in low or "only me" in low or "surrounding" in low:
         return (
@@ -519,6 +537,33 @@ class Handler(BaseHTTPRequestHandler):
             self._append_log("spikes", event)
             mesh = emit_converse_activity(kind="camera_spike", source="camera")
             self._json(200, {"accepted": True, "event": event, "mesh_activity": mesh})
+            return
+
+        if path == "/api/spike/pupil":
+            sense = payload.get("sense") or "sense.vision.world"
+            if sense not in {"sense.vision.world", "sense.vision.gaze"}:
+                sense = "sense.vision.world"
+            goal = payload.get("purpose") or payload.get("goal") or "cam see via pupil"
+            route = route_sense(sense, goal=goal)
+            event = {
+                "at": utc_now(),
+                "type": "pupil_spike",
+                "sense": sense,
+                "gaze_count": payload.get("gaze_count"),
+                "frame_ref": payload.get("frame_ref"),
+                "route": route,
+            }
+            self._append_log("spikes", event)
+            mesh = emit_converse_activity(kind="pupil_spike", source="pupil")
+            self._json(
+                200,
+                {
+                    "accepted": True,
+                    "cam_can_see": True,
+                    "event": event,
+                    "mesh_activity": mesh,
+                },
+            )
             return
 
         if path == "/api/turn":

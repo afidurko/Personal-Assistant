@@ -1,23 +1,23 @@
 {
-  "at": "2026-09-19T20:07:09Z",
+  "at": "2026-09-19T20:16:32Z",
   "overall": "warning",
   "checks": [
     {
       "neuron": "neuron.vitals_loop",
       "loadavg": [
-        0.10546875,
-        1.82373046875,
-        2.1015625
+        3.7470703125,
+        3.8193359375,
+        3.19580078125
       ],
       "cwd": "/workspace",
       "status": "healthy"
     },
     {
-      "senses": 29,
-      "hotspot_options": 39,
-      "known_nodes": 136,
+      "senses": 30,
+      "hotspot_options": 40,
+      "known_nodes": 138,
       "motors": 20,
-      "edges": 291,
+      "edges": 296,
       "hard_errors": [],
       "missing_edges": [],
       "soft_warnings": [],
@@ -32,11 +32,11 @@
       "status": "warning",
       "sample": [
         "-173837314b7e02f4179c95b60fb6ca08c6d6f3bf integrations/cline",
-        " 8bafc65df0bec5719b722cdb04be028b6bed54d8 integrations/inkbox (heads/main)",
         "-0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis",
         "-93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk",
         "-b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection",
         "-4cfe04f70da070207b032eed62db76a0c82e11b7 integrations/public-apis",
+        " 7a3cd9e8d2e54ac123ab0ed292d741732db899a2 integrations/pupil (v3.6-14-g7a3cd9e8)",
         "-baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain",
         "-64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide"
       ]
@@ -46,13 +46,13 @@
       "present": [
         "integrations/jarvis",
         "integrations/paddledetection",
+        "integrations/pupil",
         "integrations/llmavatartalk",
         "integrations/voicestudio",
         "integrations/smart-second-brain",
         "integrations/swiftguide",
         "integrations/public-apis",
-        "integrations/cline",
-        "integrations/inkbox"
+        "integrations/cline"
       ],
       "missing": [],
       "status": "healthy"
@@ -95,7 +95,7 @@
     {
       "neuron": "neuron.priority_boot",
       "present": true,
-      "step_count": 20,
+      "step_count": 19,
       "status": "healthy"
     },
     {
@@ -127,12 +127,13 @@
   "hooks": {
     "improve_engine": {
       "exit": 0,
-      "preview": "{\n  \"at\": \"2026-09-19T20:07:09Z\",\n  \"health_overall\": \"warning\",\n  \"task_count\": 1,\n  \"tasks\": [\n    {\n      \"id\": \"improve.submodule_health.warning\",\n      \"title\": \"Init/sync git submodules\",\n      \"severity\": \"medium\",\n      \"status\": \"warning\",\n      \"neuron\": \"neuron.submodule_health\",\n      \"area\": \"area.apfc\",\n      \"detail\": {\n        \"count\": 9,\n        \"uninitialized\": 8,\n        \"status"
+      "preview": "{\n  \"at\": \"2026-09-19T20:16:33Z\",\n  \"health_overall\": \"warning\",\n  \"task_count\": 1,\n  \"tasks\": [\n    {\n      \"id\": \"improve.submodule_health.warning\",\n      \"title\": \"Init/sync git submodules\",\n      \"severity\": \"medium\",\n      \"status\": \"warning\",\n      \"neuron\": \"neuron.submodule_health\",\n      \"area\": \"area.apfc\",\n      \"detail\": {\n        \"count\": 9,\n        \"uninitialized\": 8,\n        \"status"
     },
     "persist_weekly": null,
     "fornix": {
       "exit": 0,
       "preview": "fornix: skipped (recent)\n"
     }
-  }
+  },
+  "exit_code": 0
 }

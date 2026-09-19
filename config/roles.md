@@ -9,7 +9,7 @@
 | Coding | `coding` | yes | — | Cline effector — shared by all agents |
 | Careers | `careers` | yes | — | LinkedIn + Indeed |
 | Comms | `comms` | yes | — | text/call/FaceTime + avatar + **Inkbox** identity |
-| Vision | `vision` | yes | — | PaddleDetection when tasked |
+| Vision | `vision` | yes | — | PaddleDetection + Pupil (Cam can see) |
 | QA | `qa` | yes | — | verifies + logs |
 | Memory Curator | `memory-curator` | yes | — | mesh + smart-second-brain |
 | AGI Scout | `agi-scout` | yes | `team.agi-research-scan` | daily AI/AGI paper scan lead |
@@ -64,6 +64,7 @@
 - Public APIs: `integrations/public-apis` (all agents — free API catalog)
 - Inkbox: `integrations/inkbox` (agent identity — email/phone/vault/tunnels; outbound gated)
 - Vision: `integrations/paddledetection`
+- Gaze / eye tracking: `integrations/pupil`
 - Presence: `integrations/llmavatartalk`
 - Local speech: `integrations/voicestudio`
 - Second brain: `integrations/smart-second-brain`

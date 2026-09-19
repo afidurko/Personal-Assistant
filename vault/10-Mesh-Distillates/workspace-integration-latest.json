@@ -4,6 +4,7 @@
   "soft_warnings": [
     "integration empty: integrations/jarvis (submodule init or create config)",
     "integration empty: integrations/paddledetection (submodule init or create config)",
+    "integration empty: integrations/pupil (submodule init or create config)",
     "integration empty: integrations/llmavatartalk (submodule init or create config)",
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
     "integration empty: integrations/public-apis (submodule init or create config)",
@@ -32,6 +33,12 @@
     {
       "id": "paddledetection",
       "path": "integrations/paddledetection",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "pupil",
+      "path": "integrations/pupil",
       "populated": false,
       "policy_exists": true
     },
@@ -87,7 +94,7 @@
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=29 edges=291"
+    "detail": "senses=31 edges=304"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

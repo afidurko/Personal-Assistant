@@ -161,6 +161,62 @@
       "behavior": "ingest_visual_spikes"
     },
     {
+      "id": "hotspot.gaze",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.vision.gaze",
+        "switch.pupil_vision",
+        "area.visual",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.pupil"
+      ],
+      "behavior": "ingest_gaze_spikes",
+      "integration": "pupil",
+      "mesh_ns": "mesh/gaze"
+    },
+    {
+      "id": "hotspot.pupil_see",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.ifof",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.vision.world",
+        "switch.pupil_vision",
+        "area.visual",
+        "area.dlpfc",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.pupil"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "cam_see_via_pupil_world_and_gaze",
+      "integration": "pupil",
+      "mesh_ns": "mesh/vision"
+    },
+    {
       "id": "hotspot.jarvis",
       "area": "area.parietal",
       "columns": [

@@ -28,3 +28,7 @@
 	path = integrations/inkbox
 	url = https://github.com/afidurko/inkbox.git
 	branch = main
+[submodule "integrations/pupil"]
+	path = integrations/pupil
+	url = https://github.com/afidurko/pupil.git
+	branch = master

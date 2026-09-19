@@ -35,6 +35,18 @@
 - Results distilled to `mesh/vision` (see `config/integrations/paddledetection.md`)
 - Live iPhone camera is via **iOS companion** (below), not PaddleDetection directly
 
+## Eye tracking (Pupil) — Cam can see
+
+- Submodule: `integrations/pupil` @ `master` ← [afidurko/pupil](https://github.com/afidurko/pupil)
+- **ENABLED** so Cam can see: `identity/persistence/CAM_PUPIL_VISION_ENABLED.md`
+- Switch: `switch.pupil_vision` · Motor: `motor.pupil`
+- Senses: `sense.vision.world` (scene) + `sense.vision.gaze`
+- Hotspot: `hotspot.pupil_see`
+- Bridge: `scripts/pupil-see.py` · Converse spike: `POST /api/spike/pupil`
+- Results distilled to `mesh/vision` + `mesh/gaze`
+- Policy: `config/integrations/pupil.md`
+- Not continuous surveillance of third parties without Aaron’s task
+
 ## iOS companion (Aaron face/voice + camera/mic)
 
 - Scaffold: `companions/ios/` · policy: `config/integrations/ios-companion.md`
