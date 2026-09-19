@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-19T18:34:34Z",
-  "epoch": 1789842874,
+  "at": "2026-09-19T18:42:55Z",
+  "epoch": 1789843375,
   "firing": [
     {
       "neuron": "neuron.improve_engine",
@@ -27,19 +27,6 @@
         "tract.fornix"
       ],
       "source": "qa_loop"
-    },
-    {
-      "neuron": "neuron.mesh_sync_loop",
-      "kind": "loop",
-      "area": "area.mtl",
-      "intensity": 0.85,
-      "reason": "consolidate:6_themes",
-      "tracts": [
-        "tract.fornix",
-        "tract.cingulum",
-        "tract.ilf"
-      ],
-      "source": "fornix_consolidate"
     },
     {
       "neuron": "neuron.submodule_health",
@@ -111,12 +98,26 @@
         "tract.fornix",
         "tract.forceps_minor"
       ]
+    },
+    {
+      "neuron": "neuron.ops",
+      "kind": "agent",
+      "area": "area.parietal",
+      "intensity": 0.35,
+      "reason": "idle_ready",
+      "tracts": [
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf1",
+        "tract.slf",
+        "tract.slf3",
+        "tract.mdlf"
+      ]
     }
   ],
   "active_areas": [
     "area.apfc",
     "area.cingulate",
-    "area.mtl",
     "area.parietal"
   ],
   "active_tracts": [
@@ -127,19 +128,12 @@
     "tract.forceps_minor",
     "tract.fornix",
     "tract.ifof",
-    "tract.ilf",
     "tract.mdlf",
     "tract.slf",
     "tract.slf1",
     "tract.slf3"
   ],
   "recent_tasks": [
-    {
-      "type": "synapse",
-      "tracts": [],
-      "overall": null,
-      "t": 20
-    },
     {
       "type": "synapse",
       "tracts": [],
@@ -208,6 +202,12 @@
       "tracts": [],
       "overall": "warning",
       "t": 31
+    },
+    {
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 32
     }
   ],
   "health_overall": "warning",

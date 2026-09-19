@@ -131,5 +131,6 @@
       "exit": 0,
       "preview": "fornix: skipped (recent)\n"
     }
-  }
+  },
+  "exit_code": 0
 }
