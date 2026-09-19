@@ -455,6 +455,7 @@ class AaronVoiceGate:
         return self.backend
 
     def status(self) -> dict:
+        self.reload_store()
         enrolled = self.store.enrolled
         return {
             "enabled": bool(self.cfg.get("enabled", True)),
@@ -470,6 +471,11 @@ class AaronVoiceGate:
             ),
             "ready_for_production": enrolled and self.store.backend.startswith("funasr"),
         }
+
+    def reload_store(self) -> None:
+        """Pick up new enrollments written by the CLI without restarting."""
+        path = self.store.path
+        self.store = VoiceStore.load(path)
 
     def enroll_file(
         self,
@@ -572,6 +578,7 @@ class AaronVoiceGate:
                 threshold=self.threshold,
                 device_id=device_id,
             )
+        self.reload_store()
         if not self.store.enrolled:
             return GateResult(
                 accepted=False if self.fail_closed else True,
