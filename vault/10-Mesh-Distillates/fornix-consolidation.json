@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-19T18:34:34Z",
+  "at": "2026-09-19T18:33:13Z",
   "neuron": "neuron.mesh_sync_loop",
   "bus": "tract.fornix",
   "episodic_scanned": 40,
@@ -23,8 +23,8 @@
       "theme": "connectome / cortex",
       "count": 4,
       "samples": [
-        "vault/02-Cam/Connectome.md",
         "vault/04-Research/2026-09-16-Drosophila-male-CNS-connectome-Cell.md",
+        "vault/02-Cam/Connectome.md",
         "vault/10-Mesh-Distillates/Connectome-Simulations.md",
         "vault/04-Research/scholar/2026-09-17/connectome-mapping.md"
       ]
@@ -57,31 +57,6 @@
       "path": "vault/03-Projects/Improve-Engine-Tasks.md",
       "title": "Improve Engine Tasks",
       "chars": 314
-    },
-    {
-      "path": "vault/02-Cam/Connectome.md",
-      "title": "Cam Connectome",
-      "chars": 1376
-    },
-    {
-      "path": "vault/04-Research/Research.md",
-      "title": "Research",
-      "chars": 947
-    },
-    {
-      "path": "vault/02-Cam/Operating Manual.md",
-      "title": "Operating Manual",
-      "chars": 2291
-    },
-    {
-      "path": "vault/10-Mesh-Distillates/public-apis/README.md",
-      "title": "Public APIs distillates",
-      "chars": 330
-    },
-    {
-      "path": "vault/04-Research/public-apis/README.md",
-      "title": "Public APIs research notes",
-      "chars": 224
     },
     {
       "path": "vault/README.md",
@@ -124,9 +99,34 @@
       "chars": 1182
     },
     {
+      "path": "vault/04-Research/Research.md",
+      "title": "Research",
+      "chars": 622
+    },
+    {
       "path": "vault/04-Research/2026-09-16-Brodmann-neural-mesh-remap.md",
       "title": "Cam Brodmann cortex remap",
       "chars": 2620
+    },
+    {
+      "path": "vault/03-Projects/Priority-Stack-Implemented.md",
+      "title": "Priority stack \u2014 implemented",
+      "chars": 1615
+    },
+    {
+      "path": "vault/03-Projects/iOS-Companion-SwiftGuide-Stack.md",
+      "title": "Cam iOS companion \u2014 stack from SwiftGuide",
+      "chars": 879
+    },
+    {
+      "path": "vault/03-Projects/Projects.md",
+      "title": "Projects",
+      "chars": 563
+    },
+    {
+      "path": "vault/03-Projects/System-Health-Neurons.md",
+      "title": "Neurons to add \u2014 health, workspaces, project ops",
+      "chars": 2260
     }
   ]
 }

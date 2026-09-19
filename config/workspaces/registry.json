@@ -189,6 +189,18 @@
         "credential_env": "SERPAPI_API_KEY"
       },
       {
+        "id": "funasr",
+        "path": "https://github.com/afidurko/FunASR",
+        "policy": "config/integrations/funasr.md",
+        "script": "scripts/aaron-voice-enroll.py",
+        "sense": [
+          "sense.aaron.voice",
+          "sense.audio.transcript"
+        ],
+        "doc": "docs/AARON_VOICE_GATE.md",
+        "notes": "Aaron-only voice gate embeddings (CAM++); not a git submodule yet"
+      },
+      {
         "id": "public-apis",
         "path": "integrations/public-apis",
         "policy": "config/integrations/public-apis.md",
@@ -464,6 +476,17 @@
           ]
         },
         {
+          "id": "funasr",
+          "match_any": [
+            "funasr",
+            "aaron voice",
+            "aaron-only",
+            "speaker id",
+            "voice gate",
+            "campplus"
+          ]
+        },
+        {
           "id": "public-apis",
           "match_any": [
             "public-apis",
@@ -669,6 +692,17 @@
           "audio2face",
           "riva",
           "metahuman"
+        ]
+      },
+      {
+        "id": "funasr",
+        "match_any": [
+          "funasr",
+          "aaron voice",
+          "aaron-only",
+          "speaker id",
+          "voice gate",
+          "campplus"
         ]
       },
       {

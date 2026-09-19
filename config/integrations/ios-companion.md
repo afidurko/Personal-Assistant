@@ -26,9 +26,11 @@ Native iOS: same `/api/*` contract once Xcode app is created.
 | `sense.ios.camera` | frame ref / thumbnail hash, purpose, aaron_face_score? |
 | `sense.ios.mic` | audio ref / duration, purpose, aaron_voice_score? |
 | `sense.aaron.face` | score ∈ [0,1], device_id, enrolled=true |
-| `sense.aaron.voice` | score ∈ [0,1], device_id, enrolled=true |
+| `sense.aaron.voice` | score ∈ [0,1], device_id, enrolled=true · or WAV via `/api/voice/gate` |
 
-Match threshold default: **0.85** (configurable in mesh prefs).
+Match threshold default: **0.85** (`config/identity/aaron-voice.json` · `switch.identity`).
+
+Mic converse turns must pass the Aaron voice gate (`docs/AARON_VOICE_GATE.md`) so surrounding speakers do not create Cam turns.
 
 ## Security
 - TLS to Aaron’s Cam host only

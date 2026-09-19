@@ -7,12 +7,12 @@
 | Capability | Have it today? | Notes |
 |---|---|---|
 | Recognize **Aaron’s** face | **Enrollment started** | Photos enrolled; live matcher still companion-side |
-| Recognize **Aaron’s** voice | **Partial** | Needs voice samples + speaker-ID; converse uses ASR now |
+| Recognize **Aaron’s** voice | **Gate implemented** | Enroll WAVs on host (`scripts/aaron-voice-enroll.py`); FunASR CAM++ for production |
 | iPhone **camera** access | **Yes via web companion** | Native iOS app still scaffold; browser camera works on device |
 | iPhone **microphone** access | **Yes via web companion** | Open `docs/CAM_CONVERSE.md` — run server on Aaron’s Mac/phone browser |
 | Live converse with Cam | **Yes via web companion** | Mic → transcript → Cam reply → soft TTS |
 | Cam’s face / soft voice (assistant persona) | Yes | Portrait + browser TTS / RIVA plan |
-| Speech-to-text (ASR) | Browser Speech API now; RIVA later | Transcribes words; speaker-ID still separate |
+| Speech-to-text (ASR) | Browser Speech API now; FunASR/RIVA later | Runs **after** Aaron voice gate on server |
 | Object/person detection | PaddleDetection on media | Plus Aaron photo enrollment |
 
 **Important:** Cloud Agent VMs have no mic. Live talk requires running `cam-converse-server.py` on Aaron’s machine.
@@ -74,12 +74,14 @@ centers → motors (unchanged)
 ## Build plan
 
 1. **Web companion (ready)** — `companions/web/` + `scripts/cam-converse-server.py` — mic/camera/converse in browser
-2. **iOS companion app** (`companions/ios/`) — SwiftUI + AVFoundation; same `/api/*` as web
-3. **Enrollment flow** — Aaron face (done from photos) + voice samples on-device
-4. **Match APIs** — `POST /spike/aaron.face` · `POST /spike/aaron.voice` with score + device id
-5. **RIVA studio** — swap browser TTS/ASR for full presence when Audio2Face is up
+2. **Aaron-only voice gate (ready scaffold)** — `docs/AARON_VOICE_GATE.md` · FunASR CAM++ enroll on host
+3. **iOS companion app** (`companions/ios/`) — SwiftUI + AVFoundation; same `/api/*` as web
+4. **Enrollment flow** — Aaron face (done from photos) + **voice samples on-device/host**
+5. **Match APIs** — `POST /api/spike/aaron.face` · `POST /api/spike/aaron.voice` · `POST /api/voice/gate`
+6. **RIVA studio** — TTS/Audio2Face for full presence; hearing can stay on FunASR gate
 
 ## Repo pointers
+- Voice gate: `docs/AARON_VOICE_GATE.md` · `config/integrations/funasr.md`
 - Live converse: `docs/CAM_CONVERSE.md`
 - Companion scaffold: `companions/ios/README.md` · `companions/web/`
 - Integration policy: `config/integrations/ios-companion.md`

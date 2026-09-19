@@ -52,6 +52,15 @@
       "on_violate": "strip",
       "strip_motors": ["motor.text", "motor.call", "motor.facetime", "motor.speak"],
       "revise_to": "draft_only"
+    },
+    {
+      "id": "speak_requires_aaron_identity",
+      "description": "motor.speak only when switch.identity is act (Aaron voice/face match)",
+      "if_any_motors": ["motor.speak"],
+      "require_switch_act": ["switch.identity"],
+      "on_violate": "strip",
+      "strip_motors": ["motor.speak"],
+      "revise_to": "hold_non_aaron_voice"
     }
   ]
 }
