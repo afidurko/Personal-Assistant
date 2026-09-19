@@ -1,12 +1,23 @@
 {
   "ok": true,
   "hard_errors": [],
-  "soft_warnings": [],
+  "soft_warnings": [
+    "integration empty: integrations/jarvis (submodule init or create config)",
+    "integration empty: integrations/paddledetection (submodule init or create config)",
+    "integration empty: integrations/pupil (submodule init or create config)",
+    "integration empty: integrations/llmavatartalk (submodule init or create config)",
+    "integration empty: integrations/smart-second-brain (submodule init or create config)",
+    "integration empty: integrations/public-apis (submodule init or create config)",
+    "integration empty: integrations/cline (submodule init or create config)",
+    "integration empty: integrations/voicestudio (submodule init or create config)",
+    "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)"
+  ],
   "mesh_flags": {
     "daily_agi_research_scan": true,
     "cam_enhance_apply_requires_aaron": true,
     "google_scholar": true,
     "public_apis": true,
+    "inkbox": true,
     "unlimited_subagents": true,
     "slm_cortex_enabled": true,
     "dl_cortex_enabled": true,
@@ -16,31 +27,31 @@
     {
       "id": "jarvis",
       "path": "integrations/jarvis",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {
       "id": "paddledetection",
       "path": "integrations/paddledetection",
-      "populated": true,
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "pupil",
+      "path": "integrations/pupil",
+      "populated": false,
       "policy_exists": true
     },
     {
       "id": "llmavatartalk",
       "path": "integrations/llmavatartalk",
-      "populated": true,
-      "policy_exists": true
-    },
-    {
-      "id": "voicestudio",
-      "path": "integrations/voicestudio",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {
       "id": "smart-second-brain",
       "path": "integrations/smart-second-brain",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {
@@ -50,22 +61,40 @@
       "policy_exists": true
     },
     {
+      "id": "public-apis",
+      "path": "integrations/public-apis",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
       "id": "cline",
       "path": "integrations/cline",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "inkbox",
+      "path": "integrations/inkbox",
       "populated": true,
       "policy_exists": true
     },
     {
-      "id": "public-apis",
-      "path": "integrations/public-apis",
-      "populated": true,
+      "id": "voicestudio",
+      "path": "integrations/voicestudio",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "funasr",
+      "path": "https://github.com/afidurko/FunASR",
+      "populated": false,
       "policy_exists": true
     }
   ],
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=28 edges=281"
+    "detail": "senses=31 edges=304"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

@@ -32,6 +32,19 @@
     "sync_script": "scripts/sync-cline-session.py",
     "tickets": "identity/persistence/tickets"
   },
+  "mesh/comms": {
+    "inkbox": true,
+    "inkbox_config": "config/integrations/inkbox.json",
+    "inkbox_script": "scripts/inkbox-check.py",
+    "inkbox_motor": "motor.inkbox",
+    "inkbox_sense": "sense.inkbox.event",
+    "inkbox_hotspot": "hotspot.inkbox",
+    "inkbox_submodule": "integrations/inkbox",
+    "inkbox_source": "https://github.com/afidurko/inkbox",
+    "outbound_gate": "switch.outbound",
+    "credential_env": "INKBOX_API_KEY",
+    "status": "wired"
+  },
   "mesh/enhance": {
     "applied_configs": [
       "config/memory/hmo-tiers.json",
@@ -135,7 +148,9 @@
     "swarm_config": "config/swarm/privileges.json",
     "tailscale_enabled": true,
     "tool_creator_user": true,
-    "unlimited_subagents": true
+    "unlimited_subagents": true,
+    "inkbox": true,
+    "inkbox_submodule": "integrations/inkbox"
   },
   "mesh/open-questions": {
     "ios_companion_pair_code": "generate on first launch",
@@ -263,7 +278,10 @@
     "voicestudio_connected": true,
     "voicestudio_local_speech": true,
     "voicestudio_models_installed": true,
-    "weekly_review": true
+    "weekly_review": true,
+    "inkbox": true,
+    "inkbox_outbound_gated": true
+
   },
   "mesh/projects": {
     "default_workspace_id": "personal-assistant",
@@ -309,7 +327,11 @@
     "public_apis_script": "scripts/public-apis-search.py",
     "registry": "config/tools/registry.json",
     "status": "active",
-    "team": "team.tooling"
+    "team": "team.tooling",
+    "inkbox": true,
+    "inkbox_config": "config/integrations/inkbox.json",
+    "inkbox_script": "scripts/inkbox-check.py",
+    "inkbox_motor": "motor.inkbox"
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",

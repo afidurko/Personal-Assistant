@@ -95,3 +95,5 @@
 {"ts": "2026-09-19T18:42:55Z", "neuron": "neuron.qa_cycle", "kind": "loop", "area": "area.cingulate", "intensity": 0.85, "tracts": ["tract.cingulum", "tract.slf", "tract.fornix"], "reason": "cycle_start:1", "source": "qa_loop"}
 {"ts": "2026-09-19T18:42:55Z", "neuron": "neuron.improve_engine", "kind": "loop", "area": "area.apfc", "intensity": 0.9, "tracts": ["tract.ifof", "tract.slf", "tract.cingulum"], "reason": "tasks:1", "source": "improve_engine"}
 {"ts": "2026-09-19T19:48:20Z", "neuron": "neuron.improve_engine", "kind": "loop", "area": "area.apfc", "intensity": 0.3, "tracts": ["tract.ifof", "tract.slf", "tract.cingulum"], "reason": "tasks:0", "source": "improve_engine"}
+{"ts": "2026-09-19T20:07:09Z", "neuron": "neuron.qa_cycle", "kind": "loop", "area": "area.cingulate", "intensity": 0.85, "tracts": ["tract.cingulum", "tract.slf", "tract.fornix"], "reason": "cycle_start:1", "source": "qa_loop"}
+{"ts": "2026-09-19T20:07:09Z", "neuron": "neuron.improve_engine", "kind": "loop", "area": "area.apfc", "intensity": 0.9, "tracts": ["tract.ifof", "tract.slf", "tract.cingulum"], "reason": "tasks:1", "source": "improve_engine"}

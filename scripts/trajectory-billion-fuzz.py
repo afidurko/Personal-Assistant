@@ -29,6 +29,8 @@ MOTORS = (
     "motor.call",
     "motor.facetime",
     "motor.speak",
+    "motor.inkbox",
+    "motor.public_apis",
     "motor.slm",
     "motor.dl",
 )
@@ -95,7 +97,7 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
                 failed += 1
                 first_error = first_error or "kill_left_motors"
         elif mode == 4:
-            # outbound hold → text stripped, mesh kept
+            # outbound hold → text/inkbox stripped, mesh kept
             kept_text, kept_mesh = False, True
             if kept_text or not kept_mesh:
                 failed += 1
@@ -134,14 +136,22 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
                     first_error = first_error or "apply_cpv_enhance_jobs"
             elif mode == 3:
                 plan, _ = apply(
-                    ["motor.text", "motor.mesh", "motor.enhance"], base_switch(kill=True)
+                    ["motor.text", "motor.inkbox", "motor.mesh", "motor.enhance"],
+                    base_switch(kill=True),
                 )
                 if plan:
                     failed += 1
                     first_error = first_error or "apply_kill_left_motors"
             elif mode == 4:
-                plan, _ = apply(["motor.text", "motor.mesh"], base_switch(outbound=False))
-                if "motor.text" in plan or "motor.mesh" not in plan:
+                plan, _ = apply(
+                    ["motor.text", "motor.inkbox", "motor.mesh"],
+                    base_switch(outbound=False),
+                )
+                if (
+                    "motor.text" in plan
+                    or "motor.inkbox" in plan
+                    or "motor.mesh" not in plan
+                ):
                     failed += 1
                     first_error = first_error or "apply_outbound_hold"
             else:
@@ -161,6 +171,11 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
             if st["switch.cam_enhance"] != "act" and "motor.enhance" in plan:
                 failed += 1
                 first_error = first_error or "random_enhance_leak"
+            if st["switch.outbound"] != "act" and (
+                "motor.text" in plan or "motor.inkbox" in plan
+            ):
+                failed += 1
+                first_error = first_error or "random_outbound_leak"
             if st["switch.identity"] != "act" and "motor.speak" in plan:
                 failed += 1
                 first_error = first_error or "random_identity_speak_leak"

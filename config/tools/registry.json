@@ -213,6 +213,24 @@
       "status": "active",
       "integration": "config/integrations/public-apis-addons.json",
       "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.inkbox.check",
+      "purpose": "Confirm Inkbox connectome + submodule wiring (no API key required)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/inkbox-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": ["use_tool", "read_mesh"],
+      "requires_switch": ["switch.kill"],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/inkbox.json",
+      "motor": "motor.inkbox"
     }
   ]
 }

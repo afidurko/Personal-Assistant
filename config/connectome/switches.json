@@ -21,7 +21,7 @@
     {
       "id": "switch.outbound",
       "default": "act_under_autonomy",
-      "act": ["motor.text", "motor.call", "motor.facetime", "motor.speak"],
+      "act": ["motor.text", "motor.call", "motor.facetime", "motor.speak", "motor.inkbox"],
       "hold": "draft_only",
       "flipped_by": ["Aaron", "switch.kill"]
     },

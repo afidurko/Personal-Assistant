@@ -33,6 +33,10 @@ class WorkspaceRegistryTests(unittest.TestCase):
         c = cw.choose_workspace(goal="paddledetection model export")
         self.assertEqual(c["workspace"]["id"], "paddledetection")
 
+    def test_choose_inkbox(self):
+        c = cw.choose_workspace(goal="inkbox sdk identity email")
+        self.assertEqual(c["workspace"]["id"], "inkbox")
+
     def test_choose_voicestudio(self):
         c = cw.choose_workspace(goal="voicestudio voice cloning local tts")
         self.assertEqual(c["workspace"]["id"], "voicestudio")
@@ -170,6 +174,7 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertIn("choose_workspace", tools)
         self.assertIn("mesh_search", tools)
         self.assertIn("connectome_route", tools)
+        self.assertIn("inkbox_check", tools)
         self.assertIn("voicestudio_health", tools)
 
     def test_voicestudio_speak_dry_run(self):

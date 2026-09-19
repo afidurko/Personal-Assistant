@@ -100,6 +100,19 @@ def pick_hotspot(
         if any(
             tok in g
             for tok in (
+                "inkbox",
+                "agent identity",
+                "agent email",
+                "agent phone",
+                "provision phone",
+                "inkbox vault",
+                "inkbox tunnel",
+            )
+        ) and ("inkbox" in blob or "identity" in blob or "comms" in blob or "email" in blob):
+            score += 5
+        if any(
+            tok in g
+            for tok in (
                 "code",
                 "coding",
                 "cline",
