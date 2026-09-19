@@ -240,6 +240,20 @@
       "notes": "Google Scholar via SerpAPI — citations + literature for info/research (+ AGI when relevant)"
     },
     {
+      "id": "sense.catalog.public_apis",
+      "modality": "tool",
+      "source": [
+        "public_apis_catalog",
+        "afidurko_public_apis"
+      ],
+      "emits": [
+        "spike.tool_result",
+        "spike.fact",
+        "spike.route_hint"
+      ],
+      "notes": "Curated free/public API catalog — shared discovery for all agents (integrations/public-apis)"
+    },
+    {
       "id": "sense.slm.inference",
       "modality": "model",
       "source": "slm_runtime",

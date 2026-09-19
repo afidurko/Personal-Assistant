@@ -117,5 +117,11 @@
     ]
   },
   "pathway_hotspot": "hotspot.agi_daily_scan",
-  "script": "scripts/agi-research-scan.py"
+  "script": "scripts/agi-research-scan.py",
+  "connectors": [
+    "google-scholar",
+    "public-apis"
+  ],
+  "public_apis_hotspot": "hotspot.public_apis",
+  "notes": "When findings imply new free API tooling for Cam, consult public-apis catalog before inventing endpoints"
 }

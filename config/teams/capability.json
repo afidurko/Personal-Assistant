@@ -50,5 +50,12 @@
     "lineage_terminate": true
   },
   "related_teams": ["team.tooling", "team.info"],
-  "pathway_hotspot": "hotspot.capability"
+  "pathway_hotspot": "hotspot.capability",
+  "connectors": [
+    "public-apis",
+    "cline",
+    "google-scholar"
+  ],
+  "public_apis_hotspot": "hotspot.public_apis",
+  "notes": "Any capability work unit may discover free APIs via motor.public_apis"
 }

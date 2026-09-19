@@ -1,0 +1,134 @@
+{
+  "at": "2026-09-19T18:34:34Z",
+  "overall": "warning",
+  "checks": [
+    {
+      "neuron": "neuron.vitals_loop",
+      "loadavg": [
+        0.0,
+        0.0146484375,
+        0.0
+      ],
+      "cwd": "/workspace",
+      "status": "healthy"
+    },
+    {
+      "senses": 26,
+      "hotspot_options": 36,
+      "known_nodes": 131,
+      "motors": 18,
+      "edges": 272,
+      "hard_errors": [],
+      "missing_edges": [],
+      "soft_warnings": [],
+      "ok": true,
+      "neuron": "neuron.connectome_check",
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.submodule_health",
+      "count": 7,
+      "uninitialized": 6,
+      "status": "warning",
+      "sample": [
+        "-173837314b7e02f4179c95b60fb6ca08c6d6f3bf integrations/cline",
+        "-0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis",
+        "-93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk",
+        "-b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection",
+        " 4cfe04f70da070207b032eed62db76a0c82e11b7 integrations/public-apis (heads/master)",
+        "-baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain",
+        "-64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide"
+      ]
+    },
+    {
+      "neuron": "neuron.integration_pulse",
+      "present": [
+        "integrations/jarvis",
+        "integrations/paddledetection",
+        "integrations/llmavatartalk",
+        "integrations/smart-second-brain",
+        "integrations/swiftguide"
+      ],
+      "missing": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.persist_sync",
+      "manifest": true,
+      "mesh_seed": true,
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.secret_hygiene",
+      "suspects": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.drift_scan",
+      "readme_mentions_3d": true,
+      "plasticity_config": true,
+      "areas_config": true,
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.converse_health",
+      "reachable": false,
+      "body": "",
+      "status": "idle",
+      "notes": "idle if converse server not running \u2014 not critical"
+    },
+    {
+      "neuron": "neuron.arch_scan",
+      "issues": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.vuln_scan",
+      "findings": [],
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.priority_boot",
+      "present": true,
+      "step_count": 18,
+      "status": "healthy"
+    },
+    {
+      "neuron": "neuron.tailscale_reach",
+      "status": "idle",
+      "cli": false,
+      "notes": "tailscale CLI not available in this environment",
+      "wanted": [
+        "aaron-iphone",
+        "aaron-ipad"
+      ]
+    }
+  ],
+  "neurons_fired": [
+    "neuron.vitals_loop",
+    "neuron.connectome_check",
+    "neuron.submodule_health",
+    "neuron.integration_pulse",
+    "neuron.persist_sync",
+    "neuron.secret_hygiene",
+    "neuron.drift_scan",
+    "neuron.converse_health",
+    "neuron.arch_scan",
+    "neuron.vuln_scan",
+    "neuron.priority_boot",
+    "neuron.tailscale_reach"
+  ],
+  "workspace": "/workspace",
+  "hooks": {
+    "improve_engine": {
+      "exit": 0,
+      "preview": "{\n  \"at\": \"2026-09-19T18:34:34Z\",\n  \"health_overall\": \"warning\",\n  \"task_count\": 1,\n  \"tasks\": [\n    {\n      \"id\": \"improve.submodule_health.warning\",\n      \"title\": \"Init/sync git submodules\",\n      \"severity\": \"medium\",\n      \"status\": \"warning\",\n      \"neuron\": \"neuron.submodule_health\",\n      \"area\": \"area.apfc\",\n      \"detail\": {\n        \"count\": 7,\n        \"uninitialized\": 6,\n        \"status"
+    },
+    "persist_weekly": null,
+    "fornix": {
+      "exit": 0,
+      "preview": "fornix: consolidated 40 notes \u2192 6 themes\nwrote vault/10-Mesh-Distillates/fornix-consolidation.json\n"
+    }
+  },
+  "exit_code": 0
+}
