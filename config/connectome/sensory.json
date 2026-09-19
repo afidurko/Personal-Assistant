@@ -237,7 +237,7 @@
         "spike.fact",
         "spike.cite"
       ],
-      "notes": "Google Scholar via SerpAPI — citations + literature for info/research (+ AGI when relevant)"
+      "notes": "Google Scholar via SerpAPI \u2014 citations + literature for info/research (+ AGI when relevant)"
     },
     {
       "id": "sense.catalog.public_apis",
@@ -292,6 +292,26 @@
         "spike.tool_result"
       ],
       "notes": "Registered tool execution results from team.tooling"
+    },
+    {
+      "id": "sense.voicestudio.health",
+      "modality": "audio_platform",
+      "source": "voicestudio_backend",
+      "emits": [
+        "spike.tool_result"
+      ],
+      "notes": "VoiceStudio GET /health \u2014 local speech engine readiness"
+    },
+    {
+      "id": "sense.voicestudio.result",
+      "modality": "audio_platform",
+      "source": "voicestudio_mcp_or_api",
+      "emits": [
+        "spike.speech",
+        "spike.audio",
+        "spike.tool_result"
+      ],
+      "notes": "TTS/ASR/clone job result from VoiceStudio REST or MCP \u2014 not Aaron speaker-ID"
     }
   ]
 }

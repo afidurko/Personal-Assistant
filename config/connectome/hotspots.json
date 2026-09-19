@@ -571,6 +571,37 @@
       "integration": "config/integrations/google-scholar.json"
     },
     {
+"id": "hotspot.voicestudio_result",
+      "center": "center.comms",
+      "pathway": [
+        "sense.voicestudio.result",
+        "center.comms",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "distill_voicestudio_tts_asr_clone_results",
+      "integration": "config/integrations/voicestudio.json"
+    },
+    {
+      "id": "hotspot.voicestudio",
+      "center": "center.comms",
+      "pathway": [
+        "sense.voicestudio.health",
+        "center.comms",
+        "switch.autonomy",
+        "motor.voicestudio"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "local_voicestudio_health_and_speech_api",
+      "integration": "config/integrations/voicestudio.json"
+    },
+    {
       "id": "hotspot.public_apis",
       "center": "center.tooling",
       "pathway": [

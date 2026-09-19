@@ -33,6 +33,10 @@ class WorkspaceRegistryTests(unittest.TestCase):
         c = cw.choose_workspace(goal="paddledetection model export")
         self.assertEqual(c["workspace"]["id"], "paddledetection")
 
+    def test_choose_voicestudio(self):
+        c = cw.choose_workspace(goal="voicestudio voice cloning local tts")
+        self.assertEqual(c["workspace"]["id"], "voicestudio")
+
     def test_explicit_id_wins(self):
         c = cw.choose_workspace(goal="cline sdk", workspace_id="jarvis")
         self.assertEqual(c["workspace"]["id"], "jarvis")
@@ -139,6 +143,45 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertIn("choose_workspace", tools)
         self.assertIn("mesh_search", tools)
         self.assertIn("connectome_route", tools)
+        self.assertIn("voicestudio_health", tools)
+
+    def test_voicestudio_speak_dry_run(self):
+        proc = self._run(
+            "scripts/voicestudio-speak.py",
+            "--text",
+            "hello",
+            "--dry-run",
+            "--json",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        data = json.loads(proc.stdout)
+        self.assertTrue(data["ok"])
+        self.assertTrue(data.get("dry_run"))
+
+    def test_pack_voicestudio_result(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            job = Path(tmp) / "job.json"
+            job.write_text(
+                json.dumps(
+                    {
+                        "kind": "tts",
+                        "profile_id": "cam-soft",
+                        "output_path": "/tmp/x.wav",
+                        "duration_s": 1.2,
+                        "ok": True,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            proc = self._run(
+                "scripts/pack-voicestudio-result.py",
+                "--job",
+                str(job),
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            data = json.loads(proc.stdout)
+            self.assertEqual(data["namespace"], "mesh/voice")
+            self.assertTrue(data["synthetic"])
 
     def test_sync_schedules(self):
         proc = self._run("scripts/sync-cline-schedules.py", "--apply-cache")

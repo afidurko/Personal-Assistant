@@ -63,6 +63,7 @@
 - Public APIs: `integrations/public-apis` (all agents — free API catalog)
 - Vision: `integrations/paddledetection`
 - Presence: `integrations/llmavatartalk`
+- Local speech: `integrations/voicestudio`
 - Second brain: `integrations/smart-second-brain`
 - Google Scholar: `config/integrations/google-scholar.md` (SerpAPI bridge)
 - Cartography: `integrations/swiftguide` (mind maps + iOS stack)

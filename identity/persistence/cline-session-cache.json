@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-17T11:16:29.590245+00:00",
+    "at": "2026-09-19T19:08:54.223761+00:00",
     "mode": "act",
-    "summary": "Cam + live 3D cortex on home with voice listen/speak and background autonomy spawn bay (PR #9)",
-    "workspace": "personal-assistant"
+    "summary": "Installed OmniVoice+whisper-base; TTS+ASR smoke OK; all 7 submodules; system healthy. Aaron-only: SERPAPI, Slack OAuth, Tailscale, RIVA/A2F, Cam voice profile bind.",
+    "workspace": "."
   },
   "notes": [
     {
@@ -17,6 +17,26 @@
     {
       "at": "2026-09-17T00:52:47.020261+00:00",
       "text": "cline wired",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T18:32:13.769941+00:00",
+      "text": "mesh/voice + vault/03-Projects/VoiceStudio-Local-Speech.md",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T18:53:23.134814+00:00",
+      "text": "MERGE_READINESS_VOICESTUDIO.md",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T19:01:20.025606+00:00",
+      "text": "CONNECTION_STATUS.md",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T19:08:54.223761+00:00",
+      "text": "CONNECTION_STATUS.md aaron_only backlog",
       "workspace": "."
     }
   ],
@@ -67,11 +87,11 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": false,
+      "workspace_exists": true,
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-19T19:05:42.862236+00:00",
+  "schedules_synced_at": "2026-09-19T19:47:51.243533+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

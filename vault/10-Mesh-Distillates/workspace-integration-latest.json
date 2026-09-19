@@ -1,13 +1,7 @@
 {
   "ok": true,
   "hard_errors": [],
-  "soft_warnings": [
-    "integration empty: integrations/jarvis (submodule init or create config)",
-    "integration empty: integrations/paddledetection (submodule init or create config)",
-    "integration empty: integrations/llmavatartalk (submodule init or create config)",
-    "integration empty: integrations/smart-second-brain (submodule init or create config)",
-    "integration empty: integrations/cline (submodule init or create config)"
-  ],
+  "soft_warnings": [],
   "mesh_flags": {
     "daily_agi_research_scan": true,
     "cam_enhance_apply_requires_aaron": true,
@@ -22,25 +16,31 @@
     {
       "id": "jarvis",
       "path": "integrations/jarvis",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
       "id": "paddledetection",
       "path": "integrations/paddledetection",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
       "id": "llmavatartalk",
       "path": "integrations/llmavatartalk",
-      "populated": false,
+      "populated": true,
+      "policy_exists": true
+    },
+    {
+      "id": "voicestudio",
+      "path": "integrations/voicestudio",
+      "populated": true,
       "policy_exists": true
     },
     {
       "id": "smart-second-brain",
       "path": "integrations/smart-second-brain",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
@@ -50,22 +50,22 @@
       "policy_exists": true
     },
     {
-      "id": "public-apis",
-      "path": "integrations/public-apis",
+      "id": "cline",
+      "path": "integrations/cline",
       "populated": true,
       "policy_exists": true
     },
     {
-      "id": "cline",
-      "path": "integrations/cline",
-      "populated": false,
+      "id": "public-apis",
+      "path": "integrations/public-apis",
+      "populated": true,
       "policy_exists": true
     }
   ],
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=26 edges=272"
+    "detail": "senses=28 edges=281"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",
