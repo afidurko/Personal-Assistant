@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-17T11:16:29.590245+00:00",
+    "at": "2026-09-19T18:32:13.769941+00:00",
     "mode": "act",
-    "summary": "Cam + live 3D cortex on home with voice listen/speak and background autonomy spawn bay (PR #9)",
-    "workspace": "personal-assistant"
+    "summary": "Wired afidurko/VoiceStudio into Cam: submodule, coding workspace, connectome motor.voicestudio, persona local TTS fallback, health probe. PR #17.",
+    "workspace": "."
   },
   "notes": [
     {
@@ -17,6 +17,11 @@
     {
       "at": "2026-09-17T00:52:47.020261+00:00",
       "text": "cline wired",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T18:32:13.769941+00:00",
+      "text": "mesh/voice + vault/03-Projects/VoiceStudio-Local-Speech.md",
       "workspace": "."
     }
   ],
