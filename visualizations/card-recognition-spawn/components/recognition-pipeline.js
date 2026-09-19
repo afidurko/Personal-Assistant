@@ -21,7 +21,9 @@ AFRAME.registerComponent('recognition-pipeline', {
   },
 
   _onReady: function (evt) {
-    this.catalogComp = this.el.sceneEl.querySelector('[card-catalog]').components['card-catalog'];
+    this.catalogComp = this.el.sceneEl.components['card-catalog'] ||
+      (this.el.sceneEl.querySelector('[card-catalog]') &&
+        this.el.sceneEl.querySelector('[card-catalog]').components['card-catalog']);
     this._log('Catalog loaded (' + (evt.detail.catalog.cards || []).length + ' cards).');
   },
 
@@ -69,12 +71,11 @@ AFRAME.registerComponent('recognition-pipeline', {
 
     // Demo: damaging moves hit the other active spawn if present.
     if (move.damage > 0) {
-      var spawner = this.el.sceneEl.querySelector('[character-spawner]');
-      if (spawner && spawner.components['character-spawner']) {
-        var active = spawner.components['character-spawner'].active;
-        Object.keys(active).forEach(function (id) {
+      var spawnerComp = this.el.sceneEl.components['character-spawner'];
+      if (spawnerComp && spawnerComp.active) {
+        Object.keys(spawnerComp.active).forEach(function (id) {
           if (id !== cardId) {
-            spawner.components['character-spawner'].applyDamage(id, move.damage);
+            spawnerComp.applyDamage(id, move.damage);
           }
         });
       }
