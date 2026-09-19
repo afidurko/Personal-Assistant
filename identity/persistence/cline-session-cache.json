@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T19:53:35.358244+00:00",
+    "at": "2026-09-19T20:06:34.245777+00:00",
     "mode": "act",
-    "summary": "Overall system integration: home converse\u2192connectome+live-activity via system-bridge; pieces.json; /api/system; SystemPulse; cam-system smoke. PR #22.",
+    "summary": "Organism bus upgrade: in-process kernel, causal motors, identity gate, HMO, WS cortex, dual-stream/MAP, trajectory physics, circadian, flight envelope PASS. Blockers: FunASR/VoiceStudio, MemoryBear, Pupil, nulltickets, sLM weights, embodiment PRs.",
     "workspace": "."
   },
   "notes": [
