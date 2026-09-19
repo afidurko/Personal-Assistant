@@ -28,10 +28,24 @@ Native iOS: same `/api/*` contract once Xcode app is created.
 | `sense.aaron.face` | score ∈ [0,1], device_id, enrolled=true |
 | `sense.aaron.voice` | score ∈ [0,1], device_id, enrolled=true |
 
-Match threshold default: **0.85** (configurable in mesh prefs).
+Match threshold default: **0.85** quiet / **0.88** noisy (configurable in `config/identity/aaron-voice-gate.json`).
+
+## Aaron-only in noisy rooms
+
+Cam must recognize **Aaron’s voice only**. Surrounding conversation is filtered:
+
+1. Enroll Aaron once (~10s quiet speech) in the companion / home UI
+2. On each mic utterance, on-device spectral voiceprint scores vs enrollment
+3. Below threshold (or multi-speaker hint) → **ignore** — no Cam reply
+4. Server `/api/turn` also rejects mic turns without a passing `aaron_voice_score`
+5. Typing still works (`text_bypass`)
+
+Config: `config/identity/aaron-voice-gate.json`  
+Hotspot: `hotspot.aaron_voice_noise` · Sense: `sense.aaron.voice` · Switch: `switch.identity`
 
 ## Security
 - TLS to Aaron’s Cam host only
 - Enrollment samples never leave device unless Aaron opts in
 - Pairing requires Aaron confirmation once (QR / setup code)
 - Revoke from nullhub / kill switch clears session tokens
+- Voiceprints stay in on-device storage by default (`localStorage`)

@@ -1441,6 +1441,18 @@ h2,
   color: var(--teal-soft);
 }
 
+.cam-bubble.system {
+  opacity: 0.88;
+}
+
+.cam-bubble.system .who {
+  color: #c4a35a;
+}
+
+.cam-enroll span {
+  background: linear-gradient(90deg, #5a9a8a, #9ec5c0);
+}
+
 .cam-bubble .text {
   color: var(--text);
   line-height: 1.4;

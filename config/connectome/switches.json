@@ -55,7 +55,9 @@
       "hold": "reject_non_aaron_identity",
       "flipped_by": ["Aaron"],
       "threshold": 0.85,
-      "notes": "Aaron face/voice recognition via iOS companion; enroll Aaron only"
+      "aaron_only_mic": true,
+      "noisy_environment_mode": true,
+      "notes": "Aaron face/voice recognition via iOS companion; enroll Aaron only; noisy rooms use aaron-voice-gate (reject non-Aaron ASR)"
     },
     {
       "id": "switch.ios_capture",

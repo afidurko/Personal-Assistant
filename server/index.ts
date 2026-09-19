@@ -168,10 +168,27 @@ app.get('/api/session', (_req, res) => {
 });
 
 app.post('/api/turn', async (req, res) => {
-  const body = req.body as { text?: string; transcript?: string; source?: string };
+  const body = req.body as {
+    text?: string;
+    transcript?: string;
+    source?: string;
+    aaron_voice_score?: number;
+    enrolled?: boolean;
+    multi_speaker_hint?: boolean;
+  };
   const text = String(body.text ?? body.transcript ?? '');
   const source = String(body.source ?? 'text');
-  const reply = await converse.turn(text, source);
+  const reply = await converse.turn({
+    text,
+    source,
+    aaron_voice_score: body.aaron_voice_score,
+    enrolled: body.enrolled,
+    multi_speaker_hint: body.multi_speaker_hint,
+  });
+  if (reply.rejected) {
+    res.status(403).json(reply);
+    return;
+  }
   // Pulse autonomy when Aaron talks so Cam keeps self-tasks warm
   void autonomy.tick({
     workspaces: orchestrator.getWorkspaces(),
@@ -183,12 +200,37 @@ app.post('/api/turn', async (req, res) => {
 
 app.post('/api/spike/mic', (req, res) => {
   micListeningHint = true;
-  const body = req.body as { purpose?: string; transcript?: string };
+  const body = req.body as {
+    purpose?: string;
+    transcript?: string;
+    aaron_voice_score?: number;
+  };
   res.json({
     ok: true,
     sense: 'sense.ios.mic',
     purpose: body.purpose ?? 'conversation',
+    aaron_voice_score: body.aaron_voice_score ?? null,
     accepted: true,
+  });
+});
+
+app.post('/api/spike/aaron.voice', (req, res) => {
+  const body = req.body as {
+    score?: number;
+    enrolled?: boolean;
+    multi_speaker_hint?: boolean;
+    device_id?: string;
+  };
+  const score = typeof body.score === 'number' ? body.score : 0;
+  res.json({
+    ok: true,
+    sense: 'sense.aaron.voice',
+    score,
+    enrolled: Boolean(body.enrolled),
+    multi_speaker_hint: Boolean(body.multi_speaker_hint),
+    device_id: body.device_id ?? 'unknown',
+    threshold: 0.85,
+    accepted: score >= 0.85,
   });
 });
 

@@ -125,14 +125,16 @@
     "swarm_config": "config/swarm/privileges.json",
     "tailscale_enabled": true,
     "tool_creator_user": true,
-    "unlimited_subagents": true
+    "unlimited_subagents": true,
+    "aaron_voice_only_in_noise": true,
+    "aaron_voice_gate": true
   },
   "mesh/open-questions": {
     "ios_companion_pair_code": "generate on first launch",
     "ios_host_uri": "set on Aaron machine (Cam host reachable from iPhone)",
     "riva_studio_uri": "set on Aaron machine",
     "standing_approval_rules": "standing autonomy ON for session_01 grants",
-    "vault_path": "set \u2014 starter at repo vault/"
+    "vault_path": "set — starter at repo vault/"
   },
   "mesh/persona": {
     "age": 32,
@@ -239,7 +241,9 @@
     "timezone": "America/New_York",
     "tool_creator_user": true,
     "unlimited_subagents": true,
-    "weekly_review": true
+    "weekly_review": true,
+    "aaron_voice_only": true,
+    "aaron_voice_gate_config": "config/identity/aaron-voice-gate.json"
   },
   "mesh/projects": {
     "default_workspace_id": "personal-assistant",
@@ -274,5 +278,13 @@
     "status": "starter_vault_created",
     "vault_path": "vault",
     "welcome": "vault/Welcome.md"
+  },
+  "mesh/identity": {
+    "aaron_voice_only": true,
+    "noisy_environment_filter": true,
+    "config": "config/identity/aaron-voice-gate.json",
+    "sense": "sense.aaron.voice",
+    "switch": "switch.identity",
+    "hotspot": "hotspot.aaron_voice_noise"
   }
 }

@@ -1,14 +1,17 @@
-/* Cam web companion — mic + camera + converse */
+/* Cam web companion — mic + camera + Aaron-only voice gate */
 (() => {
+  const VG = window.CamAaronVoiceGate;
   const $ = (id) => document.getElementById(id);
   const statusEl = $("status");
   const partialEl = $("partial");
   const transcriptEl = $("transcript");
   const micLevel = $("micLevel");
+  const voiceScoreEl = $("voiceScore");
   const video = $("camPreview");
   const btnMic = $("btnMic");
   const btnCam = $("btnCam");
   const btnStop = $("btnStop");
+  const btnEnroll = $("btnEnroll");
   const textForm = $("textForm");
   const textIn = $("textIn");
   const hintEl = $("hint");
@@ -20,14 +23,19 @@
   let micStream = null;
   let camStream = null;
   let raf = 0;
-  let mode = "on_device"; // on_device | server
+  let mode = "on_device";
   let history = [];
+  let gateCfg = VG.mergeConfig();
+  let profile = VG.loadProfile();
+  let utter = null;
+  let enroll = null;
+  let enrolling = false;
 
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-  function setStatus(msg, kind = "") {
+  function setStatus(msg, kind) {
     statusEl.textContent = msg;
     statusEl.className = "status" + (kind ? " " + kind : "");
   }
@@ -35,7 +43,8 @@
   function addBubble(who, text) {
     const div = document.createElement("div");
     div.className = "bubble " + who;
-    div.innerHTML = `<div class="who">${who === "aaron" ? "Aaron" : "Cam"}</div><div></div>`;
+    const label = who === "aaron" ? "Aaron" : who === "cam" ? "Cam" : "Gate";
+    div.innerHTML = `<div class="who">${label}</div><div></div>`;
     div.lastChild.textContent = text;
     transcriptEl.appendChild(div);
     transcriptEl.scrollTop = transcriptEl.scrollHeight;
@@ -46,10 +55,13 @@
     const low = t.toLowerCase();
     if (!t) return "I'm here, Aaron. Whenever you're ready — I'm listening.";
     if (/hello|hi cam|hey cam|^hi\b|^hey\b/.test(low)) {
-      return "Hi Aaron. Soft and clear on this device. Mic path is on — say what you need.";
+      return "Hi Aaron. Soft and clear on this device. Aaron-only voice filter is on.";
     }
     if (/mic|microphone|hear me|working/.test(low)) {
-      return "Yes — I can hear you in on-device mode on your iPhone or iPad. Keep talking.";
+      return "Yes — I listen for your voice only. Surrounding conversation is ignored once you're enrolled.";
+    }
+    if (/only my voice|my voice only|ignore.*(other|people|room|noise|surround)/.test(low)) {
+      return "Aaron-only mode is active. Enroll once if needed, then I'll filter other speakers.";
     }
     if (/camera|face|see me/.test(low)) {
       return "Camera is available here too. I already know your face from the photos you shared.";
@@ -65,7 +77,8 @@
     return `I heard you: “${short}”. Tell me the next step and I'll take it from there.`;
   }
 
-  function speakCam(text, opts = {}) {
+  function speakCam(text, opts) {
+    opts = opts || {};
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -87,33 +100,89 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body || {}),
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = new Error(data.cam || data.error || res.statusText);
+      err.status = res.status;
+      err.body = data;
+      throw err;
+    }
+    return data;
+  }
+
+  function gateUtterance(source) {
+    let score = source === "text" ? 1 : 0;
+    let multi = false;
+    if (source !== "text" && profile && utter && utter.ready()) {
+      score = utter.scoreAgainst(profile);
+      const live = utter.toProfile();
+      multi = VG.multiSpeakerHint(live ? live.bands : profile.bands, profile, score);
+    }
+    if (utter) utter.reset();
+    const decision = VG.decide(score, gateCfg, {
+      enrolled: !!profile,
+      multiSpeakerHint: multi,
+      source: source,
+    });
+    if (voiceScoreEl) {
+      voiceScoreEl.textContent = profile
+        ? `Aaron match ${(score * 100).toFixed(0)}%`
+        : "Not enrolled";
+    }
+    return { score: score, multi: multi, decision: decision };
   }
 
   async function sendTurn(text, source) {
     if (!text.trim()) return;
+    const gated = gateUtterance(source);
+    if (!gated.decision.accept) {
+      const msg =
+        gated.decision.reason === "enrollment_required"
+          ? "Enroll your voice first (quiet ~10s) so Cam can ignore other people."
+          : gated.decision.reason === "rejected_surrounding_speech"
+            ? "Heard other voices nearby — ignored. Speak again when it’s you."
+            : `Not matched as Aaron (${(gated.score * 100).toFixed(0)}%). Ignored surrounding speech.`;
+      addBubble("system", msg);
+      setStatus(msg, "warn");
+      return;
+    }
+
     addBubble("aaron", text);
     partialEl.textContent = "";
-    history.push({ role: "aaron", text });
+    history.push({ role: "aaron", text: text });
     setStatus("Cam is listening…");
     try {
       let reply;
       let speak = { rate: 0.95, pitch: 1.05, lang: "en-US" };
       if (mode === "server") {
         try {
+          await postJSON("/api/spike/aaron.voice", {
+            score: gated.score,
+            enrolled: !!profile,
+            multi_speaker_hint: gated.multi,
+            device_id: "web-companion",
+          });
           await postJSON("/api/spike/mic", {
             purpose: "conversation",
             transcript: text,
+            aaron_voice_score: gated.score,
           });
           const turn = await postJSON("/api/turn", {
-            text,
+            text: text,
             transcript: text,
-            source,
+            source: source,
+            aaron_voice_score: gated.score,
+            enrolled: !!profile,
+            multi_speaker_hint: gated.multi,
           });
           reply = turn.cam;
           speak = turn.speak || speak;
-        } catch (_) {
+        } catch (e) {
+          if (e.status === 403 && e.body && e.body.cam) {
+            addBubble("system", e.body.cam);
+            setStatus("Filtered non-Aaron speech", "warn");
+            return;
+          }
           mode = "on_device";
           reply = camReplyLocal(text);
           setStatus("Server unreachable — on-device Cam", "warn");
@@ -125,7 +194,9 @@
       addBubble("cam", reply);
       speakCam(reply, speak);
       setStatus(
-        mode === "server" ? "Listening — server mode" : "Listening — on-device (iOS)",
+        mode === "server"
+          ? "Listening — Aaron only (server)"
+          : "Listening — Aaron only (on-device)",
         "ok"
       );
     } catch (e) {
@@ -134,26 +205,44 @@
   }
 
   function meterLoop() {
-    if (!analyser) return;
-    const data = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteTimeDomainData(data);
-    let sum = 0;
-    for (let i = 0; i < data.length; i++) {
-      const v = (data[i] - 128) / 128;
-      sum += v * v;
+    if (!analyser || !audioCtx) return;
+    const frame = VG.extractVoiceFrame(analyser, audioCtx.sampleRate, gateCfg);
+    micLevel.style.width = Math.min(100, Math.round(frame.rms * 400)) + "%";
+
+    if (enrolling && enroll) {
+      enroll.push(frame);
+      const need = gateCfg.enroll_seconds;
+      const pct = Math.min(100, Math.round((enroll.elapsedSeconds() / need) * 100));
+      partialEl.textContent = `Enrolling Aaron’s voice… ${pct}% — speak alone`;
+      if (enroll.elapsedSeconds() >= need && enroll.ready()) {
+        const p = enroll.toProfile();
+        if (p) {
+          VG.saveProfile(p, gateCfg.storage_key);
+          profile = p;
+          enrolling = false;
+          enroll = null;
+          addBubble(
+            "system",
+            "Aaron voice enrolled. Cam will only accept your voice in noisy rooms."
+          );
+          setStatus("Enrolled — Aaron-only listening", "ok");
+          if (btnEnroll) btnEnroll.textContent = "Re-enroll my voice";
+        }
+      }
+    } else if (utter && frame.voiced) {
+      utter.push(frame);
+      if (profile && utter.ready() && voiceScoreEl) {
+        voiceScoreEl.textContent =
+          "Aaron match " + (utter.scoreAgainst(profile) * 100).toFixed(0) + "%";
+      }
     }
-    const rms = Math.sqrt(sum / data.length);
-    micLevel.style.width = Math.min(100, Math.round(rms * 400)) + "%";
     raf = requestAnimationFrame(meterLoop);
   }
 
-  async function enableMic() {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setStatus("This browser cannot access the microphone.", "warn");
-      return;
-    }
+  async function ensureAudio() {
+    if (micStream && analyser && audioCtx) return;
     micStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true },
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       video: false,
     });
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -162,7 +251,36 @@
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
     src.connect(analyser);
-    meterLoop();
+    if (!raf) meterLoop();
+  }
+
+  async function startEnroll() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus("This browser cannot access the microphone.", "warn");
+      return;
+    }
+    await ensureAudio();
+    enroll = new VG.Accumulator(gateCfg);
+    enrolling = true;
+    btnStop.disabled = false;
+    addBubble(
+      "system",
+      "Speak alone for ~" + gateCfg.enroll_seconds + "s so Cam learns only your voice."
+    );
+    setStatus("Enrolling Aaron’s voice…", "ok");
+  }
+
+  async function enableMic() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus("This browser cannot access the microphone.", "warn");
+      return;
+    }
+    await ensureAudio();
+    utter = new VG.Accumulator(gateCfg);
+
+    if (!profile && gateCfg.require_enrollment_for_mic) {
+      await startEnroll();
+    }
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
@@ -175,6 +293,10 @@
     recognition.interimResults = true;
     recognition.lang = "en-US";
     recognition.onresult = (ev) => {
+      if (enrolling) {
+        partialEl.textContent = "Enrolling… keep talking alone";
+        return;
+      }
       let interim = "";
       let finalText = "";
       for (let i = ev.resultIndex; i < ev.results.length; i++) {
@@ -199,11 +321,14 @@
     recognition.start();
     btnMic.disabled = true;
     btnStop.disabled = false;
-    setStatus("Mic live — speak to Cam", "ok");
+    setStatus(
+      profile ? "Mic live — Aaron only" : "Mic live — enroll your voice to filter others",
+      "ok"
+    );
   }
 
   async function enableCam() {
-    if (!navigator.mediaDevices?.getUserMedia) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus("Camera API missing in this browser.", "warn");
       return;
     }
@@ -229,25 +354,28 @@
 
   function stopAll() {
     recognizing = false;
+    enrolling = false;
     try {
-      recognition?.stop();
+      recognition && recognition.stop();
     } catch (_) {}
     recognition = null;
     if (raf) cancelAnimationFrame(raf);
     raf = 0;
-    micStream?.getTracks().forEach((t) => t.stop());
-    camStream?.getTracks().forEach((t) => t.stop());
+    if (micStream) micStream.getTracks().forEach((t) => t.stop());
+    if (camStream) camStream.getTracks().forEach((t) => t.stop());
     micStream = null;
     camStream = null;
-    audioCtx?.close();
+    if (audioCtx) audioCtx.close();
     audioCtx = null;
     analyser = null;
+    utter = null;
+    enroll = null;
     video.srcObject = null;
     micLevel.style.width = "0%";
     btnMic.disabled = false;
     btnCam.disabled = false;
     btnStop.disabled = true;
-    setStatus("Stopped. Enable mic or camera to continue.");
+    setStatus("Stopped. Enable mic or enroll voice to continue.");
   }
 
   btnMic.addEventListener("click", () =>
@@ -257,6 +385,12 @@
     enableCam().catch((e) => setStatus(e.message, "warn"))
   );
   btnStop.addEventListener("click", stopAll);
+  if (btnEnroll) {
+    btnEnroll.addEventListener("click", () =>
+      startEnroll().catch((e) => setStatus(e.message, "warn"))
+    );
+    if (profile) btnEnroll.textContent = "Re-enroll my voice";
+  }
   textForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const v = textIn.value;
@@ -266,33 +400,46 @@
 
   if (isIOS) {
     hintEl.textContent =
-      "iPhone/iPad: use Safari → Share → Add to Home Screen, then open Cam and tap Enable mic & talk.";
+      "iPhone/iPad: Add to Home Screen, enroll your voice once in quiet, then talk — Cam ignores other people.";
+  } else {
+    hintEl.textContent =
+      "Aaron-only: enroll your voice (~10s quiet), then enable mic. Surrounding conversation is filtered out.";
   }
 
-  // Prefer server if present; else on-device
   fetch("/api/health")
     .then((r) => r.json())
     .then((h) => {
       if (h && h.ok) {
         mode = "server";
+        if (h.voice_gate) gateCfg = VG.mergeConfig(h.voice_gate);
         const net = h.network || {};
         const via = net.tailscale_enabled
-          ? `tailscale · ${net.iphone_open || net.url || ""}`
+          ? "tailscale · " + (net.iphone_open || net.url || "")
           : "local server";
-        setStatus(`Cam online · ENABLED · ${via}`, "ok");
+        setStatus("Cam online · Aaron-only voice · " + via, "ok");
       } else {
         mode = "on_device";
-        setStatus("On-device Cam (no server) — ready for mic", "ok");
+        setStatus("On-device Cam — enroll voice, then mic", "ok");
       }
     })
     .catch(() => {
       mode = "on_device";
-      setStatus("On-device Cam for iPhone/iPad — tap Enable mic & talk", "ok");
+      setStatus("On-device Cam — enroll voice, then Enable mic & talk", "ok");
     });
+
+  fetch("/config/identity/aaron-voice-gate.json")
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null)
+    .then((cfg) => {
+      if (cfg) gateCfg = VG.mergeConfig(cfg);
+    });
+
+  if (voiceScoreEl) {
+    voiceScoreEl.textContent = profile ? "Aaron enrolled" : "Not enrolled";
+  }
 
   if (window.speechSynthesis) {
     window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged = () =>
-      window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
   }
 })();

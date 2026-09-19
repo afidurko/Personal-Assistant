@@ -1,16 +1,23 @@
 /**
  * Cam converse — soft airy replies + session log for the home presence.
  * Browser supplies mic/ASR; this module handles turn logic and distill logs.
+ * Mic turns are Aaron-only gated (noisy-room filter) via aaron-voice-gate.
  */
 import { appendFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import {
+  evaluateAaronVoiceGate,
+  loadAaronVoiceGatePolicy,
+  type VoiceGateResult,
+} from './aaron-voice-gate.js';
 
 export interface ConverseTurn {
-  role: 'aaron' | 'cam';
+  role: 'aaron' | 'cam' | 'system';
   text: string;
   source?: string;
   at: string;
+  gate?: VoiceGateResult;
 }
 
 export interface ConverseReply {
@@ -18,6 +25,16 @@ export interface ConverseReply {
   speak: { rate: number; pitch: number; lang: string };
   sessionId: string;
   history: ConverseTurn[];
+  rejected?: boolean;
+  gate?: VoiceGateResult;
+}
+
+export interface ConverseTurnInput {
+  text: string;
+  source?: string;
+  aaron_voice_score?: number | null;
+  enrolled?: boolean;
+  multi_speaker_hint?: boolean;
 }
 
 const SPEAK = { rate: 0.95, pitch: 1.05, lang: 'en-US' } as const;
@@ -33,26 +50,67 @@ export class CamConverse {
     return this.history.map((h) => ({ ...h }));
   }
 
-  async turn(text: string, source = 'text'): Promise<ConverseReply> {
-    const aaronText = (text || '').trim();
+  async turn(input: string | ConverseTurnInput, source = 'text'): Promise<ConverseReply> {
+    const req: ConverseTurnInput =
+      typeof input === 'string' ? { text: input, source } : { source: 'text', ...input };
+    const aaronText = (req.text || '').trim();
+    const src = req.source || source || 'text';
+    const policy = await loadAaronVoiceGatePolicy(this.rootDir);
+    const gate = evaluateAaronVoiceGate(
+      {
+        source: src,
+        aaron_voice_score: req.aaron_voice_score,
+        enrolled: req.enrolled,
+        multi_speaker_hint: req.multi_speaker_hint,
+      },
+      policy,
+    );
+
+    if (!gate.accept) {
+      const cam =
+        gate.reason === 'enrollment_required'
+          ? 'I only take Aaron’s voice on the mic. Enroll your voice once in a quiet moment, then try again.'
+          : gate.reason === 'rejected_surrounding_speech'
+            ? 'I heard other voices nearby and ignored them. Speak again when it’s you, Aaron.'
+            : `I didn’t match that as your voice (score ${Math.round(gate.score * 100)}%). Surrounding speech stays filtered out.`;
+      const at = new Date().toISOString();
+      this.history.push({ role: 'system', text: cam, source: src, at, gate });
+      if (this.history.length > 80) this.history = this.history.slice(-80);
+      await this.logTurn(aaronText, cam, src, gate);
+      return {
+        cam,
+        speak: { ...SPEAK },
+        sessionId: this.sessionId,
+        history: this.getHistory(),
+        rejected: true,
+        gate,
+      };
+    }
+
     const at = new Date().toISOString();
     if (aaronText) {
-      this.history.push({ role: 'aaron', text: aaronText, source, at });
+      this.history.push({ role: 'aaron', text: aaronText, source: src, at, gate });
     }
     const cam = camReply(aaronText);
     this.history.push({ role: 'cam', text: cam, source: 'reply', at: new Date().toISOString() });
     // Keep a rolling window so spawn/memory stays light
     if (this.history.length > 80) this.history = this.history.slice(-80);
-    await this.logTurn(aaronText, cam, source);
+    await this.logTurn(aaronText, cam, src, gate);
     return {
       cam,
       speak: { ...SPEAK },
       sessionId: this.sessionId,
       history: this.getHistory(),
+      gate,
     };
   }
 
-  private async logTurn(aaron: string, cam: string, source: string): Promise<void> {
+  private async logTurn(
+    aaron: string,
+    cam: string,
+    source: string,
+    gate?: VoiceGateResult,
+  ): Promise<void> {
     try {
       const dir = path.join(this.rootDir, 'vault/10-Mesh-Distillates/converse');
       await mkdir(dir, { recursive: true });
@@ -64,6 +122,7 @@ export class CamConverse {
           source,
           aaron,
           cam,
+          gate,
         }) + '\n';
       await appendFile(path.join(dir, `${day}.jsonl`), line, 'utf8');
     } catch {
@@ -80,7 +139,10 @@ export function camReply(aaronText: string): string {
     return "Hi Aaron. Soft and clear — mic path is live. Say what you need and I'll take it.";
   }
   if (/mic|microphone|hear me|listening|working/.test(low)) {
-    return "Yes — I'm listening to the room. Keep talking; I'll answer when you pause.";
+    return "Yes — I'm listening for your voice only. Surrounding conversation gets filtered out once you're enrolled.";
+  }
+  if (/only my voice|my voice only|ignore.*(other|people|room|noise|surround)/.test(low)) {
+    return "Got it — Aaron-only mode is on. Enroll once if you haven't, then I'll ignore other speakers in noisy places.";
   }
   if (/brain|cortex|3d|mesh/.test(low)) {
     return "The 3D cortex is live behind me — fibers light as my agents and tasks fire. Spin it; tap tracts to explore.";

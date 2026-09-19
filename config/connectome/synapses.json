@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "analogy": "Allowed synapses \u2014 Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
+  "analogy": "Allowed synapses — Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
   "rules": [
     "Every motor fire needs an Aaron-rooted task or standing goal spike",
     "Non-Aaron tasking spikes die at switch.tasking (OFC identity gate)",
@@ -156,7 +156,7 @@
       "from": "area.visual",
       "to": "area.auditory",
       "weight": 0.6,
-      "notes": "photo\u2194voice enrollment bridge"
+      "notes": "photo↔voice enrollment bridge"
     },
     {
       "from": "area.visual",
@@ -1437,6 +1437,36 @@
       "to": "area.mtl",
       "weight": 0.9,
       "notes": "feedback"
+    },
+    {
+      "from": "sense.aaron.voice",
+      "to": "area.ofc",
+      "weight": 1.0,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "switch.tasking",
+      "to": "area.auditory",
+      "weight": 0.8,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "area.auditory",
+      "to": "switch.ios_capture",
+      "weight": 0.8,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "motor.mesh",
+      "weight": 0.7,
+      "notes": "aaron_voice_noise"
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "aaron_voice_noise"
     }
   ]
 }

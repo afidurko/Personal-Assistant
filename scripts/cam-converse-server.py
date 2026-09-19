@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "companions" / "web"
 LOG_DIR = ROOT / "vault" / "10-Mesh-Distillates" / "converse"
 VOICE = json.loads((ROOT / "config" / "persona" / "voice.json").read_text(encoding="utf-8"))
+VOICE_GATE_PATH = ROOT / "config" / "identity" / "aaron-voice-gate.json"
 VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
 TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
 
@@ -33,6 +34,56 @@ try:
     import activity_emit
 except Exception:  # pragma: no cover
     activity_emit = None  # type: ignore
+
+
+def load_voice_gate() -> dict:
+    if not VOICE_GATE_PATH.exists():
+        return {
+            "aaron_only": True,
+            "noisy_environment_mode": True,
+            "reject_non_aaron_asr": True,
+            "require_enrollment_for_mic": True,
+            "text_bypass": True,
+            "match_threshold": 0.85,
+            "noisy_threshold": 0.88,
+        }
+    return json.loads(VOICE_GATE_PATH.read_text(encoding="utf-8"))
+
+
+def evaluate_voice_gate(payload: dict, source: str) -> dict:
+    """Server-side Aaron-only gate for mic turns (scores come from companion)."""
+    policy = load_voice_gate()
+    score = payload.get("aaron_voice_score")
+    score_f = float(score) if isinstance(score, (int, float)) else 0.0
+    enrolled = payload.get("enrolled")
+    multi = bool(payload.get("multi_speaker_hint"))
+
+    if source == "text" and policy.get("text_bypass", True):
+        return {"accept": True, "reason": "text_bypass", "score": 1.0, "threshold": 0.0}
+    if not policy.get("aaron_only", True) or not policy.get("reject_non_aaron_asr", True):
+        return {"accept": True, "reason": "aaron_only_disabled", "score": score_f, "threshold": 0.0}
+    if source not in {"mic", "speech"}:
+        return {"accept": True, "reason": "non_mic_source", "score": score_f, "threshold": 0.0}
+    if policy.get("require_enrollment_for_mic", True) and enrolled is False:
+        return {
+            "accept": False,
+            "reason": "enrollment_required",
+            "score": 0.0,
+            "threshold": float(policy.get("match_threshold", 0.85)),
+        }
+    threshold = float(
+        policy.get("noisy_threshold", 0.88)
+        if policy.get("noisy_environment_mode", True) or multi
+        else policy.get("match_threshold", 0.85)
+    )
+    if score_f >= threshold:
+        return {"accept": True, "reason": "aaron_voice_match", "score": score_f, "threshold": threshold}
+    return {
+        "accept": False,
+        "reason": "rejected_surrounding_speech" if multi else "below_threshold",
+        "score": score_f,
+        "threshold": threshold,
+    }
 
 
 def load_tailscale() -> dict:
@@ -194,8 +245,16 @@ def cam_reply(aaron_text: str, history: list[dict]) -> str:
         )
     if "mic" in low or "microphone" in low or "hear me" in low or "working" in low:
         return (
-            "If you can read this after speaking, the listen path is up. "
-            "I'm Cam — soft voice, always here for you. Say what you need."
+            "Yes — I'm listening for your voice only. "
+            "Surrounding conversation is filtered out once you're enrolled."
+        )
+    if "only my voice" in low or "my voice only" in low or (
+        "ignore" in low
+        and any(w in low for w in ("other", "people", "room", "noise", "surround"))
+    ):
+        return (
+            "Aaron-only mode is on. Enroll once if you haven't, "
+            "then I'll ignore other speakers in noisy places."
         )
     if "camera" in low or "face" in low or "see me" in low:
         return (
@@ -282,6 +341,7 @@ class Handler(BaseHTTPRequestHandler):
                         "enabled_by": "Aaron",
                         "ios_capture_mode": "standing_on",
                         "aaron_face_enrolled": VISUAL.exists(),
+                        "aaron_voice_only": True,
                         "host_has_local_mic": False,  # browser supplies mic
                         "tailscale": bool(ts.get("enabled")),
                     },
@@ -293,6 +353,7 @@ class Handler(BaseHTTPRequestHandler):
                         "character": VOICE["identity"]["voice_character"],
                         "tts_browser_hint": "speechSynthesis; soft rate 0.95",
                     },
+                    "voice_gate": load_voice_gate(),
                 },
             )
             return
@@ -364,9 +425,61 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {"accepted": True, "event": event, "mesh_activity": mesh})
             return
 
+        if path == "/api/spike/aaron.voice":
+            score = payload.get("score")
+            score_f = float(score) if isinstance(score, (int, float)) else 0.0
+            route = route_sense("sense.aaron.voice", goal="verify aaron voice")
+            event = {
+                "at": utc_now(),
+                "type": "aaron_voice_spike",
+                "score": score_f,
+                "enrolled": payload.get("enrolled"),
+                "multi_speaker_hint": payload.get("multi_speaker_hint"),
+                "device_id": payload.get("device_id"),
+                "route": route,
+            }
+            self._append_log("spikes", event)
+            self._json(
+                200,
+                {
+                    "accepted": score_f >= 0.85,
+                    "sense": "sense.aaron.voice",
+                    "event": event,
+                },
+            )
+            return
+
         if path == "/api/turn":
             text = (payload.get("text") or payload.get("transcript") or "").strip()
             source = payload.get("source", "text")
+            gate = evaluate_voice_gate(payload, source)
+            if not gate.get("accept"):
+                msg = (
+                    "I only take Aaron’s voice on the mic. Enroll your voice once, then try again."
+                    if gate.get("reason") == "enrollment_required"
+                    else "I heard other voices nearby and ignored them. Speak again when it’s you, Aaron."
+                    if gate.get("reason") == "rejected_surrounding_speech"
+                    else f"I didn’t match that as your voice (score {round(gate.get('score', 0) * 100)}%). Filtered."
+                )
+                turn = {
+                    "id": str(uuid.uuid4()),
+                    "at": utc_now(),
+                    "source": source,
+                    "aaron": text,
+                    "cam": msg,
+                    "rejected": True,
+                    "gate": gate,
+                    "speak": {
+                        "enabled": True,
+                        "rate": 0.95,
+                        "pitch": 1.05,
+                        "lang": "en-US",
+                        "style": "soft airy fluent English",
+                    },
+                }
+                self._append_log("turns", turn)
+                self._json(403, turn)
+                return
             sense = "sense.ios.mic" if source in {"mic", "speech"} else "sense.chat.aaron"
             route = route_sense(sense, goal=text)
             reply = cam_reply(text, STATE.history)
@@ -383,6 +496,7 @@ class Handler(BaseHTTPRequestHandler):
                 "source": source,
                 "aaron": text,
                 "cam": reply,
+                "gate": gate,
                 "route": {
                     "sense": sense,
                     "hotspot_id": route.get("hotspot_id"),
