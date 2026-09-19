@@ -196,8 +196,9 @@ export type SuggestionKind =
   | 'cam-enhance'
   | 'research-memory'
   | 'api-catalog'
-  | 'card-embodiment';
-
+  | 'card-embodiment'
+  | 'presence-voice'
+  | 'identity';
 export interface SuggestiveImplementation {
   id: string;
   kind: SuggestionKind;

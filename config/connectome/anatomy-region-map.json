@@ -1,0 +1,128 @@
+[
+  {
+    "name": "area.dlpfc",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.rostralmiddlefrontal", "lh.superiorfrontal"]
+  },
+  {
+    "name": "area.apfc",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.frontalpole"]
+  },
+  {
+    "name": "area.ofc",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.lateralorbitofrontal", "lh.medialorbitofrontal"]
+  },
+  {
+    "name": "area.broca",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.parsopercularis", "lh.parstriangularis", "lh.parsorbitalis"]
+  },
+  {
+    "name": "area.premotor",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.caudalmiddlefrontal"]
+  },
+  {
+    "name": "area.motor",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.precentral", "lh.paracentral"]
+  },
+  {
+    "name": "area.parietal",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.superiorparietal", "lh.inferiorparietal", "lh.precuneus", "lh.postcentral"]
+  },
+  {
+    "name": "area.wernicke",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.bankssts", "lh.supramarginal"]
+  },
+  {
+    "name": "area.temporal",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.middletemporal", "lh.inferiortemporal", "lh.temporalpole", "lh.fusiform"]
+  },
+  {
+    "name": "area.auditory",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.transversetemporal", "lh.superiortemporal"]
+  },
+  {
+    "name": "area.visual",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.lateraloccipital", "lh.cuneus", "lh.pericalcarine", "lh.lingual"]
+  },
+  {
+    "name": "area.cingulate",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.caudalanteriorcingulate", "lh.rostralanteriorcingulate", "lh.posteriorcingulate", "lh.isthmuscingulate"]
+  },
+  {
+    "name": "area.mtl",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.entorhinal", "lh.parahippocampal"]
+  },
+  {
+    "name": "area.mtl.hippocampus",
+    "source": "subcortical",
+    "merge": "left",
+    "parcels": ["Left-Hippocampus"]
+  },
+  {
+    "name": "fill.insula",
+    "source": "cortical",
+    "merge": "left",
+    "parcels": ["lh.insula"]
+  },
+  {
+    "name": "deep.amygdala",
+    "source": "subcortical",
+    "merge": "left",
+    "parcels": ["Left-Amygdala"]
+  },
+  {
+    "name": "deep.thalamus",
+    "source": "subcortical",
+    "merge": "left",
+    "parcels": ["Left-Thalamus-Proper"]
+  },
+  {
+    "name": "deep.striatum",
+    "source": "subcortical",
+    "merge": "left",
+    "parcels": ["Left-Caudate", "Left-Putamen", "Left-Accumbens-area"]
+  },
+  {
+    "name": "deep.cerebellum",
+    "source": "subcortical",
+    "merge": "left",
+    "parcels": ["Left-Cerebellum-Cortex"]
+  },
+  {
+    "name": "deep.brainstem",
+    "source": "subcortical",
+    "merge": "both",
+    "parcels": ["Brain-Stem"]
+  },
+  {
+    "name": "deep.callosum",
+    "source": "subcortical",
+    "merge": "both",
+    "parcels": ["CC_Anterior", "CC_Central", "CC_Mid_Anterior", "CC_Mid_Posterior", "CC_Posterior"]
+  }
+]

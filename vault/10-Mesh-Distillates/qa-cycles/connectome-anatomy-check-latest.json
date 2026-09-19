@@ -1,0 +1,19 @@
+{
+  "areas": 13,
+  "mapped_areas": 13,
+  "region_entries": 21,
+  "missing_map": [],
+  "extra_map": [],
+  "missing_centroids": [],
+  "glb_bytes": 7782328,
+  "public_glb_bytes": 7782328,
+  "notice": true,
+  "ok": true,
+  "errors": [],
+  "suggestions": [
+    "Keep anatomy-region-map.json in lockstep with areas.json when adding Brodmann hubs",
+    "Regenerate cam-cortex.glb via scripts/build-cam-cortex-glb.sh after map edits",
+    "Serve viz from repo root so live-activity.json resolves beside the glass shell",
+    "React hero loads /cortex/cam-cortex.glb \u2014 keep public/cortex mirrored"
+  ]
+}

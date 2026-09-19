@@ -35,3 +35,7 @@ Promoted from episodic vault scan at `2026-09-19T18:34:34Z`.
 - [AGI Daily Scan](vault/04-Research/AGI-Daily-Scan.md)
 - [Research Brief — Papers to help Cam function better](vault/04-Research/2026-09-17-Cam-Function-Papers.md)
 - [Research Brief — Drosophila male CNS connectome (Cell 2026)](vault/04-Research/2026-09-16-Drosophila-male-CNS-connectome-Cell.md)
+- [SwiftGuide → Cam brain map](vault/04-Research/2026-09-16-SwiftGuide-brain-map.md)
+- [Neuroplasticity & neurogenesis in Cam’s mesh](vault/04-Research/2026-09-16-Neuroplasticity-neurogenesis-mesh.md)
+- [Cam Brodmann cortex remap](vault/04-Research/2026-09-16-Brodmann-neural-mesh-remap.md)
+- [Priority stack — implemented](vault/03-Projects/Priority-Stack-Implemented.md)

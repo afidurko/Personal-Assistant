@@ -89,9 +89,10 @@
         "area.broca",
         "switch.presence",
         "switch.outbound",
+        "switch.identity",
         "motor.speak"
       ],
-      "behavior": "hear_think_speak_with_cam_face_voice"
+      "behavior": "hear_think_speak_with_cam_face_voice_aaron_only"
     },
     {
       "id": "hotspot.life_ops",
@@ -132,6 +133,10 @@
         "switch.outbound",
         "motor.text"
       ],
+      "side_effects": [
+        "motor.inkbox",
+        "motor.mesh"
+      ],
       "behavior": "triage_and_reply_email"
     },
     {
@@ -154,6 +159,62 @@
         "motor.mesh"
       ],
       "behavior": "ingest_visual_spikes"
+    },
+    {
+      "id": "hotspot.gaze",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.vision.gaze",
+        "switch.pupil_vision",
+        "area.visual",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.pupil"
+      ],
+      "behavior": "ingest_gaze_spikes",
+      "integration": "pupil",
+      "mesh_ns": "mesh/gaze"
+    },
+    {
+      "id": "hotspot.pupil_see",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.ifof",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.vision.world",
+        "switch.pupil_vision",
+        "area.visual",
+        "area.dlpfc",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.pupil"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "cam_see_via_pupil_world_and_gaze",
+      "integration": "pupil",
+      "mesh_ns": "mesh/vision"
     },
     {
       "id": "hotspot.jarvis",
@@ -570,6 +631,37 @@
       "integration": "config/integrations/google-scholar.json"
     },
     {
+"id": "hotspot.voicestudio_result",
+      "center": "center.comms",
+      "pathway": [
+        "sense.voicestudio.result",
+        "center.comms",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "distill_voicestudio_tts_asr_clone_results",
+      "integration": "config/integrations/voicestudio.json"
+    },
+    {
+      "id": "hotspot.voicestudio",
+      "center": "center.comms",
+      "pathway": [
+        "sense.voicestudio.health",
+        "center.comms",
+        "switch.autonomy",
+        "motor.voicestudio"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "local_voicestudio_health_and_speech_api",
+      "integration": "config/integrations/voicestudio.json"
+    },
+    {
       "id": "hotspot.public_apis",
       "center": "center.tooling",
       "pathway": [
@@ -589,6 +681,33 @@
       "team": "team.tooling",
       "available_to": "all_roles_and_subagents",
       "integration": "config/integrations/public-apis.json"
+    },
+    {
+      "id": "hotspot.inkbox",
+      "center": "center.comms",
+      "area": "area.broca",
+      "columns": [
+        "neuron.comms",
+        "neuron.language_in"
+      ],
+      "tracts": [
+        "tract.arcuate",
+        "tract.corticospinal"
+      ],
+      "pathway": [
+        "sense.inkbox.event",
+        "center.comms",
+        "switch.outbound",
+        "motor.inkbox"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "agent_identity_email_phone_vault_tunnels",
+      "team": "team.capability",
+      "available_to": "comms_and_gated_outbound",
+      "integration": "config/integrations/inkbox.json"
     },
     {
       "id": "hotspot.slm_assist",

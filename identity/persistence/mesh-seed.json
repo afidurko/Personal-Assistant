@@ -32,6 +32,19 @@
     "sync_script": "scripts/sync-cline-session.py",
     "tickets": "identity/persistence/tickets"
   },
+  "mesh/comms": {
+    "inkbox": true,
+    "inkbox_config": "config/integrations/inkbox.json",
+    "inkbox_script": "scripts/inkbox-check.py",
+    "inkbox_motor": "motor.inkbox",
+    "inkbox_sense": "sense.inkbox.event",
+    "inkbox_hotspot": "hotspot.inkbox",
+    "inkbox_submodule": "integrations/inkbox",
+    "inkbox_source": "https://github.com/afidurko/inkbox",
+    "outbound_gate": "switch.outbound",
+    "credential_env": "INKBOX_API_KEY",
+    "status": "wired"
+  },
   "mesh/enhance": {
     "applied_configs": [
       "config/memory/hmo-tiers.json",
@@ -68,6 +81,8 @@
     "always_on": true,
     "auto_start_converse_server": true,
     "boss_worker_primitives": true,
+    "cam_can_see": true,
+    "cam_converse_local": true,
     "cam_converse_port": 8787,
     "cam_converse_url_config": "config/network/tailscale.json",
     "cam_converse_via": "tailscale",
@@ -78,6 +93,9 @@
     "cam_live_converse_enabled": true,
     "cam_live_mic": true,
     "cam_live_mic_enabled": true,
+    "cam_pupil_vision": true,
+    "cam_pupil_vision_enabled": true,
+    "cam_see_via": "pupil",
     "cline_available_to_all_agents": true,
     "cline_coding_effector": true,
     "cline_cross_workspace": true,
@@ -110,6 +128,11 @@
     "max_subagents": null,
     "only_aaron_may_assign_tasks": true,
     "privilege_inheritance": true,
+    "pupil_hotspot": "hotspot.pupil_see",
+    "pupil_motor": "motor.pupil",
+    "pupil_sense_world": "sense.vision.world",
+    "pupil_submodule": "integrations/pupil",
+    "pupil_vision_mode": "standing_on",
     "qa_auto_fix": true,
     "qa_auto_rerun": true,
     "qa_default_n": 1000000000,
@@ -125,7 +148,9 @@
     "swarm_config": "config/swarm/privileges.json",
     "tailscale_enabled": true,
     "tool_creator_user": true,
-    "unlimited_subagents": true
+    "unlimited_subagents": true,
+    "inkbox": true,
+    "inkbox_submodule": "integrations/inkbox"
   },
   "mesh/open-questions": {
     "ios_companion_pair_code": "generate on first launch",
@@ -163,6 +188,8 @@
     "boss_worker_primitives": true,
     "brain_enhancement": "smart-second-brain",
     "cam_age": 32,
+    "cam_can_see": true,
+    "cam_converse_local": true,
     "cam_converse_port": 8787,
     "cam_converse_url_config": "config/network/tailscale.json",
     "cam_converse_via": "tailscale",
@@ -178,6 +205,9 @@
     "cam_live_mic_enabled": true,
     "cam_origin": "Argentina",
     "cam_primary_language": "en",
+    "cam_pupil_vision": true,
+    "cam_pupil_vision_enabled": true,
+    "cam_see_via": "pupil",
     "cam_voice": "soft airy fluent English",
     "chief_voice": "Cam",
     "cline_available_to_all_agents": true,
@@ -225,6 +255,11 @@
     "prefer_small_vision_models": true,
     "privilege_inheritance": true,
     "proactive": true,
+    "pupil_hotspot": "hotspot.pupil_see",
+    "pupil_motor": "motor.pupil",
+    "pupil_sense_world": "sense.vision.world",
+    "pupil_submodule": "integrations/pupil",
+    "pupil_vision_mode": "standing_on",
     "qa_auto_fix": true,
     "qa_auto_rerun": true,
     "qa_default_n": 1000000000,
@@ -239,12 +274,24 @@
     "timezone": "America/New_York",
     "tool_creator_user": true,
     "unlimited_subagents": true,
-    "weekly_review": true
+    "voicestudio_config": "config/integrations/voicestudio.json",
+    "voicestudio_connected": true,
+    "voicestudio_local_speech": true,
+    "voicestudio_models_installed": true,
+    "weekly_review": true,
+    "inkbox": true,
+    "inkbox_outbound_gated": true
+
   },
   "mesh/projects": {
     "default_workspace_id": "personal-assistant",
     "source": "config/workspaces/registry.json",
-    "status": "registry_wired"
+    "status": "registry_wired",
+    "voicestudio": {
+      "remote": "github.com/afidurko/VoiceStudio",
+      "vault": "vault/03-Projects/VoiceStudio-Local-Speech.md",
+      "workspace_id": "voicestudio"
+    }
   },
   "mesh/research": {
     "adversarial_on_sensitive": true,
@@ -260,32 +307,67 @@
     "google_scholar": true,
     "google_scholar_config": "config/integrations/google-scholar.json",
     "google_scholar_script": "scripts/scholar-search.py",
+    "include_counterarguments": true,
     "public_apis": true,
-    "public_apis_config": "config/integrations/public-apis.json",
-    "public_apis_script": "scripts/public-apis-search.py",
+    "public_apis_addon_script": "scripts/public-apis-addon.py",
     "public_apis_addons": true,
     "public_apis_addons_config": "config/integrations/public-apis-addons.json",
-    "public_apis_addon_script": "scripts/public-apis-addon.py",
-    "include_counterarguments": true,
+    "public_apis_config": "config/integrations/public-apis.json",
+    "public_apis_script": "scripts/public-apis-search.py",
     "save_to_mesh": true,
     "use_smart_second_brain": true
   },
   "mesh/tools": {
+    "public_apis": true,
+    "public_apis_addon_script": "scripts/public-apis-addon.py",
+    "public_apis_addons": true,
+    "public_apis_addons_config": "config/integrations/public-apis-addons.json",
+    "public_apis_available_to": "all_roles_and_subagents",
+    "public_apis_config": "config/integrations/public-apis.json",
+    "public_apis_script": "scripts/public-apis-search.py",
     "registry": "config/tools/registry.json",
     "status": "active",
     "team": "team.tooling",
-    "public_apis": true,
-    "public_apis_config": "config/integrations/public-apis.json",
-    "public_apis_script": "scripts/public-apis-search.py",
-    "public_apis_addons": true,
-    "public_apis_addons_config": "config/integrations/public-apis-addons.json",
-    "public_apis_addon_script": "scripts/public-apis-addon.py",
-    "public_apis_available_to": "all_roles_and_subagents"
+    "inkbox": true,
+    "inkbox_config": "config/integrations/inkbox.json",
+    "inkbox_script": "scripts/inkbox-check.py",
+    "inkbox_motor": "motor.inkbox"
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",
     "status": "starter_vault_created",
     "vault_path": "vault",
     "welcome": "vault/Welcome.md"
+  },
+  "mesh/voice": {
+    "aaron_only": [
+      "SERPAPI_API_KEY",
+      "Slack MCP OAuth",
+      "Tailscale MagicDNS on daily host",
+      "NVIDIA RIVA + Audio2Face desk studio",
+      "Bind soft-airy Cam VoiceStudio profile_id"
+    ],
+    "backend_default": "http://localhost:3900",
+    "backend_live": "http://localhost:3900",
+    "config": "config/integrations/voicestudio.json",
+    "connected_at": "2026-09-19T19:08:54.198456+00:00",
+    "connection_doc": "vault/10-Mesh-Distillates/CONNECTION_STATUS.md",
+    "device": "cpu",
+    "health_script": "scripts/voicestudio-health.py",
+    "integration": "integrations/voicestudio",
+    "mcp_mounted": true,
+    "mcp_path": "/mcp",
+    "model_weights": "not_downloaded_awaiting_aaron",
+    "models_installed": [
+      "k2-fsa/OmniVoice",
+      "Systran/faster-whisper-base"
+    ],
+    "notes": "Local TTS/ASR/clone/dub; not the brain",
+    "policy": "config/integrations/voicestudio.md",
+    "presence_face_still": "integrations/llmavatartalk",
+    "smoke_transcript": "Hello, Aaron. Cam is connected on Local Voice Studio.",
+    "smoke_tts": "data/voicestudio/cam-smoke-20260919T190824Z.wav",
+    "status": "connected_cpu_models_installed",
+    "version": "0.5.4"
   }
 }

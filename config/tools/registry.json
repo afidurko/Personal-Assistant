@@ -16,14 +16,20 @@
         "stdout": "string",
         "exit_code": "number"
       },
-      "required_privileges": ["use_jarvis", "use_tool"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "required_privileges": [
+        "use_jarvis",
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "template"
     },
     {
       "id": "tool.connectome.route",
-      "purpose": "Dry-run a sense→motor plan via connectome-route.py",
+      "purpose": "Dry-run a sense\u2192motor plan via connectome-route.py",
       "created_by_role": "tool-creator",
       "entrypoint": "scripts/connectome-route.py",
       "kind": "local_script",
@@ -35,26 +41,62 @@
       "outputs": {
         "motor_plan": "object"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "template"
     },
     {
-      "id": "tool.swarm.check",
-      "purpose": "Validate privilege inheritance + boss/worker primitives",
+      "id": "tool.pupil.see",
+      "purpose": "Ingest Pupil world camera + gaze so Cam can see (mesh/vision + mesh/gaze)",
       "created_by_role": "tool-creator",
-      "entrypoint": "scripts/swarm-check.py",
+      "entrypoint": "scripts/pupil-see.py",
       "kind": "local_script",
-      "inputs": {},
+      "inputs": {
+        "gaze": "string?",
+        "world": "string?",
+        "probe": "boolean?",
+        "dry_run": "boolean?"
+      },
+      "outputs": {
+        "accepted": "boolean",
+        "mesh_vision": "object",
+        "mesh_gaze": "object",
+        "route": "object"
+      },
+      "required_privileges": ["use_tool", "read_mesh", "write_mesh"],
+      "requires_switch": ["switch.pupil_vision", "switch.kill"],
+      "risk": "medium",
+      "status": "active"
+    },
+    {
+      "id": "tool.voicestudio.health",
+      "purpose": "Probe VoiceStudio local backend /health for Cam speech readiness",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/voicestudio-health.py",
+      "kind": "local_script",
+      "inputs": {
+        "base_url": "string?",
+        "timeout": "number?"
+      },
       "outputs": {
         "ok": "boolean",
         "report": "object"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
-      "status": "active"
+      "status": "active",
+      "integration": "config/integrations/voicestudio.json"
     },
     {
       "id": "tool.public_apis.search",
@@ -75,8 +117,14 @@
         "returned": "number",
         "total_catalog": "number"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "active",
       "integration": "config/integrations/public-apis.json",
@@ -95,8 +143,14 @@
       "outputs": {
         "mesh_doc": "object"
       },
-      "required_privileges": ["use_tool", "write_mesh"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "active",
       "integration": "config/integrations/public-apis.json",
@@ -123,8 +177,14 @@
         "result": "object",
         "provider": "string"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "active",
       "integration": "config/integrations/public-apis-addons.json",
@@ -142,12 +202,35 @@
         "addons": "object[]",
         "count": "number"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "active",
       "integration": "config/integrations/public-apis-addons.json",
       "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.inkbox.check",
+      "purpose": "Confirm Inkbox connectome + submodule wiring (no API key required)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/inkbox-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": ["use_tool", "read_mesh"],
+      "requires_switch": ["switch.kill"],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/inkbox.json",
+      "motor": "motor.inkbox"
     }
   ]
 }

@@ -1,0 +1,4 @@
+[
+  {"norm_pos": [0.51, 0.48], "confidence": 0.94, "timestamp": 1.0, "topic": "gaze.3d.01"},
+  {"norm_pos": [0.53, 0.47], "confidence": 0.91, "timestamp": 1.033, "topic": "gaze.3d.01"}
+]

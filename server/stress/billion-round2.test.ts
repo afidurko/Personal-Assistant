@@ -102,9 +102,20 @@ describe('suggestive implementations', () => {
 
     expect(suggestions.some((s) => s.kind === 'cam-enhance')).toBe(true);
     expect(suggestions.some((s) => s.kind === 'research-memory')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'identity')).toBe(true);
     expect(suggestions.some((s) => s.id.includes('trajectory') || s.id.includes('hmo'))).toBe(
       true,
     );
+    expect(suggestions.some((s) => s.id.includes('aaron-voice'))).toBe(true);
+  });
+
+  it('includes presence-voice suggestions for VoiceStudio local speech', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({ id: 'workspace-health', kind: 'health', score: 92, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'presence-voice')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('voicestudio'))).toBe(true);
   });
 
   it('includes api-catalog suggestions for improvements/swarm workspaces', () => {

@@ -21,7 +21,7 @@
     {
       "id": "switch.outbound",
       "default": "act_under_autonomy",
-      "act": ["motor.text", "motor.call", "motor.facetime", "motor.speak"],
+      "act": ["motor.text", "motor.call", "motor.facetime", "motor.speak", "motor.inkbox"],
       "hold": "draft_only",
       "flipped_by": ["Aaron", "switch.kill"]
     },
@@ -66,6 +66,16 @@
       "enabled_by": "Aaron",
       "enabled_at": "2026-09-16",
       "notes": "ENABLED — Aaron authorized live mic/camera converse; kill switch still pauses"
+    },
+    {
+      "id": "switch.pupil_vision",
+      "default": "standing_on",
+      "act": ["sense.vision.world", "sense.vision.gaze", "motor.pupil"],
+      "hold": "no_pupil_capture",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "enabled_by": "Aaron",
+      "enabled_at": "2026-09-19",
+      "notes": "ENABLED — Aaron authorized Pupil so Cam can see (world camera + gaze); not always-on surveillance of others; kill still pauses"
     },
     {
       "id": "switch.research_scan",

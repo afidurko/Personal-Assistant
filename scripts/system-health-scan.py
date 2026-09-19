@@ -67,12 +67,15 @@ def check_integrations() -> dict:
     expected = [
         "integrations/jarvis",
         "integrations/paddledetection",
+        "integrations/pupil",
         "integrations/llmavatartalk",
+        "integrations/voicestudio",
         "integrations/smart-second-brain",
         "integrations/swiftguide",
         "integrations/public-apis",
         "integrations/cline",
         "integrations/joshinator-analyzer",
+        "integrations/inkbox",
     ]
     present = [p for p in expected if (ROOT / p).exists()]
     missing = [p for p in expected if p not in present]
@@ -87,6 +90,7 @@ def check_integrations() -> dict:
             ROOT
             / "integrations/joshinator-analyzer/backend/app/services/embodiment_service.py"
         ).exists(),
+        "integrations/inkbox": (ROOT / "config/integrations/inkbox.json").exists(),
     }
     for path, ok in config_ok.items():
         if path in missing and ok:

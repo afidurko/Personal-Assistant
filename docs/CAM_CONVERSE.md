@@ -33,7 +33,18 @@ On iPhone: `http://aaron-ipad:8787` (edit MagicDNS in `config/network/tailscale.
 - `GET /api/session`
 
 ## Connectome
-Mic → `sense.ios.mic` · Camera → `sense.ios.camera` · Chat fallback → `sense.chat.aaron`
+Mic → `sense.ios.mic` · Camera → `sense.ios.camera` · Chat fallback → `sense.chat.aaron`  
+Aaron-only hearing → `sense.aaron.voice` via FunASR CAM++ gate (`docs/AARON_VOICE_GATE.md`)
+
+## Aaron-only mic (server mode)
+
+Mic turns require a passing voice gate when enrollment exists:
+
+1. Enroll: `python3 scripts/aaron-voice-enroll.py identity/aaron/local/voice/samples/*.wav`
+2. Companion sends ~4s WAV (`audio_wav_b64`) with each final transcript
+3. Non-Aaron / surrounding speech → HTTP 403, no Cam reply
+
+`GET /api/voice/status` · `POST /api/voice/gate` · `POST /api/spike/aaron.voice`
 
 ## Logs
 `vault/10-Mesh-Distillates/converse/*.jsonl` (server mode only)
