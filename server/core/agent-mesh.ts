@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type {
   AgentCycleResult,
   Finding,
@@ -15,26 +17,54 @@ import {
 } from '../../shared/agentLayers.js';
 import type { NeuralMesh } from './neural-mesh.js';
 import type { PersistentMemory } from './persistent-memory.js';
+import { SwarmRuntime } from './swarm-runtime.js';
 
 const SEVERITY_ORDER = { critical: 5, high: 4, medium: 3, low: 2, info: 1 } as const;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DEFAULT_ROOT = path.resolve(__dirname, '../..');
 
 export class AgentMeshRuntime {
   private jobs: LoopJob[] = [];
   private lastCycle: AgentCycleResult | null = null;
   private loopArmed = true;
   private previousScores = new Map<string, number>();
+  private swarm: SwarmRuntime | null = null;
+  private readonly rootDir: string;
+  private readonly dataDir: string;
 
   constructor(
     private readonly mesh: NeuralMesh,
     private readonly memory: PersistentMemory,
-  ) {}
+    options: { rootDir?: string; dataDir?: string } = {},
+  ) {
+    this.rootDir = options.rootDir ?? DEFAULT_ROOT;
+    this.dataDir = options.dataDir ?? path.join(this.rootDir, 'data');
+  }
+
+  private async ensureSwarm(): Promise<SwarmRuntime> {
+    if (!this.swarm) {
+      this.swarm = new SwarmRuntime(this.mesh, this.memory, this.dataDir, this.rootDir);
+      await this.swarm.load();
+    }
+    return this.swarm;
+  }
 
   getJobs(): LoopJob[] {
     return this.jobs.map((j) => ({ ...j }));
   }
 
   getLastCycle(): AgentCycleResult | null {
-    return this.lastCycle ? { ...this.lastCycle, loopActions: [...this.lastCycle.loopActions] } : null;
+    return this.lastCycle
+      ? {
+          ...this.lastCycle,
+          loopActions: [...this.lastCycle.loopActions],
+          swarm: this.lastCycle.swarm ? { ...this.lastCycle.swarm } : null,
+        }
+      : null;
+  }
+
+  getSwarmState() {
+    return this.swarm?.getState() ?? null;
   }
 
   setLoopArmed(armed: boolean): void {
@@ -46,7 +76,7 @@ export class AgentMeshRuntime {
   }
 
   /**
-   * One deep-layer agent cycle: commute → memory → persistence → issue-loop.
+   * One deep-layer agent cycle: commute → memory → persistence → issue-loop → swarm.
    */
   async runCycle(input: {
     workspaces: WorkspaceSnapshot[];
@@ -60,9 +90,18 @@ export class AgentMeshRuntime {
       ? await this.runIssueFixLoop(workspaces, suggestions)
       : [];
 
+    const swarmRuntime = await this.ensureSwarm();
+    const swarmCycle = await swarmRuntime.runCycle({ workspaces });
+
     const efficiencyGain = Math.min(
       1,
-      commutePaths.length * 0.08 + memoryWrites * 0.05 + persistedJobs * 0.04 + loopActions.length * 0.1,
+      commutePaths.length * 0.08 +
+        memoryWrites * 0.05 +
+        persistedJobs * 0.04 +
+        loopActions.length * 0.1 +
+        swarmCycle.spawns * 0.03 +
+        swarmCycle.assigns * 0.04 +
+        swarmCycle.denials * 0.02,
     );
 
     // Pulse agent nodes
@@ -79,10 +118,19 @@ export class AgentMeshRuntime {
 
     this.lastCycle = {
       commutePaths,
-      memoryWrites,
+      memoryWrites: memoryWrites + swarmCycle.memoryWrites,
       persistedJobs,
       loopActions,
       efficiencyGain,
+      swarm: {
+        spawns: swarmCycle.spawns,
+        assigns: swarmCycle.assigns,
+        broadcasts: swarmCycle.broadcasts,
+        denials: swarmCycle.denials,
+        terminations: swarmCycle.terminations,
+        activeAgents: swarmCycle.activeAgents,
+        namespacesTouched: swarmCycle.namespacesTouched,
+      },
     };
     await this.mesh.save();
     return this.lastCycle;

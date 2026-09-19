@@ -4,6 +4,7 @@
 - Cam always-on with locked persona (face + soft airy voice)
 - Persistence + smart-second-brain vault linked
 - Research and careers (LinkedIn/Indeed) running to completion without mid-task interruption
+- Google Scholar connected for literature + citations
 
 ## 90-day win
 - Full RIVA/Audio2Face presence daily
@@ -21,4 +22,6 @@
 | smart-second-brain starter vault | memory-curator | **created** at `vault/` — open in Obsidian |
 | Persistence | memory-curator | done |
 | LinkedIn + Indeed | careers | enabled |
+| Google Scholar | info / researcher | enabled (needs `SERPAPI_API_KEY` locally) |
+| Cam-function paper batch (HMO/MMP/OCL/persona) | capability | **applied** 2026-09-17 |
 | Avatar studio | comms | awaiting RIVA/Audio2Face on Aaron machine |

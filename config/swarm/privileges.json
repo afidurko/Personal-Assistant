@@ -1,0 +1,231 @@
+{
+  "version": 1,
+  "source": "HAAS privilege inheritance adapted for Cam (Aaron = human master, not SOB)",
+  "docs": "docs/HAAS_CAM_PATTERNS.md",
+  "sole_operator": "Aaron",
+  "notes": [
+    "Unlimited subagent count and depth remain (identity/persistence/UNLIMITED_SUBAGENTS.md).",
+    "Privilege inheritance does NOT cap spawn count — it only prevents privilege escalation.",
+    "Agents never receive Aaron-only privileges (task_giver, kill_master, cam_enhance_apply)."
+  ],
+  "levels": {
+    "0": {
+      "id": "human.aaron",
+      "kind": "human",
+      "label": "Aaron",
+      "may_spawn_agents": true,
+      "notes": "Sole root task-giver and master kill switch"
+    },
+    "1": {
+      "id": "chief",
+      "kind": "agent",
+      "label": "Cam chief",
+      "role": "chief",
+      "may_spawn_agents": true
+    },
+    "2": {
+      "id": "specialist_or_team_lead",
+      "kind": "agent",
+      "label": "Specialists / team leads",
+      "may_spawn_agents": true,
+      "notes": "Created by chief or by Aaron via Cam"
+    },
+    "3+": {
+      "id": "subagent",
+      "kind": "agent",
+      "label": "Recursive subagents",
+      "may_spawn_agents": true,
+      "notes": "level = parent.level + 1; unbounded"
+    }
+  },
+  "privilege_catalog": {
+    "aaron_only": [
+      "task_giver",
+      "kill_master",
+      "cam_enhance_apply",
+      "revoke_standing_autonomy",
+      "enroll_identity"
+    ],
+    "agent_grantable": [
+      "spawn_subagents",
+      "assign_task",
+      "broadcast",
+      "resolve_task",
+      "send_message",
+      "terminate_lineage",
+      "read_mesh",
+      "write_mesh",
+      "read_vault",
+      "write_vault",
+      "use_jarvis",
+      "use_slm",
+      "use_dl",
+      "use_vision",
+      "create_tool",
+      "use_tool",
+      "web_fetch",
+      "cam_enhance_propose",
+      "outbound_draft",
+      "outbound_send",
+      "careers_draft",
+      "careers_submit"
+    ]
+  },
+  "role_defaults": {
+    "chief": {
+      "level": 1,
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "broadcast",
+        "resolve_task",
+        "send_message",
+        "terminate_lineage",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_dl",
+        "use_vision",
+        "create_tool",
+        "use_tool",
+        "web_fetch",
+        "cam_enhance_propose",
+        "outbound_draft",
+        "outbound_send",
+        "careers_draft",
+        "careers_submit"
+      ]
+    },
+    "capability-broker": {
+      "level": 2,
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "broadcast",
+        "resolve_task",
+        "send_message",
+        "terminate_lineage",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_dl",
+        "create_tool",
+        "use_tool",
+        "web_fetch",
+        "cam_enhance_propose"
+      ]
+    },
+    "task-executor": {
+      "level": 2,
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_dl",
+        "use_tool"
+      ]
+    },
+    "tool-creator": {
+      "level": 2,
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "create_tool",
+        "use_tool",
+        "use_jarvis",
+        "use_slm",
+        "cam_enhance_propose"
+      ]
+    },
+    "tool-user": {
+      "level": 2,
+      "privileges": [
+        "spawn_subagents",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "use_tool",
+        "use_jarvis",
+        "use_slm",
+        "use_dl"
+      ]
+    },
+    "qa": {
+      "level": 2,
+      "privileges": [
+        "spawn_subagents",
+        "send_message",
+        "resolve_task",
+        "terminate_lineage",
+        "read_mesh",
+        "write_mesh",
+        "read_vault"
+      ]
+    },
+    "default_subagent": {
+      "level": null,
+      "privileges": [
+        "spawn_subagents",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "use_tool"
+      ]
+    }
+  },
+  "inheritance_rules": {
+    "child_level": "parent.level + 1",
+    "child_privileges": "subset_of_parent",
+    "cannot_escalate": true,
+    "cannot_grant_aaron_only": true,
+    "spawn_one_level_below_only": true,
+    "unlimited_count": true,
+    "unlimited_depth": true,
+    "human_gate_to_spawn": false
+  },
+  "lineage_terminate": {
+    "enabled": true,
+    "who_may_terminate": [
+      "Aaron (kill_master — all agents)",
+      "Any ancestor agent with terminate_lineage privilege",
+      "Creator of the target agent"
+    ],
+    "effects": [
+      "Cancel open child tickets",
+      "Release leases",
+      "Write mesh/agent-lineage termination event",
+      "Do not delete mesh facts"
+    ],
+    "mesh_namespace": "mesh/agent-lineage"
+  },
+  "switch_gating": {
+    "outbound_send": "switch.outbound",
+    "careers_submit": "switch.careers_submit",
+    "cam_enhance_apply": "switch.cam_enhance",
+    "web_fetch": "switch.research_scan",
+    "use_slm": "switch.slm_local",
+    "use_dl": "switch.dl_local",
+    "all_motor": "switch.kill"
+  }
+}

@@ -19,12 +19,34 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SIM = ROOT / "scripts" / "connectome-simulate.py"
 CHECK = ROOT / "scripts" / "connectome-check.py"
+HEALTH = ROOT / "scripts" / "system-health-scan.py"
+EVENTS = ROOT / "vault" / "10-Mesh-Distillates" / "activity-events.jsonl"
 CFG = ROOT / "config" / "connectome"
 CYCLES = ROOT / "vault" / "10-Mesh-Distillates" / "qa-cycles"
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def emit_activity(reason: str, intensity: float = 0.7) -> None:
+    EVENTS.parent.mkdir(parents=True, exist_ok=True)
+    with EVENTS.open("a", encoding="utf-8") as f:
+        f.write(
+            json.dumps(
+                {
+                    "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "neuron": "neuron.qa_cycle",
+                    "kind": "loop",
+                    "area": "area.cingulate",
+                    "intensity": intensity,
+                    "tracts": ["tract.cingulum", "tract.slf", "tract.fornix"],
+                    "reason": reason,
+                    "source": "qa_loop",
+                }
+            )
+            + "\n"
+        )
 
 
 def run_static_check() -> dict:
@@ -38,6 +60,22 @@ def run_static_check() -> dict:
         report = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
         report = {"ok": False, "parse_error": proc.stdout[:500]}
+    report["exit_code"] = proc.returncode
+    return report
+
+
+def run_health_scan() -> dict:
+    """Fire health_conductor — workspace vitals / drift / integrations."""
+    proc = subprocess.run(
+        [sys.executable, str(HEALTH), "--json"],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    try:
+        report = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        report = {"overall": "critical", "parse_error": (proc.stdout or "")[:500]}
     report["exit_code"] = proc.returncode
     return report
 
@@ -266,14 +304,19 @@ def write_suggestions(
         "",
         "## After green (standing improvements)",
         "- CI: `bash scripts/ci-connectome.sh` (check + workspace unit tests + 1M strict)",
+        "- Standing: `python3 scripts/system-health-scan.py` (health_conductor)",
         "- Nightly billion fuzz via `qa-loop.py --n 1000000000 --cycles 1`",
+        "- Trajectory OCL/CPV billion: `python3 scripts/trajectory-billion-fuzz.py --n 1000000000`",
         "- Progress heartbeats every 50M sims for long campaigns (simulator v3)",
-        "- Traffic-weighted sense sampling (chat/vault/cline-heavy)",
+        "- Traffic-weighted sense sampling (chat/vault/cline/scholar/arxiv-heavy)",
         "- Mirror QA cycle events into `identity/persistence/qa-mesh-latest.json`",
         "- Cline workspace runtime: `python3 scripts/test_cline_workspaces.py`",
         "- When Mac is available: flip Tailscale preferred host to aaron-mac",
         "- Suggest: bind `run-cline.py` tickets into live nulltickets when stack is up",
         "- Suggest: `cline mcp install cam` on each Aaron machine after persist-import",
+        "- Suggest: pack research mesh writes with `scripts/pack-mesh-claim.py` (MMP)",
+        "- Suggest: keep HMO primary lean — persona/prefs only; archive vault distillates",
+        "- Suggest: before merge run `trajectory-policy-check` + dual billion campaigns",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
@@ -297,10 +340,20 @@ def main() -> int:
         cycle_dir = CYCLES / f"{stamp}-cycle-{c:02d}"
         cycle_dir.mkdir(parents=True, exist_ok=True)
         print(f"[qa] === cycle {c}/{args.cycles} ===", flush=True)
+        emit_activity(f"cycle_start:{c}", 0.85)
 
         check = run_static_check()
         (cycle_dir / "static-check.json").write_text(
             json.dumps(check, indent=2) + "\n", encoding="utf-8"
+        )
+        health = run_health_scan()
+        (cycle_dir / "system-health.json").write_text(
+            json.dumps(health, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            f"[qa] health_conductor: {health.get('overall', '?')} "
+            f"({len(health.get('checks') or [])} neurons)",
+            flush=True,
         )
         if not check.get("ok"):
             print("[qa] static check FAIL — dispatching fix team", flush=True)

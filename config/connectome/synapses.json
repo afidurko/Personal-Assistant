@@ -1,172 +1,1442 @@
 {
-  "version": 1,
-  "analogy": "Allowed synapses — proofread edges only",
+  "version": 3,
+  "analogy": "Allowed synapses \u2014 Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
   "rules": [
     "Every motor fire needs an Aaron-rooted task or standing goal spike",
-    "Non-Aaron tasking spikes die at switch.tasking",
+    "Non-Aaron tasking spikes die at switch.tasking (OFC identity gate)",
     "switch.kill silences all motor.* edges",
-    "center.qa may insert hold before act",
-    "Log every synapse traversal to nulltickets run events"
+    "area.cingulate (QA) may insert hold before act",
+    "Log every synapse traversal to nulltickets run events",
+    "Successful act pathways Hebbian-strengthen matching tracts (config/connectome/tracts.json)"
   ],
   "edges": [
-    {"from": "sense.chat.aaron", "to": "center.chief", "weight": 1.0},
-    {"from": "sense.audio.transcript", "to": "center.chief", "weight": 1.0},
-    {"from": "sense.careers.listing", "to": "center.careers", "weight": 1.0},
-    {"from": "sense.calendar.event", "to": "center.ops", "weight": 1.0},
-    {"from": "sense.email.thread", "to": "center.comms", "weight": 1.0},
-    {"from": "sense.vision.detection", "to": "center.vision", "weight": 1.0},
-    {"from": "sense.jarvis.result", "to": "center.ops", "weight": 0.9},
-    {"from": "sense.cline.result", "to": "center.coding", "weight": 1.0},
-    {"from": "sense.vault.hit", "to": "center.memory", "weight": 1.0},
-    {"from": "sense.vault.hit", "to": "center.qa", "weight": 0.6},
-    {"from": "sense.mesh.hit", "to": "center.memory", "weight": 1.0},
-
-    {"from": "center.chief", "to": "center.router", "weight": 1.0},
-    {"from": "center.chief", "to": "center.comms", "weight": 0.9},
-    {"from": "center.chief", "to": "center.memory", "weight": 0.8},
-    {"from": "center.chief", "to": "center.qa", "weight": 0.7},
-
-    {"from": "center.router", "to": "center.research", "weight": 1.0},
-    {"from": "center.router", "to": "center.careers", "weight": 1.0},
-    {"from": "center.router", "to": "center.ops", "weight": 1.0},
-    {"from": "center.router", "to": "center.comms", "weight": 1.0},
-    {"from": "center.router", "to": "center.docs", "weight": 1.0},
-    {"from": "center.router", "to": "center.coding", "weight": 1.0},
-    {"from": "center.router", "to": "center.vision", "weight": 0.7},
-
-    {"from": "center.research", "to": "sense.vault.hit", "weight": 0.5, "notes": "retrieval drive"},
-    {"from": "center.research", "to": "center.qa", "weight": 1.0},
-    {"from": "center.careers", "to": "center.qa", "weight": 1.0},
-    {"from": "center.careers", "to": "switch.careers_submit", "weight": 1.0},
-    {"from": "center.ops", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "center.ops", "to": "center.memory", "weight": 0.8},
-    {"from": "center.comms", "to": "switch.outbound", "weight": 1.0},
-    {"from": "center.comms", "to": "switch.presence", "weight": 1.0},
-    {"from": "center.comms", "to": "center.chief", "weight": 0.8},
-    {"from": "center.docs", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "center.coding", "to": "center.qa", "weight": 1.0},
-    {"from": "center.coding", "to": "center.memory", "weight": 0.9},
-    {"from": "center.coding", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "center.vision", "to": "center.chief", "weight": 1.0},
-    {"from": "center.vision", "to": "center.memory", "weight": 0.8},
-    {"from": "center.qa", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "center.qa", "to": "switch.careers_submit", "weight": 0.9},
-    {"from": "center.qa", "to": "center.chief", "weight": 0.8},
-    {"from": "center.memory", "to": "center.chief", "weight": 1.0},
-    {"from": "center.memory", "to": "switch.autonomy", "weight": 1.0},
-    {"from": "center.memory", "to": "motor.mesh", "when": "act", "weight": 1.0},
-    {"from": "center.memory", "to": "motor.vault", "when": "act", "weight": 0.9},
-
-    {"from": "switch.presence", "to": "switch.outbound", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.text", "when": "act", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.call", "when": "act", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.facetime", "when": "act", "weight": 1.0},
-    {"from": "switch.outbound", "to": "motor.speak", "when": "act", "weight": 0.8},
-    {"from": "switch.presence", "to": "motor.speak", "when": "act", "weight": 1.0},
-    {"from": "switch.careers_submit", "to": "motor.jobs", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.jarvis", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.cline", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.docs", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.vault", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.calendar", "when": "act", "weight": 1.0},
-    {"from": "switch.autonomy", "to": "motor.mesh", "when": "act", "weight": 0.9},
-
-    {"from": "motor.text", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.call", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.facetime", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.speak", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.speak", "to": "sense.audio.transcript", "weight": 0.4, "notes": "self-hear loop"},
-    {"from": "motor.jarvis", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.cline", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
-    {"from": "motor.docs", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.jobs", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.vault", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
-    {"from": "motor.calendar", "to": "center.memory", "weight": 0.7, "notes": "feedback"},
-    {"from": "motor.mesh", "to": "center.memory", "weight": 0.9, "notes": "feedback"},
-
-    {"from": "sense.aaron.face", "to": "center.chief", "weight": 1.0},
-    {"from": "sense.aaron.voice", "to": "center.chief", "weight": 1.0},
-    {"from": "sense.ios.camera", "to": "switch.ios_capture", "weight": 1.0},
-    {"from": "sense.ios.mic", "to": "switch.ios_capture", "weight": 1.0},
-    {"from": "center.chief", "to": "switch.identity", "weight": 1.0},
-    {"from": "center.chief", "to": "switch.tasking", "weight": 1.0},
-    {"from": "switch.identity", "to": "switch.tasking", "weight": 1.0},
-    {"from": "switch.tasking", "to": "center.memory", "weight": 0.9},
-    {"from": "switch.ios_capture", "to": "center.vision", "when": "act", "weight": 1.0},
-    {"from": "switch.ios_capture", "to": "center.comms", "when": "act", "weight": 1.0},
-
-    {"from": "sense.photos.library", "to": "center.vision", "weight": 1.0},
-    {"from": "sense.files.media", "to": "center.vision", "weight": 1.0},
-    {"from": "sense.files.media", "to": "center.comms", "weight": 0.9},
-    {"from": "center.vision", "to": "center.comms", "weight": 0.6, "notes": "photo-face to video-voice bridge"},
-    {"from": "switch.identity", "to": "center.memory", "weight": 1.0},
-
-    {"from": "sense.clock.daily", "to": "center.agi_scan", "weight": 1.0},
-    {"from": "sense.web.arxiv", "to": "center.agi_scan", "weight": 1.0},
-    {"from": "sense.web.agi_feed", "to": "center.agi_scan", "weight": 1.0},
-    {"from": "sense.slm.inference", "to": "center.slm", "weight": 1.0},
-    {"from": "sense.dl.embedding", "to": "center.dl", "weight": 1.0},
-
-    {"from": "center.router", "to": "center.agi_scan", "weight": 1.0},
-    {"from": "center.router", "to": "center.enhance", "weight": 1.0},
-    {"from": "center.router", "to": "center.capability", "weight": 1.0},
-    {"from": "center.router", "to": "center.info", "weight": 1.0},
-    {"from": "center.router", "to": "center.slm", "weight": 1.0},
-    {"from": "center.router", "to": "center.dl", "weight": 1.0},
-
-    {"from": "center.agi_scan", "to": "center.enhance", "weight": 1.0},
-    {"from": "center.agi_scan", "to": "center.research", "weight": 0.8},
-    {"from": "center.agi_scan", "to": "center.qa", "weight": 0.9},
-    {"from": "center.agi_scan", "to": "center.dl", "weight": 0.7},
-    {"from": "center.agi_scan", "to": "switch.research_scan", "weight": 1.0},
-
-    {"from": "center.enhance", "to": "center.qa", "weight": 1.0},
-    {"from": "center.enhance", "to": "center.slm", "weight": 0.7},
-    {"from": "center.enhance", "to": "center.dl", "weight": 0.7},
-    {"from": "center.enhance", "to": "switch.cam_enhance", "weight": 1.0},
-    {"from": "center.enhance", "to": "switch.autonomy", "weight": 0.8},
-
-    {"from": "center.capability", "to": "center.info", "weight": 1.0},
-    {"from": "center.capability", "to": "center.slm", "weight": 0.9},
-    {"from": "center.capability", "to": "center.dl", "weight": 0.9},
-    {"from": "center.capability", "to": "center.ops", "weight": 0.8},
-    {"from": "center.capability", "to": "center.research", "weight": 0.8},
-    {"from": "center.capability", "to": "center.qa", "weight": 1.0},
-    {"from": "center.capability", "to": "switch.autonomy", "weight": 1.0},
-
-    {"from": "center.info", "to": "center.research", "weight": 0.9},
-    {"from": "center.info", "to": "center.memory", "weight": 0.9},
-    {"from": "center.info", "to": "center.agi_scan", "weight": 0.7},
-    {"from": "center.info", "to": "center.slm", "weight": 0.8},
-    {"from": "center.info", "to": "center.qa", "weight": 1.0},
-    {"from": "center.info", "to": "sense.vault.hit", "weight": 0.6, "notes": "retrieval drive"},
-
-    {"from": "center.slm", "to": "switch.slm_local", "weight": 1.0},
-    {"from": "center.slm", "to": "center.chief", "weight": 0.9},
-    {"from": "center.slm", "to": "center.memory", "weight": 0.8},
-    {"from": "center.slm", "to": "center.capability", "weight": 0.7},
-
-    {"from": "center.dl", "to": "switch.dl_local", "weight": 1.0},
-    {"from": "center.dl", "to": "center.memory", "weight": 0.9},
-    {"from": "center.dl", "to": "center.vision", "weight": 0.7},
-    {"from": "center.dl", "to": "center.agi_scan", "weight": 0.6},
-    {"from": "center.dl", "to": "center.enhance", "weight": 0.7},
-
-    {"from": "center.qa", "to": "switch.research_scan", "weight": 0.9},
-    {"from": "center.qa", "to": "switch.cam_enhance", "weight": 0.9},
-
-    {"from": "switch.research_scan", "to": "motor.web_fetch", "when": "act", "weight": 1.0},
-    {"from": "switch.research_scan", "to": "motor.vault", "when": "act", "weight": 0.8},
-    {"from": "switch.research_scan", "to": "motor.mesh", "when": "act", "weight": 0.8},
-    {"from": "switch.cam_enhance", "to": "motor.enhance", "when": "act", "weight": 1.0},
-    {"from": "switch.slm_local", "to": "motor.slm", "when": "act", "weight": 1.0},
-    {"from": "switch.dl_local", "to": "motor.dl", "when": "act", "weight": 1.0},
-
-    {"from": "motor.web_fetch", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
-    {"from": "motor.enhance", "to": "center.memory", "weight": 0.9, "notes": "feedback"},
-    {"from": "motor.slm", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
-    {"from": "motor.slm", "to": "sense.slm.inference", "weight": 0.5, "notes": "self-model loop"},
-    {"from": "motor.dl", "to": "center.memory", "weight": 0.8, "notes": "feedback"},
-    {"from": "motor.dl", "to": "sense.dl.embedding", "weight": 0.5, "notes": "self-model loop"}
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.wernicke",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.dlpfc",
+      "weight": 0.9,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.audio.transcript",
+      "to": "area.auditory",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.careers.listing",
+      "to": "area.temporal",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.calendar.event",
+      "to": "area.parietal",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.email.thread",
+      "to": "area.wernicke",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.vision.detection",
+      "to": "area.visual",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.jarvis.result",
+      "to": "area.parietal",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.vault.hit",
+      "to": "area.mtl",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vault.hit",
+      "to": "area.cingulate",
+      "weight": 0.6
+    },
+    {
+      "from": "sense.mesh.hit",
+      "to": "area.mtl",
+      "weight": 1.0,
+      "tract": "tract.mesh_callosal"
+    },
+    {
+      "from": "sense.swiftguide.map",
+      "to": "area.apfc",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.aaron.face",
+      "to": "area.dlpfc",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.aaron.voice",
+      "to": "area.dlpfc",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.ios.camera",
+      "to": "switch.ios_capture",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.ios.mic",
+      "to": "switch.ios_capture",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.photos.library",
+      "to": "area.visual",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.files.media",
+      "to": "area.visual",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.files.media",
+      "to": "area.auditory",
+      "weight": 0.9
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.broca",
+      "weight": 1.0,
+      "tract": "tract.arcuate"
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.temporal",
+      "weight": 0.8
+    },
+    {
+      "from": "area.auditory",
+      "to": "area.dlpfc",
+      "weight": 1.0
+    },
+    {
+      "from": "area.auditory",
+      "to": "area.broca",
+      "weight": 0.9,
+      "tract": "tract.arcuate"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "tract": "tract.ifof"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.temporal",
+      "weight": 0.8,
+      "tract": "tract.ilf"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.auditory",
+      "weight": 0.6,
+      "notes": "photo\u2194voice enrollment bridge"
+    },
+    {
+      "from": "area.visual",
+      "to": "area.mtl",
+      "weight": 0.8
+    },
+    {
+      "from": "area.parietal",
+      "to": "area.dlpfc",
+      "weight": 0.9,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.parietal",
+      "to": "area.mtl",
+      "weight": 0.8
+    },
+    {
+      "from": "area.parietal",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.temporal",
+      "to": "area.cingulate",
+      "weight": 1.0
+    },
+    {
+      "from": "area.temporal",
+      "to": "area.dlpfc",
+      "weight": 0.8,
+      "tract": "tract.uncinate"
+    },
+    {
+      "from": "area.temporal",
+      "to": "sense.vault.hit",
+      "weight": 0.5,
+      "notes": "retrieval drive"
+    },
+    {
+      "from": "area.temporal",
+      "to": "switch.careers_submit",
+      "weight": 0.9
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.temporal",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.apfc",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.broca",
+      "weight": 0.9,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.parietal",
+      "weight": 0.8,
+      "tract": "tract.slf"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.visual",
+      "weight": 0.7
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.cingulate",
+      "weight": 1.0,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "area.ofc",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "switch.identity",
+      "weight": 1.0
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "switch.tasking",
+      "weight": 1.0
+    },
+    {
+      "from": "area.apfc",
+      "to": "area.mtl",
+      "weight": 1.0,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.apfc",
+      "to": "area.cingulate",
+      "weight": 1.0
+    },
+    {
+      "from": "area.apfc",
+      "to": "area.temporal",
+      "weight": 0.8
+    },
+    {
+      "from": "area.apfc",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.apfc",
+      "to": "sense.swiftguide.map",
+      "weight": 0.5,
+      "notes": "map re-query"
+    },
+    {
+      "from": "area.broca",
+      "to": "area.dlpfc",
+      "weight": 0.8,
+      "tract": "tract.arcuate"
+    },
+    {
+      "from": "area.broca",
+      "to": "area.mtl",
+      "weight": 0.7
+    },
+    {
+      "from": "area.broca",
+      "to": "switch.outbound",
+      "weight": 1.0
+    },
+    {
+      "from": "area.broca",
+      "to": "switch.presence",
+      "weight": 1.0
+    },
+    {
+      "from": "area.ofc",
+      "to": "switch.identity",
+      "weight": 1.0
+    },
+    {
+      "from": "area.ofc",
+      "to": "switch.kill",
+      "weight": 1.0
+    },
+    {
+      "from": "area.ofc",
+      "to": "area.temporal",
+      "weight": 0.8,
+      "tract": "tract.uncinate"
+    },
+    {
+      "from": "area.mtl",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "notes": "feedback integrate",
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.mtl",
+      "to": "area.cingulate",
+      "weight": 0.8
+    },
+    {
+      "from": "area.mtl",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.mtl",
+      "to": "motor.mesh",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "area.mtl",
+      "to": "motor.vault",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "area.cingulate",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "area.cingulate",
+      "to": "switch.careers_submit",
+      "weight": 0.9
+    },
+    {
+      "from": "area.cingulate",
+      "to": "area.dlpfc",
+      "weight": 0.8,
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "area.premotor",
+      "to": "area.motor",
+      "weight": 1.0,
+      "tract": "tract.corticospinal"
+    },
+    {
+      "from": "area.motor",
+      "to": "motor.text",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "area.motor",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.identity",
+      "to": "switch.tasking",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.identity",
+      "to": "area.mtl",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.tasking",
+      "to": "area.mtl",
+      "weight": 0.9
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "area.visual",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "area.auditory",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "area.broca",
+      "when": "act",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.presence",
+      "to": "switch.outbound",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.text",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.call",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.facetime",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.presence",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.careers_submit",
+      "to": "motor.jobs",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.jarvis",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.docs",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.vault",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.calendar",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.mesh",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "motor.text",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.call",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.facetime",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.speak",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.speak",
+      "to": "sense.audio.transcript",
+      "weight": 0.4,
+      "notes": "self-hear loop"
+    },
+    {
+      "from": "motor.jarvis",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.docs",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.jobs",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.vault",
+      "to": "area.mtl",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.calendar",
+      "to": "area.mtl",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.mesh",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "area.mtl",
+      "to": "area.dlpfc",
+      "weight": 1.0,
+      "notes": "feedback integrate",
+      "tract": "tract.cingulum"
+    },
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.apfc",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    },
+    {
+      "from": "sense.chat.aaron",
+      "to": "area.cingulate",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    },
+    {
+      "from": "area.wernicke",
+      "to": "area.apfc",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    },
+    {
+      "from": "area.temporal",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "efficiency short-path"
+    },
+    {
+      "from": "sense.chat.aaron",
+      "to": "center.chief",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.audio.transcript",
+      "to": "center.chief",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.careers.listing",
+      "to": "center.careers",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.calendar.event",
+      "to": "center.ops",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.email.thread",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vision.detection",
+      "to": "center.vision",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.jarvis.result",
+      "to": "center.ops",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.cline.result",
+      "to": "center.coding",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vault.hit",
+      "to": "center.memory",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vault.hit",
+      "to": "center.qa",
+      "weight": 0.6
+    },
+    {
+      "from": "sense.mesh.hit",
+      "to": "center.memory",
+      "weight": 1.0
+    },
+    {
+      "from": "center.chief",
+      "to": "center.router",
+      "weight": 1.0
+    },
+    {
+      "from": "center.chief",
+      "to": "center.comms",
+      "weight": 0.9
+    },
+    {
+      "from": "center.chief",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "center.chief",
+      "to": "center.qa",
+      "weight": 0.7
+    },
+    {
+      "from": "center.router",
+      "to": "center.research",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.careers",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.ops",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.docs",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.coding",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.vision",
+      "weight": 0.7
+    },
+    {
+      "from": "center.research",
+      "to": "sense.vault.hit",
+      "weight": 0.5,
+      "notes": "retrieval drive"
+    },
+    {
+      "from": "center.research",
+      "to": "center.qa",
+      "weight": 1.0
+    },
+    {
+      "from": "center.research",
+      "to": "switch.research_scan",
+      "weight": 0.9,
+      "notes": "Scholar / paper fetch"
+    },
+    {
+      "from": "center.careers",
+      "to": "center.qa",
+      "weight": 1.0
+    },
+    {
+      "from": "center.careers",
+      "to": "switch.careers_submit",
+      "weight": 1.0
+    },
+    {
+      "from": "center.ops",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "center.ops",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "center.comms",
+      "to": "switch.outbound",
+      "weight": 1.0
+    },
+    {
+      "from": "center.comms",
+      "to": "switch.presence",
+      "weight": 1.0
+    },
+    {
+      "from": "center.comms",
+      "to": "center.chief",
+      "weight": 0.8
+    },
+    {
+      "from": "center.docs",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "center.coding",
+      "to": "center.qa",
+      "weight": 1.0
+    },
+    {
+      "from": "center.coding",
+      "to": "center.memory",
+      "weight": 0.9
+    },
+    {
+      "from": "center.coding",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "center.vision",
+      "to": "center.chief",
+      "weight": 1.0
+    },
+    {
+      "from": "center.vision",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "center.qa",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "center.qa",
+      "to": "switch.careers_submit",
+      "weight": 0.9
+    },
+    {
+      "from": "center.qa",
+      "to": "center.chief",
+      "weight": 0.8
+    },
+    {
+      "from": "center.memory",
+      "to": "center.chief",
+      "weight": 1.0
+    },
+    {
+      "from": "center.memory",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "center.memory",
+      "to": "motor.mesh",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "center.memory",
+      "to": "motor.vault",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.cline",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "motor.text",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.call",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.facetime",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.speak",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.jarvis",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.cline",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.docs",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.jobs",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.vault",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.calendar",
+      "to": "center.memory",
+      "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.mesh",
+      "to": "center.memory",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "sense.aaron.face",
+      "to": "center.chief",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.aaron.voice",
+      "to": "center.chief",
+      "weight": 1.0
+    },
+    {
+      "from": "center.chief",
+      "to": "switch.identity",
+      "weight": 1.0
+    },
+    {
+      "from": "center.chief",
+      "to": "switch.tasking",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.tasking",
+      "to": "center.memory",
+      "weight": 0.9
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "center.vision",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.ios_capture",
+      "to": "center.comms",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.photos.library",
+      "to": "center.vision",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.files.media",
+      "to": "center.vision",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.files.media",
+      "to": "center.comms",
+      "weight": 0.9
+    },
+    {
+      "from": "center.vision",
+      "to": "center.comms",
+      "weight": 0.6,
+      "notes": "photo-face to video-voice bridge"
+    },
+    {
+      "from": "switch.identity",
+      "to": "center.memory",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.clock.daily",
+      "to": "center.agi_scan",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.web.arxiv",
+      "to": "center.agi_scan",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.web.agi_feed",
+      "to": "center.agi_scan",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.web.scholar",
+      "to": "center.info",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.web.scholar",
+      "to": "center.research",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.web.scholar",
+      "to": "center.agi_scan",
+      "weight": 0.7,
+      "notes": "when query is AI/AGI-relevant"
+    },
+    {
+      "from": "sense.slm.inference",
+      "to": "center.slm",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.dl.embedding",
+      "to": "center.dl",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.agi_scan",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.enhance",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.capability",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.info",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.slm",
+      "weight": 1.0
+    },
+    {
+      "from": "center.router",
+      "to": "center.dl",
+      "weight": 1.0
+    },
+    {
+      "from": "center.agi_scan",
+      "to": "center.enhance",
+      "weight": 1.0
+    },
+    {
+      "from": "center.agi_scan",
+      "to": "center.research",
+      "weight": 0.8
+    },
+    {
+      "from": "center.agi_scan",
+      "to": "center.qa",
+      "weight": 0.9
+    },
+    {
+      "from": "center.agi_scan",
+      "to": "center.dl",
+      "weight": 0.7
+    },
+    {
+      "from": "center.agi_scan",
+      "to": "switch.research_scan",
+      "weight": 1.0
+    },
+    {
+      "from": "center.enhance",
+      "to": "center.qa",
+      "weight": 1.0
+    },
+    {
+      "from": "center.enhance",
+      "to": "center.slm",
+      "weight": 0.7
+    },
+    {
+      "from": "center.enhance",
+      "to": "center.dl",
+      "weight": 0.7
+    },
+    {
+      "from": "center.enhance",
+      "to": "switch.cam_enhance",
+      "weight": 1.0
+    },
+    {
+      "from": "center.enhance",
+      "to": "switch.autonomy",
+      "weight": 0.8
+    },
+    {
+      "from": "center.capability",
+      "to": "center.info",
+      "weight": 1.0
+    },
+    {
+      "from": "center.capability",
+      "to": "center.slm",
+      "weight": 0.9
+    },
+    {
+      "from": "center.capability",
+      "to": "center.dl",
+      "weight": 0.9
+    },
+    {
+      "from": "center.capability",
+      "to": "center.ops",
+      "weight": 0.8
+    },
+    {
+      "from": "center.capability",
+      "to": "center.research",
+      "weight": 0.8
+    },
+    {
+      "from": "center.capability",
+      "to": "center.qa",
+      "weight": 1.0
+    },
+    {
+      "from": "center.capability",
+      "to": "switch.autonomy",
+      "weight": 1.0
+    },
+    {
+      "from": "center.info",
+      "to": "center.research",
+      "weight": 0.9
+    },
+    {
+      "from": "center.info",
+      "to": "center.memory",
+      "weight": 0.9
+    },
+    {
+      "from": "center.info",
+      "to": "center.agi_scan",
+      "weight": 0.7
+    },
+    {
+      "from": "center.info",
+      "to": "center.slm",
+      "weight": 0.8
+    },
+    {
+      "from": "center.info",
+      "to": "center.qa",
+      "weight": 1.0
+    },
+    {
+      "from": "center.info",
+      "to": "sense.vault.hit",
+      "weight": 0.6,
+      "notes": "retrieval drive"
+    },
+    {
+      "from": "center.info",
+      "to": "switch.research_scan",
+      "weight": 0.8,
+      "notes": "Scholar fetch under research_scan"
+    },
+    {
+      "from": "center.slm",
+      "to": "switch.slm_local",
+      "weight": 1.0
+    },
+    {
+      "from": "center.slm",
+      "to": "center.chief",
+      "weight": 0.9
+    },
+    {
+      "from": "center.slm",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "center.slm",
+      "to": "center.capability",
+      "weight": 0.7
+    },
+    {
+      "from": "center.dl",
+      "to": "switch.dl_local",
+      "weight": 1.0
+    },
+    {
+      "from": "center.dl",
+      "to": "center.memory",
+      "weight": 0.9
+    },
+    {
+      "from": "center.dl",
+      "to": "center.vision",
+      "weight": 0.7
+    },
+    {
+      "from": "center.dl",
+      "to": "center.agi_scan",
+      "weight": 0.6
+    },
+    {
+      "from": "center.dl",
+      "to": "center.enhance",
+      "weight": 0.7
+    },
+    {
+      "from": "center.qa",
+      "to": "switch.research_scan",
+      "weight": 0.9
+    },
+    {
+      "from": "center.qa",
+      "to": "switch.cam_enhance",
+      "weight": 0.9
+    },
+    {
+      "from": "center.qa",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "proofread distillates into mesh/memory"
+    },
+    {
+      "from": "center.qa",
+      "to": "switch.tooling",
+      "weight": 0.9
+    },
+    {
+      "from": "switch.research_scan",
+      "to": "motor.web_fetch",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.research_scan",
+      "to": "motor.vault",
+      "when": "act",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.research_scan",
+      "to": "motor.mesh",
+      "when": "act",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.cam_enhance",
+      "to": "motor.enhance",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.slm_local",
+      "to": "motor.slm",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.dl_local",
+      "to": "motor.dl",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "motor.web_fetch",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.enhance",
+      "to": "center.memory",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.slm",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.slm",
+      "to": "sense.slm.inference",
+      "weight": 0.5,
+      "notes": "self-model loop"
+    },
+    {
+      "from": "motor.dl",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.dl",
+      "to": "sense.dl.embedding",
+      "weight": 0.5,
+      "notes": "self-model loop"
+    },
+    {
+      "from": "sense.swarm.message",
+      "to": "center.tooling",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.swarm.message",
+      "to": "center.capability",
+      "weight": 0.8
+    },
+    {
+      "from": "sense.swarm.message",
+      "to": "center.chief",
+      "weight": 0.7
+    },
+    {
+      "from": "sense.tool.result",
+      "to": "center.tooling",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.tool.result",
+      "to": "center.ops",
+      "weight": 0.8
+    },
+    {
+      "from": "sense.tool.result",
+      "to": "center.qa",
+      "weight": 0.9
+    },
+    {
+      "from": "center.router",
+      "to": "center.tooling",
+      "weight": 1.0
+    },
+    {
+      "from": "center.capability",
+      "to": "center.tooling",
+      "weight": 0.9
+    },
+    {
+      "from": "center.tooling",
+      "to": "center.capability",
+      "weight": 0.8
+    },
+    {
+      "from": "center.tooling",
+      "to": "center.ops",
+      "weight": 0.9
+    },
+    {
+      "from": "center.tooling",
+      "to": "center.qa",
+      "weight": 1.0
+    },
+    {
+      "from": "center.tooling",
+      "to": "center.slm",
+      "weight": 0.6
+    },
+    {
+      "from": "center.tooling",
+      "to": "switch.tooling",
+      "weight": 1.0
+    },
+    {
+      "from": "center.tooling",
+      "to": "switch.autonomy",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.tooling",
+      "to": "motor.tool",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.tooling",
+      "to": "motor.swarm",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.tooling",
+      "to": "motor.mesh",
+      "when": "act",
+      "weight": 0.8
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.swarm",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "motor.tool",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.tool",
+      "to": "sense.tool.result",
+      "weight": 0.7,
+      "notes": "tool result loop"
+    },
+    {
+      "from": "motor.swarm",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.swarm",
+      "to": "sense.swarm.message",
+      "weight": 0.9,
+      "notes": "agent bus loop"
+    },
+    {
+      "from": "motor.cline",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.slm",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.dl",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.enhance",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.tool",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.web_fetch",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.swarm",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    }
   ]
 }

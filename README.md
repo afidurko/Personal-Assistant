@@ -19,37 +19,52 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 
 ## Design
 
-- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
-- **Teams:** AGI Research Scan (daily) · Capability · Information — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
+- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
+- **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
+- **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed
-- **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents
+- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed · **Google Scholar** · `config/tools/registry.json`
+- **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents (privilege inheritance, no escalation)
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
 Persona: [docs/PERSONA.md](docs/PERSONA.md) · Persistence: [docs/PERSISTENCE.md](docs/PERSISTENCE.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Workspaces: [docs/WORKSPACES_WORKFLOW.md](docs/WORKSPACES_WORKFLOW.md)
 
 ## Connectome architecture (brain map)
 
-Cam is wired like a nervous system — see [docs/CONNECTOME_ARCHITECTURE.md](docs/CONNECTOME_ARCHITECTURE.md):
+Cam is a **Brodmann cortex** — see [docs/CONNECTOME_ARCHITECTURE.md](docs/CONNECTOME_ARCHITECTURE.md):
 
 ```text
-Aaron → sensory → higher centers → circuit switches → motor effectors
+Aaron → sensory → Brodmann areas (columns=agents/loops) → switches → motor
+                 ↘ association tracts = neural mesh ↗
 ```
+
+Lenses: **3D cortex** (spin + rewind) · **2D flat** · plasticity tape for tract errors.
 
 ```bash
 # Example: route a careers spike to motor plan
 python3 scripts/connectome-route.py --sense sense.careers.listing --goal "watch roles"
+# QA conflict-monitoring loop through ACC
+python3 scripts/connectome-route.py --sense sense.chat.aaron --goal "qa loop"
+# SwiftGuide → iOS companion stack brief
+python3 scripts/connectome-route.py --sense sense.swiftguide.map --goal "ios companion stack"
+# Plasticity / neurogenesis tape
+python3 scripts/connectome-plasticity.py --neurogenesis
 # Daily AGI research scan pathway
 python3 scripts/connectome-route.py --sense sense.clock.daily --goal "daily agi scan"
+# Google Scholar literature search (fixture / live)
+python3 scripts/connectome-route.py --sense sense.web.scholar --goal "scholar search"
+python3 scripts/scholar-search.py --query "connectome mapping" --offline
 # Run the daily scan (arXiv → vault/mesh proposals)
 python3 scripts/agi-research-scan.py
 # Confirm workspace + integration wiring
 python3 scripts/workspace-integration-check.py
+# HAAS→Cam privilege + boss/worker contracts
+python3 scripts/swarm-check.py
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
-# Live brain + spinal cord visualization (all repos)
+# Live 3D cortex
 bash scripts/serve-connectome-viz.sh
 # open http://127.0.0.1:8765/visualizations/connectome/
 ```

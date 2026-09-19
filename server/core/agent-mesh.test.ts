@@ -49,6 +49,8 @@ describe('deep agent mesh layers', () => {
       }
       expect(edges.some((e) => e.kind === 'feeds' && e.from === 'layer-commute')).toBe(true);
       expect(edges.some((e) => e.kind === 'loops')).toBe(true);
+      expect(nodes.some((n) => n.id === layerHubId('swarm'))).toBe(true);
+      expect(nodes.some((n) => n.id === agentNodeId('boss-router'))).toBe(true);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

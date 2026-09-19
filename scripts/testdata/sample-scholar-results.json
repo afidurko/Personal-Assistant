@@ -1,0 +1,37 @@
+{
+  "query": "Drosophila male CNS connectome",
+  "engine": "google_scholar",
+  "organic_results": [
+    {
+      "position": 1,
+      "title": "A Drosophila male CNS connectome",
+      "result_id": "demo-result-1",
+      "link": "https://doi.org/10.1016/j.cell.2026.example",
+      "snippet": "Whole-brain connectome of the adult male Drosophila CNS enabling sensory-to-motor pathway analysis.",
+      "publication_info": {
+        "summary": "Berg et al. - Cell - 2026",
+        "authors": [{"name": "Berg"}, {"name": "et al."}]
+      },
+      "inline_links": {
+        "cited_by": {"total": 42, "link": "https://scholar.google.com/scholar?cites=demo1"}
+      },
+      "resources": [
+        {"title": "PDF", "file_format": "PDF", "link": "https://example.org/paper.pdf"}
+      ]
+    },
+    {
+      "position": 2,
+      "title": "Circuit switches in isomorphic sensory pathways",
+      "result_id": "demo-result-2",
+      "link": "https://doi.org/10.1038/example.2025",
+      "snippet": "Antagonistic motor outcomes from shared sensory input via higher-center switches.",
+      "publication_info": {
+        "summary": "Demo Author - Nature Neuro - 2025",
+        "authors": [{"name": "Demo Author"}]
+      },
+      "inline_links": {
+        "cited_by": {"total": 17}
+      }
+    }
+  ]
+}

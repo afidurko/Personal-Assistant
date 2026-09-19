@@ -6,7 +6,8 @@ export type WorkspaceKind =
   | 'vulnerability'
   | 'updates'
   | 'improvements'
-  | 'agi_research';
+  | 'agi_research'
+  | 'swarm';
 
 export type ScanStatus = 'idle' | 'scanning' | 'healthy' | 'warning' | 'critical' | 'stale';
 
@@ -22,7 +23,12 @@ export type MeshEdgeKind =
   | 'commutes'
   | 'repairs'
   | 'persists'
-  | 'loops';
+  | 'loops'
+  | 'assigns'
+  | 'broadcasts'
+  | 'spawns'
+  | 'terminates'
+  | 'inherits';
 
 export interface Finding {
   id: string;
@@ -82,7 +88,8 @@ export type BrainRegion =
   | 'insula'
   | 'basal_ganglia'
   | 'striatum'
-  | 'repair_loop';
+  | 'repair_loop'
+  | 'swarm_bus';
 
 export interface MeshEdge {
   id: string;
@@ -96,7 +103,7 @@ export interface MeshEdge {
 
 export interface MemoryTrace {
   id: string;
-  kind: 'episodic' | 'semantic' | 'procedural' | 'scan' | 'agent' | 'loop';
+  kind: 'episodic' | 'semantic' | 'procedural' | 'scan' | 'agent' | 'loop' | 'swarm';
   content: string;
   workspaceIds: string[];
   nodeIds: string[];
@@ -132,6 +139,16 @@ export interface AgentCycleResult {
   persistedJobs: number;
   loopActions: LoopJob[];
   efficiencyGain: number;
+  /** HAAS→Cam swarm cycle summary (privileges / lineage / boss-worker) */
+  swarm?: {
+    spawns: number;
+    assigns: number;
+    broadcasts: number;
+    denials: number;
+    terminations: number;
+    activeAgents: number;
+    namespacesTouched: string[];
+  } | null;
 }
 
 export interface NeuralMeshState {
@@ -172,7 +189,12 @@ export type SuggestionKind =
   | 'agent-commute'
   | 'agent-memory'
   | 'agent-persistence'
-  | 'agent-repair';
+  | 'agent-repair'
+  | 'swarm-privilege'
+  | 'swarm-lineage'
+  | 'swarm-tooling'
+  | 'cam-enhance'
+  | 'research-memory';
 
 export interface SuggestiveImplementation {
   id: string;
@@ -277,5 +299,12 @@ export const WORKSPACE_META: Record<
     description: 'Daily AI/AGI paper scan → Cam enhancement proposals (Aaron gates apply).',
     region: 'hippocampus',
     defaultColor: '#9b59b6',
+  },
+  swarm: {
+    name: 'Swarm Mesh',
+    description:
+      'Privilege inheritance, lineage terminate, and boss/worker bus across all agents and workspaces.',
+    region: 'swarm_bus',
+    defaultColor: '#1abc9c',
   },
 };

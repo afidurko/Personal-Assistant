@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Route a sensory spike through Cam's connectome map to motor outputs.
 
-Validates sense → center → switch → motor pathways using config/connectome/*.json.
+Validates sense → Brodmann area → switch → motor pathways using config/connectome/*.json.
 Does not execute side effects — prints the motor plan Cam should run.
 """
 
@@ -16,6 +16,7 @@ CFG = ROOT / "config" / "connectome"
 import sys
 sys.path.insert(0, str(ROOT / "scripts"))
 import cam_workspaces as cw  # noqa: E402
+import trajectory_policies as tp  # noqa: E402
 
 
 def load(name: str):
@@ -46,13 +47,30 @@ def pick_hotspot(
     g = goal.lower()
     scored = []
     for h in candidates:
-        blob = f"{h.get('id','')} {h.get('behavior','')} {h.get('center','')}".lower()
+        blob = f"{h.get('id','')} {h.get('behavior','')} {h.get('center','')} {h.get('area','')}".lower()
         score = sum(1 for token in g.split() if token and token in blob)
         if "doc" in g and "doc" in blob:
             score += 3
         if ("research" in g or "brief" in g) and "research" in blob:
             score += 3
         if ("job" in g or "career" in g) and "career" in blob:
+            score += 3
+        if ("qa" in g or "conflict" in g) and (
+            "qa" in blob or "conflict" in blob or "cycle" in blob
+        ):
+            score += 4
+        # "loop" alone is too common in ordinary chat — require qa/conflict context
+        if "loop" in g and ("qa" in g or "conflict" in g) and (
+            "qa" in blob or "conflict" in blob or "cycle" in blob
+        ):
+            score += 2
+        if ("ios" in g or "swift" in g or "stack" in g) and (
+            "ios" in blob or "swift" in blob or "stack" in blob or "cartograph" in blob
+        ):
+            score += 4
+        if ("map" in g or "mind" in g or "cartograph" in g) and (
+            "map" in blob or "cartograph" in blob or "knowledge" in blob
+        ):
             score += 3
         if ("agi" in g or "arxiv" in g or "paper" in g or "scan" in g) and (
             "agi" in blob or "arxiv" in blob or "scan" in blob
@@ -243,19 +261,26 @@ def main() -> int:
             if motor_allowed(side, effector_reqs, switch_state):
                 planned_motors.append(side)
         behavior = hotspot["behavior"]
-        center = hotspot["center"]
+        center = hotspot.get("area") or hotspot.get("center")
+        columns = hotspot.get("columns") or []
+        tracts = hotspot.get("tracts") or []
     else:
-        pathway = [args.sense, "center.chief", "center.memory", "switch.autonomy", "motor.mesh"]
+        pathway = [args.sense, "area.wernicke", "area.dlpfc", "area.mtl", "switch.autonomy", "motor.mesh"]
         planned_motors = (
             ["motor.mesh"]
             if motor_allowed("motor.mesh", effector_reqs, switch_state)
             else []
         )
         behavior = "generic_integrate_and_remember"
-        center = "center.chief"
+        center = "area.dlpfc"
+        columns = []
+        tracts = []
 
     known_motors = {e["id"] for e in motor["effectors"]}
     planned_motors = [m for m in planned_motors if m in known_motors]
+
+    # OCL / CPV trajectory policies (Aaron-approved 2026-09-17)
+    planned_motors, policy_violations = tp.apply_policies(planned_motors, switch_state)
 
     edge_pairs = {(e["from"], e["to"]) for e in synapses["edges"]}
     missing = []
@@ -267,7 +292,10 @@ def main() -> int:
         "accepted": True,
         "sense": args.sense,
         "goal": args.goal,
+        "area": center,
         "center": center,
+        "columns": columns,
+        "tracts": tracts,
         "behavior": behavior,
         "hotspot_id": hotspot.get("id") if hotspot else None,
         "alt_hotspots": [
@@ -276,12 +304,18 @@ def main() -> int:
         "pathway": pathway,
         "switch_state": switch_state,
         "motor_plan": planned_motors,
+        "trajectory_violations": policy_violations,
         "response_rule": motor["response_rule"],
         "missing_explicit_edges": missing[:10],
         "persona": {
             "name": "Cam",
             "voice": "soft airy fluent English",
             "sole_operator": "Aaron",
+        },
+        "dual_process": {
+            "fast": "center.slm",
+            "slow": ["center.capability", "center.chief", "center.qa"],
+            "config": "config/enhancement/dual-process.json",
         },
     }
     # When coding motor is planned, attach workspace resolution for run-cline.py

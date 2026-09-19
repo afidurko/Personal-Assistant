@@ -88,6 +88,24 @@ describe('suggestive implementations', () => {
     expect(suggestions.some((s) => s.kind === 'agent-repair')).toBe(true);
     expect(suggestions.some((s) => s.kind === 'learning')).toBe(true);
   });
+  it('includes cam-enhance and research-memory suggestions for AGI workspace', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({
+        id: 'workspace-agi_research',
+        kind: 'agi_research',
+        score: 80,
+        status: 'warning',
+        findings: [],
+      }),
+      snap({ id: 'workspace-health', kind: 'health', score: 100, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'cam-enhance')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'research-memory')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('trajectory') || s.id.includes('hmo'))).toBe(
+      true,
+    );
+  });
 });
 
 describe('billion-scale round 2', () => {
@@ -158,14 +176,20 @@ describe('integration after suggestive implementations', () => {
       await orch.init();
       await orch.runOnce();
       const state = orch.getFullState();
-      expect(state.workspaces.length).toBe(6);
+      expect(state.workspaces.length).toBe(7);
       expect(state.workspaces.some((w) => w.kind === 'agi_research')).toBe(true);
+      expect(state.workspaces.some((w) => w.kind === 'swarm')).toBe(true);
       expect(state.suggestions?.length ?? 0).toBeGreaterThan(0);
       expect(state.nodes.some((n) => n.kind === 'concept')).toBe(true);
+      expect(state.nodes.some((n) => n.id === 'layer-swarm')).toBe(true);
+      expect(state.lastAgentCycle?.swarm?.activeAgents ?? 0).toBeGreaterThan(0);
 
       const mem = new PersistentMemory({ dataDir });
       await mem.load();
       expect(mem.getTraces().length).toBeGreaterThan(0);
+      expect(mem.getTraces().some((t) => t.kind === 'swarm' || t.tags.includes('cross-workspace'))).toBe(
+        true,
+      );
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

@@ -7,6 +7,12 @@ cd "$ROOT"
 echo "== connectome-check =="
 python3 scripts/connectome-check.py
 
+echo "== trajectory-policy-check =="
+python3 scripts/trajectory-policy-check.py
+
+echo "== memory-tier-check =="
+python3 scripts/memory-tier-check.py
+
 echo "== cline workspace unit tests =="
 python3 scripts/test_cline_workspaces.py
 

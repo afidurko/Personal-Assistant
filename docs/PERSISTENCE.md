@@ -17,7 +17,10 @@ Aaron required: store Session/memory for **this workspace and all future workspa
 | Bundle manifest | `identity/persistence/manifest.json` | Versioned export metadata |
 | Cline rules | `.clinerules` · `AGENTS.md` · `.cursor/rules/cam-cline.mdc` | Policy for every Cline session / workspace |
 | Daily AGI grant | `identity/persistence/DAILY_AGI_SCAN.md` | Standing research-scan authority |
+| HAAS→Cam grant | `identity/persistence/HAAS_CAM_PATTERNS.md` | Privilege inheritance + tooling team |
 | Teams + sLM/DL | `config/teams/`, `config/enhancement/slm-dl.json` | Agent teams + local cortex |
+| Swarm contracts | `config/swarm/` | Privileges, primitives, autonomy triad |
+| Tool registry | `config/tools/registry.json` | tool-creator → tool-user specs |
 | Workspace registry | `config/workspaces/registry.json` | Vault + scan + coding + integration map |
 
 ## Guarantees

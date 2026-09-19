@@ -6,7 +6,8 @@ export type AgentLayerId =
   | 'commute'
   | 'memory'
   | 'persistence'
-  | 'issue-loop';
+  | 'issue-loop'
+  | 'swarm';
 
 export type AgentRoleId =
   | 'commute-router'
@@ -16,7 +17,11 @@ export type AgentRoleId =
   | 'job-persistence'
   | 'completion-guardian'
   | 'issue-fix-loop'
-  | 'regression-sentinel';
+  | 'regression-sentinel'
+  | 'privilege-broker'
+  | 'lineage-guardian'
+  | 'boss-router'
+  | 'tool-broker';
 
 export interface AgentLayerMeta {
   id: AgentLayerId;
@@ -32,8 +37,8 @@ export interface MeshAgentDef {
   layer: AgentLayerId;
   name: string;
   mandate: string;
-  /** How this agent improves commute / memory / persistence */
-  enhances: Array<'commute' | 'memory' | 'persistence' | 'repair'>;
+  /** How this agent improves commute / memory / persistence / swarm */
+  enhances: Array<'commute' | 'memory' | 'persistence' | 'repair' | 'swarm'>;
   region: BrainRegion;
   color: string;
   relatedWorkspaceKinds: WorkspaceKind[];
@@ -41,7 +46,7 @@ export interface MeshAgentDef {
   maxLoopAttempts?: number;
 }
 
-/** Stacked deep layers — issue-loop is the dedicated repair stratum. */
+/** Stacked deep layers — swarm is the privilege / lineage / boss-worker stratum. */
 export const AGENT_LAYERS: AgentLayerMeta[] = [
   {
     id: 'commute',
@@ -79,6 +84,15 @@ export const AGENT_LAYERS: AgentLayerMeta[] = [
     purpose:
       'Dedicated looping agents that detect regressions and findings, attempt fixes, re-verify, and persist outcomes.',
   },
+  {
+    id: 'swarm',
+    name: 'Swarm Privilege & Bus Layer',
+    depth: 5,
+    region: 'swarm_bus',
+    color: '#1abc9c',
+    purpose:
+      'HAAS→Cam: privilege inheritance, lineage terminate, and boss/worker synapse ops shared by every agent and workspace.',
+  },
 ];
 
 export const MESH_AGENTS: MeshAgentDef[] = [
@@ -90,7 +104,7 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['commute'],
     region: 'basal_ganglia',
     color: '#4fc3f7',
-    relatedWorkspaceKinds: ['health', 'improvements'],
+    relatedWorkspaceKinds: ['health', 'improvements', 'swarm'],
   },
   {
     id: 'efficiency-broker',
@@ -100,7 +114,7 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['commute', 'persistence'],
     region: 'basal_ganglia',
     color: '#29b6f6',
-    relatedWorkspaceKinds: ['architecture', 'updates'],
+    relatedWorkspaceKinds: ['architecture', 'updates', 'swarm'],
   },
   {
     id: 'memory-consolidator',
@@ -110,7 +124,7 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['memory'],
     region: 'hippocampus',
     color: '#9575cd',
-    relatedWorkspaceKinds: ['health', 'architecture'],
+    relatedWorkspaceKinds: ['health', 'architecture', 'swarm', 'agi_research'],
   },
   {
     id: 'recall-amplifier',
@@ -120,7 +134,7 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['memory', 'commute'],
     region: 'hippocampus',
     color: '#7e57c2',
-    relatedWorkspaceKinds: ['improvements', 'vulnerability'],
+    relatedWorkspaceKinds: ['improvements', 'vulnerability', 'swarm'],
   },
   {
     id: 'job-persistence',
@@ -130,7 +144,7 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['persistence'],
     region: 'striatum',
     color: '#26a69a',
-    relatedWorkspaceKinds: ['improvements', 'updates'],
+    relatedWorkspaceKinds: ['improvements', 'updates', 'swarm'],
   },
   {
     id: 'completion-guardian',
@@ -140,7 +154,7 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['persistence', 'repair'],
     region: 'striatum',
     color: '#00897b',
-    relatedWorkspaceKinds: ['vulnerability', 'health'],
+    relatedWorkspaceKinds: ['vulnerability', 'health', 'swarm'],
   },
   {
     id: 'issue-fix-loop',
@@ -151,7 +165,7 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['repair', 'persistence'],
     region: 'repair_loop',
     color: '#ff7043',
-    relatedWorkspaceKinds: ['vulnerability', 'architecture', 'health'],
+    relatedWorkspaceKinds: ['vulnerability', 'architecture', 'health', 'swarm'],
     maxLoopAttempts: 5,
   },
   {
@@ -162,8 +176,57 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['repair', 'commute'],
     region: 'repair_loop',
     color: '#f4511e',
-    relatedWorkspaceKinds: ['health', 'updates', 'vulnerability'],
+    relatedWorkspaceKinds: ['health', 'updates', 'vulnerability', 'swarm'],
     maxLoopAttempts: 3,
+  },
+  {
+    id: 'privilege-broker',
+    layer: 'swarm',
+    name: 'Privilege Broker',
+    mandate:
+      'Enforce privilege inheritance on every spawn: child ⊆ parent; never grant aaron_only privileges.',
+    enhances: ['swarm', 'persistence'],
+    region: 'swarm_bus',
+    color: '#16a085',
+    relatedWorkspaceKinds: ['swarm', 'health', 'architecture', 'improvements', 'agi_research'],
+  },
+  {
+    id: 'lineage-guardian',
+    layer: 'swarm',
+    name: 'Lineage Guardian',
+    mandate: 'Track agent lineage; allow ancestors (or Aaron) to terminate descendants safely.',
+    enhances: ['swarm', 'repair'],
+    region: 'swarm_bus',
+    color: '#0e9f6e',
+    relatedWorkspaceKinds: ['swarm', 'vulnerability', 'health', 'updates'],
+  },
+  {
+    id: 'boss-router',
+    layer: 'swarm',
+    name: 'Boss/Worker Router',
+    mandate: 'assign_task / broadcast / resolve_task / send_message across all workspace agents.',
+    enhances: ['swarm', 'commute'],
+    region: 'swarm_bus',
+    color: '#048c7f',
+    relatedWorkspaceKinds: [
+      'swarm',
+      'health',
+      'architecture',
+      'vulnerability',
+      'updates',
+      'improvements',
+      'agi_research',
+    ],
+  },
+  {
+    id: 'tool-broker',
+    layer: 'swarm',
+    name: 'Tool Broker',
+    mandate: 'tool-creator → tool-user registry; privilege-gated tool runs shared via mesh/tools.',
+    enhances: ['swarm', 'memory'],
+    region: 'swarm_bus',
+    color: '#117a65',
+    relatedWorkspaceKinds: ['swarm', 'architecture', 'updates', 'improvements'],
   },
 ];
 

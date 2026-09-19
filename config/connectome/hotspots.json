@@ -1,57 +1,92 @@
 {
-  "version": 1,
-  "analogy": "Connection hotspots in higher centers — dense specialized subgraphs",
+  "version": 3,
+  "analogy": "Short-path hotspots \u2014 small-world efficiency: local columns, sparse tracts, fewer hops",
   "hotspots": [
     {
       "id": "hotspot.careers",
-      "center": "center.careers",
+      "area": "area.temporal",
+      "columns": [
+        "neuron.careers",
+        "neuron.watch_loop",
+        "neuron.qa"
+      ],
+      "tracts": [
+        "tract.uncinate"
+      ],
       "pathway": [
         "sense.careers.listing",
-        "center.careers",
-        "center.qa",
+        "area.temporal",
         "switch.careers_submit",
         "motor.jobs"
       ],
-      "side_effects": ["motor.vault", "motor.mesh"],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
       "behavior": "watch_rank_draft_or_submit_jobs"
     },
     {
       "id": "hotspot.research",
-      "center": "center.research",
+      "area": "area.temporal",
+      "columns": [
+        "neuron.language_in",
+        "neuron.research",
+        "neuron.qa",
+        "neuron.semantic"
+      ],
+      "tracts": [
+        "tract.arcuate",
+        "tract.cingulum"
+      ],
       "pathway": [
         "sense.chat.aaron",
-        "center.chief",
-        "center.router",
-        "center.research",
-        "sense.vault.hit",
-        "center.qa",
+        "area.wernicke",
+        "area.temporal",
         "switch.autonomy",
         "motor.vault"
       ],
-      "side_effects": ["motor.mesh"],
+      "side_effects": [
+        "motor.mesh"
+      ],
       "behavior": "source_backed_briefs"
     },
     {
       "id": "hotspot.docs",
-      "center": "center.docs",
+      "area": "area.apfc",
+      "columns": [
+        "neuron.docs",
+        "neuron.plan_loop"
+      ],
+      "tracts": [
+        "tract.cingulum"
+      ],
       "pathway": [
         "sense.chat.aaron",
-        "center.chief",
-        "center.router",
-        "center.docs",
+        "area.apfc",
         "switch.autonomy",
         "motor.docs"
       ],
-      "side_effects": ["motor.vault"],
+      "side_effects": [
+        "motor.vault"
+      ],
       "behavior": "draft_edit_documents"
     },
     {
       "id": "hotspot.presence",
-      "center": "center.comms",
+      "area": "area.broca",
+      "columns": [
+        "neuron.asr",
+        "neuron.speak_loop",
+        "neuron.comms"
+      ],
+      "tracts": [
+        "tract.arcuate",
+        "tract.corticospinal"
+      ],
       "pathway": [
         "sense.audio.transcript",
-        "center.chief",
-        "center.comms",
+        "area.auditory",
+        "area.broca",
         "switch.presence",
         "switch.outbound",
         "motor.speak"
@@ -60,22 +95,40 @@
     },
     {
       "id": "hotspot.life_ops",
-      "center": "center.ops",
+      "area": "area.parietal",
+      "columns": [
+        "neuron.ops",
+        "neuron.life_ops_loop"
+      ],
+      "tracts": [
+        "tract.slf"
+      ],
       "pathway": [
         "sense.calendar.event",
-        "center.ops",
+        "area.parietal",
         "switch.autonomy",
         "motor.calendar"
       ],
-      "side_effects": ["motor.jarvis", "motor.vault"],
+      "side_effects": [
+        "motor.jarvis",
+        "motor.vault"
+      ],
       "behavior": "schedule_and_chores"
     },
     {
       "id": "hotspot.email",
-      "center": "center.comms",
+      "area": "area.broca",
+      "columns": [
+        "neuron.language_in",
+        "neuron.comms"
+      ],
+      "tracts": [
+        "tract.arcuate"
+      ],
       "pathway": [
         "sense.email.thread",
-        "center.comms",
+        "area.wernicke",
+        "area.broca",
         "switch.outbound",
         "motor.text"
       ],
@@ -83,12 +136,20 @@
     },
     {
       "id": "hotspot.vision",
-      "center": "center.vision",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.cingulum"
+      ],
       "pathway": [
         "sense.vision.detection",
-        "center.vision",
-        "center.chief",
-        "center.memory",
+        "area.visual",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
@@ -96,15 +157,267 @@
     },
     {
       "id": "hotspot.jarvis",
-      "center": "center.ops",
+      "area": "area.parietal",
+      "columns": [
+        "neuron.ops",
+        "neuron.life_ops_loop"
+      ],
+      "tracts": [
+        "tract.slf",
+        "tract.cingulum"
+      ],
       "pathway": [
         "sense.jarvis.result",
-        "center.ops",
-        "center.memory",
+        "area.parietal",
+        "area.mtl",
         "switch.autonomy",
         "motor.mesh"
       ],
       "behavior": "absorb_tool_results"
+    },
+    {
+      "id": "hotspot.vault_recall",
+      "area": "area.mtl",
+      "columns": [
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.vault.hit",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "vault_engram_recall"
+    },
+    {
+      "id": "hotspot.mesh_recall",
+      "area": "area.mtl",
+      "columns": [
+        "neuron.memory",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.mesh_callosal"
+      ],
+      "pathway": [
+        "sense.mesh.hit",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "mesh_engram_recall"
+    },
+    {
+      "id": "hotspot.aaron_face",
+      "area": "area.ofc",
+      "columns": [
+        "neuron.identity_gate",
+        "neuron.boundary"
+      ],
+      "tracts": [
+        "tract.uncinate",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.aaron.face",
+        "area.dlpfc",
+        "switch.identity",
+        "switch.tasking",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "verify_aaron_face_for_tasking"
+    },
+    {
+      "id": "hotspot.aaron_voice",
+      "area": "area.ofc",
+      "columns": [
+        "neuron.identity_gate",
+        "neuron.boundary"
+      ],
+      "tracts": [
+        "tract.uncinate",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.aaron.voice",
+        "area.dlpfc",
+        "switch.identity",
+        "switch.tasking",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "verify_aaron_voice_for_tasking"
+    },
+    {
+      "id": "hotspot.ios_camera",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.enroll_loop"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.ifof"
+      ],
+      "pathway": [
+        "sense.ios.camera",
+        "switch.ios_capture",
+        "area.visual",
+        "area.dlpfc",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "tasked_iphone_camera_ingest"
+    },
+    {
+      "id": "hotspot.ios_mic",
+      "area": "area.auditory",
+      "columns": [
+        "neuron.asr",
+        "neuron.speak_loop"
+      ],
+      "tracts": [
+        "tract.arcuate"
+      ],
+      "pathway": [
+        "sense.ios.mic",
+        "switch.ios_capture",
+        "area.auditory",
+        "area.broca",
+        "area.dlpfc",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "tasked_iphone_mic_listen"
+    },
+    {
+      "id": "hotspot.aaron_enroll_photos",
+      "area": "area.visual",
+      "columns": [
+        "neuron.enroll_loop",
+        "neuron.vision"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.photos.library",
+        "area.visual",
+        "area.dlpfc",
+        "switch.identity",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "enroll_aaron_face_from_photos"
+    },
+    {
+      "id": "hotspot.aaron_enroll_media",
+      "area": "area.visual",
+      "columns": [
+        "neuron.enroll_loop",
+        "neuron.asr"
+      ],
+      "tracts": [
+        "tract.ilf",
+        "tract.arcuate"
+      ],
+      "pathway": [
+        "sense.files.media",
+        "area.visual",
+        "area.auditory",
+        "area.dlpfc",
+        "switch.identity",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "enroll_aaron_face_voice_photo_to_video"
+    },
+    {
+      "id": "hotspot.knowledge_map",
+      "area": "area.apfc",
+      "columns": [
+        "neuron.cartographer",
+        "neuron.mesh_sync_loop"
+      ],
+      "tracts": [
+        "tract.cingulum",
+        "tract.ifof"
+      ],
+      "pathway": [
+        "sense.swiftguide.map",
+        "area.apfc",
+        "switch.autonomy",
+        "motor.vault"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "browse_hierarchical_knowledge_map"
+    },
+    {
+      "id": "hotspot.ios_stack",
+      "area": "area.apfc",
+      "columns": [
+        "neuron.cartographer",
+        "neuron.docs"
+      ],
+      "tracts": [
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.swiftguide.map",
+        "area.apfc",
+        "switch.autonomy",
+        "motor.docs"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "recommend_ios_companion_stack_from_swiftguide"
+    },
+    {
+      "id": "hotspot.qa_cycle",
+      "area": "area.cingulate",
+      "columns": [
+        "neuron.qa_cycle",
+        "neuron.qa"
+      ],
+      "tracts": [
+        "tract.cingulum",
+        "tract.mesh_callosal"
+      ],
+      "pathway": [
+        "sense.chat.aaron",
+        "area.cingulate",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "continuous_conflict_monitoring_qa_loop"
     },
     {
       "id": "hotspot.coding",
@@ -118,7 +431,11 @@
         "switch.autonomy",
         "motor.cline"
       ],
-      "side_effects": ["motor.docs", "motor.vault", "motor.mesh"],
+      "side_effects": [
+        "motor.docs",
+        "motor.vault",
+        "motor.mesh"
+      ],
       "behavior": "plan_act_code_across_workspaces"
     },
     {
@@ -131,118 +448,10 @@
         "switch.autonomy",
         "motor.mesh"
       ],
-      "side_effects": ["motor.vault"],
+      "side_effects": [
+        "motor.vault"
+      ],
       "behavior": "absorb_cline_session_distillates"
-    },
-    {
-      "id": "hotspot.vault_recall",
-      "center": "center.memory",
-      "pathway": [
-        "sense.vault.hit",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "behavior": "vault_engram_recall"
-    },
-    {
-      "id": "hotspot.mesh_recall",
-      "center": "center.memory",
-      "pathway": [
-        "sense.mesh.hit",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "behavior": "mesh_engram_recall"
-    },
-    {
-      "id": "hotspot.aaron_face",
-      "center": "center.chief",
-      "pathway": [
-        "sense.aaron.face",
-        "center.chief",
-        "switch.identity",
-        "switch.tasking",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "behavior": "verify_aaron_face_for_tasking"
-    },
-    {
-      "id": "hotspot.aaron_voice",
-      "center": "center.chief",
-      "pathway": [
-        "sense.aaron.voice",
-        "center.chief",
-        "switch.identity",
-        "switch.tasking",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "behavior": "verify_aaron_voice_for_tasking"
-    },
-    {
-      "id": "hotspot.ios_camera",
-      "center": "center.vision",
-      "pathway": [
-        "sense.ios.camera",
-        "switch.ios_capture",
-        "center.vision",
-        "center.chief",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "side_effects": ["motor.vault"],
-      "behavior": "tasked_iphone_camera_ingest"
-    },
-    {
-      "id": "hotspot.ios_mic",
-      "center": "center.comms",
-      "pathway": [
-        "sense.ios.mic",
-        "switch.ios_capture",
-        "center.comms",
-        "center.chief",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "behavior": "tasked_iphone_mic_listen"
-    },
-    {
-      "id": "hotspot.aaron_enroll_photos",
-      "center": "center.vision",
-      "pathway": [
-        "sense.photos.library",
-        "center.vision",
-        "center.chief",
-        "switch.identity",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "side_effects": ["motor.vault"],
-      "behavior": "enroll_aaron_face_from_photos"
-    },
-    {
-      "id": "hotspot.aaron_enroll_media",
-      "center": "center.vision",
-      "pathway": [
-        "sense.files.media",
-        "center.vision",
-        "center.comms",
-        "center.chief",
-        "switch.identity",
-        "center.memory",
-        "switch.autonomy",
-        "motor.mesh"
-      ],
-      "side_effects": ["motor.vault"],
-      "behavior": "enroll_aaron_face_voice_photo_to_video"
     },
     {
       "id": "hotspot.agi_daily_scan",
@@ -255,7 +464,11 @@
         "switch.research_scan",
         "motor.web_fetch"
       ],
-      "side_effects": ["motor.vault", "motor.mesh", "motor.dl"],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh",
+        "motor.dl"
+      ],
       "behavior": "daily_scan_ai_agi_papers_propose_cam_enhancements",
       "team": "team.agi-research-scan"
     },
@@ -270,7 +483,11 @@
         "switch.research_scan",
         "motor.web_fetch"
       ],
-      "side_effects": ["motor.vault", "motor.mesh", "motor.dl"],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh",
+        "motor.dl"
+      ],
       "behavior": "ingest_arxiv_ai_agi_papers",
       "team": "team.agi-research-scan"
     },
@@ -285,7 +502,10 @@
         "switch.research_scan",
         "motor.web_fetch"
       ],
-      "side_effects": ["motor.vault", "motor.mesh"],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
       "behavior": "ingest_open_agi_findings_feeds",
       "team": "team.agi-research-scan"
     },
@@ -301,7 +521,11 @@
         "switch.autonomy",
         "motor.mesh"
       ],
-      "side_effects": ["motor.vault", "motor.slm", "motor.dl"],
+      "side_effects": [
+        "motor.vault",
+        "motor.slm",
+        "motor.dl"
+      ],
       "behavior": "decompose_task_spawn_team_complete_work",
       "team": "team.capability"
     },
@@ -318,9 +542,32 @@
         "switch.autonomy",
         "motor.vault"
       ],
-      "side_effects": ["motor.mesh", "motor.web_fetch", "motor.slm"],
+      "side_effects": [
+        "motor.mesh",
+        "motor.web_fetch",
+        "motor.slm"
+      ],
       "behavior": "vault_mesh_web_cited_information",
       "team": "team.info"
+    },
+    {
+      "id": "hotspot.google_scholar",
+      "center": "center.info",
+      "pathway": [
+        "sense.web.scholar",
+        "center.info",
+        "center.research",
+        "center.qa",
+        "switch.research_scan",
+        "motor.web_fetch"
+      ],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
+      "behavior": "google_scholar_literature_and_citations",
+      "team": "team.info",
+      "integration": "config/integrations/google-scholar.json"
     },
     {
       "id": "hotspot.slm_assist",
@@ -333,7 +580,9 @@
         "switch.slm_local",
         "motor.slm"
       ],
-      "side_effects": ["motor.mesh"],
+      "side_effects": [
+        "motor.mesh"
+      ],
       "behavior": "local_slm_route_compress_draft_assist"
     },
     {
@@ -360,7 +609,9 @@
         "switch.dl_local",
         "motor.dl"
       ],
-      "side_effects": ["motor.mesh"],
+      "side_effects": [
+        "motor.mesh"
+      ],
       "behavior": "local_dl_embed_rerank_cluster_assist"
     },
     {
@@ -387,9 +638,65 @@
         "switch.cam_enhance",
         "motor.enhance"
       ],
-      "side_effects": ["motor.vault", "motor.mesh"],
+      "side_effects": [
+        "motor.vault",
+        "motor.mesh"
+      ],
       "behavior": "aaron_gated_apply_cam_functionality_enhancement",
       "team": "team.capability"
+    },
+    {
+      "id": "hotspot.tooling",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.chat.aaron",
+        "center.chief",
+        "center.router",
+        "center.tooling",
+        "center.qa",
+        "switch.tooling",
+        "motor.tool"
+      ],
+      "side_effects": [
+        "motor.swarm",
+        "motor.mesh",
+        "motor.jarvis"
+      ],
+      "behavior": "create_or_run_registered_tool_under_privileges",
+      "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.swarm_bus",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.swarm.message",
+        "center.tooling",
+        "center.capability",
+        "switch.autonomy",
+        "motor.swarm"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "boss_worker_assign_broadcast_resolve",
+      "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.tool_result",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.tool.result",
+        "center.tooling",
+        "center.qa",
+        "center.memory",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "absorb_tool_result_into_mesh",
+      "team": "team.tooling"
     }
   ]
 }

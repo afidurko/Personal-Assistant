@@ -65,9 +65,9 @@
     },
     {
       "id": "motor.web_fetch",
-      "channel": ["http_fetch", "arxiv_api"],
+      "channel": ["http_fetch", "arxiv_api", "google_scholar", "serpapi_scholar"],
       "requires_switch": ["switch.research_scan", "switch.kill"],
-      "notes": "Fetch papers/findings for AGI scan and info team — no outbound messaging"
+      "notes": "Fetch papers/findings for Scholar, AGI scan, and info team — no outbound messaging"
     },
     {
       "id": "motor.enhance",
@@ -86,6 +86,18 @@
       "channel": ["local_dl", "embeddings", "rerank"],
       "requires_switch": ["switch.dl_local", "switch.kill"],
       "notes": "Invoke Cam DL cortex (embed/rerank/cluster/identity vectors)"
+    },
+    {
+      "id": "motor.tool",
+      "channel": ["tool_registry", "jarvis_cli", "local_script"],
+      "requires_switch": ["switch.tooling", "switch.kill"],
+      "notes": "Run a registered tool via tool-user (config/tools/registry.json)"
+    },
+    {
+      "id": "motor.swarm",
+      "channel": ["nulltickets_store", "agent_bus"],
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Emit synapse.assign_task / broadcast / resolve / send_message / spawn / terminate_lineage"
     }
   ],
   "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"

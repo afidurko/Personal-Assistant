@@ -170,8 +170,16 @@ export class PersistentMemory {
     }
 
     // Also prune non-scan traces that are extremely weak and fully decayed.
+    // Keep swarm + semantic + agent traces longer — they are cross-workspace contracts.
     this.traces = this.traces.filter(
-      (t) => !(t.salience < WEAK_SALIENCE && t.decay > 0.9 && t.kind !== 'semantic'),
+      (t) =>
+        !(
+          t.salience < WEAK_SALIENCE &&
+          t.decay > 0.9 &&
+          t.kind !== 'semantic' &&
+          t.kind !== 'swarm' &&
+          t.kind !== 'agent'
+        ),
     );
   }
 

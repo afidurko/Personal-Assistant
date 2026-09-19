@@ -23,6 +23,8 @@ vault/10-Mesh-Distillates/converse/*.jsonl
 vault/10-Mesh-Distillates/activity-events.jsonl
 vault/10-Mesh-Distillates/live-activity.json
 vault/10-Mesh-Distillates/improve-tasks.json
+vault/10-Mesh-Distillates/.fornix-last-run
+vault/10-Mesh-Distillates/.persist-weekly
 scripts/__pycache__/
 identity/persistence/tickets/pending/*.json
 identity/persistence/tickets/done/*.json

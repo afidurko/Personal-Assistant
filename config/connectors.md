@@ -62,12 +62,31 @@
 - See `config/integrations/smart-second-brain.md`
 - Set `config/persona/vault.json` → `vault_path`
 
+## Knowledge cartography (SwiftGuide)
+
+- Submodule: `integrations/swiftguide`
+- Hierarchical mind maps + 2026 Swift ecosystem report
+- Dual-lens brain map: CNS anatomy ↔ mind-map trees
+- iOS companion stack picks in `config/connectome/mindmap.json`
+- See `config/integrations/swiftguide.md`
+- Spikes: `sense.swiftguide.map` → `area.apfc` (cartography columns)
+
 ## Careers boards
 
 - **LinkedIn** — watch matching roles, draft Easy-Apply/outreach; submit only after Aaron approves
 - **Indeed** — watch matching roles, draft applications; submit only after Aaron approves
 - Credentials stay in local secrets (never commit)
 - All opportunities logged to `mesh/careers` + tickets for cross-workspace persistence
+
+## Google Scholar (literature + citations)
+
+- Policy: `config/integrations/google-scholar.md`
+- Config: `config/integrations/google-scholar.json`
+- Sense: `sense.web.scholar` · Hotspot: `hotspot.google_scholar`
+- Bridge: **SerpAPI** (`SERPAPI_API_KEY` in local `.env` — never commit)
+- Used by Information + Research (+ AGI scout when AI/AGI-relevant)
+- Scripts: `scripts/scholar-search.py`, `scripts/pack-scholar-result.py`
+- Distills to `mesh/research` + `vault/04-Research/scholar/`
 
 ## Bridge later (OpenClaw-inspired external plugins)
 
@@ -96,3 +115,5 @@ specialist tool or modern API — not the Java/Thrift stack.
 - [ ] Test message/call in dry-run mode
 - [ ] LinkedIn connected (careers watch)
 - [ ] Indeed connected (careers watch)
+- [ ] Google Scholar connected (SerpAPI key in local `.env`)
+- [ ] Optional: Scholar `profile.author_id` set for Aaron citation watch
