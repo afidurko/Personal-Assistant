@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Card Recognition → 3D Spawn • A-Frame</title>
+    <meta name="description" content="Detect a 2D card, resolve catalog metadata, spawn a 3D character + spatial UI.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+    <script src="components/card-catalog.js"></script>
+    <script src="components/card-detector.js"></script>
+    <script src="components/procedural-creature.js"></script>
+    <script src="components/character-spawner.js"></script>
+    <script src="components/battle-arena.js"></script>
+    <script src="components/recognition-pipeline.js"></script>
+    <style>
+      html, body { margin: 0; height: 100%; background: #0b1220; }
+      .hud {
+        position: fixed; z-index: 10; left: 16px; right: 16px; top: 12px;
+        display: flex; gap: 12px; justify-content: space-between; pointer-events: none;
+        font-family: "IBM Plex Mono", ui-monospace, monospace; color: #e8eef8;
+      }
+      .panel {
+        background: rgba(12, 18, 32, 0.72); border: 1px solid rgba(124, 255, 240, 0.25);
+        backdrop-filter: blur(8px); padding: 10px 12px; max-width: 340px;
+      }
+      .panel h1 {
+        margin: 0 0 6px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+        color: #7CFFF0; font-weight: 600;
+      }
+      .panel p, #detect-status, #pipeline-log { margin: 0; font-size: 12px; line-height: 1.45; opacity: 0.92; }
+      #pipeline-log div { margin-bottom: 4px; opacity: 0.85; }
+      #action-banner {
+        position: fixed; z-index: 10; left: 0; right: 0; bottom: 28px;
+        text-align: center; font-family: "Sora", system-ui, sans-serif;
+        font-size: clamp(18px, 3vw, 28px); font-weight: 700; letter-spacing: 0.04em;
+        color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,0.55); pointer-events: none;
+      }
+      .links { pointer-events: auto; margin-top: 8px; }
+      .links a { color: #9BE8FF; margin-right: 10px; font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <div class="hud">
+      <div class="panel">
+        <h1>Pipeline</h1>
+        <p id="detect-status">Booting…</p>
+        <div id="pipeline-log" style="margin-top:8px"></div>
+        <div class="links">
+          <a href="mindar.html">MindAR camera mode</a>
+          <a href="README.md">Architecture</a>
+        </div>
+      </div>
+      <div class="panel">
+        <h1>Lab table</h1>
+        <p>Tap a card → detect → catalog → spawn 3D creature, HP bar, and moves. Same events work with MindAR or an external CV detector.</p>
+      </div>
+    </div>
+    <div id="action-banner">SCAN A CARD TO BEGIN</div>
+
+    <a-scene
+      card-catalog="src: catalog.json"
+      card-detector="mode: lab"
+      character-spawner="spawnRoot: #spawn-root"
+      recognition-pipeline
+      background="color: #0b1220"
+      cursor="rayOrigin: mouse"
+      raycaster="objects: .detectable-card, .move-btn"
+      renderer="antialias: true; colorManagement: true"
+      shadow="type: pcfsoft">
+
+      <a-assets timeout="10000">
+        <img id="card-volt" src="assets/card-volt-wisp.svg" crossorigin="anonymous">
+        <img id="card-ember" src="assets/card-ember-drake.svg" crossorigin="anonymous">
+        <img id="card-tide" src="assets/card-tide-finch.svg" crossorigin="anonymous">
+        <img id="wood" src="assets/table.svg" crossorigin="anonymous">
+      </a-assets>
+
+      <a-entity light="type: ambient; intensity: 0.55"></a-entity>
+      <a-entity light="type: directional; intensity: 1.1; castShadow: true" position="2 4 1"></a-entity>
+
+      <!-- Desk surface -->
+      <a-plane
+        src="#wood"
+        width="3.2" height="2.0" rotation="-90 0 0" position="0 0 -1.1"
+        material="repeat: 1 1" shadow="receive: true"></a-plane>
+
+      <a-entity id="arena" battle-arena position="0 0.01 -1.1" visible="false"></a-entity>
+      <a-entity id="spawn-root"></a-entity>
+
+      <!-- Physical card proxies (stand-ins for printed targets) -->
+      <a-plane
+        class="detectable-card"
+        data-card-id="volt-wisp"
+        src="#card-volt"
+        width="0.42" height="0.58"
+        position="-0.55 0.01 -0.75"
+        rotation="-90 12 0"
+        material="side: double"
+        shadow="cast: true">
+        <a-text value="ACTIVE" align="center" width="1.2" color="#7CFFF0" position="0 0.36 0.01" rotation="90 0 0"></a-text>
+      </a-plane>
+
+      <a-plane
+        class="detectable-card"
+        data-card-id="ember-drake"
+        src="#card-ember"
+        width="0.42" height="0.58"
+        position="0.55 0.01 -0.75"
+        rotation="-90 -10 0"
+        material="side: double"
+        shadow="cast: true">
+        <a-text value="OPPONENT" align="center" width="1.2" color="#FFB3A0" position="0 0.36 0.01" rotation="90 0 0"></a-text>
+      </a-plane>
+
+      <a-plane
+        class="detectable-card"
+        data-card-id="tide-finch"
+        src="#card-tide"
+        width="0.42" height="0.58"
+        position="0 0.01 -1.55"
+        rotation="-90 0 0"
+        material="side: double"
+        shadow="cast: true">
+        <a-text value="BENCH" align="center" width="1.2" color="#9BE8FF" position="0 0.36 0.01" rotation="90 0 0"></a-text>
+      </a-plane>
+
+      <a-entity id="rig" position="0 1.35 0.55">
+        <a-camera look-controls wasd-controls="acceleration: 18"></a-camera>
+      </a-entity>
+
+      <a-sky color="#152033"></a-sky>
+    </a-scene>
+  </body>
+</html>
