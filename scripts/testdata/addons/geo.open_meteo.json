@@ -1,0 +1,14 @@
+{
+  "results": [
+    {
+      "id": 5128581,
+      "name": "New York",
+      "latitude": 40.71427,
+      "longitude": -74.00597,
+      "country": "United States",
+      "admin1": "New York",
+      "timezone": "America/New_York"
+    }
+  ],
+  "_fixture": true
+}

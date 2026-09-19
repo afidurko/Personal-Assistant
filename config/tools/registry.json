@@ -16,14 +16,20 @@
         "stdout": "string",
         "exit_code": "number"
       },
-      "required_privileges": ["use_jarvis", "use_tool"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "required_privileges": [
+        "use_jarvis",
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "template"
     },
     {
       "id": "tool.connectome.route",
-      "purpose": "Dry-run a sense→motor plan via connectome-route.py",
+      "purpose": "Dry-run a sense\u2192motor plan via connectome-route.py",
       "created_by_role": "tool-creator",
       "entrypoint": "scripts/connectome-route.py",
       "kind": "local_script",
@@ -35,8 +41,13 @@
       "outputs": {
         "motor_plan": "object"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "template"
     },
@@ -51,8 +62,13 @@
         "ok": "boolean",
         "report": "object"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "active"
     },
@@ -70,11 +86,131 @@
         "ok": "boolean",
         "report": "object"
       },
-      "required_privileges": ["use_tool"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "active",
       "integration": "config/integrations/voicestudio.json"
+    },
+    {
+      "id": "tool.public_apis.search",
+      "purpose": "Search the curated free/public API catalog (afidurko/public-apis) for any Cam agent",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/public-apis-search.py",
+      "kind": "local_script",
+      "inputs": {
+        "query": "string",
+        "category": "string",
+        "auth": "string",
+        "https": "boolean",
+        "num": "number",
+        "offline": "boolean"
+      },
+      "outputs": {
+        "results": "object[]",
+        "returned": "number",
+        "total_catalog": "number"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/public-apis.json",
+      "motor": "motor.public_apis",
+      "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.public_apis.pack",
+      "purpose": "Pack public-apis search JSON into a mesh/tools distillate",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/pack-public-apis-result.py",
+      "kind": "local_script",
+      "inputs": {
+        "results": "string"
+      },
+      "outputs": {
+        "mesh_doc": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/public-apis.json",
+      "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.public_apis.addon",
+      "purpose": "Call an allowlisted public-apis thin-wrapper add-on (no free-form URLs)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/public-apis-addon.py",
+      "kind": "local_script",
+      "inputs": {
+        "addon_id": "string",
+        "offline": "boolean",
+        "latitude": "number",
+        "longitude": "number",
+        "name": "string",
+        "days": "number",
+        "ids": "string",
+        "vs": "string"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "result": "object",
+        "provider": "string"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/public-apis-addons.json",
+      "motor": "motor.public_apis",
+      "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.public_apis.addon_list",
+      "purpose": "List allowlisted public-apis thin-wrapper add-ons",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/public-apis-addon.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "addons": "object[]",
+        "count": "number"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/public-apis-addons.json",
+      "available_to": "all_roles_and_subagents"
     }
   ]
 }

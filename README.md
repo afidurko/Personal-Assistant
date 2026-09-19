@@ -25,7 +25,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
-- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed · **Google Scholar** · `config/tools/registry.json`
+- **Tools:** Jarvis · Cline · PaddleDetection · LinkedIn/Indeed · **Google Scholar** · **public-apis** · `config/tools/registry.json`
 - **Autonomy:** Aaron assigns; Cam finishes without mid-task interference; 24/7 available; teams spawn unlimited subagents (privilege inheritance, no escalation)
 
 Face: [`identity/persona/cam-face.jpg`](identity/persona/cam-face.jpg)  
@@ -125,5 +125,7 @@ Persona locked. Starter vault created. Always-on autonomy set.
 Brain reimagined with AGI scan / capability / info teams + sLM/DL cortex.
 Cline wired as shared coding effector for all agents and future workspaces
 (registry, runner, MCP, schedules, tickets).
+Public-apis wired as shared free-API catalog for all agents
+(`motor.public_apis`, MCP `public_apis_search`, tooling/info/capability/AGI teams).
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.
 Neural-mesh scanner stack is present alongside the Cam connectome foundation.

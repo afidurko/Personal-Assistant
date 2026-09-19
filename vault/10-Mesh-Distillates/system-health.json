@@ -1,23 +1,23 @@
 {
-  "at": "2026-09-19T19:08:35Z",
+  "at": "2026-09-19T19:48:20Z",
   "overall": "healthy",
   "checks": [
     {
       "neuron": "neuron.vitals_loop",
       "loadavg": [
-        0.68017578125,
-        0.32470703125,
-        1.06298828125
+        0.36572265625,
+        0.11669921875,
+        0.4111328125
       ],
       "cwd": "/workspace",
       "status": "healthy"
     },
     {
-      "senses": 27,
-      "hotspot_options": 37,
-      "known_nodes": 132,
-      "motors": 18,
-      "edges": 271,
+      "senses": 28,
+      "hotspot_options": 38,
+      "known_nodes": 134,
+      "motors": 19,
+      "edges": 281,
       "hard_errors": [],
       "missing_edges": [],
       "soft_warnings": [],
@@ -27,7 +27,7 @@
     },
     {
       "neuron": "neuron.submodule_health",
-      "count": 7,
+      "count": 8,
       "uninitialized": 0,
       "status": "healthy",
       "sample": [
@@ -35,6 +35,7 @@
         " 0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis (heads/master)",
         " 93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk (heads/main)",
         " b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection (heads/release/2.9)",
+        " 4cfe04f70da070207b032eed62db76a0c82e11b7 integrations/public-apis (heads/master)",
         " baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain (heads/main)",
         " 64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide (heads/master)",
         " 7ec803afa7c94ccf96973edcda58debe9b145693 integrations/voicestudio (v0.5.3-360-g7ec803af)"
@@ -48,7 +49,9 @@
         "integrations/llmavatartalk",
         "integrations/voicestudio",
         "integrations/smart-second-brain",
-        "integrations/swiftguide"
+        "integrations/swiftguide",
+        "integrations/public-apis",
+        "integrations/cline"
       ],
       "missing": [],
       "status": "healthy"
@@ -91,7 +94,7 @@
     {
       "neuron": "neuron.priority_boot",
       "present": true,
-      "step_count": 18,
+      "step_count": 19,
       "status": "healthy"
     },
     {
@@ -123,15 +126,12 @@
   "hooks": {
     "improve_engine": {
       "exit": 0,
-      "preview": "{\n  \"at\": \"2026-09-19T19:08:35Z\",\n  \"health_overall\": \"healthy\",\n  \"task_count\": 0,\n  \"tasks\": [],\n  \"neuron\": \"neuron.improve_engine\"\n}\n"
+      "preview": "{\n  \"at\": \"2026-09-19T19:48:20Z\",\n  \"health_overall\": \"healthy\",\n  \"task_count\": 0,\n  \"tasks\": [],\n  \"neuron\": \"neuron.improve_engine\"\n}\n"
     },
     "persist_weekly": {
       "neuron": "neuron.persist_sync",
-      "ran": true,
-      "exit": 0,
-      "out": "refreshed identity/persistence/mesh-seed.json\n",
-      "status": "healthy",
-      "marker_written": true
+      "skipped": true,
+      "reason": "recent"
     },
     "fornix": {
       "exit": 0,

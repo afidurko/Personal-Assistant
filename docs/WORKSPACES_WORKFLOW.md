@@ -80,6 +80,7 @@ Aaron (sole task-giver / kill / enhance-approve)
 | LLMAvatarTalk | `config/integrations/llmavatartalk.md` | empty submodule | needs init |
 | VoiceStudio | `config/integrations/voicestudio.md` + `.json` | empty submodule | needs init + local backend |
 | smart-second-brain | `config/integrations/smart-second-brain.md` | empty submodule | needs Obsidian enable |
+| public-apis | `config/integrations/public-apis.md` | submodule + search scripts | shared by all agents |
 | iOS / Tailscale converse | docs + companions | companions present | machine-local |
 | Null stack (nullclaw/tickets/boiler/hub) | architecture only | not vendored here | future |
 | Scan workspace server (PR#2) | registry stub here | full TS on PR#2 | merge then `npm` |

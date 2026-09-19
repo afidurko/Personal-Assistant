@@ -89,6 +89,17 @@ def pick_hotspot(
         if any(
             tok in g
             for tok in (
+                "public api",
+                "public-apis",
+                "free api",
+                "api catalog",
+                "open api list",
+            )
+        ) and ("public_apis" in blob or "public-apis" in blob or "api" in blob):
+            score += 5
+        if any(
+            tok in g
+            for tok in (
                 "code",
                 "coding",
                 "cline",

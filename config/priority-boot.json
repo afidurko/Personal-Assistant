@@ -23,6 +23,11 @@
       "role": "info-retriever"
     },
     {
+      "id": "public_apis",
+      "title": "Public APIs free-API catalog (all agents)",
+      "role": "tool-user"
+    },
+    {
       "id": "careers_linkedin_indeed",
       "title": "Job watch on LinkedIn + Indeed",
       "role": "careers"

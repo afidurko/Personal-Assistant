@@ -87,11 +87,11 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": false,
+      "workspace_exists": true,
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-19T18:53:10.386610+00:00",
+  "schedules_synced_at": "2026-09-19T19:47:51.243533+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

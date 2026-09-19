@@ -36,6 +36,7 @@ Local: VoiceStudio TTS/ASR (cloned Cam voice) + cam-face.jpg when studio is offl
 Simple: cam-face.jpg + light TTS when neither studio nor VoiceStudio is up
 Brain+: nullclaw + smart-second-brain + sLM/DL cortex + agent teams (AGI scan / capability / info)
 Code:   Cline (`integrations/cline`) as shared motor for all agents/workspaces
+APIs:   public-apis (`integrations/public-apis`) as shared free-API catalog for all agents
 ```
 
 - Presence I/O: `integrations/llmavatartalk`
@@ -62,4 +63,5 @@ Code:   Cline (`integrations/cline`) as shared motor for all agents/workspaces
 - LLMAvatarTalk + smart-second-brain: **wired as submodules**
 - VoiceStudio: **wired as submodule** — local TTS/ASR/clone/dub + MCP
 - Cline: **wired as submodule** — shared coding effector for all agents/workspaces
+- Public APIs: **wired as submodule** — shared free-API catalog for all agents/workspaces
 - Studio RIVA/Audio2Face bring-up: on Aaron’s machine
