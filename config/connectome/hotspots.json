@@ -570,6 +570,27 @@
       "integration": "config/integrations/google-scholar.json"
     },
     {
+      "id": "hotspot.public_apis",
+      "center": "center.tooling",
+      "pathway": [
+        "sense.catalog.public_apis",
+        "center.tooling",
+        "center.info",
+        "center.capability",
+        "switch.autonomy",
+        "motor.public_apis"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.tool",
+        "motor.vault"
+      ],
+      "behavior": "discover_free_public_apis_for_any_agent",
+      "team": "team.tooling",
+      "available_to": "all_roles_and_subagents",
+      "integration": "config/integrations/public-apis.json"
+    },
+    {
       "id": "hotspot.slm_assist",
       "center": "center.slm",
       "pathway": [

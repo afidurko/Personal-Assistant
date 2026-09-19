@@ -161,6 +161,7 @@ Examples:
 - `sense.cline.result` — Cline coding-agent feedback  
 - `sense.web.arxiv` / `sense.web.agi_feed` — AGI paper feeds  
 - `sense.web.scholar` — Google Scholar literature + citations (SerpAPI)  
+- `sense.catalog.public_apis` — curated free/public API catalog (all agents)  
 - `sense.arxiv.paper` / `sense.clock.daily` — AGI daily scan inputs  
 - `sense.swiftguide.map` — SwiftGuide cartography  
 
@@ -231,6 +232,7 @@ Effectors fire only after a switch resolves to **act**.
 | `motor.calendar` | Calendar mutations |
 | `motor.mesh` | Mesh KV puts / archives |
 | `motor.web_fetch` | HTTP / arXiv / **Google Scholar** fetch (AGI scan / info) |
+| `motor.public_apis` | Search **public-apis** catalog (shared by all agents) |
 | `motor.enhance` | Apply Cam config/role/connectome/sLM-DL changes (Aaron-gated) |
 | `motor.slm` | Local small-LM inference |
 | `motor.dl` | Local DL embed/rerank/cluster |
@@ -250,6 +252,7 @@ From the paper’s “male-specific connection hotspots” idea — Cam densifie
 7. **Capability hotspot** — Aaron task → capability team → specialists/sLM/DL → done  
 8. **Info hotspot** — question → vault→mesh→**Scholar**→web → cited answer  
 8b. **Google Scholar hotspot** — `sense.web.scholar` → info/research → `motor.web_fetch`  
+8c. **Public APIs hotspot** — `sense.catalog.public_apis` → tooling/info/capability → `motor.public_apis` (all agents)  
 9. **sLM / DL hotspots** — local model assists + feedback into mesh  
 10. **Tooling / swarm bus hotspots** — tool-creator→tool-user + privilege-aware agent messaging  
 11. **Cartography / QA loop hotspots** — SwiftGuide maps + ACC conflict-monitoring cycles  
@@ -282,6 +285,7 @@ Rules:
 | Human master switch | Aaron (+ nullhub when live) |
 | Long-term engram | smart-second-brain vault + mesh |
 | Coding effector | Cline (`integrations/cline`) |
+| Free API catalog | public-apis (`integrations/public-apis`) — all agents |
 | Knowledge cartography | SwiftGuide (`integrations/swiftguide`) |
 | Embodied voice/face motor | LLMAvatarTalk |
 

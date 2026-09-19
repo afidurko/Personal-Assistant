@@ -6,7 +6,8 @@ Implements a small JSON-RPC MCP subset over stdin/stdout:
 
 Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
-  vault_search, connectome_route, kill_switch_status, ticket_list
+  vault_search, connectome_route, kill_switch_status, ticket_list,
+  public_apis_search
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -15,6 +16,7 @@ Install into Cline (example):
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -24,7 +26,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import cam_workspaces as cw  # noqa: E402
 
 SERVER_NAME = "cam-personal-assistant"
-SERVER_VERSION = "1.0.0"
+SERVER_VERSION = "1.1.0"
 
 
 def _ok(result: Any, req_id: Any) -> dict:
@@ -114,6 +116,25 @@ def tool_defs() -> list[dict]:
                 "properties": {
                     "status": {"type": "string", "enum": ["pending", "done", "all"]},
                     "limit": {"type": "integer"},
+                },
+            },
+        },
+        {
+            "name": "public_apis_search",
+            "description": (
+                "Search the curated free/public API catalog (afidurko/public-apis) "
+                "shared by all Cam agents. Offline fixture available."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "category": {"type": "string"},
+                    "auth": {"type": "string"},
+                    "https": {"type": "boolean"},
+                    "num": {"type": "integer"},
+                    "offline": {"type": "boolean"},
+                    "list_categories": {"type": "boolean"},
                 },
             },
         },
@@ -230,6 +251,26 @@ def ticket_list(status: str = "all", limit: int = 20) -> dict:
     return {"tickets": items}
 
 
+def public_apis_search(arguments: dict) -> Any:
+    cmd = [sys.executable, str(ROOT / "scripts/public-apis-search.py")]
+    if arguments.get("list_categories"):
+        cmd.append("--list-categories")
+    if arguments.get("query"):
+        cmd.extend(["--query", str(arguments["query"])])
+    if arguments.get("category"):
+        cmd.extend(["--category", str(arguments["category"])])
+    if arguments.get("auth"):
+        cmd.extend(["--auth", str(arguments["auth"])])
+    if arguments.get("https"):
+        cmd.append("--https")
+    if arguments.get("num") is not None:
+        cmd.extend(["--num", str(int(arguments["num"]))])
+    if arguments.get("offline") is True:
+        cmd.append("--offline")
+    out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+    return json.loads(out)
+
+
 def call_tool(name: str, arguments: dict) -> Any:
     if name == "list_workspaces":
         return cw.mesh_projects_doc()
@@ -256,6 +297,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return kill_switch_status()
     if name == "ticket_list":
         return ticket_list(arguments.get("status", "all"), int(arguments.get("limit") or 20))
+    if name == "public_apis_search":
+        return public_apis_search(arguments)
     raise ValueError(f"unknown tool: {name}")
 
 

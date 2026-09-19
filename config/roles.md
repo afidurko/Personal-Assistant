@@ -17,7 +17,7 @@
 | AGI Synthesist | `agi-synthesist` | yes | `team.agi-research-scan` | map findings → Cam proposals |
 | Capability Broker | `capability-broker` | yes | `team.capability` | task + enhance brokerage |
 | Task Executor | `task-executor` | yes | `team.capability` | concrete work units |
-| Info Retriever | `info-retriever` | yes | `team.info` | vault→mesh→**Scholar**→web facts |
+| Info Retriever | `info-retriever` | yes | `team.info` | vault→mesh→**Scholar**→**public-apis**→web facts |
 | SLM Runtime | `slm-runtime` | yes | — | local small-LM cortex |
 | DL Enhance | `dl-enhance` | yes | — | embeddings / rerank / vectors |
 | Tool Creator | `tool-creator` | yes | `team.tooling` | design/register tools (HAAS pattern) |
@@ -42,6 +42,7 @@
 - Child work is still tracked as nulltickets tasks when the runtime is live
 - Boss/worker primitives: `config/swarm/primitives.json`
 - **Any role may invoke Cline** (`motor.cline`) for coding — not siloed to `coding`
+- **Any role may invoke public-apis** (`motor.public_apis`) for free API discovery — not siloed to tooling
 
 ## Enhancement cortex (DL + sLMs)
 
@@ -59,6 +60,7 @@
 
 - Jarvis: `integrations/jarvis`
 - Cline: `integrations/cline` (all agents / all workspaces)
+- Public APIs: `integrations/public-apis` (all agents — free API catalog)
 - Vision: `integrations/paddledetection`
 - Presence: `integrations/llmavatartalk`
 - Second brain: `integrations/smart-second-brain`

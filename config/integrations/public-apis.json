@@ -1,0 +1,58 @@
+{
+  "id": "public-apis",
+  "name": "Public APIs catalog",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "role": "Curated free/public API discovery catalog shared by all Cam agents and workspaces",
+  "policy": "config/integrations/public-apis.md",
+  "remote": "github.com/afidurko/public-apis",
+  "homepage": "https://github.com/afidurko/public-apis",
+  "path": "integrations/public-apis",
+  "catalog_file": "integrations/public-apis/README.md",
+  "sense": "sense.catalog.public_apis",
+  "hotspot": "hotspot.public_apis",
+  "motor": "motor.public_apis",
+  "switch": "switch.autonomy",
+  "center": "center.tooling",
+  "mesh_namespace": "mesh/tools",
+  "vault_dir": "vault/04-Research/public-apis",
+  "provider": {
+    "primary": "local_readme_catalog",
+    "fallback": "github_raw",
+    "raw_url": "https://raw.githubusercontent.com/afidurko/public-apis/master/README.md",
+    "notes": "Catalog is the submodule README (markdown tables). No API key required for search. Prefer local checkout; optional raw fetch for refresh."
+  },
+  "defaults": {
+    "num_results": 12,
+    "https_preferred": true,
+    "save_to_mesh": true,
+    "save_to_vault": true,
+    "offline_ok": true
+  },
+  "scripts": {
+    "search": "scripts/public-apis-search.py",
+    "pack": "scripts/pack-public-apis-result.py",
+    "check": "scripts/public-apis-check.py"
+  },
+  "teams": [
+    "team.agi-research-scan",
+    "team.capability",
+    "team.info",
+    "team.tooling"
+  ],
+  "roles": [
+    "tool-user",
+    "tool-creator",
+    "info-retriever",
+    "researcher",
+    "ops",
+    "coding",
+    "capability-broker",
+    "task-executor",
+    "agi-scout",
+    "chief",
+    "qa"
+  ],
+  "available_to": "all_roles_and_subagents"
+}

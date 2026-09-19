@@ -7,6 +7,9 @@ For open literature and citations, use **Google Scholar**
 (`config/integrations/google-scholar.md` · `scripts/scholar-search.py`) via
 `sense.web.scholar` / `switch.research_scan`. Prefer Scholar over generic web
 search for papers; prefer arXiv API for fresh AI/AGI preprints when tasked.
+For free/public HTTP API discovery, use **public-apis**
+(`config/integrations/public-apis.md` · `scripts/public-apis-search.py`) via
+`sense.catalog.public_apis` / `motor.public_apis` before inventing endpoints.
 Pack mesh writes with MMP fields via `scripts/pack-mesh-claim.py`.
 Scientific codebases may be treated as learnable agent environments when Aaron
 tasks code-backed research (`config/enhancement/science-agent-env.json`).

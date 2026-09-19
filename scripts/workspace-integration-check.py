@@ -44,6 +44,8 @@ HARD_PATHS = [
     "config/pipelines/cam-enhance-gate.json",
     "config/integrations/google-scholar.json",
     "config/integrations/google-scholar.md",
+    "config/integrations/public-apis.json",
+    "config/integrations/public-apis.md",
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
@@ -52,6 +54,9 @@ HARD_PATHS = [
     "scripts/cam-enhance-propose.py",
     "scripts/scholar-search.py",
     "scripts/pack-scholar-result.py",
+    "scripts/public-apis-search.py",
+    "scripts/pack-public-apis-result.py",
+    "scripts/public-apis-check.py",
     "scripts/swarm-check.py",
     "scripts/persist-export.py",
     "scripts/persist-import.py",
@@ -123,6 +128,11 @@ def mesh_flags(seed: dict) -> dict:
             or research.get("cam_enhance_apply_requires_aaron")
         ),
         "google_scholar": bool(research.get("google_scholar")),
+        "public_apis": bool(
+            research.get("public_apis")
+            or prefs.get("public_apis")
+            or (seed.get("mesh/tools") or {}).get("public_apis")
+        ),
         "unlimited_subagents": bool(prefs.get("unlimited_subagents") or facts.get("unlimited_subagents")),
         "slm_cortex_enabled": bool(prefs.get("slm_cortex_enabled")),
         "dl_cortex_enabled": bool(prefs.get("dl_cortex_enabled")),
@@ -230,6 +240,25 @@ def main() -> int:
         if scholar.get("hotspot_id") != "hotspot.google_scholar":
             route_ok = False
             route_notes.append("scholar sense should hit hotspot.google_scholar")
+        public_apis = json.loads(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/connectome-route.py"),
+                    "--sense",
+                    "sense.catalog.public_apis",
+                    "--goal",
+                    "find free weather api",
+                ],
+                text=True,
+            )
+        )
+        if "motor.public_apis" not in public_apis.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("public-apis pathway missing motor.public_apis")
+        if public_apis.get("hotspot_id") != "hotspot.public_apis":
+            route_ok = False
+            route_notes.append("public-apis sense should hit hotspot.public_apis")
     except Exception as exc:  # noqa: BLE001
         route_ok = False
         route_notes.append(str(exc))
