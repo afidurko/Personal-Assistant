@@ -28,3 +28,11 @@ Local TTS / ASR / clone / dub for Cam when NVIDIA RIVA studio is offline. Brain 
 - Submodule initialized at `7ec803a`
 - Dual billion QA green — see `vault/10-Mesh-Distillates/MERGE_READINESS_VOICESTUDIO.md`
 - Live backend still needs Aaron host Electron + optional model consent
+
+
+## Live connection (cloud 2026-09-19)
+
+- Backend **UP** on CPU · `http://127.0.0.1:3900/health`
+- MCP mounted at `/mcp` · Cam tool `voicestudio_health` OK
+- OmniVoice weights **not** downloaded (await Aaron consent ~2.3GB)
+- See `vault/10-Mesh-Distillates/CONNECTION_STATUS.md`

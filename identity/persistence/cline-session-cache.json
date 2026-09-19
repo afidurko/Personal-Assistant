@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T18:53:23.134814+00:00",
+    "at": "2026-09-19T19:01:20.025606+00:00",
     "mode": "act",
-    "summary": "Dual 1B connectome green + trajectory 1B green for VoiceStudio; bridges+suggestive presence-voice; CI OK; merge-ready PR #17.",
+    "summary": "Connected VoiceStudio backend CPU v0.5.4 + MCP + Cam converse :8787; 6/7 submodules; Scholar needs SERPAPI; Slack auth timed out.",
     "workspace": "."
   },
   "notes": [
@@ -27,6 +27,11 @@
     {
       "at": "2026-09-19T18:53:23.134814+00:00",
       "text": "MERGE_READINESS_VOICESTUDIO.md",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T19:01:20.025606+00:00",
+      "text": "CONNECTION_STATUS.md",
       "workspace": "."
     }
   ],

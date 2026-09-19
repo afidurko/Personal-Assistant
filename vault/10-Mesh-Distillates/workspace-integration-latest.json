@@ -2,12 +2,7 @@
   "ok": true,
   "hard_errors": [],
   "soft_warnings": [
-    "integration empty: integrations/jarvis (submodule init or create config)",
-    "integration empty: integrations/paddledetection (submodule init or create config)",
-    "integration empty: integrations/llmavatartalk (submodule init or create config)",
-    "integration empty: integrations/voicestudio (submodule init or create config)",
-    "integration empty: integrations/smart-second-brain (submodule init or create config)",
-    "integration empty: integrations/cline (submodule init or create config)"
+    "integration empty: integrations/paddledetection (submodule init or create config)"
   ],
   "mesh_flags": {
     "daily_agi_research_scan": true,
@@ -22,7 +17,7 @@
     {
       "id": "jarvis",
       "path": "integrations/jarvis",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
@@ -34,19 +29,19 @@
     {
       "id": "llmavatartalk",
       "path": "integrations/llmavatartalk",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
       "id": "voicestudio",
       "path": "integrations/voicestudio",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
       "id": "smart-second-brain",
       "path": "integrations/smart-second-brain",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
@@ -58,7 +53,7 @@
     {
       "id": "cline",
       "path": "integrations/cline",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     }
   ],
