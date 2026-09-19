@@ -1386,6 +1386,18 @@ h2,
   color: var(--scanning);
 }
 
+.cam-adaptive {
+  font-size: 0.75rem;
+  color: var(--teal-soft);
+  margin-top: 0.25rem;
+}
+
+.cam-gate-stats {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 0.15rem;
+}
+
 .cam-meter {
   height: 3px;
   background: rgba(61, 184, 168, 0.12);

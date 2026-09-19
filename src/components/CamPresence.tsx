@@ -17,14 +17,19 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
     enrolled,
     enrollProgress,
     aaronOnly,
+    adaptiveRaised,
+    gateStats,
     startListening,
     startEnroll,
     clearEnrollment,
+    exportProfile,
+    importProfile,
     stop,
     sendTurn,
   } = useCamVoice();
   const [draft, setDraft] = useState('');
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const importRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     onListeningChange?.(listening);
@@ -41,7 +46,9 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
       : status === 'listening'
         ? aaronOnly
           ? enrolled
-            ? `Aaron-only · match ${(voiceScore * 100).toFixed(0)}%`
+            ? `Aaron-only · match ${(voiceScore * 100).toFixed(0)}%${
+                adaptiveRaised ? ' · adaptive↑' : ''
+              }`
             : 'Aaron-only — enroll voice to filter the room'
           : 'Listening…'
         : status === 'ignored'
@@ -76,6 +83,16 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
             soft airy · Aaron-only voice · ignores room chatter when enrolled
           </p>
           <p className={`cam-status status-${status}`}>{statusLabel}</p>
+          {adaptiveRaised ? (
+            <p className="cam-adaptive" aria-live="polite">
+              Adaptive noise gate raised after surrounding speech
+            </p>
+          ) : null}
+          {gateStats.rejects > 0 ? (
+            <p className="cam-gate-stats">
+              Gate rejects {gateStats.rejects} · accepts {gateStats.accepts}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -128,10 +145,34 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
           </button>
         )}
         {enrolled && !listening ? (
-          <button type="button" className="btn btn-ghost" onClick={clearEnrollment}>
-            Clear voice print
-          </button>
+          <>
+            <button type="button" className="btn btn-ghost" onClick={() => exportProfile()}>
+              Export voice profile
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => importRef.current?.click()}
+            >
+              Import voice profile
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={clearEnrollment}>
+              Clear voice print
+            </button>
+          </>
         ) : null}
+        <input
+          ref={importRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            void file.text().then((raw) => importProfile(raw));
+            e.target.value = '';
+          }}
+        />
       </div>
 
       <form

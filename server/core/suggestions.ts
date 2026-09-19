@@ -321,10 +321,25 @@ function fromAgentContext(
     implementation:
       'Exercise enrollment, then speak with background noise / a second talker; confirm Gate ignores. Keep match_threshold 0.85 / noisy_threshold 0.88.',
     sketch:
-      'npx vitest run server/core/aaron-voice-gate.test.ts src/lib/aaronVoiceGate.test.ts\npython3 scripts/aaron-voice-gate-check.py',
+      'npx vitest run server/core/aaron-voice-gate.test.ts server/core/aaron-voice-gate-addons.test.ts src/lib/aaronVoiceGate.test.ts\npython3 scripts/aaron-voice-gate-check.py',
     priority: 74,
     relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
     relatedConceptIds: ['protocols-extensions'],
+    sourceFindingIds: [],
+  });
+  out.push({
+    id: 'suggest-aaron-voice-addons',
+    kind: 'identity-voice',
+    title: 'Use voice-gate add-ons (adaptive / export / reject stats)',
+    rationale:
+      'Adaptive noise raises threshold after multi-speaker streaks; export/import keeps the Aaron print across devices; reject stats feed health.',
+    implementation:
+      'Enable mic → trigger surrounding rejects → confirm adaptive↑ badge. Export profile, import on another device. Check /api/health voice_gate_stats.',
+    sketch:
+      'python3 scripts/pack-aaron-voice-profile.py --from-json identity/aaron/voice-profile.json --json\ncurl -s localhost:8787/api/health | jq .voice_gate_stats',
+    priority: 70,
+    relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+    relatedConceptIds: ['error-handling'],
     sourceFindingIds: [],
   });
 

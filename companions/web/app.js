@@ -12,6 +12,9 @@
   const btnCam = $("btnCam");
   const btnStop = $("btnStop");
   const btnEnroll = $("btnEnroll");
+  const btnExport = $("btnExport");
+  const btnImport = $("btnImport");
+  const importFile = $("importFile");
   const textForm = $("textForm");
   const textIn = $("textIn");
   const hintEl = $("hint");
@@ -30,6 +33,9 @@
   let utter = null;
   let enroll = null;
   let enrolling = false;
+  let adaptiveRaised = false;
+  let multiSpeakerStreak = 0;
+  let acceptsSinceRaise = 0;
 
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -123,13 +129,21 @@
       enrolled: !!profile,
       multiSpeakerHint: multi,
       source: source,
+      adaptiveRaised: adaptiveRaised,
     });
     if (voiceScoreEl) {
-      voiceScoreEl.textContent = profile
-        ? `Aaron match ${(score * 100).toFixed(0)}%`
+      const base = profile
+        ? "Aaron match " + (score * 100).toFixed(0) + "%"
         : "Not enrolled";
+      voiceScoreEl.textContent = adaptiveRaised ? base + " · adaptive↑" : base;
     }
     return { score: score, multi: multi, decision: decision };
+  }
+
+  function syncProfileButtons() {
+    if (btnExport) btnExport.hidden = !profile;
+    if (btnImport) btnImport.hidden = false;
+    if (btnEnroll) btnEnroll.textContent = profile ? "Re-enroll my voice" : "Enroll my voice (10s)";
   }
 
   async function sendTurn(text, source) {
@@ -144,7 +158,35 @@
             : `Not matched as Aaron (${(gated.score * 100).toFixed(0)}%). Ignored surrounding speech.`;
       addBubble("system", msg);
       setStatus(msg, "warn");
+      multiSpeakerStreak +=
+        gated.multi || gated.decision.reason === "rejected_surrounding_speech" ? 1 : 0;
+      if (multiSpeakerStreak >= (gateCfg.adaptive_streak_to_raise || 2)) {
+        adaptiveRaised = true;
+      }
+      acceptsSinceRaise = 0;
+      fetch("/api/voice/gate/reject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          score: gated.score,
+          threshold: gated.decision.threshold,
+          reason: gated.decision.reason,
+          source: source,
+          multi_speaker_hint: gated.multi,
+          device_id: "web-companion",
+        }),
+      }).catch(function () {});
       return;
+    }
+
+    if (source !== "text") {
+      acceptsSinceRaise += 1;
+      if (adaptiveRaised && acceptsSinceRaise >= (gateCfg.adaptive_cooldown_accepts || 3)) {
+        adaptiveRaised = false;
+        multiSpeakerStreak = 0;
+        acceptsSinceRaise = 0;
+      }
+      if (!gated.multi) multiSpeakerStreak = 0;
     }
 
     addBubble("aaron", text);
@@ -174,9 +216,14 @@
             aaron_voice_score: gated.score,
             enrolled: !!profile,
             multi_speaker_hint: gated.multi,
+            device_id: "web-companion",
           });
           reply = turn.cam;
           speak = turn.speak || speak;
+          if (turn.voice_stats) {
+            adaptiveRaised = !!turn.voice_stats.adaptive_raised;
+            multiSpeakerStreak = turn.voice_stats.multi_speaker_streak || multiSpeakerStreak;
+          }
         } catch (e) {
           if (e.status === 403 && e.body && e.body.cam) {
             addBubble("system", e.body.cam);
@@ -195,7 +242,7 @@
       speakCam(reply, speak);
       setStatus(
         mode === "server"
-          ? "Listening — Aaron only (server)"
+          ? "Listening — Aaron only (server)" + (adaptiveRaised ? " · adaptive↑" : "")
           : "Listening — Aaron only (on-device)",
         "ok"
       );
@@ -226,7 +273,7 @@
             "Aaron voice enrolled. Cam will only accept your voice in noisy rooms."
           );
           setStatus("Enrolled — Aaron-only listening", "ok");
-          if (btnEnroll) btnEnroll.textContent = "Re-enroll my voice";
+          syncProfileButtons();
         }
       }
     } else if (utter && frame.voiced) {
@@ -389,7 +436,62 @@
     btnEnroll.addEventListener("click", () =>
       startEnroll().catch((e) => setStatus(e.message, "warn"))
     );
-    if (profile) btnEnroll.textContent = "Re-enroll my voice";
+  }
+  if (btnExport) {
+    btnExport.addEventListener("click", () => {
+      if (!profile) return;
+      const blob = new Blob(
+        [
+          JSON.stringify(
+            {
+              subject: "Aaron",
+              exported_at: new Date().toISOString(),
+              source: "web_companion_export",
+              profile: profile,
+            },
+            null,
+            2
+          ),
+        ],
+        { type: "application/json" }
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "aaron-voice-profile.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      postJSON("/api/voice/profile", { profile: profile }).catch(function () {});
+      addBubble("system", "Aaron voice profile exported.");
+    });
+  }
+  if (btnImport && importFile) {
+    btnImport.addEventListener("click", () => importFile.click());
+    importFile.addEventListener("change", () => {
+      const file = importFile.files && importFile.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || ""));
+          const p = parsed.profile && parsed.profile.version === 1 ? parsed.profile : parsed;
+          if (!p || p.version !== 1 || p.subject !== "Aaron" || !Array.isArray(p.bands)) {
+            setStatus("Invalid Aaron voice profile", "warn");
+            return;
+          }
+          VG.saveProfile(p, gateCfg.storage_key);
+          profile = p;
+          syncProfileButtons();
+          postJSON("/api/voice/profile", { profile: p }).catch(function () {});
+          addBubble("system", "Aaron voice profile imported.");
+          setStatus("Imported Aaron voice profile", "ok");
+        } catch (e) {
+          setStatus("Import failed: " + e.message, "warn");
+        }
+        importFile.value = "";
+      };
+      reader.readAsText(file);
+    });
   }
   textForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -412,6 +514,9 @@
       if (h && h.ok) {
         mode = "server";
         if (h.voice_gate) gateCfg = VG.mergeConfig(h.voice_gate);
+        if (h.voice_gate_stats && h.voice_gate_stats.adaptive_raised) {
+          adaptiveRaised = true;
+        }
         const net = h.network || {};
         const via = net.tailscale_enabled
           ? "tailscale · " + (net.iphone_open || net.url || "")
@@ -437,6 +542,7 @@
   if (voiceScoreEl) {
     voiceScoreEl.textContent = profile ? "Aaron enrolled" : "Not enrolled";
   }
+  syncProfileButtons();
 
   if (window.speechSynthesis) {
     window.speechSynthesis.getVoices();

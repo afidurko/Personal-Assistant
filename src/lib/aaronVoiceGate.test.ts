@@ -3,8 +3,10 @@ import {
   cosineSimilarity,
   decideAaronVoiceGate,
   DEFAULT_VOICE_GATE,
+  exportVoiceProfileJson,
   multiSpeakerHint,
   normalizeInPlace,
+  parseImportedVoiceProfile,
 } from '@/lib/aaronVoiceGate';
 
 describe('aaronVoiceGate client', () => {
@@ -31,6 +33,32 @@ describe('aaronVoiceGate client', () => {
     });
     expect(d.accept).toBe(true);
     expect(d.reason).toBe('aaron_voice_match');
+  });
+
+  it('raises threshold when adaptive noise is active', () => {
+    const d = decideAaronVoiceGate(0.89, DEFAULT_VOICE_GATE, {
+      enrolled: true,
+      source: 'mic',
+      adaptiveRaised: true,
+    });
+    expect(d.accept).toBe(false);
+    expect(d.threshold).toBe(0.91);
+  });
+
+  it('exports and re-imports Aaron voice profile JSON', () => {
+    const profile = {
+      version: 1 as const,
+      subject: 'Aaron' as const,
+      bands: new Array(32).fill(0.1),
+      pitchHz: 130,
+      enrolledAt: new Date().toISOString(),
+      sampleSeconds: 10,
+      frameCount: 30,
+    };
+    const raw = exportVoiceProfileJson(profile);
+    const back = parseImportedVoiceProfile(raw);
+    expect(back?.subject).toBe('Aaron');
+    expect(back?.bands).toHaveLength(32);
   });
 
   it('flags multi-speaker when mid energy spikes and score is weak', () => {

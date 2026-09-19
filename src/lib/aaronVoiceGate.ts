@@ -18,6 +18,10 @@ export interface AaronVoiceGateConfig {
   f_low_hz: number;
   f_high_hz: number;
   storage_key: string;
+  /** Adaptive noise add-on (optional; from config addons.adaptive_noise). */
+  adaptive_raised_threshold?: number;
+  adaptive_streak_to_raise?: number;
+  adaptive_cooldown_accepts?: number;
 }
 
 export interface VoiceProfile {
@@ -53,12 +57,31 @@ export const DEFAULT_VOICE_GATE: AaronVoiceGateConfig = {
   f_low_hz: 80,
   f_high_hz: 4000,
   storage_key: 'cam.aaron.voice.profile.v1',
+  adaptive_raised_threshold: 0.91,
+  adaptive_streak_to_raise: 2,
+  adaptive_cooldown_accepts: 3,
 };
 
 export function mergeVoiceGateConfig(
-  partial?: Partial<AaronVoiceGateConfig> | null,
+  partial?: Partial<AaronVoiceGateConfig> & {
+    addons?: { adaptive_noise?: Record<string, unknown> };
+  } | null,
 ): AaronVoiceGateConfig {
-  return { ...DEFAULT_VOICE_GATE, ...(partial || {}) };
+  const base = { ...DEFAULT_VOICE_GATE, ...(partial || {}) };
+  const adaptive = partial?.addons?.adaptive_noise;
+  if (adaptive) {
+    if (typeof adaptive.raised_threshold === 'number') {
+      base.adaptive_raised_threshold = adaptive.raised_threshold;
+    }
+    if (typeof adaptive.streak_to_raise === 'number') {
+      base.adaptive_streak_to_raise = adaptive.streak_to_raise;
+    }
+    if (typeof adaptive.cooldown_accepts === 'number') {
+      base.adaptive_cooldown_accepts = adaptive.cooldown_accepts;
+    }
+  }
+  delete (base as { addons?: unknown }).addons;
+  return base;
 }
 
 function bandIndex(freqHz: number, cfg: AaronVoiceGateConfig): number | null {
@@ -218,7 +241,12 @@ export function multiSpeakerHint(
 export function decideAaronVoiceGate(
   score: number,
   cfg: AaronVoiceGateConfig,
-  opts: { enrolled: boolean; multiSpeakerHint?: boolean; source?: string } = {
+  opts: {
+    enrolled: boolean;
+    multiSpeakerHint?: boolean;
+    source?: string;
+    adaptiveRaised?: boolean;
+  } = {
     enrolled: true,
   },
 ): GateDecision {
@@ -250,10 +278,13 @@ export function decideAaronVoiceGate(
       multiSpeakerHint: false,
     };
   }
-  const threshold =
+  let threshold =
     cfg.noisy_environment_mode || opts.multiSpeakerHint
       ? cfg.noisy_threshold
       : cfg.match_threshold;
+  if (opts.adaptiveRaised) {
+    threshold = Math.max(threshold, cfg.adaptive_raised_threshold ?? 0.91);
+  }
   const accept = score >= threshold;
   return {
     accept,
@@ -266,6 +297,34 @@ export function decideAaronVoiceGate(
         : 'below_threshold',
     multiSpeakerHint: Boolean(opts.multiSpeakerHint),
   };
+}
+
+export function exportVoiceProfileJson(
+  profile: VoiceProfile,
+): string {
+  return JSON.stringify(
+    {
+      subject: 'Aaron',
+      exported_at: new Date().toISOString(),
+      source: 'cam_presence_export',
+      profile,
+    },
+    null,
+    2,
+  );
+}
+
+export function parseImportedVoiceProfile(raw: string): VoiceProfile | null {
+  try {
+    const parsed = JSON.parse(raw) as { profile?: VoiceProfile } & VoiceProfile;
+    const profile = parsed.profile && parsed.profile.version === 1 ? parsed.profile : parsed;
+    if (profile?.version !== 1 || !Array.isArray(profile.bands) || profile.subject !== 'Aaron') {
+      return null;
+    }
+    return profile;
+  } catch {
+    return null;
+  }
 }
 
 export function loadVoiceProfile(

@@ -1,23 +1,23 @@
 /**
  * Cam converse — soft airy replies + session log for the home presence.
  * Browser supplies mic/ASR; this module handles turn logic and distill logs.
- * Mic turns are Aaron-only gated (noisy-room filter) via aaron-voice-gate.
+ * Mic turns are Aaron-only gated (noisy-room filter) via aaron-voice-gate add-ons.
  */
 import { appendFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import type { VoiceGateResult } from './aaron-voice-gate.js';
 import {
-  evaluateAaronVoiceGate,
-  loadAaronVoiceGatePolicy,
-  type VoiceGateResult,
-} from './aaron-voice-gate.js';
+  AaronVoiceGateAddons,
+  type VoiceGateStats,
+} from './aaron-voice-gate-addons.js';
 
 export interface ConverseTurn {
   role: 'aaron' | 'cam' | 'system';
   text: string;
   source?: string;
   at: string;
-  gate?: VoiceGateResult;
+  gate?: VoiceGateResult & { adaptive?: boolean };
 }
 
 export interface ConverseReply {
@@ -26,7 +26,8 @@ export interface ConverseReply {
   sessionId: string;
   history: ConverseTurn[];
   rejected?: boolean;
-  gate?: VoiceGateResult;
+  gate?: VoiceGateResult & { adaptive?: boolean };
+  voice_stats?: VoiceGateStats;
 }
 
 export interface ConverseTurnInput {
@@ -35,6 +36,7 @@ export interface ConverseTurnInput {
   aaron_voice_score?: number | null;
   enrolled?: boolean;
   multi_speaker_hint?: boolean;
+  device_id?: string;
 }
 
 const SPEAK = { rate: 0.95, pitch: 1.05, lang: 'en-US' } as const;
@@ -43,11 +45,18 @@ export class CamConverse {
   readonly sessionId = randomUUID();
   readonly started = new Date().toISOString();
   private history: ConverseTurn[] = [];
+  readonly voiceAddons: AaronVoiceGateAddons;
 
-  constructor(private readonly rootDir: string) {}
+  constructor(private readonly rootDir: string) {
+    this.voiceAddons = new AaronVoiceGateAddons(rootDir);
+  }
 
   getHistory(): ConverseTurn[] {
     return this.history.map((h) => ({ ...h }));
+  }
+
+  getVoiceStats(): VoiceGateStats {
+    return this.voiceAddons.getStats();
   }
 
   async turn(input: string | ConverseTurnInput, source = 'text'): Promise<ConverseReply> {
@@ -55,16 +64,12 @@ export class CamConverse {
       typeof input === 'string' ? { text: input, source } : { source: 'text', ...input };
     const aaronText = (req.text || '').trim();
     const src = req.source || source || 'text';
-    const policy = await loadAaronVoiceGatePolicy(this.rootDir);
-    const gate = evaluateAaronVoiceGate(
-      {
-        source: src,
-        aaron_voice_score: req.aaron_voice_score,
-        enrolled: req.enrolled,
-        multi_speaker_hint: req.multi_speaker_hint,
-      },
-      policy,
-    );
+    const gate = await this.voiceAddons.evaluateWithAddons({
+      source: src,
+      aaron_voice_score: req.aaron_voice_score,
+      enrolled: req.enrolled,
+      multi_speaker_hint: req.multi_speaker_hint,
+    });
 
     if (!gate.accept) {
       const cam =
@@ -76,6 +81,15 @@ export class CamConverse {
       const at = new Date().toISOString();
       this.history.push({ role: 'system', text: cam, source: src, at, gate });
       if (this.history.length > 80) this.history = this.history.slice(-80);
+      await this.voiceAddons.recordReject({
+        at,
+        source: src,
+        score: gate.score,
+        threshold: gate.threshold,
+        reason: gate.reason,
+        multi_speaker_hint: req.multi_speaker_hint,
+        device_id: req.device_id,
+      });
       await this.logTurn(aaronText, cam, src, gate);
       return {
         cam,
@@ -84,6 +98,7 @@ export class CamConverse {
         history: this.getHistory(),
         rejected: true,
         gate,
+        voice_stats: this.getVoiceStats(),
       };
     }
 
@@ -102,6 +117,7 @@ export class CamConverse {
       sessionId: this.sessionId,
       history: this.getHistory(),
       gate,
+      voice_stats: this.getVoiceStats(),
     };
   }
 

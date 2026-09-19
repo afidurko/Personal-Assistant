@@ -18,10 +18,27 @@
     f_low_hz: 80,
     f_high_hz: 4000,
     storage_key: "cam.aaron.voice.profile.v1",
+    adaptive_raised_threshold: 0.91,
+    adaptive_streak_to_raise: 2,
+    adaptive_cooldown_accepts: 3,
   };
 
   function mergeConfig(partial) {
-    return Object.assign({}, DEFAULTS, partial || {});
+    const base = Object.assign({}, DEFAULTS, partial || {});
+    const adaptive = partial && partial.addons && partial.addons.adaptive_noise;
+    if (adaptive) {
+      if (typeof adaptive.raised_threshold === "number") {
+        base.adaptive_raised_threshold = adaptive.raised_threshold;
+      }
+      if (typeof adaptive.streak_to_raise === "number") {
+        base.adaptive_streak_to_raise = adaptive.streak_to_raise;
+      }
+      if (typeof adaptive.cooldown_accepts === "number") {
+        base.adaptive_cooldown_accepts = adaptive.cooldown_accepts;
+      }
+    }
+    delete base.addons;
+    return base;
   }
 
   function normalizeInPlace(v) {
@@ -170,10 +187,13 @@
         multiSpeakerHint: false,
       };
     }
-    const threshold =
+    let threshold =
       cfg.noisy_environment_mode || opts.multiSpeakerHint
         ? cfg.noisy_threshold
         : cfg.match_threshold;
+    if (opts.adaptiveRaised) {
+      threshold = Math.max(threshold, cfg.adaptive_raised_threshold || 0.91);
+    }
     const accept = score >= threshold;
     return {
       accept: accept,

@@ -57,7 +57,8 @@ function stateFingerprint(state: ReturnType<typeof fullState>): string {
 
 let lastStateFingerprint = '';
 
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
+  const voicePolicy = await converse.voiceAddons.loadPolicy();
   res.json({
     ok: true,
     service: 'personal-assistant',
@@ -69,8 +70,12 @@ app.get('/api/health', (_req, res) => {
       cortex3d: true,
       autonomy: true,
       enabled: true,
+      aaron_voice_only: true,
+      voice_addons: true,
     },
     session_id: converse.sessionId,
+    voice_gate: voicePolicy,
+    voice_gate_stats: converse.getVoiceStats(),
   });
 });
 
@@ -175,6 +180,7 @@ app.post('/api/turn', async (req, res) => {
     aaron_voice_score?: number;
     enrolled?: boolean;
     multi_speaker_hint?: boolean;
+    device_id?: string;
   };
   const text = String(body.text ?? body.transcript ?? '');
   const source = String(body.source ?? 'text');
@@ -184,6 +190,7 @@ app.post('/api/turn', async (req, res) => {
     aaron_voice_score: body.aaron_voice_score,
     enrolled: body.enrolled,
     multi_speaker_hint: body.multi_speaker_hint,
+    device_id: body.device_id,
   });
   if (reply.rejected) {
     res.status(403).json(reply);
@@ -196,6 +203,43 @@ app.post('/api/turn', async (req, res) => {
     listening: true,
   });
   res.json(reply);
+});
+
+app.post('/api/voice/gate/reject', async (req, res) => {
+  const body = req.body as {
+    score?: number;
+    threshold?: number;
+    reason?: string;
+    source?: string;
+    multi_speaker_hint?: boolean;
+    device_id?: string;
+  };
+  const at = new Date().toISOString();
+  await converse.voiceAddons.recordReject({
+    at,
+    source: String(body.source ?? 'mic'),
+    score: Number(body.score ?? 0),
+    threshold: Number(body.threshold ?? 0.88),
+    reason: String(body.reason ?? 'client_reject'),
+    multi_speaker_hint: Boolean(body.multi_speaker_hint),
+    device_id: body.device_id,
+  });
+  res.json({ ok: true, stats: converse.getVoiceStats() });
+});
+
+app.get('/api/voice/profile', async (_req, res) => {
+  const saved = await converse.voiceAddons.loadSavedProfile();
+  res.json({ ok: true, profile: saved });
+});
+
+app.post('/api/voice/profile', async (req, res) => {
+  const body = req.body as { profile?: unknown };
+  if (!body.profile) {
+    res.status(400).json({ ok: false, error: 'profile_required' });
+    return;
+  }
+  const pathWritten = await converse.voiceAddons.saveProfile(body.profile);
+  res.json({ ok: true, path: pathWritten });
 });
 
 app.post('/api/spike/mic', (req, res) => {
@@ -214,7 +258,7 @@ app.post('/api/spike/mic', (req, res) => {
   });
 });
 
-app.post('/api/spike/aaron.voice', (req, res) => {
+app.post('/api/spike/aaron.voice', async (req, res) => {
   const body = req.body as {
     score?: number;
     enrolled?: boolean;
@@ -222,6 +266,15 @@ app.post('/api/spike/aaron.voice', (req, res) => {
     device_id?: string;
   };
   const score = typeof body.score === 'number' ? body.score : 0;
+  const gate = await converse.voiceAddons.evaluateWithAddons(
+    {
+      source: 'mic',
+      aaron_voice_score: score,
+      enrolled: body.enrolled !== false,
+      multi_speaker_hint: Boolean(body.multi_speaker_hint),
+    },
+    { note: false },
+  );
   res.json({
     ok: true,
     sense: 'sense.aaron.voice',
@@ -229,8 +282,10 @@ app.post('/api/spike/aaron.voice', (req, res) => {
     enrolled: Boolean(body.enrolled),
     multi_speaker_hint: Boolean(body.multi_speaker_hint),
     device_id: body.device_id ?? 'unknown',
-    threshold: 0.85,
-    accepted: score >= 0.85,
+    threshold: gate.threshold,
+    accepted: gate.accept,
+    gate,
+    voice_stats: converse.getVoiceStats(),
   });
 });
 

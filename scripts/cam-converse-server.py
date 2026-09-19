@@ -26,6 +26,9 @@ WEB = ROOT / "companions" / "web"
 LOG_DIR = ROOT / "vault" / "10-Mesh-Distillates" / "converse"
 VOICE = json.loads((ROOT / "config" / "persona" / "voice.json").read_text(encoding="utf-8"))
 VOICE_GATE_PATH = ROOT / "config" / "identity" / "aaron-voice-gate.json"
+VOICE_PROFILE_PATH = ROOT / "identity" / "aaron" / "voice-profile.json"
+VOICE_REJECTS_PATH = ROOT / "data" / "runtime" / "aaron-voice-rejects.jsonl"
+VOICE_STATS_PATH = ROOT / "data" / "runtime" / "aaron-voice-stats.json"
 VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
 TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
 
@@ -46,44 +49,182 @@ def load_voice_gate() -> dict:
             "text_bypass": True,
             "match_threshold": 0.85,
             "noisy_threshold": 0.88,
+            "addons": {},
         }
     return json.loads(VOICE_GATE_PATH.read_text(encoding="utf-8"))
 
 
-def evaluate_voice_gate(payload: dict, source: str) -> dict:
+class VoiceGateAddonsState:
+    """Adaptive noise + reject stats for the Python converse server."""
+
+    def __init__(self) -> None:
+        self.rejects = 0
+        self.accepts = 0
+        self.last_reject_at: str | None = None
+        self.last_reason: str | None = None
+        self.adaptive_raised = False
+        self.multi_speaker_streak = 0
+        self.accepts_since_raise = 0
+
+    def as_dict(self) -> dict:
+        return {
+            "rejects": self.rejects,
+            "accepts": self.accepts,
+            "last_reject_at": self.last_reject_at,
+            "last_reason": self.last_reason,
+            "adaptive_raised": self.adaptive_raised,
+            "multi_speaker_streak": self.multi_speaker_streak,
+        }
+
+
+VOICE_ADDONS = VoiceGateAddonsState()
+
+
+def evaluate_voice_gate(payload: dict, source: str, *, note: bool = True) -> dict:
     """Server-side Aaron-only gate for mic turns (scores come from companion)."""
     policy = load_voice_gate()
     score = payload.get("aaron_voice_score")
     score_f = float(score) if isinstance(score, (int, float)) else 0.0
     enrolled = payload.get("enrolled")
     multi = bool(payload.get("multi_speaker_hint"))
+    addons = policy.get("addons") or {}
+    adaptive = addons.get("adaptive_noise") or {}
 
     if source == "text" and policy.get("text_bypass", True):
+        if note:
+            VOICE_ADDONS.accepts += 1
         return {"accept": True, "reason": "text_bypass", "score": 1.0, "threshold": 0.0}
     if not policy.get("aaron_only", True) or not policy.get("reject_non_aaron_asr", True):
+        if note:
+            VOICE_ADDONS.accepts += 1
         return {"accept": True, "reason": "aaron_only_disabled", "score": score_f, "threshold": 0.0}
     if source not in {"mic", "speech"}:
+        if note:
+            VOICE_ADDONS.accepts += 1
         return {"accept": True, "reason": "non_mic_source", "score": score_f, "threshold": 0.0}
     if policy.get("require_enrollment_for_mic", True) and enrolled is False:
-        return {
+        gate = {
             "accept": False,
             "reason": "enrollment_required",
             "score": 0.0,
             "threshold": float(policy.get("match_threshold", 0.85)),
         }
-    threshold = float(
-        policy.get("noisy_threshold", 0.88)
-        if policy.get("noisy_environment_mode", True) or multi
-        else policy.get("match_threshold", 0.85)
+        if note:
+            _note_reject(gate, source, multi, payload.get("device_id"))
+        return gate
+
+    noisy_threshold = float(policy.get("noisy_threshold", 0.88))
+    match_threshold = float(policy.get("match_threshold", 0.85))
+    raised = False
+    if adaptive.get("enabled", True):
+        streak_need = int(adaptive.get("streak_to_raise", 2))
+        raised = VOICE_ADDONS.adaptive_raised or (
+            VOICE_ADDONS.multi_speaker_streak >= streak_need and multi
+        )
+        if raised:
+            noisy_threshold = float(adaptive.get("raised_threshold", 0.91))
+
+    threshold = (
+        noisy_threshold
+        if policy.get("noisy_environment_mode", True) or multi or raised
+        else match_threshold
     )
     if score_f >= threshold:
-        return {"accept": True, "reason": "aaron_voice_match", "score": score_f, "threshold": threshold}
-    return {
+        if note:
+            VOICE_ADDONS.accepts += 1
+            VOICE_ADDONS.accepts_since_raise += 1
+            cooldown = int(adaptive.get("cooldown_accepts", 3))
+            if VOICE_ADDONS.adaptive_raised and VOICE_ADDONS.accepts_since_raise >= cooldown:
+                VOICE_ADDONS.adaptive_raised = False
+                VOICE_ADDONS.multi_speaker_streak = 0
+                VOICE_ADDONS.accepts_since_raise = 0
+            if not multi:
+                VOICE_ADDONS.multi_speaker_streak = 0
+        return {
+            "accept": True,
+            "reason": "aaron_voice_match",
+            "score": score_f,
+            "threshold": threshold,
+            "adaptive": raised,
+        }
+
+    gate = {
         "accept": False,
         "reason": "rejected_surrounding_speech" if multi else "below_threshold",
         "score": score_f,
         "threshold": threshold,
+        "adaptive": raised,
     }
+    if note:
+        _note_reject(gate, source, multi, payload.get("device_id"))
+    return gate
+
+
+def _note_reject(gate: dict, source: str, multi: bool, device_id: object = None) -> None:
+    VOICE_ADDONS.rejects += 1
+    VOICE_ADDONS.last_reject_at = utc_now()
+    VOICE_ADDONS.last_reason = gate.get("reason")
+    VOICE_ADDONS.accepts_since_raise = 0
+    if multi or gate.get("reason") == "rejected_surrounding_speech":
+        VOICE_ADDONS.multi_speaker_streak += 1
+    if gate.get("adaptive") or VOICE_ADDONS.multi_speaker_streak >= 2:
+        VOICE_ADDONS.adaptive_raised = True
+    try:
+        VOICE_REJECTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        event = {
+            "at": VOICE_ADDONS.last_reject_at,
+            "source": source,
+            "score": gate.get("score"),
+            "threshold": gate.get("threshold"),
+            "reason": gate.get("reason"),
+            "multi_speaker_hint": multi,
+            "device_id": device_id,
+        }
+        with VOICE_REJECTS_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(event) + "\n")
+        VOICE_STATS_PATH.write_text(
+            json.dumps(VOICE_ADDONS.as_dict(), indent=2) + "\n", encoding="utf-8"
+        )
+    except OSError:
+        pass
+
+
+def record_client_reject(payload: dict) -> dict:
+    gate = {
+        "accept": False,
+        "reason": payload.get("reason") or "client_reject",
+        "score": float(payload.get("score") or 0),
+        "threshold": float(payload.get("threshold") or 0.88),
+        "adaptive": VOICE_ADDONS.adaptive_raised,
+    }
+    _note_reject(
+        gate,
+        str(payload.get("source") or "mic"),
+        bool(payload.get("multi_speaker_hint")),
+        payload.get("device_id"),
+    )
+    return VOICE_ADDONS.as_dict()
+
+
+def save_voice_profile(profile: object) -> str:
+    VOICE_PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    doc = {
+        "subject": "Aaron",
+        "saved_at": utc_now(),
+        "source": "cam_voice_gate_addon",
+        "profile": profile,
+    }
+    VOICE_PROFILE_PATH.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    return str(VOICE_PROFILE_PATH.relative_to(ROOT))
+
+
+def load_voice_profile() -> dict | None:
+    if not VOICE_PROFILE_PATH.exists():
+        return None
+    try:
+        return json.loads(VOICE_PROFILE_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
 
 
 def load_tailscale() -> dict:
@@ -354,6 +495,7 @@ class Handler(BaseHTTPRequestHandler):
                         "tts_browser_hint": "speechSynthesis; soft rate 0.95",
                     },
                     "voice_gate": load_voice_gate(),
+                    "voice_gate_stats": VOICE_ADDONS.as_dict(),
                 },
             )
             return
@@ -366,6 +508,9 @@ class Handler(BaseHTTPRequestHandler):
                     "turns": len(STATE.history),
                 },
             )
+            return
+        if path == "/api/voice/profile":
+            self._json(200, {"ok": True, "profile": load_voice_profile()})
             return
 
         # static companion (relative paths for iOS PWA / on-device)
@@ -445,6 +590,16 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/spike/aaron.voice":
             score = payload.get("score")
             score_f = float(score) if isinstance(score, (int, float)) else 0.0
+            gate = evaluate_voice_gate(
+                {
+                    "aaron_voice_score": score_f,
+                    "enrolled": payload.get("enrolled", True),
+                    "multi_speaker_hint": payload.get("multi_speaker_hint"),
+                    "device_id": payload.get("device_id"),
+                },
+                "mic",
+                note=False,
+            )
             route = route_sense("sense.aaron.voice", goal="verify aaron voice")
             event = {
                 "at": utc_now(),
@@ -453,17 +608,34 @@ class Handler(BaseHTTPRequestHandler):
                 "enrolled": payload.get("enrolled"),
                 "multi_speaker_hint": payload.get("multi_speaker_hint"),
                 "device_id": payload.get("device_id"),
+                "gate": gate,
                 "route": route,
             }
             self._append_log("spikes", event)
             self._json(
                 200,
                 {
-                    "accepted": score_f >= 0.85,
+                    "accepted": gate.get("accept"),
                     "sense": "sense.aaron.voice",
+                    "gate": gate,
+                    "voice_stats": VOICE_ADDONS.as_dict(),
                     "event": event,
                 },
             )
+            return
+
+        if path == "/api/voice/gate/reject":
+            stats = record_client_reject(payload)
+            self._json(200, {"ok": True, "stats": stats})
+            return
+
+        if path == "/api/voice/profile":
+            profile = payload.get("profile")
+            if profile is None:
+                self._json(400, {"ok": False, "error": "profile_required"})
+                return
+            path_written = save_voice_profile(profile)
+            self._json(200, {"ok": True, "path": path_written})
             return
 
         if path == "/api/turn":
@@ -486,6 +658,7 @@ class Handler(BaseHTTPRequestHandler):
                     "cam": msg,
                     "rejected": True,
                     "gate": gate,
+                    "voice_stats": VOICE_ADDONS.as_dict(),
                     "speak": {
                         "enabled": True,
                         "rate": 0.95,
@@ -514,6 +687,7 @@ class Handler(BaseHTTPRequestHandler):
                 "aaron": text,
                 "cam": reply,
                 "gate": gate,
+                "voice_stats": VOICE_ADDONS.as_dict(),
                 "route": {
                     "sense": sense,
                     "hotspot_id": route.get("hotspot_id"),

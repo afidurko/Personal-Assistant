@@ -2,5 +2,12 @@
   "ok": true,
   "hard_errors": [],
   "soft_warnings": [],
-  "config": "aaron-voice-gate"
+  "config": "aaron-voice-gate",
+  "addons": [
+    "adaptive_noise",
+    "health_pulse",
+    "ios_speaker_id",
+    "profile_export",
+    "reject_stats"
+  ]
 }

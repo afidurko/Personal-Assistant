@@ -4,10 +4,12 @@ import {
   VoiceprintAccumulator,
   clearVoiceProfile,
   decideAaronVoiceGate,
+  exportVoiceProfileJson,
   extractVoiceFrame,
   loadVoiceProfile,
   mergeVoiceGateConfig,
   multiSpeakerHint,
+  parseImportedVoiceProfile,
   saveVoiceProfile,
   type AaronVoiceGateConfig,
   type GateDecision,
@@ -30,11 +32,24 @@ export interface CamBubble {
   at: string;
 }
 
+export interface VoiceGateClientStats {
+  rejects: number;
+  accepts: number;
+  adaptiveRaised: boolean;
+  multiSpeakerStreak: number;
+}
+
 interface TurnResponse {
   cam: string;
   speak?: { rate?: number; pitch?: number; lang?: string };
   rejected?: boolean;
-  gate?: { reason?: string; score?: number; threshold?: number };
+  gate?: { reason?: string; score?: number; threshold?: number; adaptive?: boolean };
+  voice_stats?: {
+    rejects?: number;
+    accepts?: number;
+    adaptive_raised?: boolean;
+    multi_speaker_streak?: number;
+  };
 }
 
 function speakCam(text: string, opts: { rate?: number; pitch?: number; lang?: string } = {}) {
@@ -78,6 +93,7 @@ async function postTurn(
       aaron_voice_score: gate.score,
       enrolled: gate.enrolled,
       multi_speaker_hint: gate.multiSpeakerHint,
+      device_id: 'web-home',
     }),
   });
   if (res.status === 403) {
@@ -100,6 +116,13 @@ export function useCamVoice() {
   const [enrollProgress, setEnrollProgress] = useState(0);
   const [gateCfg, setGateCfg] = useState<AaronVoiceGateConfig>(DEFAULT_VOICE_GATE);
   const [lastGate, setLastGate] = useState<GateDecision | null>(null);
+  const [adaptiveRaised, setAdaptiveRaised] = useState(false);
+  const [gateStats, setGateStats] = useState<VoiceGateClientStats>({
+    rejects: 0,
+    accepts: 0,
+    adaptiveRaised: false,
+    multiSpeakerStreak: 0,
+  });
 
   const recognizingRef = useRef(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -113,6 +136,9 @@ export function useCamVoice() {
   const enrollRef = useRef<VoiceprintAccumulator | null>(null);
   const enrollingRef = useRef(false);
   const cfgRef = useRef(gateCfg);
+  const adaptiveRef = useRef(false);
+  const streakRef = useRef(0);
+  const acceptsSinceRaiseRef = useRef(0);
 
   useEffect(() => {
     cfgRef.current = gateCfg;
@@ -125,6 +151,51 @@ export function useCamVoice() {
     setEnrolled(Boolean(p));
   }, []);
 
+  const applyServerStats = useCallback((stats?: TurnResponse['voice_stats']) => {
+    if (!stats) return;
+    const raised = Boolean(stats.adaptive_raised);
+    adaptiveRef.current = raised;
+    setAdaptiveRaised(raised);
+    streakRef.current = Number(stats.multi_speaker_streak ?? streakRef.current);
+    setGateStats({
+      rejects: Number(stats.rejects ?? 0),
+      accepts: Number(stats.accepts ?? 0),
+      adaptiveRaised: raised,
+      multiSpeakerStreak: streakRef.current,
+    });
+  }, []);
+
+  const noteClientReject = useCallback(
+    async (decision: GateDecision, score: number, multi: boolean) => {
+      streakRef.current += multi || decision.reason === 'rejected_surrounding_speech' ? 1 : 0;
+      const need = cfgRef.current.adaptive_streak_to_raise ?? 2;
+      if (streakRef.current >= need) {
+        adaptiveRef.current = true;
+        setAdaptiveRaised(true);
+      }
+      acceptsSinceRaiseRef.current = 0;
+      setGateStats((s) => ({
+        ...s,
+        rejects: s.rejects + 1,
+        adaptiveRaised: adaptiveRef.current,
+        multiSpeakerStreak: streakRef.current,
+      }));
+      await fetch('/api/voice/gate/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          score,
+          threshold: decision.threshold,
+          reason: decision.reason,
+          source: 'mic',
+          multi_speaker_hint: multi,
+          device_id: 'web-home',
+        }),
+      }).catch(() => undefined);
+    },
+    [],
+  );
+
   const meterLoop = useCallback(() => {
     const analyser = analyserRef.current;
     const ctx = audioCtxRef.current;
@@ -136,10 +207,7 @@ export function useCamVoice() {
       enrollRef.current.push(frame);
       const need = cfgRef.current.enroll_seconds;
       setEnrollProgress(Math.min(1, enrollRef.current.elapsedSeconds / need));
-      if (
-        enrollRef.current.elapsedSeconds >= need &&
-        enrollRef.current.ready()
-      ) {
+      if (enrollRef.current.elapsedSeconds >= need && enrollRef.current.ready()) {
         const profile = enrollRef.current.toProfile(need);
         if (profile) {
           saveVoiceProfile(profile, localStorage, cfgRef.current.storage_key);
@@ -170,99 +238,119 @@ export function useCamVoice() {
     rafRef.current = requestAnimationFrame(meterLoop);
   }, []);
 
-  const sendTurn = useCallback(async (text: string, source: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || busyRef.current) return;
-    const cfg = cfgRef.current;
-    const profile = profileRef.current;
+  const sendTurn = useCallback(
+    async (text: string, source: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || busyRef.current) return;
+      const cfg = cfgRef.current;
+      const profile = profileRef.current;
 
-    let score = source === 'text' ? 1 : 0;
-    let multi = false;
-    if (source !== 'text' && profile && utterRef.current?.ready()) {
-      score = utterRef.current.scoreAgainst(profile);
-      const bands = utterRef.current.toProfile()?.bands || profile.bands;
-      multi = multiSpeakerHint(bands, profile, score);
-    }
-    utterRef.current?.reset();
+      let score = source === 'text' ? 1 : 0;
+      let multi = false;
+      if (source !== 'text' && profile && utterRef.current?.ready()) {
+        score = utterRef.current.scoreAgainst(profile);
+        const bands = utterRef.current.toProfile()?.bands || profile.bands;
+        multi = multiSpeakerHint(bands, profile, score);
+      }
+      utterRef.current?.reset();
 
-    const decision = decideAaronVoiceGate(score, cfg, {
-      enrolled: Boolean(profile),
-      multiSpeakerHint: multi,
-      source,
-    });
-    setLastGate(decision);
-    setVoiceScore(score);
-
-    if (!decision.accept) {
-      setStatus('ignored');
-      const msg =
-        decision.reason === 'enrollment_required'
-          ? 'Enroll your voice first (quiet 10s) so Cam can ignore other people.'
-          : decision.reason === 'rejected_surrounding_speech'
-            ? 'Heard other voices nearby — ignored. Speak again when it’s you.'
-            : `Not matched as Aaron (score ${(score * 100).toFixed(0)}% < ${(decision.threshold * 100).toFixed(0)}%). Ignored.`;
-      setBubbles((b) => [...b, { who: 'system', text: msg, at: new Date().toISOString() }]);
-      setTimeout(() => {
-        if (recognizingRef.current) setStatus('listening');
-      }, 1200);
-      return;
-    }
-
-    busyRef.current = true;
-    setBubbles((b) => [...b, { who: 'aaron', text: trimmed, at: new Date().toISOString() }]);
-    setPartial('');
-    setStatus('thinking');
-    try {
-      await fetch('/api/spike/aaron.voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          score,
-          enrolled: Boolean(profile),
-          multi_speaker_hint: multi,
-          device_id: 'web-home',
-        }),
-      }).catch(() => undefined);
-      await fetch('/api/spike/mic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          purpose: 'conversation',
-          transcript: trimmed,
-          aaron_voice_score: score,
-        }),
-      }).catch(() => undefined);
-      const turn = await postTurn(trimmed, source, {
-        score,
+      const decision = decideAaronVoiceGate(score, cfg, {
         enrolled: Boolean(profile),
         multiSpeakerHint: multi,
+        source,
+        adaptiveRaised: adaptiveRef.current,
       });
-      if (turn.rejected) {
+      setLastGate(decision);
+      setVoiceScore(score);
+
+      if (!decision.accept) {
         setStatus('ignored');
-        setBubbles((b) => [
-          ...b,
-          {
-            who: 'system',
-            text: turn.cam || 'Server rejected non-Aaron speech.',
-            at: new Date().toISOString(),
-          },
-        ]);
+        const msg =
+          decision.reason === 'enrollment_required'
+            ? 'Enroll your voice first (quiet 10s) so Cam can ignore other people.'
+            : decision.reason === 'rejected_surrounding_speech'
+              ? 'Heard other voices nearby — ignored. Speak again when it’s you.'
+              : `Not matched as Aaron (score ${(score * 100).toFixed(0)}% < ${(decision.threshold * 100).toFixed(0)}%). Ignored.`;
+        setBubbles((b) => [...b, { who: 'system', text: msg, at: new Date().toISOString() }]);
+        void noteClientReject(decision, score, multi);
+        setTimeout(() => {
+          if (recognizingRef.current) setStatus('listening');
+        }, 1200);
         return;
       }
-      setBubbles((b) => [...b, { who: 'cam', text: turn.cam, at: new Date().toISOString() }]);
-      setStatus('speaking');
-      speakCam(turn.cam, turn.speak);
-      setTimeout(() => {
-        if (recognizingRef.current) setStatus('listening');
-        else setStatus('idle');
-      }, Math.min(8000, 600 + turn.cam.length * 45));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Turn failed');
-      setStatus('error');
-    } finally {
-      busyRef.current = false;
-    }
-  }, []);
+
+      if (source !== 'text') {
+        acceptsSinceRaiseRef.current += 1;
+        if (
+          adaptiveRef.current &&
+          acceptsSinceRaiseRef.current >= (cfg.adaptive_cooldown_accepts ?? 3)
+        ) {
+          adaptiveRef.current = false;
+          streakRef.current = 0;
+          acceptsSinceRaiseRef.current = 0;
+          setAdaptiveRaised(false);
+        }
+        if (!multi) streakRef.current = 0;
+      }
+
+      busyRef.current = true;
+      setBubbles((b) => [...b, { who: 'aaron', text: trimmed, at: new Date().toISOString() }]);
+      setPartial('');
+      setStatus('thinking');
+      try {
+        await fetch('/api/spike/aaron.voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            score,
+            enrolled: Boolean(profile),
+            multi_speaker_hint: multi,
+            device_id: 'web-home',
+          }),
+        }).catch(() => undefined);
+        await fetch('/api/spike/mic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            purpose: 'conversation',
+            transcript: trimmed,
+            aaron_voice_score: score,
+          }),
+        }).catch(() => undefined);
+        const turn = await postTurn(trimmed, source, {
+          score,
+          enrolled: Boolean(profile),
+          multiSpeakerHint: multi,
+        });
+        applyServerStats(turn.voice_stats);
+        if (turn.rejected) {
+          setStatus('ignored');
+          setBubbles((b) => [
+            ...b,
+            {
+              who: 'system',
+              text: turn.cam || 'Server rejected non-Aaron speech.',
+              at: new Date().toISOString(),
+            },
+          ]);
+          return;
+        }
+        setBubbles((b) => [...b, { who: 'cam', text: turn.cam, at: new Date().toISOString() }]);
+        setStatus('speaking');
+        speakCam(turn.cam, turn.speak);
+        setTimeout(() => {
+          if (recognizingRef.current) setStatus('listening');
+          else setStatus('idle');
+        }, Math.min(8000, 600 + turn.cam.length * 45));
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Turn failed');
+        setStatus('error');
+      } finally {
+        busyRef.current = false;
+      }
+    },
+    [applyServerStats, noteClientReject],
+  );
 
   const stop = useCallback(() => {
     recognizingRef.current = false;
@@ -296,7 +384,6 @@ export function useCamVoice() {
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
-        // Prefer single-talker path when browser supports it
         autoGainControl: true,
       },
       video: false,
@@ -352,6 +439,49 @@ export function useCamVoice() {
       ...b,
       { who: 'system', text: 'Aaron voice enrollment cleared.', at: new Date().toISOString() },
     ]);
+  }, []);
+
+  const exportProfile = useCallback(() => {
+    const profile = profileRef.current;
+    if (!profile) return false;
+    const blob = new Blob([exportVoiceProfileJson(profile)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'aaron-voice-profile.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    void fetch('/api/voice/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile }),
+    }).catch(() => undefined);
+    setBubbles((b) => [
+      ...b,
+      { who: 'system', text: 'Aaron voice profile exported.', at: new Date().toISOString() },
+    ]);
+    return true;
+  }, []);
+
+  const importProfile = useCallback(async (raw: string) => {
+    const profile = parseImportedVoiceProfile(raw);
+    if (!profile) {
+      setError('Invalid Aaron voice profile JSON');
+      return false;
+    }
+    saveVoiceProfile(profile, localStorage, cfgRef.current.storage_key);
+    profileRef.current = profile;
+    setEnrolled(true);
+    await fetch('/api/voice/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile }),
+    }).catch(() => undefined);
+    setBubbles((b) => [
+      ...b,
+      { who: 'system', text: 'Aaron voice profile imported.', at: new Date().toISOString() },
+    ]);
+    return true;
   }, []);
 
   const startListening = useCallback(async () => {
@@ -452,10 +582,14 @@ export function useCamVoice() {
     enrolled,
     enrollProgress,
     lastGate,
+    adaptiveRaised,
+    gateStats,
     aaronOnly: gateCfg.aaron_only,
     startListening,
     startEnroll,
     clearEnrollment,
+    exportProfile,
+    importProfile,
     stop,
     sendTurn,
   };
