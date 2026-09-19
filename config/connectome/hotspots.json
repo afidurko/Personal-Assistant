@@ -89,9 +89,10 @@
         "area.broca",
         "switch.presence",
         "switch.outbound",
+        "switch.identity",
         "motor.speak"
       ],
-      "behavior": "hear_think_speak_with_cam_face_voice"
+      "behavior": "hear_think_speak_with_cam_face_voice_aaron_only"
     },
     {
       "id": "hotspot.life_ops",

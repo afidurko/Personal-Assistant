@@ -39,15 +39,6 @@
       "tts_provider": "voicestudio_local_or_light_fallback",
       "tts_integration": "integrations/voicestudio"
     },
-    "local_voicestudio": {
-      "integration": "integrations/voicestudio",
-      "asr": "voicestudio_local",
-      "tts": "voicestudio_local",
-      "face": "identity/persona/cam-face.jpg",
-      "mcp": "http://localhost:3900/mcp",
-      "brain": "nullclaw_cam_plus_smart_second_brain",
-      "notes": "Prefer when RIVA/Audio2Face studio is offline; clone Cam soft-airy voice locally"
-    },
     "full_presence": {
       "integration": "integrations/llmavatartalk",
       "asr": "nvidia_riva",
@@ -56,6 +47,15 @@
       "optional_body": "unreal_metahuman",
       "brain": "nullclaw_cam_plus_smart_second_brain",
       "optional_local_tts_fallback": "integrations/voicestudio"
+    },
+    "local_voicestudio": {
+      "integration": "integrations/voicestudio",
+      "asr": "voicestudio_local",
+      "tts": "voicestudio_local",
+      "face": "identity/persona/cam-face.jpg",
+      "mcp": "http://localhost:3900/mcp",
+      "brain": "nullclaw_cam_plus_smart_second_brain",
+      "notes": "Prefer when RIVA/Audio2Face studio is offline; clone Cam soft-airy voice locally"
     }
   },
   "tts": {
@@ -78,12 +78,17 @@
     }
   },
   "stt": {
-    "provider": "nvidia_riva",
+    "provider": "aaron_voice_gate",
+    "embedding_backend": "funasr_campplus",
+    "asr_provider": "browser_speech_or_funasr",
     "locale": "en-US",
     "also_accept": [
       "es-US",
       "es-AR"
     ],
+    "aaron_only": true,
+    "gate_config": "config/identity/aaron-voice.json",
+    "full_presence_asr": "nvidia_riva",
     "local_fallback": {
       "provider": "voicestudio",
       "integration": "integrations/voicestudio"

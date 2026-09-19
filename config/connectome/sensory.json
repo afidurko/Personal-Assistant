@@ -66,11 +66,15 @@
     {
       "id": "sense.audio.transcript",
       "modality": "audio",
-      "source": "nvidia_riva_asr",
+      "source": [
+        "aaron_voice_gate",
+        "funasr_asr",
+        "nvidia_riva_asr"
+      ],
       "emits": [
         "spike.speech"
       ],
-      "notes": "Presence hearing via LLMAvatarTalk/RIVA"
+      "notes": "Transcript only after Aaron voice gate; FunASR ASR or RIVA; browser Speech API interim"
     },
     {
       "id": "sense.vision.detection",
@@ -108,7 +112,7 @@
         "spike.speech",
         "spike.audio"
       ],
-      "notes": "iPhone microphone \u2014 tasked listen / ASR feed"
+      "notes": "iPhone microphone \u2014 tasked listen; must pass Aaron voice gate before converse"
     },
     {
       "id": "sense.aaron.face",
@@ -123,12 +127,16 @@
     {
       "id": "sense.aaron.voice",
       "modality": "identity",
-      "source": "ios_companion_speaker_id",
+      "source": [
+        "aaron_voice_gate",
+        "funasr_campplus",
+        "ios_companion_speaker_id"
+      ],
       "emits": [
         "spike.aaron_present",
         "spike.identity"
       ],
-      "notes": "Aaron voice/speaker-ID score \u2014 not the same as ASR transcript"
+      "notes": "Aaron enrolled voice match (FunASR CAM++ embeddings + Cam gate); not anonymous diarization"
     },
     {
       "id": "sense.photos.library",

@@ -220,6 +220,18 @@
         "motor": "motor.public_apis",
         "remote": "github.com/afidurko/public-apis",
         "available_to": "all_roles_and_subagents"
+      },
+      {
+        "id": "funasr",
+        "path": "https://github.com/afidurko/FunASR",
+        "policy": "config/integrations/funasr.md",
+        "script": "scripts/aaron-voice-enroll.py",
+        "sense": [
+          "sense.aaron.voice",
+          "sense.audio.transcript"
+        ],
+        "doc": "docs/AARON_VOICE_GATE.md",
+        "notes": "Aaron-only voice gate embeddings (CAM++); not a git submodule yet"
       }
     ],
     "parallel_prs": [
@@ -521,6 +533,17 @@
             "integrations/public-apis",
             "apilayer public-apis"
           ]
+        },
+        {
+          "id": "funasr",
+          "match_any": [
+            "funasr",
+            "aaron voice",
+            "aaron-only",
+            "speaker id",
+            "voice gate",
+            "campplus"
+          ]
         }
       ]
     },
@@ -763,6 +786,17 @@
           "free api catalog",
           "integrations/public-apis",
           "apilayer public-apis"
+        ]
+      },
+      {
+        "id": "funasr",
+        "match_any": [
+          "funasr",
+          "aaron voice",
+          "aaron-only",
+          "speaker id",
+          "voice gate",
+          "campplus"
         ]
       }
     ]
