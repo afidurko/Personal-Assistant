@@ -37,6 +37,10 @@ class WorkspaceRegistryTests(unittest.TestCase):
         c = cw.choose_workspace(goal="voicestudio voice cloning local tts")
         self.assertEqual(c["workspace"]["id"], "voicestudio")
 
+    def test_choose_pupil(self):
+        c = cw.choose_workspace(goal="pupil eye tracking gaze capture")
+        self.assertEqual(c["workspace"]["id"], "pupil")
+
     def test_explicit_id_wins(self):
         c = cw.choose_workspace(goal="cline sdk", workspace_id="jarvis")
         self.assertEqual(c["workspace"]["id"], "jarvis")
@@ -104,6 +108,29 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertEqual(data["hotspot_id"], "hotspot.coding")
         self.assertIn("motor.cline", data["motor_plan"])
         self.assertIn("workspace", data)
+
+    def test_pupil_see_route(self):
+        proc = self._run(
+            "scripts/connectome-route.py",
+            "--sense",
+            "sense.vision.world",
+            "--goal",
+            "cam see via pupil",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        data = json.loads(proc.stdout)
+        self.assertEqual(data["hotspot_id"], "hotspot.pupil_see")
+        self.assertIn("motor.pupil", data["motor_plan"])
+
+    def test_pupil_see_dry_run(self):
+        proc = self._run("scripts/pupil-see.py", "--dry-run", "--no-route")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        proc2 = self._run("scripts/pupil-see.py", "--dry-run")
+        self.assertEqual(proc2.returncode, 0, proc2.stderr)
+        data = json.loads(proc2.stdout)
+        self.assertTrue(data["cam_can_see"])
+        self.assertEqual(data["motor"], "motor.pupil")
+        self.assertIn("motor.pupil", (data.get("route") or {}).get("motor_plan") or [])
 
     def test_connectome_check(self):
         proc = self._run("scripts/connectome-check.py", "--json")

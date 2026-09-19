@@ -52,24 +52,26 @@
       "status": "template"
     },
     {
-      "id": "tool.swarm.check",
-      "purpose": "Validate privilege inheritance + boss/worker primitives",
+      "id": "tool.pupil.see",
+      "purpose": "Ingest Pupil world camera + gaze so Cam can see (mesh/vision + mesh/gaze)",
       "created_by_role": "tool-creator",
-      "entrypoint": "scripts/swarm-check.py",
+      "entrypoint": "scripts/pupil-see.py",
       "kind": "local_script",
-      "inputs": {},
-      "outputs": {
-        "ok": "boolean",
-        "report": "object"
+      "inputs": {
+        "gaze": "string?",
+        "world": "string?",
+        "probe": "boolean?",
+        "dry_run": "boolean?"
       },
-      "required_privileges": [
-        "use_tool",
-        "read_mesh"
-      ],
-      "requires_switch": [
-        "switch.kill"
-      ],
-      "risk": "low",
+      "outputs": {
+        "accepted": "boolean",
+        "mesh_vision": "object",
+        "mesh_gaze": "object",
+        "route": "object"
+      },
+      "required_privileges": ["use_tool", "read_mesh", "write_mesh"],
+      "requires_switch": ["switch.pupil_vision", "switch.kill"],
+      "risk": "medium",
       "status": "active"
     },
     {

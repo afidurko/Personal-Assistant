@@ -91,6 +91,13 @@
       "notes": "Shared coding effector \u2014 every role/subagent may invoke; not the brain"
     },
     {
+      "id": "motor.pupil",
+      "channel": ["pupil_capture", "pupil_service", "pupil_remote_api"],
+      "path": "integrations/pupil",
+      "requires_switch": ["switch.pupil_vision", "switch.kill"],
+      "notes": "Cam eyes — Pupil world camera + gaze ingest via scripts/pupil-see.py; not the brain"
+    },
+    {
       "id": "motor.docs",
       "channel": [
         "filesystem",

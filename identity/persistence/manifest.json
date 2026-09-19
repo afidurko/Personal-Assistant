@@ -1,6 +1,6 @@
 {
   "assistant": "Cam",
-  "bundle_version": 9,
+  "bundle_version": 10,
   "created_at": "2026-09-17T00:44:07.028390+00:00",
   "excludes": [
     "secrets",
@@ -13,14 +13,15 @@
     ".clinerules",
     ".cursor/rules/cam-cline.mdc",
     "AGENTS.md",
-    "config/connectors.md",
     "config/connectome/trajectory-policies.json",
+    "config/connectors.md",
     "config/enhancement/dual-process.json",
     "config/enhancement/science-agent-env.json",
     "config/enhancement/slm-dl.json",
     "config/enhancement/social-harness.json",
     "config/enhancement/vision-grounding.json",
     "config/integrations/cline.md",
+    "config/integrations/pupil.md",
     "config/memory/hmo-tiers.json",
     "config/memory/mesh-claim-schema.json",
     "config/persona/consistency-checks.json",
@@ -61,15 +62,18 @@
     "identity/GOALS.md",
     "identity/PROFILE.md",
     "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
+    "identity/persistence/CAM_PUPIL_VISION_ENABLED.md",
     "identity/persistence/CONTINUOUS_QA.md",
     "identity/persistence/DAILY_AGI_SCAN.md",
     "identity/persistence/HAAS_CAM_PATTERNS.md",
     "identity/persistence/UNLIMITED_SUBAGENTS.md",
     "identity/persistence/cline-schedules.export.json",
     "identity/persistence/cline-session-cache.json",
-    "identity/persistence/mesh-seed.json"
+    "identity/persistence/mesh-seed.json",
+    "scripts/pack-gaze-result.py",
+    "scripts/pupil-see.py"
   ],
   "scope": "this_workspace_and_future_workspaces",
   "timezone": "America/New_York",
-  "updated_at": "2026-09-17T11:03:00.000000+00:00"
+  "updated_at": "2026-09-19T19:08:50.600959+00:00"
 }
