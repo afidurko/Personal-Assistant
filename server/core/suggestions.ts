@@ -329,6 +329,21 @@ function fromAgentContext(
       relatedConceptIds: ['error-handling', 'protocols-extensions'],
       sourceFindingIds: [],
     });
+    out.push({
+      id: 'suggest-cam-reason-dry-run',
+      kind: 'cam-reason',
+      title: 'Keep Phase B cam-reason dry-run + billion fuzz green before Phase C',
+      rationale:
+        'SGR slow-path must stay bar-gated; every-mic SGR and LitServe farms are cut until dry-run proofs hold.',
+      implementation:
+        'Run test_cam_reason + cam-reason-billion-fuzz; converse only above intent/length bar; LitServe thin proxy later.',
+      sketch:
+        'python3 scripts/test_cam_reason.py\npython3 scripts/cam-reason-billion-fuzz.py --n 1000000000\nbash scripts/ci-connectome.sh',
+      priority: 73,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['error-handling', 'protocols-extensions'],
+      sourceFindingIds: [],
+    });
   }
 
   // Aaron-only voice gate — always suggest when identity / converse surfaces are present

@@ -1,0 +1,257 @@
+{
+  "id": "cam-reasoning-logic",
+  "title": "Cam unified reasoning loop (SGR + MAP + dual-process + recall + SRM)",
+  "status": "proposed",
+  "authorized_by": null,
+  "authorized_at": null,
+  "plan_doc": "docs/CAM_REASONING.md",
+  "proposal": null,
+  "sgr": {
+    "remote": "https://github.com/afidurko/sgr-agent-core",
+    "path": "integrations/sgr-agent-core",
+    "policy": "config/integrations/sgr-agent-core.md",
+    "default_agent": "sgr_tool_calling_agent",
+    "fallback_agent": "sgr_agent",
+    "docs": "https://vamplabai.github.io/sgr-agent-core/framework/main-concepts/",
+    "llm_backend_preferred": "litserve_openai_compatible"
+  },
+  "litserve": {
+    "remote": "https://github.com/afidurko/LitServe",
+    "path": "integrations/litserve",
+    "policy": "config/integrations/litserve.md",
+    "wrapper": "scripts/cam-litserve.py",
+    "serves": [
+      "motor.slm",
+      "motor.dl",
+      "sgr_chat_completions"
+    ],
+    "default_host": "127.0.0.1",
+    "default_port": 8080
+  },
+  "depends_on": [
+    "config/enhancement/dual-process.json",
+    "config/enhancement/slm-dl.json",
+    "config/connectome/mesh-params.json",
+    "config/connectome/trajectory-policies.json",
+    "config/memory/hmo-tiers.json",
+    "config/memory/mesh-claim-schema.json",
+    "integrations/sgr-agent-core",
+    "integrations/litserve"
+  ],
+  "version": 5,
+  "phase_b_scope": {
+    "include": [
+      "cam-reason.py dry-run",
+      "Cam ReasoningTool subclass fields",
+      "escalate bar only",
+      "toolkit: MeshRecall ConnectomeRoute TrajectoryCheck FinalAnswer",
+      "reasoning_trace JSONL"
+    ],
+    "exclude": [
+      "cam-litserve.py",
+      "full local LLM / vLLM farm",
+      "converse every-turn SGR",
+      "TypeScript reasoner first",
+      "SGR skills / ACP",
+      "ClineTool Scholar Jarvis in first toolkit",
+      "motor.sgr hotspot",
+      "cortex MAP HUD",
+      "LitServe MCP batch streaming TTS"
+    ]
+  },
+  "stages": [
+    "accept",
+    "fast",
+    "gate",
+    "recall",
+    "sgr",
+    "stream",
+    "reflect",
+    "switch",
+    "motor",
+    "distill"
+  ],
+  "fast_path": {
+    "center": "center.slm",
+    "motor": "motor.slm",
+    "inference_host": "litserve",
+    "skip_stages": [
+      "sgr"
+    ],
+    "light_plan": true,
+    "analogy": "System-1"
+  },
+  "slow_path": {
+    "centers": [
+      "center.capability",
+      "center.chief",
+      "center.qa"
+    ],
+    "engine": "sgr",
+    "require_stages": [
+      "recall",
+      "sgr",
+      "reflect"
+    ],
+    "analogy": "System-2 Schema-Guided Reasoning"
+  },
+  "escalation": {
+    "confidence_below": 0.65,
+    "always_slow_intents": [
+      "enhance",
+      "outbound",
+      "careers_submit",
+      "money",
+      "identity_boundary",
+      "multi_step",
+      "research_cite",
+      "explicit_plan"
+    ],
+    "always_fast_intents": [
+      "greeting",
+      "ack",
+      "mic_check",
+      "presence_chatter"
+    ],
+    "escalate_on": [
+      "open_ticket_multistep",
+      "weak_personal_fact_hits",
+      "prior_qa_veto",
+      "prior_trajectory_violation"
+    ]
+  },
+  "map_stages": {
+    "source": "config/connectome/mesh-params.json#planning_modules_map",
+    "order": [
+      "error_monitoring",
+      "state_prediction",
+      "state_evaluation",
+      "task_decomposition",
+      "task_coordination",
+      "action_proposal"
+    ],
+    "sgr_hooks": {
+      "error_monitoring": "ReasoningTool.current_situation",
+      "state_prediction": "ReasoningTool.remaining_steps",
+      "state_evaluation": "toolkit_filtered_by_switches",
+      "task_decomposition": "GeneratePlanTool|AdaptPlanTool",
+      "task_coordination": "workspace_lease_and_teams",
+      "action_proposal": "select_action_cam_motor_tool"
+    }
+  },
+  "cam_toolkit": [
+    "ReasoningTool",
+    "ClarificationTool",
+    "FinalAnswerTool",
+    "MeshRecallTool",
+    "ConnectomeRouteTool",
+    "TrajectoryCheckTool"
+  ],
+  "cam_toolkit_later": [
+    "GeneratePlanTool",
+    "AdaptPlanTool",
+    "ScholarFetchTool",
+    "ClineTool",
+    "JarvisTool"
+  ],
+  "sgr_limits": {
+    "max_iterations_dry_run": 4,
+    "converse_policy": "bar_on_intent_or_length",
+    "never_every_mic_turn": true
+  },
+  "memory_gate": {
+    "hmo": "config/memory/hmo-tiers.json",
+    "order": [
+      "primary",
+      "secondary",
+      "archive"
+    ],
+    "amm_triggers": [
+      "aaron_question",
+      "open_ticket",
+      "persona_check"
+    ],
+    "never_invent_aaron_facts": true,
+    "prefer_before_web": "MeshRecallTool"
+  },
+  "self_reflection": {
+    "center": "center.qa",
+    "checks": [
+      "trajectory_policies",
+      "mesh_claim_schema",
+      "persona_consistency"
+    ]
+  },
+  "dual_stream": {
+    "source": "config/connectome/mesh-params.json#language_dual_stream"
+  },
+  "trace": {
+    "kind": "reasoning_trace",
+    "distill_dir": "vault/10-Mesh-Distillates/reasoning",
+    "mesh_namespace": "mesh/runs",
+    "include_sgr_fields": true
+  },
+  "runtime": {
+    "cli": "scripts/cam-reason.py",
+    "litserve": "scripts/cam-litserve.py",
+    "agent_definitions": "config/sgr/cam-agents.yaml",
+    "server_module": "server/core/cam-reason.ts",
+    "proposed_motor": "motor.sgr",
+    "note": "Phase B dry-run CLI shipped (scripts/cam-reason.py). LitServe/converse deferred."
+  },
+  "open_questions_for_aaron": [
+    {
+      "id": "q.confidence",
+      "ask": "Fast\u2192SGR confidence threshold?",
+      "answer": 0.65,
+      "interim": true
+    },
+    {
+      "id": "q.converse_always",
+      "ask": "Run SGR on every mic turn or only above intent/length bar?",
+      "answer": "bar_on_intent_or_length",
+      "interim": false,
+      "cut": "every_mic_turn_sgr"
+    },
+    {
+      "id": "q.max_burst",
+      "ask": "Max SGR iterations / MAP subagent burst per turn?",
+      "answer": {
+        "dry_run_max_iterations": 4,
+        "ceiling": "inherit_asi"
+      },
+      "interim": true
+    },
+    {
+      "id": "q.agent_class",
+      "ask": "Default SGRToolCallingAgent vs SGRAgent for local sLM?",
+      "answer": "sgr_tool_calling_agent",
+      "interim": false
+    },
+    {
+      "id": "q.impl_surface",
+      "ask": "Prefer Python CLI (Phase B) or TypeScript server module first?",
+      "answer": "python_cli_first",
+      "interim": false,
+      "cut": "typescript_first"
+    },
+    {
+      "id": "q.litserve_bind",
+      "ask": "LitServe default bind for home vs Tailscale peers?",
+      "answer": {
+        "host": "127.0.0.1",
+        "port": 8080,
+        "tailscale": "later"
+      },
+      "interim": true
+    },
+    {
+      "id": "q.live_llm",
+      "ask": "Phase B live SGR may use cloud OpenAI-compatible, or dry-run stubs only until LitServe proxy?",
+      "answer": null,
+      "interim": true,
+      "note": "Only remaining open question that blocks live (non-dry-run) SGR"
+    }
+  ],
+  "phase_b_status": "implemented_dry_run"
+}
