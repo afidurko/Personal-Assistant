@@ -26,6 +26,7 @@
           { "id": "sense.swiftguide.map", "label": "SwiftGuide map" },
           { "id": "sense.careers.listing", "label": "Jobs boards" },
           { "id": "sense.audio.transcript", "label": "ASR" },
+          { "id": "sense.voicestudio.health", "label": "VoiceStudio health" },
           { "id": "sense.ios.camera", "label": "iPhone camera" },
           { "id": "sense.ios.mic", "label": "iPhone mic" }
         ]
@@ -49,6 +50,7 @@
         "label": "Motor periphery",
         "children": [
           { "id": "motor.speak", "label": "Speak + face" },
+          { "id": "motor.voicestudio", "label": "VoiceStudio local" },
           { "id": "motor.vault", "label": "Vault write" },
           { "id": "motor.mesh", "label": "Mesh" },
           { "id": "motor.docs", "label": "Docs" },

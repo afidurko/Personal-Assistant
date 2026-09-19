@@ -109,6 +109,15 @@ describe('suggestive implementations', () => {
     expect(suggestions.some((s) => s.id.includes('aaron-voice'))).toBe(true);
   });
 
+  it('includes presence-voice suggestions for VoiceStudio local speech', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({ id: 'workspace-health', kind: 'health', score: 92, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'presence-voice')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('voicestudio'))).toBe(true);
+  });
+
   it('includes api-catalog suggestions for improvements/swarm workspaces', () => {
     const suggestions = buildSuggestiveImplementations([
       snap({

@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-19",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -175,6 +175,20 @@
         "policy": "config/integrations/llmavatartalk.md"
       },
       {
+        "id": "voicestudio",
+        "path": "integrations/voicestudio",
+        "policy": "config/integrations/voicestudio.md",
+        "config": "config/integrations/voicestudio.json",
+        "remote": "github.com/afidurko/VoiceStudio",
+        "sense": [
+          "sense.voicestudio.health",
+          "sense.voicestudio.result"
+        ],
+        "hotspot": "hotspot.voicestudio",
+        "motor": "motor.voicestudio",
+        "health_script": "scripts/voicestudio-health.py"
+      },
+      {
         "id": "smart-second-brain",
         "path": "integrations/smart-second-brain",
         "policy": "config/integrations/smart-second-brain.md"
@@ -189,16 +203,11 @@
         "credential_env": "SERPAPI_API_KEY"
       },
       {
-        "id": "funasr",
-        "path": "https://github.com/afidurko/FunASR",
-        "policy": "config/integrations/funasr.md",
-        "script": "scripts/aaron-voice-enroll.py",
-        "sense": [
-          "sense.aaron.voice",
-          "sense.audio.transcript"
-        ],
-        "doc": "docs/AARON_VOICE_GATE.md",
-        "notes": "Aaron-only voice gate embeddings (CAM++); not a git submodule yet"
+        "id": "cline",
+        "path": "integrations/cline",
+        "policy": "config/integrations/cline.md",
+        "remote": "github.com/afidurko/cline",
+        "effector": "motor.cline"
       },
       {
         "id": "public-apis",
@@ -213,11 +222,16 @@
         "available_to": "all_roles_and_subagents"
       },
       {
-        "id": "cline",
-        "path": "integrations/cline",
-        "policy": "config/integrations/cline.md",
-        "remote": "github.com/afidurko/cline",
-        "effector": "motor.cline"
+        "id": "funasr",
+        "path": "https://github.com/afidurko/FunASR",
+        "policy": "config/integrations/funasr.md",
+        "script": "scripts/aaron-voice-enroll.py",
+        "sense": [
+          "sense.aaron.voice",
+          "sense.audio.transcript"
+        ],
+        "doc": "docs/AARON_VOICE_GATE.md",
+        "notes": "Aaron-only voice gate embeddings (CAM++); not a git submodule yet"
       }
     ],
     "parallel_prs": [
@@ -373,6 +387,27 @@
         "cursor_bootstrap": true
       },
       {
+        "id": "voicestudio",
+        "label": "VoiceStudio local speech",
+        "path": "integrations/voicestudio",
+        "remote": "github.com/afidurko/VoiceStudio",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "comms",
+          "ops",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/voicestudio",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
+      },
+      {
         "id": "public-apis",
         "label": "Public APIs catalog",
         "path": "integrations/public-apis",
@@ -387,7 +422,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Curated free API index — shared by all agents via motor.public_apis"
+        "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
       }
     ]
   },
@@ -476,14 +511,17 @@
           ]
         },
         {
-          "id": "funasr",
+          "id": "voicestudio",
           "match_any": [
-            "funasr",
-            "aaron voice",
-            "aaron-only",
-            "speaker id",
-            "voice gate",
-            "campplus"
+            "voicestudio",
+            "voice studio",
+            "omnivoice",
+            "voice cloning",
+            "voice clone",
+            "video dubbing",
+            "audiobook",
+            "elevenlabs local",
+            "local tts"
           ]
         },
         {
@@ -494,6 +532,17 @@
             "free api catalog",
             "integrations/public-apis",
             "apilayer public-apis"
+          ]
+        },
+        {
+          "id": "funasr",
+          "match_any": [
+            "funasr",
+            "aaron voice",
+            "aaron-only",
+            "speaker id",
+            "voice gate",
+            "campplus"
           ]
         }
       ]
@@ -617,6 +666,27 @@
       "cursor_bootstrap": true
     },
     {
+      "id": "voicestudio",
+      "label": "VoiceStudio local speech",
+      "path": "integrations/voicestudio",
+      "remote": "github.com/afidurko/VoiceStudio",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "ops",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/voicestudio",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
+    },
+    {
       "id": "public-apis",
       "label": "Public APIs catalog",
       "path": "integrations/public-apis",
@@ -631,7 +701,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Curated free API index — shared by all agents via motor.public_apis"
+      "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
     }
   ],
   "chooser": {
@@ -695,14 +765,17 @@
         ]
       },
       {
-        "id": "funasr",
+        "id": "voicestudio",
         "match_any": [
-          "funasr",
-          "aaron voice",
-          "aaron-only",
-          "speaker id",
-          "voice gate",
-          "campplus"
+          "voicestudio",
+          "voice studio",
+          "omnivoice",
+          "voice cloning",
+          "voice clone",
+          "video dubbing",
+          "audiobook",
+          "elevenlabs local",
+          "local tts"
         ]
       },
       {
@@ -713,6 +786,17 @@
           "free api catalog",
           "integrations/public-apis",
           "apilayer public-apis"
+        ]
+      },
+      {
+        "id": "funasr",
+        "match_any": [
+          "funasr",
+          "aaron voice",
+          "aaron-only",
+          "speaker id",
+          "voice gate",
+          "campplus"
         ]
       }
     ]

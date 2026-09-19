@@ -4,6 +4,7 @@ dist/
 dist-server/
 data/*.json
 data/runtime/
+data/voicestudio/
 !data/.gitkeep
 .DS_Store
 *.log

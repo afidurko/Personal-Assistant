@@ -113,6 +113,19 @@ def pick_hotspot(
             )
         ) and ("coding" in blob or "cline" in blob):
             score += 5
+        if any(
+            tok in g
+            for tok in (
+                "voicestudio",
+                "omnivoice",
+                "voice clone",
+                "voice cloning",
+                "local tts",
+                "dubbing",
+                "audiobook",
+            )
+        ) and ("voicestudio" in blob or "voice" in blob):
+            score += 5
         scored.append((score, h))
     scored.sort(key=lambda x: x[0], reverse=True)
     return scored[0][1]

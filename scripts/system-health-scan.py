@@ -68,6 +68,7 @@ def check_integrations() -> dict:
         "integrations/jarvis",
         "integrations/paddledetection",
         "integrations/llmavatartalk",
+        "integrations/voicestudio",
         "integrations/smart-second-brain",
         "integrations/swiftguide",
         "integrations/public-apis",
