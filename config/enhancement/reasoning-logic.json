@@ -1,25 +1,34 @@
 {
   "id": "cam-reasoning-logic",
-  "title": "Cam unified reasoning loop (MAP + dual-process + recall + SRM)",
+  "title": "Cam unified reasoning loop (SGR + MAP + dual-process + recall + SRM)",
   "status": "proposed",
   "authorized_by": null,
   "authorized_at": null,
   "plan_doc": "docs/CAM_REASONING.md",
   "proposal": null,
+  "sgr": {
+    "remote": "https://github.com/afidurko/sgr-agent-core",
+    "path": "integrations/sgr-agent-core",
+    "policy": "config/integrations/sgr-agent-core.md",
+    "default_agent": "sgr_tool_calling_agent",
+    "fallback_agent": "sgr_agent",
+    "docs": "https://vamplabai.github.io/sgr-agent-core/framework/main-concepts/"
+  },
   "depends_on": [
     "config/enhancement/dual-process.json",
     "config/connectome/mesh-params.json",
     "config/connectome/trajectory-policies.json",
     "config/memory/hmo-tiers.json",
-    "config/memory/mesh-claim-schema.json"
+    "config/memory/mesh-claim-schema.json",
+    "integrations/sgr-agent-core"
   ],
-  "version": 1,
+  "version": 2,
   "stages": [
     "accept",
     "fast",
     "gate",
     "recall",
-    "plan",
+    "sgr",
     "stream",
     "reflect",
     "switch",
@@ -29,14 +38,15 @@
   "fast_path": {
     "center": "center.slm",
     "motor": "motor.slm",
-    "skip_stages": ["plan"],
+    "skip_stages": ["sgr"],
     "light_plan": true,
     "analogy": "System-1"
   },
   "slow_path": {
     "centers": ["center.capability", "center.chief", "center.qa"],
-    "require_stages": ["recall", "plan", "reflect"],
-    "analogy": "System-2"
+    "engine": "sgr",
+    "require_stages": ["recall", "sgr", "reflect"],
+    "analogy": "System-2 Schema-Guided Reasoning"
   },
   "escalation": {
     "confidence_below": 0.65,
@@ -72,13 +82,35 @@
       "task_decomposition",
       "task_coordination",
       "action_proposal"
-    ]
+    ],
+    "sgr_hooks": {
+      "error_monitoring": "ReasoningTool.current_situation",
+      "state_prediction": "ReasoningTool.remaining_steps",
+      "state_evaluation": "toolkit_filtered_by_switches",
+      "task_decomposition": "GeneratePlanTool|AdaptPlanTool",
+      "task_coordination": "workspace_lease_and_teams",
+      "action_proposal": "select_action_cam_motor_tool"
+    }
   },
+  "cam_toolkit": [
+    "ReasoningTool",
+    "GeneratePlanTool",
+    "AdaptPlanTool",
+    "ClarificationTool",
+    "FinalAnswerTool",
+    "MeshRecallTool",
+    "ConnectomeRouteTool",
+    "TrajectoryCheckTool",
+    "ScholarFetchTool",
+    "ClineTool",
+    "JarvisTool"
+  ],
   "memory_gate": {
     "hmo": "config/memory/hmo-tiers.json",
     "order": ["primary", "secondary", "archive"],
     "amm_triggers": ["aaron_question", "open_ticket", "persona_check"],
-    "never_invent_aaron_facts": true
+    "never_invent_aaron_facts": true,
+    "prefer_before_web": "MeshRecallTool"
   },
   "self_reflection": {
     "center": "center.qa",
@@ -94,28 +126,36 @@
   "trace": {
     "kind": "reasoning_trace",
     "distill_dir": "vault/10-Mesh-Distillates/reasoning",
-    "mesh_namespace": "mesh/runs"
+    "mesh_namespace": "mesh/runs",
+    "include_sgr_fields": true
   },
   "runtime": {
     "cli": "scripts/cam-reason.py",
+    "agent_definitions": "config/sgr/cam-agents.yaml",
     "server_module": "server/core/cam-reason.ts",
-    "note": "CLI first (Phase B); server wire in Phase C — neither shipped until Aaron applies"
+    "proposed_motor": "motor.sgr",
+    "note": "CLI + Cam toolkit first (Phase B); server wire in Phase C — neither applied until Aaron approves"
   },
   "open_questions_for_aaron": [
     {
       "id": "q.confidence",
-      "ask": "Fast→slow confidence threshold?",
+      "ask": "Fast→SGR confidence threshold?",
       "interim": 0.65
     },
     {
       "id": "q.converse_always",
-      "ask": "Run full reasoner on every mic turn or only above intent/length bar?",
+      "ask": "Run SGR on every mic turn or only above intent/length bar?",
       "interim": "bar_on_intent_or_length"
     },
     {
       "id": "q.max_burst",
-      "ask": "Max MAP subagent burst per turn?",
+      "ask": "Max SGR iterations / MAP subagent burst per turn?",
       "interim": "inherit_asi_ceiling"
+    },
+    {
+      "id": "q.agent_class",
+      "ask": "Default SGRToolCallingAgent vs SGRAgent for local sLM?",
+      "interim": "sgr_tool_calling_agent"
     },
     {
       "id": "q.impl_surface",
