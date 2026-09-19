@@ -369,6 +369,23 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         # static companion (relative paths for iOS PWA / on-device)
+        if path.startswith("/config/"):
+            file_path = (ROOT / path.lstrip("/")).resolve()
+            if not str(file_path).startswith(str((ROOT / "config").resolve())):
+                self.send_error(403)
+                return
+            if not file_path.is_file():
+                self.send_error(404)
+                return
+            data = file_path.read_bytes()
+            self.send_response(200)
+            self._cors()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
         rel = "index.html" if path in ("/", "") else path.lstrip("/")
         if rel in {"assets/cam-face.jpg", "face.jpg"}:
             file_path = WEB / "face.jpg"
