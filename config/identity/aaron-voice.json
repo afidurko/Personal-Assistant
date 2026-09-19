@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "subject": "Aaron",
+  "purpose": "Aaron-only voice recognition — ignore surrounding speakers",
+  "enabled": true,
+  "fail_closed": true,
+  "threshold": 0.85,
+  "min_segment_ms": 400,
+  "min_aaron_speech_ms": 300,
+  "sample_rate": 16000,
+  "backend": "auto",
+  "funasr_model": "iic/speech_campplus_sv_zh-cn_16k-common",
+  "funasr_model_alias": "cam++",
+  "store_path": "identity/aaron/local/voice/embeddings.json",
+  "samples_dir": "identity/aaron/local/voice/samples",
+  "converse_require_voice_match_for_mic": true,
+  "text_turns_bypass_gate": true,
+  "notes": [
+    "FunASR CAM++ supplies embeddings only; Cam owns enrollment + match + gate.",
+    "Anonymous diarization labels (spk=0) are NOT Aaron identity.",
+    "hash_dev backend is for unit tests / bring-up only — not production identity."
+  ]
+}

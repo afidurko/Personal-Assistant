@@ -22,19 +22,29 @@ persistence bundle (`.clinerules` travels with the repo).
 - **MemoryBear:** cognitive memory effector (`motor.memorybear`) for extract /
   associate / forget / reflect across all agents — complements vault + mesh.
 - **LLMAvatarTalk / iOS companion:** presence only — not a second brain.
+- **Inkbox:** agent email/phone/identity/vault/tunnels — live send via
+  `motor.inkbox` under `switch.outbound` (not from Cline).
 
 ## Connectome discipline
 
 - Prefer pathways in `config/connectome/` — sensory → centers → switches → motor.
 - Coding fires as `motor.cline` under `switch.autonomy` (silenced by `switch.kill`).
 - Do not send outbound messages, place calls, submit job applications, or move
-  money from Cline — hand those to gated motors/roles.
+  money from Cline — hand those to gated motors/roles (`motor.inkbox` for
+  agent email/phone identity).
 
 ## All agents
 
 Any Cam role or subagent may invoke Cline for coding work. Inherit boundaries
 and mesh/vault access. Unlimited subagents are authorized by Aaron; still log
 work to tickets/mesh when the Null stack is live.
+
+Any Cam role or subagent may invoke `motor.public_apis`
+(`scripts/public-apis-search.py` / MCP `public_apis_search`) to discover
+curated free/public APIs before inventing endpoints.
+
+Outbound Inkbox send/call/SMS requires `switch.outbound` act — prefer `comms`
+and `scripts/inkbox-check.py` wiring; never free-send from Cline.
 
 ## Cross-workspace
 

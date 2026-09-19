@@ -1,23 +1,23 @@
 {
-  "at": "2026-09-17T10:54:09Z",
-  "overall": "healthy",
+  "at": "2026-09-19T20:07:09Z",
+  "overall": "warning",
   "checks": [
     {
       "neuron": "neuron.vitals_loop",
       "loadavg": [
-        4.97802734375,
-        4.66845703125,
-        4.607421875
+        0.10546875,
+        1.82373046875,
+        2.1015625
       ],
       "cwd": "/workspace",
       "status": "healthy"
     },
     {
-      "senses": 16,
-      "hotspot_options": 19,
-      "known_nodes": 100,
-      "motors": 10,
-      "edges": 101,
+      "senses": 29,
+      "hotspot_options": 39,
+      "known_nodes": 136,
+      "motors": 20,
+      "edges": 291,
       "hard_errors": [],
       "missing_edges": [],
       "soft_warnings": [],
@@ -27,15 +27,18 @@
     },
     {
       "neuron": "neuron.submodule_health",
-      "count": 5,
-      "uninitialized": 0,
-      "status": "healthy",
+      "count": 9,
+      "uninitialized": 8,
+      "status": "warning",
       "sample": [
-        " 0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis (heads/master)",
-        " 93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk (heads/main)",
-        " b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection (heads/release/2.9)",
-        " baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain (heads/main)",
-        " 64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide (heads/master)"
+        "-173837314b7e02f4179c95b60fb6ca08c6d6f3bf integrations/cline",
+        " 8bafc65df0bec5719b722cdb04be028b6bed54d8 integrations/inkbox (heads/main)",
+        "-0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis",
+        "-93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk",
+        "-b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection",
+        "-4cfe04f70da070207b032eed62db76a0c82e11b7 integrations/public-apis",
+        "-baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain",
+        "-64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide"
       ]
     },
     {
@@ -44,8 +47,12 @@
         "integrations/jarvis",
         "integrations/paddledetection",
         "integrations/llmavatartalk",
+        "integrations/voicestudio",
         "integrations/smart-second-brain",
-        "integrations/swiftguide"
+        "integrations/swiftguide",
+        "integrations/public-apis",
+        "integrations/cline",
+        "integrations/inkbox"
       ],
       "missing": [],
       "status": "healthy"
@@ -70,9 +77,9 @@
     },
     {
       "neuron": "neuron.converse_health",
-      "reachable": true,
-      "body": "{\n  \"ok\": true,\n  \"assistant\": \"Cam\",\n  \"session_id\": \"b80640e3-a9be-485b-9cdf-b9a10aba1262\",\n  \"started\": \"2026-09-17T01:40:32.728318+00:00\",\n  \"capabilities\": {\n    \"mic\": true,\n    \"camera\": true,\n",
-      "status": "healthy",
+      "reachable": false,
+      "body": "",
+      "status": "idle",
       "notes": "idle if converse server not running \u2014 not critical"
     },
     {
@@ -88,7 +95,7 @@
     {
       "neuron": "neuron.priority_boot",
       "present": true,
-      "step_count": 10,
+      "step_count": 20,
       "status": "healthy"
     },
     {
@@ -118,11 +125,11 @@
   ],
   "workspace": "/workspace",
   "hooks": {
-    "persist_weekly": {
-      "neuron": "neuron.persist_sync",
-      "skipped": true,
-      "reason": "recent"
+    "improve_engine": {
+      "exit": 0,
+      "preview": "{\n  \"at\": \"2026-09-19T20:07:09Z\",\n  \"health_overall\": \"warning\",\n  \"task_count\": 1,\n  \"tasks\": [\n    {\n      \"id\": \"improve.submodule_health.warning\",\n      \"title\": \"Init/sync git submodules\",\n      \"severity\": \"medium\",\n      \"status\": \"warning\",\n      \"neuron\": \"neuron.submodule_health\",\n      \"area\": \"area.apfc\",\n      \"detail\": {\n        \"count\": 9,\n        \"uninitialized\": 8,\n        \"status"
     },
+    "persist_weekly": null,
     "fornix": {
       "exit": 0,
       "preview": "fornix: skipped (recent)\n"

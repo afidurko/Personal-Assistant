@@ -30,6 +30,8 @@ Only Aaron assigns work. Logs retained. Kill switch = pause all.
 
 **Live converse (2026-09-16):** ENABLED for iPhone + iPad now; **Mac slot open for later** (`docs/IOS_DEVICES.md`).
 
+**Pupil vision (2026-09-19):** ENABLED — Cam can see via Pupil world camera + gaze (`identity/persistence/CAM_PUPIL_VISION_ENABLED.md`).
+
 ## Conflict resolutions
 
 | Tension | Resolution |

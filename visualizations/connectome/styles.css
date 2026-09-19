@@ -636,51 +636,54 @@ footer {
   border-color: var(--teal);
 }
 
-/* —— DTI tractography mode —— */
+/* —— Anatomical cortex + DTI mode —— */
 body.dti-mode {
-  --bg0: #000000;
-  --bg1: #050508;
-  --sand: #e8eef8;
-  --sand-dim: #9aa8c0;
-  --teal: #3d8bff;
-  --teal-bright: #5fd4ff;
-  --ink: #f0f4fa;
-  --muted: #7a889c;
-  --line: rgba(95, 180, 255, 0.28);
-  --line-dim: rgba(120, 140, 180, 0.18);
-  --font-display: "IBM Plex Mono", ui-monospace, monospace;
-  background: #000;
+  --bg0: #070c0b;
+  --bg1: #0e1815;
+  --sand: #e6d5b8;
+  --sand-dim: #b8a888;
+  --teal: #3d9b8f;
+  --teal-bright: #5fd4c4;
+  --ink: #f3efe6;
+  --muted: #8a9a92;
+  --line: rgba(95, 212, 196, 0.28);
+  --line-dim: rgba(230, 213, 184, 0.16);
+  --font-display: "Sora", system-ui, sans-serif;
+  background:
+    radial-gradient(1000px 600px at 30% 20%, #1a332c 0%, transparent 55%),
+    radial-gradient(800px 500px at 80% 85%, #1a1510 0%, transparent 50%),
+    #070c0b;
 }
-body.dti-mode::before { opacity: 0.15; }
+body.dti-mode::before { opacity: 0.2; }
 body.dti-mode .viz-panel-3d {
-  background: #000;
-  border-color: rgba(80, 120, 200, 0.25);
-  border-radius: 8px;
-  box-shadow: inset 0 0 80px rgba(40, 80, 180, 0.12);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, #12201c 0%, #05080a 70%);
+  border-color: rgba(95, 212, 196, 0.22);
+  border-radius: 10px;
+  box-shadow: inset 0 0 90px rgba(61, 155, 143, 0.08);
 }
 body.dti-mode .panel {
-  background: rgba(8, 10, 16, 0.92);
-  border-radius: 8px;
-  border-color: rgba(80, 120, 200, 0.22);
+  background: rgba(10, 18, 16, 0.88);
+  border-radius: 10px;
+  border-color: rgba(95, 212, 196, 0.18);
 }
 body.dti-mode .panel h2 {
   font-family: var(--font-display);
   font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #9eb0d0;
+  color: var(--sand-dim);
 }
-body.dti-mode .brand h1 { font-family: var(--font-display); color: #e8eef8; }
+body.dti-mode .brand h1 { font-family: var(--font-display); color: var(--sand); }
 body.dti-mode .controls button {
-  border-radius: 6px;
-  font-family: var(--font-display);
+  border-radius: 8px;
   font-size: 0.72rem;
 }
 .label3d.dti {
   font-family: "IBM Plex Mono", monospace;
   font-size: 10px;
-  color: rgba(200, 220, 255, 0.75);
-  text-shadow: 0 0 8px rgba(80, 160, 255, 0.5);
+  color: rgba(230, 213, 184, 0.78);
+  text-shadow: 0 0 10px rgba(61, 155, 143, 0.45);
   white-space: nowrap;
   background: transparent;
   border: none;
@@ -752,12 +755,17 @@ body.dti-mode .side {
   font-size: 0.65rem;
   padding: 0.2rem 0.45rem;
   border-radius: 4px;
-  border: 1px solid rgba(95, 180, 255, 0.35);
-  background: rgba(20, 40, 80, 0.6);
-  color: #cfe4ff;
+  border: 1px solid rgba(95, 212, 196, 0.35);
+  background: rgba(12, 28, 24, 0.65);
+  color: var(--sand-dim, #b8a888);
   cursor: pointer;
 }
-.view-presets button:hover { border-color: #5fd4ff; color: #fff; }
+.view-presets button:hover { border-color: var(--teal-bright, #5fd4c4); color: #fff; }
+.view-presets button.on {
+  border-color: var(--teal-bright, #5fd4c4);
+  color: var(--teal-bright, #5fd4c4);
+  background: rgba(61, 155, 143, 0.18);
+}
 .ctrl-group {
   grid-column: 1 / -1;
   font-family: "IBM Plex Mono", monospace;
@@ -774,3 +782,38 @@ body.dti-mode .controls {
   flex-wrap: wrap;
   gap: 0.35rem;
 }
+
+/* Cam home iframe — cortex only, no nested dashboard chrome */
+html.embed,
+body.embed {
+  overflow: hidden;
+  height: 100%;
+  background: #000;
+}
+body.embed .chrome-only {
+  display: none !important;
+}
+body.embed .stage-3d {
+  grid-template-rows: 1fr;
+  height: 100vh;
+  height: 100dvh;
+}
+body.embed .workspace-3d {
+  grid-template-columns: 1fr;
+  min-height: 0;
+  height: 100%;
+}
+body.embed .viz-panel-3d {
+  min-height: 0;
+  height: 100%;
+  border-radius: 0;
+  border: 0;
+}
+body.embed .viz-panel-3d canvas {
+  border-radius: 0;
+}
+body.embed .hud-dti {
+  left: 0.65rem;
+  bottom: 0.55rem;
+}
+

@@ -91,7 +91,9 @@ python3 scripts/run-cline.py \
 | obsidian plugin, second brain | `smart-second-brain` |
 | jarviscli | `jarvis` |
 | paddledetection | `paddledetection` |
+| pupil / eye tracking / gaze | `pupil` |
 | audio2face, riva | `llmavatartalk` |
+| voicestudio, omnivoice, voice cloning, local tts | `voicestudio` |
 | Explicit Aaron path | that path wins |
 
 ```bash

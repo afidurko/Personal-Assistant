@@ -61,6 +61,16 @@ describe('suggestive implementations', () => {
     expect(suggestions.some((s) => s.kind === 'learning')).toBe(true);
   });
 
+  it('always includes Aaron-only identity-voice suggestions', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({ id: 'workspace-health', kind: 'health', score: 95 }),
+    ]);
+    expect(suggestions.some((s) => s.kind === 'identity-voice')).toBe(true);
+    expect(suggestions.some((s) => s.id === 'suggest-aaron-voice-enroll')).toBe(true);
+    expect(suggestions.some((s) => s.id === 'suggest-aaron-voice-noisy-gate')).toBe(true);
+    expect(suggestions.some((s) => s.id === 'suggest-aaron-voice-addons')).toBe(true);
+  });
+
   it('includes agent-commute and agent-repair suggestions for weak/critical workspaces', () => {
     const suggestions = buildSuggestiveImplementations([
       snap({
@@ -102,9 +112,38 @@ describe('suggestive implementations', () => {
 
     expect(suggestions.some((s) => s.kind === 'cam-enhance')).toBe(true);
     expect(suggestions.some((s) => s.kind === 'research-memory')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'identity')).toBe(true);
     expect(suggestions.some((s) => s.id.includes('trajectory') || s.id.includes('hmo'))).toBe(
       true,
     );
+    expect(suggestions.some((s) => s.id.includes('aaron-voice'))).toBe(true);
+  });
+
+  it('includes presence-voice suggestions for VoiceStudio local speech', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({ id: 'workspace-health', kind: 'health', score: 92, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'presence-voice')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('voicestudio'))).toBe(true);
+  });
+
+  it('includes api-catalog suggestions for improvements/swarm workspaces', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({
+        id: 'workspace-improvements',
+        kind: 'improvements',
+        score: 70,
+        status: 'warning',
+        findings: [],
+      }),
+      snap({ id: 'workspace-health', kind: 'health', score: 100, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'api-catalog')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('public-apis'))).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'card-embodiment')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('card-embodiment'))).toBe(true);
   });
 });
 

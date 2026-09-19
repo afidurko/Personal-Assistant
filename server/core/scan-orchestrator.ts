@@ -22,6 +22,7 @@ import {
 import { AgentMeshRuntime } from './agent-mesh.js';
 import { runAllScans } from '../workspaces/index.js';
 import type { AgentCycleResult, LoopJob } from '../../shared/types.js';
+import { ScanDeltaCache } from './scan-delta.js';
 
 export type ScanOrchestratorEvent =
   | 'tick'
@@ -65,6 +66,9 @@ export class ScanOrchestrator extends EventEmitter {
   private suggestions: SuggestiveImplementation[] = [];
   private agents: AgentMeshRuntime | null = null;
   private lastAgentCycle: AgentCycleResult | null = null;
+  private readonly scanDelta = new ScanDeltaCache();
+  private scanCacheHits = 0;
+  private readonly useScanDelta: boolean;
 
   constructor(options: ScanOrchestratorOptions = {}) {
     super();
@@ -73,6 +77,7 @@ export class ScanOrchestrator extends EventEmitter {
     this.intervalMs = options.intervalMs ?? 15_000;
     this.mesh = options.mesh ?? new NeuralMesh({ dataDir: this.dataDir });
     this.memory = options.memory ?? new PersistentMemory({ dataDir: this.dataDir });
+    this.useScanDelta = !options.runScans;
     this.runScans = options.runScans ?? ((root) => runAllScans(root));
   }
 
@@ -119,8 +124,19 @@ export class ScanOrchestrator extends EventEmitter {
     this.emitState();
 
     let snapshots: WorkspaceSnapshot[] = [];
+    let cacheHit = false;
     try {
-      snapshots = await this.runScans(this.rootDir);
+      if (this.useScanDelta) {
+        const result = await this.scanDelta.run(this.rootDir);
+        snapshots = result.snapshots;
+        cacheHit = result.cacheHit;
+        if (cacheHit) {
+          this.scanCacheHits += 1;
+          console.log(`[scan] delta cache hit (#${this.scanCacheHits}) — skipping tree walk`);
+        }
+      } else {
+        snapshots = await this.runScans(this.rootDir);
+      }
     } catch (err) {
       this.scanning = false;
       this.emitState();
@@ -159,42 +175,46 @@ export class ScanOrchestrator extends EventEmitter {
     const memoryWrites: MemoryTrace[] = [];
     const allFindings: Finding[] = [];
 
-    for (const snap of snapshots) {
-      allFindings.push(...snap.findings);
-      const meshNode = this.mesh.findWorkspaceNode(snap.id, snap.kind);
-      const nodeId = meshNode?.id ?? `ws-${snap.kind}`;
-      for (const finding of snap.findings) {
-        const salience = severityToSalience(finding.severity);
-        const trace = await this.memory.write({
+    if (!cacheHit) {
+      for (const snap of snapshots) {
+        allFindings.push(...snap.findings);
+        const meshNode = this.mesh.findWorkspaceNode(snap.id, snap.kind);
+        const nodeId = meshNode?.id ?? `ws-${snap.kind}`;
+        for (const finding of snap.findings) {
+          const salience = severityToSalience(finding.severity);
+          const trace = await this.memory.write({
+            kind: 'scan',
+            content: `${finding.title}: ${finding.detail}`,
+            workspaceIds: [snap.id],
+            nodeIds: finding.relatedNodeIds ?? [nodeId],
+            salience,
+            createdAt: finding.createdAt || new Date().toISOString(),
+            lastAccessedAt: new Date().toISOString(),
+            decay: 0,
+            tags: [snap.kind, finding.category, finding.severity, 'scan'],
+          });
+          memoryWrites.push(trace);
+        }
+
+        const breadcrumb = await this.memory.write({
           kind: 'scan',
-          content: `${finding.title}: ${finding.detail}`,
+          content: `Scan ${snap.name}: score=${snap.score} status=${snap.status} findings=${snap.findings.length}`,
           workspaceIds: [snap.id],
-          nodeIds: finding.relatedNodeIds ?? [nodeId],
-          salience,
-          createdAt: finding.createdAt || new Date().toISOString(),
+          nodeIds: [nodeId],
+          salience: Math.max(0.08, 0.2 + (100 - snap.score) / 200),
+          createdAt: new Date().toISOString(),
           lastAccessedAt: new Date().toISOString(),
           decay: 0,
-          tags: [snap.kind, finding.category, finding.severity, 'scan'],
+          tags: [snap.kind, 'cycle', snap.status],
         });
-        memoryWrites.push(trace);
+        memoryWrites.push(breadcrumb);
       }
 
-      const breadcrumb = await this.memory.write({
-        kind: 'scan',
-        content: `Scan ${snap.name}: score=${snap.score} status=${snap.status} findings=${snap.findings.length}`,
-        workspaceIds: [snap.id],
-        nodeIds: [nodeId],
-        salience: Math.max(0.08, 0.2 + (100 - snap.score) / 200),
-        createdAt: new Date().toISOString(),
-        lastAccessedAt: new Date().toISOString(),
-        decay: 0,
-        tags: [snap.kind, 'cycle', snap.status],
-      });
-      memoryWrites.push(breadcrumb);
+      await this.memory.decayAll(0.01);
+      await this.mesh.save();
+    } else {
+      for (const snap of snapshots) allFindings.push(...snap.findings);
     }
-
-    await this.memory.decayAll(0.01);
-    await this.mesh.save();
 
     this.cycleCount += 1;
     this.lastCycleAt = new Date().toISOString();

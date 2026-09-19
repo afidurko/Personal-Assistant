@@ -33,7 +33,8 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/research/agi-scan` | daily AGI paper distillates (via vault mirror) |
 | `mesh/workspaces` | scan-workspace snapshots (health/arch/vuln/updates/improvements) |
 | `mesh/agent-lineage` | spawn tree, privilege grants, lineage terminations |
-| `mesh/tools` | registered tool specs + run distillates (team.tooling) |
+| `mesh/tools` | registered tool specs + run distillates (team.tooling) + **public-apis** catalog hits |
+| `mesh/comms` | **Inkbox** identity + outbound channel distillates (email/phone/vault/tunnels) |
 
 ## Deep agent layers (TypeScript neural mesh)
 
@@ -77,11 +78,14 @@ Config (not a second runtime): `config/swarm/`
 - Cline tickets via `scripts/export-cline-tickets.py` → `mesh/runs`
 - Workspace registry via `scripts/choose-workspace.py --mesh-projects`
 - Vision results sync via `scripts/pack-vision-result.py` (+ `config/enhancement/vision-grounding.json`)
+- Gaze / eye-tracking results sync via `scripts/pack-gaze-result.py` → `mesh/gaze`
+- Cam see (Pupil world + gaze) via `scripts/pupil-see.py` → `mesh/vision` + `mesh/gaze`
 - Scholar results sync via `scripts/pack-scholar-result.py` / `scripts/scholar-search.py`
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
 - Knowledge maps via SwiftGuide; sync stack/taxonomy distillates to `mesh/cartography`
 - AGI daily scan archives via `scripts/agi-research-scan.py` → vault + mesh distillates
 - Tool specs/runs via team.tooling → `mesh/tools`
+- Inkbox identity/outbound via `motor.inkbox` → `mesh/comms` (gated by `switch.outbound`)
 - Cross-workspace: `scripts/persist-export.py` / `persist-import.py`
 - Integration confirmation: `scripts/workspace-integration-check.py` · `docs/WORKSPACES_WORKFLOW.md`
 - Swarm contracts: `scripts/swarm-check.py` · `docs/HAAS_CAM_PATTERNS.md`

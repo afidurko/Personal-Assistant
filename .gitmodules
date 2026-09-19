@@ -20,3 +20,18 @@
 [submodule "integrations/memorybear"]
 	path = integrations/memorybear
 	url = https://github.com/afidurko/MemoryBear.git
+[submodule "integrations/voicestudio"]
+	path = integrations/voicestudio
+	url = https://github.com/afidurko/VoiceStudio.git
+[submodule "integrations/public-apis"]
+	path = integrations/public-apis
+	url = https://github.com/afidurko/public-apis.git
+	branch = master
+[submodule "integrations/inkbox"]
+	path = integrations/inkbox
+	url = https://github.com/afidurko/inkbox.git
+	branch = main
+[submodule "integrations/pupil"]
+	path = integrations/pupil
+	url = https://github.com/afidurko/pupil.git
+	branch = master

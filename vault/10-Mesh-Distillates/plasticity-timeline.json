@@ -382,10 +382,10 @@
     },
     {
       "t": 31,
-      "ts": "2026-09-17T10:48:18Z",
+      "ts": "2026-09-19T18:33:13Z",
       "type": "health_scan",
-      "status": "ok",
-      "overall": "healthy",
+      "status": "warn",
+      "overall": "warning",
       "neurons": [
         "neuron.vitals_loop",
         "neuron.connectome_check",
@@ -402,8 +402,8 @@
       ]
     },
     {
-      "t": 32,
-      "ts": "2026-09-17T10:53:06Z",
+      "t": 33,
+      "ts": "2026-09-19T19:48:20Z",
       "type": "health_scan",
       "status": "ok",
       "overall": "healthy",
@@ -424,10 +424,10 @@
     },
     {
       "t": 33,
-      "ts": "2026-09-17T10:54:09Z",
+      "ts": "2026-09-19T20:07:09Z",
       "type": "health_scan",
-      "status": "ok",
-      "overall": "healthy",
+      "status": "warn",
+      "overall": "warning",
       "neurons": [
         "neuron.vitals_loop",
         "neuron.connectome_check",

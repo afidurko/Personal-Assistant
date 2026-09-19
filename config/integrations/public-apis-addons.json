@@ -1,0 +1,130 @@
+{
+  "id": "public-apis-addons",
+  "name": "Public APIs thin-wrapper add-ons",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "parent": "config/integrations/public-apis.json",
+  "role": "Allowlisted no-auth (or free-tier) HTTP thin wrappers discovered via public-apis — shared by all Cam agents",
+  "policy": "config/integrations/public-apis.md",
+  "available_to": "all_roles_and_subagents",
+  "motor": "motor.public_apis",
+  "tool": "tool.public_apis.addon",
+  "script": "scripts/public-apis-addon.py",
+  "mesh_namespace": "mesh/tools",
+  "vault_dir": "vault/04-Research/public-apis/addons",
+  "defaults": {
+    "timeout_s": 20,
+    "offline_ok": true,
+    "save_to_mesh": true,
+    "user_agent": "Cam-PublicAPIs-Addon/1.0"
+  },
+  "rules": [
+    "Only call endpoints listed in this allowlist — never free-form URL fetch from catalog hits",
+    "Prefer Auth=No HTTPS APIs; never commit third-party API keys",
+    "Kill switch / switch.autonomy hold pauses live calls",
+    "Offline fixtures required for CI and --offline"
+  ],
+  "addons": [
+    {
+      "id": "weather.open_meteo",
+      "name": "Open-Meteo forecast",
+      "catalog_name": "Open-Meteo",
+      "catalog_url": "https://open-meteo.com/",
+      "category": "Weather",
+      "auth": "No",
+      "https": true,
+      "purpose": "Current + daily forecast for lat/lon (ops / Jarvis complement)",
+      "method": "GET",
+      "url_template": "https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days={days}",
+      "params": {
+        "latitude": {"type": "number", "required": true},
+        "longitude": {"type": "number", "required": true},
+        "days": {"type": "integer", "default": 3, "min": 1, "max": 7}
+      },
+      "fixture": "scripts/testdata/addons/weather.open_meteo.json",
+      "roles": ["ops", "info-retriever", "chief", "tool-user"]
+    },
+    {
+      "id": "geo.open_meteo",
+      "name": "Open-Meteo geocoding",
+      "catalog_name": "Open-Meteo",
+      "catalog_url": "https://open-meteo.com/",
+      "category": "Geocoding",
+      "auth": "No",
+      "https": true,
+      "purpose": "Resolve place name → lat/lon for weather and life-ops",
+      "method": "GET",
+      "url_template": "https://geocoding-api.open-meteo.com/v1/search?name={name}&count={count}&language=en&format=json",
+      "params": {
+        "name": {"type": "string", "required": true},
+        "count": {"type": "integer", "default": 5, "min": 1, "max": 10}
+      },
+      "fixture": "scripts/testdata/addons/geo.open_meteo.json",
+      "roles": ["ops", "info-retriever", "chief", "tool-user"]
+    },
+    {
+      "id": "ip.ipify",
+      "name": "ipify public IP",
+      "catalog_name": "IPify",
+      "catalog_url": "https://www.ipify.org/",
+      "category": "Geocoding",
+      "auth": "No",
+      "https": true,
+      "purpose": "Public IP lookup for network diagnostics (ops)",
+      "method": "GET",
+      "url_template": "https://api.ipify.org?format=json",
+      "params": {},
+      "fixture": "scripts/testdata/addons/ip.ipify.json",
+      "roles": ["ops", "tool-user", "qa"]
+    },
+    {
+      "id": "facts.catfact",
+      "name": "Cat Facts",
+      "catalog_name": "Cat Facts",
+      "catalog_url": "https://catfact.ninja/",
+      "category": "Animals",
+      "auth": "No",
+      "https": true,
+      "purpose": "Smoke-test free API path + light presence demos",
+      "method": "GET",
+      "url_template": "https://catfact.ninja/fact",
+      "params": {},
+      "fixture": "scripts/testdata/addons/facts.catfact.json",
+      "roles": ["tool-user", "qa", "comms"]
+    },
+    {
+      "id": "dogs.ceo",
+      "name": "Dog CEO random image",
+      "catalog_name": "Dogs",
+      "catalog_url": "https://dog.ceo/dog-api/",
+      "category": "Animals",
+      "auth": "No",
+      "https": true,
+      "purpose": "Random dog image URL for presence/demo smoke tests",
+      "method": "GET",
+      "url_template": "https://dog.ceo/api/breeds/image/random",
+      "params": {},
+      "fixture": "scripts/testdata/addons/dogs.ceo.json",
+      "roles": ["tool-user", "qa", "comms"]
+    },
+    {
+      "id": "crypto.coingecko_simple",
+      "name": "CoinGecko simple price",
+      "catalog_name": "CoinGecko",
+      "catalog_url": "https://www.coingecko.com/en/api",
+      "category": "Cryptocurrency",
+      "auth": "No",
+      "https": true,
+      "purpose": "Simple crypto USD prices without an API key (research/ops)",
+      "method": "GET",
+      "url_template": "https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies={vs}",
+      "params": {
+        "ids": {"type": "string", "default": "bitcoin,ethereum"},
+        "vs": {"type": "string", "default": "usd"}
+      },
+      "fixture": "scripts/testdata/addons/crypto.coingecko_simple.json",
+      "roles": ["researcher", "info-retriever", "ops", "tool-user"]
+    }
+  ]
+}

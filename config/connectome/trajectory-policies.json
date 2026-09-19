@@ -14,44 +14,113 @@
     {
       "id": "no_enhance_without_aaron",
       "description": "motor.enhance only when switch.cam_enhance is act",
-      "if_any_motors": ["motor.enhance"],
-      "require_switch_act": ["switch.cam_enhance"],
+      "if_any_motors": [
+        "motor.enhance"
+      ],
+      "require_switch_act": [
+        "switch.cam_enhance"
+      ],
       "on_violate": "strip",
-      "strip_motors": ["motor.enhance"],
+      "strip_motors": [
+        "motor.enhance"
+      ],
       "revise_to": "propose_only_mesh_log"
     },
     {
       "id": "no_enhance_with_jobs_burst",
       "description": "Do not apply Cam functionality changes in the same unsupervised plan as job submit",
-      "if_all_motors": ["motor.enhance", "motor.jobs"],
+      "if_all_motors": [
+        "motor.enhance",
+        "motor.jobs"
+      ],
       "on_violate": "strip",
-      "strip_motors": ["motor.enhance"],
+      "strip_motors": [
+        "motor.enhance"
+      ],
       "revise_to": "jobs_ok_enhance_held"
     },
     {
       "id": "research_fetch_not_enhance",
       "description": "Research scan may fetch/vault/mesh but never silently enhance",
-      "if_any_motors": ["motor.web_fetch"],
-      "if_any_motors_extra": ["motor.enhance"],
-      "require_switch_act": ["switch.cam_enhance"],
+      "if_any_motors": [
+        "motor.web_fetch"
+      ],
+      "if_any_motors_extra": [
+        "motor.enhance"
+      ],
+      "require_switch_act": [
+        "switch.cam_enhance"
+      ],
       "on_violate": "strip",
-      "strip_motors": ["motor.enhance"],
+      "strip_motors": [
+        "motor.enhance"
+      ],
       "revise_to": "fetch_distill_only"
     },
     {
       "id": "kill_silences_all",
       "description": "Kill switch clears every motor",
-      "if_switch_act": ["switch.kill"],
+      "if_switch_act": [
+        "switch.kill"
+      ],
       "on_violate": "clear_all_motors"
     },
     {
       "id": "outbound_requires_outbound_switch",
       "description": "Outbound motors require switch.outbound act",
-      "if_any_motors": ["motor.text", "motor.call", "motor.facetime", "motor.speak"],
-      "require_switch_act": ["switch.outbound"],
+      "if_any_motors": [
+        "motor.text",
+        "motor.call",
+        "motor.facetime",
+        "motor.speak",
+        "motor.inkbox"
+      ],
+      "require_switch_act": [
+        "switch.outbound"
+      ],
       "on_violate": "strip",
-      "strip_motors": ["motor.text", "motor.call", "motor.facetime", "motor.speak"],
+      "strip_motors": [
+        "motor.text",
+        "motor.call",
+        "motor.facetime",
+        "motor.speak",
+        "motor.inkbox"
+      ],
       "revise_to": "draft_only"
+    },
+    {
+      "id": "speak_requires_aaron_identity",
+      "description": "motor.speak only when switch.identity is act (Aaron voice/face match)",
+      "if_any_motors": [
+        "motor.speak"
+      ],
+      "require_switch_act": [
+        "switch.identity"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.speak"
+      ],
+      "revise_to": "hold_non_aaron_voice"
+    },
+    {
+      "id": "voicestudio_api_not_outbound_speak",
+      "description": "motor.voicestudio may write files via local API; audible speak still needs motor.speak + outbound",
+      "if_any_motors": [
+        "motor.voicestudio"
+      ],
+      "if_any_motors_extra": [
+        "motor.speak"
+      ],
+      "require_switch_act": [
+        "switch.outbound",
+        "switch.presence"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.speak"
+      ],
+      "revise_to": "file_render_only_hold_audible"
     }
   ]
 }

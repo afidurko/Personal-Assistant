@@ -1,56 +1,134 @@
 {
   "version": 1,
-  "analogy": "Motor periphery — effectors fire only after switch resolves to act",
+  "analogy": "Motor periphery \u2014 effectors fire only after switch resolves to act",
   "effectors": [
     {
       "id": "motor.text",
-      "channel": ["sms", "imessage", "chat"],
-      "requires_switch": ["switch.outbound", "switch.kill"],
+      "channel": [
+        "sms",
+        "imessage",
+        "chat"
+      ],
+      "requires_switch": [
+        "switch.outbound",
+        "switch.kill"
+      ],
       "persona": "Cam fluent English soft airy when speaking as Cam"
     },
     {
       "id": "motor.call",
-      "channel": ["phone"],
-      "requires_switch": ["switch.outbound", "switch.kill"]
+      "channel": [
+        "phone"
+      ],
+      "requires_switch": [
+        "switch.outbound",
+        "switch.kill"
+      ]
     },
     {
       "id": "motor.facetime",
-      "channel": ["facetime"],
-      "requires_switch": ["switch.outbound", "switch.kill"]
+      "channel": [
+        "facetime"
+      ],
+      "requires_switch": [
+        "switch.outbound",
+        "switch.kill"
+      ]
     },
     {
       "id": "motor.speak",
-      "channel": ["riva_tts", "audio2face", "metahuman_optional"],
-      "requires_switch": ["switch.presence", "switch.outbound", "switch.kill"],
-      "voice_profile": "config/persona/voice.json"
+      "channel": [
+        "riva_tts",
+        "audio2face",
+        "metahuman_optional",
+        "voicestudio_local_tts"
+      ],
+      "requires_switch": [
+        "switch.presence",
+        "switch.outbound",
+        "switch.identity",
+        "switch.kill"
+      ],
+      "voice_profile": "config/persona/voice.json",
+      "notes": "Aaron-only audible speak (switch.identity). RIVA/Audio2Face for full presence; VoiceStudio for local-first TTS when studio offline."
+    },
+    {
+      "id": "motor.voicestudio",
+      "channel": [
+        "voicestudio_rest",
+        "voicestudio_mcp"
+      ],
+      "path": "integrations/voicestudio",
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "config": "config/integrations/voicestudio.json",
+      "notes": "Local VoiceStudio API/MCP (health, list voices, generate/transcribe to files). Audible playback still uses motor.speak."
     },
     {
       "id": "motor.jarvis",
-      "channel": ["jarvis_cli"],
-      "requires_switch": ["switch.autonomy", "switch.kill"]
+      "channel": [
+        "jarvis_cli"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ]
     },
     {
       "id": "motor.cline",
-      "channel": ["cline_cli", "cline_sdk", "cline_ide"],
+      "channel": [
+        "cline_cli",
+        "cline_sdk",
+        "cline_ide"
+      ],
       "path": "integrations/cline",
-      "requires_switch": ["switch.autonomy", "switch.kill"],
-      "notes": "Shared coding effector — every role/subagent may invoke; not the brain"
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "notes": "Shared coding effector \u2014 every role/subagent may invoke; not the brain"
+    },
+    {
+      "id": "motor.pupil",
+      "channel": ["pupil_capture", "pupil_service", "pupil_remote_api"],
+      "path": "integrations/pupil",
+      "requires_switch": ["switch.pupil_vision", "switch.kill"],
+      "notes": "Cam eyes — Pupil world camera + gaze ingest via scripts/pupil-see.py; not the brain"
     },
     {
       "id": "motor.docs",
-      "channel": ["filesystem", "docs_editors"],
-      "requires_switch": ["switch.autonomy", "switch.kill"]
+      "channel": [
+        "filesystem",
+        "docs_editors"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ]
     },
     {
       "id": "motor.jobs",
-      "channel": ["linkedin", "indeed"],
-      "requires_switch": ["switch.careers_submit", "switch.kill"]
+      "channel": [
+        "linkedin",
+        "indeed"
+      ],
+      "requires_switch": [
+        "switch.careers_submit",
+        "switch.kill"
+      ]
     },
     {
       "id": "motor.vault",
-      "channel": ["obsidian_vault"],
+      "channel": [
+        "obsidian_vault"
+      ],
       "path": "vault",
-      "requires_switch": ["switch.autonomy", "switch.kill"]
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ]
     },
     {
       "id": "motor.memorybear",
@@ -61,51 +139,121 @@
     },
     {
       "id": "motor.calendar",
-      "channel": ["calendar"],
-      "requires_switch": ["switch.autonomy", "switch.kill"]
+      "channel": [
+        "calendar"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ]
     },
     {
       "id": "motor.mesh",
-      "channel": ["nulltickets_store"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "channel": [
+        "nulltickets_store"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "notes": "Kill pauses new mesh claims; curator may flush logs only if Aaron allows"
     },
     {
       "id": "motor.web_fetch",
-      "channel": ["http_fetch", "arxiv_api", "google_scholar", "serpapi_scholar"],
-      "requires_switch": ["switch.research_scan", "switch.kill"],
-      "notes": "Fetch papers/findings for Scholar, AGI scan, and info team — no outbound messaging"
+      "channel": [
+        "http_fetch",
+        "arxiv_api",
+        "google_scholar",
+        "serpapi_scholar"
+      ],
+      "requires_switch": [
+        "switch.research_scan",
+        "switch.kill"
+      ],
+      "notes": "Fetch papers/findings for Scholar, AGI scan, and info team \u2014 no outbound messaging"
     },
     {
       "id": "motor.enhance",
-      "channel": ["config_patch", "role_prompt", "connectome_edge", "slm_dl_recipe"],
-      "requires_switch": ["switch.cam_enhance", "switch.kill"],
+      "channel": [
+        "config_patch",
+        "role_prompt",
+        "connectome_edge",
+        "slm_dl_recipe"
+      ],
+      "requires_switch": [
+        "switch.cam_enhance",
+        "switch.kill"
+      ],
       "notes": "Apply Cam functionality changes only when Aaron flips switch.cam_enhance"
     },
     {
       "id": "motor.slm",
-      "channel": ["local_slm"],
-      "requires_switch": ["switch.slm_local", "switch.kill"],
+      "channel": [
+        "local_slm"
+      ],
+      "requires_switch": [
+        "switch.slm_local",
+        "switch.kill"
+      ],
       "notes": "Invoke Cam sLM cortex (classify/route/compress/draft assist)"
     },
     {
       "id": "motor.dl",
-      "channel": ["local_dl", "embeddings", "rerank"],
-      "requires_switch": ["switch.dl_local", "switch.kill"],
+      "channel": [
+        "local_dl",
+        "embeddings",
+        "rerank"
+      ],
+      "requires_switch": [
+        "switch.dl_local",
+        "switch.kill"
+      ],
       "notes": "Invoke Cam DL cortex (embed/rerank/cluster/identity vectors)"
     },
     {
       "id": "motor.tool",
-      "channel": ["tool_registry", "jarvis_cli", "local_script"],
-      "requires_switch": ["switch.tooling", "switch.kill"],
+      "channel": [
+        "tool_registry",
+        "jarvis_cli",
+        "local_script"
+      ],
+      "requires_switch": [
+        "switch.tooling",
+        "switch.kill"
+      ],
       "notes": "Run a registered tool via tool-user (config/tools/registry.json)"
     },
     {
+      "id": "motor.public_apis",
+      "channel": [
+        "public_apis_catalog",
+        "local_script"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "notes": "Search afidurko/public-apis catalog (scripts/public-apis-search.py) \u2014 shared by all agents; no spend"
+    },
+    {
+      "id": "motor.inkbox",
+      "channel": ["inkbox_sdk", "inkbox_cli", "email", "sms", "phone", "vault", "tunnel"],
+      "path": "integrations/inkbox",
+      "requires_switch": ["switch.outbound", "switch.kill"],
+      "notes": "Inkbox agent identity — email/phone/SMS/vault/tunnels; gated outbound; not free-send from Cline"
+    },
+    {
       "id": "motor.swarm",
-      "channel": ["nulltickets_store", "agent_bus"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "channel": [
+        "nulltickets_store",
+        "agent_bus"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "notes": "Emit synapse.assign_task / broadcast / resolve / send_message / spawn / terminate_lineage"
     }
   ],
-  "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"
+  "response_rule": "Motor output must correspond to an active sensory\u2192center\u2192switch act pathway (no orphan actions)"
 }

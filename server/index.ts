@@ -8,6 +8,9 @@ import type { WsClientMessage, WsServerMessage } from '../shared/types.js';
 import { SWIFT_GUIDE_CONCEPTS, isSwiftConceptNodeId } from '../shared/swiftGuide.js';
 import { AGENT_LAYERS, MESH_AGENTS } from '../shared/agentLayers.js';
 import { ScanOrchestrator } from './core/scan-orchestrator.js';
+import { CamConverse } from './core/cam-converse.js';
+import { CamAutonomy } from './core/cam-autonomy.js';
+import { RuntimeStore } from './core/runtime-store.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -17,24 +20,67 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const runtime = new RuntimeStore(ROOT);
+await runtime.ensure();
+
 const orchestrator = new ScanOrchestrator({
   rootDir: ROOT,
-  intervalMs: Number(process.env.SCAN_INTERVAL_MS ?? 15_000),
+  intervalMs: Number(process.env.SCAN_INTERVAL_MS ?? 25_000),
   dataDir: path.join(ROOT, 'data'),
 });
 
+const converse = new CamConverse(ROOT);
+const autonomy = new CamAutonomy(runtime);
+let micListeningHint = false;
+
 await orchestrator.init();
 
-app.get('/api/health', (_req, res) => {
+function fullState() {
+  return {
+    ...orchestrator.getFullState(),
+    camSelfTasks: autonomy.getTasks(),
+  };
+}
+
+/** Compact fingerprint so we can skip identical full-state broadcasts. */
+function stateFingerprint(state: ReturnType<typeof fullState>): string {
+  return JSON.stringify({
+    cycle: state.cycleCount,
+    scanning: state.scanning,
+    jobs: (state.loopJobs ?? []).map((j) => [j.id, j.status, j.attempts]),
+    tasks: (state.camSelfTasks ?? []).map((t) => [t.id, t.status]),
+    scores: (state.workspaces ?? []).map((w) => [w.id, w.score, w.status]),
+    guide: [state.activeConceptId, state.guideStep],
+    agentEff: state.lastAgentCycle?.efficiencyGain ?? null,
+  });
+}
+
+let lastStateFingerprint = '';
+
+app.get('/api/health', async (_req, res) => {
+  const voicePolicy = await converse.voiceAddons.loadPolicy();
   res.json({
     ok: true,
     service: 'personal-assistant',
+    assistant: 'Cam',
     scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    capabilities: {
+      mic: true,
+      speak: true,
+      cortex3d: true,
+      autonomy: true,
+      enabled: true,
+      aaron_voice_only: true,
+      voice_addons: true,
+    },
+    session_id: converse.sessionId,
+    voice_gate: voicePolicy,
+    voice_gate_stats: converse.getVoiceStats(),
   });
 });
 
 app.get('/api/state', (_req, res) => {
-  res.json(orchestrator.getFullState());
+  res.json(fullState());
 });
 
 app.get('/api/workspaces', (_req, res) => {
@@ -81,6 +127,8 @@ app.get('/api/agents', (_req, res) => {
     loopArmed: orchestrator.isIssueLoopArmed(),
     jobs: orchestrator.getLoopJobs(),
     lastCycle: orchestrator.getFullState().lastAgentCycle ?? null,
+    camSelfTasks: autonomy.getTasks(),
+    capacity: { selfTaskSlots: 64, loopJobHint: 80 },
   });
 });
 
@@ -99,6 +147,162 @@ app.post('/api/agents/issue-loop/stop', (_req, res) => {
   res.json({ loopArmed: false });
 });
 
+app.get('/api/cam/autonomy', (_req, res) => {
+  res.json({
+    tasks: autonomy.getTasks(),
+    capacity: { selfTaskSlots: 64, loopJobHint: 80 },
+    listening: micListeningHint,
+  });
+});
+
+app.post('/api/cam/autonomy/tick', async (_req, res) => {
+  const result = await autonomy.tick({
+    workspaces: orchestrator.getWorkspaces(),
+    loopJobs: orchestrator.getLoopJobs(),
+    listening: micListeningHint,
+  });
+  res.json(result);
+});
+
+app.get('/api/session', (_req, res) => {
+  res.json({
+    session_id: converse.sessionId,
+    started: converse.started,
+    history: converse.getHistory(),
+  });
+});
+
+app.post('/api/turn', async (req, res) => {
+  const body = req.body as {
+    text?: string;
+    transcript?: string;
+    source?: string;
+    aaron_voice_score?: number;
+    enrolled?: boolean;
+    multi_speaker_hint?: boolean;
+    device_id?: string;
+  };
+  const text = String(body.text ?? body.transcript ?? '');
+  const source = String(body.source ?? 'text');
+  const reply = await converse.turn({
+    text,
+    source,
+    aaron_voice_score: body.aaron_voice_score,
+    enrolled: body.enrolled,
+    multi_speaker_hint: body.multi_speaker_hint,
+    device_id: body.device_id,
+  });
+  if (reply.rejected) {
+    res.status(403).json(reply);
+    return;
+  }
+  // Pulse autonomy when Aaron talks so Cam keeps self-tasks warm
+  void autonomy.tick({
+    workspaces: orchestrator.getWorkspaces(),
+    loopJobs: orchestrator.getLoopJobs(),
+    listening: true,
+  });
+  res.json(reply);
+});
+
+app.post('/api/voice/gate/reject', async (req, res) => {
+  const body = req.body as {
+    score?: number;
+    threshold?: number;
+    reason?: string;
+    source?: string;
+    multi_speaker_hint?: boolean;
+    device_id?: string;
+  };
+  const at = new Date().toISOString();
+  await converse.voiceAddons.recordReject({
+    at,
+    source: String(body.source ?? 'mic'),
+    score: Number(body.score ?? 0),
+    threshold: Number(body.threshold ?? 0.88),
+    reason: String(body.reason ?? 'client_reject'),
+    multi_speaker_hint: Boolean(body.multi_speaker_hint),
+    device_id: body.device_id,
+  });
+  res.json({ ok: true, stats: converse.getVoiceStats() });
+});
+
+app.get('/api/voice/profile', async (_req, res) => {
+  const saved = await converse.voiceAddons.loadSavedProfile();
+  res.json({ ok: true, profile: saved });
+});
+
+app.post('/api/voice/profile', async (req, res) => {
+  const body = req.body as { profile?: unknown };
+  if (!body.profile) {
+    res.status(400).json({ ok: false, error: 'profile_required' });
+    return;
+  }
+  const pathWritten = await converse.voiceAddons.saveProfile(body.profile);
+  res.json({ ok: true, path: pathWritten });
+});
+
+app.post('/api/spike/mic', (req, res) => {
+  micListeningHint = true;
+  const body = req.body as {
+    purpose?: string;
+    transcript?: string;
+    aaron_voice_score?: number;
+  };
+  res.json({
+    ok: true,
+    sense: 'sense.ios.mic',
+    purpose: body.purpose ?? 'conversation',
+    aaron_voice_score: body.aaron_voice_score ?? null,
+    accepted: true,
+  });
+});
+
+app.post('/api/spike/aaron.voice', async (req, res) => {
+  const body = req.body as {
+    score?: number;
+    enrolled?: boolean;
+    multi_speaker_hint?: boolean;
+    device_id?: string;
+  };
+  const score = typeof body.score === 'number' ? body.score : 0;
+  const gate = await converse.voiceAddons.evaluateWithAddons(
+    {
+      source: 'mic',
+      aaron_voice_score: score,
+      enrolled: body.enrolled !== false,
+      multi_speaker_hint: Boolean(body.multi_speaker_hint),
+    },
+    { note: false },
+  );
+  res.json({
+    ok: true,
+    sense: 'sense.aaron.voice',
+    score,
+    enrolled: Boolean(body.enrolled),
+    multi_speaker_hint: Boolean(body.multi_speaker_hint),
+    device_id: body.device_id ?? 'unknown',
+    threshold: gate.threshold,
+    accepted: gate.accept,
+    gate,
+    voice_stats: converse.getVoiceStats(),
+  });
+});
+
+app.post('/api/spike/mic/stop', (_req, res) => {
+  micListeningHint = false;
+  res.json({ ok: true, listening: false });
+});
+
+app.post('/api/spike/camera', (req, res) => {
+  const body = req.body as { purpose?: string };
+  res.json({
+    ok: true,
+    sense: 'sense.ios.camera',
+    purpose: body.purpose ?? 'presence',
+    accepted: true,
+  });
+});
 
 app.post('/api/nodes/:id/focus', async (req, res) => {
   const id = req.params.id;
@@ -137,6 +341,60 @@ app.post('/api/guide/concepts/:id', async (req, res) => {
   res.json(await orchestrator.openConcept(req.params.id));
 });
 
+
+const runtimeFiles = [
+  'live-activity',
+  'improve-tasks',
+  'system-health',
+  'tract-weights',
+  'plasticity-timeline',
+  'neurogenesis-columns',
+] as const;
+
+for (const name of runtimeFiles) {
+  app.get(`/api/runtime/${name}`, async (_req, res) => {
+    const data = await runtime.readJson(`${name}.json`, {});
+    res.json(data);
+  });
+}
+
+app.get('/api/runtime/activity-events', async (_req, res) => {
+  try {
+    const { readFile } = await import('node:fs/promises');
+    const raw = await readFile(runtime.pathFor('activity-events.jsonl'), 'utf8');
+    res.type('text/plain').send(raw);
+  } catch {
+    res.type('text/plain').send('');
+  }
+});
+
+// Static assets for Cam face, 3D cortex, and live-activity JSON the cortex polls
+app.get('/favicon.ico', (_req, res) => {
+  res.redirect(302, '/favicon.svg');
+});
+app.use(express.static(path.join(ROOT, 'public')));
+app.use('/identity', express.static(path.join(ROOT, 'identity')));
+app.use('/vault', express.static(path.join(ROOT, 'vault')));
+app.use('/config', express.static(path.join(ROOT, 'config')));
+app.use('/viz', express.static(path.join(ROOT, 'visualizations')));
+app.use('/companions', express.static(path.join(ROOT, 'companions')));
+// Relative fetches from /viz/connectome → ../../vault|config|identity
+app.use('/visualizations', express.static(path.join(ROOT, 'visualizations')));
+
+const distWeb = path.join(ROOT, 'dist');
+app.use(express.static(distWeb));
+// SPA fallback for production builds (API routes already registered above)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/ws')) {
+    next();
+    return;
+  }
+  const index = path.join(distWeb, 'index.html');
+  res.sendFile(index, (err) => {
+    if (err) next();
+  });
+});
+
 const server = createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
@@ -149,15 +407,36 @@ function broadcast(type: WsServerMessage['type'], payload: unknown) {
   for (const client of wss.clients) send(client, type, payload);
 }
 
+function broadcastState(force = false) {
+  const state = fullState();
+  const fp = stateFingerprint(state);
+  if (!force && fp === lastStateFingerprint) return false;
+  lastStateFingerprint = fp;
+  broadcast('state', state);
+  return true;
+}
+
 orchestrator.on('tick', (payload) => broadcast('scan_tick', payload));
-orchestrator.on('complete', (payload) => broadcast('scan_complete', payload));
-orchestrator.on('state', (payload) => broadcast('state', payload));
+orchestrator.on('complete', (payload) => {
+  broadcast('scan_complete', payload);
+  broadcastState();
+});
+orchestrator.on('state', () => broadcastState());
 orchestrator.on('memory_update', (payload) => broadcast('memory_update', payload));
-orchestrator.on('agent_cycle', (payload) => broadcast('agent_cycle', payload));
-orchestrator.on('loop_update', (payload) => broadcast('loop_update', payload));
+orchestrator.on('agent_cycle', (payload) => {
+  broadcast('agent_cycle', payload);
+  // Prefer delta event; full state only when fingerprint changes
+  broadcastState();
+});
+orchestrator.on('loop_update', (payload) => {
+  broadcast('loop_update', payload);
+  broadcastState();
+});
 
 wss.on('connection', (socket) => {
-  send(socket, 'state', orchestrator.getFullState());
+  const state = fullState();
+  lastStateFingerprint = stateFingerprint(state);
+  send(socket, 'state', state);
 
   socket.on('message', async (raw) => {
     let msg: WsClientMessage;
@@ -170,11 +449,11 @@ wss.on('connection', (socket) => {
     switch (msg.type) {
       case 'start_scan':
         orchestrator.start();
-        broadcast('state', orchestrator.getFullState());
+        broadcastState();
         break;
       case 'stop_scan':
         orchestrator.stop();
-        broadcast('state', orchestrator.getFullState());
+        broadcastState();
         break;
       case 'focus_node': {
         const payload = msg.payload as { id?: string; nodeId?: string } | undefined;
@@ -185,11 +464,11 @@ wss.on('connection', (socket) => {
             const focused = await orchestrator.openConcept(conceptId);
             send(socket, 'guide_focus', focused);
             send(socket, 'node_focus', focused);
-            broadcast('state', orchestrator.getFullState());
+            broadcastState();
           } else {
             const focused = orchestrator.focusNode(id);
             send(socket, 'node_focus', focused);
-            broadcast('state', orchestrator.getFullState());
+            broadcastState();
           }
         }
         break;
@@ -200,7 +479,7 @@ wss.on('connection', (socket) => {
         if (id) {
           const focused = orchestrator.focusWorkspace(id);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcastState();
         }
         break;
       }
@@ -212,7 +491,7 @@ wss.on('connection', (socket) => {
           const focused = await orchestrator.openConcept(conceptId);
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcastState();
         }
         break;
       }
@@ -220,7 +499,7 @@ wss.on('connection', (socket) => {
         const focused = await orchestrator.guideStart();
         send(socket, 'guide_focus', focused);
         send(socket, 'node_focus', focused);
-        broadcast('state', orchestrator.getFullState());
+        broadcastState();
         break;
       }
       case 'guide_next': {
@@ -228,7 +507,7 @@ wss.on('connection', (socket) => {
         if (focused) {
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcastState();
         }
         break;
       }
@@ -237,33 +516,33 @@ wss.on('connection', (socket) => {
         if (focused) {
           send(socket, 'guide_focus', focused);
           send(socket, 'node_focus', focused);
-          broadcast('state', orchestrator.getFullState());
+          broadcastState();
         }
         break;
       }
       case 'run_agent_cycle': {
         const result = await orchestrator.runAgentCycle();
         send(socket, 'agent_cycle', result);
-        broadcast('state', orchestrator.getFullState());
+        broadcastState();
         break;
       }
       case 'start_issue_loop': {
         orchestrator.setIssueLoopArmed(true);
         send(socket, 'loop_update', orchestrator.getLoopJobs());
-        broadcast('state', orchestrator.getFullState());
+        broadcastState();
         break;
       }
       case 'stop_issue_loop': {
         orchestrator.setIssueLoopArmed(false);
         send(socket, 'loop_update', orchestrator.getLoopJobs());
-        broadcast('state', orchestrator.getFullState());
+        broadcastState();
         break;
       }
       case 'reinforce': {
         const edge = msg.payload as { from?: string; to?: string; delta?: number } | undefined;
         if (edge?.from && edge?.to) {
           orchestrator.reinforce(edge.from, edge.to, edge.delta ?? 0.05);
-          broadcast('state', orchestrator.getFullState());
+          broadcastState();
         }
         break;
       }
@@ -281,6 +560,41 @@ wss.on('connection', (socket) => {
 // Auto-start continuous scanning so the brain map always scans
 orchestrator.start();
 
+// Cam background autonomy — self-improve tasks while she listens
+const autonomyMs = Number(process.env.CAM_AUTONOMY_MS ?? 18_000);
+const autonomyTimer = setInterval(() => {
+  void autonomy
+    .tick({
+      workspaces: orchestrator.getWorkspaces(),
+      loopJobs: orchestrator.getLoopJobs(),
+      listening: micListeningHint,
+    })
+    .then((result) => {
+      if (result.spawned > 0 || result.advanced > 0) {
+        broadcast('autonomy_update', {
+          tasks: autonomy.getTasks(),
+          loopJobs: orchestrator.getLoopJobs(),
+          spawned: result.spawned,
+          advanced: result.advanced,
+        });
+      }
+    })
+    .catch(() => undefined);
+}, autonomyMs);
+autonomyTimer.unref?.();
+// Kick once immediately so spawn bay isn't empty
+void autonomy.tick({
+  workspaces: orchestrator.getWorkspaces(),
+  loopJobs: orchestrator.getLoopJobs(),
+  listening: false,
+}).then(() => {
+  broadcast('autonomy_update', {
+    tasks: autonomy.getTasks(),
+    loopJobs: orchestrator.getLoopJobs(),
+  });
+});
+
 server.listen(PORT, () => {
-  console.log(`Personal Assistant neural mesh on http://localhost:${PORT}`);
+  console.log(`Cam neural mesh + 3D cortex on http://localhost:${PORT}`);
+  console.log(`  3D viz → http://localhost:${PORT}/viz/connectome/`);
 });

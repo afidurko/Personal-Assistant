@@ -168,6 +168,15 @@ export interface NeuralMeshState {
   loopJobs?: LoopJob[];
   /** Last agent-mesh cycle summary */
   lastAgentCycle?: AgentCycleResult | null;
+  /** Cam background self-improve tasks */
+  camSelfTasks?: Array<{
+    id: string;
+    title: string;
+    detail: string;
+    status: string;
+    neuron: string;
+    severity: string;
+  }>;
 }
 
 export type SuggestionKind =
@@ -185,8 +194,12 @@ export type SuggestionKind =
   | 'swarm-lineage'
   | 'swarm-tooling'
   | 'cam-enhance'
-  | 'research-memory';
-
+  | 'research-memory'
+  | 'api-catalog'
+  | 'card-embodiment'
+  | 'identity-voice'
+  | 'presence-voice'
+  | 'identity';
 export interface SuggestiveImplementation {
   id: string;
   kind: SuggestionKind;
@@ -217,7 +230,8 @@ export interface WsServerMessage {
     | 'node_focus'
     | 'guide_focus'
     | 'agent_cycle'
-    | 'loop_update';
+    | 'loop_update'
+    | 'autonomy_update';
   payload: unknown;
   at: string;
 }

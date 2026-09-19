@@ -271,19 +271,21 @@
     {
       "id": "center.info",
       "role": "info-retriever",
-      "function": "vault\u2192mesh\u2192Scholar\u2192web information gather with citations",
+      "function": "vault\u2192mesh\u2192Scholar\u2192public-apis\u2192web information gather with citations",
       "accepts": [
         "spike.question",
         "spike.fact",
         "spike.note_ref",
         "spike.paper",
-        "spike.cite"
+        "spike.cite",
+        "spike.tool_result"
       ],
       "projects_to": [
         "center.research",
         "center.memory",
         "center.agi_scan",
         "center.slm",
+        "center.tooling",
         "center.qa",
         "switch.research_scan"
       ],
@@ -330,23 +332,29 @@
     {
       "id": "center.tooling",
       "role": "tool-creator",
-      "function": "tool-creator \u2192 tool-user; privilege-aware tool registry for motors",
+      "function": "tool-creator \u2192 tool-user; privilege-aware tool registry + public-apis catalog for motors",
       "accepts": [
         "spike.task",
         "spike.tool_result",
         "spike.swarm",
-        "spike.question"
+        "spike.question",
+        "spike.route_hint",
+        "spike.fact"
       ],
       "projects_to": [
         "center.capability",
         "center.ops",
+        "center.info",
         "center.qa",
         "center.slm",
         "switch.autonomy",
         "switch.tooling"
       ],
       "team": "team.tooling",
-      "swarm": "config/swarm/privileges.json"
+      "swarm": "config/swarm/privileges.json",
+      "integrations": [
+        "config/integrations/public-apis.json"
+      ]
     }
   ],
   "preferred": "config/connectome/areas.json",
