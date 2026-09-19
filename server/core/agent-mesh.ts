@@ -167,8 +167,13 @@ export class AgentMeshRuntime {
     const consolidator = MESH_AGENTS.find((a) => a.id === 'memory-consolidator')!;
     const amplifier = MESH_AGENTS.find((a) => a.id === 'recall-amplifier')!;
 
-    for (const ws of workspaces) {
-      if (ws.findings.length === 0) continue;
+    // Limit per-cycle disk writes — pick weakest workspaces only
+    const targets = [...workspaces]
+      .filter((ws) => ws.findings.length > 0)
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 2);
+
+    for (const ws of targets) {
       const top = [...ws.findings].sort(
         (a, b) => SEVERITY_ORDER[b.severity] - SEVERITY_ORDER[a.severity],
       )[0];
@@ -186,12 +191,13 @@ export class AgentMeshRuntime {
       writes += 1;
     }
 
-    // Amplify memories matching open loop jobs
-    for (const job of this.jobs.filter((j) => j.status === 'queued' || j.status === 'running')) {
+    // Amplify at most one open job recall per cycle
+    const openJob = this.jobs.find((j) => j.status === 'queued' || j.status === 'running');
+    if (openJob) {
       await this.memory.write({
         kind: 'agent',
-        content: `[${amplifier.name}] recall boost for job “${job.title}”`,
-        workspaceIds: job.sourceWorkspaceId ? [job.sourceWorkspaceId] : [],
+        content: `[${amplifier.name}] recall boost for job “${openJob.title}”`,
+        workspaceIds: openJob.sourceWorkspaceId ? [openJob.sourceWorkspaceId] : [],
         nodeIds: [agentNodeId(amplifier.id)],
         salience: 0.6,
         createdAt: new Date().toISOString(),
@@ -261,10 +267,10 @@ export class AgentMeshRuntime {
       }
     }
 
-    // Cap job list
+    // Cap job list — generous room for Cam + spawn of agents
     this.jobs = this.jobs
       .sort((a, b) => SEVERITY_ORDER[b.severity] - SEVERITY_ORDER[a.severity])
-      .slice(0, 40);
+      .slice(0, 80);
 
     return count;
   }
@@ -310,7 +316,7 @@ export class AgentMeshRuntime {
       (j) => j.status === 'queued' || j.status === 'running' || j.status === 'verifying',
     );
 
-    for (const job of queue.slice(0, 6)) {
+    for (const job of queue.slice(0, 12)) {
       job.status = 'running';
       job.attempts += 1;
       job.assignedAgentId = job.assignedAgentId || fixer.id;

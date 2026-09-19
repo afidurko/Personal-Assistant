@@ -4,6 +4,19 @@ Cam is Aaron’s always-on Argentine assistant (32, blue eyes, brown hair, soft 
 for life automation, source-backed research, documents, LinkedIn/Indeed jobs, and
 talking presence — with a smart second brain, **agent teams**, and a **sLM/DL cortex**.
 
+## Home (Cam + live 3D cortex)
+
+```bash
+npm install
+npm run dev
+# → http://127.0.0.1:5173  — Cam listens/speaks; 3D DTI cortex mounts in-process (vendored three)
+# API/mesh  → http://127.0.0.1:8787
+# Standalone viz → http://127.0.0.1:8787/viz/connectome/
+```
+
+Cam stays on in the background spawning self-improve tasks (spawn bay on the home page).
+Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache skips tree walks when sources are unchanged.
+
 ## Design
 
 - **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)

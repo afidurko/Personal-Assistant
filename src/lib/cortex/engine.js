@@ -1,15 +1,60 @@
-/* Cam Cortex — DTI tractography mesh driven by live agents/tasks */
+/* Cam Cortex engine — mountable DTI tractography (vendored three) */
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 
-const EMBED =
-  document.documentElement.classList.contains("embed") ||
-  new URLSearchParams(location.search).get("embed") === "1" ||
-  new URLSearchParams(location.search).get("embed") === "true";
-const POLL_MS = EMBED ? 5000 : 2500;
-const AMBIENT_HIGH = EMBED ? 420 : 900;
-const AMBIENT_LOW = EMBED ? 160 : 280;
+/**
+ * @param {HTMLElement} container
+ * @param {{ embed?: boolean, liveActivityUrl?: string, pollMs?: number }} [options]
+ */
+export function mountCortex(container, options = {}) {
+  const root = container;
+  const EMBED = options.embed !== false;
+  const liveActivityUrl = options.liveActivityUrl || "/api/runtime/live-activity";
+  const POLL_MS = options.pollMs ?? (EMBED ? 5000 : 2500);
+  let AMBIENT_HIGH = EMBED ? 420 : 900;
+  let AMBIENT_LOW = EMBED ? 160 : 280;
+
+  // Adaptive LOD from hardware
+  const cores = (typeof navigator !== "undefined" && navigator.hardwareConcurrency) || 4;
+  if (cores <= 4) {
+    AMBIENT_HIGH = Math.min(AMBIENT_HIGH, 320);
+    AMBIENT_LOW = Math.min(AMBIENT_LOW, 140);
+  }
+
+  root.classList.add("cortex-mount");
+  if (EMBED) root.classList.add("embed");
+  root.innerHTML = `
+    <div class="viz-panel viz-panel-3d" id="viewport">
+      <canvas id="c"></canvas>
+      <div class="hud hud-dti">
+        <span>Orbit · zoom · fibers brighten with agents</span>
+        <div class="view-presets">
+          <button type="button" id="view-coronal" title="Coronal">Cor</button>
+          <button type="button" id="view-axial" title="Axial">Ax</button>
+          <button type="button" id="view-sagittal" title="Sagittal">Sag</button>
+          <button type="button" id="view-lod" title="Toggle fiber density">LOD</button>
+        </div>
+        <span class="chip on" id="chip-live">0 agents</span>
+      </div>
+    </div>
+    <div class="chrome-only" hidden>
+      <div id="log"></div>
+      <div id="agents"></div>
+      <div id="controls"></div>
+      <div id="weights"></div>
+      <button type="button" id="btn-play">▶</button>
+      <button type="button" id="btn-rew">⏮</button>
+      <button type="button" id="btn-fwd">⏭</button>
+      <input type="range" id="scrub" min="0" max="0" value="0" />
+      <span id="chip-t"></span>
+      <span id="chip-err"></span>
+      <span id="chip-plast"></span>
+      <span id="chip-neuro"></span>
+      <span id="chip-kill"></span>
+      <span id="chip-auto"></span>
+    </div>
+  `;
 
 const AREAS = [
   { id: "area.dlpfc", label: "DLPFC", ba: "BA9/46", p: [-1.35, 1.15, 0.85], r: 0.28, lobe: "frontal" },
@@ -64,17 +109,17 @@ const SPIKES = [
 ];
 
 const areaById = Object.fromEntries(AREAS.map((a) => [a.id, a]));
-const logEl = document.getElementById("log");
-const scrub = document.getElementById("scrub");
-const chipT = document.getElementById("chip-t");
-const chipErr = document.getElementById("chip-err");
-const chipPlast = document.getElementById("chip-plast");
-const chipNeuro = document.getElementById("chip-neuro");
-const chipKill = document.getElementById("chip-kill");
-const weightsEl = document.getElementById("weights");
-const controlsEl = document.getElementById("controls");
-const agentsEl = document.getElementById("agents");
-const liveChip = document.getElementById("chip-live");
+const logEl = root.querySelector("#log");
+const scrub = root.querySelector("#scrub");
+const chipT = root.querySelector("#chip-t");
+const chipErr = root.querySelector("#chip-err");
+const chipPlast = root.querySelector("#chip-plast");
+const chipNeuro = root.querySelector("#chip-neuro");
+const chipKill = root.querySelector("#chip-kill");
+const weightsEl = root.querySelector("#weights");
+const controlsEl = root.querySelector("#controls");
+const agentsEl = root.querySelector("#agents");
+const liveChip = root.querySelector("#chip-live");
 
 let weights = Object.fromEntries(TRACTS.map((t) => [t.alias || t.id, 0.55]));
 let myelination = Object.fromEntries(TRACTS.map((t) => [t.alias || t.id, t.myelination || 0.7]));
@@ -115,10 +160,19 @@ function dtiColor(dir) {
   return new THREE.Color(r / s, g / s, b / s);
 }
 
-const viewport = document.getElementById("viewport");
-const canvas = document.getElementById("c");
+const viewport = root.querySelector("#viewport");
+const canvas = root.querySelector("#c");
+if (!viewport || !canvas) {
+  root.innerHTML = '<p class="cortex-fallback">Cortex viewport missing.</p>';
+  return {
+    destroy() {},
+    pause() {},
+    resume() {},
+    setLodHigh() {},
+  };
+}
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, 2));
 renderer.setClearColor(0x000000, 1);
 
 const labelRenderer = new CSS2DRenderer();
@@ -374,14 +428,20 @@ AREAS.forEach((a) => {
 });
 
 function resize() {
-  const w = viewport.clientWidth;
-  const h = viewport.clientHeight;
+  if (!viewport) return;
+  const w = Math.max(1, viewport.clientWidth);
+  const h = Math.max(1, viewport.clientHeight);
   renderer.setSize(w, h, false);
   labelRenderer.setSize(w, h);
-  camera.aspect = w / Math.max(h, 1);
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
 window.addEventListener("resize", resize);
+const resizeObs =
+  typeof ResizeObserver !== "undefined"
+    ? new ResizeObserver(() => resize())
+    : null;
+resizeObs?.observe(viewport);
 resize();
 
 function setAreaLit(id, mode) {
@@ -637,7 +697,7 @@ async function fireSpike(spike, injectError = false) {
   if (spike.system) highlightSystem(spike.system);
   if (spike.health) {
     try {
-      const r = await fetch("../../vault/10-Mesh-Distillates/system-health.json").then((x) => x.json());
+      const r = await fetch("/api/runtime/system-health").then((x) => x.json());
       (r.checks || []).forEach((c) => {
         healthStatus[c.neuron] = c.status;
         agentActivity[c.neuron] = c.status === "healthy" ? 0.5 : c.status === "idle" ? 0.2 : 0.95;
@@ -701,7 +761,7 @@ function applyLiveFeed(feed) {
 
 async function pollLiveActivity() {
   try {
-    const r = await fetch("../../vault/10-Mesh-Distillates/live-activity.json?t=" + Date.now()).then((x) => x.json());
+    const r = await fetch(liveActivityUrl + (liveActivityUrl.includes("?") ? "&" : "?") + "t=" + Date.now()).then((x) => x.json());
     applyLiveFeed(r);
   } catch (_) {
     /* offline */
@@ -803,26 +863,26 @@ function renderControls() {
   });
   controlsEl.appendChild(reset);
 
-  document.getElementById("view-coronal")?.addEventListener("click", () => setCameraView("coronal"));
-  document.getElementById("view-axial")?.addEventListener("click", () => setCameraView("axial"));
-  document.getElementById("view-sagittal")?.addEventListener("click", () => setCameraView("sagittal"));
-  document.getElementById("view-lod")?.addEventListener("click", () => {
+  root.querySelector("#view-coronal")?.addEventListener("click", () => setCameraView("coronal"));
+  root.querySelector("#view-axial")?.addEventListener("click", () => setCameraView("axial"));
+  root.querySelector("#view-sagittal")?.addEventListener("click", () => setCameraView("sagittal"));
+  root.querySelector("#view-lod")?.addEventListener("click", () => {
     lodHigh = !lodHigh;
     buildAmbientConnectome(lodHigh ? AMBIENT_HIGH : AMBIENT_LOW);
     log(`<span class="center">LOD</span> ${lodHigh ? "high" : "low"} ambient fibers`);
   });
 }
 
-document.getElementById("btn-play")?.addEventListener("click", () => {
+root.querySelector("#btn-play")?.addEventListener("click", () => {
   playing = !playing;
-  const btn = document.getElementById("btn-play");
+  const btn = root.querySelector("#btn-play");
   if (btn) btn.textContent = playing ? "⏸" : "▶";
 });
-document.getElementById("btn-rew")?.addEventListener("click", () => {
+root.querySelector("#btn-rew")?.addEventListener("click", () => {
   playing = false;
   seek(cursor - 1);
 });
-document.getElementById("btn-fwd")?.addEventListener("click", () => {
+root.querySelector("#btn-fwd")?.addEventListener("click", () => {
   playing = false;
   seek(cursor + 1);
 });
@@ -834,12 +894,12 @@ scrub?.addEventListener("input", () => {
 async function loadSeed() {
   try {
     const [w, t, c, n, h, live] = await Promise.all([
-      fetch("../../vault/10-Mesh-Distillates/tract-weights.json").then((r) => r.json()).catch(() => ({})),
-      fetch("../../vault/10-Mesh-Distillates/plasticity-timeline.json").then((r) => r.json()).catch(() => ({})),
-      fetch("../../vault/10-Mesh-Distillates/neurogenesis-columns.json").then((r) => r.json()).catch(() => ({})),
-      fetch("../../config/connectome/neurons.json").then((r) => r.json()),
-      fetch("../../vault/10-Mesh-Distillates/system-health.json").then((r) => r.json()).catch(() => null),
-      fetch("../../vault/10-Mesh-Distillates/live-activity.json").then((r) => r.json()).catch(() => null),
+      fetch("/api/runtime/tract-weights").then((r) => r.json()).catch(() => ({})),
+      fetch("/api/runtime/plasticity-timeline").then((r) => r.json()).catch(() => ({})),
+      fetch("/api/runtime/neurogenesis-columns").then((r) => r.json()).catch(() => ({})),
+      fetch("/config/connectome/neurons.json").then((r) => r.json()).catch(() => ({ neurons: [] })),
+      fetch("/api/runtime/system-health").then((r) => r.json()).catch(() => null),
+      fetch(liveActivityUrl).then((r) => r.json()).catch(() => null),
     ]);
     catalogNeurons = n.neurons || [];
     if (h?.checks) {
@@ -891,11 +951,16 @@ function setAnimating(on) {
     livePoll = setInterval(pollLiveActivity, POLL_MS);
   } else {
     clearInterval(livePoll);
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+    }
   }
 }
 
 document.addEventListener("visibilitychange", () => {
-  setAnimating(!(document.hidden || document.visibilityState === "hidden"));
+  const hidden = document.hidden || document.visibilityState === "hidden";
+  setAnimating(!hidden);
 });
 window.addEventListener("message", (ev) => {
   const data = ev?.data;
@@ -914,8 +979,20 @@ function animate(now) {
     return;
   }
   rafId = requestAnimationFrame(animate);
-  const dt = Math.min(0.05, (now - lastDecay) / 1000);
+  const frameDt = now - lastDecay;
+  const dt = Math.min(0.05, frameDt / 1000);
   lastDecay = now;
+
+  // Adaptive LOD: if frames stall, drop ambient fiber density
+  if (frameDt > 40 && lodHigh) {
+    lodHigh = false;
+    buildAmbientConnectome(AMBIENT_LOW);
+    log(`<span class="center">LOD</span> auto→low (${Math.round(frameDt)}ms)`);
+  } else if (frameDt < 18 && !lodHigh && cores > 4 && Math.random() < 0.002) {
+    lodHigh = true;
+    buildAmbientConnectome(AMBIENT_HIGH);
+  }
+
   controls.update();
   brain.rotation.y += autoSim ? 0.0012 : 0.0004;
   decayActivity(dt);
@@ -925,7 +1002,7 @@ function animate(now) {
     if (cursor < events.length - 1) seek(cursor + 1);
     else {
       playing = false;
-      const btn = document.getElementById("btn-play");
+      const btn = root.querySelector("#btn-play");
       if (btn) btn.textContent = "▶";
     }
   }
@@ -963,3 +1040,53 @@ log(
     EMBED ? " · embed" : ""
   }`
 );
+
+  function destroy() {
+    setAnimating(false);
+    clearInterval(livePoll);
+    window.removeEventListener("resize", resize);
+    try {
+      resizeObs?.disconnect();
+    } catch (_) {}
+    try {
+      controls.dispose();
+    } catch (_) {}
+    try {
+      // Dispose tract + ambient GPU resources
+      Object.values(tractLineGroups).forEach((g) => {
+        g.traverse((obj) => {
+          if (obj.geometry) obj.geometry.dispose?.();
+          if (obj.material) {
+            if (Array.isArray(obj.material)) obj.material.forEach((m) => m.dispose?.());
+            else obj.material.dispose?.();
+          }
+        });
+        brain.remove(g);
+      });
+      if (ambientLines) {
+        ambientLines.geometry?.dispose?.();
+        ambientLines.material?.dispose?.();
+        brain.remove(ambientLines);
+      }
+      fiberPulses.splice(0).forEach((m) => {
+        m.geometry?.dispose?.();
+        m.material?.dispose?.();
+        brain.remove(m);
+      });
+      renderer.dispose();
+      labelRenderer.domElement.remove();
+      renderer.forceContextLoss?.();
+    } catch (_) {}
+    root.innerHTML = "";
+  }
+
+  return {
+    destroy,
+    pause: () => setAnimating(false),
+    resume: () => setAnimating(true),
+    setLodHigh: (high) => {
+      lodHigh = Boolean(high);
+      buildAmbientConnectome(lodHigh ? AMBIENT_HIGH : AMBIENT_LOW);
+    },
+  };
+}

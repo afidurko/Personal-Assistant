@@ -24,6 +24,7 @@ const emptyState: NeuralMeshState = {
   suggestions: [],
   loopJobs: [],
   lastAgentCycle: null,
+  camSelfTasks: [],
 };
 
 export interface MeshStore extends NeuralMeshState {
@@ -111,6 +112,8 @@ export const useMeshStore = create<MeshStore>((set, get) => ({
         next.lastAgentCycle !== undefined
           ? (next.lastAgentCycle as AgentCycleResult | null)
           : prev.lastAgentCycle,
+      camSelfTasks:
+        (next.camSelfTasks as NeuralMeshState['camSelfTasks'] | undefined) ?? prev.camSelfTasks,
     });
   },
 
