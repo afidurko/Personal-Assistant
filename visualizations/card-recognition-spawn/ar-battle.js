@@ -32,7 +32,8 @@
     step: 1,
     you: null,
     opp: null,
-    turn: 'you'
+    turn: 'you',
+    inputLocked: false
   };
 
   var view = document.getElementById('ar-view');
@@ -123,6 +124,7 @@
 
   function useMove(moveId) {
     if (!state.you || !state.opp || view.classList.contains('mode-setup')) return;
+    if (state.inputLocked || state.turn !== 'you') return;
     var move = state.you.moves.find(function (m) { return m.id === moveId; });
     if (!move) return;
 
@@ -133,6 +135,8 @@
       return;
     }
 
+    state.inputLocked = true;
+    state.turn = 'resolving';
     var youFighter = document.getElementById('fighter-you');
     var oppFighter = document.getElementById('fighter-opp');
     youFighter.classList.remove('punch');
@@ -159,12 +163,15 @@
         logTitle.textContent = 'YOU WIN';
         logBody.textContent = 'Opponent knocked out.';
         document.getElementById('panel-wait').textContent = 'Victory';
+        state.turn = 'done';
+        state.inputLocked = true;
       }, 600);
       return;
     }
 
     // Opponent reply beat — mirrors “OPPONENT TURN” panel in the reference
     window.setTimeout(function () {
+      state.turn = 'opp';
       document.getElementById('panel-wait').hidden = true;
       logTitle.textContent = 'OPPONENT TURN';
       logBody.textContent = '1. Drew 1 card.';
@@ -182,6 +189,8 @@
         document.getElementById('panel-wait').textContent = 'Waiting…';
         logTitle.textContent = 'YOUR TURN';
         logBody.textContent = 'Choose an attack.';
+        state.turn = 'you';
+        state.inputLocked = false;
       }, 1100);
     }, 1200);
   }
