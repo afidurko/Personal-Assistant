@@ -7,6 +7,7 @@ import { ScanControls } from '@/components/ScanControls';
 import { SwiftGuidePanel } from '@/components/SwiftGuidePanel';
 import { SuggestionsPanel } from '@/components/SuggestionsPanel';
 import { AgentSpawnBay } from '@/components/AgentSpawnBay';
+import { SystemPulse } from '@/components/SystemPulse';
 import { useMeshSocket } from '@/hooks/useMeshSocket';
 import { useMeshStore } from '@/store/meshStore';
 
@@ -76,6 +77,8 @@ export default function App() {
         onStartIssueLoop={() => startIssueLoop()}
         onStopIssueLoop={() => stopIssueLoop()}
       />
+
+      <SystemPulse />
 
       <div className="detail-grid three">
         <WorkspacePanel onOpenWorkspace={(id) => openWorkspace(id)} />

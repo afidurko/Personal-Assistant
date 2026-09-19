@@ -60,6 +60,8 @@ python3 scripts/scholar-search.py --query "connectome mapping" --offline
 python3 scripts/agi-research-scan.py
 # Confirm workspace + integration wiring
 python3 scripts/workspace-integration-check.py
+# Overall system pulse (all pieces on one bus)
+python3 scripts/cam-system.py --smoke
 # HAAS→Cam privilege + boss/worker contracts
 python3 scripts/swarm-check.py
 # Kill switch silences motors
@@ -127,5 +129,7 @@ Cline wired as shared coding effector for all agents and future workspaces
 (registry, runner, MCP, schedules, tickets).
 Public-apis wired as shared free-API catalog for all agents
 (`motor.public_apis`, MCP `public_apis_search`, tooling/info/capability/AGI teams).
+**Overall system bridge** ties home converse → connectome → live cortex activity
+(`server/core/system-bridge.ts`, `GET /api/system`, `python3 scripts/cam-system.py`).
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.
-Neural-mesh scanner stack is present alongside the Cam connectome foundation.
+Neural-mesh scanner stack and Cam connectome share one activity bus via the system bridge.

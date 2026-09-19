@@ -10,6 +10,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Workspace registry: [`config/workspaces/registry.json`](config/workspaces/registry.json)
 - Runner: `python3 scripts/run-cline.py --goal "..." "prompt"`
 - Chooser: `python3 scripts/choose-workspace.py --goal "..."`
+- System: `python3 scripts/cam-system.py --smoke` — all pieces on one bus
 - MCP: `python3 scripts/cam-mcp-server.py` (stdio) — install with `cline mcp install cam -- ...`
 - Schedules: `python3 scripts/sync-cline-schedules.py --apply-cache --print-commands`
 - Public APIs: `python3 scripts/public-apis-search.py --query "weather"`

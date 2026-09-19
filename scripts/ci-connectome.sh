@@ -4,6 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+echo "== cam system integration =="
+python3 scripts/cam-system.py --smoke
+python3 scripts/test_cam_system.py
+
 echo "== connectome-check =="
 python3 scripts/connectome-check.py
 

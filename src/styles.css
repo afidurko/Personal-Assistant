@@ -1556,3 +1556,128 @@ h2,
   margin-bottom: 0.65rem;
 }
 
+/* System pulse — one bus for all Cam pieces */
+.system-pulse {
+  padding: 1.75rem clamp(1.25rem, 3vw, 2.5rem) 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.system-pulse-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 1.25rem;
+  align-items: start;
+  margin-bottom: 1rem;
+  max-width: 64rem;
+}
+
+.system-pulse-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  grid-column: 1;
+}
+
+.system-pulse-head p {
+  grid-column: 1;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  max-width: 48ch;
+}
+
+.system-overall {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border);
+  color: var(--foam-dim);
+}
+
+.system-overall.status-healthy {
+  color: var(--healthy);
+  border-color: rgba(46, 194, 126, 0.45);
+}
+
+.system-overall.status-warning {
+  color: var(--amber);
+  border-color: rgba(230, 168, 23, 0.45);
+}
+
+.system-overall.status-critical {
+  color: var(--coral);
+  border-color: rgba(227, 93, 93, 0.45);
+}
+
+.system-error {
+  color: var(--coral);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.system-piece-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  gap: 0.55rem 0.85rem;
+}
+
+.system-piece {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.45rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+}
+
+.system-piece-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--idle);
+  grid-row: 1 / span 2;
+  align-self: center;
+  animation: system-dot-breathe 2.8s var(--ease-pulse) infinite;
+}
+
+.system-piece.status-healthy .system-piece-dot {
+  background: var(--healthy);
+}
+
+.system-piece.status-warning .system-piece-dot {
+  background: var(--amber);
+}
+
+.system-piece.status-critical .system-piece-dot {
+  background: var(--coral);
+}
+
+.system-piece-title {
+  color: var(--text);
+}
+
+.system-piece-layer {
+  grid-column: 2;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@keyframes system-dot-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+

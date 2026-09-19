@@ -47,10 +47,12 @@ HARD_PATHS = [
     "config/integrations/public-apis.json",
     "config/integrations/public-apis.md",
     "config/integrations/public-apis-addons.json",
+    "config/system/pieces.json",
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
     "docs/HAAS_CAM_PATTERNS.md",
+    "docs/SYSTEM_INTEGRATION.md",
     "scripts/agi-research-scan.py",
     "scripts/cam-enhance-propose.py",
     "scripts/scholar-search.py",
@@ -59,6 +61,7 @@ HARD_PATHS = [
     "scripts/pack-public-apis-result.py",
     "scripts/public-apis-check.py",
     "scripts/public-apis-addon.py",
+    "scripts/cam-system.py",
     "scripts/swarm-check.py",
     "scripts/persist-export.py",
     "scripts/persist-import.py",
@@ -67,6 +70,7 @@ HARD_PATHS = [
     "scripts/pack-mesh-claim.py",
     "scripts/apply-cam-enhancements.py",
     "server/core/swarm-runtime.ts",
+    "server/core/system-bridge.ts",
     "server/workspaces/swarm.ts",
     "shared/swarmPrivileges.ts",
     "shared/agentLayers.ts",
@@ -92,6 +96,8 @@ PERSIST_MUST_INCLUDE = [
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
     "docs/HAAS_CAM_PATTERNS.md",
+    "docs/SYSTEM_INTEGRATION.md",
+    "config/system/pieces.json",
 ]
 
 

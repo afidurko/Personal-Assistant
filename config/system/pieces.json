@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "assistant": "Cam",
+  "human": "Aaron",
+  "purpose": "Canonical inventory of Cam pieces and how they compose one live system",
+  "bus": {
+    "sense_to_motor": "scripts/connectome-route.py",
+    "live_activity": "data/runtime/live-activity.json",
+    "activity_events": "data/runtime/activity-events.jsonl",
+    "mesh_api": "http://127.0.0.1:8787",
+    "home_ui": "http://127.0.0.1:5173",
+    "ws": "ws://127.0.0.1:8787/ws"
+  },
+  "pieces": [
+    {
+      "id": "piece.connectome",
+      "title": "Brodmann connectome",
+      "layer": "brain",
+      "paths": ["config/connectome/", "scripts/connectome-route.py", "scripts/connectome-check.py"],
+      "check": "python3 scripts/connectome-check.py",
+      "feeds": ["piece.home_cortex", "piece.swarm", "piece.tools"]
+    },
+    {
+      "id": "piece.neural_mesh",
+      "title": "Neural mesh scanners",
+      "layer": "runtime",
+      "paths": ["server/core/scan-orchestrator.ts", "server/workspaces/", "shared/"],
+      "check": "npm run lint",
+      "feeds": ["piece.home_ui", "piece.autonomy"]
+    },
+    {
+      "id": "piece.home_ui",
+      "title": "Cam home (React + Vite)",
+      "layer": "presence",
+      "paths": ["src/App.tsx", "src/components/CamPresence.tsx"],
+      "depends_on": ["piece.neural_mesh", "piece.converse"],
+      "feeds": ["piece.home_cortex"]
+    },
+    {
+      "id": "piece.home_cortex",
+      "title": "Live 3D cortex",
+      "layer": "presence",
+      "paths": ["src/lib/cortex/", "visualizations/connectome/"],
+      "depends_on": ["piece.connectome", "piece.system_bridge"],
+      "feeds": []
+    },
+    {
+      "id": "piece.converse",
+      "title": "Cam converse (mic/speak turns)",
+      "layer": "presence",
+      "paths": ["server/core/cam-converse.ts", "companions/web/"],
+      "depends_on": ["piece.system_bridge"],
+      "feeds": ["piece.autonomy", "piece.home_cortex"]
+    },
+    {
+      "id": "piece.system_bridge",
+      "title": "System bridge (turns → connectome + activity)",
+      "layer": "glue",
+      "paths": ["server/core/system-bridge.ts", "scripts/cam-system.py", "config/system/pieces.json"],
+      "depends_on": ["piece.connectome"],
+      "feeds": ["piece.home_cortex", "piece.health"]
+    },
+    {
+      "id": "piece.autonomy",
+      "title": "Background self-improve spawn",
+      "layer": "runtime",
+      "paths": ["server/core/cam-autonomy.ts"],
+      "depends_on": ["piece.neural_mesh"],
+      "feeds": ["piece.home_cortex"]
+    },
+    {
+      "id": "piece.health",
+      "title": "System health + improve engine",
+      "layer": "ops",
+      "paths": ["scripts/system-health-scan.py", "scripts/improve-engine.py"],
+      "depends_on": ["piece.connectome"],
+      "feeds": ["piece.autonomy", "piece.home_cortex"]
+    },
+    {
+      "id": "piece.swarm",
+      "title": "HAAS privilege + boss/worker",
+      "layer": "brain",
+      "paths": ["config/swarm/", "scripts/swarm-check.py", "server/core/swarm-runtime.ts"],
+      "check": "python3 scripts/swarm-check.py",
+      "feeds": ["piece.teams", "piece.cline"]
+    },
+    {
+      "id": "piece.teams",
+      "title": "Agent teams (AGI / capability / info / tooling)",
+      "layer": "brain",
+      "paths": ["config/teams/", "docs/CAM_BRAIN.md"],
+      "feeds": ["piece.cline", "piece.public_apis", "piece.scholar"]
+    },
+    {
+      "id": "piece.cline",
+      "title": "Cline coding effector",
+      "layer": "motor",
+      "paths": ["integrations/cline", "config/integrations/cline.md", "scripts/run-cline.py"],
+      "feeds": []
+    },
+    {
+      "id": "piece.public_apis",
+      "title": "Public APIs catalog",
+      "layer": "motor",
+      "paths": ["integrations/public-apis", "config/integrations/public-apis.json", "scripts/public-apis-search.py"],
+      "check": "python3 scripts/public-apis-check.py",
+      "feeds": []
+    },
+    {
+      "id": "piece.scholar",
+      "title": "Google Scholar",
+      "layer": "sense",
+      "paths": ["config/integrations/google-scholar.json", "scripts/scholar-search.py"],
+      "feeds": ["piece.teams"]
+    },
+    {
+      "id": "piece.vault",
+      "title": "Smart second brain vault",
+      "layer": "memory",
+      "paths": ["vault/", "integrations/smart-second-brain", "config/persona/vault.json"],
+      "feeds": ["piece.teams"]
+    },
+    {
+      "id": "piece.tools",
+      "title": "Tools registry",
+      "layer": "motor",
+      "paths": ["config/tools/registry.json"],
+      "feeds": []
+    },
+    {
+      "id": "piece.workspaces",
+      "title": "Workspace registry + chooser",
+      "layer": "ops",
+      "paths": ["config/workspaces/registry.json", "scripts/choose-workspace.py"],
+      "feeds": ["piece.cline"]
+    },
+    {
+      "id": "piece.ios",
+      "title": "iOS companion converse",
+      "layer": "presence",
+      "paths": ["companions/ios/", "config/integrations/ios-companion.md"],
+      "depends_on": ["piece.converse"],
+      "feeds": []
+    },
+    {
+      "id": "piece.persistence",
+      "title": "Persistence bundle",
+      "layer": "memory",
+      "paths": ["identity/persistence/", "scripts/persist-export.py"],
+      "feeds": ["piece.vault"]
+    }
+  ],
+  "boot_order": [
+    "piece.persistence",
+    "piece.connectome",
+    "piece.swarm",
+    "piece.teams",
+    "piece.tools",
+    "piece.workspaces",
+    "piece.neural_mesh",
+    "piece.system_bridge",
+    "piece.converse",
+    "piece.autonomy",
+    "piece.home_ui",
+    "piece.home_cortex",
+    "piece.health"
+  ]
+}

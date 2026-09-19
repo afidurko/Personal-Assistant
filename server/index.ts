@@ -11,6 +11,7 @@ import { ScanOrchestrator } from './core/scan-orchestrator.js';
 import { CamConverse } from './core/cam-converse.js';
 import { CamAutonomy } from './core/cam-autonomy.js';
 import { RuntimeStore } from './core/runtime-store.js';
+import { SystemBridge } from './core/system-bridge.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -31,6 +32,7 @@ const orchestrator = new ScanOrchestrator({
 
 const converse = new CamConverse(ROOT);
 const autonomy = new CamAutonomy(runtime);
+const bridge = new SystemBridge(ROOT, runtime);
 let micListeningHint = false;
 
 await orchestrator.init();
@@ -57,21 +59,47 @@ function stateFingerprint(state: ReturnType<typeof fullState>): string {
 
 let lastStateFingerprint = '';
 
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
+  const system = await bridge.status({
+    sessionId: converse.sessionId,
+    scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    listening: micListeningHint,
+  });
   res.json({
-    ok: true,
+    ok: system.ok,
     service: 'personal-assistant',
     assistant: 'Cam',
     scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    listening: micListeningHint,
+    overall: system.overall,
+    pieces: system.pieces.length,
     capabilities: {
       mic: true,
       speak: true,
       cortex3d: true,
       autonomy: true,
+      system_bridge: true,
       enabled: true,
     },
     session_id: converse.sessionId,
   });
+});
+
+app.get('/api/system', async (_req, res) => {
+  const system = await bridge.status({
+    sessionId: converse.sessionId,
+    scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    listening: micListeningHint,
+  });
+  res.json(system);
+});
+
+app.post('/api/system/route', async (req, res) => {
+  const body = req.body as { sense?: string; goal?: string };
+  const sense = String(body.sense ?? 'sense.chat.aaron');
+  const goal = String(body.goal ?? '');
+  const route = await bridge.routeSense(sense, goal);
+  res.json(route);
 });
 
 app.get('/api/state', (_req, res) => {
@@ -172,23 +200,35 @@ app.post('/api/turn', async (req, res) => {
   const text = String(body.text ?? body.transcript ?? '');
   const source = String(body.source ?? 'text');
   const reply = await converse.turn(text, source);
+  // Bridge: light cortex + route connectome so home, mesh, and motors share one bus
+  const bridged = await bridge.onTurn(text, source);
   // Pulse autonomy when Aaron talks so Cam keeps self-tasks warm
   void autonomy.tick({
     workspaces: orchestrator.getWorkspaces(),
     loopJobs: orchestrator.getLoopJobs(),
     listening: true,
   });
-  res.json(reply);
+  res.json({
+    ...reply,
+    bridge: {
+      route: bridged.route,
+      activities: bridged.activities.length,
+    },
+  });
 });
 
-app.post('/api/spike/mic', (req, res) => {
+app.post('/api/spike/mic', async (req, res) => {
   micListeningHint = true;
   const body = req.body as { purpose?: string; transcript?: string };
+  const purpose = body.purpose ?? 'conversation';
+  const bridged = await bridge.onMicSpike(purpose);
   res.json({
     ok: true,
     sense: 'sense.ios.mic',
-    purpose: body.purpose ?? 'conversation',
-    accepted: true,
+    purpose,
+    accepted: bridged.route.accepted !== false,
+    route: bridged.route,
+    activities: bridged.activities.length,
   });
 });
 
@@ -197,13 +237,17 @@ app.post('/api/spike/mic/stop', (_req, res) => {
   res.json({ ok: true, listening: false });
 });
 
-app.post('/api/spike/camera', (req, res) => {
+app.post('/api/spike/camera', async (req, res) => {
   const body = req.body as { purpose?: string };
+  const purpose = body.purpose ?? 'presence';
+  const bridged = await bridge.onCameraSpike(purpose);
   res.json({
     ok: true,
     sense: 'sense.ios.camera',
-    purpose: body.purpose ?? 'presence',
-    accepted: true,
+    purpose,
+    accepted: bridged.route.accepted !== false,
+    route: bridged.route,
+    activities: bridged.activities.length,
   });
 });
 

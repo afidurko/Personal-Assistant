@@ -1,0 +1,245 @@
+{
+  "at": "2026-09-19T19:46:33Z",
+  "overall": "warning",
+  "ok": true,
+  "assistant": "Cam",
+  "bus": {
+    "sense_to_motor": "scripts/connectome-route.py",
+    "live_activity": "data/runtime/live-activity.json",
+    "activity_events": "data/runtime/activity-events.jsonl",
+    "mesh_api": "http://127.0.0.1:8787",
+    "home_ui": "http://127.0.0.1:5173",
+    "ws": "ws://127.0.0.1:8787/ws"
+  },
+  "boot_order": [
+    "piece.persistence",
+    "piece.connectome",
+    "piece.swarm",
+    "piece.teams",
+    "piece.tools",
+    "piece.workspaces",
+    "piece.neural_mesh",
+    "piece.system_bridge",
+    "piece.converse",
+    "piece.autonomy",
+    "piece.home_ui",
+    "piece.home_cortex",
+    "piece.health"
+  ],
+  "pieces": [
+    {
+      "id": "piece.connectome",
+      "title": "Brodmann connectome",
+      "layer": "brain",
+      "status": "healthy",
+      "paths": {
+        "config/connectome/": "ok",
+        "scripts/connectome-route.py": "ok",
+        "scripts/connectome-check.py": "ok"
+      }
+    },
+    {
+      "id": "piece.neural_mesh",
+      "title": "Neural mesh scanners",
+      "layer": "runtime",
+      "status": "healthy",
+      "paths": {
+        "server/core/scan-orchestrator.ts": "ok",
+        "server/workspaces/": "ok",
+        "shared/": "ok"
+      }
+    },
+    {
+      "id": "piece.home_ui",
+      "title": "Cam home (React + Vite)",
+      "layer": "presence",
+      "status": "healthy",
+      "paths": {
+        "src/App.tsx": "ok",
+        "src/components/CamPresence.tsx": "ok"
+      }
+    },
+    {
+      "id": "piece.home_cortex",
+      "title": "Live 3D cortex",
+      "layer": "presence",
+      "status": "healthy",
+      "paths": {
+        "src/lib/cortex/": "ok",
+        "visualizations/connectome/": "ok"
+      }
+    },
+    {
+      "id": "piece.converse",
+      "title": "Cam converse (mic/speak turns)",
+      "layer": "presence",
+      "status": "healthy",
+      "paths": {
+        "server/core/cam-converse.ts": "ok",
+        "companions/web/": "ok"
+      }
+    },
+    {
+      "id": "piece.system_bridge",
+      "title": "System bridge (turns \u2192 connectome + activity)",
+      "layer": "glue",
+      "status": "healthy",
+      "paths": {
+        "server/core/system-bridge.ts": "ok",
+        "scripts/cam-system.py": "ok",
+        "config/system/pieces.json": "ok"
+      }
+    },
+    {
+      "id": "piece.autonomy",
+      "title": "Background self-improve spawn",
+      "layer": "runtime",
+      "status": "healthy",
+      "paths": {
+        "server/core/cam-autonomy.ts": "ok"
+      }
+    },
+    {
+      "id": "piece.health",
+      "title": "System health + improve engine",
+      "layer": "ops",
+      "status": "healthy",
+      "paths": {
+        "scripts/system-health-scan.py": "ok",
+        "scripts/improve-engine.py": "ok"
+      }
+    },
+    {
+      "id": "piece.swarm",
+      "title": "HAAS privilege + boss/worker",
+      "layer": "brain",
+      "status": "healthy",
+      "paths": {
+        "config/swarm/": "ok",
+        "scripts/swarm-check.py": "ok",
+        "server/core/swarm-runtime.ts": "ok"
+      }
+    },
+    {
+      "id": "piece.teams",
+      "title": "Agent teams (AGI / capability / info / tooling)",
+      "layer": "brain",
+      "status": "healthy",
+      "paths": {
+        "config/teams/": "ok",
+        "docs/CAM_BRAIN.md": "ok"
+      }
+    },
+    {
+      "id": "piece.cline",
+      "title": "Cline coding effector",
+      "layer": "motor",
+      "status": "warning",
+      "paths": {
+        "integrations/cline": "empty",
+        "config/integrations/cline.md": "ok",
+        "scripts/run-cline.py": "ok"
+      }
+    },
+    {
+      "id": "piece.public_apis",
+      "title": "Public APIs catalog",
+      "layer": "motor",
+      "status": "warning",
+      "paths": {
+        "integrations/public-apis": "empty",
+        "config/integrations/public-apis.json": "ok",
+        "scripts/public-apis-search.py": "ok"
+      }
+    },
+    {
+      "id": "piece.scholar",
+      "title": "Google Scholar",
+      "layer": "sense",
+      "status": "healthy",
+      "paths": {
+        "config/integrations/google-scholar.json": "ok",
+        "scripts/scholar-search.py": "ok"
+      }
+    },
+    {
+      "id": "piece.vault",
+      "title": "Smart second brain vault",
+      "layer": "memory",
+      "status": "warning",
+      "paths": {
+        "vault/": "ok",
+        "integrations/smart-second-brain": "empty",
+        "config/persona/vault.json": "ok"
+      }
+    },
+    {
+      "id": "piece.tools",
+      "title": "Tools registry",
+      "layer": "motor",
+      "status": "healthy",
+      "paths": {
+        "config/tools/registry.json": "ok"
+      }
+    },
+    {
+      "id": "piece.workspaces",
+      "title": "Workspace registry + chooser",
+      "layer": "ops",
+      "status": "healthy",
+      "paths": {
+        "config/workspaces/registry.json": "ok",
+        "scripts/choose-workspace.py": "ok"
+      }
+    },
+    {
+      "id": "piece.ios",
+      "title": "iOS companion converse",
+      "layer": "presence",
+      "status": "healthy",
+      "paths": {
+        "companions/ios/": "ok",
+        "config/integrations/ios-companion.md": "ok"
+      }
+    },
+    {
+      "id": "piece.persistence",
+      "title": "Persistence bundle",
+      "layer": "memory",
+      "status": "healthy",
+      "paths": {
+        "identity/persistence/": "ok",
+        "scripts/persist-export.py": "ok"
+      }
+    }
+  ],
+  "piece_count": 18,
+  "hard_missing": [],
+  "smokes": [
+    {
+      "id": "connectome-check",
+      "ok": true,
+      "exit": 0,
+      "preview": "connectome-check: PASS\n  senses=26 options=36 edges=272 hard=0 missing=0"
+    },
+    {
+      "id": "swarm-check",
+      "ok": true,
+      "exit": 0,
+      "preview": "OK: privilege inheritance, lineage terminate, and primitives validated\n  simulated events: 9\n  deep spawn reached level: 6"
+    },
+    {
+      "id": "workspace-integration-check",
+      "ok": true,
+      "exit": 0,
+      "preview": "workspace-integration-check: PASS\n  SOFT integration empty: integrations/jarvis (submodule init or create config)\n  SOFT integration empty: integrations/paddledetection (submodule init or create config)\n  SOFT integration empty: integration"
+    },
+    {
+      "id": "connectome-route-chat",
+      "ok": true,
+      "exit": 0,
+      "preview": "{\n  \"accepted\": true,\n  \"sense\": \"sense.chat.aaron\",\n  \"goal\": \"system smoke\",\n  \"area\": \"area.temporal\",\n  \"center\": \"area.temporal\",\n  \"columns\": [\n    \"neuron.language_in\",\n    \"neuron.research\",\n    \"neuron.qa\",\n    \"neuron.semantic\"\n  "
+    }
+  ],
+  "smoke_ok": true
+}

@@ -6,6 +6,7 @@
     "integration empty: integrations/paddledetection (submodule init or create config)",
     "integration empty: integrations/llmavatartalk (submodule init or create config)",
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
+    "integration empty: integrations/public-apis (submodule init or create config)",
     "integration empty: integrations/cline (submodule init or create config)"
   ],
   "mesh_flags": {
@@ -52,7 +53,7 @@
     {
       "id": "public-apis",
       "path": "integrations/public-apis",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {
