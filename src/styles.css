@@ -254,7 +254,11 @@ h2,
 .cortex-stage {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  min-height: min(58vh, 620px);
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   background:
     radial-gradient(ellipse 70% 55% at 50% 48%, #12201c 0%, #05080a 72%);
   animation: fade-rise 1s var(--ease-out) 0.1s both;
@@ -298,6 +302,7 @@ h2,
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
   font-size: 0.72rem;
   color: var(--foam-dim);
@@ -1293,15 +1298,6 @@ h2,
   }
 }
 
-.cortex-stage {
-  position: relative;
-  min-height: min(58vh, 620px);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  background: #000;
-  overflow: hidden;
-}
-
 .cortex-stage.listening {
   box-shadow: inset 0 0 0 1px rgba(61, 184, 168, 0.35);
 }
@@ -1388,18 +1384,6 @@ h2,
   font-size: 0.9rem;
   padding: 1rem;
   text-align: center;
-}
-
-.cortex-hud {
-  position: absolute;
-  left: 1rem;
-  bottom: 1rem;
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  pointer-events: none;
-  z-index: 2;
-  flex-wrap: wrap;
 }
 
 .cortex-hud-pill {
