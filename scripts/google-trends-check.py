@@ -70,6 +70,27 @@ def main() -> int:
     tool_ids = [t.get("id") for t in tools.get("tools") or []]
     if "tool.google_trends.search" not in tool_ids:
         errors.append("tools registry missing tool.google_trends.search")
+    if "tool.google_trends.addon" not in tool_ids:
+        errors.append("tools registry missing tool.google_trends.addon")
+
+    addons_path = ROOT / "config/integrations/google-trends-addons.json"
+    if not addons_path.exists():
+        errors.append("missing config/integrations/google-trends-addons.json")
+    else:
+        addons = load(addons_path)
+        if not addons.get("addons"):
+            errors.append("google-trends-addons.json has empty addons list")
+        try:
+            doctor = json.loads(
+                subprocess.check_output(
+                    [sys.executable, str(ROOT / "scripts/google-trends-addon.py"), "doctor"],
+                    text=True,
+                )
+            )
+            if not doctor.get("ok"):
+                errors.append(f"addon_doctor:{doctor}")
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"addon_doctor:{exc}")
 
     for team in ("info", "capability", "agi-research-scan"):
         tpath = ROOT / f"config/teams/{team}.json"

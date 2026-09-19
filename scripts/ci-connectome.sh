@@ -42,7 +42,9 @@ python3 scripts/public-apis-addon.py doctor
 
 echo "== google-trends unit + wiring =="
 python3 scripts/test_google_trends.py
+python3 scripts/test_google_trends_addons.py
 python3 scripts/google-trends-check.py
+python3 scripts/google-trends-addon.py doctor
 
 echo "== joshinator IP-safe embodiment =="
 python3 -m pip install -q -r integrations/joshinator-analyzer/backend/requirements-ci.txt

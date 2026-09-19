@@ -141,10 +141,12 @@
 - Config: `config/integrations/google-trends.json`
 - Sense: `sense.catalog.google_trends` · Hotspot: `hotspot.google_trends` · Motor: `motor.google_trends`
 - **Available to all roles and subagents** — index/fetch published Trends CSVs (no full-repo clone; ~382MB upstream)
-- Scripts: `scripts/google-trends-search.py`, `scripts/pack-google-trends-result.py`, `scripts/google-trends-check.py`
-- MCP: `google_trends_search` via `scripts/cam-mcp-server.py`
+- Scripts: `scripts/google-trends-search.py`, `scripts/pack-google-trends-result.py`, `scripts/google-trends-check.py`, `scripts/google-trends-addon.py`
+- MCP: `google_trends_search` · `google_trends_addon` via `scripts/cam-mcp-server.py`
+- Add-ons: `config/integrations/google-trends-addons.json` (allowlisted searches + dataset previews)
 - Distills to `mesh/research` + `vault/04-Research/google-trends/`
 - No API key; live mode uses GitHub trees API + raw file fetch
+- Free-form path fetch outside allowlisted add-ons is forbidden for the addon motor
 
 ## Public APIs (free API catalog — all agents)
 

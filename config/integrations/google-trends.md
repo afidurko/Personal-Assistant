@@ -41,6 +41,11 @@ python3 scripts/google-trends-search.py --query election --offline
 # Live index via GitHub API (cached under data/runtime/)
 python3 scripts/google-trends-search.py --query "nba finals" --num 8
 
+# Curated add-ons (allowlisted searches + tiny dataset previews)
+python3 scripts/google-trends-addon.py list
+python3 scripts/google-trends-addon.py call trends.search_election --offline
+python3 scripts/google-trends-addon.py call trends.dataset_game_theory --offline
+
 # List extensions / years in catalog
 python3 scripts/google-trends-search.py --list-years --offline
 python3 scripts/google-trends-search.py --list-ext --offline

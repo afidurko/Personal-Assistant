@@ -8,7 +8,7 @@ Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
-  public_apis_search, public_apis_addon, google_trends_search, inkbox_check,
+  public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   voicestudio_health
 
 Install into Cline (example):
@@ -207,6 +207,24 @@ def tool_defs() -> list[dict]:
                     "offline": {"type": "boolean"},
                     "list_years": {"type": "boolean"},
                     "fetch": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "google_trends_addon",
+            "description": (
+                "Call an allowlisted Google Trends curated search or dataset preview "
+                "(election/nba/storm searches; game_theory / same_sex_marriage previews). "
+                "No free-form paths — only curated add-on ids."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "addon_id": {"type": "string"},
+                    "list": {"type": "boolean"},
+                    "offline": {"type": "boolean"},
+                    "num": {"type": "integer"},
+                    "preview_lines": {"type": "integer"},
                 },
             },
         },
@@ -450,6 +468,26 @@ def google_trends_search(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def google_trends_addon(arguments: dict) -> Any:
+    cmd = [sys.executable, str(ROOT / "scripts/google-trends-addon.py")]
+    if arguments.get("list"):
+        cmd.append("list")
+        out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+        return json.loads(out)
+    addon_id = arguments.get("addon_id")
+    if not addon_id:
+        raise ValueError("addon_id required unless list=true")
+    cmd.extend(["call", str(addon_id)])
+    if arguments.get("num") is not None:
+        cmd.extend(["--num", str(int(arguments["num"]))])
+    if arguments.get("preview_lines") is not None:
+        cmd.extend(["--preview-lines", str(int(arguments["preview_lines"]))])
+    if arguments.get("offline") is True:
+        cmd.append("--offline")
+    out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+    return json.loads(out)
+
+
 def inkbox_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
@@ -521,6 +559,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return public_apis_addon(arguments)
     if name == "google_trends_search":
         return google_trends_search(arguments)
+    if name == "google_trends_addon":
+        return google_trends_addon(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
     if name == "voicestudio_health":

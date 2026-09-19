@@ -40,8 +40,10 @@
   "scripts": {
     "search": "scripts/google-trends-search.py",
     "pack": "scripts/pack-google-trends-result.py",
-    "check": "scripts/google-trends-check.py"
+    "check": "scripts/google-trends-check.py",
+    "addon": "scripts/google-trends-addon.py"
   },
+  "addons": "config/integrations/google-trends-addons.json",
   "fixture": "scripts/testdata/sample-google-trends-catalog.json",
   "teams": ["team.info", "team.capability", "team.agi-research-scan", "team.tooling"],
   "roles": ["info-retriever", "researcher", "agi-scout", "tool-user", "capability-broker"]

@@ -39,6 +39,7 @@ DEFAULT_INCLUDE = [
     "config/integrations/google-scholar.md",
     "config/integrations/google-trends.json",
     "config/integrations/google-trends.md",
+    "config/integrations/google-trends-addons.json",
     "identity/persistence/GOOGLE_TRENDS.md",
     "config/integrations/memorybear.json",
     "config/integrations/memorybear.md",

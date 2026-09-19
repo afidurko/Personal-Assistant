@@ -1,0 +1,52 @@
+{
+  "_fixture": true,
+  "addon_id": "trends.search_election",
+  "kind": "catalog_search",
+  "query": "election",
+  "returned": 3,
+  "results": [
+    {
+      "path": "20150617_DenmarkElections.csv",
+      "name": "20150617_DenmarkElections.csv",
+      "stem": "20150617_DenmarkElections",
+      "topic": "DenmarkElections",
+      "ext": "csv",
+      "size": 22431,
+      "folder": null,
+      "year": "2015",
+      "sha": "fb0af658e01547fd43652cac58bef5e439b8207e",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150617_DenmarkElections.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150617_DenmarkElections.csv",
+      "score": 22
+    },
+    {
+      "path": "20150626_ElectionCandidatesbyWeek.csv",
+      "name": "20150626_ElectionCandidatesbyWeek.csv",
+      "stem": "20150626_ElectionCandidatesbyWeek",
+      "topic": "ElectionCandidatesbyWeek",
+      "ext": "csv",
+      "size": 7094,
+      "folder": null,
+      "year": "2015",
+      "sha": "949ad24604b9e643f88e65db2afe24866139dfeb",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150626_ElectionCandidatesbyWeek.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150626_ElectionCandidatesbyWeek.csv",
+      "score": 22
+    },
+    {
+      "path": "20150722_ElectionsWeekly.csv",
+      "name": "20150722_ElectionsWeekly.csv",
+      "stem": "20150722_ElectionsWeekly",
+      "topic": "ElectionsWeekly",
+      "ext": "csv",
+      "size": 6320,
+      "folder": null,
+      "year": "2015",
+      "sha": "0e44e16aaab91c3dfc84f0da0eac68681371ef69",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150722_ElectionsWeekly.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150722_ElectionsWeekly.csv",
+      "score": 22
+    }
+  ],
+  "source_repo": "github.com/GoogleTrends/data"
+}
