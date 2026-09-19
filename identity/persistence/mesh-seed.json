@@ -127,7 +127,9 @@
     "tool_creator_user": true,
     "unlimited_subagents": true,
     "aaron_voice_only_in_noise": true,
-    "aaron_voice_gate": true
+    "aaron_voice_gate": true,
+    "aaron_voice_gate_addons": true,
+    "aaron_voice_adaptive_noise": true
   },
   "mesh/open-questions": {
     "ios_companion_pair_code": "generate on first launch",
@@ -282,6 +284,11 @@
   "mesh/identity": {
     "aaron_voice_only": true,
     "noisy_environment_filter": true,
+    "adaptive_noise": true,
+    "profile_export": true,
+    "reject_stats": true,
+    "health_pulse": "neuron.aaron_voice_gate",
+    "ios_speaker_id": "companions/ios/CamVoiceGate.swift",
     "config": "config/identity/aaron-voice-gate.json",
     "sense": "sense.aaron.voice",
     "switch": "switch.identity",

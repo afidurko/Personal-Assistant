@@ -68,6 +68,7 @@ describe('suggestive implementations', () => {
     expect(suggestions.some((s) => s.kind === 'identity-voice')).toBe(true);
     expect(suggestions.some((s) => s.id === 'suggest-aaron-voice-enroll')).toBe(true);
     expect(suggestions.some((s) => s.id === 'suggest-aaron-voice-noisy-gate')).toBe(true);
+    expect(suggestions.some((s) => s.id === 'suggest-aaron-voice-addons')).toBe(true);
   });
 
   it('includes agent-commute and agent-repair suggestions for weak/critical workspaces', () => {

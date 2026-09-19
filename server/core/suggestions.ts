@@ -334,10 +334,10 @@ function fromAgentContext(
     rationale:
       'Adaptive noise raises threshold after multi-speaker streaks; export/import keeps the Aaron print across devices; reject stats feed health.',
     implementation:
-      'Enable mic → trigger surrounding rejects → confirm adaptive↑ badge. Export profile, import on another device. Check /api/health voice_gate_stats.',
+      'Enable mic → trigger surrounding rejects → confirm adaptive↑ badge. Export profile, import on another device. Check /api/health voice_gate_stats and neuron.aaron_voice_gate.',
     sketch:
-      'python3 scripts/pack-aaron-voice-profile.py --from-json identity/aaron/voice-profile.json --json\ncurl -s localhost:8787/api/health | jq .voice_gate_stats',
-    priority: 70,
+      'python3 scripts/pack-aaron-voice-profile.py --help\npython3 scripts/aaron-voice-gate-check.py\nnpx vitest run server/core/aaron-voice-gate-addons.test.ts\n# curl -s localhost:8787/api/health | jq .voice_gate_stats',
+    priority: 72,
     relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
     relatedConceptIds: ['error-handling'],
     sourceFindingIds: [],
