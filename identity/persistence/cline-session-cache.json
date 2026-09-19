@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-17T11:16:29.590245+00:00",
-    "mode": "act",
-    "summary": "Cam + live 3D cortex on home with voice listen/speak and background autonomy spawn bay (PR #9)",
-    "workspace": "personal-assistant"
+    "at": "2026-09-19T18:29:26.124269+00:00",
+    "mode": "plan",
+    "summary": "Drafted Cam unified reasoning loop plan (docs/CAM_REASONING.md + proposed reasoning-logic.json); PR #16; Phase B CLI not started",
+    "workspace": "/workspace"
   },
   "notes": [
     {
@@ -76,6 +76,7 @@
   "submodule": "integrations/cline",
   "workspaces": [
     ".",
-    "personal-assistant"
+    "personal-assistant",
+    "/workspace"
   ]
 }
