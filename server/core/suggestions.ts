@@ -336,10 +336,24 @@ function fromAgentContext(
       rationale:
         'SGR slow-path must stay bar-gated; every-mic SGR and LitServe farms are cut until dry-run proofs hold.',
       implementation:
-        'Run test_cam_reason + cam-reason-billion-fuzz; converse only above intent/length bar; LitServe thin proxy later.',
+        'Run test_cam_reason + cam-reason-billion-fuzz + merge-prep-trillion; converse only above intent/length bar; LitServe thin proxy later.',
       sketch:
-        'python3 scripts/test_cam_reason.py\npython3 scripts/cam-reason-billion-fuzz.py --n 1000000000\nbash scripts/ci-connectome.sh',
+        'python3 scripts/test_cam_reason.py\npython3 scripts/cam-reason-billion-fuzz.py --n 1000000000\nbash scripts/merge-prep-trillion.sh\nbash scripts/ci-connectome.sh',
       priority: 73,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['error-handling', 'protocols-extensions'],
+      sourceFindingIds: [],
+    });
+    out.push({
+      id: 'suggest-cam-trillion-campaign',
+      kind: 'cam-reason',
+      title: 'Keep triple-trillion property campaign green before merge',
+      rationale:
+        'Connectome holds + trajectory OCL/CPV + cam-reason escalate/bar must stay green at 3e12×2 before shipping reasoning changes.',
+      implementation:
+        'Run bash scripts/merge-prep-trillion.sh; archive cam-trillion-pass-{a,b}.json; fail closed on any suite error.',
+      sketch: 'bash scripts/merge-prep-trillion.sh\n# evidence: vault/10-Mesh-Distillates/MERGE_READINESS_TRILLION.md',
+      priority: 76,
       relatedWorkspaceIds: [agiWs.id],
       relatedConceptIds: ['error-handling', 'protocols-extensions'],
       sourceFindingIds: [],

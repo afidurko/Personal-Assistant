@@ -309,6 +309,7 @@ def write_suggestions(
         "- Aaron **test** protocol (3T→fix→suggest→3T→merge): `python3 scripts/three-trillion-campaign.py --passes 2`",
         "- Trajectory OCL/CPV billion: `python3 scripts/trajectory-billion-fuzz.py --n 1000000000`",
         "- Cam reason billion: `python3 scripts/cam-reason-billion-fuzz.py --n 1000000000`",
+        "- Triple-trillion campaign: `bash scripts/merge-prep-trillion.sh`",
         "- Aaron-only voice gate billion: `python3 scripts/aaron-voice-billion-fuzz.py --n 1000000000`",
         "- Progress heartbeats every 50M sims for long campaigns (simulator v3)",
         "- Traffic-weighted sense sampling (chat/vault/cline/scholar/arxiv/aaron.voice/public-apis/inkbox-heavy)",

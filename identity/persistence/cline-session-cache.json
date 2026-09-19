@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T21:48:54.395432+00:00",
+    "at": "2026-09-19T23:52:11.187865+00:00",
     "mode": "act",
-    "summary": "Dual 3T green for google-trends PR #24 \u2014 READY TO MERGE",
-    "workspace": "."
+    "summary": "Dual 3e12 cam-property trillion green (A/B 0 fails); MERGE_READINESS_TRILLION READY; PR #28 mergeable CLEAN \u2014 Aaron merge (agent cannot merge via API)",
+    "workspace": "/workspace"
   },
   "notes": [
     {
@@ -53,6 +53,11 @@
       "at": "2026-09-19T21:48:54.395432+00:00",
       "text": "fixed pydantic dep in 3T campaign; curated trends add-ons",
       "workspace": "."
+    },
+    {
+      "at": "2026-09-19T23:52:11.187865+00:00",
+      "text": "Evidence: cam-trillion-pass-{a,b}.json; unified merge-prep with main three-trillion-campaign",
+      "workspace": "/workspace"
     }
   ],
   "rules": ".clinerules",
