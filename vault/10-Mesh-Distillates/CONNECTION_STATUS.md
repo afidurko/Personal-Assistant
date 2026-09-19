@@ -1,52 +1,46 @@
 # Connection status — 2026-09-19 cloud agent
 
-**Goal:** Connect what you can (VoiceStudio + Cam stack)
+**Mandate:** Do what Cam can; Aaron later handles only what is absolutely blocked here.
 
-## Live now
+## Done in this environment
 
-| Service | Status | Endpoint |
-|---|---|---|
-| VoiceStudio backend | **UP** (CPU, v0.5.4) | `http://127.0.0.1:3900/health` → `{"status":"ok","device":"cpu"}` |
-| VoiceStudio MCP | **mounted** | `http://127.0.0.1:3900/mcp` (client id `cam`) |
-| VoiceStudio OpenAPI | **UP** | 270 paths · speech/voices ready |
-| Cam converse | **UP** | `http://127.0.0.1:8787/api/health` |
-| Cam MCP `voicestudio_health` | **OK** | reports backend healthy |
-| Submodules | **6/7 populated** | cline, jarvis, llmavatartalk, smart-second-brain, swiftguide, voicestudio |
-| Cline rules | **installed** | across populated workspaces |
+| Item | Evidence |
+|---|---|
+| VoiceStudio backend | `GET /health` → `ok` · CPU · v0.5.4 · `:3900` |
+| VoiceStudio MCP | Mounted at `/mcp` · Cam tool `voicestudio_health` OK |
+| OmniVoice TTS weights | **Installed** `k2-fsa/OmniVoice` (~3.27 GB on disk) |
+| Faster-Whisper ASR | **Installed** `Systran/faster-whisper-base` (~148 MB) |
+| Speech smoke | WAV generated · 3.32s · PCM 24 kHz mono |
+| Transcription smoke | `"Hello, Aaron. Cam is connected on Local Voice Studio."` |
+| Cam converse | UP `:8787/api/health` |
+| All 7 integration submodules | Populated (incl. PaddleDetection) |
+| Cline rules | Installed across workspaces |
+| System health | **HEALTHY** (only Tailscale reach idle — expected in cloud) |
+| Dual billion QA + trajectory | Green on PR branch |
+| Mesh distillate | `vault/10-Mesh-Distillates/voice/smoke-tts.json` |
 
-## Connected with limits
+Local artifacts (not in git): `data/voicestudio/cam-smoke-*.wav`
 
-| Item | Status | Why |
-|---|---|---|
-| OmniVoice TTS model | not downloaded | ~2.3 GB — needs Aaron consent before first generate |
-| ASR / AudioSeal | not cached | same opt-in download policy |
-| Google Scholar live | dry-run only | `SERPAPI_API_KEY` not in this environment |
-| Slack MCP | auth timed out | needs Aaron interactive OAuth |
-| PaddleDetection | empty | skipped (large); init on demand |
-| Tailscale reach | idle | cloud VM is not Aaron’s Tailscale host |
-| Full RIVA / Audio2Face | not here | NVIDIA studio on Aaron desk only |
+## Aaron-only backlog (cannot do from this cloud VM)
 
-## How to use (this VM while processes run)
+1. **`SERPAPI_API_KEY`** — put in local `.env` for live Google Scholar  
+2. **Slack MCP OAuth** — interactive browser auth (timed out twice here)  
+3. **Tailscale MagicDNS** — join this host or prefer `aaron-mac` / iPad path in `config/network/tailscale.json`  
+4. **NVIDIA RIVA + Audio2Face** — desk GPU studio for full LLMAvatarTalk presence  
+5. **Bind a soft-airy Cam clone profile** in VoiceStudio UI (replace `alloy` alias) and set `tts.local_fallback.profile_id` in `config/persona/voice.json`  
+6. **Optional:** HF token if gated models (pyannote, etc.) are needed later  
+7. **Optional:** Electron desktop installer on Aaron’s daily driver (cloud uses `uv`/API path)
+
+## Quick reopen
 
 ```bash
-# Health
+# Backend (if stopped)
+cd integrations/voicestudio && bun run dev:api
+
+# Converse
+python3 scripts/cam-converse-server.py
+
+# Speak / health
 python3 scripts/voicestudio-health.py
-
-# Speak dry-run (no model)
-python3 scripts/voicestudio-speak.py --text "Hello Aaron" --dry-run
-
-# After Aaron approves model download:
-# python3 scripts/voicestudio-speak.py --text "Hello Aaron"
-
-# Converse UI
-open http://127.0.0.1:8787
-
-# Cam MCP
-python3 scripts/cam-mcp-server.py   # stdio; tool voicestudio_health
+python3 scripts/voicestudio-speak.py --text "Hello Aaron" --voice alloy
 ```
-
-## Process notes
-
-- VoiceStudio API started via `uv sync` + `bun run dev:api` in tmux `voicestudio-api`
-- Converse in tmux `cam-converse`
-- MCP output mode preferred: `OMNIVOICE_MCP_OUTPUT_MODE=files` · base `/workspace/data/voicestudio`

@@ -7,7 +7,10 @@
     "origin": "Argentina",
     "eyes": "blue",
     "hair": "brown",
-    "languages": ["en", "es"],
+    "languages": [
+      "en",
+      "es"
+    ],
     "primary_language": "en",
     "english": "fluent",
     "voice_character": "soft airy calm fluent English; Argentine origin"
@@ -69,14 +72,18 @@
       "config": "config/integrations/voicestudio.json",
       "backend": "http://localhost:3900",
       "mcp_client_id": "cam",
-      "profile_id": null,
-      "notes": "Bind a soft-airy Cam clone in VoiceStudio; set profile_id when ready"
+      "profile_id": "alloy",
+      "notes": "alloy is a compatibility alias until Aaron binds a soft-airy Cam clone in VoiceStudio",
+      "provisional_alias": true
     }
   },
   "stt": {
     "provider": "nvidia_riva",
     "locale": "en-US",
-    "also_accept": ["es-US", "es-AR"],
+    "also_accept": [
+      "es-US",
+      "es-AR"
+    ],
     "local_fallback": {
       "provider": "voicestudio",
       "integration": "integrations/voicestudio"

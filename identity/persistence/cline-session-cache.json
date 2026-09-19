@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T19:01:20.025606+00:00",
+    "at": "2026-09-19T19:08:54.223761+00:00",
     "mode": "act",
-    "summary": "Connected VoiceStudio backend CPU v0.5.4 + MCP + Cam converse :8787; 6/7 submodules; Scholar needs SERPAPI; Slack auth timed out.",
+    "summary": "Installed OmniVoice+whisper-base; TTS+ASR smoke OK; all 7 submodules; system healthy. Aaron-only: SERPAPI, Slack OAuth, Tailscale, RIVA/A2F, Cam voice profile bind.",
     "workspace": "."
   },
   "notes": [
@@ -32,6 +32,11 @@
     {
       "at": "2026-09-19T19:01:20.025606+00:00",
       "text": "CONNECTION_STATUS.md",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T19:08:54.223761+00:00",
+      "text": "CONNECTION_STATUS.md aaron_only backlog",
       "workspace": "."
     }
   ],

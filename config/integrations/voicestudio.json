@@ -41,13 +41,17 @@
   "health_script": "scripts/voicestudio-health.py",
   "notes": "Local-first ElevenLabs alternative. Brain stays nullclaw/Cam. Face stay LLMAvatarTalk when full presence is on.",
   "runtime": {
-    "last_connected_at": "2026-09-19T19:01:08.116897+00:00",
+    "last_connected_at": "2026-09-19T19:08:54.198988+00:00",
     "device": "cpu",
     "version": "0.5.4",
     "health": "ok",
     "mcp_mounted": true,
-    "model_preload": "skipped_not_installed",
-    "host": "cloud_agent",
-    "notes": "Connected without OmniVoice weights; first generate_speech needs Aaron download consent (~2.3GB)."
+    "models_installed": [
+      "k2-fsa/OmniVoice",
+      "Systran/faster-whisper-base"
+    ],
+    "smoke_tts_ok": true,
+    "smoke_asr_ok": true,
+    "host": "cloud_agent"
   }
 }

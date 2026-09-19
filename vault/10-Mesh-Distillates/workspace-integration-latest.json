@@ -1,9 +1,7 @@
 {
   "ok": true,
   "hard_errors": [],
-  "soft_warnings": [
-    "integration empty: integrations/paddledetection (submodule init or create config)"
-  ],
+  "soft_warnings": [],
   "mesh_flags": {
     "daily_agi_research_scan": true,
     "cam_enhance_apply_requires_aaron": true,
@@ -23,7 +21,7 @@
     {
       "id": "paddledetection",
       "path": "integrations/paddledetection",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
