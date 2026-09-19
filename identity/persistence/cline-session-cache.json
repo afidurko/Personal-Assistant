@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T19:08:54.223761+00:00",
+    "at": "2026-09-19T19:59:24.897145+00:00",
     "mode": "act",
-    "summary": "Installed OmniVoice+whisper-base; TTS+ASR smoke OK; all 7 submodules; system healthy. Aaron-only: SERPAPI, Slack OAuth, Tailscale, RIVA/A2F, Cam voice profile bind.",
+    "summary": "Fix hero-stage CSS clash (glass+CamPresence); refresh ci-sim; re-merge main",
     "workspace": "."
   },
   "notes": [
@@ -87,11 +87,11 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": true,
+      "workspace_exists": false,
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-19T19:47:51.243533+00:00",
+  "schedules_synced_at": "2026-09-19T19:58:28.824408+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

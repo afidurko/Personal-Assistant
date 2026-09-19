@@ -217,5 +217,61 @@ class SimIntegrityTests(unittest.TestCase):
         self.assertEqual(missing, [])
 
 
+class AnatomyCortexTests(unittest.TestCase):
+    def test_anatomy_check_script(self):
+        proc = subprocess.run(
+            [sys.executable, "scripts/connectome-anatomy-check.py", "--json"],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+        data = json.loads(proc.stdout)
+        self.assertTrue(data["ok"], data.get("errors"))
+        self.assertGreaterEqual(data["mapped_areas"], data["areas"])
+        self.assertGreater(data["glb_bytes"], 100_000)
+
+    def test_region_map_covers_areas(self):
+        areas = json.loads(
+            (ROOT / "config/connectome/areas.json").read_text(encoding="utf-8")
+        )
+        region_map = json.loads(
+            (ROOT / "config/connectome/anatomy-region-map.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        area_ids = {a["id"] for a in areas["areas"]}
+        mapped = {
+            e["name"]
+            for e in region_map
+            if e.get("name", "").startswith("area.")
+            and not e["name"].endswith(".hippocampus")
+        }
+        self.assertEqual(area_ids - mapped, set())
+
+    def test_glass_modules_present(self):
+        viz = ROOT / "visualizations" / "connectome"
+        self.assertTrue((viz / "cortex-anatomy.js").is_file())
+        self.assertTrue((viz / "cortex3d.js").is_file())
+        body = (viz / "cortex-anatomy.js").read_text(encoding="utf-8")
+        self.assertIn("MeshPhysicalMaterial", body)
+        self.assertIn("setTranslucency", body)
+        self.assertIn("installGlassEnvironment", body)
+
+
+    def test_merge_prep_script_exists(self):
+        p = ROOT / "scripts" / "merge-prep-billion.sh"
+        self.assertTrue(p.is_file())
+        body = p.read_text(encoding="utf-8")
+        self.assertIn("1000000000", body)
+        self.assertIn("connectome-anatomy-check", body)
+
+    def test_serve_viz_repo_root(self):
+        body = (ROOT / "scripts" / "serve-connectome-viz.sh").read_text(encoding="utf-8")
+        self.assertIn("visualizations/connectome", body)
+        self.assertIn("live-activity.json", body)
+        self.assertIn("repo-root", body)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

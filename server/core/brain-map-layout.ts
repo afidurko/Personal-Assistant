@@ -1,18 +1,23 @@
 import type { BrainRegion } from '../../shared/types.js';
 
-/** Canonical region anchors in a brain-ish oval (normalized 0–1). */
+/**
+ * Canonical region anchors projected from FreeSurfer-like Cam cortex centroids
+ * (config/connectome/anatomy-centroids.json) into a left-lateral 0–1 map:
+ *   x ← anterior→posterior (FS Y)
+ *   y ← superior→inferior (FS Z, flipped for SVG)
+ */
 const REGION_ANCHORS: Record<BrainRegion, { x: number; y: number }> = {
-  prefrontal: { x: 0.28, y: 0.22 },
-  cortex: { x: 0.5, y: 0.18 },
-  thalamus: { x: 0.5, y: 0.48 },
-  hippocampus: { x: 0.42, y: 0.62 },
-  amygdala: { x: 0.72, y: 0.68 },
-  insula: { x: 0.68, y: 0.42 },
-  cerebellum: { x: 0.5, y: 0.82 },
-  basal_ganglia: { x: 0.38, y: 0.4 },
-  striatum: { x: 0.58, y: 0.55 },
-  repair_loop: { x: 0.78, y: 0.36 },
-  swarm_bus: { x: 0.22, y: 0.52 },
+  prefrontal: { x: 0.18, y: 0.28 },
+  cortex: { x: 0.42, y: 0.22 },
+  thalamus: { x: 0.48, y: 0.48 },
+  hippocampus: { x: 0.55, y: 0.62 },
+  amygdala: { x: 0.52, y: 0.58 },
+  insula: { x: 0.4, y: 0.42 },
+  cerebellum: { x: 0.72, y: 0.78 },
+  basal_ganglia: { x: 0.44, y: 0.45 },
+  striatum: { x: 0.4, y: 0.4 },
+  repair_loop: { x: 0.58, y: 0.34 },
+  swarm_bus: { x: 0.32, y: 0.5 },
 };
 
 /**
