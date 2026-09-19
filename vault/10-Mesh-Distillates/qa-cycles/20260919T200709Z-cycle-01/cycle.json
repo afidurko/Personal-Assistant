@@ -1,9 +1,12 @@
 {
-  "namespace": "mesh/runs",
-  "kind": "qa_cycle",
-  "cycle_dir": "vault/10-Mesh-Distillates/qa-cycles/20260919T200709Z-cycle-01",
+  "cycle": 1,
+  "of": 1,
   "at": "20260919T201346Z",
-  "status": "green",
+  "await_human": false,
+  "static_check": {
+    "ok": true,
+    "missing": []
+  },
   "metrics": {
     "n": 1000000000,
     "passed": 1000000000,
@@ -20,6 +23,5 @@
     "exit_code": 0
   },
   "findings": [],
-  "await_human": false,
-  "continuous_qa": true
+  "status": "green"
 }
