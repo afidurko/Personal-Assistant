@@ -1,9 +1,9 @@
 {
   "version": 1,
   "title": "Cam unified workspace registry",
-  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
+  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts — so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-19",
+  "updated_at": "2026-09-17",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -170,23 +170,6 @@
         "policy": "config/integrations/paddledetection.md"
       },
       {
-        "id": "pupil",
-        "path": "integrations/pupil",
-        "policy": "config/integrations/pupil.md",
-        "remote": "github.com/afidurko/pupil",
-        "sense": "sense.vision.world",
-        "sense_gaze": "sense.vision.gaze",
-        "hotspot": "hotspot.pupil_see",
-        "motor": "motor.pupil",
-        "switch": "switch.pupil_vision",
-        "mesh_ns": [
-          "mesh/vision",
-          "mesh/gaze"
-        ],
-        "bridge": "scripts/pupil-see.py",
-        "enabled": "identity/persistence/CAM_PUPIL_VISION_ENABLED.md"
-      },
-      {
         "id": "llmavatartalk",
         "path": "integrations/llmavatartalk",
         "policy": "config/integrations/llmavatartalk.md"
@@ -223,6 +206,30 @@
         "policy": "config/integrations/cline.md",
         "remote": "github.com/afidurko/cline",
         "effector": "motor.cline"
+      },
+      {
+        "id": "joshinator-analyzer",
+        "path": "integrations/joshinator-analyzer",
+        "policy": "config/integrations/joshinator-analyzer.md",
+        "remote": "github.com/afidurko/joshinator-analyzer",
+        "notes": "Vendored mirror with IP-safe procedural 3D embodiment; push upstream when write access granted"
+      },
+      {
+        "id": "pupil",
+        "path": "integrations/pupil",
+        "policy": "config/integrations/pupil.md",
+        "remote": "github.com/afidurko/pupil",
+        "sense": "sense.vision.world",
+        "sense_gaze": "sense.vision.gaze",
+        "hotspot": "hotspot.pupil_see",
+        "motor": "motor.pupil",
+        "switch": "switch.pupil_vision",
+        "mesh_ns": [
+          "mesh/vision",
+          "mesh/gaze"
+        ],
+        "bridge": "scripts/pupil-see.py",
+        "enabled": "identity/persistence/CAM_PUPIL_VISION_ENABLED.md"
       },
       {
         "id": "inkbox",
@@ -423,25 +430,6 @@
         "cursor_bootstrap": true
       },
       {
-        "id": "pupil",
-        "label": "Pupil eye tracking",
-        "path": "integrations/pupil",
-        "remote": "github.com/afidurko/pupil",
-        "default_branch": "master",
-        "roles_allowed": [
-          "coding",
-          "vision",
-          "chief"
-        ],
-        "cline_data_dir": "~/.cline/data/workspaces/pupil",
-        "rules": [
-          ".clinerules"
-        ],
-        "install_rules": true,
-        "cursor_bootstrap": true,
-        "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
-      },
-      {
         "id": "llmavatartalk",
         "label": "LLMAvatarTalk presence",
         "path": "integrations/llmavatartalk",
@@ -474,7 +462,46 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+        "notes": "Curated free API index — shared by all agents via motor.public_apis"
+      },
+      {
+        "id": "joshinator-analyzer",
+        "label": "Joshinator card analyzer + 3D embodiment",
+        "path": "integrations/joshinator-analyzer",
+        "remote": "github.com/afidurko/joshinator-analyzer",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "vision",
+          "ops",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/joshinator-analyzer",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "IP-safe procedural embodiment; vendored until upstream push works"
+      },
+      {
+        "id": "pupil",
+        "label": "Pupil eye tracking",
+        "path": "integrations/pupil",
+        "remote": "github.com/afidurko/pupil",
+        "default_branch": "master",
+        "roles_allowed": [
+          "coding",
+          "vision",
+          "chief"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/pupil",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
       },
       {
         "id": "inkbox",
@@ -496,7 +523,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+        "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
       },
       {
         "id": "voicestudio",
@@ -598,18 +625,6 @@
           ]
         },
         {
-          "id": "pupil",
-          "match_any": [
-            "pupil",
-            "eye tracking",
-            "eye-tracking",
-            "gaze tracking",
-            "integrations/pupil",
-            "pupil labs",
-            "pupil capture"
-          ]
-        },
-        {
           "id": "llmavatartalk",
           "match_any": [
             "llmavatartalk",
@@ -626,6 +641,28 @@
             "free api catalog",
             "integrations/public-apis",
             "apilayer public-apis"
+          ]
+        },
+        {
+          "id": "joshinator-analyzer",
+          "match_any": [
+            "joshinator",
+            "card analyzer",
+            "card embodiment",
+            "sports card",
+            "integrations/joshinator-analyzer"
+          ]
+        },
+        {
+          "id": "pupil",
+          "match_any": [
+            "pupil",
+            "eye tracking",
+            "eye-tracking",
+            "gaze tracking",
+            "integrations/pupil",
+            "pupil labs",
+            "pupil capture"
           ]
         },
         {
@@ -787,25 +824,6 @@
       "cursor_bootstrap": true
     },
     {
-      "id": "pupil",
-      "label": "Pupil eye tracking",
-      "path": "integrations/pupil",
-      "remote": "github.com/afidurko/pupil",
-      "default_branch": "master",
-      "roles_allowed": [
-        "coding",
-        "vision",
-        "chief"
-      ],
-      "cline_data_dir": "~/.cline/data/workspaces/pupil",
-      "rules": [
-        ".clinerules"
-      ],
-      "install_rules": true,
-      "cursor_bootstrap": true,
-      "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
-    },
-    {
       "id": "llmavatartalk",
       "label": "LLMAvatarTalk presence",
       "path": "integrations/llmavatartalk",
@@ -838,7 +856,46 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+      "notes": "Curated free API index — shared by all agents via motor.public_apis"
+    },
+    {
+      "id": "joshinator-analyzer",
+      "label": "Joshinator card analyzer + 3D embodiment",
+      "path": "integrations/joshinator-analyzer",
+      "remote": "github.com/afidurko/joshinator-analyzer",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "ops",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/joshinator-analyzer",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "IP-safe procedural embodiment; vendored until upstream push works"
+    },
+    {
+      "id": "pupil",
+      "label": "Pupil eye tracking",
+      "path": "integrations/pupil",
+      "remote": "github.com/afidurko/pupil",
+      "default_branch": "master",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "chief"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/pupil",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
     },
     {
       "id": "inkbox",
@@ -860,7 +917,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+      "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
     },
     {
       "id": "voicestudio",
@@ -978,18 +1035,6 @@
         ]
       },
       {
-        "id": "pupil",
-        "match_any": [
-          "pupil",
-          "eye tracking",
-          "eye-tracking",
-          "gaze tracking",
-          "integrations/pupil",
-          "pupil labs",
-          "pupil capture"
-        ]
-      },
-      {
         "id": "llmavatartalk",
         "match_any": [
           "llmavatartalk",
@@ -1006,6 +1051,28 @@
           "free api catalog",
           "integrations/public-apis",
           "apilayer public-apis"
+        ]
+      },
+      {
+        "id": "joshinator-analyzer",
+        "match_any": [
+          "joshinator",
+          "card analyzer",
+          "card embodiment",
+          "sports card",
+          "integrations/joshinator-analyzer"
+        ]
+      },
+      {
+        "id": "pupil",
+        "match_any": [
+          "pupil",
+          "eye tracking",
+          "eye-tracking",
+          "gaze tracking",
+          "integrations/pupil",
+          "pupil labs",
+          "pupil capture"
         ]
       },
       {

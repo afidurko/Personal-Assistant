@@ -71,6 +71,18 @@ Source: `connectome-sim-1b-merge-b.json`
 
 **Merge verdict:** Pass A + Pass B both green. See `MERGE_READINESS.md`.
 
+## Joshinator embodiment — dual billion (2026-09-19)
+
+| Pass | N | Failed | Artifact |
+|---|---|---|---|
+| Connectome A | 1e9 | 0 | `connectome-sim-1b-joshinator-pass1.json` |
+| Connectome B | 1e9 | 0 | `connectome-sim-1b-joshinator-pass2.json` |
+| Trajectory B′ | 1e9 | 0 | `trajectory-1b-joshinator-pass2.json` |
+| Embodiment B″ | 1e9 | 0 | `embodiment-1b-joshinator-pass2.json` |
+
+Suggestive doc: `qa-cycles/JOSHINATOR-EMBODIMENT-SUGGESTIVE-20260919.md`  
+Merge: `MERGE_READINESS.md`
+
 ## What works
 - Sense→center→switch→motor→feedback pathways
 - Kill + non-Aaron antagonistic holds

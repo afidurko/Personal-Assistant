@@ -288,11 +288,13 @@ def main() -> int:
         "sense.calendar.event": 2.0,
         "sense.cline.result": 2.5,
         "sense.jarvis.result": 1.5,
+        # Voice / presence (main): Aaron voice gate + FunASR / VoiceStudio traffic
         "sense.audio.transcript": 2.0,
-        "sense.vision.detection": 1.0,
+        # Card analyze → IP-safe embodiment (this branch) + Pupil gaze/world (main)
+        "sense.vision.detection": 2.0,
         "sense.vision.gaze": 1.0,
         "sense.vision.world": 1.2,
-        "sense.ios.camera": 1.0,
+        "sense.ios.camera": 1.2,
         "sense.ios.mic": 2.75,
         "sense.aaron.face": 2.0,
         "sense.aaron.voice": 3.5,

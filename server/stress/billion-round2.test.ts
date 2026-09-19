@@ -144,6 +144,8 @@ describe('suggestive implementations', () => {
 
     expect(suggestions.some((s) => s.kind === 'api-catalog')).toBe(true);
     expect(suggestions.some((s) => s.id.includes('public-apis'))).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'card-embodiment')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('card-embodiment'))).toBe(true);
   });
 });
 

@@ -1,0 +1,65 @@
+{
+  "n": 1000000000,
+  "workers": 4,
+  "elapsed_s": 496.74326248400007,
+  "sims_per_sec": 2013112.3570744146,
+  "passed": 1000000000,
+  "failed": 0,
+  "kill_holds": 2000948,
+  "non_aaron_holds": 156020,
+  "feedback_ok": 997843032,
+  "first_errors": [],
+  "missing_edges_count": 0,
+  "missing_edges_sample": [],
+  "soft_warnings_sample": [],
+  "unlimited_subagents": true,
+  "continuous_qa": true,
+  "simulator": "v3-weighted-heartbeats",
+  "traffic_weighted": true,
+  "workers_detail": [
+    {
+      "worker_id": 1,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "kill_holds": 500357,
+      "non_aaron_holds": 38790,
+      "feedback_ok": 249460853,
+      "first_error": null,
+      "elapsed_s": 485.8676236179999
+    },
+    {
+      "worker_id": 2,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "kill_holds": 500078,
+      "non_aaron_holds": 39205,
+      "feedback_ok": 249460717,
+      "first_error": null,
+      "elapsed_s": 489.3109869460002
+    },
+    {
+      "worker_id": 0,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "kill_holds": 500113,
+      "non_aaron_holds": 39136,
+      "feedback_ok": 249460751,
+      "first_error": null,
+      "elapsed_s": 493.87391442800003
+    },
+    {
+      "worker_id": 3,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "kill_holds": 500400,
+      "non_aaron_holds": 38889,
+      "feedback_ok": 249460711,
+      "first_error": null,
+      "elapsed_s": 496.73259318500004
+    }
+  ]
+}
