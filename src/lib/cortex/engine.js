@@ -5,13 +5,16 @@ import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer
 
 /**
  * @param {HTMLElement} container
- * @param {{ embed?: boolean, liveActivityUrl?: string, pollMs?: number }} [options]
+ * @param {{ embed?: boolean, liveActivityUrl?: string, pollMs?: number, wsUrl?: string }} [options]
  */
 export function mountCortex(container, options = {}) {
   const root = container;
   const EMBED = options.embed !== false;
   const liveActivityUrl = options.liveActivityUrl || "/api/runtime/live-activity";
   const POLL_MS = options.pollMs ?? (EMBED ? 5000 : 2500);
+  const wsUrl =
+    options.wsUrl ||
+    `${typeof location !== "undefined" && location.protocol === "https:" ? "wss" : "ws"}://${typeof location !== "undefined" ? location.host : "127.0.0.1:8787"}/ws`;
   let AMBIENT_HIGH = EMBED ? 420 : 900;
   let AMBIENT_LOW = EMBED ? 160 : 280;
 
@@ -935,6 +938,39 @@ renderControls();
 loadSeed();
 let livePoll = setInterval(pollLiveActivity, POLL_MS);
 
+/** Push path — activity_update over /ws for instant tract lighting */
+let activityWs = null;
+let activityWsRetry = 0;
+function connectActivityWs() {
+  try {
+    if (activityWs) {
+      try {
+        activityWs.close();
+      } catch (_) {}
+    }
+    activityWs = new WebSocket(wsUrl);
+    activityWs.addEventListener("open", () => {
+      activityWsRetry = 0;
+    });
+    activityWs.addEventListener("message", (ev) => {
+      try {
+        const msg = JSON.parse(String(ev.data));
+        if (msg.type === "activity_update" && msg.payload?.live) {
+          applyLiveFeed(msg.payload.live);
+        }
+      } catch (_) {}
+    });
+    activityWs.addEventListener("close", () => {
+      activityWs = null;
+      const wait = Math.min(12_000, 800 * Math.pow(1.6, activityWsRetry++));
+      setTimeout(connectActivityWs, wait);
+    });
+  } catch (_) {
+    /* ws unavailable — poll remains */
+  }
+}
+connectActivityWs();
+
 let lastPlay = 0;
 let lastDecay = performance.now();
 let viewMode = 0; // cycle coronal / axial / sagittal-ish on soft auto
@@ -1044,6 +1080,10 @@ log(
   function destroy() {
     setAnimating(false);
     clearInterval(livePoll);
+    try {
+      activityWs?.close();
+    } catch (_) {}
+    activityWs = null;
     window.removeEventListener("resize", resize);
     try {
       resizeObs?.disconnect();

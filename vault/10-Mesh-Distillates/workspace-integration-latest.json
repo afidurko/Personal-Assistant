@@ -4,11 +4,11 @@
   "soft_warnings": [
     "integration empty: integrations/jarvis (submodule init or create config)",
     "integration empty: integrations/paddledetection (submodule init or create config)",
-    "integration empty: integrations/pupil (submodule init or create config)",
     "integration empty: integrations/llmavatartalk (submodule init or create config)",
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
     "integration empty: integrations/public-apis (submodule init or create config)",
     "integration empty: integrations/cline (submodule init or create config)",
+    "integration empty: integrations/pupil (submodule init or create config)",
     "integration empty: integrations/voicestudio (submodule init or create config)",
     "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)"
   ],
@@ -17,11 +17,11 @@
     "cam_enhance_apply_requires_aaron": true,
     "google_scholar": true,
     "public_apis": true,
-    "inkbox": true,
     "unlimited_subagents": true,
     "slm_cortex_enabled": true,
     "dl_cortex_enabled": true,
-    "persistence_cross_workspace": true
+    "persistence_cross_workspace": true,
+    "inkbox": true
   },
   "integrations": [
     {

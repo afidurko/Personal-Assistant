@@ -179,7 +179,8 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 5b. Keep SwiftGuide for mind-map cartography + iOS stack picks (`integrations/swiftguide`) — **added**
 6. Keep Cline as shared coding effector for all agents/workspaces (`integrations/cline`) — **added**
 7. Keep public-apis as shared free-API catalog for all agents (`integrations/public-apis`) — **added**
-7. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
+7b. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
+7c. **Overall system bridge** — home converse ↔ connectome ↔ live cortex activity (`config/system/pieces.json`, `server/core/system-bridge.ts`, `scripts/cam-system.py`) — **added**
 8. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
 9. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
 10. Wire mesh + vault + Cline session/ticket sync into live nulltickets
