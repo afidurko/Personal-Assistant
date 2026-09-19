@@ -1,0 +1,126 @@
+{
+  "id": "cam-reasoning-logic",
+  "title": "Cam unified reasoning loop (MAP + dual-process + recall + SRM)",
+  "status": "proposed",
+  "authorized_by": null,
+  "authorized_at": null,
+  "plan_doc": "docs/CAM_REASONING.md",
+  "proposal": null,
+  "depends_on": [
+    "config/enhancement/dual-process.json",
+    "config/connectome/mesh-params.json",
+    "config/connectome/trajectory-policies.json",
+    "config/memory/hmo-tiers.json",
+    "config/memory/mesh-claim-schema.json"
+  ],
+  "version": 1,
+  "stages": [
+    "accept",
+    "fast",
+    "gate",
+    "recall",
+    "plan",
+    "stream",
+    "reflect",
+    "switch",
+    "motor",
+    "distill"
+  ],
+  "fast_path": {
+    "center": "center.slm",
+    "motor": "motor.slm",
+    "skip_stages": ["plan"],
+    "light_plan": true,
+    "analogy": "System-1"
+  },
+  "slow_path": {
+    "centers": ["center.capability", "center.chief", "center.qa"],
+    "require_stages": ["recall", "plan", "reflect"],
+    "analogy": "System-2"
+  },
+  "escalation": {
+    "confidence_below": 0.65,
+    "always_slow_intents": [
+      "enhance",
+      "outbound",
+      "careers_submit",
+      "money",
+      "identity_boundary",
+      "multi_step",
+      "research_cite",
+      "explicit_plan"
+    ],
+    "always_fast_intents": [
+      "greeting",
+      "ack",
+      "mic_check",
+      "presence_chatter"
+    ],
+    "escalate_on": [
+      "open_ticket_multistep",
+      "weak_personal_fact_hits",
+      "prior_qa_veto",
+      "prior_trajectory_violation"
+    ]
+  },
+  "map_stages": {
+    "source": "config/connectome/mesh-params.json#planning_modules_map",
+    "order": [
+      "error_monitoring",
+      "state_prediction",
+      "state_evaluation",
+      "task_decomposition",
+      "task_coordination",
+      "action_proposal"
+    ]
+  },
+  "memory_gate": {
+    "hmo": "config/memory/hmo-tiers.json",
+    "order": ["primary", "secondary", "archive"],
+    "amm_triggers": ["aaron_question", "open_ticket", "persona_check"],
+    "never_invent_aaron_facts": true
+  },
+  "self_reflection": {
+    "center": "center.qa",
+    "checks": [
+      "trajectory_policies",
+      "mesh_claim_schema",
+      "persona_consistency"
+    ]
+  },
+  "dual_stream": {
+    "source": "config/connectome/mesh-params.json#language_dual_stream"
+  },
+  "trace": {
+    "kind": "reasoning_trace",
+    "distill_dir": "vault/10-Mesh-Distillates/reasoning",
+    "mesh_namespace": "mesh/runs"
+  },
+  "runtime": {
+    "cli": "scripts/cam-reason.py",
+    "server_module": "server/core/cam-reason.ts",
+    "note": "CLI first (Phase B); server wire in Phase C — neither shipped until Aaron applies"
+  },
+  "open_questions_for_aaron": [
+    {
+      "id": "q.confidence",
+      "ask": "Fast→slow confidence threshold?",
+      "interim": 0.65
+    },
+    {
+      "id": "q.converse_always",
+      "ask": "Run full reasoner on every mic turn or only above intent/length bar?",
+      "interim": "bar_on_intent_or_length"
+    },
+    {
+      "id": "q.max_burst",
+      "ask": "Max MAP subagent burst per turn?",
+      "interim": "inherit_asi_ceiling"
+    },
+    {
+      "id": "q.impl_surface",
+      "ask": "Prefer Python CLI (Phase B) or TypeScript server module first?",
+      "interim": "python_cli_first"
+    }
+  ]
+}

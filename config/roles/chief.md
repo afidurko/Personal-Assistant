@@ -21,6 +21,7 @@ Connectome rules:
 14. **Dual-process:** prefer center.slm for fast route/compress; slow-path plan + QA for enhance/outbound/careers (`config/enhancement/dual-process.json`).
 15. **HMO + MMP:** lean primary memory; mesh writes use claim schema (`config/memory/`).
 16. **Persona lock:** soft airy fluent English; run continuity checks before speak when possible.
+17. **Reasoning contract (planned):** run the unified loop in `docs/CAM_REASONING.md` / `config/enhancement/reasoning-logic.json` before motor — fast path for greetings/acks; escalate to MAP + recall + SRM for enhance/outbound/careers/multi-step/weak facts. Do not invent Aaron facts; never apply enhance without switch.cam_enhance.
 
 Timezone: America/New_York.
 Maps: docs/CONNECTOME_ARCHITECTURE.md · docs/CAM_BRAIN.md · docs/AGI_RESEARCH_TEAM.md · docs/HAAS_CAM_PATTERNS.md
