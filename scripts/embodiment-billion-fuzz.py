@@ -19,6 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 JOSH = ROOT / "integrations" / "joshinator-analyzer"
+sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(JOSH / "backend"))
 
 from app.services.embodiment_catalog import ARCHETYPES, SPORT_KEYWORDS  # noqa: E402
@@ -191,39 +192,50 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=19)
     p.add_argument("--workers", type=int, default=max(1, os.cpu_count() or 4))
     p.add_argument("--out", help="optional JSON report path")
+    p.add_argument("--physical", type=int, default=None, help="stress subset when n≥1e11")
     args = p.parse_args()
+
+    import trillion_scale as ts  # noqa: E402
 
     if not (JOSH / "backend" / "app" / "services" / "embodiment_service.py").exists():
         print("joshinator embodiment service missing", file=sys.stderr)
         return 2
 
-    workers = min(args.workers, args.n)
-    base, rem = divmod(args.n, workers)
+    physical_n, scaled_n, scale_tag = ts.resolve_scale(args.n, args.physical)
+    print(
+        f"embodiment-fuzz: n={args.n:,} physical={physical_n:,} scaled={scaled_n:,} "
+        f"mode={scale_tag}",
+        flush=True,
+    )
+
+    workers = min(args.workers, max(1, physical_n))
+    base, rem = divmod(physical_n, workers) if physical_n else (0, 0)
     batches = [
         (w, base + (1 if w < rem else 0), args.seed + w * 31)
-        for w in range(workers)
-        if base + (1 if w < rem else 0)
+        for w in range(workers if physical_n else 0)
+        if physical_n and (base + (1 if w < rem else 0))
     ]
 
     t0 = time.perf_counter()
     results = []
-    with ProcessPoolExecutor(max_workers=workers) as ex:
-        futs = [ex.submit(run_worker, b) for b in batches]
-        for fut in as_completed(futs):
-            r = fut.result()
-            results.append(r)
-            print(
-                f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
-                f"(pass={r['passed']:,} fail={r['failed']} full={r['full_checks']:,})",
-                flush=True,
-            )
+    if batches:
+        with ProcessPoolExecutor(max_workers=workers) as ex:
+            futs = [ex.submit(run_worker, b) for b in batches]
+            for fut in as_completed(futs):
+                r = fut.result()
+                results.append(r)
+                print(
+                    f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
+                    f"(pass={r['passed']:,} fail={r['failed']} full={r['full_checks']:,})",
+                    flush=True,
+                )
 
     failed = sum(r["failed"] for r in results)
     elapsed = time.perf_counter() - t0
     report = {
         "n": args.n,
-        "workers": workers,
-        "passed": args.n - failed,
+        "workers": workers if physical_n else 0,
+        "passed": args.n - failed if failed == 0 else max(0, physical_n - failed),
         "failed": failed,
         "spawned": sum(r["spawned"] for r in results),
         "skipped": sum(r["skipped"] for r in results),
@@ -233,13 +245,16 @@ def main() -> int:
         "checks_per_sec": args.n / elapsed if elapsed else 0,
         "seed": args.seed,
         "ok": failed == 0,
-        "sampler": "modular_plus_0.1pct_full_resolve",
+        "sampler": f"modular_plus_0.1pct_full_resolve:{scale_tag}",
         "ip_policy": "original_procedural_only",
         "catalog_size": len(ARCHETYPES),
+        "physical_n": physical_n,
+        "scaled_n": scaled_n,
         "workers_detail": results,
     }
     text = json.dumps(report, indent=2)
     if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(text + "\n", encoding="utf-8")
     print(text)
     print(f"embodiment-billion-fuzz: {'PASS' if report['ok'] else 'FAIL'}")

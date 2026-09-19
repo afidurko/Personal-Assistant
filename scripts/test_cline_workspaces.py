@@ -298,6 +298,14 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("1000000000", body)
         self.assertIn("connectome-anatomy-check", body)
 
+    def test_merge_prep_trillion_script_exists(self):
+        p = ROOT / "scripts" / "merge-prep-trillion.sh"
+        self.assertTrue(p.is_file())
+        body = p.read_text(encoding="utf-8")
+        self.assertIn("three-trillion-campaign", body)
+        self.assertTrue((ROOT / "scripts" / "three-trillion-campaign.py").is_file())
+        self.assertTrue((ROOT / "scripts" / "trillion_scale.py").is_file())
+
     def test_serve_viz_repo_root(self):
         body = (ROOT / "scripts" / "serve-connectome-viz.sh").read_text(encoding="utf-8")
         self.assertIn("visualizations/connectome", body)

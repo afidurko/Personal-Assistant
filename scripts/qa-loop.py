@@ -306,6 +306,7 @@ def write_suggestions(
         "- CI: `bash scripts/ci-connectome.sh` (check + workspace unit tests + 1M strict)",
         "- Standing: `python3 scripts/system-health-scan.py` (health_conductor)",
         "- Nightly billion fuzz via `qa-loop.py --n 1000000000 --cycles 1`",
+        "- Aaron **test** protocol (3T→fix→suggest→3T→merge): `python3 scripts/three-trillion-campaign.py --passes 2`",
         "- Trajectory OCL/CPV billion: `python3 scripts/trajectory-billion-fuzz.py --n 1000000000`",
         "- Cam reason billion: `python3 scripts/cam-reason-billion-fuzz.py --n 1000000000`",
         "- Aaron-only voice gate billion: `python3 scripts/aaron-voice-billion-fuzz.py --n 1000000000`",
@@ -322,7 +323,8 @@ def write_suggestions(
         "- Suggest: `cline mcp install cam` on each Aaron machine after persist-import",
         "- Suggest: pack research mesh writes with `scripts/pack-mesh-claim.py` (MMP)",
         "- Suggest: keep HMO primary lean — persona/prefs only; archive vault distillates",
-        "- Suggest: before merge run `trajectory-policy-check` + dual billion + cam-reason billion",
+        "- Suggest: before merge run `trajectory-policy-check` + dual three-trillion "
+        "(`merge-prep-trillion.sh`) + cam-reason billion",
         "- Suggest: Phase C converse bar-only — never every-mic SGR",
         "- Suggest: LitServe thin proxy after dry-run green; no vLLM farm yet",
         "- Suggest: expand Cam toolkit (Cline/Scholar) only after Phase B merge",
