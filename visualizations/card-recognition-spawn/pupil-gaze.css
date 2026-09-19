@@ -64,8 +64,8 @@
 }
 .calib-dot {
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 50%;
+  top: 50%;
   width: 28px;
   height: 28px;
   margin: -14px 0 0 -14px;
@@ -76,7 +76,7 @@
   animation: calibPulse 1s ease-in-out infinite;
 }
 @keyframes calibPulse {
-  50% { transform: translate(var(--tx, 0), var(--ty, 0)) scale(1.12); }
+  50% { box-shadow: 0 0 0 14px rgba(125, 255, 240, 0.15), 0 0 36px rgba(125, 255, 240, 0.8); }
 }
 .calib-hint {
   position: absolute;
@@ -128,32 +128,33 @@
   left: 0;
   top: 0;
   z-index: 80;
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 160ms ease;
   will-change: transform;
 }
 .gaze-cursor.on { opacity: 1; }
+.gaze-cursor svg { width: 52px; height: 52px; }
 .gaze-ring-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.25);
-  stroke-width: 2.5;
+  fill: rgba(0, 0, 0, 0.25);
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 3;
 }
 .gaze-ring {
   fill: none;
   stroke: #7dfff0;
-  stroke-width: 2.5;
+  stroke-width: 3.5;
   stroke-linecap: round;
   transform: rotate(-90deg);
   transform-origin: 20px 20px;
-  transition: stroke-dashoffset 60ms linear;
+  transition: stroke-dashoffset 50ms linear;
 }
 .gaze-core {
   fill: #7dfff0;
-  filter: drop-shadow(0 0 6px rgba(125, 255, 240, 0.8));
+  filter: drop-shadow(0 0 8px rgba(125, 255, 240, 0.95));
 }
 
 [data-gaze-target].gaze-hot {
