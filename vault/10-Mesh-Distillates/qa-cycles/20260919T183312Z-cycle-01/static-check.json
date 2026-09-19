@@ -3,9 +3,10 @@
   "hotspot_options": 35,
   "known_nodes": 129,
   "motors": 17,
-  "edges": 264,
+  "edges": 262,
   "hard_errors": [],
   "missing_edges": [],
   "soft_warnings": [],
-  "ok": true
+  "ok": true,
+  "exit_code": 0
 }

@@ -296,6 +296,22 @@ function fromAgentContext(
     });
   }
 
+  out.push({
+    id: 'suggest-aaron-voice-only-gate',
+    kind: 'identity',
+    title: 'Keep Aaron-only voice gate enrolled before live mic',
+    rationale:
+      'Surrounding speakers must not create Cam turns — enroll FunASR CAM++ templates and fail closed until ready.',
+    implementation:
+      'Record Aaron-only WAVs, run aaron-voice-enroll.py, verify with aaron-voice-verify.py and aaron-voice-billion-fuzz before merging presence changes.',
+    sketch:
+      'python3 scripts/aaron-voice-enroll.py identity/aaron/local/voice/samples/*.wav\npython3 scripts/aaron-voice-billion-fuzz.py --n 1000000000\npython3 scripts/cam-converse-server.py',
+    priority: 82,
+    relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+    relatedConceptIds: ['error-handling', 'protocols-extensions'],
+    sourceFindingIds: [],
+  });
+
   const critical = workspaces.flatMap((w) => w.findings.filter((f) => f.severity === 'critical'));
   if (critical.length > 0) {
     const fixer = MESH_AGENTS.find((a) => a.id === 'issue-fix-loop')!;

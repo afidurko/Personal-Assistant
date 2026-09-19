@@ -307,8 +307,9 @@ def write_suggestions(
         "- Standing: `python3 scripts/system-health-scan.py` (health_conductor)",
         "- Nightly billion fuzz via `qa-loop.py --n 1000000000 --cycles 1`",
         "- Trajectory OCL/CPV billion: `python3 scripts/trajectory-billion-fuzz.py --n 1000000000`",
+        "- Aaron-only voice gate billion: `python3 scripts/aaron-voice-billion-fuzz.py --n 1000000000`",
         "- Progress heartbeats every 50M sims for long campaigns (simulator v3)",
-        "- Traffic-weighted sense sampling (chat/vault/cline/scholar/arxiv-heavy)",
+        "- Traffic-weighted sense sampling (chat/vault/cline/scholar/arxiv/aaron.voice-heavy)",
         "- Mirror QA cycle events into `identity/persistence/qa-mesh-latest.json`",
         "- Cline workspace runtime: `python3 scripts/test_cline_workspaces.py`",
         "- When Mac is available: flip Tailscale preferred host to aaron-mac",
@@ -317,6 +318,8 @@ def write_suggestions(
         "- Suggest: pack research mesh writes with `scripts/pack-mesh-claim.py` (MMP)",
         "- Suggest: keep HMO primary lean — persona/prefs only; archive vault distillates",
         "- Suggest: before merge run `trajectory-policy-check` + dual billion campaigns",
+        "- Suggest: enroll Aaron voice (`aaron-voice-enroll.py`) before live mic; keep fail-closed",
+        "- Suggest: `speak_requires_aaron_identity` — motor.speak stripped when switch.identity holds",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")

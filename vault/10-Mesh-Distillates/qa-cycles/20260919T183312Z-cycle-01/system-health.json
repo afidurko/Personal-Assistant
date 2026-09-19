@@ -128,5 +128,6 @@
       "exit": 0,
       "preview": "fornix: consolidated 40 notes \u2192 6 themes\nwrote vault/10-Mesh-Distillates/fornix-consolidation.json\n"
     }
-  }
+  },
+  "exit_code": 0
 }

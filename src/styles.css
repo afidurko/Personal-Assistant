@@ -1059,6 +1059,10 @@ h2,
   color: var(--coral);
 }
 
+.suggestion-kind.identity {
+  color: #9ed8ff;
+}
+
 .suggestion-kind.agent-commute {
   color: #6ec6ff;
 }

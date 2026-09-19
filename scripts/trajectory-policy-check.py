@@ -89,6 +89,16 @@ def main() -> int:
         errors.append("mesh_should_remain_when_outbound_held")
     demos.append({"case": "outbound_hold", "motor_plan": plan5, "violations": v5})
 
+    # identity hold → speak stripped
+    id_state = dict(r1.get("switch_state") or {})
+    id_state["switch.identity"] = "hold"
+    plan6, v6 = tp.apply_policies(["motor.speak", "motor.mesh"], id_state)
+    if "motor.speak" in plan6:
+        errors.append("speak_not_stripped_on_identity_hold")
+    if "motor.mesh" not in plan6:
+        errors.append("mesh_should_remain_when_identity_held")
+    demos.append({"case": "identity_hold_speak", "motor_plan": plan6, "violations": v6})
+
     if cfg.get("status") != "applied":
         errors.append("policies_not_applied")
 

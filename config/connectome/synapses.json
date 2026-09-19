@@ -451,6 +451,20 @@
       "weight": 1.0
     },
     {
+      "from": "switch.outbound",
+      "to": "switch.identity",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Aaron-only speak gate — identity after outbound for presence path"
+    },
+    {
+      "from": "switch.identity",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Strip speak when Aaron voice/face match fails"
+    },
+    {
       "from": "switch.careers_submit",
       "to": "motor.jobs",
       "when": "act",

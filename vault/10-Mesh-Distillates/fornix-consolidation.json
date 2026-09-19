@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-17T01:36:13Z",
+  "at": "2026-09-19T18:33:13Z",
   "neuron": "neuron.mesh_sync_loop",
   "bus": "tract.fornix",
   "episodic_scanned": 40,
@@ -15,28 +15,25 @@
       "theme": "SwiftGuide cartography",
       "count": 2,
       "samples": [
-        "vault/03-Projects/iOS-Companion-SwiftGuide-Stack.md",
-        "vault/04-Research/2026-09-16-SwiftGuide-brain-map.md"
+        "vault/04-Research/2026-09-16-SwiftGuide-brain-map.md",
+        "vault/03-Projects/iOS-Companion-SwiftGuide-Stack.md"
       ]
     },
     {
       "theme": "connectome / cortex",
-      "count": 3,
+      "count": 4,
       "samples": [
-        "vault/02-Cam/Connectome.md",
         "vault/04-Research/2026-09-16-Drosophila-male-CNS-connectome-Cell.md",
-        "vault/10-Mesh-Distillates/Connectome-Simulations.md"
+        "vault/02-Cam/Connectome.md",
+        "vault/10-Mesh-Distillates/Connectome-Simulations.md",
+        "vault/04-Research/scholar/2026-09-17/connectome-mapping.md"
       ]
     },
     {
       "theme": "QA campaigns",
-      "count": 8,
+      "count": 1,
       "samples": [
-        "vault/10-Mesh-Distillates/Continuous-QA-Campaign.md",
-        "vault/10-Mesh-Distillates/qa-cycles/AUDIT-FIX-20260916.md",
-        "vault/10-Mesh-Distillates/qa-cycles/MERGE-PREP-CORRECTIVES.md",
-        "vault/10-Mesh-Distillates/qa-cycles/20260916T144156Z-cycle-01/suggestions.md",
-        "vault/10-Mesh-Distillates/qa-cycles/20260916T131540Z-cycle-02/suggestions.md"
+        "vault/10-Mesh-Distillates/Continuous-QA-Campaign.md"
       ]
     },
     {
@@ -59,57 +56,7 @@
     {
       "path": "vault/03-Projects/Improve-Engine-Tasks.md",
       "title": "Improve Engine Tasks",
-      "chars": 240
-    },
-    {
-      "path": "vault/03-Projects/Projects.md",
-      "title": "Projects",
-      "chars": 563
-    },
-    {
-      "path": "vault/03-Projects/Open-Questions-Fasciculus-AGI.md",
-      "title": "Open questions \u2014 fasciculus mesh & AGI stance",
-      "chars": 709
-    },
-    {
-      "path": "vault/03-Projects/Priority-Stack-Implemented.md",
-      "title": "Priority stack \u2014 implemented",
-      "chars": 1341
-    },
-    {
-      "path": "vault/10-Mesh-Distillates/2026-09-17-fasciculus-AGI-mesh.md",
-      "title": "White-matter fasciculi \u00d7 AGI mesh \u2014 research distillate",
-      "chars": 3052
-    },
-    {
-      "path": "vault/03-Projects/System-Health-Neurons.md",
-      "title": "Neurons to add \u2014 health, workspaces, project ops",
-      "chars": 2465
-    },
-    {
-      "path": "vault/02-Cam/Connectome.md",
-      "title": "Cam Connectome",
-      "chars": 644
-    },
-    {
-      "path": "vault/04-Research/2026-09-16-Neuroplasticity-neurogenesis-mesh.md",
-      "title": "Neuroplasticity & neurogenesis in Cam\u2019s mesh",
-      "chars": 1182
-    },
-    {
-      "path": "vault/04-Research/2026-09-16-Brodmann-neural-mesh-remap.md",
-      "title": "Cam Brodmann cortex remap",
-      "chars": 2620
-    },
-    {
-      "path": "vault/03-Projects/iOS-Companion-SwiftGuide-Stack.md",
-      "title": "Cam iOS companion \u2014 stack from SwiftGuide",
-      "chars": 879
-    },
-    {
-      "path": "vault/04-Research/2026-09-16-SwiftGuide-brain-map.md",
-      "title": "SwiftGuide \u2192 Cam brain map",
-      "chars": 1243
+      "chars": 314
     },
     {
       "path": "vault/README.md",
@@ -127,9 +74,59 @@
       "chars": 53
     },
     {
+      "path": "vault/04-Research/AGI-Daily-Scan.md",
+      "title": "AGI Daily Scan",
+      "chars": 437
+    },
+    {
+      "path": "vault/04-Research/2026-09-17-Cam-Function-Papers.md",
+      "title": "Research Brief \u2014 Papers to help Cam function better",
+      "chars": 6309
+    },
+    {
       "path": "vault/04-Research/2026-09-16-Drosophila-male-CNS-connectome-Cell.md",
       "title": "Research Brief \u2014 Drosophila male CNS connectome (Cell 2026)",
       "chars": 2687
+    },
+    {
+      "path": "vault/04-Research/2026-09-16-SwiftGuide-brain-map.md",
+      "title": "SwiftGuide \u2192 Cam brain map",
+      "chars": 1243
+    },
+    {
+      "path": "vault/04-Research/2026-09-16-Neuroplasticity-neurogenesis-mesh.md",
+      "title": "Neuroplasticity & neurogenesis in Cam\u2019s mesh",
+      "chars": 1182
+    },
+    {
+      "path": "vault/04-Research/Research.md",
+      "title": "Research",
+      "chars": 622
+    },
+    {
+      "path": "vault/04-Research/2026-09-16-Brodmann-neural-mesh-remap.md",
+      "title": "Cam Brodmann cortex remap",
+      "chars": 2620
+    },
+    {
+      "path": "vault/03-Projects/Priority-Stack-Implemented.md",
+      "title": "Priority stack \u2014 implemented",
+      "chars": 1615
+    },
+    {
+      "path": "vault/03-Projects/iOS-Companion-SwiftGuide-Stack.md",
+      "title": "Cam iOS companion \u2014 stack from SwiftGuide",
+      "chars": 879
+    },
+    {
+      "path": "vault/03-Projects/Projects.md",
+      "title": "Projects",
+      "chars": 563
+    },
+    {
+      "path": "vault/03-Projects/System-Health-Neurons.md",
+      "title": "Neurons to add \u2014 health, workspaces, project ops",
+      "chars": 2260
     }
   ]
 }
