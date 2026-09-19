@@ -5,6 +5,7 @@
  */
 (function () {
   var DWELL_MS = 750;
+  var DWELL_COOLDOWN_MS = 900;
   var SMOOTH = 0.35;
   var state = {
     mode: 'idle', // idle | calibrating | tracking
@@ -14,12 +15,15 @@
     sy: window.innerHeight / 2,
     dwellTarget: null,
     dwellStarted: 0,
+    dwellCooldownUntil: 0,
     calibration: null,
     samples: [],
     usingCamera: false,
+    usingPupilBridge: false,
     faceLandmarker: null,
     video: null,
-    raf: 0
+    raf: 0,
+    pupilPoll: 0
   };
 
   var cursor = document.getElementById('gaze-cursor');
@@ -79,12 +83,26 @@
   function activate(el) {
     if (!el) return;
     el.classList.remove('gaze-hot');
-    // Prefer click so existing listeners fire
+    state.dwellLockUntil = performance.now() + DWELL_COOLDOWN_MS;
+    state.dwellTarget = null;
+    state.dwellStarted = 0;
+    if (ring) {
+      ring.style.strokeDashoffset = '94';
+      ring.classList.remove('filling');
+    }
     el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     setStatus('Selected · ' + (el.getAttribute('aria-label') || el.textContent || el.id || 'target').trim().slice(0, 28));
   }
 
   function updateDwell(now) {
+    if (now < state.dwellLockUntil) {
+      document.querySelectorAll('.gaze-hot').forEach(function (n) { n.classList.remove('gaze-hot'); });
+      if (ring) {
+        ring.style.strokeDashoffset = '94';
+        ring.classList.remove('filling');
+      }
+      return;
+    }
     var target = hitTest();
     document.querySelectorAll('.gaze-hot').forEach(function (n) {
       if (n !== target) n.classList.remove('gaze-hot');
@@ -111,10 +129,7 @@
       ring.style.strokeDashoffset = String(94 * (1 - t));
     }
     if (t >= 1) {
-      var chosen = state.dwellTarget;
-      state.dwellTarget = null;
-      state.dwellStarted = 0;
-      activate(chosen);
+      activate(state.dwellTarget);
     }
   }
 
@@ -286,7 +301,7 @@
       var y = p.y * window.innerHeight;
       dot.style.left = x + 'px';
       dot.style.top = y + 'px';
-      hint.textContent = state.usingCamera
+      hint.textContent = (state.usingCamera || state.usingPupilBridge)
         ? 'Look at the dot · dwell or press Space / click (' + (idx + 1) + '/5)'
         : 'Point at the dot · click (' + (idx + 1) + '/5)';
       state._calibCollect = true;
@@ -299,7 +314,7 @@
         v: state._calibScreen.y / window.innerHeight
       };
       // For pointer fallback during calib, use pointer position as raw
-      if (!state.usingCamera) {
+      if (!state.usingCamera && !state.usingPupilBridge) {
         raw = {
           u: state._calibScreen.x / window.innerWidth,
           v: state._calibScreen.y / window.innerHeight
@@ -320,9 +335,11 @@
         calibOverlay.hidden = true;
         state.mode = 'tracking';
         state._calibCollect = false;
-        setStatus(state.usingCamera
-          ? 'Pupil control on · dwell ' + (DWELL_MS / 1000) + 's to select'
-          : 'Pointer-gaze demo · dwell to select');
+        setStatus(state.usingPupilBridge
+          ? 'Cam Pupil gaze · dwell ' + (DWELL_MS / 1000) + 's to select'
+          : state.usingCamera
+            ? 'Webcam iris · dwell ' + (DWELL_MS / 1000) + 's to select'
+            : 'Pointer-gaze demo · dwell to select');
         return;
       }
       place();
@@ -342,7 +359,7 @@
     function calibWatch() {
       if (state.mode !== 'calibrating') return;
       requestAnimationFrame(calibWatch);
-      if (!state.usingCamera || !state._calibRaw) return;
+      if ((!state.usingCamera && !state.usingPupilBridge) || !state._calibRaw) return;
       var pt = {
         x: state._calibRaw.u * window.innerWidth,
         y: state._calibRaw.v * window.innerHeight
@@ -362,6 +379,53 @@
       }
     }
     calibWatch();
+  }
+
+  function applyPupilNorm(norm, confidence) {
+    if (!norm || norm.length < 2) return;
+    if (typeof confidence === 'number' && confidence < 0.35) return;
+    // Pupil Labs norm_pos: origin bottom-left → flip Y for CSS screen space
+    var u = Math.max(0, Math.min(1, Number(norm[0])));
+    var v = Math.max(0, Math.min(1, 1 - Number(norm[1])));
+    if (state.mode === 'calibrating' && state._calibCollect) {
+      state._calibRaw = { u: u, v: v };
+      return;
+    }
+    if (state.mode !== 'tracking') return;
+    var pt = applyCalib(u, v);
+    smoothTo(
+      Math.max(0, Math.min(window.innerWidth, pt.x)),
+      Math.max(0, Math.min(window.innerHeight, pt.y))
+    );
+  }
+
+  async function enablePupilBridge() {
+    var url = (window.PUPIL_GAZE_URL || 'http://127.0.0.1:8766/gaze');
+    setStatus('Connecting to Cam Pupil bridge…');
+    state.usingCamera = false;
+    state.usingPupilBridge = true;
+    async function poll() {
+      try {
+        var res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+        if (data && data.ok && data.norm_pos) {
+          applyPupilNorm(data.norm_pos, data.confidence);
+          if (state.mode === 'tracking') {
+            setStatus('Cam Pupil gaze · dwell to select');
+          }
+        } else {
+          setStatus('Pupil bridge online · waiting for gaze samples');
+        }
+      } catch (err) {
+        setStatus('Pupil bridge offline — start scripts/pupil-gaze-bridge.py');
+      }
+    }
+    await poll();
+    state.pupilPoll = window.setInterval(poll, 33);
+    cursor.classList.add('on');
+    requestAnimationFrame(trackFrame);
+    startCalibration();
   }
 
   function enablePointerFallback() {
@@ -406,6 +470,10 @@
     }
   }
 
+  document.getElementById('gaze-pupil').addEventListener('click', function () {
+    document.getElementById('gaze-gate').hidden = true;
+    enablePupilBridge();
+  });
   document.getElementById('gaze-start').addEventListener('click', function () {
     document.getElementById('gaze-gate').hidden = true;
     start();
