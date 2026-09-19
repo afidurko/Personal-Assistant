@@ -100,7 +100,19 @@
     "status": "applied",
     "authorized_at": "2026-09-17",
     "fast": "center.slm",
-    "slow": ["center.capability", "center.chief", "center.qa"]
+    "slow": ["center.capability", "center.chief", "center.qa"],
+    "reasoning_loop_plan": "config/enhancement/reasoning-logic.json",
+    "docs": "docs/CAM_REASONING.md"
+  },
+  "inference_host": {
+    "id": "litserve",
+    "status": "proposed",
+    "remote": "https://github.com/afidurko/LitServe",
+    "path": "integrations/litserve",
+    "policy": "config/integrations/litserve.md",
+    "serves": ["motor.slm", "motor.dl", "sgr_openai_compatible"],
+    "planned_wrapper": "scripts/cam-litserve.py",
+    "note": "Local LitAPI host for fast-path sLM + DL; optional OpenAI-compatible backend for SGR"
   },
   "non_goals": [
     "Training unbounded foundation models in this repo",

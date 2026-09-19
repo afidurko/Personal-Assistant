@@ -12,7 +12,9 @@
     "integration empty: integrations/pupil (submodule init or create config)",
     "integration empty: integrations/inkbox (submodule init or create config)",
     "integration empty: integrations/voicestudio (submodule init or create config)",
-    "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)"
+    "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)",
+    "integration empty: integrations/sgr-agent-core (submodule init or create config)",
+    "integration empty: integrations/litserve (submodule init or create config)"
   ],
   "mesh_flags": {
     "daily_agi_research_scan": true,
@@ -102,6 +104,18 @@
     {
       "id": "funasr",
       "path": "https://github.com/afidurko/FunASR",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "sgr-agent-core",
+      "path": "integrations/sgr-agent-core",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "litserve",
+      "path": "integrations/litserve",
       "populated": false,
       "policy_exists": true
     }

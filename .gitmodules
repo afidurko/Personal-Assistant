@@ -20,6 +20,12 @@
 [submodule "integrations/memorybear"]
 	path = integrations/memorybear
 	url = https://github.com/afidurko/MemoryBear.git
+[submodule "integrations/sgr-agent-core"]
+	path = integrations/sgr-agent-core
+	url = https://github.com/afidurko/sgr-agent-core.git
+[submodule "integrations/litserve"]
+	path = integrations/litserve
+	url = https://github.com/afidurko/LitServe.git
 [submodule "integrations/voicestudio"]
 	path = integrations/voicestudio
 	url = https://github.com/afidurko/VoiceStudio.git

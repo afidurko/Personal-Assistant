@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T19:59:24.897145+00:00",
+    "at": "2026-09-19T21:33:51.280604+00:00",
     "mode": "act",
-    "summary": "Fix hero-stage CSS clash (glass+CamPresence); refresh ci-sim; re-merge main",
+    "summary": "PR#22 merge main: keep organism bus (kernel/motors/identity/HMO) + main inkbox/voice-gate/pupil/VoiceStudio/AR-pupil/#16 cam-reason. connectome-check PASS.",
     "workspace": "."
   },
   "notes": [
@@ -37,6 +37,11 @@
     {
       "at": "2026-09-19T19:08:54.223761+00:00",
       "text": "CONNECTION_STATUS.md aaron_only backlog",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T20:06:34.245777+00:00",
+      "text": "Organism bus upgrade: in-process kernel, causal motors, identity gate, HMO, WS cortex, dual-stream/MAP, trajectory physics, circadian, flight envelope PASS. Blockers: FunASR/VoiceStudio, MemoryBear, P",
       "workspace": "."
     }
   ],
@@ -91,11 +96,12 @@
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-19T20:17:35.487118+00:00",
+  "schedules_synced_at": "2026-09-19T21:02:04.579864+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
     ".",
-    "personal-assistant"
+    "personal-assistant",
+    "/workspace"
   ]
 }

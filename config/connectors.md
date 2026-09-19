@@ -1,5 +1,14 @@
 # Connectors policy
 
+## System integration (all pieces on one bus)
+
+- Inventory: `config/system/pieces.json`
+- Bridge: `server/core/system-bridge.ts` — home `/api/turn` + mic/camera spikes
+  route through connectome and light DTI live-activity
+- Status: `GET /api/system` · CLI `python3 scripts/cam-system.py --smoke`
+- Docs: `docs/SYSTEM_INTEGRATION.md`
+- Home UI: System pulse panel lists every piece
+
 ## Prefer (nullclaw native)
 
 - iMessage, email, Telegram, Discord, Slack, WhatsApp, web, CLI

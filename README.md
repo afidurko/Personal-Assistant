@@ -63,6 +63,8 @@ python3 scripts/workspace-integration-check.py
 # MemoryBear cognitive memory (offline doctor)
 python3 scripts/memorybear.py --doctor --offline
 python3 scripts/memorybear-check.py
+# Overall system pulse (all pieces on one bus)
+python3 scripts/cam-system.py --smoke
 # HAAS→Cam privilege + boss/worker contracts
 python3 scripts/swarm-check.py
 # Kill switch silences motors
@@ -132,5 +134,7 @@ MemoryBear wired as shared cognitive memory effector for all agents/workspaces
 (sense/motor/hotspots, mesh/memorybear, MCP read/write, HMO secondary tier).
 Public-apis wired as shared free-API catalog for all agents
 (`motor.public_apis`, MCP `public_apis_search`, tooling/info/capability/AGI teams).
+**Overall system bridge** ties home converse → connectome → live cortex activity
+(`server/core/system-bridge.ts`, `GET /api/system`, `python3 scripts/cam-system.py`).
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.
-Neural-mesh scanner stack is present alongside the Cam connectome foundation.
+Neural-mesh scanner stack and Cam connectome share one activity bus via the system bridge.
