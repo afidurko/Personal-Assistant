@@ -1,7 +1,32 @@
 {
-  "at": "2026-09-17T10:48:18Z",
-  "health_overall": "healthy",
-  "task_count": 0,
-  "tasks": [],
+  "at": "2026-09-19T18:33:13Z",
+  "health_overall": "warning",
+  "task_count": 1,
+  "tasks": [
+    {
+      "id": "improve.submodule_health.warning",
+      "title": "Init/sync git submodules",
+      "severity": "medium",
+      "status": "warning",
+      "neuron": "neuron.submodule_health",
+      "area": "area.apfc",
+      "detail": {
+        "count": 6,
+        "uninitialized": 6,
+        "status": "warning",
+        "sample": [
+          "-173837314b7e02f4179c95b60fb6ca08c6d6f3bf integrations/cline",
+          "-0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis",
+          "-93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk",
+          "-b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection",
+          "-baa4ee82a7c86a2d515a9d7b3e8aea00ca386384 integrations/smart-second-brain",
+          "-64fa9ef58fc14b966238033b8e5c0b3649ca93f6 integrations/swiftguide"
+        ]
+      },
+      "suggested_cmd": "git submodule update --init --depth 1",
+      "created_at": "2026-09-19T18:33:13Z",
+      "source": "neuron.improve_engine"
+    }
+  ],
   "neuron": "neuron.improve_engine"
 }

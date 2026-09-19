@@ -95,6 +95,13 @@
     "into": ["slm.candidates", "deep_learning.candidates", "config/roles", "config/connectome"],
     "apply_gate": "switch.cam_enhance"
   },
+  "dual_process": {
+    "config": "config/enhancement/dual-process.json",
+    "status": "applied",
+    "authorized_at": "2026-09-17",
+    "fast": "center.slm",
+    "slow": ["center.capability", "center.chief", "center.qa"]
+  },
   "non_goals": [
     "Training unbounded foundation models in this repo",
     "Letting models assign root tasks (Aaron only)",

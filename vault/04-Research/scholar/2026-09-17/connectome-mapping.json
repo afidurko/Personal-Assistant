@@ -1,0 +1,60 @@
+{
+  "engine": "google_scholar",
+  "fetched_at": "2026-09-17T22:22:37.425641+00:00",
+  "offline": true,
+  "organic_results": [
+    {
+      "inline_links": {
+        "cited_by": {
+          "link": "https://scholar.google.com/scholar?cites=demo1",
+          "total": 42
+        }
+      },
+      "link": "https://doi.org/10.1016/j.cell.2026.example",
+      "position": 1,
+      "publication_info": {
+        "authors": [
+          {
+            "name": "Berg"
+          },
+          {
+            "name": "et al."
+          }
+        ],
+        "summary": "Berg et al. - Cell - 2026"
+      },
+      "resources": [
+        {
+          "file_format": "PDF",
+          "link": "https://example.org/paper.pdf",
+          "title": "PDF"
+        }
+      ],
+      "result_id": "demo-result-1",
+      "snippet": "Whole-brain connectome of the adult male Drosophila CNS enabling sensory-to-motor pathway analysis.",
+      "title": "A Drosophila male CNS connectome"
+    },
+    {
+      "inline_links": {
+        "cited_by": {
+          "total": 17
+        }
+      },
+      "link": "https://doi.org/10.1038/example.2025",
+      "position": 2,
+      "publication_info": {
+        "authors": [
+          {
+            "name": "Demo Author"
+          }
+        ],
+        "summary": "Demo Author - Nature Neuro - 2025"
+      },
+      "result_id": "demo-result-2",
+      "snippet": "Antagonistic motor outcomes from shared sensory input via higher-center switches.",
+      "title": "Circuit switches in isomorphic sensory pathways"
+    }
+  ],
+  "provider": "fixture",
+  "query": "connectome mapping"
+}

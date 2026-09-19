@@ -4,77 +4,75 @@
   "trigger": "sense.clock.daily",
   "hotspot": "hotspot.agi_daily_scan",
   "human_gate_for_apply": "switch.cam_enhance",
-  "generated_at": "2026-09-17T00:23:36.072548+00:00",
+  "generated_at": "2026-09-17T10:49:46.515146+00:00",
   "mode": "live",
   "fetch_error": null,
-  "count": 5,
-  "propose_count": 3,
+  "count": 11,
+  "propose_count": 5,
   "papers": [
     {
-      "id": "http://arxiv.org/abs/2609.17527v1",
-      "title": "Agentic Societies Need a Social Harness",
-      "summary": "An agentic society is a collection of AI agents that coordinate autonomously across trust boundaries, on behalf of different principals whose objectives may only partially align. We show experimentally that in agentic societies even honest, competent agents often fail to reach satisfactory outcomes with existing harnesses and messaging primitives, and that faulty or malicious agents can stall collaboration, influence outcomes, and pursue other harmful goals by exploiting vulnerabilities in communication (``speech''). We argue that agentic societies need a \\emph{social harness} for inter-agent interactions, in addition to each agent's \\emph{personal harness}, which manages its private context and communication with its principal. We propose a layered architecture for social harnesses which (i) prevents classes of failures outright, (ii) enables agents to detect invalid messages at runtime, and (iii) supports post-facto investigation and consequences, and highlight directions for future research to realize these capabilities.",
-      "published": "2026-09-15T17:57:27Z",
+      "id": "http://arxiv.org/abs/2609.19137v1",
+      "title": "Dreaming the Sound of Contact: Leveraging Video and Audio Generation for Zero-Shot Force-Aware Manipulation and Data Generation",
+      "summary": "Recent advances in video generation allow robots to learn manipulation trajectories from generated videos. However, these approaches produce purely kinematic trajectories that lack force information, causing failures in contact-rich tasks where appropriate contact forces are essential for success. In this work, we explore augmenting generated video with audio to shape a bounded, time-varying desired-force profile using the loudness of generated contact sounds. We present a pipeline that jointly leverages generated video and audio to derive motion trajectories and corresponding desired-force profiles from a structured natural-language task prompt. We execute these force-aware trajectories on a Franka Panda robot using a closed-loop force regulator that tracks the audio-shaped force profile during contact. We evaluate our pipeline on multiple tasks that require making contact and demonstrate successful manipulation where a kinematic-only baseline fails. We also use the pipeline as a data generation engine to train policies that achieve the tasks in a closed-loop manner. Project website, videos, and dataset: https://dreamingcontactsound.github.io/",
+      "published": "2026-09-16T17:56:44Z",
       "authors": [
-        "Tapan Chugh",
-        "Vidushi Singh",
-        "Krish Jain",
-        "Arvind Krishnamurthy",
-        "Ratul Mahajan"
+        "Guanhua Ji",
+        "Tianyu Li",
+        "Dayoon Suh",
+        "Yuqian Zhang",
+        "Boyan Zhang",
+        "Nadia Figueroa"
       ],
       "categories": [
         "cs.AI",
-        "cs.MA",
-        "cs.NI"
+        "cs.RO"
       ],
       "source": "arxiv",
-      "url": "http://arxiv.org/abs/2609.17527v1",
+      "url": "http://arxiv.org/abs/2609.19137v1",
       "relevance_scores": {
-        "enhance_cam_routing": 3,
-        "enhance_memory_mesh": 0,
-        "enhance_presence_voice": 2,
+        "enhance_cam_routing": 0,
+        "enhance_memory_mesh": 3,
+        "enhance_presence_voice": 0,
         "enhance_vision": 2,
         "enhance_slm_local": 0,
         "enhance_dl_embeddings": 0,
         "general_agi_theory": 1
       },
-      "relevance_total": 8,
+      "relevance_total": 6,
       "propose": true,
       "cam_touchpoints": [
-        "center.capability",
-        "center.comms",
         "center.dl",
-        "center.router",
+        "center.info",
+        "center.memory",
         "center.vision",
-        "config/roles",
-        "motor.speak"
+        "smart-second-brain"
       ]
     },
     {
-      "id": "http://arxiv.org/abs/2609.17523v1",
-      "title": "ScienceBuddy: Recursive-in-Recursive Self-Improvement for Interactive Scientific Agents",
-      "summary": "We introduce and release ScienceBuddy, an interactive scientific research workspace that brings continually improving scientific agents into researchers' everyday workflows. ScienceBuddy supports researchers in carrying out scientific tasks while transforming their requests, feedback, and execution evidence into tasks and evaluation rubrics for continual learning. At its core is recursive-in-recursive self-improvement, a paradigm that couples harness evolution with model reinforcement learning: the inner recursion improves the harness with the model fixed, while the outer recursion trains the model under the improved harness. Harness evolution shapes training experience, and model learning creates new opportunities for harness adaptation. We present case studies of researcher interaction, harness refinement, and model learning, with the benchmark cases spanning four scientific task families. By releasing ScienceBuddy as a research product, we make this paradigm available to the scientific community and take a step toward discovery intelligence: scientific AI that advances through sustained collaboration with researchers and evolves alongside the research it supports. Website: http:",
-      "published": "2026-09-15T17:55:28Z",
+      "id": "http://arxiv.org/abs/2609.19134v1",
+      "title": "ScienceIDE: Turning World's Scientific Codebase into Agent Learnable Environments",
+      "summary": "Scientific code repositories encode decades of human knowledge in executable models, methods, and tools. Yet fragmented toolchains, implicit domain conventions, and specialized correctness criteria make this knowledge difficult to convert into reliable learning experience-a challenge we call the scientific experience bottleneck. We introduce ScienceIDE, infrastructure for turning the world's scientific code into programmable environments for scientific agents. Guided by expert-defined scientific cases and acceptance criteria, agents transform repositories into executable environments that support task generation, execution, and scientific verification. These environments provide a shared foundation for supervised fine-tuning, reinforcement learning, and evaluation. Using verified interaction trajectories, we train PhAI-IDE-72B, PhAI-IDE-9B, and PhAI-IDE-4B. The model family shows gains in held-out scientific-code repair and across selected general-purpose benchmarks in code, reasoning, and knowledge, providing evidence of positive transfer from scientific experience to broader capabilities. ScienceIDE lays the foundation for an integrated workspace for agent learning and scientific",
+      "published": "2026-09-16T17:55:47Z",
       "authors": [
-        "Shuhan Xue",
-        "Jianyuan Zhong",
-        "Ziyuan Nan",
+        "Hejia Geng",
+        "Zesen Huang",
+        "Haoyang Li",
         "Wenbin Li",
-        "Zhaochen Yu",
-        "Jinchao Ding",
-        "Qiang Gao",
-        "Pengyu Zhan",
-        "Yuntong Zhang",
-        "Tian Cheng",
-        "Zhenfei Yin",
-        "Yingcheng Wu"
+        "Koutian Wu",
+        "Zihan Zhou",
+        "Yuanbo Pang",
+        "Weihao Liu",
+        "Zigong Xu",
+        "Zhiping Li",
+        "Zongzheng Zhang",
+        "Chuanfei Dong"
       ],
       "categories": [
-        "cs.AI",
-        "cs.CL"
+        "cs.CL",
+        "cs.CY"
       ],
       "source": "arxiv",
-      "url": "http://arxiv.org/abs/2609.17523v1",
+      "url": "http://arxiv.org/abs/2609.19134v1",
       "relevance_scores": {
         "enhance_cam_routing": 3,
         "enhance_memory_mesh": 3,
@@ -96,26 +94,59 @@
       ]
     },
     {
-      "id": "http://arxiv.org/abs/2609.17521v1",
-      "title": "PhysStream: Streaming Physics-Grounded Video Generation with Structured Scene Memory and Fine-Grained Motion Control",
-      "summary": "Interactive control for video generation is moving from coarse prompts toward fine-grained, physically meaningful manipulation of dynamic scenes. Yet existing controllable methods either require the full control schedule before generation starts, or use pixel-space signals that dictate object positions rather than physical dynamics. To address these limitations, we propose PhysStream, an autoregressive model for physics-grounded image-to-video synthesis that incorporates structured scene memory---positional maps and object tracking maps derived online from previously generated frames---and supports fine-grained motion control via sparse velocity-increment signals that encode physical quantities, letting the model learn the underlying dynamics. We train our model in two stages: a bidirectional model is first finetuned with motion-control conditioning, then a causal autoregressive model is trained with additional structured scene memory, further improving physical consistency. PhysStream enables interactive, mid-generation control over multi-object tabletop rigid-body scenes---a capability not supported by prior methods---reducing motion distribution distance (FVMD) by 33% and trajec",
-      "published": "2026-09-15T17:55:13Z",
+      "id": "http://arxiv.org/abs/2609.19128v1",
+      "title": "Cognitive Extensions for Dual-Process Language Agents: Memory and Self-Reflection in Interactive Environments",
+      "summary": "Language agents remain brittle in interactive environments, where success requires long-horizon state tracking, valid action execution, and recovery from failed steps. We extend SwiftSage, a dual-process agent that combines a fast action proposer with a slower planner, using two modular cognitive extensions: an Adaptive Memory Module (AMM) for salience-gated episodic storage and trigger-driven retrieval, and a Self-Reflection Module (SRM) for bounded execution-time validation and corrective intervention. Both modules are implemented as feature-flagged extensions over the same execution substrate, enabling controlled ablations on ScienceWorld. Across four configurations---baseline, baseline+AMM, baseline+SRM, and the full system---the full system achieves the best mean final score (64.62), success rate (43.17%), and successful-step efficiency (19.33 steps), while SRM is the strongest standalone contributor. The results suggest that execution-time control is the dominant bottleneck in this setting, while episodic memory becomes most useful once the runtime loop is stabilized.",
+      "published": "2026-09-16T17:50:42Z",
       "authors": [
-        "Chuhao Chen",
-        "Peter Wonka",
-        "Chaoyang Wang",
-        "Chen Wang",
-        "Qiao Feng",
-        "Sergey Tulyakov",
-        "Lingjie Liu"
+        "Jo\u00e3o Meneses dos Santos",
+        "Arlindo L. Oliveira"
       ],
       "categories": [
         "cs.AI",
-        "cs.CV",
-        "cs.GR"
+        "cs.LG",
+        "cs.MA"
       ],
       "source": "arxiv",
-      "url": "http://arxiv.org/abs/2609.17521v1",
+      "url": "http://arxiv.org/abs/2609.19128v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 3,
+        "enhance_memory_mesh": 3,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 6,
+      "propose": true,
+      "cam_touchpoints": [
+        "center.capability",
+        "center.info",
+        "center.memory",
+        "center.router",
+        "config/roles",
+        "smart-second-brain"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.19143v1",
+      "title": "PANORAMA: Panoptic Grounded Captioning via Mask Proposal Selection",
+      "summary": "Intelligent systems that act in the world require image understanding that is both comprehensive and spatially grounded. Current vision-language models (VLMs) can generate fluent and detailed image captions, but reliably associating them with image pixels remains challenging. Existing methods that combine dense captioning with pixel-level grounding often produce either incomplete descriptions or inaccurate segmentation masks. We study this problem through panoptic grounded captioning, a task that requires a VLM to describe both foreground objects and background regions while grounding each referring phrase with pixel-level masks. We make three contributions. First, we introduce PanoCaps, a human-annotated benchmark constructed from panoptic segmentation datasets. It provides dense captions with near-complete pixel coverage and image-text alignments at the entity level, supporting both training and evaluation. We further propose a phrase-mask matching protocol and a generalized Panoptic Quality (gPQ) metric that jointly evaluates textual and mask agreement. Second, we formulate phrase grounding as selection from a phrase-conditioned pool of mask proposals and introduce PANORAMA, a V",
+      "published": "2026-09-16T17:59:30Z",
+      "authors": [
+        "Sara Pieri",
+        "Evangelos Kazakos",
+        "Shizhe Chen",
+        "Josef Sivic",
+        "Cordelia Schmid"
+      ],
+      "categories": [
+        "cs.CL",
+        "cs.CV"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.19143v1",
       "relevance_scores": {
         "enhance_cam_routing": 0,
         "enhance_memory_mesh": 3,
@@ -136,19 +167,59 @@
       ]
     },
     {
-      "id": "http://arxiv.org/abs/2609.17516v1",
-      "title": "When Should LLMs Abstain? Chain-of-Self-Questioning for Selective Risk Control",
-      "summary": "Large language models can produce fluent answers when their factual support is weak. This paper introduces Chain-of-Self-Questioning (CoSQ), a prompt-only framework that makes answer commitment conditional on an explicit assessment of the information required to answer a question. We evaluate three CoSQ variants under seventeen conditions on the 817-item TruthfulQA multiple-choice validation set using eleven open-weight and hosted model families. In the final balanced-option protocol, Grounded-CoSQ at \u03c4=0.90 reduces the mean unconditional wrong-commitment rate from 13.1% under chain-of-thought prompting to 8.9%, a 32.1% relative reduction, while increasing answered accuracy from 86.9% to 89.7% and answering 87.6% of questions. Both improvements hold for all eleven models and at every evaluated threshold. Critical-CoSQ and Adaptive-CoSQ provide neighboring operating points with 88.6% and 86.5% coverage, respectively, while remaining more reliable than the baseline. A secondary Natural Questions Short-Answer evaluation provides convergent open-form evidence. These findings show that self-assessment can support explicit, tunable answer-or-abstain decisions when an unsupported commitme",
-      "published": "2026-09-15T17:52:24Z",
+      "id": "http://arxiv.org/abs/2609.18820v1",
+      "title": "Compositional Policy Violations: When Step-Level Compliance Fails In Agentic AI Workflows",
+      "summary": "Agentic workflows now make consequential decisions in regulated settings, and the governance placed around them is almost entirely step-scoped: input-output classifiers, per turn rails, and span-level evaluators. The policies organizations actually hold, such as referral thresholds, authority limits, and review requirements, are properties of the whole execution rather than of any one step. This mismatch admits a failure mode we call a Compositional Policy Violation (CPV): every individual step passes its own check while the composed execution violates the governing policy. A predicate over a single step cannot evaluate a property that step does not determine, so no improvement in the accuracy of the step-scoped monitors detects this class. We define CPVs as the failure of step-level compliance to compose, and present a taxonomy of four types: Authority Creep, Threshold Laundering, Cumulative Sum Violation, and Context Collapse. We show that the correct repair for each class is dictated by where the guarded quantity mutates. We then introduce a provenance-aware runtime architecture that evaluates policies over complete execution traces, recomputing guarded quantities from raw prove",
+      "published": "2026-09-16T15:27:33Z",
       "authors": [
-        "Ali \u015eenol"
+        "Ashwini Kurady",
+        "Sri Sai Charith Grandhi",
+        "Rajesh Gupta",
+        "Sumit Mamoria"
       ],
       "categories": [
         "cs.AI",
-        "cs.CL"
+        "cs.MA"
       ],
       "source": "arxiv",
-      "url": "http://arxiv.org/abs/2609.17516v1",
+      "url": "http://arxiv.org/abs/2609.18820v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 3,
+        "enhance_memory_mesh": 0,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 2,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 5,
+      "propose": true,
+      "cam_touchpoints": [
+        "center.capability",
+        "center.dl",
+        "center.router",
+        "center.vision",
+        "config/roles"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.19144v1",
+      "title": "A Zeroth-Order Paradigm for LLM Preference Alignment",
+      "summary": "Direct preference alignment methods are widely used to align large language models (LLMs) with human preferences because of their computational and memory efficiency. However, likelihood displacement motivates alternative ways to extract information from preference pairs with small likelihood margins. In this paper, we propose and analyze Comparison-based Preference Optimization (ComPO), a zeroth-order alignment method based on comparison oracles. ComPO extracts directional information from these pairs without directly optimizing a differentiable preference loss on them. We establish a convergence guarantee for its basic offline scheme under smoothness, gradient sparsity, and compatibility between the oracle and a latent objective. We further introduce online ComPO, which retains the offline comparison mechanism and uses unlabeled policy generations for reverse-KL control relative to a reference policy. Following the coverage perspective of preference fine-tuning, we establish a performance guarantee for a basic constrained scheme under local coverage and in-distribution pairwise reward accuracy. Experiments on Mistral, Llama, Gemma-2, Qwen3, and Gemma-3 models demonstrate improvem",
+      "published": "2026-09-16T17:59:35Z",
+      "authors": [
+        "Peter Chen",
+        "Xi Chen",
+        "Wotao Yin",
+        "Tianyi Lin"
+      ],
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.19144v1",
       "relevance_scores": {
         "enhance_cam_routing": 0,
         "enhance_memory_mesh": 3,
@@ -167,21 +238,154 @@
       ]
     },
     {
-      "id": "http://arxiv.org/abs/2609.17515v1",
-      "title": "What Breaks Under Pruning in Smart Homes, and When? Evaluating LLM Degradation Across Architectures and Task Complexity",
-      "summary": "Pruning can reduce the deployment cost of large language models (LLMs), but its impact on context-grounded tool calling remains poorly understood. We systematically study pruning-induced degradation in smart-home tool calling across four LLMs spanning dense Transformer, dense hybrid, and mixture-of-experts (MoE) architectures, together with depth, width, hybrid, and expert pruning methods. After post-pruning supervised fine-tuning (SFT), we evaluate more than 19,500 instances from three smart-home datasets. Beyond aggregate task accuracy, we characterize degradation along two dimensions: action components (i.e., operation, device, argument, and value) and task complexity. Our results show that dense models have narrow safe pruning regions followed by sharp degradation, while MoE models tolerate substantially more pruning. Pruning degrades grounded specificity before schema-level intent, and aggressive dense pruning can induce systematic over-refusal. These findings highlight the importance of evaluating pruning beyond aggregate accuracy when selecting pruned LLMs for reliable tool execution.",
-      "published": "2026-09-15T17:51:48Z",
+      "id": "http://arxiv.org/abs/2609.19135v1",
+      "title": "Exponential Hardness of Off-Policy Evaluation under History-Dependent Logging",
+      "summary": "Can a logged dataset visit every hidden state frequently and still be exponentially uninformative about a target policy's value? We show that it can when the logger depends on history. For every horizon $H \\ge 3$, we construct two POMDPs with at most two latent states per stage, three actions, and a common logger with three memory states. Action coverage, belief coverage, and two behavior-marginal outcome-revealing conditions all have constants independent of $H$. Nevertheless, evaluating a known deterministic target policy to accuracy $1/8$ requires $\u0398((3/2)^H \\log(1/\u03b4))$ logged episodes at confidence $1-\u03b4$, for $0 < \u03b4\\le 1/4$, even when both candidate models are known. The mechanism is simple: a reset erases the unknown transition that determines the target value. We characterize the resulting statistical experiment exactly and obtain a matching optimal estimator. A directed two-lane gridworld realizes the construction, and trajectory simulations agree with its finite-sample prediction. The result establishes intractability for the history-dependent-logging, model-based case posed by Zhang and Jiang (2025, arXiv:2503.01134), under their behavior-marginal definition of revealing.",
+      "published": "2026-09-16T17:56:12Z",
       "authors": [
-        "Congjing Zhang",
-        "Vashishtha Patil",
-        "Henning Lange",
-        "Usman Aleem"
+        "Pranaya Jajoo"
       ],
       "categories": [
+        "cs.LG"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.19135v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 0,
+        "enhance_memory_mesh": 3,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 3,
+      "propose": false,
+      "cam_touchpoints": [
+        "center.info",
+        "center.memory",
+        "smart-second-brain"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.19124v1",
+      "title": "Flag Game: A Toy Model for Mechanistic Swarm Interpretability",
+      "summary": "Emergent coordinated behaviors of AI agents are starting to present critical safety risks. A key phenomenon driving these behaviors is the rapid formation and spread of beliefs about the world, and mechanistic understanding is crucial for collective alignment. To this end, we introduce the Flag Game, a toy model for studying the mechanisms of collective belief formation. Concretely, a hidden country flag defines the ground truth, and each bounded agent directly observes only a private crop but can exchange beliefs and weigh social evidence from peers. Despite its simplicity, the Flag Game reproduces rich collective phenomenology: non-monotonic scaling of performance with population size, accuracy gains from social-awareness prompting and team diversity, and strong effects of organizational structure. In particular, we identify that collective belief collapse at small population sizes turns into collective belief polarization as the population grows. This polarization causes the performance decline at large population sizes, but creates diversity in collective beliefs. Finally, we dissect the mechanisms underlying collective belief collapse and polarization with two complementary ap",
+      "published": "2026-09-16T17:46:06Z",
+      "authors": [
+        "Elizabeth Pavlova",
+        "Hidenori Tanaka"
+      ],
+      "categories": [
+        "cond-mat.dis-nn",
+        "cond-mat.stat-mech",
+        "cs.AI",
+        "cs.MA",
+        "physics.soc-ph"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.19124v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 3,
+        "enhance_memory_mesh": 0,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 3,
+      "propose": false,
+      "cam_touchpoints": [
+        "center.capability",
+        "center.router",
+        "config/roles"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.18929v1",
+      "title": "Social Laws for Multi-agent Coordination in Stochastic Environments",
+      "summary": "In multi-agent environments, coordinating agents to prevent interference and ensure robust individual performance is a critical challenge. Previous research on social laws for multi-agent systems has primarily focused on deterministic, goal-based settings. This paper extends the concept of social laws to stochastic, reward-based environments, proposing a formalism for defining and verifying their robustness under various conditions. We introduce the notion of $\u03b1$-robustness, a measure of the guaranteed utility each agent retains while pursuing its optimal single agent policy, assuming all agents obey the social law. We then present an approach for robustness verification of social laws in stochastic settings, based on a reduction to solving a series of Markov decision processes. Empirical evaluations on toy environments illustrate the potential of our framework.",
+      "published": "2026-09-16T17:05:03Z",
+      "authors": [
+        "Rolando Fernandez",
+        "Caleb Probine",
+        "Tyler Lee",
+        "Jeffrey Chen",
+        "Erez Karpas",
+        "Muhammad Arrasy Rahman",
+        "Peter Stone",
+        "Ufuk Topcu"
+      ],
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.MA"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.18929v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 3,
+        "enhance_memory_mesh": 0,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 3,
+      "propose": false,
+      "cam_touchpoints": [
+        "center.capability",
+        "center.router",
+        "config/roles"
+      ]
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.19145v1",
+      "title": "Objective vs. Search: Decomposing What Makes a Good Tokeniser",
+      "summary": "Two dominant tokenisation algorithms are used by modern language models: byte-pair encoding (BPE) and UnigramLM. These differ along two orthogonal axes: their optimisation objective (compression vs. log-likelihood) and their search procedure (bottom-up merging vs. top-down pruning). Existing comparisons confound these axes, making it unclear whether their observed differences stem from what is being optimised vs. how it is being optimised. We disentangle the two by introducing two new tokenisation algorithms that complete this 2x2 design space: BottomUpLL, a bottom-up likelihood-based tokeniser, and TopDownComp, a top-down compression-based tokeniser. We train language models with tokenisers produced by each algorithm, varying: model size, vocabulary sizes, and domain (English-only vs. multilingual). Evaluating models on bits-per-byte, we find that the search procedure -- not the objective -- is the dominant factor: bottom-up tokenisers consistently achieve lower bits-per-byte in most settings. Evaluating models on the BLiMP task, however, shows no consistent relationship between design choice and performance. Overall, our results disentangle the effect of tokeniser design choices ",
+      "published": "2026-09-16T17:59:45Z",
+      "authors": [
+        "Ahmetcan Yavuz",
+        "Clara Meister",
+        "Tiago Pimentel"
+      ],
+      "categories": [
+        "cs.AI",
         "cs.CL"
       ],
       "source": "arxiv",
-      "url": "http://arxiv.org/abs/2609.17515v1",
+      "url": "http://arxiv.org/abs/2609.19145v1",
+      "relevance_scores": {
+        "enhance_cam_routing": 0,
+        "enhance_memory_mesh": 0,
+        "enhance_presence_voice": 0,
+        "enhance_vision": 0,
+        "enhance_slm_local": 0,
+        "enhance_dl_embeddings": 0,
+        "general_agi_theory": 0
+      },
+      "relevance_total": 0,
+      "propose": false,
+      "cam_touchpoints": []
+    },
+    {
+      "id": "http://arxiv.org/abs/2609.19107v1",
+      "title": "How Model Growth, Recursion, and Boundary Operators Influence Scaling Exponents",
+      "summary": "Scaling laws predict how loss decreases with increases in computation. We show, contrary to conventional wisdom, that architectural interventions can modify scaling exponents in pre-training, leading to exponential improvements in performance with increases in computation. As an anchoring point, we consider the architectural formulation of looped transformers. Although not typically used in this way, looping, also known as recursive depth, provides a mechanism for model growth, by increasing the number of loops during training. Model growth, with and without shared weights, provides the biggest changes to the scaling exponents. In particular, a 7.4B model growth architecture matches GPT-3 13B on CORE with roughly $20\\times$ less compute, and has compute efficiency gains that increase with scale. Moreover, simply using a boundary operator in a vanilla transformer, which normalizes and injects an earlier block, also provides increasing compute-efficiency gains, although to a lesser extent. In the data-constrained, multi-epoch setting, standard looping has a useful regularizing effect, where we find it is compute-optimal to increase the number of loops with scale. These results can be",
+      "published": "2026-09-16T17:36:13Z",
+      "authors": [
+        "Zixi Chen",
+        "Akshay Vegesna",
+        "Samip Dahal",
+        "Andrew Gordon Wilson"
+      ],
+      "categories": [
+        "cs.LG"
+      ],
+      "source": "arxiv",
+      "url": "http://arxiv.org/abs/2609.19107v1",
       "relevance_scores": {
         "enhance_cam_routing": 0,
         "enhance_memory_mesh": 0,

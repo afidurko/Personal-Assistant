@@ -19,8 +19,18 @@
   </script>
 </head>
 <body class="viz3d dti-mode">
+  <script>
+    /* Embed mode for Cam home iframe — hide chrome before paint */
+    (function () {
+      var q = new URLSearchParams(location.search);
+      if (q.get("embed") === "1" || q.get("embed") === "true") {
+        document.documentElement.classList.add("embed");
+        document.body.classList.add("embed");
+      }
+    })();
+  </script>
   <div class="stage stage-3d">
-    <header>
+    <header class="chrome-only">
       <div class="brand">
         <img src="../../identity/persona/cam-face.jpg" alt="Cam" />
         <div>
@@ -55,7 +65,7 @@
         </div>
       </div>
 
-      <aside class="side">
+      <aside class="side chrome-only">
         <section class="panel">
           <h2>Live agents / tasks</h2>
           <div class="agents" id="agents"></div>
@@ -94,9 +104,9 @@
       </aside>
     </div>
 
-    <footer>
-      <span>Near-glass DK shell · DTI RGB · live-activity · Aaron sole task-giver</span>
-      <span>visualizations/connectome · human cortex</span>
+    <footer class="chrome-only">
+      <span>Near-glass DK shell · DTI RGB · Catani AF · Yeh systems · live-activity · Aaron sole task-giver</span>
+      <span>visualizations/connectome · human cortex · 3D</span>
     </footer>
   </div>
   <script type="module" src="cortex3d.js"></script>

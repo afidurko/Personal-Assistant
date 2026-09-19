@@ -782,3 +782,38 @@ body.dti-mode .controls {
   flex-wrap: wrap;
   gap: 0.35rem;
 }
+
+/* Cam home iframe — cortex only, no nested dashboard chrome */
+html.embed,
+body.embed {
+  overflow: hidden;
+  height: 100%;
+  background: #000;
+}
+body.embed .chrome-only {
+  display: none !important;
+}
+body.embed .stage-3d {
+  grid-template-rows: 1fr;
+  height: 100vh;
+  height: 100dvh;
+}
+body.embed .workspace-3d {
+  grid-template-columns: 1fr;
+  min-height: 0;
+  height: 100%;
+}
+body.embed .viz-panel-3d {
+  min-height: 0;
+  height: 100%;
+  border-radius: 0;
+  border: 0;
+}
+body.embed .viz-panel-3d canvas {
+  border-radius: 0;
+}
+body.embed .hud-dti {
+  left: 0.65rem;
+  bottom: 0.55rem;
+}
+

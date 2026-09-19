@@ -24,6 +24,12 @@
     "sole_task_giver": "Aaron",
     "kill_switch": "aaron_pause_all"
   },
+  "persona_continuity": {
+    "config": "config/persona/consistency-checks.json",
+    "doc": "config/persona/consistency-checks.md",
+    "status": "applied",
+    "authorized_at": "2026-09-17"
+  },
   "modes": {
     "simple": {
       "face_asset": "identity/persona/cam-face.jpg",
@@ -48,9 +54,14 @@
     "riva_uri_config": "integrations/llmavatartalk/config.py URI"
   },
   "stt": {
-    "provider": "nvidia_riva",
+    "provider": "aaron_voice_gate",
+    "embedding_backend": "funasr_campplus",
+    "asr_provider": "browser_speech_or_funasr",
     "locale": "en-US",
-    "also_accept": ["es-US", "es-AR"]
+    "also_accept": ["es-US", "es-AR"],
+    "aaron_only": true,
+    "gate_config": "config/identity/aaron-voice.json",
+    "full_presence_asr": "nvidia_riva"
   },
   "live": {
     "text": true,

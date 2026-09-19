@@ -1,0 +1,22 @@
+{
+  "id": "cam-science-agent-env",
+  "title": "Scientific agent environments for Cam research roles",
+  "source_papers": [
+    "https://arxiv.org/abs/2609.19134",
+    "https://arxiv.org/abs/2609.17523"
+  ],
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "status": "applied",
+  "proposals": [
+    "vault/02-Cam/enhancement-proposals/2026-09-17-scienceide-turning-world-s-scientific-codebase-i.md",
+    "vault/02-Cam/enhancement-proposals/2026-09-17-sciencebuddy-recursive-in-recursive-self-improve.md"
+  ],
+  "rules": [
+    "Researcher / info-retriever may treat scientific repos as learnable tool environments when Aaron tasks code-backed research",
+    "Recursive self-improvement loops stay propose-only for Cam core; apply via switch.cam_enhance",
+    "Cite primary papers + code URLs; distill to mesh/research + vault/04-Research",
+    "Prefer Cline effector for coding workspaces when implementing paper methods"
+  ],
+  "roles": ["researcher", "info-retriever", "agi-scout", "coding"]
+}

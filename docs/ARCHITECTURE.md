@@ -20,9 +20,10 @@ and outbound contact (text / FaceTime / call) when needed.
 | [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
 | [SwiftGuide](https://github.com/afidurko/SwiftGuide) | **Knowledge cartography** | Hierarchical mind maps + 2026 Swift stack guide for iOS companion |
 | [cline](https://github.com/afidurko/cline) | **Coding effector** | CLI/SDK/IDE agent — shared by all roles & workspaces; not the brain |
+| [public-apis](https://github.com/afidurko/public-apis) | **Free API catalog** | Curated public/free HTTP APIs — shared discovery for all agents |
 
 **Rule:** Null stack owns execution truth. Jarvis, Cline, PaddleDetection, LLMAvatarTalk,
-smart-second-brain, and SwiftGuide are tools Cam uses. Only Aaron assigns work; Cam finishes granted
+smart-second-brain, SwiftGuide, and public-apis are tools Cam uses. Only Aaron assigns work; Cam finishes granted
 work without mid-task interference.
 
 ## Mental model
@@ -83,7 +84,7 @@ You (human) ──override / kill──► nullhub / chat
 | Role id | Job |
 |---|---|
 | `chief` | Cam — talks to Aaron; always-on; finishes work without mid-task interruption |
-| `researcher` | Source-backed research; uses vault + web |
+| `researcher` | Source-backed research; vault + **Google Scholar** + web |
 | `ops` | Life automation; Jarvis |
 | `docs` | Draft/fix documents |
 | `coding` | Cline-powered code edits (also invokable by every role) |
@@ -174,6 +175,7 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 5. Keep smart-second-brain for vault intelligence (`integrations/smart-second-brain`) — **added**
 5b. Keep SwiftGuide for mind-map cartography + iOS stack picks (`integrations/swiftguide`) — **added**
 6. Keep Cline as shared coding effector for all agents/workspaces (`integrations/cline`) — **added**
+7. Keep public-apis as shared free-API catalog for all agents (`integrations/public-apis`) — **added**
 7. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
 8. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
 9. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)

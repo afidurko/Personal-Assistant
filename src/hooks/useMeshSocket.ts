@@ -108,6 +108,17 @@ export function useMeshSocket() {
           if (Array.isArray(jobs)) setStateFromServer({ loopJobs: jobs });
           break;
         }
+        case 'autonomy_update': {
+          const payload = msg.payload as {
+            tasks?: NeuralMeshState['camSelfTasks'];
+            loopJobs?: LoopJob[];
+          };
+          setStateFromServer({
+            camSelfTasks: payload.tasks,
+            loopJobs: payload.loopJobs ?? undefined,
+          });
+          break;
+        }
         default:
           break;
       }
@@ -144,18 +155,41 @@ export function useMeshSocket() {
       });
 
       ws.addEventListener('error', () => {
-        ws.close();
+        // Browser always follows with `close` — do not call close() here
+        // (closing while CONNECTING logs a noisy console warning).
       });
     };
 
-    connect();
+    // Defer so React Strict Mode's immediate unmount cancels before a socket opens.
+    timerRef.current = setTimeout(connect, 0);
 
     return () => {
       unmountedRef.current = true;
       if (timerRef.current) clearTimeout(timerRef.current);
-      wsRef.current?.close();
+      const ws = wsRef.current;
       wsRef.current = null;
       setConnected(false);
+      if (!ws) return;
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.close();
+        } catch {
+          /* ignore */
+        }
+      } else if (ws.readyState === WebSocket.CONNECTING) {
+        // Avoid "closed before the connection is established" — close after open.
+        ws.addEventListener(
+          'open',
+          () => {
+            try {
+              ws.close();
+            } catch {
+              /* ignore */
+            }
+          },
+          { once: true },
+        );
+      }
     };
   }, [setConnected, setStateFromServer, setScanning, upsertMemory, selectNode, selectConcept]);
 

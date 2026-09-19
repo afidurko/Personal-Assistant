@@ -21,8 +21,14 @@
     {
       "id": "motor.speak",
       "channel": ["riva_tts", "audio2face", "metahuman_optional"],
-      "requires_switch": ["switch.presence", "switch.outbound", "switch.kill"],
-      "voice_profile": "config/persona/voice.json"
+      "requires_switch": [
+        "switch.presence",
+        "switch.outbound",
+        "switch.identity",
+        "switch.kill"
+      ],
+      "voice_profile": "config/persona/voice.json",
+      "notes": "Aaron-only listen/speak — identity hold strips speak when biometrics fail"
     },
     {
       "id": "motor.jarvis",
@@ -65,9 +71,9 @@
     },
     {
       "id": "motor.web_fetch",
-      "channel": ["http_fetch", "arxiv_api"],
+      "channel": ["http_fetch", "arxiv_api", "google_scholar", "serpapi_scholar"],
       "requires_switch": ["switch.research_scan", "switch.kill"],
-      "notes": "Fetch papers/findings for AGI scan and info team — no outbound messaging"
+      "notes": "Fetch papers/findings for Scholar, AGI scan, and info team — no outbound messaging"
     },
     {
       "id": "motor.enhance",
@@ -92,6 +98,12 @@
       "channel": ["tool_registry", "jarvis_cli", "local_script"],
       "requires_switch": ["switch.tooling", "switch.kill"],
       "notes": "Run a registered tool via tool-user (config/tools/registry.json)"
+    },
+    {
+      "id": "motor.public_apis",
+      "channel": ["public_apis_catalog", "local_script"],
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Search afidurko/public-apis catalog (scripts/public-apis-search.py) — shared by all agents; no spend"
     },
     {
       "id": "motor.swarm",

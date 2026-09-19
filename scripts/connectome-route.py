@@ -16,6 +16,7 @@ CFG = ROOT / "config" / "connectome"
 import sys
 sys.path.insert(0, str(ROOT / "scripts"))
 import cam_workspaces as cw  # noqa: E402
+import trajectory_policies as tp  # noqa: E402
 
 
 def load(name: str):
@@ -85,6 +86,17 @@ def pick_hotspot(
             score += 3
         if ("capability" in g or "complete" in g or "team" in g) and "capability" in blob:
             score += 3
+        if any(
+            tok in g
+            for tok in (
+                "public api",
+                "public-apis",
+                "free api",
+                "api catalog",
+                "open api list",
+            )
+        ) and ("public_apis" in blob or "public-apis" in blob or "api" in blob):
+            score += 5
         if any(
             tok in g
             for tok in (
@@ -278,6 +290,9 @@ def main() -> int:
     known_motors = {e["id"] for e in motor["effectors"]}
     planned_motors = [m for m in planned_motors if m in known_motors]
 
+    # OCL / CPV trajectory policies (Aaron-approved 2026-09-17)
+    planned_motors, policy_violations = tp.apply_policies(planned_motors, switch_state)
+
     edge_pairs = {(e["from"], e["to"]) for e in synapses["edges"]}
     missing = []
     for a, b in zip(pathway, pathway[1:]):
@@ -300,12 +315,18 @@ def main() -> int:
         "pathway": pathway,
         "switch_state": switch_state,
         "motor_plan": planned_motors,
+        "trajectory_violations": policy_violations,
         "response_rule": motor["response_rule"],
         "missing_explicit_edges": missing[:10],
         "persona": {
             "name": "Cam",
             "voice": "soft airy fluent English",
             "sole_operator": "Aaron",
+        },
+        "dual_process": {
+            "fast": "center.slm",
+            "slow": ["center.capability", "center.chief", "center.qa"],
+            "config": "config/enhancement/dual-process.json",
         },
     }
     # When coding motor is planned, attach workspace resolution for run-cline.py

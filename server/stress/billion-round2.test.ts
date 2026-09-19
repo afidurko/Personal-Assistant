@@ -88,6 +88,42 @@ describe('suggestive implementations', () => {
     expect(suggestions.some((s) => s.kind === 'agent-repair')).toBe(true);
     expect(suggestions.some((s) => s.kind === 'learning')).toBe(true);
   });
+  it('includes cam-enhance and research-memory suggestions for AGI workspace', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({
+        id: 'workspace-agi_research',
+        kind: 'agi_research',
+        score: 80,
+        status: 'warning',
+        findings: [],
+      }),
+      snap({ id: 'workspace-health', kind: 'health', score: 100, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'cam-enhance')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'research-memory')).toBe(true);
+    expect(suggestions.some((s) => s.kind === 'identity')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('trajectory') || s.id.includes('hmo'))).toBe(
+      true,
+    );
+    expect(suggestions.some((s) => s.id.includes('aaron-voice'))).toBe(true);
+  });
+
+  it('includes api-catalog suggestions for improvements/swarm workspaces', () => {
+    const suggestions = buildSuggestiveImplementations([
+      snap({
+        id: 'workspace-improvements',
+        kind: 'improvements',
+        score: 70,
+        status: 'warning',
+        findings: [],
+      }),
+      snap({ id: 'workspace-health', kind: 'health', score: 100, findings: [] }),
+    ]);
+
+    expect(suggestions.some((s) => s.kind === 'api-catalog')).toBe(true);
+    expect(suggestions.some((s) => s.id.includes('public-apis'))).toBe(true);
+  });
 });
 
 describe('billion-scale round 2', () => {

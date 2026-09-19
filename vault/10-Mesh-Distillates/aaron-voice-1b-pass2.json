@@ -1,0 +1,55 @@
+{
+  "n": 1000000000,
+  "workers": 4,
+  "passed": 1000000000,
+  "failed": 0,
+  "first_error": null,
+  "elapsed_s": 233.158272485,
+  "checks_per_sec": 4288932.103253312,
+  "seed": 42,
+  "ok": true,
+  "backend": "hash_dev",
+  "sampler": "inline_modular_plus_0.01pct_full_gate",
+  "workers_detail": [
+    {
+      "worker_id": 0,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 230.81649808099974,
+      "ref_aaron_score": 1.0,
+      "ref_other_score": 0.004
+    },
+    {
+      "worker_id": 1,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 231.10625016699987,
+      "ref_aaron_score": 1.0,
+      "ref_other_score": 0.004
+    },
+    {
+      "worker_id": 3,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 231.09015808599997,
+      "ref_aaron_score": 1.0,
+      "ref_other_score": 0.004
+    },
+    {
+      "worker_id": 2,
+      "attempted": 250000000,
+      "passed": 250000000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 232.81947739999987,
+      "ref_aaron_score": 1.0,
+      "ref_other_score": 0.004
+    }
+  ]
+}

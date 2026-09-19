@@ -451,6 +451,20 @@
       "weight": 1.0
     },
     {
+      "from": "switch.outbound",
+      "to": "switch.identity",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Aaron-only speak gate — identity after outbound for presence path"
+    },
+    {
+      "from": "switch.identity",
+      "to": "motor.speak",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Strip speak when Aaron voice/face match fails"
+    },
+    {
       "from": "switch.careers_submit",
       "to": "motor.jobs",
       "when": "act",
@@ -485,6 +499,13 @@
       "to": "motor.mesh",
       "when": "act",
       "weight": 0.9
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.public_apis",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "shared free-API catalog for all agents"
     },
     {
       "from": "motor.text",
@@ -703,6 +724,12 @@
       "from": "center.research",
       "to": "center.qa",
       "weight": 1.0
+    },
+    {
+      "from": "center.research",
+      "to": "switch.research_scan",
+      "weight": 0.9,
+      "notes": "Scholar / paper fetch"
     },
     {
       "from": "center.careers",
@@ -957,6 +984,43 @@
       "weight": 1.0
     },
     {
+      "from": "sense.web.scholar",
+      "to": "center.info",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.web.scholar",
+      "to": "center.research",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.web.scholar",
+      "to": "center.agi_scan",
+      "weight": 0.7,
+      "notes": "when query is AI/AGI-relevant"
+    },
+    {
+      "from": "sense.catalog.public_apis",
+      "to": "center.tooling",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.catalog.public_apis",
+      "to": "center.info",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.catalog.public_apis",
+      "to": "center.capability",
+      "weight": 0.85
+    },
+    {
+      "from": "sense.catalog.public_apis",
+      "to": "center.agi_scan",
+      "weight": 0.6,
+      "notes": "when AGI scan needs free API tooling ideas"
+    },
+    {
       "from": "sense.slm.inference",
       "to": "center.slm",
       "weight": 1.0
@@ -1111,6 +1175,12 @@
       "to": "sense.vault.hit",
       "weight": 0.6,
       "notes": "retrieval drive"
+    },
+    {
+      "from": "center.info",
+      "to": "switch.research_scan",
+      "weight": 0.8,
+      "notes": "Scholar fetch under research_scan"
     },
     {
       "from": "center.slm",
@@ -1297,6 +1367,18 @@
     },
     {
       "from": "center.tooling",
+      "to": "center.info",
+      "weight": 0.9,
+      "notes": "public-apis catalog shared with information pathway"
+    },
+    {
+      "from": "center.info",
+      "to": "center.capability",
+      "weight": 0.8,
+      "notes": "info briefs feed capability work units"
+    },
+    {
+      "from": "center.tooling",
       "to": "center.ops",
       "weight": 0.9
     },
@@ -1349,6 +1431,24 @@
       "to": "center.memory",
       "weight": 0.8,
       "notes": "feedback"
+    },
+    {
+      "from": "motor.public_apis",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — catalog hits into memory periphery"
+    },
+    {
+      "from": "motor.public_apis",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.public_apis",
+      "to": "sense.tool.result",
+      "weight": 0.7,
+      "notes": "catalog search result loop"
     },
     {
       "from": "motor.tool",

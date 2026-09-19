@@ -14,8 +14,18 @@
     },
     {
       "id": "research_mesh",
-      "title": "Source-backed research into mesh/vault",
+      "title": "Source-backed research into mesh/vault (Google Scholar + vault)",
       "role": "researcher"
+    },
+    {
+      "id": "google_scholar",
+      "title": "Google Scholar literature connector (SerpAPI)",
+      "role": "info-retriever"
+    },
+    {
+      "id": "public_apis",
+      "title": "Public APIs free-API catalog (all agents)",
+      "role": "tool-user"
     },
     {
       "id": "careers_linkedin_indeed",
@@ -54,7 +64,7 @@
     },
     {
       "id": "agi_research_scan_daily",
-      "title": "Daily AI/AGI research scan → Cam enhancement proposals",
+      "title": "Daily AI/AGI research scan \u2192 Cam enhancement proposals",
       "role": "agi-scout",
       "team": "team.agi-research-scan",
       "enabled": true

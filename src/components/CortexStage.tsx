@@ -13,6 +13,7 @@ import {
 import type { BrainRegion } from '@shared/types';
 
 interface CortexStageProps {
+  listening?: boolean;
   onFocusArea?: (areaId: string) => void;
 }
 
@@ -21,10 +22,11 @@ type LiveFeed = {
   firing_count?: number;
 };
 
-export function CortexStage({ onFocusArea }: CortexStageProps) {
+export function CortexStage({ listening = false, onFocusArea }: CortexStageProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<CortexApi | null>(null);
   const activityRef = useRef<Record<string, number>>({});
+  const listeningRef = useRef(listening);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agents, setAgents] = useState(0);
@@ -33,6 +35,10 @@ export function CortexStage({ onFocusArea }: CortexStageProps) {
   const scanning = useMeshStore((s) => s.scanning);
   const nodes = useMeshStore((s) => s.nodes);
   const selectedNodeId = useMeshStore((s) => s.selectedNodeId);
+
+  useEffect(() => {
+    listeningRef.current = listening;
+  }, [listening]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -135,11 +141,18 @@ export function CortexStage({ onFocusArea }: CortexStageProps) {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       controls.update();
-      brain.rotation.z += 0.00085;
+      // Always-on idle spin; listen mode slightly livelier
+      brain.rotation.z += listeningRef.current ? 0.00135 : 0.00085;
       Object.keys(areaActivity).forEach((id) => {
         areaActivity[id] = Math.max(0, (areaActivity[id] || 0) - dt * 0.18);
         apiRef.current?.setParcelHeat(id, areaActivity[id], 'idle');
       });
+      if (listeningRef.current) {
+        ['area.auditory', 'area.broca', 'area.wernicke'].forEach((id) => {
+          areaActivity[id] = Math.max(areaActivity[id] || 0, 0.45);
+          apiRef.current?.setParcelHeat(id, areaActivity[id], 'lit');
+        });
+      }
       renderer.render(scene, camera);
     };
     raf = requestAnimationFrame(tick);
@@ -220,7 +233,10 @@ export function CortexStage({ onFocusArea }: CortexStageProps) {
   }, [glass, ready]);
 
   return (
-    <div className="cortex-stage" aria-label="Glass Cam cortex">
+    <div
+      className={`cortex-stage${listening ? ' listening' : ''}`}
+      aria-label="Glass Cam cortex"
+    >
       <div ref={hostRef} className="cortex-canvas-host" />
       {!ready && !error && <div className="cortex-status">Loading glass cortex…</div>}
       {error && (

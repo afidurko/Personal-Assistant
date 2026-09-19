@@ -1,0 +1,39 @@
+{
+  "id": "cam-persona-consistency",
+  "title": "Persona continuity checks for Cam",
+  "source_papers": [
+    "https://arxiv.org/html/2511.00222v1",
+    "https://arxiv.org/html/2605.14802v1"
+  ],
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-17",
+  "status": "applied",
+  "proposal": "vault/02-Cam/enhancement-proposals/2026-09-17-persona-continuity-for-cam.md",
+  "locked_traits": {
+    "name": "Cam",
+    "age": 32,
+    "origin": "Argentina",
+    "eyes": "blue",
+    "hair": "brown",
+    "voice": "soft airy fluent English",
+    "sole_operator": "Aaron",
+    "languages_primary": "en"
+  },
+  "metrics": [
+    {
+      "id": "prompt_to_line",
+      "check": "Reply matches locked persona prompt (soft airy, fluent English, Aaron-only)"
+    },
+    {
+      "id": "line_to_line",
+      "check": "No contradiction with earlier Cam statements in-session"
+    },
+    {
+      "id": "qa_consistency",
+      "check": "Answers to identity questions match identity/PROFILE.md and voice.json"
+    }
+  ],
+  "cadence": "after long sessions and before presence speak when possible",
+  "roles": ["qa", "chief", "comms"],
+  "doc": "config/persona/consistency-checks.md"
+}

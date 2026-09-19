@@ -1,6 +1,6 @@
 # Enhancement proposal — ScienceBuddy: Recursive-in-Recursive Self-Improvement for Interactive Scientific Agents
 
-**Status:** propose_only (awaiting Aaron / `switch.cam_enhance`)
+**Status:** applied (Aaron approved 2026-09-17 · `switch.cam_enhance` for this batch)
 **Date:** 2026-09-17
 **Source:** [http://arxiv.org/abs/2609.17523v1](http://arxiv.org/abs/2609.17523v1)
 **Relevance:** 6 — {'enhance_cam_routing': 3, 'enhance_memory_mesh': 3, 'enhance_presence_voice': 0, 'enhance_vision': 0, 'enhance_slm_local': 0, 'enhance_dl_embeddings': 0, 'general_agi_theory': 0}
@@ -24,3 +24,9 @@ We introduce and release ScienceBuddy, an interactive scientific research worksp
 2. Aaron approve via `config/pipelines/cam-enhance-gate.json`
 3. capability-broker applies with implementer subagents
 4. `python3 scripts/connectome-check.py`
+
+
+## Apply record
+
+- **BATCH APPLIED** by Aaron 2026-09-17 via `scripts/apply-cam-enhancements.py`
+- Implementer: Cam capability-broker (this checkout)

@@ -1,36 +1,44 @@
-# Merge readiness — Cam Personal Assistant
+# Merge readiness — Cam enhance implement-all
 
-**Verdict: READY TO MERGE**
+**Branch:** `cursor/cam-enhance-implement-all-dda4`  
+**Date:** 2026-09-17  
+**Authorized:** Aaron approved all Cam-function proposals + implement-all + dual billion QA
 
-Date: 2026-09-16  
-Branch: `cursor/personal-assistant-foundation-ba29`  
-PR: https://github.com/afidurko/Personal-Assistant/pull/1
+## Verdict
 
-## Gates (all green)
+**READY TO MERGE**
 
-| Gate | Result |
-|---|---|
-| Static `connectome-check.py` | PASS — 15 senses, 77 edges, 0 missing |
-| Merge-prep Pass A (seed 201) | 1e9 / 0 failed, 0 missing edges |
-| Merge-prep Pass B (seed 301) | 1e9 / 0 failed, 0 missing edges |
-| Prior Pass 1 + Pass 2 | both green (see Connectome-Simulations.md) |
-| Continuous QA + unlimited subagents | persisted |
-| Kill / non-Aaron holds | active in both merge passes |
+Both billion connectome campaigns green (0 failures). Trajectory OCL/CPV billion green. Suggestive implementations added. Rebased onto latest `main`. CI gate green.
 
-## Evidence
-- `connectome-sim-1b-merge-a.json` — ~2.42M sims/s, 413s
-- `connectome-sim-1b-merge-b.json` — ~2.48M sims/s, 403s
-- `qa-cycles/MERGE-PREP-CORRECTIVES.md`
-- `Connectome-Simulations.md`
+## Campaigns
 
-## Scope shipping
-- Null-stack Cam PA: connectome sense→center→switch→motor→feedback
-- Aaron-only identity + standing autonomy + kill switch
-- iPhone / iPad companions (Mac host slot open for later)
-- Tailscale companion network config
-- Live converse (on-device Safari/PWA mic/camera)
+| Pass | Tool | N | Failed | Rate | Artifact |
+|---|---|---|---|---|---|
+| A | `qa-loop.py` connectome | 1e9 | 0 | ~2.59M sims/s | `qa-cycles/20260917T115533Z-cycle-01/` · `connectome-sim-1b-pass1-enhance.json` |
+| Fix + suggest | traffic weights, MMP/HMO suggestions, traj billion fuzz, CI gates | — | — | — | this commit |
+| B | `qa-loop.py` connectome | 1e9 | 0 | ~2.55M sims/s | `qa-cycles/20260917T120749Z-cycle-01/` · `connectome-sim-1b-pass2-enhance.json` |
+| B′ | `trajectory-billion-fuzz.py` | 1e9 | 0 | ~8.6M checks/s | `trajectory-1b-pass2.json` |
 
-## Post-merge standing watch
-- CI smoke: `connectome-check.py` + `--n 1000000 --strict-edges`
-- Nightly: `qa-loop.py --n 1000000000 --cycles 1`
-- When Mac ready: flip Tailscale host to `aaron-mac`
+## Correctives / suggestive implementations shipped
+
+1. Traffic-weighted sampling includes scholar / arxiv / agi / clock / sLM / DL / swarm senses  
+2. Suggestive kinds `cam-enhance` + `research-memory` for AGI workspace (`server/core/suggestions.ts`)  
+3. `scripts/trajectory-billion-fuzz.py` — OCL/CPV property campaign  
+4. CI gate: `trajectory-policy-check` + `memory-tier-check`  
+5. QA standing suggestions document MMP / HMO / dual-billion merge steps  
+
+## Pre-merge checklist (verified)
+
+- [x] `bash scripts/ci-connectome.sh`
+- [x] `python3 scripts/trajectory-policy-check.py`
+- [x] `python3 scripts/memory-tier-check.py`
+- [x] `python3 scripts/connectome-check.py`
+- [x] Dual billion connectome campaigns
+- [x] Trajectory billion campaign
+- [x] Vitest suggestive + cam-enhance unit coverage
+
+## Notes
+
+- `switch.cam_enhance` remains **hold** by default for future batches  
+- Submodule empty soft-warnings are expected in this cloud checkout  
+- Runtime noise (`activity-events.jsonl`, plasticity timelines) not required for merge  

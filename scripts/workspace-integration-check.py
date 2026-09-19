@@ -32,17 +32,40 @@ HARD_PATHS = [
     "config/swarm/autonomy-triad.json",
     "config/tools/registry.json",
     "config/enhancement/slm-dl.json",
+    "config/enhancement/dual-process.json",
+    "config/enhancement/social-harness.json",
+    "config/enhancement/vision-grounding.json",
+    "config/enhancement/science-agent-env.json",
+    "config/memory/hmo-tiers.json",
+    "config/memory/mesh-claim-schema.json",
+    "config/connectome/trajectory-policies.json",
+    "config/persona/consistency-checks.json",
     "config/pipelines/daily-agi-scan.json",
     "config/pipelines/cam-enhance-gate.json",
+    "config/integrations/google-scholar.json",
+    "config/integrations/google-scholar.md",
+    "config/integrations/public-apis.json",
+    "config/integrations/public-apis.md",
+    "config/integrations/public-apis-addons.json",
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",
     "docs/HAAS_CAM_PATTERNS.md",
     "scripts/agi-research-scan.py",
     "scripts/cam-enhance-propose.py",
+    "scripts/scholar-search.py",
+    "scripts/pack-scholar-result.py",
+    "scripts/public-apis-search.py",
+    "scripts/pack-public-apis-result.py",
+    "scripts/public-apis-check.py",
+    "scripts/public-apis-addon.py",
     "scripts/swarm-check.py",
     "scripts/persist-export.py",
     "scripts/persist-import.py",
+    "scripts/trajectory-policy-check.py",
+    "scripts/memory-tier-check.py",
+    "scripts/pack-mesh-claim.py",
+    "scripts/apply-cam-enhancements.py",
     "server/core/swarm-runtime.ts",
     "server/workspaces/swarm.ts",
     "shared/swarmPrivileges.ts",
@@ -52,12 +75,18 @@ HARD_PATHS = [
 PERSIST_MUST_INCLUDE = [
     "identity/persistence/DAILY_AGI_SCAN.md",
     "identity/persistence/HAAS_CAM_PATTERNS.md",
+    "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
     "config/teams/agi-research-scan.json",
     "config/teams/capability.json",
     "config/teams/info.json",
     "config/teams/tooling.json",
     "config/swarm/privileges.json",
     "config/enhancement/slm-dl.json",
+    "config/enhancement/dual-process.json",
+    "config/memory/hmo-tiers.json",
+    "config/memory/mesh-claim-schema.json",
+    "config/connectome/trajectory-policies.json",
+    "config/persona/consistency-checks.json",
     "config/workspaces/registry.json",
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
@@ -75,9 +104,12 @@ def load_export_includes() -> list[str]:
     return [line.strip().strip(",").strip('"') for line in chunk.splitlines() if '"' in line]
 
 
-def submodule_populated(path: Path) -> bool:
+def integration_ready(path: Path) -> bool:
+    """True if a submodule dir is checked out, or a config-file connector exists."""
     if not path.exists():
         return False
+    if path.is_file():
+        return path.stat().st_size > 0
     # empty dir or gitlink without checkout → no files besides maybe .git
     entries = [p for p in path.iterdir() if p.name != ".git"]
     return len(entries) > 0
@@ -96,6 +128,12 @@ def mesh_flags(seed: dict) -> dict:
         "cam_enhance_apply_requires_aaron": bool(
             prefs.get("cam_enhance_apply_requires_aaron")
             or research.get("cam_enhance_apply_requires_aaron")
+        ),
+        "google_scholar": bool(research.get("google_scholar")),
+        "public_apis": bool(
+            research.get("public_apis")
+            or prefs.get("public_apis")
+            or (seed.get("mesh/tools") or {}).get("public_apis")
         ),
         "unlimited_subagents": bool(prefs.get("unlimited_subagents") or facts.get("unlimited_subagents")),
         "slm_cortex_enabled": bool(prefs.get("slm_cortex_enabled")),
@@ -125,8 +163,8 @@ def main() -> int:
             {
                 "id": item["id"],
                 "path": item["path"],
-                "populated": submodule_populated(path),
-                "policy_exists": (ROOT / item["policy"]).exists(),
+                "populated": integration_ready(path),
+                "policy_exists": (ROOT / item["policy"]).exists() if item.get("policy") else False,
             }
         )
 
@@ -185,11 +223,50 @@ def main() -> int:
         if "motor.enhance" in hold.get("motor_plan", []):
             route_ok = False
             route_notes.append("enhance motor fired without --enhance")
+        scholar = json.loads(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/connectome-route.py"),
+                    "--sense",
+                    "sense.web.scholar",
+                    "--goal",
+                    "scholar search",
+                ],
+                text=True,
+            )
+        )
+        if "motor.web_fetch" not in scholar.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("scholar pathway missing motor.web_fetch")
+        if scholar.get("hotspot_id") != "hotspot.google_scholar":
+            route_ok = False
+            route_notes.append("scholar sense should hit hotspot.google_scholar")
+        public_apis = json.loads(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/connectome-route.py"),
+                    "--sense",
+                    "sense.catalog.public_apis",
+                    "--goal",
+                    "find free weather api",
+                ],
+                text=True,
+            )
+        )
+        if "motor.public_apis" not in public_apis.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("public-apis pathway missing motor.public_apis")
+        if public_apis.get("hotspot_id") != "hotspot.public_apis":
+            route_ok = False
+            route_notes.append("public-apis sense should hit hotspot.public_apis")
     except Exception as exc:  # noqa: BLE001
         route_ok = False
         route_notes.append(str(exc))
 
     soft = []
+    hard_errors = []
     if not pr2_scan_server:
         soft.append("PR#2 scan workspaces (server/workspaces) not in this checkout yet")
     else:
@@ -201,9 +278,10 @@ def main() -> int:
             hard_errors.append("missing_workspace_kind:agi_research")
     for integ in integrations:
         if not integ["populated"]:
-            soft.append(f"submodule empty: {integ['path']} (run git submodule update --init --recursive)")
+            soft.append(f"integration empty: {integ['path']} (submodule init or create config)")
+        if not integ["policy_exists"]:
+            soft.append(f"missing policy for {integ['id']}")
 
-    hard_errors = []
     hard_errors += [f"missing:{p}" for p in hard_missing]
     hard_errors += [f"persist_export_missing:{p}" for p in persist_gaps]
     hard_errors += [f"mesh_flag_off:{k}" for k in flag_gaps]

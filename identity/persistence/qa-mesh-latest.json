@@ -1,25 +1,26 @@
 {
   "namespace": "mesh/runs",
   "kind": "qa_cycle",
-  "cycle_dir": "vault/10-Mesh-Distillates/qa-cycles/20260917T013738Z-cycle-01",
-  "at": "20260917T014509Z",
+  "cycle_dir": "vault/10-Mesh-Distillates/qa-cycles/20260919T185226Z-cycle-01",
+  "at": "20260919T190000Z",
   "status": "green",
   "metrics": {
     "n": 1000000000,
     "passed": 1000000000,
     "failed": 0,
-    "kill_holds": 2001480,
-    "non_aaron_holds": 234848,
-    "feedback_ok": 997763672,
+    "kill_holds": 2000944,
+    "non_aaron_holds": 147178,
+    "feedback_ok": 997851878,
     "missing_edges_count": 0,
-    "sims_per_sec": 2215728.4532309906,
-    "elapsed_s": 451.3188421359996,
-    "qa_wall_s": 451.36196944899984,
+    "sims_per_sec": 1656616.9586763522,
+    "elapsed_s": 603.6398424890003,
+    "qa_wall_s": 603.6398424890003,
     "workers": 4,
     "first_errors": [],
     "exit_code": 0
   },
   "findings": [],
   "await_human": false,
-  "continuous_qa": true
+  "continuous_qa": true,
+  "notes": "Merged main (public-apis) into aaron-voice-only-gate; latest pointer = voice-gate pass2 connectome billion"
 }

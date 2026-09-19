@@ -262,6 +262,76 @@ function fromAgentContext(
     });
   }
 
+  const improvementsWs = workspaces.find((w) => w.kind === 'improvements');
+  const toolingRelated = swarmWs ?? improvementsWs;
+  if (toolingRelated) {
+    out.push({
+      id: 'suggest-public-apis-catalog',
+      kind: 'api-catalog',
+      title: 'Discover free APIs via public-apis before inventing endpoints',
+      rationale:
+        'All Cam agents share motor.public_apis — catalog hits beat ad-hoc URL invention for thin wrappers.',
+      implementation:
+        'Search scripts/public-apis-search.py (or MCP public_apis_search), pack into mesh/tools, then register a thin tool if reuse is likely.',
+      sketch:
+        'python3 scripts/public-apis-search.py --query weather --num 8\npython3 scripts/public-apis-addon.py call weather.open_meteo --latitude 40.7 --longitude -74.0 --offline',
+      priority: toolingRelated.score < 85 ? 66 : 48,
+      relatedWorkspaceIds: [toolingRelated.id],
+      relatedConceptIds: ['protocols-extensions'],
+      sourceFindingIds: toolingRelated.findings.map((f) => f.id).slice(0, 3),
+    });
+  }
+
+  const agiWs = workspaces.find((w) => w.kind === 'agi_research');
+  if (agiWs) {
+    out.push({
+      id: 'suggest-cam-hmo-mmp',
+      kind: 'research-memory',
+      title: 'Keep HMO tiers + MMP claims hot during research scans',
+      rationale:
+        'AGI / Cam-function research writes must stay lean in primary memory and remix via claim schema.',
+      implementation:
+        'Pack distillates with scripts/pack-mesh-claim.py; verify tiers via scripts/memory-tier-check.py before promoting to mesh/facts.',
+      sketch:
+        'python3 scripts/pack-mesh-claim.py --claim "…" --role agi-scout --source "title|url"\npython3 scripts/memory-tier-check.py',
+      priority: agiWs.score < 85 ? 74 : 52,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['simple-values'],
+      sourceFindingIds: agiWs.findings.map((f) => f.id).slice(0, 3),
+    });
+    out.push({
+      id: 'suggest-cam-trajectory-gate',
+      kind: 'cam-enhance',
+      title: 'Re-verify OCL/CPV trajectory gates after enhance batches',
+      rationale:
+        'Enhancement applies must not leak motor.enhance without Aaron or compose with jobs.',
+      implementation:
+        'Run trajectory-policy-check and trajectory-billion-fuzz before merge; keep switch.cam_enhance default hold.',
+      sketch:
+        'python3 scripts/trajectory-policy-check.py\npython3 scripts/trajectory-billion-fuzz.py --n 1000000000',
+      priority: 70,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['error-handling', 'protocols-extensions'],
+      sourceFindingIds: [],
+    });
+  }
+
+  out.push({
+    id: 'suggest-aaron-voice-only-gate',
+    kind: 'identity',
+    title: 'Keep Aaron-only voice gate enrolled before live mic',
+    rationale:
+      'Surrounding speakers must not create Cam turns — enroll FunASR CAM++ templates and fail closed until ready.',
+    implementation:
+      'Record Aaron-only WAVs, run aaron-voice-enroll.py, verify with aaron-voice-verify.py and aaron-voice-billion-fuzz before merging presence changes.',
+    sketch:
+      'python3 scripts/aaron-voice-enroll.py identity/aaron/local/voice/samples/*.wav\npython3 scripts/aaron-voice-billion-fuzz.py --n 1000000000\npython3 scripts/cam-converse-server.py',
+    priority: 82,
+    relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+    relatedConceptIds: ['error-handling', 'protocols-extensions'],
+    sourceFindingIds: [],
+  });
+
   const critical = workspaces.flatMap((w) => w.findings.filter((f) => f.severity === 'critical'));
   if (critical.length > 0) {
     const fixer = MESH_AGENTS.find((a) => a.id === 'issue-fix-loop')!;

@@ -1,7 +1,7 @@
 {
   "id": "team.info",
   "name": "Information Team",
-  "purpose": "Get accurate, sourced information for Aaron and for Cam’s other teams — vault-first, then mesh, then web.",
+  "purpose": "Get accurate, sourced information for Aaron and for Cam\u2019s other teams \u2014 vault-first, then mesh, then web.",
   "authorized_by": "Aaron",
   "authorized_at": "2026-09-17",
   "lead_center": "center.info",
@@ -36,6 +36,8 @@
   "order_of_lookup": [
     "vault (smart-second-brain)",
     "mesh namespaces",
+    "google scholar (literature + citations)",
+    "public-apis catalog (free HTTP APIs)",
     "web + paper feeds",
     "specialist hotspots"
   ],
@@ -43,5 +45,11 @@
     "unlimited": true,
     "human_gate_to_spawn": false
   },
-  "pathway_hotspot": "hotspot.info_gather"
+  "pathway_hotspot": "hotspot.info_gather",
+  "connectors": [
+    "google-scholar",
+    "public-apis"
+  ],
+  "scholar_hotspot": "hotspot.google_scholar",
+  "public_apis_hotspot": "hotspot.public_apis"
 }

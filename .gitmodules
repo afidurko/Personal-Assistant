@@ -17,3 +17,7 @@
 [submodule "integrations/cline"]
 	path = integrations/cline
 	url = https://github.com/afidurko/cline.git
+[submodule "integrations/public-apis"]
+	path = integrations/public-apis
+	url = https://github.com/afidurko/public-apis.git
+	branch = master
