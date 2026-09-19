@@ -8,12 +8,12 @@ Cam’s brain is a **connectome** plus standing **agent teams**, a **DL + sLM co
 Aaron
   └─ sensory periphery (chat, vault, web/arxiv, Google Scholar, clock, ASR, vision, sLM/DL feedback, swarm bus)
        └─ higher centers (chief, router, specialists, AGI scan, enhance, info, capability, tooling, slm, dl)
-            └─ reasoning loop (fast sLM → escalate → recall → **SGR Reason→Select→Act** → dual-stream → reflect → switches)
+            └─ reasoning loop (fast **LitServe** sLM → escalate → recall → **SGR Reason→Select→Act** → dual-stream → reflect → switches)
             └─ circuit switches (autonomy, research_scan, cam_enhance, tooling, slm_local, dl_local, kill, …)
                  └─ motor (vault, mesh, web_fetch, enhance, tool, swarm, slm, dl, speak, jobs, …)
 ```
 
-**Reasoning contract (plan):** [CAM_REASONING.md](CAM_REASONING.md) · SGR: [`integrations/sgr-agent-core`](../integrations/sgr-agent-core) · proposed `config/enhancement/reasoning-logic.json`
+**Reasoning contract (plan):** [CAM_REASONING.md](CAM_REASONING.md) · SGR: [`integrations/sgr-agent-core`](../integrations/sgr-agent-core) · LitServe: [`integrations/litserve`](../integrations/litserve) · proposed `config/enhancement/reasoning-logic.json`
 
 ## Teams (all may spawn subagents)
 

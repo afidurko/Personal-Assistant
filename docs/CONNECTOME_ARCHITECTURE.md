@@ -70,7 +70,7 @@ Unlimited subagent depth = unbounded columnar recruitment inside DLPFC (`neuron.
 Hebbian rule: completed **act** pathways strengthen tract weights **and** bump myelination; QA veto / kill weakens weights.
 
 Parameters: `config/connectome/mesh-params.json` (memory tiers, MAP planning buses, dual-stream, ASI stance).  
-Unified turn reasoning (plan): [CAM_REASONING.md](CAM_REASONING.md) · SGR substrate [`integrations/sgr-agent-core`](../integrations/sgr-agent-core) · `config/enhancement/reasoning-logic.json`.  
+Unified turn reasoning (plan): [CAM_REASONING.md](CAM_REASONING.md) · SGR [`integrations/sgr-agent-core`](../integrations/sgr-agent-core) · LitServe [`integrations/litserve`](../integrations/litserve) · `config/enhancement/reasoning-logic.json`.  
 Research: `vault/10-Mesh-Distillates/2026-09-17-fasciculus-AGI-mesh.md`
 
 ## End-to-end flow

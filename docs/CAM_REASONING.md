@@ -2,11 +2,12 @@
 
 **Status:** plan — not applied  
 **Owner:** Aaron (sole task-giver)  
-**Depends on:** connectome route, dual-process, HMO/MMP, OCL/CPV, dual-stream, QA, **SGR Agent Core**  
+**Depends on:** connectome route, dual-process, HMO/MMP, OCL/CPV, dual-stream, QA, **SGR Agent Core**, **LitServe**  
 **SGR source:** [afidurko/sgr-agent-core](https://github.com/afidurko/sgr-agent-core) · `integrations/sgr-agent-core`  
+**Inference host:** [afidurko/LitServe](https://github.com/afidurko/LitServe) · `integrations/litserve`  
 **Apply gate:** runtime wiring is a Cam functionality change → `switch.cam_enhance` + proposal when ready
 
-This doc unifies Cam’s cognition pieces into one **inspectable reasoning loop**, with **Schema-Guided Reasoning (SGR)** as the slow-path deliberative engine.
+This doc unifies Cam’s cognition pieces into one **inspectable reasoning loop**, with **Schema-Guided Reasoning (SGR)** as the slow-path deliberative engine and **LitServe** as the local sLM/DL (and optional OpenAI-compatible) inference host.
 
 ## Why this plan
 
@@ -16,7 +17,8 @@ This doc unifies Cam’s cognition pieces into one **inspectable reasoning loop*
 | Fast/slow | `config/enhancement/dual-process.json` | Declared only; converse/chief do not escalate |
 | Language | `scripts/dual-stream-router.py` | Stream pick is separate from plan/act |
 | MAP PFC | `mesh-params.planning_modules_map` | Labels only — no ordered stage runner |
-| **Schema reasoner** | **SGR submodule now present** | Not yet wrapped as Cam motor / tools |
+| **Schema reasoner** | **SGR submodule present** | Not yet wrapped as Cam motor / tools |
+| **Inference host** | **LitServe submodule present** | No Cam LitAPI wrappers / `cam-litserve` yet |
 | Memory | HMO tiers + AMM triggers | Not called as a pre-plan gate on every Aaron turn |
 | Reflection | QA + trajectory policies | Pre-motor checks exist; not bound into a slow-path SRM step |
 | Home converse | `server/core/cam-converse.ts` | Pattern replies — not connectome-backed reasoning |
@@ -52,6 +54,19 @@ Cam maps that onto the connectome:
 
 Integration policy: [`config/integrations/sgr-agent-core.md`](../config/integrations/sgr-agent-core.md)
 
+## LitServe as local inference host
+
+[afidurko/LitServe](https://github.com/afidurko/LitServe) (`integrations/litserve`) hosts Cam’s model motors:
+
+```text
+fast path  → LitServe sLM classify / compress / route hint
+slow path  → SGR ──AsyncOpenAI──► LitServe /v1/chat/completions  (or Aaron-configured cloud)
+DL jobs    → LitServe embed / rerank
+```
+
+Policy: [`config/integrations/litserve.md`](../config/integrations/litserve.md) · recipe: `config/enhancement/slm-dl.json`  
+Kill / `switch.slm_local` / `switch.dl_local` still gate every call.
+
 ### Cam toolkit (planned wrappers)
 
 | Tool | Wraps |
@@ -71,7 +86,7 @@ SGR tools never fire enhance/outbound/careers-submit without the matching `switc
 ```text
 sense spike (Aaron-rooted)
   → 0. ACCEPT   switch.tasking / kill
-  → 1. FAST     center.slm classify + route hint + compress   (System-1)
+  → 1. FAST     center.slm via **LitServe** classify + route hint + compress   (System-1)
   → 2. GATE     escalate?  (see Escalation)
   → 3. RECALL   HMO primary → secondary → vault (salience-gated)
   → 4. SGR      Reasoning → Select → Act loop (MAP-aligned; slow path)
@@ -174,22 +189,24 @@ Cortex live feed may pulse tracts named in the active stages (same activity-even
 
 ## Implementation phases
 
-### Phase A — Spec + SGR checkout (this PR)
+### Phase A — Spec + SGR + LitServe checkout (this PR)
 
 - [x] `docs/CAM_REASONING.md` (this plan)  
 - [x] Draft `config/enhancement/reasoning-logic.json` (`status: proposed`)  
 - [x] `config/integrations/sgr-agent-core.md` + submodule `integrations/sgr-agent-core`  
+- [x] `config/integrations/litserve.md` + submodule `integrations/litserve`  
 - [x] Registry + cross-links (brain, chief, Operating Manual)  
 
-### Phase B — CLI orchestrator + Cam toolkit
+### Phase B — CLI orchestrator + Cam toolkit + LitAPI
 
 - [ ] `scripts/cam-reason.py` — dry-run + live modes  
   - Fast gate → recall stubs → escalate to SGR agent with Cam toolkit  
   - Reuse `connectome-route.py` for pathway / motor_plan baseline  
   - Emit reasoning_trace JSON  
-- [ ] `config/sgr/cam-agents.yaml` — Cam AgentDefinition(s)  
+- [ ] `scripts/cam-litserve.py` — LitAPI endpoints for sLM/DL + OpenAI-compatible chat  
+- [ ] `config/sgr/cam-agents.yaml` — Cam AgentDefinition(s) pointing LLM base_url at LitServe  
 - [ ] Cam tools: MeshRecall, ConnectomeRoute, TrajectoryCheck, Cline, Scholar  
-- [ ] Tests: escalate rules, kill silence, enhance strip, speak→dorsal, SGR reason schema present  
+- [ ] Tests: escalate rules, kill silence, enhance strip, speak→dorsal, SGR reason schema present, LitServe health
 
 ### Phase C — Wire home converse + chief
 
@@ -214,13 +231,14 @@ Cortex live feed may pulse tracts named in the active stages (same activity-even
 
 | Check | Command / signal |
 |---|---|
-| Submodule present | `integrations/sgr-agent-core/sgr_agent_core/` |
+| Submodule present | `integrations/sgr-agent-core/` · `integrations/litserve/` |
 | Config validates | load `reasoning-logic.json` in `cam-reason.py` |
-| Kill still wins | `--kill` → empty motor_plan |
+| Kill still wins | `--kill` → empty motor_plan; LitServe refuses |
 | Enhance held | plan never includes `motor.enhance` without `--enhance` |
 | Personal facts | dry-run shows recall / MeshRecall before invent |
-| Dual-process | greeting → fast; “propose Cam change” → SGR slow |
+| Dual-process | greeting → LitServe fast; “propose Cam change” → SGR slow |
 | SGR schema | slow path logs `ReasoningTool` fields |
+| LitServe health | `/health` (or Cam wrapper) green when slm/dl switches act |
 | Trace written | distill JSONL line per turn |
 
 ## Open questions for Aaron
@@ -229,7 +247,8 @@ Cortex live feed may pulse tracts named in the active stages (same activity-even
 2. Should home converse always run SGR on every mic turn, or only when text length / intent score exceeds a bar?  
 3. Max SGR iterations / MAP subagent burst per turn (default inherit ASI ceiling `max_neuro_columns: 24`)?  
 4. Confirm default agent: `SGRToolCallingAgent` vs `SGRAgent` for local sLM?  
-5. Prefer Python CLI first (Phase B) or TypeScript bridge in `server/core` next to converse?
+5. Prefer Python CLI first (Phase B) or TypeScript bridge in `server/core` next to converse?  
+6. LitServe bind address / port defaults for home vs Tailscale peers?
 
 Interim defaults ship in the proposed JSON so implementation can proceed once Aaron answers or accepts interim.
 
@@ -237,7 +256,8 @@ Interim defaults ship in the proposed JSON so implementation can proceed once Aa
 
 - [CAM_BRAIN.md](CAM_BRAIN.md) · [CONNECTOME_ARCHITECTURE.md](CONNECTOME_ARCHITECTURE.md)  
 - [config/integrations/sgr-agent-core.md](../config/integrations/sgr-agent-core.md)  
-- `config/enhancement/dual-process.json` · `config/connectome/mesh-params.json`  
+- [config/integrations/litserve.md](../config/integrations/litserve.md)  
+- `config/enhancement/dual-process.json` · `config/enhancement/slm-dl.json` · `config/connectome/mesh-params.json`  
 - `config/connectome/trajectory-policies.json` · `config/memory/hmo-tiers.json`  
 - Vault: `vault/03-Projects/Cam-Reasoning-Logic.md`  
-- Upstream concepts: https://vamplabai.github.io/sgr-agent-core/framework/main-concepts/
+- Upstream concepts: https://vamplabai.github.io/sgr-agent-core/framework/main-concepts/ · https://lightning.ai/docs/litserve

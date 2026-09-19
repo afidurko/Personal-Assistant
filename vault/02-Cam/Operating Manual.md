@@ -15,8 +15,8 @@ Brain overview: `docs/CAM_BRAIN.md` · [[Brain]]
 
 Motor only fires on an **act** pathway tied to Aaron’s task/goal (or standing grants). See also [[Connectome]].
 
-**Reasoning loop (plan):** Accept → Fast (sLM) → Escalate? → Recall → **SGR Reason→Select→Act** → Dual-stream → Reflect → Switches → Motor → Distill.  
-Repo: `docs/CAM_REASONING.md` · SGR: `integrations/sgr-agent-core` · project note [[Cam-Reasoning-Logic]].
+**Reasoning loop (plan):** Accept → Fast (**LitServe** sLM) → Escalate? → Recall → **SGR Reason→Select→Act** → Dual-stream → Reflect → Switches → Motor → Distill.  
+Repo: `docs/CAM_REASONING.md` · SGR: `integrations/sgr-agent-core` · LitServe: `integrations/litserve` · project note [[Cam-Reasoning-Logic]].
 
 ## Teams
 | Team | Cadence | Notes |

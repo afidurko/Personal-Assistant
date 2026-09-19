@@ -20,3 +20,6 @@
 [submodule "integrations/sgr-agent-core"]
 	path = integrations/sgr-agent-core
 	url = https://github.com/afidurko/sgr-agent-core.git
+[submodule "integrations/litserve"]
+	path = integrations/litserve
+	url = https://github.com/afidurko/LitServe.git

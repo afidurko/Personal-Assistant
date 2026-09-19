@@ -204,6 +204,16 @@
         "plan": "docs/CAM_REASONING.md",
         "config": "config/enhancement/reasoning-logic.json",
         "status": "proposed"
+      },
+      {
+        "id": "litserve",
+        "path": "integrations/litserve",
+        "policy": "config/integrations/litserve.md",
+        "remote": "github.com/afidurko/LitServe",
+        "role": "local_inference_host",
+        "serves": ["motor.slm", "motor.dl", "sgr_openai_compatible"],
+        "plan": "docs/CAM_REASONING.md",
+        "status": "proposed"
       }
     ],
     "parallel_prs": [
@@ -450,6 +460,15 @@
             "schema guided reasoning",
             "integrations/sgr-agent-core"
           ]
+        },
+        {
+          "id": "litserve",
+          "match_any": [
+            "litserve",
+            "lit serve",
+            "integrations/litserve",
+            "lightning litserve"
+          ]
         }
       ]
     },
@@ -591,6 +610,27 @@
       "install_rules": true,
       "cursor_bootstrap": true,
       "notes": "Cam slow-path reasoner — see docs/CAM_REASONING.md"
+    },
+    {
+      "id": "litserve",
+      "label": "LitServe local inference host",
+      "path": "integrations/litserve",
+      "remote": "github.com/afidurko/LitServe",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "chief",
+        "slm-runtime",
+        "dl-enhance",
+        "ops"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/litserve",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
     }
   ],
   "chooser": {
@@ -661,6 +701,15 @@
           "schema-guided reasoning",
           "schema guided reasoning",
           "integrations/sgr-agent-core"
+        ]
+      },
+      {
+        "id": "litserve",
+        "match_any": [
+          "litserve",
+          "lit serve",
+          "integrations/litserve",
+          "lightning litserve"
         ]
       }
     ]

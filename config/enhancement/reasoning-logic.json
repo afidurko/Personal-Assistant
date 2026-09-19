@@ -12,17 +12,29 @@
     "policy": "config/integrations/sgr-agent-core.md",
     "default_agent": "sgr_tool_calling_agent",
     "fallback_agent": "sgr_agent",
-    "docs": "https://vamplabai.github.io/sgr-agent-core/framework/main-concepts/"
+    "docs": "https://vamplabai.github.io/sgr-agent-core/framework/main-concepts/",
+    "llm_backend_preferred": "litserve_openai_compatible"
+  },
+  "litserve": {
+    "remote": "https://github.com/afidurko/LitServe",
+    "path": "integrations/litserve",
+    "policy": "config/integrations/litserve.md",
+    "wrapper": "scripts/cam-litserve.py",
+    "serves": ["motor.slm", "motor.dl", "sgr_chat_completions"],
+    "default_host": "127.0.0.1",
+    "default_port": 8080
   },
   "depends_on": [
     "config/enhancement/dual-process.json",
+    "config/enhancement/slm-dl.json",
     "config/connectome/mesh-params.json",
     "config/connectome/trajectory-policies.json",
     "config/memory/hmo-tiers.json",
     "config/memory/mesh-claim-schema.json",
-    "integrations/sgr-agent-core"
+    "integrations/sgr-agent-core",
+    "integrations/litserve"
   ],
-  "version": 2,
+  "version": 3,
   "stages": [
     "accept",
     "fast",
@@ -38,6 +50,7 @@
   "fast_path": {
     "center": "center.slm",
     "motor": "motor.slm",
+    "inference_host": "litserve",
     "skip_stages": ["sgr"],
     "light_plan": true,
     "analogy": "System-1"
@@ -131,10 +144,11 @@
   },
   "runtime": {
     "cli": "scripts/cam-reason.py",
+    "litserve": "scripts/cam-litserve.py",
     "agent_definitions": "config/sgr/cam-agents.yaml",
     "server_module": "server/core/cam-reason.ts",
     "proposed_motor": "motor.sgr",
-    "note": "CLI + Cam toolkit first (Phase B); server wire in Phase C — neither applied until Aaron approves"
+    "note": "CLI + LitServe + Cam toolkit first (Phase B); server wire in Phase C — neither applied until Aaron approves"
   },
   "open_questions_for_aaron": [
     {
@@ -161,6 +175,11 @@
       "id": "q.impl_surface",
       "ask": "Prefer Python CLI (Phase B) or TypeScript server module first?",
       "interim": "python_cli_first"
+    },
+    {
+      "id": "q.litserve_bind",
+      "ask": "LitServe default bind for home vs Tailscale peers?",
+      "interim": {"host": "127.0.0.1", "port": 8080, "tailscale": "forceps_optional_later"}
     }
   ]
 }
