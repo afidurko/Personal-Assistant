@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T18:29:26.124269+00:00",
+    "at": "2026-09-19T18:32:00.888313+00:00",
     "mode": "plan",
-    "summary": "Drafted Cam unified reasoning loop plan (docs/CAM_REASONING.md + proposed reasoning-logic.json); PR #16; Phase B CLI not started",
+    "summary": "Adopted afidurko/sgr-agent-core as Cam System-2 SGR substrate; submodule + CAM_REASONING update; PR #16",
     "workspace": "/workspace"
   },
   "notes": [
