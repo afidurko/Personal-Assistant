@@ -43,7 +43,19 @@ On iPhone: `http://aaron-ipad:8787` (edit MagicDNS in `config/network/tailscale.
 
 ## Connectome
 Mic → `sense.ios.mic` · Camera → `sense.ios.camera` · Chat fallback → `sense.chat.aaron`  
-Aaron voice → `sense.aaron.voice` → `switch.identity` → `hotspot.aaron_voice_noise` (reject non-Aaron in noise)
+Aaron voice → `sense.aaron.voice` → `switch.identity` → `hotspot.aaron_voice_noise` (spectral browser gate rejects non-Aaron in noise)  
+Aaron-only hearing (server) → FunASR CAM++ gate (`docs/AARON_VOICE_GATE.md`) — complementary to the on-device spectral add-ons
+
+## Aaron-only mic (server mode)
+
+Mic turns require a passing voice gate when enrollment exists:
+
+1. Browser: enroll ~10s quiet speech in the companion (spectral voiceprint / adaptive noise add-ons)
+2. Host: `python3 scripts/aaron-voice-enroll.py identity/aaron/local/voice/samples/*.wav` (FunASR CAM++)
+3. Companion sends score and/or ~4s WAV (`audio_wav_b64`) with each final transcript
+4. Non-Aaron / surrounding speech → HTTP 403, no Cam reply
+
+`GET /api/voice/status` · `POST /api/voice/gate` · `POST /api/voice/gate/reject` · `POST /api/spike/aaron.voice`
 
 ## Logs
 `vault/10-Mesh-Distillates/converse/*.jsonl` (server mode only)

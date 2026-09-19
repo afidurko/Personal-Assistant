@@ -56,5 +56,12 @@
     }
   ],
   "videos": [],
+  "voice_gate": {
+    "status": "awaiting_aaron_wav_enrollment",
+    "config": "config/identity/aaron-voice.json",
+    "cli": "scripts/aaron-voice-enroll.py",
+    "doc": "docs/AARON_VOICE_GATE.md",
+    "notes": "Face enrolled; spectral browser gate ready; FunASR templates empty until Aaron records samples on host"
+  },
   "status": "face_enrollment_complete_4_photos; voice_gate_ready"
 }

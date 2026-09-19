@@ -26,21 +26,21 @@ Native iOS: same `/api/*` contract once Xcode app is created.
 | `sense.ios.camera` | frame ref / thumbnail hash, purpose, aaron_face_score? |
 | `sense.ios.mic` | audio ref / duration, purpose, aaron_voice_score? |
 | `sense.aaron.face` | score ∈ [0,1], device_id, enrolled=true |
-| `sense.aaron.voice` | score ∈ [0,1], device_id, enrolled=true |
+| `sense.aaron.voice` | score ∈ [0,1], device_id, enrolled=true · or WAV via `/api/voice/gate` |
 
-Match threshold default: **0.85** quiet / **0.88** noisy (configurable in `config/identity/aaron-voice-gate.json`).
+Match threshold default: **0.85** quiet / **0.88** noisy (configurable in `config/identity/aaron-voice-gate.json`). Server FunASR CAM++ gate also uses **0.85** (`config/identity/aaron-voice.json` · `switch.identity`).
 
 ## Aaron-only in noisy rooms
 
-Cam must recognize **Aaron’s voice only**. Surrounding conversation is filtered:
+Cam must recognize **Aaron’s voice only**. Surrounding conversation is filtered via complementary layers:
 
-1. Enroll Aaron once (~10s quiet speech) in the companion / home UI
+1. Enroll Aaron once (~10s quiet speech) in the companion / home UI (spectral browser gate)
 2. On each mic utterance, on-device spectral voiceprint scores vs enrollment
 3. Below threshold (or multi-speaker hint) → **ignore** — no Cam reply
-4. Server `/api/turn` also rejects mic turns without a passing `aaron_voice_score`
+4. Server `/api/turn` also rejects mic turns without a passing `aaron_voice_score`; FunASR CAM++ gate (`docs/AARON_VOICE_GATE.md`) covers host-side WAV enrollment
 5. Typing still works (`text_bypass`)
 
-Config: `config/identity/aaron-voice-gate.json`  
+Config: `config/identity/aaron-voice-gate.json` · `config/identity/aaron-voice.json`  
 Hotspot: `hotspot.aaron_voice_noise` · Sense: `sense.aaron.voice` · Switch: `switch.identity`
 
 ## Security

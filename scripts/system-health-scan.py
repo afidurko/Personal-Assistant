@@ -67,12 +67,28 @@ def check_integrations() -> dict:
     expected = [
         "integrations/jarvis",
         "integrations/paddledetection",
+        "integrations/pupil",
         "integrations/llmavatartalk",
+        "integrations/voicestudio",
         "integrations/smart-second-brain",
         "integrations/swiftguide",
+        "integrations/public-apis",
+        "integrations/cline",
+        "integrations/inkbox",
     ]
     present = [p for p in expected if (ROOT / p).exists()]
     missing = [p for p in expected if p not in present]
+    # Config-backed connectors still count as present even if submodule empty
+    config_ok = {
+        "integrations/public-apis": (ROOT / "config/integrations/public-apis.json").exists(),
+        "integrations/cline": (ROOT / "config/integrations/cline.md").exists(),
+        "integrations/inkbox": (ROOT / "config/integrations/inkbox.json").exists(),
+    }
+    for path, ok in config_ok.items():
+        if path in missing and ok:
+            missing.remove(path)
+            if path not in present:
+                present.append(path)
     return {
         "neuron": "neuron.integration_pulse",
         "present": present,

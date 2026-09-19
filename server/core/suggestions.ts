@@ -262,6 +262,26 @@ function fromAgentContext(
     });
   }
 
+  const improvementsWs = workspaces.find((w) => w.kind === 'improvements');
+  const toolingRelated = swarmWs ?? improvementsWs;
+  if (toolingRelated) {
+    out.push({
+      id: 'suggest-public-apis-catalog',
+      kind: 'api-catalog',
+      title: 'Discover free APIs via public-apis before inventing endpoints',
+      rationale:
+        'All Cam agents share motor.public_apis — catalog hits beat ad-hoc URL invention for thin wrappers.',
+      implementation:
+        'Search scripts/public-apis-search.py (or MCP public_apis_search), pack into mesh/tools, then register a thin tool if reuse is likely.',
+      sketch:
+        'python3 scripts/public-apis-search.py --query weather --num 8\npython3 scripts/public-apis-addon.py call weather.open_meteo --latitude 40.7 --longitude -74.0 --offline',
+      priority: toolingRelated.score < 85 ? 66 : 48,
+      relatedWorkspaceIds: [toolingRelated.id],
+      relatedConceptIds: ['protocols-extensions'],
+      sourceFindingIds: toolingRelated.findings.map((f) => f.id).slice(0, 3),
+    });
+  }
+
   const agiWs = workspaces.find((w) => w.kind === 'agi_research');
   if (agiWs) {
     out.push({
@@ -340,6 +360,56 @@ function fromAgentContext(
     priority: 72,
     relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
     relatedConceptIds: ['error-handling'],
+    sourceFindingIds: [],
+  });
+
+  // VoiceStudio local speech — always suggest when health/comms workspaces are present
+  const healthWs = workspaces.find((w) => w.kind === 'health');
+  const voiceRelatedIds = [healthWs?.id].filter(Boolean) as string[];
+  out.push({
+    id: 'suggest-voicestudio-local-speech',
+    kind: 'presence-voice',
+    title: 'Keep VoiceStudio local TTS/ASR wired for Cam',
+    rationale:
+      'Local-first speech fallback when RIVA/Audio2Face is offline; brain stays nullclaw.',
+    implementation:
+      'Init submodule, start VoiceStudio backend, bind soft-airy Cam profile, verify /health + MCP /mcp, pack results via pack-voicestudio-result.py.',
+    sketch:
+      'git submodule update --init integrations/voicestudio\npython3 scripts/voicestudio-health.py\npython3 scripts/voicestudio-speak.py --text "Hello Aaron" --dry-run',
+    priority: 58,
+    relatedWorkspaceIds: voiceRelatedIds,
+    relatedConceptIds: ['concurrency', 'error-handling'],
+    sourceFindingIds: [],
+  });
+  out.push({
+    id: 'suggest-voicestudio-mcp-files-mode',
+    kind: 'presence-voice',
+    title: 'Prefer VoiceStudio MCP files mode for agents',
+    rationale:
+      'Base64 WAV blows LLM context; files mode keeps renders on disk under OMNIVOICE_MCP_BASE_PATH.',
+    implementation:
+      'Set OMNIVOICE_MCP_OUTPUT_MODE=files on the backend; point Cam/Cline MCP at http://localhost:3900/mcp with X-VoiceStudio-Client-Id: cam (config/mcp/voicestudio.json).',
+    sketch:
+      'export OMNIVOICE_MCP_OUTPUT_MODE=files\n# MCP URL: http://localhost:3900/mcp',
+    priority: 54,
+    relatedWorkspaceIds: voiceRelatedIds,
+    relatedConceptIds: ['protocols-extensions'],
+    sourceFindingIds: [],
+  });
+
+  out.push({
+    id: 'suggest-aaron-voice-only-gate',
+    kind: 'identity',
+    title: 'Keep Aaron-only voice gate enrolled before live mic',
+    rationale:
+      'Surrounding speakers must not create Cam turns — enroll FunASR CAM++ templates and fail closed until ready.',
+    implementation:
+      'Record Aaron-only WAVs, run aaron-voice-enroll.py, verify with aaron-voice-verify.py and aaron-voice-billion-fuzz before merging presence changes.',
+    sketch:
+      'python3 scripts/aaron-voice-enroll.py identity/aaron/local/voice/samples/*.wav\npython3 scripts/aaron-voice-billion-fuzz.py --n 1000000000\npython3 scripts/cam-converse-server.py',
+    priority: 82,
+    relatedWorkspaceIds: workspaces.map((w) => w.id).slice(0, 3),
+    relatedConceptIds: ['error-handling', 'protocols-extensions'],
     sourceFindingIds: [],
   });
 

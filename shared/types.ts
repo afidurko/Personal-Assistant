@@ -195,7 +195,10 @@ export type SuggestionKind =
   | 'swarm-tooling'
   | 'cam-enhance'
   | 'research-memory'
-  | 'identity-voice';
+  | 'identity-voice'
+  | 'presence-voice'
+  | 'identity'
+  | 'api-catalog';
 
 export interface SuggestiveImplementation {
   id: string;

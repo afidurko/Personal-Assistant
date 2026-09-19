@@ -379,6 +379,69 @@
         "neuron.priority_boot",
         "neuron.tailscale_reach"
       ]
+    },
+    {
+      "t": 31,
+      "ts": "2026-09-19T18:33:13Z",
+      "type": "health_scan",
+      "status": "warn",
+      "overall": "warning",
+      "neurons": [
+        "neuron.vitals_loop",
+        "neuron.connectome_check",
+        "neuron.submodule_health",
+        "neuron.integration_pulse",
+        "neuron.persist_sync",
+        "neuron.secret_hygiene",
+        "neuron.drift_scan",
+        "neuron.converse_health",
+        "neuron.arch_scan",
+        "neuron.vuln_scan",
+        "neuron.priority_boot",
+        "neuron.tailscale_reach"
+      ]
+    },
+    {
+      "t": 33,
+      "ts": "2026-09-19T19:48:20Z",
+      "type": "health_scan",
+      "status": "ok",
+      "overall": "healthy",
+      "neurons": [
+        "neuron.vitals_loop",
+        "neuron.connectome_check",
+        "neuron.submodule_health",
+        "neuron.integration_pulse",
+        "neuron.persist_sync",
+        "neuron.secret_hygiene",
+        "neuron.drift_scan",
+        "neuron.converse_health",
+        "neuron.arch_scan",
+        "neuron.vuln_scan",
+        "neuron.priority_boot",
+        "neuron.tailscale_reach"
+      ]
+    },
+    {
+      "t": 33,
+      "ts": "2026-09-19T20:07:09Z",
+      "type": "health_scan",
+      "status": "warn",
+      "overall": "warning",
+      "neurons": [
+        "neuron.vitals_loop",
+        "neuron.connectome_check",
+        "neuron.submodule_health",
+        "neuron.integration_pulse",
+        "neuron.persist_sync",
+        "neuron.secret_hygiene",
+        "neuron.drift_scan",
+        "neuron.converse_health",
+        "neuron.arch_scan",
+        "neuron.vuln_scan",
+        "neuron.priority_boot",
+        "neuron.tailscale_reach"
+      ]
     }
   ],
   "rules": "config/connectome/plasticity.json"

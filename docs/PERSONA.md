@@ -32,21 +32,25 @@ Aaron asked for Cam to be **available at all times** and to **complete functions
 
 ```text
 Full:  Aaron → RIVA ASR → Cam brain → RIVA TTS (soft/airy) → Audio2Face → optional Metahuman
-Simple: cam-face.jpg + light TTS when studio is offline
+Local: VoiceStudio TTS/ASR (cloned Cam voice) + cam-face.jpg when studio is offline
+Simple: cam-face.jpg + light TTS when neither studio nor VoiceStudio is up
 Brain+: nullclaw + smart-second-brain + sLM/DL cortex + agent teams (AGI scan / capability / info)
 Code:   Cline (`integrations/cline`) as shared motor for all agents/workspaces
+APIs:   public-apis (`integrations/public-apis`) as shared free-API catalog for all agents
 ```
 
 - Presence I/O: `integrations/llmavatartalk`
+- Local speech: `integrations/voicestudio` · `config/integrations/voicestudio.md`
 - Second brain: `integrations/smart-second-brain`
 - Coding: `integrations/cline` · policy `.clinerules` · `config/integrations/cline.md`
 - Enhancement cortex: `config/enhancement/slm-dl.json`
 - Teams: `config/teams/` · `docs/CAM_BRAIN.md` · `docs/AGI_RESEARCH_TEAM.md`
-- Details: `config/integrations/llmavatartalk.md`, `config/integrations/smart-second-brain.md`
+- Details: `config/integrations/llmavatartalk.md`, `config/integrations/voicestudio.md`, `config/integrations/smart-second-brain.md`
 
 ## Voice defaults
 
 - Provider: NVIDIA RIVA (`English-US.Female-1` as closest soft female base until a custom soft-airy Argentine voice is configured)
+- Local fallback: VoiceStudio (`config/integrations/voicestudio.json`) — bind a Cam clone profile when ready
 - Style: soft, airy, unhurried fluent English; never harsh or robotic; light Argentine color only if natural — clarity first
 - Default language with Aaron: **fluent English**
 - Spanish available if Aaron asks or writes in Spanish
@@ -57,5 +61,7 @@ Code:   Cline (`integrations/cline`) as shared motor for all agents/workspaces
 - Voice style notes: **set**
 - Always-on autonomy: **set**
 - LLMAvatarTalk + smart-second-brain: **wired as submodules**
+- VoiceStudio: **wired as submodule** — local TTS/ASR/clone/dub + MCP
 - Cline: **wired as submodule** — shared coding effector for all agents/workspaces
+- Public APIs: **wired as submodule** — shared free-API catalog for all agents/workspaces
 - Studio RIVA/Audio2Face bring-up: on Aaron’s machine

@@ -75,6 +75,16 @@
       "neuron": "neuron.schematic_hud",
       "why": "Optional 2D circuit-board overlay synced to live feed",
       "impl": "flat.html neurotransmitter legend mode"
+    },
+    {
+      "neuron": "neuron.voicestudio_bridge",
+      "why": "Local TTS/ASR fallback when RIVA studio offline",
+      "impl": "scripts/voicestudio-speak.py + pack-voicestudio-result.py + MCP files mode"
+    },
+    {
+      "neuron": "neuron.voicestudio_health",
+      "why": "Pulse VoiceStudio /health into system-health conductor",
+      "impl": "scripts/voicestudio-health.py wired as standing check"
     }
   ]
 }

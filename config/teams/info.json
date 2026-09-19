@@ -37,6 +37,7 @@
     "vault (smart-second-brain)",
     "mesh namespaces",
     "google scholar (literature + citations)",
+    "public-apis catalog (free HTTP APIs)",
     "web + paper feeds",
     "specialist hotspots"
   ],
@@ -46,7 +47,9 @@
   },
   "pathway_hotspot": "hotspot.info_gather",
   "connectors": [
-    "google-scholar"
+    "google-scholar",
+    "public-apis"
   ],
-  "scholar_hotspot": "hotspot.google_scholar"
+  "scholar_hotspot": "hotspot.google_scholar",
+  "public_apis_hotspot": "hotspot.public_apis"
 }

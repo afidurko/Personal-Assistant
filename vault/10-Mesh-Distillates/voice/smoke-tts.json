@@ -1,0 +1,21 @@
+{
+  "client_id": "cam",
+  "created_at": "2026-09-19T19:08:35.160415+00:00",
+  "job": {
+    "audio_id": null,
+    "chars": 51,
+    "duration_s": null,
+    "engine": "omnivoice",
+    "error": null,
+    "kind": "tts",
+    "language": null,
+    "ok": true,
+    "output_path": "data/voicestudio/cam-smoke-20260919T190824Z.wav",
+    "profile_id": "alloy"
+  },
+  "namespace": "mesh/voice",
+  "note": "raw WAV/clones not included; mark_synthetic; Aaron gate for audible play",
+  "sensitivity": "private",
+  "source": "integrations/voicestudio",
+  "synthetic": true
+}

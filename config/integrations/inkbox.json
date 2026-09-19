@@ -1,0 +1,57 @@
+{
+  "id": "inkbox",
+  "name": "Inkbox agent identity",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "role": "Agent identity + email/phone/SMS/vault/tunnel infrastructure for Cam outbound channels",
+  "policy": "config/integrations/inkbox.md",
+  "remote": "github.com/afidurko/inkbox",
+  "homepage": "https://inkbox.ai",
+  "path": "integrations/inkbox",
+  "sense": "sense.inkbox.event",
+  "hotspot": "hotspot.inkbox",
+  "motor": "motor.inkbox",
+  "switch": "switch.outbound",
+  "center": "center.comms",
+  "mesh_namespace": "mesh/comms",
+  "vault_dir": "vault/06-Life-Ops/inkbox",
+  "credential_env": "INKBOX_API_KEY",
+  "provider": {
+    "primary": "inkbox_api",
+    "console": "https://inkbox.ai/console",
+    "mcp": "https://inkbox.ai/mcp/cursor",
+    "packages": {
+      "python": "inkbox",
+      "typescript": "@inkbox/sdk",
+      "cli": "@inkbox/cli"
+    },
+    "notes": "API key from Inkbox Console. Live send/call requires switch.outbound act. Never commit keys."
+  },
+  "defaults": {
+    "save_to_mesh": true,
+    "save_to_vault": true,
+    "offline_ok": true,
+    "live_send_requires_outbound": true
+  },
+  "scripts": {
+    "check": "scripts/inkbox-check.py"
+  },
+  "teams": [
+    "team.capability",
+    "team.info",
+    "team.tooling"
+  ],
+  "roles": [
+    "comms",
+    "ops",
+    "coding",
+    "capability-broker",
+    "task-executor",
+    "tool-user",
+    "chief",
+    "qa"
+  ],
+  "available_to": "comms_and_gated_outbound",
+  "coding_workspace_id": "inkbox"
+}

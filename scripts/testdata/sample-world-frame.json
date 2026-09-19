@@ -1,0 +1,7 @@
+{
+  "id": "world-frame-demo-001",
+  "path": "local://pupil/world/demo-frame",
+  "resolution": [1280, 720],
+  "timestamp": 1.0,
+  "note": "metadata only — no raw pixels"
+}

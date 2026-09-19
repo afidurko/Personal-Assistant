@@ -1,4 +1,4 @@
-/* Cam web companion — mic + camera + Aaron-only voice gate */
+/* Cam web companion — mic + camera + converse + Aaron voice gate (spectral + FunASR) */
 (() => {
   const VG = window.CamAaronVoiceGate;
   const $ = (id) => document.getElementById(id);
@@ -36,6 +36,11 @@
   let adaptiveRaised = false;
   let multiSpeakerStreak = 0;
   let acceptsSinceRaise = 0;
+  let pcmChunks = [];
+  let pcmSampleRate = 16000;
+  let processor = null;
+  let mediaSource = null;
+  let voiceGate = { enrolled: false, require: true };
 
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -108,9 +113,12 @@
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const err = new Error(data.cam || data.error || res.statusText);
+      const err = new Error(
+        data.cam || data.reason || data.error || res.statusText
+      );
       err.status = res.status;
       err.body = data;
+      err.payload = data;
       throw err;
     }
     return data;
@@ -145,6 +153,86 @@
     if (btnImport) btnImport.hidden = false;
     if (btnEnroll) btnEnroll.textContent = profile ? "Re-enroll my voice" : "Enroll my voice (10s)";
   }
+
+
+  function floatTo16BitPCM(float32) {
+    const out = new Int16Array(float32.length);
+    for (let i = 0; i < float32.length; i++) {
+      const s = Math.max(-1, Math.min(1, float32[i]));
+      out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    }
+    return out;
+  }
+
+  function encodeWavMono(float32, sampleRate) {
+    const pcm = floatTo16BitPCM(float32);
+    const buffer = new ArrayBuffer(44 + pcm.length * 2);
+    const view = new DataView(buffer);
+    const writeStr = (offset, str) => {
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    };
+    writeStr(0, "RIFF");
+    view.setUint32(4, 36 + pcm.length * 2, true);
+    writeStr(8, "WAVE");
+    writeStr(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeStr(36, "data");
+    view.setUint32(40, pcm.length * 2, true);
+    let off = 44;
+    for (let i = 0; i < pcm.length; i++, off += 2) view.setInt16(off, pcm[i], true);
+    return buffer;
+  }
+
+  function bytesToBase64(buf) {
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+  }
+
+  function downsampleBuffer(buffer, fromRate, toRate) {
+    if (fromRate === toRate) return buffer;
+    const ratio = fromRate / toRate;
+    const newLen = Math.max(1, Math.round(buffer.length / ratio));
+    const result = new Float32Array(newLen);
+    for (let i = 0; i < newLen; i++) {
+      const idx = Math.min(buffer.length - 1, Math.floor(i * ratio));
+      result[i] = buffer[idx];
+    }
+    return result;
+  }
+
+  function recentPcmSeconds(seconds = 4) {
+    if (!pcmChunks.length) return null;
+    const need = Math.floor(pcmSampleRate * seconds);
+    let total = 0;
+    for (let i = pcmChunks.length - 1; i >= 0; i--) total += pcmChunks[i].length;
+    const merged = new Float32Array(total);
+    let off = 0;
+    for (const c of pcmChunks) {
+      merged.set(c, off);
+      off += c.length;
+    }
+    if (merged.length <= need) return merged;
+    return merged.slice(merged.length - need);
+  }
+
+  function captureWavB64(seconds = 4) {
+    const pcm = recentPcmSeconds(seconds);
+    if (!pcm || pcm.length < pcmSampleRate * 0.25) return null;
+    const wav = encodeWavMono(pcm, pcmSampleRate);
+    return bytesToBase64(wav);
+  }
+
 
   async function sendTurn(text, source) {
     if (!text.trim()) return;
@@ -198,18 +286,22 @@
       let speak = { rate: 0.95, pitch: 1.05, lang: "en-US" };
       if (mode === "server") {
         try {
+          const audio_wav_b64 =
+            source === "mic" || source === "speech" ? captureWavB64(4) : null;
           await postJSON("/api/spike/aaron.voice", {
             score: gated.score,
+            aaron_voice_score: gated.score,
             enrolled: !!profile,
             multi_speaker_hint: gated.multi,
             device_id: "web-companion",
+            audio_wav_b64: audio_wav_b64 || undefined,
           });
           await postJSON("/api/spike/mic", {
             purpose: "conversation",
             transcript: text,
             aaron_voice_score: gated.score,
           });
-          const turn = await postJSON("/api/turn", {
+          const turnBody = {
             text: text,
             transcript: text,
             source: source,
@@ -217,17 +309,45 @@
             enrolled: !!profile,
             multi_speaker_hint: gated.multi,
             device_id: "web-companion",
-          });
+          };
+          if (audio_wav_b64) turnBody.audio_wav_b64 = audio_wav_b64;
+          const turn = await postJSON("/api/turn", turnBody);
+          if (turn.accepted === false) {
+            setStatus(
+              "Ignored non-Aaron voice (" + (turn.reason || "gated") + ")",
+              "warn"
+            );
+            return;
+          }
           reply = turn.cam;
           speak = turn.speak || speak;
           if (turn.voice_stats) {
             adaptiveRaised = !!turn.voice_stats.adaptive_raised;
             multiSpeakerStreak = turn.voice_stats.multi_speaker_streak || multiSpeakerStreak;
           }
+          if (turn.voice_gate && turn.voice_gate.aaron_score != null) {
+            setStatus(
+              "Aaron voice · score " + Number(turn.voice_gate.aaron_score).toFixed(2) +
+                (adaptiveRaised ? " · adaptive↑" : ""),
+              "ok"
+            );
+          }
         } catch (e) {
-          if (e.status === 403 && e.body && e.body.cam) {
-            addBubble("system", e.body.cam);
-            setStatus("Filtered non-Aaron speech", "warn");
+          if (e.status === 403) {
+            if (e.body && e.body.cam) {
+              addBubble("system", e.body.cam);
+              setStatus("Filtered non-Aaron speech", "warn");
+            } else {
+              const reason = (e.payload && e.payload.reason) || "non_aaron_voice";
+              if (reason === "not_enrolled") {
+                setStatus(
+                  "Aaron voice not enrolled yet — type below, or run aaron-voice-enroll.py",
+                  "warn"
+                );
+              } else {
+                setStatus("Surrounding voice ignored — Aaron only (" + reason + ")", "warn");
+              }
+            }
             return;
           }
           mode = "on_device";
@@ -287,17 +407,17 @@
   }
 
   async function ensureAudio() {
-    if (micStream && analyser && audioCtx) return;
+    if (micStream && analyser && audioCtx && mediaSource) return;
     micStream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       video: false,
     });
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === "suspended") await audioCtx.resume();
-    const src = audioCtx.createMediaStreamSource(micStream);
+    mediaSource = audioCtx.createMediaStreamSource(micStream);
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
-    src.connect(analyser);
+    mediaSource.connect(analyser);
     if (!raf) meterLoop();
   }
 
@@ -328,6 +448,32 @@
     if (!profile && gateCfg.require_enrollment_for_mic) {
       await startEnroll();
     }
+
+    // Rolling PCM for FunASR CAM++ gate (16 kHz mono WAV → server)
+    pcmChunks = [];
+    pcmSampleRate = 16000;
+    const bufferSize = 4096;
+    try {
+      processor && processor.disconnect();
+    } catch (_) {}
+    processor = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+    mediaSource.connect(processor);
+    processor.connect(audioCtx.destination);
+    processor.onaudioprocess = (ev) => {
+      const input = ev.inputBuffer.getChannelData(0);
+      const down = downsampleBuffer(input, audioCtx.sampleRate, pcmSampleRate);
+      pcmChunks.push(new Float32Array(down));
+      let total = 0;
+      for (let i = pcmChunks.length - 1; i >= 0; i--) {
+        total += pcmChunks[i].length;
+        if (total > pcmSampleRate * 8) {
+          pcmChunks = pcmChunks.slice(i);
+          break;
+        }
+      }
+      const outBuf = ev.outputBuffer.getChannelData(0);
+      outBuf.fill(0);
+    };
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
@@ -368,10 +514,19 @@
     recognition.start();
     btnMic.disabled = true;
     btnStop.disabled = false;
-    setStatus(
-      profile ? "Mic live — Aaron only" : "Mic live — enroll your voice to filter others",
-      "ok"
-    );
+    if (mode === "server" && voiceGate && voiceGate.enrolled === false && !profile) {
+      setStatus(
+        "Mic live — enroll Aaron voice (companion or aaron-voice-enroll.py)",
+        "warn"
+      );
+    } else {
+      setStatus(
+        profile
+          ? "Mic live — Aaron only" + (adaptiveRaised ? " · adaptive↑" : "")
+          : "Mic live — enroll your voice to filter others",
+        "ok"
+      );
+    }
   }
 
   async function enableCam() {
@@ -408,6 +563,12 @@
     recognition = null;
     if (raf) cancelAnimationFrame(raf);
     raf = 0;
+    try {
+      processor && processor.disconnect();
+    } catch (_) {}
+    processor = null;
+    pcmChunks = [];
+    mediaSource = null;
     if (micStream) micStream.getTracks().forEach((t) => t.stop());
     if (camStream) camStream.getTracks().forEach((t) => t.stop());
     micStream = null;
@@ -502,10 +663,10 @@
 
   if (isIOS) {
     hintEl.textContent =
-      "iPhone/iPad: Add to Home Screen, enroll your voice once in quiet, then talk — Cam ignores other people.";
+      "iPhone/iPad: Add to Home Screen, enroll your voice once in quiet, then talk — Cam ignores other people (spectral + FunASR gates).";
   } else {
     hintEl.textContent =
-      "Aaron-only: enroll your voice (~10s quiet), then enable mic. Surrounding conversation is filtered out.";
+      "Aaron-only: enroll your voice (~10s quiet), then enable mic. Surrounding conversation is filtered (browser spectral + server FunASR).";
   }
 
   fetch("/api/health")
@@ -518,10 +679,18 @@
           adaptiveRaised = true;
         }
         const net = h.network || {};
+        const vg = (h.capabilities && h.capabilities.aaron_voice_gate) || {};
+        voiceGate = vg;
         const via = net.tailscale_enabled
           ? "tailscale · " + (net.iphone_open || net.url || "")
           : "local server";
-        setStatus("Cam online · Aaron-only voice · " + via, "ok");
+        if (vg.enrolled) {
+          setStatus("Cam online · Aaron voice enrolled · " + via, "ok");
+        } else if (profile) {
+          setStatus("Cam online · spectral enrolled · FunASR waiting · " + via, "ok");
+        } else {
+          setStatus("Cam online · voice gate waiting for enrollment · " + via, "warn");
+        }
       } else {
         mode = "on_device";
         setStatus("On-device Cam — enroll voice, then mic", "ok");

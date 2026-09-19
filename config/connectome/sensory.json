@@ -66,11 +66,15 @@
     {
       "id": "sense.audio.transcript",
       "modality": "audio",
-      "source": "nvidia_riva_asr",
+      "source": [
+        "aaron_voice_gate",
+        "funasr_asr",
+        "nvidia_riva_asr"
+      ],
       "emits": [
         "spike.speech"
       ],
-      "notes": "Presence hearing via LLMAvatarTalk/RIVA"
+      "notes": "Transcript only after Aaron voice gate; FunASR ASR or RIVA; browser Speech API interim"
     },
     {
       "id": "sense.vision.detection",
@@ -80,6 +84,26 @@
         "spike.visual"
       ],
       "notes": "Distilled detections only"
+    },
+    {
+      "id": "sense.vision.gaze",
+      "modality": "vision",
+      "source": "pupil",
+      "emits": [
+        "spike.visual",
+        "spike.gaze"
+      ],
+      "notes": "Distilled Pupil gaze/pupil samples only — not raw eye video"
+    },
+    {
+      "id": "sense.vision.world",
+      "modality": "vision",
+      "source": "pupil",
+      "emits": [
+        "spike.visual",
+        "spike.world_frame"
+      ],
+      "notes": "Pupil Core world/scene camera distillate — how Cam sees the room; not raw video by default"
     },
     {
       "id": "sense.jarvis.result",
@@ -108,7 +132,7 @@
         "spike.speech",
         "spike.audio"
       ],
-      "notes": "iPhone microphone \u2014 tasked listen / ASR feed"
+      "notes": "iPhone microphone \u2014 tasked listen; must pass Aaron voice gate before converse"
     },
     {
       "id": "sense.aaron.face",
@@ -123,12 +147,16 @@
     {
       "id": "sense.aaron.voice",
       "modality": "identity",
-      "source": "ios_companion_speaker_id",
+      "source": [
+        "aaron_voice_gate",
+        "funasr_campplus",
+        "ios_companion_speaker_id"
+      ],
       "emits": [
         "spike.aaron_present",
         "spike.identity"
       ],
-      "notes": "Aaron voice/speaker-ID score \u2014 not the same as ASR transcript"
+      "notes": "Aaron enrolled voice match (FunASR CAM++ embeddings + Cam gate); not anonymous diarization"
     },
     {
       "id": "sense.photos.library",
@@ -229,7 +257,36 @@
         "spike.fact",
         "spike.cite"
       ],
-      "notes": "Google Scholar via SerpAPI — citations + literature for info/research (+ AGI when relevant)"
+      "notes": "Google Scholar via SerpAPI \u2014 citations + literature for info/research (+ AGI when relevant)"
+    },
+    {
+      "id": "sense.catalog.public_apis",
+      "modality": "tool",
+      "source": [
+        "public_apis_catalog",
+        "afidurko_public_apis"
+      ],
+      "emits": [
+        "spike.tool_result",
+        "spike.fact",
+        "spike.route_hint"
+      ],
+      "notes": "Curated free/public API catalog — shared discovery for all agents (integrations/public-apis)"
+    },
+    {
+      "id": "sense.inkbox.event",
+      "modality": "comms",
+      "source": [
+        "inkbox_api",
+        "inkbox_sdk",
+        "afidurko_inkbox"
+      ],
+      "emits": [
+        "spike.message",
+        "spike.route_hint",
+        "spike.tool_result"
+      ],
+      "notes": "Inkbox identity/email/SMS/call/vault/tunnel events — integrations/inkbox"
     },
     {
       "id": "sense.slm.inference",
@@ -270,6 +327,26 @@
         "spike.tool_result"
       ],
       "notes": "Registered tool execution results from team.tooling"
+    },
+    {
+      "id": "sense.voicestudio.health",
+      "modality": "audio_platform",
+      "source": "voicestudio_backend",
+      "emits": [
+        "spike.tool_result"
+      ],
+      "notes": "VoiceStudio GET /health \u2014 local speech engine readiness"
+    },
+    {
+      "id": "sense.voicestudio.result",
+      "modality": "audio_platform",
+      "source": "voicestudio_mcp_or_api",
+      "emits": [
+        "spike.speech",
+        "spike.audio",
+        "spike.tool_result"
+      ],
+      "notes": "TTS/ASR/clone job result from VoiceStudio REST or MCP \u2014 not Aaron speaker-ID"
     }
   ]
 }

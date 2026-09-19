@@ -89,6 +89,30 @@ def pick_hotspot(
         if any(
             tok in g
             for tok in (
+                "public api",
+                "public-apis",
+                "free api",
+                "api catalog",
+                "open api list",
+            )
+        ) and ("public_apis" in blob or "public-apis" in blob or "api" in blob):
+            score += 5
+        if any(
+            tok in g
+            for tok in (
+                "inkbox",
+                "agent identity",
+                "agent email",
+                "agent phone",
+                "provision phone",
+                "inkbox vault",
+                "inkbox tunnel",
+            )
+        ) and ("inkbox" in blob or "identity" in blob or "comms" in blob or "email" in blob):
+            score += 5
+        if any(
+            tok in g
+            for tok in (
                 "code",
                 "coding",
                 "cline",
@@ -101,6 +125,19 @@ def pick_hotspot(
                 "python script",
             )
         ) and ("coding" in blob or "cline" in blob):
+            score += 5
+        if any(
+            tok in g
+            for tok in (
+                "voicestudio",
+                "omnivoice",
+                "voice clone",
+                "voice cloning",
+                "local tts",
+                "dubbing",
+                "audiobook",
+            )
+        ) and ("voicestudio" in blob or "voice" in blob):
             score += 5
         scored.append((score, h))
     scored.sort(key=lambda x: x[0], reverse=True)
