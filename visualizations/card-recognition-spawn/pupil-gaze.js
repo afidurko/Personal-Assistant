@@ -4,8 +4,8 @@
  * Falls back to pointer-as-gaze when the webcam is unavailable.
  */
 (function () {
-  var DWELL_MS = 900;
-  var SMOOTH = 0.28;
+  var DWELL_MS = 750;
+  var SMOOTH = 0.35;
   var state = {
     mode: 'idle', // idle | calibrating | tracking
     x: window.innerWidth / 2,
@@ -44,23 +44,20 @@
   }
 
   function hitTest() {
-    var el = document.elementFromPoint(state.x, state.y);
-    while (el && el !== document.body) {
-      if (el.hasAttribute && el.hasAttribute('data-gaze-target')) {
-        if (el.hasAttribute('hidden') || el.getAttribute('aria-hidden') === 'true') {
-          return null;
-        }
-        var style = window.getComputedStyle(el);
-        if (style.display === 'none' || style.visibility === 'hidden' || style.pointerEvents === 'none') {
-          return null;
-        }
-        // Skip if parent moves panel is hidden
-        var root = el.closest('#moves, #scan-btn, #zone-active, [data-gaze-target]');
-        if (root && root.id === 'moves' && root.hidden) return null;
-        if (el.id === 'scan-btn' && el.offsetParent === null) return null;
-        return el;
-      }
-      el = el.parentElement;
+    var stack = document.elementsFromPoint(state.x, state.y) || [];
+    for (var i = 0; i < stack.length; i++) {
+      var el = stack[i];
+      if (!el || !el.closest) continue;
+      if (el.closest('.gaze-cursor, .gaze-hud, .gaze-gate, .gaze-calib, .gaze-status')) continue;
+      var target = el.closest('[data-gaze-target]');
+      if (!target) continue;
+      if (target.hasAttribute('hidden')) continue;
+      var host = target.closest('#moves');
+      if (host && host.hidden) continue;
+      if (target.id === 'scan-btn' && target.closest('.mode-battle')) continue;
+      var style = window.getComputedStyle(target);
+      if (style.display === 'none' || style.visibility === 'hidden') continue;
+      return target;
     }
     return null;
   }
@@ -83,7 +80,7 @@
       state.dwellTarget = null;
       state.dwellStarted = 0;
       if (ring) {
-        ring.style.strokeDashoffset = '88';
+        ring.style.strokeDashoffset = '94';
         ring.classList.remove('filling');
       }
       return;
@@ -97,7 +94,7 @@
     var t = Math.min(1, (now - state.dwellStarted) / DWELL_MS);
     if (ring) {
       ring.classList.add('filling');
-      ring.style.strokeDashoffset = String(88 * (1 - t));
+      ring.style.strokeDashoffset = String(94 * (1 - t));
     }
     if (t >= 1) {
       var chosen = state.dwellTarget;
@@ -273,7 +270,8 @@
       var p = points[idx];
       var x = p.x * window.innerWidth;
       var y = p.y * window.innerHeight;
-      dot.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+      dot.style.left = x + 'px';
+      dot.style.top = y + 'px';
       hint.textContent = state.usingCamera
         ? 'Look at the dot · dwell or press Space / click (' + (idx + 1) + '/5)'
         : 'Point at the dot · click (' + (idx + 1) + '/5)';
