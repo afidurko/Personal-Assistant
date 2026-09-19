@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T19:51:53.048966+00:00",
+    "at": "2026-09-19T19:54:48.882985+00:00",
     "mode": "act",
-    "summary": "Merge vs main: fixed 6 simple conflicts; left App.tsx + CortexStage.tsx (glass hero vs CamPresence/voice + engine.js)",
+    "summary": "Merged main: CamPresence + glass CortexStage (listening heat); lint PASS",
     "workspace": "."
   },
   "notes": [
