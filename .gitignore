@@ -21,6 +21,7 @@ __pycache__/
 identity/persistence/cam-persistence.zip
 identity/aaron/local/
 vault/10-Mesh-Distillates/converse/*.jsonl
+vault/10-Mesh-Distillates/reasoning/*.jsonl
 vault/10-Mesh-Distillates/activity-events.jsonl
 vault/10-Mesh-Distillates/live-activity.json
 vault/10-Mesh-Distillates/improve-tasks.json

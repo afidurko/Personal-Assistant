@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T19:59:24.897145+00:00",
+    "at": "2026-09-19T21:02:25.828481+00:00",
     "mode": "act",
-    "summary": "Fix hero-stage CSS clash (glass+CamPresence); refresh ci-sim; re-merge main",
-    "workspace": "."
+    "summary": "Dual 1e9 QA (connectome+trajectory+cam-reason) green; suggestive cam-reason; MERGE_READINESS; PR #16 ready",
+    "workspace": "/workspace"
   },
   "notes": [
     {
@@ -91,11 +91,12 @@
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-19T20:17:35.487118+00:00",
+  "schedules_synced_at": "2026-09-19T21:02:04.579864+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
     ".",
-    "personal-assistant"
+    "personal-assistant",
+    "/workspace"
   ]
 }

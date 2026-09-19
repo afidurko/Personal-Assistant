@@ -1,0 +1,27 @@
+{
+  "cycle": 1,
+  "of": 1,
+  "at": "20260919T204845Z",
+  "await_human": false,
+  "static_check": {
+    "ok": true,
+    "missing": []
+  },
+  "metrics": {
+    "n": 1000000000,
+    "passed": 1000000000,
+    "failed": 0,
+    "kill_holds": 2000055,
+    "non_aaron_holds": 162536,
+    "feedback_ok": 997837409,
+    "missing_edges_count": 0,
+    "sims_per_sec": 1270794.5949662232,
+    "elapsed_s": 786.9092329799996,
+    "qa_wall_s": 787.000112404,
+    "workers": 4,
+    "first_errors": [],
+    "exit_code": 0
+  },
+  "findings": [],
+  "status": "green"
+}
