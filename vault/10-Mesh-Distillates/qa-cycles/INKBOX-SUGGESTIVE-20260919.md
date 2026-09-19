@@ -27,3 +27,10 @@ python3 scripts/trajectory-policy-check.py
 python3 scripts/qa-loop.py --n 1000000000 --cycles 1
 python3 scripts/trajectory-billion-fuzz.py --n 1000000000
 ```
+
+## Dual billion results
+
+| Pass | Connectome 1B | Trajectory 1B |
+|---|---|---|
+| 1 (`20260919T194605Z`) | 1e9 passed / 0 failed | PASS |
+| 2 verify (`20260919T195455Z`) | 1e9 passed / 0 failed | PASS |
