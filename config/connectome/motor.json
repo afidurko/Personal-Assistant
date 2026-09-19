@@ -53,6 +53,13 @@
       "requires_switch": ["switch.autonomy", "switch.kill"]
     },
     {
+      "id": "motor.memorybear",
+      "channel": ["memorybear_api", "memorybear_mcp"],
+      "path": "integrations/memorybear",
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Cognitive memory effector (read/write/forget/reflect) — all roles/subagents may invoke; complements vault + mesh"
+    },
+    {
       "id": "motor.calendar",
       "channel": ["calendar"],
       "requires_switch": ["switch.autonomy", "switch.kill"]

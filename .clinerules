@@ -19,6 +19,8 @@ persistence bundle (`.clinerules` travels with the repo).
   over Cline for non-code utilities.
 - **smart-second-brain / vault:** long-term notes; distill durable outcomes there
   and into mesh namespaces — do not invent Aaron’s personal facts.
+- **MemoryBear:** cognitive memory effector (`motor.memorybear`) for extract /
+  associate / forget / reflect across all agents — complements vault + mesh.
 - **LLMAvatarTalk / iOS companion:** presence only — not a second brain.
 
 ## Connectome discipline

@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "analogy": "Allowed synapses \u2014 Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
+  "analogy": "Allowed synapses — Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
   "rules": [
     "Every motor fire needs an Aaron-rooted task or standing goal spike",
     "Non-Aaron tasking spikes die at switch.tasking (OFC identity gate)",
@@ -156,7 +156,7 @@
       "from": "area.visual",
       "to": "area.auditory",
       "weight": 0.6,
-      "notes": "photo\u2194voice enrollment bridge"
+      "notes": "photo↔voice enrollment bridge"
     },
     {
       "from": "area.visual",
@@ -1436,6 +1436,40 @@
       "from": "motor.swarm",
       "to": "area.mtl",
       "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "sense.memorybear.hit",
+      "to": "center.memory",
+      "weight": 1.0,
+      "notes": "MemoryBear recall into MTL curator"
+    },
+    {
+      "from": "sense.memorybear.hit",
+      "to": "center.chief",
+      "weight": 0.7,
+      "notes": "surface cognitive hits to executive"
+    },
+    {
+      "from": "center.memory",
+      "to": "motor.memorybear"
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.memorybear",
+      "weight": 1.0,
+      "when": "act"
+    },
+    {
+      "from": "motor.memorybear",
+      "to": "area.mtl",
+      "weight": 1.0,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.memorybear",
+      "to": "center.memory",
+      "weight": 0.85,
       "notes": "feedback"
     }
   ]

@@ -62,6 +62,19 @@
 - See `config/integrations/smart-second-brain.md`
 - Set `config/persona/vault.json` → `vault_path`
 
+## Cognitive memory (MemoryBear) — all agents & workspaces
+
+- Submodule: `integrations/memorybear` ← [afidurko/MemoryBear](https://github.com/afidurko/MemoryBear)
+- Shared cognitive memory effector (`motor.memorybear`): extract / associate / forget / reflect
+- **Every** Cam role and subagent may invoke it for durable conversational memory
+- Config: `config/integrations/memorybear.json` · Policy: `config/integrations/memorybear.md`
+- Sense: `sense.memorybear.hit` · Hotspots: `hotspot.memorybear_recall` / `_write`
+- Scripts: `scripts/memorybear.py`, `scripts/pack-memorybear-result.py`, `scripts/memorybear-check.py`
+- MCP: `memorybear_read` / `memorybear_write` via `scripts/cam-mcp-server.py`
+- Mesh: `mesh/memorybear` · Vault: `vault/10-Mesh-Distillates/memorybear/`
+- Credentials: `MEMORYBEAR_API_KEY` + `MEMORYBEAR_END_USER_ID` (+ optional `MEMORYBEAR_API_BASE`) in local `.env`
+- Complements vault (smart-second-brain) and mesh (nulltickets) — does not replace them
+
 ## Knowledge cartography (SwiftGuide)
 
 - Submodule: `integrations/swiftguide`
@@ -117,3 +130,5 @@ specialist tool or modern API — not the Java/Thrift stack.
 - [ ] Indeed connected (careers watch)
 - [ ] Google Scholar connected (SerpAPI key in local `.env`)
 - [ ] Optional: Scholar `profile.author_id` set for Aaron citation watch
+- [ ] MemoryBear connected (`MEMORYBEAR_API_KEY` + `MEMORYBEAR_END_USER_ID` in local `.env`)
+- [ ] Optional: MemoryBear API running locally (`MEMORYBEAR_API_BASE`, default `http://127.0.0.1:8002`)

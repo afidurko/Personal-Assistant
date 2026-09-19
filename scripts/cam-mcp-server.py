@@ -6,7 +6,8 @@ Implements a small JSON-RPC MCP subset over stdin/stdout:
 
 Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
-  vault_search, connectome_route, kill_switch_status, ticket_list
+  vault_search, memorybear_read, memorybear_write, connectome_route,
+  kill_switch_status, ticket_list
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -84,6 +85,34 @@ def tool_defs() -> list[dict]:
                 "type": "object",
                 "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
                 "required": ["query"],
+            },
+        },
+        {
+            "name": "memorybear_read",
+            "description": "Recall via MemoryBear cognitive memory (offline fixture or live API).",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "offline": {"type": "boolean"},
+                    "search_switch": {
+                        "type": "string",
+                        "enum": ["deep", "normal", "quick", "express", "meta"],
+                    },
+                },
+                "required": ["query"],
+            },
+        },
+        {
+            "name": "memorybear_write",
+            "description": "Persist a concise cognitive memory via MemoryBear.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string"},
+                    "offline": {"type": "boolean"},
+                },
+                "required": ["message"],
             },
         },
         {
@@ -176,6 +205,46 @@ def vault_search(query: str, limit: int = 20) -> dict:
     return {"query": query, "hits": hits}
 
 
+def memorybear_read(query: str, offline: bool = True, search_switch: str = "express") -> dict:
+    import subprocess
+
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "memorybear.py"),
+        "read",
+        "--query",
+        query,
+        "--search-switch",
+        search_switch or "express",
+    ]
+    if offline:
+        cmd.append("--offline")
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {"error": "memorybear_read_failed", "stdout": proc.stdout, "stderr": proc.stderr}
+
+
+def memorybear_write(message: str, offline: bool = True) -> dict:
+    import subprocess
+
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "memorybear.py"),
+        "write",
+        "--message",
+        message,
+    ]
+    if offline:
+        cmd.append("--offline")
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {"error": "memorybear_write_failed", "stdout": proc.stdout, "stderr": proc.stderr}
+
+
 def connectome_route(args: dict) -> dict:
     import subprocess
 
@@ -250,6 +319,17 @@ def call_tool(name: str, arguments: dict) -> Any:
         )
     if name == "vault_search":
         return vault_search(arguments.get("query", ""), int(arguments.get("limit") or 20))
+    if name == "memorybear_read":
+        return memorybear_read(
+            arguments.get("query", ""),
+            offline=bool(arguments.get("offline", True)),
+            search_switch=arguments.get("search_switch") or "express",
+        )
+    if name == "memorybear_write":
+        return memorybear_write(
+            arguments.get("message", ""),
+            offline=bool(arguments.get("offline", True)),
+        )
     if name == "connectome_route":
         return connectome_route(arguments)
     if name == "kill_switch_status":

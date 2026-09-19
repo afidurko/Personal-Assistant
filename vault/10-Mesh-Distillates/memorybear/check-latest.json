@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "hard_errors": [],
+  "soft_warnings": [
+    "integrations/memorybear empty until git submodule update --init"
+  ],
+  "config_id": "memorybear",
+  "mesh": {
+    "enabled": true,
+    "available_to": "all_roles_and_subagents",
+    "cross_workspace": true,
+    "effector": "memorybear",
+    "motor": "motor.memorybear",
+    "sense": "sense.memorybear.hit",
+    "hotspots": [
+      "hotspot.memorybear_recall",
+      "hotspot.memorybear_write"
+    ],
+    "config": "config/integrations/memorybear.json",
+    "policy": "config/integrations/memorybear.md",
+    "client": "scripts/memorybear.py",
+    "pack": "scripts/pack-memorybear-result.py",
+    "check": "scripts/memorybear-check.py",
+    "source": "https://github.com/afidurko/MemoryBear",
+    "homepage": "https://www.memorybear.ai/",
+    "submodule": "integrations/memorybear",
+    "status": "runtime_wired",
+    "complements": [
+      "smart-second-brain",
+      "nulltickets",
+      "hmo-tiers"
+    ],
+    "credential_env": [
+      "MEMORYBEAR_API_KEY",
+      "MEMORYBEAR_END_USER_ID",
+      "MEMORYBEAR_API_BASE"
+    ]
+  }
+}

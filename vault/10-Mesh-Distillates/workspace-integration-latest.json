@@ -6,12 +6,14 @@
     "integration empty: integrations/paddledetection (submodule init or create config)",
     "integration empty: integrations/llmavatartalk (submodule init or create config)",
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
+    "integration empty: integrations/memorybear (submodule init or create config)",
     "integration empty: integrations/cline (submodule init or create config)"
   ],
   "mesh_flags": {
     "daily_agi_research_scan": true,
     "cam_enhance_apply_requires_aaron": true,
     "google_scholar": true,
+    "memorybear": true,
     "unlimited_subagents": true,
     "slm_cortex_enabled": true,
     "dl_cortex_enabled": true,
@@ -43,6 +45,12 @@
       "policy_exists": true
     },
     {
+      "id": "memorybear",
+      "path": "integrations/memorybear",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
       "id": "google-scholar",
       "path": "config/integrations/google-scholar.json",
       "populated": true,
@@ -58,7 +66,7 @@
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=25 edges=262"
+    "detail": "senses=26 edges=268"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

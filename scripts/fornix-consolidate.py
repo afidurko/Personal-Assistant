@@ -3,6 +3,7 @@
 
 Scans vault/ for recent notes and writes a semantic summary distillate.
 Respects mesh-params defaults (nightly_enabled).
+Optionally notes MemoryBear as the cognitive store complement (does not call the API).
 """
 
 from __future__ import annotations
@@ -85,6 +86,11 @@ def main() -> int:
         "episodic_scanned": len(items),
         "themes": themes,
         "top": items[:15],
+        "memorybear": {
+            "complement": True,
+            "motor": "motor.memorybear",
+            "hint": "Promote high-value distillates via scripts/memorybear.py write when live",
+        },
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

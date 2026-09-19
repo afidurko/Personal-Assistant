@@ -6,10 +6,10 @@ Cam’s brain is a **connectome** plus standing **agent teams**, a **DL + sLM co
 
 ```text
 Aaron
-  └─ sensory periphery (chat, vault, web/arxiv, Google Scholar, clock, ASR, vision, sLM/DL feedback, swarm bus)
-       └─ higher centers (chief, router, specialists, AGI scan, enhance, info, capability, tooling, slm, dl)
+  └─ sensory periphery (chat, vault, MemoryBear, web/arxiv, Google Scholar, clock, ASR, vision, sLM/DL feedback, swarm bus)
+       └─ higher centers (chief, router, specialists, memory, AGI scan, enhance, info, capability, tooling, slm, dl)
             └─ circuit switches (autonomy, research_scan, cam_enhance, tooling, slm_local, dl_local, kill, …)
-                 └─ motor (vault, mesh, web_fetch, enhance, tool, swarm, slm, dl, speak, jobs, …)
+                 └─ motor (vault, mesh, memorybear, web_fetch, enhance, tool, swarm, slm, dl, speak, jobs, …)
 ```
 
 ## Teams (all may spawn subagents)
@@ -24,6 +24,15 @@ Aaron
 Configs: `config/teams/*.json` · Swarm: `config/swarm/` · Runtime: `server/core/swarm-runtime.ts` · Docs: [HAAS_CAM_PATTERNS.md](HAAS_CAM_PATTERNS.md)
 
 Neural mesh layer **swarm** (privilege-broker, lineage-guardian, boss-router, tool-broker) runs on every scan cycle and writes shared memory namespaces for **all agents and workspaces**.
+
+## Cognitive memory (MemoryBear)
+
+Shared across all agents/workspaces — complements vault + mesh:
+
+- Sense: `sense.memorybear.hit` · Motor: `motor.memorybear`
+- Hotspots: `hotspot.memorybear_recall`, `hotspot.memorybear_write`
+- Config: `config/integrations/memorybear.json` · CLI: `scripts/memorybear.py`
+- Mesh: `mesh/memorybear` · HMO secondary substrate
 
 ## Deep learning + sLMs
 

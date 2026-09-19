@@ -111,7 +111,8 @@ python3 scripts/choose-workspace.py --list
 ## MCP tools (Cam → Cline)
 
 `list_workspaces`, `choose_workspace`, `mesh_search`, `mesh_put`, `vault_search`,
-`connectome_route`, `kill_switch_status`, `ticket_list`
+`memorybear_read`, `memorybear_write`, `connectome_route`, `kill_switch_status`,
+`ticket_list`
 
 ## Boundaries
 

@@ -6,7 +6,7 @@ talking presence — with a smart second brain, **agent teams**, and a **sLM/DL 
 
 ## Design
 
-- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
+- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [MemoryBear](https://github.com/afidurko/MemoryBear) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
 - **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
 - **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
@@ -47,6 +47,9 @@ python3 scripts/scholar-search.py --query "connectome mapping" --offline
 python3 scripts/agi-research-scan.py
 # Confirm workspace + integration wiring
 python3 scripts/workspace-integration-check.py
+# MemoryBear cognitive memory (offline doctor)
+python3 scripts/memorybear.py --doctor --offline
+python3 scripts/memorybear-check.py
 # HAAS→Cam privilege + boss/worker contracts
 python3 scripts/swarm-check.py
 # Kill switch silences motors
@@ -112,5 +115,7 @@ Persona locked. Starter vault created. Always-on autonomy set.
 Brain reimagined with AGI scan / capability / info teams + sLM/DL cortex.
 Cline wired as shared coding effector for all agents and future workspaces
 (registry, runner, MCP, schedules, tickets).
+MemoryBear wired as shared cognitive memory effector for all agents/workspaces
+(sense/motor/hotspots, mesh/memorybear, MCP read/write, HMO secondary tier).
 Next: enable Smart Second Brain in Obsidian + RIVA/Audio2Face studio + live Null stack.
 Neural-mesh scanner stack is present alongside the Cam connectome foundation.

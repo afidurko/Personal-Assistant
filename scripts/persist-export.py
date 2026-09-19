@@ -22,6 +22,7 @@ DEFAULT_INCLUDE = [
     "identity/persistence/CONTINUOUS_QA.md",
     "identity/persistence/HAAS_CAM_PATTERNS.md",
     "identity/persistence/CAM_ENHANCE_BATCH_2026-09-17.md",
+    "identity/persistence/MEMORYBEAR.md",
     "identity/persistence/cline-session-cache.json",
     "identity/persistence/cline-schedules.export.json",
     "identity/persistence/qa-mesh-latest.json",
@@ -31,6 +32,8 @@ DEFAULT_INCLUDE = [
     "config/integrations/cline.md",
     "config/integrations/google-scholar.json",
     "config/integrations/google-scholar.md",
+    "config/integrations/memorybear.json",
+    "config/integrations/memorybear.md",
     "config/workspaces/registry.json",
     "config/workspaces/schedules.json",
     "config/memory/hmo-tiers.json",
@@ -82,9 +85,13 @@ DEFAULT_INCLUDE = [
     "docs/HAAS_CAM_PATTERNS.md",
     "scripts/scholar-search.py",
     "scripts/pack-scholar-result.py",
+    "scripts/memorybear.py",
+    "scripts/pack-memorybear-result.py",
+    "scripts/memorybear-check.py",
     "vault/02-Cam/Brain.md",
     "vault/04-Research/AGI-Daily-Scan.md",
     "vault/04-Research/scholar/README.md",
+    "vault/10-Mesh-Distillates/memorybear/README.md",
 ]
 
 

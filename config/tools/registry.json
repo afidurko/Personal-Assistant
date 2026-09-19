@@ -16,8 +16,14 @@
         "stdout": "string",
         "exit_code": "number"
       },
-      "required_privileges": ["use_jarvis", "use_tool"],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "required_privileges": [
+        "use_jarvis",
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "template"
     },
@@ -35,8 +41,13 @@
       "outputs": {
         "motor_plan": "object"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
       "status": "template"
     },
@@ -51,9 +62,65 @@
         "ok": "boolean",
         "report": "object"
       },
-      "required_privileges": ["use_tool", "read_mesh"],
-      "requires_switch": ["switch.kill"],
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "risk": "low",
+      "status": "active"
+    },
+    {
+      "id": "tool.memorybear.read",
+      "purpose": "Recall cognitive memory via MemoryBear (offline fixture or live API)",
+      "created_by_role": "memory-curator",
+      "entrypoint": "scripts/memorybear.py",
+      "kind": "local_script",
+      "inputs": {
+        "query": "string",
+        "offline": "boolean",
+        "search_switch": "string"
+      },
+      "outputs": {
+        "answer": "string",
+        "memories": "object[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active"
+    },
+    {
+      "id": "tool.memorybear.write",
+      "purpose": "Persist a cognitive memory via MemoryBear extract pipeline",
+      "created_by_role": "memory-curator",
+      "entrypoint": "scripts/memorybear.py",
+      "kind": "local_script",
+      "inputs": {
+        "message": "string",
+        "offline": "boolean"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "msg_id": "string"
+      },
+      "required_privileges": [
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "medium",
       "status": "active"
     }
   ]
