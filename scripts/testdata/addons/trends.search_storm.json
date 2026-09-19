@@ -1,0 +1,52 @@
+{
+  "_fixture": true,
+  "addon_id": "trends.search_storm",
+  "kind": "catalog_search",
+  "query": "storm",
+  "returned": 3,
+  "results": [
+    {
+      "path": "20150526_Storms.csv",
+      "name": "20150526_Storms.csv",
+      "stem": "20150526_Storms",
+      "topic": "Storms",
+      "ext": "csv",
+      "size": 3944,
+      "folder": null,
+      "year": "2015",
+      "sha": "da7da98fe7f06daae37121d76649ef18d621d444",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150526_Storms.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150526_Storms.csv",
+      "score": 22
+    },
+    {
+      "path": "20150526_TexasStormQs.csv",
+      "name": "20150526_TexasStormQs.csv",
+      "stem": "20150526_TexasStormQs",
+      "topic": "TexasStormQs",
+      "ext": "csv",
+      "size": 565,
+      "folder": null,
+      "year": "2015",
+      "sha": "950014dd389b89b54c4b122502dd8343c0f7cb7f",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150526_TexasStormQs.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150526_TexasStormQs.csv",
+      "score": 22
+    },
+    {
+      "path": "20150828_StormErika.csv",
+      "name": "20150828_StormErika.csv",
+      "stem": "20150828_StormErika",
+      "topic": "StormErika",
+      "ext": "csv",
+      "size": 4928,
+      "folder": null,
+      "year": "2015",
+      "sha": "ff493d6e9dd405025f9c5988708e1c6e6728ee5e",
+      "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150828_StormErika.csv",
+      "html_url": "https://github.com/GoogleTrends/data/blob/master/20150828_StormErika.csv",
+      "score": 22
+    }
+  ],
+  "source_repo": "github.com/GoogleTrends/data"
+}

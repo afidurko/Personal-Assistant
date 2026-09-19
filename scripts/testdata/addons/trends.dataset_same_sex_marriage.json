@@ -1,0 +1,11 @@
+{
+  "_fixture": true,
+  "addon_id": "trends.dataset_same_sex_marriage",
+  "kind": "dataset_preview",
+  "path": "20150626_SameSexMarriage.csv",
+  "html_url": "https://github.com/GoogleTrends/data/blob/master/20150626_SameSexMarriage.csv",
+  "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150626_SameSexMarriage.csv",
+  "preview": "Region,Same-sex marriage\nCalifornia,100\nNew York,87\n",
+  "preview_lines": 3,
+  "note": "Offline fixture \u2014 live mode fetches raw CSV preview"
+}

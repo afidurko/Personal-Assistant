@@ -23,6 +23,16 @@
       "enabled": true
     },
     {
+      "id": "cam-nightly-memorybear-doctor",
+      "name": "Cam nightly MemoryBear doctor",
+      "workspace_id": "personal-assistant",
+      "cron": "30 7 * * *",
+      "prompt": "Run python3 scripts/memorybear-check.py and python3 scripts/memorybear.py --doctor --offline. Summarize PASS/FAIL. If MEMORYBEAR_API_KEY is set, also run a live --doctor without --offline. Do not invent Aaron personal facts or push commits.",
+      "timeout": 1200,
+      "tags": ["cam", "memory", "memorybear"],
+      "enabled": true
+    },
+    {
       "id": "cam-cline-submodule-doctor",
       "name": "Cline submodule doctor",
       "workspace_id": "cline",

@@ -34,6 +34,17 @@
       "notes": "Cross-agent mesh recall"
     },
     {
+      "id": "sense.memorybear.hit",
+      "modality": "memory",
+      "source": ["memorybear", "memorybear_v1"],
+      "emits": [
+        "spike.fact",
+        "spike.pref",
+        "spike.note_ref"
+      ],
+      "notes": "MemoryBear cognitive recall — extract/associate/forget periphery for all agents"
+    },
+    {
       "id": "sense.careers.listing",
       "modality": "opportunity",
       "source": [
@@ -272,6 +283,20 @@
         "spike.route_hint"
       ],
       "notes": "Curated free/public API catalog — shared discovery for all agents (integrations/public-apis)"
+    },
+    {
+      "id": "sense.catalog.google_trends",
+      "modality": "research",
+      "source": [
+        "google_trends_data",
+        "googletrends_github"
+      ],
+      "emits": [
+        "spike.fact",
+        "spike.finding",
+        "spike.tool_result"
+      ],
+      "notes": "Google Trends open datasets (GoogleTrends/data) — CSV/XLSX behind Trends graphics; indexed via GitHub, no submodule"
     },
     {
       "id": "sense.inkbox.event",

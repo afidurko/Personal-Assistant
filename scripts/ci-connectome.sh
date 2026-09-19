@@ -4,6 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+echo "== cam system integration =="
+python3 scripts/cam-system.py --smoke
+python3 scripts/test_cam_system.py
+python3 scripts/flight-envelope.py --offline-only
+
 echo "== connectome-check =="
 python3 scripts/connectome-check.py
 
@@ -35,7 +40,14 @@ python3 scripts/test_public_apis_addons.py
 python3 scripts/public-apis-check.py
 python3 scripts/public-apis-addon.py doctor
 
+echo "== google-trends unit + wiring =="
+python3 scripts/test_google_trends.py
+python3 scripts/test_google_trends_addons.py
+python3 scripts/google-trends-check.py
+python3 scripts/google-trends-addon.py doctor
+
 echo "== joshinator IP-safe embodiment =="
+python3 -m pip install -q -r integrations/joshinator-analyzer/backend/requirements-ci.txt
 PYTHONPATH=integrations/joshinator-analyzer/backend \
   python3 -m unittest discover -s integrations/joshinator-analyzer/backend -p 'test_embodiment.py' -v
 python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \

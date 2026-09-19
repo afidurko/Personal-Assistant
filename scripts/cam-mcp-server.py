@@ -6,8 +6,9 @@ Implements a small JSON-RPC MCP subset over stdin/stdout:
 
 Tools:
   list_workspaces, choose_workspace, mesh_search, mesh_put,
-  vault_search, connectome_route, kill_switch_status, ticket_list,
-  public_apis_search, public_apis_addon, inkbox_check,
+  vault_search, memorybear_read, memorybear_write, connectome_route,
+  kill_switch_status, ticket_list,
+  public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   voicestudio_health
 
 Install into Cline (example):
@@ -90,6 +91,34 @@ def tool_defs() -> list[dict]:
             },
         },
         {
+            "name": "memorybear_read",
+            "description": "Recall via MemoryBear cognitive memory (offline fixture or live API).",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "offline": {"type": "boolean"},
+                    "search_switch": {
+                        "type": "string",
+                        "enum": ["deep", "normal", "quick", "express", "meta"],
+                    },
+                },
+                "required": ["query"],
+            },
+        },
+        {
+            "name": "memorybear_write",
+            "description": "Persist a concise cognitive memory via MemoryBear.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string"},
+                    "offline": {"type": "boolean"},
+                },
+                "required": ["message"],
+            },
+        },
+        {
             "name": "connectome_route",
             "description": "Route a sensory spike through Cam connectome to a motor plan.",
             "inputSchema": {
@@ -159,6 +188,43 @@ def tool_defs() -> list[dict]:
                     "count": {"type": "integer"},
                     "ids": {"type": "string"},
                     "vs": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "google_trends_search",
+            "description": (
+                "Search Google Trends open datasets (github.com/GoogleTrends/data). "
+                "Offline fixture available; live mode uses GitHub git trees API."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "year": {"type": "string"},
+                    "ext": {"type": "string"},
+                    "num": {"type": "integer"},
+                    "offline": {"type": "boolean"},
+                    "list_years": {"type": "boolean"},
+                    "fetch": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "google_trends_addon",
+            "description": (
+                "Call an allowlisted Google Trends curated search or dataset preview "
+                "(election/nba/storm searches; game_theory / same_sex_marriage previews). "
+                "No free-form paths — only curated add-on ids."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "addon_id": {"type": "string"},
+                    "list": {"type": "boolean"},
+                    "offline": {"type": "boolean"},
+                    "num": {"type": "integer"},
+                    "preview_lines": {"type": "integer"},
                 },
             },
         },
@@ -239,6 +305,46 @@ def vault_search(query: str, limit: int = 20) -> dict:
         if len(hits) >= limit:
             break
     return {"query": query, "hits": hits}
+
+
+def memorybear_read(query: str, offline: bool = True, search_switch: str = "express") -> dict:
+    import subprocess
+
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "memorybear.py"),
+        "read",
+        "--query",
+        query,
+        "--search-switch",
+        search_switch or "express",
+    ]
+    if offline:
+        cmd.append("--offline")
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {"error": "memorybear_read_failed", "stdout": proc.stdout, "stderr": proc.stderr}
+
+
+def memorybear_write(message: str, offline: bool = True) -> dict:
+    import subprocess
+
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "memorybear.py"),
+        "write",
+        "--message",
+        message,
+    ]
+    if offline:
+        cmd.append("--offline")
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {"error": "memorybear_write_failed", "stdout": proc.stdout, "stderr": proc.stderr}
 
 
 def connectome_route(args: dict) -> dict:
@@ -342,6 +448,46 @@ def public_apis_addon(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def google_trends_search(arguments: dict) -> Any:
+    cmd = [sys.executable, str(ROOT / "scripts/google-trends-search.py")]
+    if arguments.get("list_years"):
+        cmd.append("--list-years")
+    if arguments.get("query"):
+        cmd.extend(["--query", str(arguments["query"])])
+    if arguments.get("year"):
+        cmd.extend(["--year", str(arguments["year"])])
+    if arguments.get("ext"):
+        cmd.extend(["--ext", str(arguments["ext"])])
+    if arguments.get("num") is not None:
+        cmd.extend(["--num", str(int(arguments["num"]))])
+    if arguments.get("fetch"):
+        cmd.extend(["--fetch", str(arguments["fetch"])])
+    if arguments.get("offline") is True:
+        cmd.append("--offline")
+    out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+    return json.loads(out)
+
+
+def google_trends_addon(arguments: dict) -> Any:
+    cmd = [sys.executable, str(ROOT / "scripts/google-trends-addon.py")]
+    if arguments.get("list"):
+        cmd.append("list")
+        out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+        return json.loads(out)
+    addon_id = arguments.get("addon_id")
+    if not addon_id:
+        raise ValueError("addon_id required unless list=true")
+    cmd.extend(["call", str(addon_id)])
+    if arguments.get("num") is not None:
+        cmd.extend(["--num", str(int(arguments["num"]))])
+    if arguments.get("preview_lines") is not None:
+        cmd.extend(["--preview-lines", str(int(arguments["preview_lines"]))])
+    if arguments.get("offline") is True:
+        cmd.append("--offline")
+    out = subprocess.check_output(cmd, text=True, cwd=str(ROOT))
+    return json.loads(out)
+
+
 def inkbox_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
@@ -390,6 +536,17 @@ def call_tool(name: str, arguments: dict) -> Any:
         )
     if name == "vault_search":
         return vault_search(arguments.get("query", ""), int(arguments.get("limit") or 20))
+    if name == "memorybear_read":
+        return memorybear_read(
+            arguments.get("query", ""),
+            offline=bool(arguments.get("offline", True)),
+            search_switch=arguments.get("search_switch") or "express",
+        )
+    if name == "memorybear_write":
+        return memorybear_write(
+            arguments.get("message", ""),
+            offline=bool(arguments.get("offline", True)),
+        )
     if name == "connectome_route":
         return connectome_route(arguments)
     if name == "kill_switch_status":
@@ -400,6 +557,10 @@ def call_tool(name: str, arguments: dict) -> Any:
         return public_apis_search(arguments)
     if name == "public_apis_addon":
         return public_apis_addon(arguments)
+    if name == "google_trends_search":
+        return google_trends_search(arguments)
+    if name == "google_trends_addon":
+        return google_trends_addon(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
     if name == "voicestudio_health":

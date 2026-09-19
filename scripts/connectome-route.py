@@ -100,6 +100,17 @@ def pick_hotspot(
         if any(
             tok in g
             for tok in (
+                "google trends",
+                "google-trends",
+                "trends data",
+                "trends dataset",
+                "search interest",
+            )
+        ) and ("google_trends" in blob or "trends" in blob):
+            score += 5
+        if any(
+            tok in g
+            for tok in (
                 "inkbox",
                 "agent identity",
                 "agent email",

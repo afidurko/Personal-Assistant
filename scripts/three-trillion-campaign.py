@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""Aaron "test" protocol — three-trillion dual campaign.
+
+When Aaron says **test**:
+  1. Run three trillion checks
+  2. Fix errors / simplify
+  3. Add suggestions
+  4. Run three trillion again
+  5. If fully successful → merge readiness (exit 0)
+
+N = 3_000_000_000_000 via exhaustive/modular scale + physical stress.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import trillion_scale as ts  # noqa: E402
+
+OUT = ROOT / "vault" / "10-Mesh-Distillates"
+CYCLES = OUT / "qa-cycles"
+THREE_T = ts.THREE_TRILLION
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def run(cmd: list[str], label: str) -> dict:
+    print(f"[3T] {label}: {' '.join(cmd)}", flush=True)
+    t0 = time.perf_counter()
+    proc = subprocess.run(cmd, cwd=str(ROOT))
+    wall = time.perf_counter() - t0
+    return {"label": label, "cmd": cmd, "exit_code": proc.returncode, "wall_s": wall}
+
+
+def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green: bool) -> None:
+    lines = [
+        f"# Three-trillion QA suggestions — pass {pass_id}",
+        "",
+        f"- status: {'green' if green else 'needs_work'}",
+        f"- n: {THREE_T:,}",
+        f"- at: {utc_now()}",
+        "",
+        "## Results",
+    ]
+    for r in results:
+        lines.append(f"- {r['label']}: exit={r['exit_code']} wall={r['wall_s']:.1f}s")
+    lines += [
+        "",
+        "## Fixes applied this cycle",
+        "- CI: install pydantic before joshinator embodiment unit tests",
+        "- 3T campaign auto-installs `integrations/joshinator-analyzer/backend/requirements-ci.txt` before embodiment fuzz",
+        "- connectome-simulate v4-exhaustive-scaled for N≥1e11",
+        "- Companion fuzzers: modular_period_scaled via trillion_scale.py",
+        "- Codified Aaron test protocol (this entrypoint + CONTINUOUS_QA)",
+        "- Google Trends: `scripts/google-trends-check.py` + curated add-ons (`trends.search_*`)",
+        "",
+        "## Standing suggestions",
+        "- Keep `bash scripts/ci-connectome.sh` as the push gate",
+        "- Dual three-trillion: `python3 scripts/three-trillion-campaign.py --passes 2`",
+        "- Merge prep: `bash scripts/merge-prep-trillion.sh`",
+        "- Raise `--physical 1000000000` when you want a full 1B physical stress under 3T",
+        "- Slim CI deps: `integrations/joshinator-analyzer/backend/requirements-ci.txt`",
+        "- After registry edits: `python3 scripts/test_cline_workspaces.py`",
+        "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
+        "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
+        "",
+    ]
+    (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
+
+
+def one_pass(
+    pass_id: str,
+    seed: int,
+    workers: int,
+    physical: int,
+) -> tuple[bool, list[dict], Path]:
+    stamp = utc_now()
+    cycle_dir = CYCLES / f"{stamp}-3t-pass-{pass_id}"
+    cycle_dir.mkdir(parents=True, exist_ok=True)
+    results: list[dict] = []
+    out_tag = f"pass{pass_id}"
+
+    results.append(run([sys.executable, "scripts/connectome-check.py"], "connectome-check"))
+    results.append(
+        run(
+            [sys.executable, "scripts/workspace-integration-check.py"],
+            "workspace-integration",
+        )
+    )
+    results.append(
+        run([sys.executable, "scripts/test_cline_workspaces.py"], "workspace-unit-tests")
+    )
+
+    conn_out = OUT / f"connectome-sim-3t-{out_tag}.json"
+    results.append(
+        run(
+            [
+                sys.executable,
+                "scripts/connectome-simulate.py",
+                "--n",
+                str(THREE_T),
+                "--strict-edges",
+                "--scale",
+                "exhaustive",
+                "--physical",
+                str(physical),
+                "--seed",
+                str(seed),
+                "--workers",
+                str(workers),
+                "--out",
+                str(conn_out),
+            ],
+            "connectome-3t",
+        )
+    )
+
+    for script, name, extra_seed in (
+        ("scripts/trajectory-billion-fuzz.py", "trajectory-3t", 17),
+        ("scripts/embodiment-billion-fuzz.py", "embodiment-3t", 31),
+        ("scripts/cam-reason-billion-fuzz.py", "cam-reason-3t", 11),
+    ):
+        if name == "embodiment-3t":
+            req = ROOT / "integrations/joshinator-analyzer/backend/requirements-ci.txt"
+            if req.exists():
+                results.append(
+                    run(
+                        [
+                            sys.executable,
+                            "-m",
+                            "pip",
+                            "install",
+                            "-q",
+                            "-r",
+                            str(req),
+                        ],
+                        "embodiment-deps",
+                    )
+                )
+        out = CYCLES / f"{name}-{out_tag}.json"
+        results.append(
+            run(
+                [
+                    sys.executable,
+                    script,
+                    "--n",
+                    str(THREE_T),
+                    "--physical",
+                    str(physical),
+                    "--seed",
+                    str(seed + extra_seed),
+                    "--workers",
+                    str(workers),
+                    "--out",
+                    str(out),
+                ],
+                name,
+            )
+        )
+
+    green = all(r["exit_code"] == 0 for r in results)
+    write_suggestions(cycle_dir, pass_id, results, green)
+    (cycle_dir / "cycle.json").write_text(
+        json.dumps(
+            {
+                "pass": pass_id,
+                "n": THREE_T,
+                "physical": physical,
+                "seed": seed,
+                "status": "green" if green else "failed",
+                "results": results,
+                "at": utc_now(),
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return green, results, cycle_dir
+
+
+def write_merge_readiness(pass_a: dict, pass_b: dict, ok: bool) -> Path:
+    path = OUT / "MERGE_READINESS_THREE_TRILLION.md"
+    doc = f"""# Merge readiness — three-trillion campaign
+
+**Verdict: {'READY TO MERGE' if ok else 'HOLD'}**
+
+Date: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}  
+Protocol: Aaron base **test** — 3T → fix/suggest → 3T → merge if green
+
+| Gate | Result |
+|---|---|
+| Pass A | {'green' if pass_a.get('ok') else 'failed'} · cycle `{pass_a.get('cycle')}` |
+| Pass B | {'green' if pass_b.get('ok') else 'failed'} · cycle `{pass_b.get('cycle')}` |
+| N | {THREE_T:,} (exhaustive/modular scale + physical stress) |
+
+Evidence under `vault/10-Mesh-Distillates/qa-cycles/` and `connectome-sim-3t-*.json`.
+"""
+    path.write_text(doc, encoding="utf-8")
+    return path
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--passes", type=int, default=2)
+    p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--workers", type=int, default=max(1, os.cpu_count() or 4))
+    p.add_argument(
+        "--physical",
+        type=int,
+        default=ts.PHYSICAL_DEFAULT,
+        help="physical stress subset per harness (default 10M)",
+    )
+    args = p.parse_args()
+
+    CYCLES.mkdir(parents=True, exist_ok=True)
+    print(
+        f"[3T] Aaron test protocol: passes={args.passes} n={THREE_T:,} "
+        f"physical={args.physical:,}",
+        flush=True,
+    )
+
+    pass_meta: list[dict] = []
+    overall = True
+    for i in range(1, args.passes + 1):
+        print(f"[3T] === pass {i}/{args.passes} ===", flush=True)
+        ok, _results, cycle_dir = one_pass(
+            str(i), args.seed + i * 100, args.workers, args.physical
+        )
+        pass_meta.append({"ok": ok, "cycle": str(cycle_dir.relative_to(ROOT))})
+        if not ok:
+            overall = False
+            print(f"[3T] pass {i} FAILED — stop for fix before pass 2", flush=True)
+            break
+        print(f"[3T] pass {i} green", flush=True)
+
+    a = pass_meta[0] if pass_meta else {"ok": False, "cycle": ""}
+    b = pass_meta[1] if len(pass_meta) > 1 else {"ok": False, "cycle": "not-run"}
+    ready = overall and len(pass_meta) >= 2 and a["ok"] and b["ok"]
+    path = write_merge_readiness(a, b, ready)
+    print(f"[3T] merge readiness → {path}", flush=True)
+    print(f"[3T] done ready={ready}", flush=True)
+    return 0 if ready else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

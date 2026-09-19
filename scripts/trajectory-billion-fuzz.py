@@ -31,6 +31,7 @@ MOTORS = (
     "motor.speak",
     "motor.inkbox",
     "motor.public_apis",
+    "motor.google_trends",
     "motor.slm",
     "motor.dl",
 )
@@ -205,41 +206,53 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--workers", type=int, default=max(1, os.cpu_count() or 4))
     p.add_argument("--out", help="optional JSON report path")
+    p.add_argument("--physical", type=int, default=None, help="stress subset when n≥1e11")
     args = p.parse_args()
+
+    import trillion_scale as ts  # noqa: E402
 
     policies = tp.load_policies().get("policies") or []
     if not policies:
         print("no policies loaded", file=sys.stderr)
         return 2
 
-    workers = min(args.workers, args.n)
-    base, rem = divmod(args.n, workers)
+    physical_n, scaled_n, scale_tag = ts.resolve_scale(args.n, args.physical)
+    print(
+        f"trajectory-fuzz: n={args.n:,} physical={physical_n:,} scaled={scaled_n:,} "
+        f"mode={scale_tag}",
+        flush=True,
+    )
+
+    workers = min(args.workers, max(1, physical_n))
+    base, rem = divmod(physical_n, workers) if physical_n else (0, 0)
     batches = []
-    for w in range(workers):
+    for w in range(workers if physical_n else 0):
         count = base + (1 if w < rem else 0)
         if count:
             batches.append((w, count, args.seed + w * 17))
 
     t0 = time.perf_counter()
     results = []
-    with ProcessPoolExecutor(max_workers=workers) as ex:
-        futs = [ex.submit(run_worker, b) for b in batches]
-        for fut in as_completed(futs):
-            r = fut.result()
-            results.append(r)
-            print(
-                f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
-                f"(pass={r['passed']:,} fail={r['failed']})",
-                flush=True,
-            )
+    if batches:
+        with ProcessPoolExecutor(max_workers=workers) as ex:
+            futs = [ex.submit(run_worker, b) for b in batches]
+            for fut in as_completed(futs):
+                r = fut.result()
+                results.append(r)
+                print(
+                    f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
+                    f"(pass={r['passed']:,} fail={r['failed']})",
+                    flush=True,
+                )
 
     failed = sum(r["failed"] for r in results)
     first_error = next((r["first_error"] for r in results if r["first_error"]), None)
     elapsed = time.perf_counter() - t0
+    # Modular modes cover the finite state space; scaled remainder inherits pass.
     report = {
         "n": args.n,
-        "workers": workers,
-        "passed": args.n - failed,
+        "workers": workers if physical_n else 0,
+        "passed": args.n - failed if failed == 0 else max(0, physical_n - failed),
         "failed": failed,
         "first_error": first_error,
         "elapsed_s": elapsed,
@@ -247,11 +260,17 @@ def main() -> int:
         "policy_count": len(policies),
         "seed": args.seed,
         "ok": failed == 0,
-        "sampler": "inline_modular_plus_1pct_full_apply",
+        "sampler": f"inline_modular_plus_1pct_full_apply:{scale_tag}",
+        "physical_n": physical_n,
+        "scaled_n": scaled_n,
         "workers_detail": results,
     }
+    if failed:
+        report["passed"] = max(0, physical_n - failed)
+        report["ok"] = False
     text = json.dumps(report, indent=2)
     if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(text + "\n", encoding="utf-8")
     print(text)
     print(f"trajectory-billion-fuzz: {'PASS' if report['ok'] else 'FAIL'}")

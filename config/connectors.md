@@ -1,5 +1,14 @@
 # Connectors policy
 
+## System integration (all pieces on one bus)
+
+- Inventory: `config/system/pieces.json`
+- Bridge: `server/core/system-bridge.ts` — home `/api/turn` + mic/camera spikes
+  route through connectome and light DTI live-activity
+- Status: `GET /api/system` · CLI `python3 scripts/cam-system.py --smoke`
+- Docs: `docs/SYSTEM_INTEGRATION.md`
+- Home UI: System pulse panel lists every piece
+
 ## Prefer (nullclaw native)
 
 - iMessage, email, Telegram, Discord, Slack, WhatsApp, web, CLI
@@ -86,6 +95,19 @@
 - See `config/integrations/smart-second-brain.md`
 - Set `config/persona/vault.json` → `vault_path`
 
+## Cognitive memory (MemoryBear) — all agents & workspaces
+
+- Submodule: `integrations/memorybear` ← [afidurko/MemoryBear](https://github.com/afidurko/MemoryBear)
+- Shared cognitive memory effector (`motor.memorybear`): extract / associate / forget / reflect
+- **Every** Cam role and subagent may invoke it for durable conversational memory
+- Config: `config/integrations/memorybear.json` · Policy: `config/integrations/memorybear.md`
+- Sense: `sense.memorybear.hit` · Hotspots: `hotspot.memorybear_recall` / `_write`
+- Scripts: `scripts/memorybear.py`, `scripts/pack-memorybear-result.py`, `scripts/memorybear-check.py`
+- MCP: `memorybear_read` / `memorybear_write` via `scripts/cam-mcp-server.py`
+- Mesh: `mesh/memorybear` · Vault: `vault/10-Mesh-Distillates/memorybear/`
+- Credentials: `MEMORYBEAR_API_KEY` + `MEMORYBEAR_END_USER_ID` (+ optional `MEMORYBEAR_API_BASE`) in local `.env`
+- Complements vault (smart-second-brain) and mesh (nulltickets) — does not replace them
+
 ## Knowledge cartography (SwiftGuide)
 
 - Submodule: `integrations/swiftguide`
@@ -111,6 +133,20 @@
 - Used by Information + Research (+ AGI scout when AI/AGI-relevant)
 - Scripts: `scripts/scholar-search.py`, `scripts/pack-scholar-result.py`
 - Distills to `mesh/research` + `vault/04-Research/scholar/`
+
+## Google Trends data (open datasets)
+
+- Source: [GoogleTrends/data](https://github.com/GoogleTrends/data)
+- Policy: `config/integrations/google-trends.md`
+- Config: `config/integrations/google-trends.json`
+- Sense: `sense.catalog.google_trends` · Hotspot: `hotspot.google_trends` · Motor: `motor.google_trends`
+- **Available to all roles and subagents** — index/fetch published Trends CSVs (no full-repo clone; ~382MB upstream)
+- Scripts: `scripts/google-trends-search.py`, `scripts/pack-google-trends-result.py`, `scripts/google-trends-check.py`, `scripts/google-trends-addon.py`
+- MCP: `google_trends_search` · `google_trends_addon` via `scripts/cam-mcp-server.py`
+- Add-ons: `config/integrations/google-trends-addons.json` (allowlisted searches + dataset previews)
+- Distills to `mesh/research` + `vault/04-Research/google-trends/`
+- No API key; live mode uses GitHub trees API + raw file fetch
+- Free-form path fetch outside allowlisted add-ons is forbidden for the addon motor
 
 ## Public APIs (free API catalog — all agents)
 
@@ -169,3 +205,6 @@ specialist tool or modern API — not the Java/Thrift stack.
 - [ ] Indeed connected (careers watch)
 - [ ] Google Scholar connected (SerpAPI key in local `.env`)
 - [ ] Optional: Scholar `profile.author_id` set for Aaron citation watch
+- [ ] Google Trends data connected (`python3 scripts/google-trends-check.py`)
+- [ ] MemoryBear connected (`MEMORYBEAR_API_KEY` + `MEMORYBEAR_END_USER_ID` in local `.env`)
+- [ ] Optional: MemoryBear API running locally (`MEMORYBEAR_API_BASE`, default `http://127.0.0.1:8002`)

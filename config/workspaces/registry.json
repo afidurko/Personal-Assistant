@@ -1,7 +1,7 @@
 {
   "version": 1,
   "title": "Cam unified workspace registry",
-  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts — so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
+  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
   "updated_at": "2026-09-17",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
@@ -180,6 +180,19 @@
         "policy": "config/integrations/smart-second-brain.md"
       },
       {
+        "id": "memorybear",
+        "path": "integrations/memorybear",
+        "policy": "config/integrations/memorybear.md",
+        "remote": "github.com/afidurko/MemoryBear",
+        "config": "config/integrations/memorybear.json",
+        "script": "scripts/memorybear.py",
+        "sense": "sense.memorybear.hit",
+        "motor": "motor.memorybear",
+        "hotspot": "hotspot.memorybear_recall",
+        "credential_env": "MEMORYBEAR_API_KEY",
+        "effector": "motor.memorybear"
+      },
+      {
         "id": "google-scholar",
         "path": "config/integrations/google-scholar.json",
         "policy": "config/integrations/google-scholar.md",
@@ -187,6 +200,19 @@
         "sense": "sense.web.scholar",
         "hotspot": "hotspot.google_scholar",
         "credential_env": "SERPAPI_API_KEY"
+      },
+      {
+        "id": "google-trends",
+        "path": "config/integrations/google-trends.json",
+        "policy": "config/integrations/google-trends.md",
+        "config": "config/integrations/google-trends.json",
+        "script": "scripts/google-trends-search.py",
+        "sense": "sense.catalog.google_trends",
+        "hotspot": "hotspot.google_trends",
+        "motor": "motor.google_trends",
+        "remote": "github.com/GoogleTrends/data",
+        "available_to": "all_roles_and_subagents",
+        "notes": "Open Trends datasets via GitHub trees API — do not submodule (~382MB)"
       },
       {
         "id": "public-apis",
@@ -394,6 +420,29 @@
         "cursor_bootstrap": true
       },
       {
+        "id": "memorybear",
+        "label": "MemoryBear cognitive memory",
+        "path": "integrations/memorybear",
+        "remote": "github.com/afidurko/MemoryBear",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "memory-curator",
+          "docs",
+          "chief",
+          "researcher",
+          "ops",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/memorybear",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Cognitive memory engine \u2014 prefer API client scripts/memorybear.py for Cam runtime"
+      },
+      {
         "id": "jarvis",
         "label": "Jarvis CLI utilities",
         "path": "integrations/jarvis",
@@ -462,7 +511,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Curated free API index — shared by all agents via motor.public_apis"
+        "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
       },
       {
         "id": "joshinator-analyzer",
@@ -501,7 +550,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
+        "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
       },
       {
         "id": "inkbox",
@@ -523,7 +572,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
+        "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
       },
       {
         "id": "voicestudio",
@@ -564,10 +613,15 @@
     "ci_connectome": "scripts/ci-connectome.sh",
     "swarm_check": "scripts/swarm-check.py",
     "scholar_search": "scripts/scholar-search.py",
+    "google_trends_search": "scripts/google-trends-search.py",
+    "google_trends_check": "scripts/google-trends-check.py",
     "public_apis_search": "scripts/public-apis-search.py",
     "public_apis_check": "scripts/public-apis-check.py",
     "public_apis_addon": "scripts/public-apis-addon.py",
-    "inkbox_check": "scripts/inkbox-check.py"
+    "inkbox_check": "scripts/inkbox-check.py",
+    "memorybear_client": "scripts/memorybear.py",
+    "memorybear_check": "scripts/memorybear-check.py",
+    "memorybear_pack": "scripts/pack-memorybear-result.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -606,6 +660,18 @@
             "smart-second-brain",
             "obsidian plugin",
             "second brain plugin"
+          ]
+        },
+        {
+          "id": "memorybear",
+          "match_any": [
+            "memorybear",
+            "memory bear",
+            "integrations/memorybear",
+            "cognitive memory",
+            "memory extract",
+            "memory forget",
+            "/v1/memory"
           ]
         },
         {
@@ -788,6 +854,29 @@
       "cursor_bootstrap": true
     },
     {
+      "id": "memorybear",
+      "label": "MemoryBear cognitive memory",
+      "path": "integrations/memorybear",
+      "remote": "github.com/afidurko/MemoryBear",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "memory-curator",
+        "docs",
+        "chief",
+        "researcher",
+        "ops",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/memorybear",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Cognitive memory engine \u2014 prefer API client scripts/memorybear.py for Cam runtime"
+    },
+    {
       "id": "jarvis",
       "label": "Jarvis CLI utilities",
       "path": "integrations/jarvis",
@@ -856,7 +945,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Curated free API index — shared by all agents via motor.public_apis"
+      "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
     },
     {
       "id": "joshinator-analyzer",
@@ -895,7 +984,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
+      "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
     },
     {
       "id": "inkbox",
@@ -917,7 +1006,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
+      "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
     },
     {
       "id": "voicestudio",
@@ -1016,6 +1105,18 @@
           "smart-second-brain",
           "obsidian plugin",
           "second brain plugin"
+        ]
+      },
+      {
+        "id": "memorybear",
+        "match_any": [
+          "memorybear",
+          "memory bear",
+          "integrations/memorybear",
+          "cognitive memory",
+          "memory extract",
+          "memory forget",
+          "/v1/memory"
         ]
       },
       {

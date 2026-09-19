@@ -9,6 +9,8 @@ Rules:
    (`scripts/scholar-search.py` · `sense.web.scholar`) before generic web search.
 3b. For free/public HTTP API discovery, use public-apis
    (`scripts/public-apis-search.py` · `sense.catalog.public_apis`) before inventing endpoints.
+3c. For Google Trends open datasets (CSV behind Trends graphics), use google-trends
+   (`scripts/google-trends-search.py` · `sense.catalog.google_trends`).
 4. Spawn gatherer / summarizer / cite-check subagents freely.
 5. Use slm-runtime for query rewrite and rerank when helpful; dl-enhance for embeddings.
 6. For AI/AGI frontier questions, loop in agi-scout feeds (arXiv + Scholar).
@@ -16,4 +18,4 @@ Rules:
 8. Never contact external people yourself.
 
 Team: config/teams/info.json
-Integration: config/integrations/google-scholar.md · config/integrations/public-apis.md
+Integration: config/integrations/google-scholar.md · config/integrations/google-trends.md · config/integrations/public-apis.md

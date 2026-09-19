@@ -1,0 +1,11 @@
+{
+  "_fixture": true,
+  "addon_id": "trends.dataset_game_theory",
+  "kind": "dataset_preview",
+  "path": "20150526_GameTheory.csv",
+  "html_url": "https://github.com/GoogleTrends/data/blob/master/20150526_GameTheory.csv",
+  "raw_url": "https://raw.githubusercontent.com/GoogleTrends/data/master/20150526_GameTheory.csv",
+  "preview": "Week,Game theory\n2014-01-05,28\n2014-01-12,30\n",
+  "preview_lines": 3,
+  "note": "Offline fixture \u2014 live mode fetches raw CSV preview"
+}

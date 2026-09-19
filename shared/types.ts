@@ -232,7 +232,8 @@ export interface WsServerMessage {
     | 'guide_focus'
     | 'agent_cycle'
     | 'loop_update'
-    | 'autonomy_update';
+    | 'autonomy_update'
+    | 'activity_update';
   payload: unknown;
   at: string;
 }

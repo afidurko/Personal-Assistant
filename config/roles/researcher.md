@@ -10,6 +10,9 @@ search for papers; prefer arXiv API for fresh AI/AGI preprints when tasked.
 For free/public HTTP API discovery, use **public-apis**
 (`config/integrations/public-apis.md` · `scripts/public-apis-search.py`) via
 `sense.catalog.public_apis` / `motor.public_apis` before inventing endpoints.
+For Google Trends open datasets (CSV/XLSX behind Trends graphics), use **google-trends**
+(`config/integrations/google-trends.md` · `scripts/google-trends-search.py`) via
+`sense.catalog.google_trends` / `motor.google_trends` — do not clone the full upstream repo.
 Pack mesh writes with MMP fields via `scripts/pack-mesh-claim.py`.
 Scientific codebases may be treated as learnable agent environments when Aaron
 tasks code-backed research (`config/enhancement/science-agent-env.json`).

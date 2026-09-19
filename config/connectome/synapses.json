@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "analogy": "Allowed synapses — Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
+  "analogy": "Allowed synapses \u2014 Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
   "rules": [
     "Every motor fire needs an Aaron-rooted task or standing goal spike",
     "Non-Aaron tasking spikes die at switch.tasking (OFC identity gate)",
@@ -178,7 +178,7 @@
       "from": "area.visual",
       "to": "area.auditory",
       "weight": 0.6,
-      "notes": "photo↔voice enrollment bridge"
+      "notes": "photo\u2194voice enrollment bridge"
     },
     {
       "from": "area.visual",
@@ -502,7 +502,7 @@
       "to": "switch.identity",
       "when": "act",
       "weight": 1.0,
-      "notes": "Aaron-only speak gate — identity after outbound for presence path"
+      "notes": "Aaron-only speak gate \u2014 identity after outbound for presence path"
     },
     {
       "from": "switch.identity",
@@ -553,6 +553,13 @@
       "when": "act",
       "weight": 1.0,
       "notes": "shared free-API catalog for all agents"
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.google_trends",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Google Trends open dataset catalog"
     },
     {
       "from": "motor.text",
@@ -619,13 +626,6 @@
       "to": "area.mtl",
       "weight": 0.9,
       "notes": "feedback"
-    },
-    {
-      "from": "area.mtl",
-      "to": "area.dlpfc",
-      "weight": 1.0,
-      "notes": "feedback integrate",
-      "tract": "tract.cingulum"
     },
     {
       "from": "sense.chat.aaron",
@@ -1102,6 +1102,28 @@
       "notes": "when AGI scan needs free API tooling ideas"
     },
     {
+      "from": "sense.catalog.google_trends",
+      "to": "center.info",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.catalog.google_trends",
+      "to": "center.research",
+      "weight": 0.9
+    },
+    {
+      "from": "sense.catalog.google_trends",
+      "to": "center.agi_scan",
+      "weight": 0.55,
+      "notes": "when AGI/info work needs public interest time-series context"
+    },
+    {
+      "from": "center.research",
+      "to": "switch.autonomy",
+      "weight": 0.75,
+      "notes": "open dataset / catalog motors that do not need research_scan"
+    },
+    {
       "from": "sense.inkbox.event",
       "to": "center.comms",
       "weight": 1.0
@@ -1537,7 +1559,7 @@
       "from": "motor.public_apis",
       "to": "area.mtl",
       "weight": 0.85,
-      "notes": "feedback — catalog hits into memory periphery"
+      "notes": "feedback \u2014 catalog hits into memory periphery"
     },
     {
       "from": "motor.public_apis",
@@ -1552,10 +1574,28 @@
       "notes": "catalog search result loop"
     },
     {
+      "from": "motor.google_trends",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — Trends dataset hits into memory periphery"
+    },
+    {
+      "from": "motor.google_trends",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.google_trends",
+      "to": "sense.tool.result",
+      "weight": 0.7,
+      "notes": "Trends catalog search/fetch result loop"
+    },
+    {
       "from": "motor.inkbox",
       "to": "area.mtl",
       "weight": 0.85,
-      "notes": "feedback — identity/outbound events into memory"
+      "notes": "feedback \u2014 identity/outbound events into memory"
     },
     {
       "from": "motor.inkbox",
@@ -1567,7 +1607,7 @@
       "from": "motor.inkbox",
       "to": "center.comms",
       "weight": 0.75,
-      "notes": "feedback — outbound result to comms"
+      "notes": "feedback \u2014 outbound result to comms"
     },
     {
       "from": "motor.tool",
@@ -1707,6 +1747,40 @@
       "from": "motor.voicestudio",
       "to": "center.comms",
       "weight": 0.7,
+      "notes": "feedback"
+    },
+    {
+      "from": "sense.memorybear.hit",
+      "to": "center.memory",
+      "weight": 1.0,
+      "notes": "MemoryBear recall into MTL curator"
+    },
+    {
+      "from": "sense.memorybear.hit",
+      "to": "center.chief",
+      "weight": 0.7,
+      "notes": "surface cognitive hits to executive"
+    },
+    {
+      "from": "center.memory",
+      "to": "motor.memorybear"
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.memorybear",
+      "weight": 1.0,
+      "when": "act"
+    },
+    {
+      "from": "motor.memorybear",
+      "to": "area.mtl",
+      "weight": 1.0,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.memorybear",
+      "to": "center.memory",
+      "weight": 0.85,
       "notes": "feedback"
     }
   ]

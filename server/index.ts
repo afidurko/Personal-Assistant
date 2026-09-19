@@ -11,6 +11,7 @@ import { ScanOrchestrator } from './core/scan-orchestrator.js';
 import { CamConverse } from './core/cam-converse.js';
 import { CamAutonomy } from './core/cam-autonomy.js';
 import { RuntimeStore } from './core/runtime-store.js';
+import { SystemBridge } from './core/system-bridge.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -31,6 +32,7 @@ const orchestrator = new ScanOrchestrator({
 
 const converse = new CamConverse(ROOT);
 const autonomy = new CamAutonomy(runtime);
+const bridge = new SystemBridge(ROOT, runtime);
 let micListeningHint = false;
 
 await orchestrator.init();
@@ -58,25 +60,55 @@ function stateFingerprint(state: ReturnType<typeof fullState>): string {
 let lastStateFingerprint = '';
 
 app.get('/api/health', async (_req, res) => {
+  const system = await bridge.status({
+    sessionId: converse.sessionId,
+    scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    listening: micListeningHint,
+  });
   const voicePolicy = await converse.voiceAddons.loadPolicy();
   res.json({
-    ok: true,
+    ok: system.ok,
     service: 'personal-assistant',
     assistant: 'Cam',
     scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    listening: micListeningHint,
+    overall: system.overall,
+    pieces: system.pieces.length,
     capabilities: {
       mic: true,
       speak: true,
       cortex3d: true,
       autonomy: true,
+      system_bridge: true,
+      connectome_kernel: true,
+      trajectory_physics: true,
       enabled: true,
       aaron_voice_only: true,
       voice_addons: true,
     },
     session_id: converse.sessionId,
+    circadian: system.circadian,
+    blockers: system.blockers?.length ?? 0,
     voice_gate: voicePolicy,
     voice_gate_stats: converse.getVoiceStats(),
   });
+});
+
+app.get('/api/system', async (_req, res) => {
+  const system = await bridge.status({
+    sessionId: converse.sessionId,
+    scanning: orchestrator.isRunning() || orchestrator.isScanning(),
+    listening: micListeningHint,
+  });
+  res.json(system);
+});
+
+app.post('/api/system/route', async (req, res) => {
+  const body = req.body as { sense?: string; goal?: string };
+  const sense = String(body.sense ?? 'sense.chat.aaron');
+  const goal = String(body.goal ?? '');
+  const route = await bridge.routeSense(sense, goal);
+  res.json(route);
 });
 
 app.get('/api/state', (_req, res) => {
@@ -178,16 +210,34 @@ app.post('/api/turn', async (req, res) => {
     transcript?: string;
     source?: string;
     aaron_voice_score?: number;
+    aaronVoiceScore?: number;
     enrolled?: boolean;
     multi_speaker_hint?: boolean;
     device_id?: string;
   };
   const text = String(body.text ?? body.transcript ?? '');
   const source = String(body.source ?? 'text');
+  const scoreRaw = body.aaron_voice_score ?? body.aaronVoiceScore;
+  const aaronVoiceScore =
+    source === 'mic' || source === 'speech'
+      ? typeof scoreRaw === 'number'
+        ? scoreRaw
+        : null
+      : undefined;
+
+  // Identity physics: mic without score is rejected by kernel
+  if ((source === 'mic' || source === 'speech') && aaronVoiceScore == null) {
+    res.status(403).json({
+      error: 'aaron_voice_required',
+      detail: 'Mic turns require aaron_voice_score ≥ identity threshold (or use text)',
+    });
+    return;
+  }
+
   const reply = await converse.turn({
     text,
     source,
-    aaron_voice_score: body.aaron_voice_score,
+    aaron_voice_score: aaronVoiceScore ?? body.aaron_voice_score,
     enrolled: body.enrolled,
     multi_speaker_hint: body.multi_speaker_hint,
     device_id: body.device_id,
@@ -196,13 +246,22 @@ app.post('/api/turn', async (req, res) => {
     res.status(403).json(reply);
     return;
   }
+  const bridged = await bridge.onTurn(text, source, { aaronVoiceScore });
   // Pulse autonomy when Aaron talks so Cam keeps self-tasks warm
   void autonomy.tick({
     workspaces: orchestrator.getWorkspaces(),
     loopJobs: orchestrator.getLoopJobs(),
     listening: true,
   });
-  res.json(reply);
+  res.json({
+    ...reply,
+    bridge: {
+      route: bridged.route,
+      activities: bridged.activities.length,
+      execution: bridged.execution,
+      memory: bridged.memory,
+    },
+  });
 });
 
 app.post('/api/voice/gate/reject', async (req, res) => {
@@ -242,19 +301,24 @@ app.post('/api/voice/profile', async (req, res) => {
   res.json({ ok: true, path: pathWritten });
 });
 
-app.post('/api/spike/mic', (req, res) => {
+app.post('/api/spike/mic', async (req, res) => {
   micListeningHint = true;
   const body = req.body as {
     purpose?: string;
     transcript?: string;
     aaron_voice_score?: number;
   };
+  const purpose = body.purpose ?? 'conversation';
+  const bridged = await bridge.onMicSpike(purpose);
   res.json({
     ok: true,
     sense: 'sense.ios.mic',
-    purpose: body.purpose ?? 'conversation',
+    purpose,
     aaron_voice_score: body.aaron_voice_score ?? null,
-    accepted: true,
+    accepted: bridged.route.accepted !== false,
+    route: bridged.route,
+    activities: bridged.activities.length,
+    execution: bridged.execution,
   });
 });
 
@@ -294,14 +358,46 @@ app.post('/api/spike/mic/stop', (_req, res) => {
   res.json({ ok: true, listening: false });
 });
 
-app.post('/api/spike/camera', (req, res) => {
+app.post('/api/spike/camera', async (req, res) => {
   const body = req.body as { purpose?: string };
+  const purpose = body.purpose ?? 'presence';
+  const bridged = await bridge.onCameraSpike(purpose);
   res.json({
     ok: true,
     sense: 'sense.ios.camera',
-    purpose: body.purpose ?? 'presence',
-    accepted: true,
+    purpose,
+    accepted: bridged.route.accepted !== false,
+    route: bridged.route,
+    activities: bridged.activities.length,
+    execution: bridged.execution,
   });
+});
+
+app.post('/api/system/rehearse', async (_req, res) => {
+  const steps: Array<{ id: string; ok: boolean; detail: string }> = [];
+  const chat = await bridge.onTurn('system rehearsal ping', 'text');
+  steps.push({
+    id: 'turn_text',
+    ok: chat.route.accepted,
+    detail: `motors=${chat.route.motor_plan.join(',')}`,
+  });
+  const reject = await bridge.routeSense('sense.ios.mic', 'adversarial', {
+    source: 'mic',
+    aaronVoiceScore: 0.1,
+  });
+  steps.push({
+    id: 'identity_reject',
+    ok: !reject.accepted,
+    detail: reject.reason || 'rejected',
+  });
+  const kill = await bridge.routeSense('sense.chat.aaron', 'kill test', { kill: true });
+  steps.push({
+    id: 'kill_silence',
+    ok: !kill.accepted && kill.motor_plan.length === 0,
+    detail: kill.reason || 'silenced',
+  });
+  const ok = steps.every((s) => s.ok);
+  res.json({ ok, at: new Date().toISOString(), steps, envelope: ok ? 'pass' : 'fail' });
 });
 
 app.post('/api/nodes/:id/focus', async (req, res) => {
@@ -406,6 +502,11 @@ function send(ws: WebSocket, type: WsServerMessage['type'], payload: unknown) {
 function broadcast(type: WsServerMessage['type'], payload: unknown) {
   for (const client of wss.clients) send(client, type, payload);
 }
+
+// Cortex push: activity fires on the bus the instant converse/motors settle
+bridge.onActivity(({ live, activities, route }) => {
+  broadcast('activity_update', { live, activities, route });
+});
 
 function broadcastState(force = false) {
   const state = fullState();

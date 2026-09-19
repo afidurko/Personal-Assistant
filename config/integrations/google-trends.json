@@ -1,0 +1,50 @@
+{
+  "id": "google-trends",
+  "name": "Google Trends open datasets",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-19",
+  "role": "Index and fetch open CSV/XLSX datasets published by Google Trends (graphics/interactives source data)",
+  "policy": "config/integrations/google-trends.md",
+  "remote": "github.com/GoogleTrends/data",
+  "homepage": "https://github.com/GoogleTrends/data",
+  "sense": "sense.catalog.google_trends",
+  "hotspot": "hotspot.google_trends",
+  "motor": "motor.google_trends",
+  "switch": "switch.autonomy",
+  "mesh_namespace": "mesh/research",
+  "vault_dir": "vault/04-Research/google-trends",
+  "available_to": "all_roles_and_subagents",
+  "provider": {
+    "primary": "github_git_trees",
+    "owner": "GoogleTrends",
+    "repo": "data",
+    "branch": "master",
+    "tree_api": "https://api.github.com/repos/GoogleTrends/data/git/trees/master?recursive=1",
+    "raw_base": "https://raw.githubusercontent.com/GoogleTrends/data/master/",
+    "html_base": "https://github.com/GoogleTrends/data/blob/master/",
+    "credential_env": null,
+    "notes": "~382MB upstream — do not submodule. Index via GitHub trees API; fetch individual files by path. No API key required (unauthenticated GitHub rate limits apply)."
+  },
+  "cache": {
+    "tree_path": "data/runtime/google-trends-tree.json",
+    "ttl_hours": 24
+  },
+  "defaults": {
+    "num_results": 12,
+    "extensions": [".csv", ".xlsx", ".xls", ".tsv", ".json"],
+    "save_to_mesh": true,
+    "save_to_vault": true,
+    "max_fetch_bytes": 5000000
+  },
+  "scripts": {
+    "search": "scripts/google-trends-search.py",
+    "pack": "scripts/pack-google-trends-result.py",
+    "check": "scripts/google-trends-check.py",
+    "addon": "scripts/google-trends-addon.py"
+  },
+  "addons": "config/integrations/google-trends-addons.json",
+  "fixture": "scripts/testdata/sample-google-trends-catalog.json",
+  "teams": ["team.info", "team.capability", "team.agi-research-scan", "team.tooling"],
+  "roles": ["info-retriever", "researcher", "agi-scout", "tool-user", "capability-broker"]
+}
