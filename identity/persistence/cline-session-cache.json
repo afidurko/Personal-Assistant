@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T21:34:25.413105+00:00",
+    "at": "2026-09-19T21:48:54.395432+00:00",
     "mode": "act",
-    "summary": "Integrated GoogleTrends/data as motor.google_trends (merged main 3T protocol)",
+    "summary": "Dual 3T green for google-trends PR #24 \u2014 READY TO MERGE",
     "workspace": "."
   },
   "notes": [
@@ -46,7 +46,12 @@
     },
     {
       "at": "2026-09-19T21:34:25.413105+00:00",
-      "text": "PR #24 — remote GitHub trees index, no submodule",
+      "text": "PR #24 \u2014 remote GitHub trees index, no submodule",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-19T21:48:54.395432+00:00",
+      "text": "fixed pydantic dep in 3T campaign; curated trends add-ons",
       "workspace": "."
     }
   ],
@@ -85,6 +90,22 @@
       "workspace_id": "personal-assistant"
     },
     {
+      "cron": "30 7 * * *",
+      "enabled": true,
+      "id": "cam-nightly-memorybear-doctor",
+      "name": "Cam nightly MemoryBear doctor",
+      "prompt": "Run python3 scripts/memorybear-check.py and python3 scripts/memorybear.py --doctor --offline. Summarize PASS/FAIL. If MEMORYBEAR_API_KEY is set, also run a live --doctor without --offline. Do not invent Aaron personal facts or push commits.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "memory",
+        "memorybear"
+      ],
+      "timeout": 1200,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
       "cron": "0 8 * * MON",
       "enabled": false,
       "id": "cam-cline-submodule-doctor",
@@ -101,7 +122,7 @@
       "workspace_id": "cline"
     }
   ],
-  "schedules_synced_at": "2026-09-19T21:02:04.579864+00:00",
+  "schedules_synced_at": "2026-09-19T21:48:21.098810+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
