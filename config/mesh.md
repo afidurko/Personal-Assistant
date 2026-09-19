@@ -78,6 +78,7 @@ Config (not a second runtime): `config/swarm/`
 - Workspace registry via `scripts/choose-workspace.py --mesh-projects`
 - Vision results sync via `scripts/pack-vision-result.py` (+ `config/enhancement/vision-grounding.json`)
 - Gaze / eye-tracking results sync via `scripts/pack-gaze-result.py` → `mesh/gaze`
+- Cam see (Pupil world + gaze) via `scripts/pupil-see.py` → `mesh/vision` + `mesh/gaze`
 - Scholar results sync via `scripts/pack-scholar-result.py` / `scripts/scholar-search.py`
 - Vault intelligence via smart-second-brain; sync summaries to `mesh/vault`
 - Knowledge maps via SwiftGuide; sync stack/taxonomy distillates to `mesh/cartography`

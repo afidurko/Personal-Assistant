@@ -96,6 +96,16 @@
       "notes": "Distilled Pupil gaze/pupil samples only — not raw eye video"
     },
     {
+      "id": "sense.vision.world",
+      "modality": "vision",
+      "source": "pupil",
+      "emits": [
+        "spike.visual",
+        "spike.world_frame"
+      ],
+      "notes": "Pupil Core world/scene camera distillate — how Cam sees the room; not raw video by default"
+    },
+    {
       "id": "sense.jarvis.result",
       "modality": "tool",
       "source": "jarvis_cli",

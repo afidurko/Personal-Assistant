@@ -30,7 +30,8 @@
           { "id": "sense.ios.camera", "label": "iPhone camera" },
           { "id": "sense.ios.mic", "label": "iPhone mic" },
           { "id": "sense.vision.detection", "label": "PaddleDetection" },
-          { "id": "sense.vision.gaze", "label": "Pupil gaze" }
+          { "id": "sense.vision.gaze", "label": "Pupil gaze" },
+          { "id": "sense.vision.world", "label": "Pupil world (Cam sees)" }
         ]
       },
       {
@@ -57,6 +58,7 @@
           { "id": "motor.mesh", "label": "Mesh" },
           { "id": "motor.docs", "label": "Docs" },
           { "id": "motor.jarvis", "label": "Jarvis" },
+          { "id": "motor.pupil", "label": "Pupil eyes" },
           { "id": "motor.jobs", "label": "Apply" },
           { "id": "motor.text", "label": "Text" }
         ]

@@ -291,6 +291,7 @@ def main() -> int:
         "sense.audio.transcript": 2.0,
         "sense.vision.detection": 1.0,
         "sense.vision.gaze": 1.0,
+        "sense.vision.world": 1.2,
         "sense.ios.camera": 1.0,
         "sense.ios.mic": 2.5,
         "sense.aaron.face": 2.0,

@@ -91,7 +91,7 @@ You (human) ──override / kill──► nullhub / chat
 | `coding` | Cline-powered code edits (also invokable by every role) |
 | `careers` | LinkedIn + Indeed |
 | `comms` | Text / call / FaceTime + avatar presence |
-| `vision` | PaddleDetection + Pupil gaze on tasked media |
+| `vision` | PaddleDetection + Pupil (Cam can see via world/gaze) |
 | `qa` | Verifies outputs and logs |
 | `memory-curator` | Mesh + smart-second-brain coherence |
 | `agi-scout` | Daily AI/AGI paper scan lead (`team.agi-research-scan`) |

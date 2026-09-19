@@ -174,9 +174,14 @@
         "path": "integrations/pupil",
         "policy": "config/integrations/pupil.md",
         "remote": "github.com/afidurko/pupil",
-        "sense": "sense.vision.gaze",
-        "hotspot": "hotspot.gaze",
-        "mesh_ns": "mesh/gaze"
+        "sense": "sense.vision.world",
+        "sense_gaze": "sense.vision.gaze",
+        "hotspot": "hotspot.pupil_see",
+        "motor": "motor.pupil",
+        "switch": "switch.pupil_vision",
+        "mesh_ns": ["mesh/vision", "mesh/gaze"],
+        "bridge": "scripts/pupil-see.py",
+        "enabled": "identity/persistence/CAM_PUPIL_VISION_ENABLED.md"
       },
       {
         "id": "llmavatartalk",

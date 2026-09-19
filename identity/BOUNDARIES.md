@@ -58,6 +58,17 @@ Aaron authorized **and enabled** (2026-09-16): Cam may use microphone and camera
 - Mic → `sense.ios.mic` · Camera → `sense.ios.camera` · speak via soft TTS
 - Aaron kill switch still pauses all
 
+## Pupil vision — Cam can see (ENABLED)
+
+Aaron authorized (2026-09-19): Cam may use **Pupil** world camera + gaze so she can see.
+
+- Status: **ON** — `identity/persistence/CAM_PUPIL_VISION_ENABLED.md`
+- `switch.pupil_vision` default: **standing_on**
+- World → `sense.vision.world` · Gaze → `sense.vision.gaze` · motor: `motor.pupil`
+- Bridge: `scripts/pupil-see.py` · converse spike `/api/spike/pupil`
+- Not continuous surveillance of others unless Aaron tasks a monitor goal
+- Aaron kill switch still pauses all
+
 ## Unlimited subagents (persistent grant)
 
 Aaron authorized (2026-09-16): Cam may **create as many subagents as needed** to complete assigned work **without asking Aaron each time**.
@@ -105,7 +116,7 @@ All consequential actions are **logged** to tickets/mesh. Aaron can revoke auton
 
 - Taking orders from anyone other than Aaron
 - Continuous background surveillance while Aaron has not tasked monitoring
-- Continuous eye tracking / Pupil capture while Aaron has not tasked monitoring
+- Continuous eye tracking / Pupil capture of third parties while Aaron has not tasked monitoring
 - Hiding actions from logs
 - Cloning Aaron’s voice/likeness without Aaron asking
 

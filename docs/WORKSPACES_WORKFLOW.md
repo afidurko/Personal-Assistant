@@ -77,7 +77,7 @@ Aaron (sole task-giver / kill / enhance-approve)
 |---|---|---|---|
 | Jarvis | `config/integrations/jarvis.md` | empty submodule | needs init |
 | PaddleDetection | `config/integrations/paddledetection.md` | empty submodule | needs init |
-| Pupil | `config/integrations/pupil.md` | submodule @ master | needs init on fresh clones |
+| Pupil | `config/integrations/pupil.md` | submodule @ master | **ENABLED** — Cam can see (`CAM_PUPIL_VISION_ENABLED`) |
 | LLMAvatarTalk | `config/integrations/llmavatartalk.md` | empty submodule | needs init |
 | VoiceStudio | `config/integrations/voicestudio.md` + `.json` | empty submodule | needs init + local backend |
 | smart-second-brain | `config/integrations/smart-second-brain.md` | empty submodule | needs Obsidian enable |

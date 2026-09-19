@@ -1,16 +1,19 @@
-# Pupil integration — open source eye tracking
+# Pupil integration — Cam’s eyes (open source eye tracking)
 
 Source: [afidurko/pupil](https://github.com/afidurko/pupil) (`master`)  
 Upstream: [pupil-labs/pupil](https://github.com/pupil-labs/pupil) · [docs.pupil-labs.com/core](https://docs.pupil-labs.com/core/)  
-Path: [`integrations/pupil`](../../integrations/pupil) (git submodule)
+Path: [`integrations/pupil`](../../integrations/pupil) (git submodule)  
+Enablement: [`identity/persistence/CAM_PUPIL_VISION_ENABLED.md`](../../identity/persistence/CAM_PUPIL_VISION_ENABLED.md) — **ENABLED** so Cam can see
 
 ## Role in the team
 
-Pupil is Cam’s **eye-tracking / gaze tool layer** — Pupil Capture, Player, and
-Service for pupil detection, gaze mapping, and recording when Aaron tasks it.
+Pupil is Cam’s **eye-tracking / gaze + world-camera** layer — Pupil Capture,
+Player, and Service. The **world camera** is how Cam sees the room; eye cameras
+supply gaze overlays.
 
-It complements PaddleDetection (object/pose vision). It is **not** the brain and
-**not** always-on surveillance.
+It complements PaddleDetection (object/pose on stills/video) and the iOS
+companion camera (Aaron converse). It is **not** the brain and **not** always-on
+surveillance.
 
 | Concern | Owner |
 |---|---|
@@ -19,12 +22,25 @@ It complements PaddleDetection (object/pose vision). It is **not** the brain and
 | Scheduling | nullboiler |
 | Human override | nullhub / Aaron kill |
 | Object/pose detection on media | PaddleDetection |
-| Gaze / pupil / eye-tracking streams | **Pupil** |
-| Live iPhone camera | iOS companion |
+| Live see (world + gaze) | **Pupil** (`motor.pupil`) |
+| Live iPhone camera converse | iOS companion |
 
-The `vision` role (and subagents) may run Pupil on hardware Aaron provides or on
-recordings Aaron approves. Continuous eye monitoring of anyone other than Aaron
-is not authorized.
+## Connectome (Cam can see)
+
+| Piece | Id |
+|---|---|
+| Switch | `switch.pupil_vision` (standing_on — Aaron 2026-09-19) |
+| Sense (world) | `sense.vision.world` |
+| Sense (gaze) | `sense.vision.gaze` |
+| Hotspot | `hotspot.pupil_see` / `hotspot.gaze` |
+| Motor | `motor.pupil` |
+| Mesh | `mesh/vision` + `mesh/gaze` |
+| Bridge | `scripts/pupil-see.py` |
+
+```bash
+python3 scripts/pupil-see.py --dry-run
+python3 scripts/connectome-route.py --sense sense.vision.world --goal "see"
+```
 
 ## Install (on Aaron’s machine — heavy)
 
@@ -43,41 +59,36 @@ cd integrations/pupil/pupil_src
 python main.py capture   # or player / service
 ```
 
-Prefer the network real-time API for Cam bridges when Capture/Service is already
-running ([developer docs](https://docs.pupil-labs.com/core/developer/)). Full GUI
-bundles are optional; keep large offline analysis human-initiated.
+Prefer the network real-time API when Capture/Service is already running
+([developer docs](https://docs.pupil-labs.com/core/developer/)).
 
 ## Mesh bridge
 
-Gaze summaries (not raw video) go to `mesh/gaze`:
-
 ```bash
+# Combined Cam-see ingest (world + gaze)
+python3 scripts/pupil-see.py \
+  --gaze path/to/gaze.json \
+  --world path/to/world-meta.json \
+  --out-dir /tmp/cam-see
+
+# Gaze-only packer
 python3 scripts/pack-gaze-result.py \
   --gaze path/to/gaze.json \
   --out /tmp/mesh-gaze.json
 ```
 
-When nulltickets is up, curator/`vision` `PUT`s that document under `mesh/gaze`.
-
-## Connectome
-
-| Piece | Id |
-|---|---|
-| Sense | `sense.vision.gaze` |
-| Hotspot | `hotspot.gaze` |
-| Center | `center.vision` |
-| Mesh | `mesh/gaze` |
+Converse / companion spike: `POST /api/spike/pupil` on `cam-converse-server.py`.
 
 ## Useful entry points (upstream)
 
-- `pupil_src/main.py capture` — live capture + pupil/gaze
+- `pupil_src/main.py capture` — live capture + pupil/gaze + world
 - `pupil_src/main.py player` — offline recording playback
 - `pupil_src/main.py service` — headless service / API host
 - Network API — real-time gaze over ZMQ for app integration
 
 ## Privacy defaults
 
-- No background eye-tracking loop unless Aaron tasks a monitor goal
-- Distill gaze points + confidence + timestamps into mesh; raw recordings stay local
-- Do not enroll or track non-Aaron eyes as Aaron identity
-- Pair with iOS companion for phone camera; Pupil Core hardware when available
+- Enabled for Cam to see when tasked / converse spikes fire
+- No background continuous eye-tracking of others unless Aaron tasks a monitor goal
+- Distill frame refs + gaze + confidence into mesh; raw recordings stay local
+- Kill switch pauses `motor.pupil`
