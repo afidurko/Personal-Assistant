@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="580" viewBox="0 0 420 580">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF8A5B"/>
+      <stop offset="100%" stop-color="#C43B1D"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="580" rx="18" fill="#1C0F0A"/>
+  <rect x="16" y="16" width="388" height="548" rx="12" fill="url(#g)" stroke="#3A160C" stroke-width="6"/>
+  <text x="210" y="64" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#1C0F0A">Ember Drake</text>
+  <text x="48" y="100" font-family="monospace" font-size="18" fill="#1C0F0A">HP 80 · Flame</text>
+  <polygon points="210,150 280,360 140,360" fill="#FFB347" stroke="#1C0F0A" stroke-width="4"/>
+  <circle cx="185" cy="230" r="9" fill="#111"/>
+  <circle cx="235" cy="230" r="9" fill="#111"/>
+  <polygon points="210,120 230,160 190,160" fill="#FFE08A"/>
+  <text x="48" y="460" font-family="monospace" font-size="16" fill="#1C0F0A">Cinder Tap · Flare Rush</text>
+  <text x="48" y="490" font-family="monospace" font-size="14" fill="#4A2014">Scan to spawn 3D form</text>
+</svg>
