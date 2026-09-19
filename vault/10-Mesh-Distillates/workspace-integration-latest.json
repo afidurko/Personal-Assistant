@@ -12,6 +12,7 @@
     "daily_agi_research_scan": true,
     "cam_enhance_apply_requires_aaron": true,
     "google_scholar": true,
+    "public_apis": true,
     "unlimited_subagents": true,
     "slm_cortex_enabled": true,
     "dl_cortex_enabled": true,
@@ -49,6 +50,12 @@
       "policy_exists": true
     },
     {
+      "id": "public-apis",
+      "path": "integrations/public-apis",
+      "populated": true,
+      "policy_exists": true
+    },
+    {
       "id": "cline",
       "path": "integrations/cline",
       "populated": false,
@@ -58,7 +65,7 @@
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=25 edges=262"
+    "detail": "senses=26 edges=272"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

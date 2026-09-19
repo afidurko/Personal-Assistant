@@ -94,6 +94,12 @@
       "notes": "Run a registered tool via tool-user (config/tools/registry.json)"
     },
     {
+      "id": "motor.public_apis",
+      "channel": ["public_apis_catalog", "local_script"],
+      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "notes": "Search afidurko/public-apis catalog (scripts/public-apis-search.py) — shared by all agents; no spend"
+    },
+    {
       "id": "motor.swarm",
       "channel": ["nulltickets_store", "agent_bus"],
       "requires_switch": ["switch.autonomy", "switch.kill"],

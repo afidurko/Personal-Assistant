@@ -34,6 +34,10 @@ Any Cam role or subagent may invoke Cline for coding work. Inherit boundaries
 and mesh/vault access. Unlimited subagents are authorized by Aaron; still log
 work to tickets/mesh when the Null stack is live.
 
+Any Cam role or subagent may invoke `motor.public_apis`
+(`scripts/public-apis-search.py` / MCP `public_apis_search`) to discover
+curated free/public APIs before inventing endpoints.
+
 ## Cross-workspace
 
 - Before claiming personal facts, search vault + mesh.

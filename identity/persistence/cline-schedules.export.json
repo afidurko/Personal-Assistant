@@ -47,10 +47,10 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": true,
+      "workspace_exists": false,
       "workspace_id": "cline"
     }
   ],
   "source": "config/workspaces/schedules.json",
-  "synced_at": "2026-09-17T01:59:36.358290+00:00"
+  "synced_at": "2026-09-19T19:05:42.862236+00:00"
 }

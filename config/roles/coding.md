@@ -17,6 +17,7 @@ Rules:
 - You are **not** the brain. Cam/nullclaw plans; Cline executes code work.
 - **Every** Cam role and subagent may summon you / invoke Cline for coding.
 - Prefer Jarvis for trivial non-code CLI chores.
+- Prefer `motor.public_apis` when picking a free HTTP API for a thin wrapper.
 - Obey `.clinerules` and Aaron-only tasking; kill switch silences this motor.
 - Never outbound-message, call, submit jobs, or spend money from Cline.
 - Isolate state with per-workspace `CLINE_DATA_DIR` (runner sets this).

@@ -1,180 +1,217 @@
 {
-  "at": "2026-09-17T11:16:26.781Z",
-  "epoch": 1789643786781,
+  "at": "2026-09-19T18:42:55Z",
+  "epoch": 1789843375,
   "firing": [
-    {
-      "neuron": "neuron.memory",
-      "kind": "loop",
-      "area": "area.mtl",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.fornix",
-        "tract.cingulum",
-        "tract.cingulum2"
-      ],
-      "reason": "cam_autonomy:done:Consolidate episodic converse into semantic me",
-      "ts": "2026-09-17T11:16:14.778Z"
-    },
-    {
-      "neuron": "neuron.delegate_burst",
-      "kind": "loop",
-      "area": "area.dlpfc",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.slf",
-        "tract.cingulum",
-        "tract.forceps_minor"
-      ],
-      "reason": "cam_autonomy:done:Sweep spawn bay capacity for subagents",
-      "ts": "2026-09-17T11:16:26.780Z"
-    },
-    {
-      "neuron": "neuron.speak_loop",
-      "kind": "loop",
-      "area": "area.broca",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.arcuate",
-        "tract.af_anterior",
-        "tract.fat"
-      ],
-      "reason": "cam_autonomy:done:Tune speak/hear arcuate pathway",
-      "ts": "2026-09-17T11:16:26.779Z"
-    },
-    {
-      "neuron": "neuron.mesh_sync_loop",
-      "kind": "loop",
-      "area": "area.mtl",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.fornix",
-        "tract.cingulum",
-        "tract.cingulum2"
-      ],
-      "reason": "cam_autonomy:done:Refresh live activity feed for cortex fibers",
-      "ts": "2026-09-17T11:16:14.778Z"
-    },
-    {
-      "neuron": "neuron.health_conductor",
-      "kind": "agent",
-      "area": "area.cingulate",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.slf",
-        "tract.cingulum",
-        "tract.forceps_minor"
-      ],
-      "reason": "cam_autonomy:running:Health conductor standing scan",
-      "ts": "2026-09-17T11:16:26.780Z"
-    },
     {
       "neuron": "neuron.improve_engine",
       "kind": "loop",
       "area": "area.apfc",
-      "intensity": 0.95,
+      "intensity": 0.9,
+      "reason": "tasks:1",
       "tracts": [
+        "tract.ifof",
         "tract.slf",
-        "tract.cingulum",
-        "tract.forceps_minor"
+        "tract.cingulum"
       ],
-      "reason": "cam_autonomy:done:Propose Cam system enhancement from scan findi",
-      "ts": "2026-09-17T11:16:26.780Z"
+      "source": "improve_engine"
+    },
+    {
+      "neuron": "neuron.qa_cycle",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "intensity": 0.85,
+      "reason": "cycle_start:1",
+      "tracts": [
+        "tract.cingulum",
+        "tract.slf",
+        "tract.fornix"
+      ],
+      "source": "qa_loop"
+    },
+    {
+      "neuron": "neuron.submodule_health",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "intensity": 0.75,
+      "reason": "health:warning",
+      "tracts": [
+        "tract.slf1",
+        "tract.fat",
+        "tract.cingulum",
+        "tract.fornix",
+        "tract.forceps_minor"
+      ]
+    },
+    {
+      "neuron": "neuron.vitals_loop",
+      "kind": "loop",
+      "area": "area.parietal",
+      "intensity": 0.45,
+      "reason": "health:healthy",
+      "tracts": [
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf1",
+        "tract.slf",
+        "tract.slf3",
+        "tract.mdlf"
+      ]
+    },
+    {
+      "neuron": "neuron.arch_scan",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "intensity": 0.45,
+      "reason": "health:healthy",
+      "tracts": [
+        "tract.slf1",
+        "tract.fat",
+        "tract.cingulum",
+        "tract.fornix",
+        "tract.forceps_minor"
+      ]
+    },
+    {
+      "neuron": "neuron.vuln_scan",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "intensity": 0.45,
+      "reason": "health:healthy",
+      "tracts": [
+        "tract.slf1",
+        "tract.fat",
+        "tract.cingulum",
+        "tract.fornix",
+        "tract.forceps_minor"
+      ]
+    },
+    {
+      "neuron": "neuron.drift_scan",
+      "kind": "loop",
+      "area": "area.cingulate",
+      "intensity": 0.45,
+      "reason": "health:healthy",
+      "tracts": [
+        "tract.slf1",
+        "tract.fat",
+        "tract.cingulum",
+        "tract.fornix",
+        "tract.forceps_minor"
+      ]
+    },
+    {
+      "neuron": "neuron.ops",
+      "kind": "agent",
+      "area": "area.parietal",
+      "intensity": 0.35,
+      "reason": "idle_ready",
+      "tracts": [
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf1",
+        "tract.slf",
+        "tract.slf3",
+        "tract.mdlf"
+      ]
     }
   ],
   "active_areas": [
-    "area.mtl",
-    "area.dlpfc",
-    "area.broca",
+    "area.apfc",
     "area.cingulate",
-    "area.apfc"
+    "area.parietal"
   ],
   "active_tracts": [
-    "tract.fornix",
-    "tract.cingulum",
-    "tract.cingulum2",
-    "tract.slf",
-    "tract.forceps_minor",
-    "tract.arcuate",
     "tract.af_anterior",
-    "tract.fat"
+    "tract.af_posterior",
+    "tract.cingulum",
+    "tract.fat",
+    "tract.forceps_minor",
+    "tract.fornix",
+    "tract.ifof",
+    "tract.mdlf",
+    "tract.slf",
+    "tract.slf1",
+    "tract.slf3"
   ],
   "recent_tasks": [
     {
-      "id": "cam-self-092682a1",
-      "title": "Tune speak/hear arcuate pathway",
-      "status": "done",
-      "neuron": "neuron.speak_loop"
+      "type": "synapse",
+      "tracts": [],
+      "overall": null,
+      "t": 21
     },
     {
-      "id": "cam-self-e264f30c",
-      "title": "Propose Cam system enhancement from scan findings",
-      "status": "done",
-      "neuron": "neuron.improve_engine"
+      "type": "synapse",
+      "tracts": [],
+      "overall": null,
+      "t": 22
     },
     {
-      "id": "cam-self-8ee2b7ce",
-      "title": "Sweep spawn bay capacity for subagents",
-      "status": "done",
-      "neuron": "neuron.delegate_burst"
+      "type": "synapse",
+      "tracts": [],
+      "overall": null,
+      "t": 23
     },
     {
-      "id": "cam-self-f90895b1",
-      "title": "Refresh live activity feed for cortex fibers",
-      "status": "done",
-      "neuron": "neuron.mesh_sync_loop"
+      "type": "ltp",
+      "tracts": [
+        "tract.arcuate",
+        "tract.cingulum"
+      ],
+      "overall": null,
+      "t": 24
     },
     {
-      "id": "cam-self-c35c2b68",
-      "title": "Consolidate episodic converse into semantic memory",
-      "status": "done",
-      "neuron": "neuron.memory"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 25
     },
     {
-      "id": "cam-self-19458713",
-      "title": "Sweep spawn bay capacity for subagents",
-      "status": "done",
-      "neuron": "neuron.delegate_burst"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 26
     },
     {
-      "id": "cam-self-cfd1e66d",
-      "title": "Propose Cam system enhancement from scan findings",
-      "status": "done",
-      "neuron": "neuron.improve_engine"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 27
     },
     {
-      "id": "cam-self-3f52818f",
-      "title": "Health conductor standing scan",
-      "status": "running",
-      "neuron": "neuron.health_conductor"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 28
     },
     {
-      "id": "cam-self-a05d184a",
-      "title": "Tune speak/hear arcuate pathway",
-      "status": "done",
-      "neuron": "neuron.speak_loop"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 29
     },
     {
-      "id": "cam-self-d9c9ca19",
-      "title": "Refresh live activity feed for cortex fibers",
-      "status": "done",
-      "neuron": "neuron.mesh_sync_loop"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "healthy",
+      "t": 30
     },
     {
-      "id": "cam-self-c0334598",
-      "title": "Consolidate episodic converse into semantic memory",
-      "status": "done",
-      "neuron": "neuron.memory"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 31
     },
     {
-      "id": "cam-self-8210c9e7",
-      "title": "Propose Cam system enhancement from scan findings",
-      "status": "done",
-      "neuron": "neuron.improve_engine"
+      "type": "health_scan",
+      "tracts": [],
+      "overall": "warning",
+      "t": 32
     }
   ],
+  "health_overall": "warning",
   "improve_tasks": 1,
-  "neuron_count": 6,
-  "firing_count": 6,
-  "standing": true,
-  "note": "Cam home autonomy + converse feed"
+  "neuron_count": 42,
+  "firing_count": 8
 }

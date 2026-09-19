@@ -33,7 +33,7 @@ Shared across every agent. Backed by nulltickets `/store`.
 | `mesh/research/agi-scan` | daily AGI paper distillates (via vault mirror) |
 | `mesh/workspaces` | scan-workspace snapshots (health/arch/vuln/updates/improvements) |
 | `mesh/agent-lineage` | spawn tree, privilege grants, lineage terminations |
-| `mesh/tools` | registered tool specs + run distillates (team.tooling) |
+| `mesh/tools` | registered tool specs + run distillates (team.tooling) + **public-apis** catalog hits |
 
 ## Deep agent layers (TypeScript neural mesh)
 
