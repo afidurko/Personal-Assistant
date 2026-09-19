@@ -195,6 +195,7 @@ export type SuggestionKind =
   | 'swarm-tooling'
   | 'cam-enhance'
   | 'research-memory'
+  | 'identity-voice'
   | 'presence-voice'
   | 'identity'
   | 'api-catalog';

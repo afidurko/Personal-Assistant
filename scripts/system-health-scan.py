@@ -150,6 +150,58 @@ def check_vitals() -> dict:
     }
 
 
+def check_aaron_voice_gate() -> dict:
+    """Pulse Aaron-only voice gate add-ons (config + check script)."""
+    cfg_path = ROOT / "config" / "identity" / "aaron-voice-gate.json"
+    if not cfg_path.exists():
+        return {
+            "neuron": "neuron.aaron_voice_gate",
+            "status": "critical",
+            "present": False,
+        }
+    try:
+        cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {
+            "neuron": "neuron.aaron_voice_gate",
+            "status": "critical",
+            "present": True,
+            "parse": "fail",
+        }
+    addons = cfg.get("addons") or {}
+    missing = [
+        k
+        for k in (
+            "adaptive_noise",
+            "profile_export",
+            "reject_stats",
+            "health_pulse",
+            "ios_speaker_id",
+        )
+        if k not in addons
+    ]
+    code, out = run([sys.executable, str(ROOT / "scripts" / "aaron-voice-gate-check.py"), "--json"])
+    ok = code == 0 and cfg.get("aaron_only") is True
+    stats_path = ROOT / "data" / "runtime" / "aaron-voice-stats.json"
+    stats = None
+    if stats_path.exists():
+        try:
+            stats = json.loads(stats_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            stats = None
+    return {
+        "neuron": "neuron.aaron_voice_gate",
+        "status": "healthy" if ok and not missing else ("warning" if ok else "critical"),
+        "aaron_only": bool(cfg.get("aaron_only")),
+        "addons_present": sorted(addons.keys()),
+        "addons_missing": missing,
+        "check_exit": code,
+        "check_preview": out[:200],
+        "stats": stats,
+        "ios_contract": (addons.get("ios_speaker_id") or {}).get("contract"),
+    }
+
+
 def check_converse_health() -> dict:
     # best-effort local probe
     code, out = run(["curl", "-s", "-m", "2", "http://127.0.0.1:8787/api/health"])
@@ -346,6 +398,7 @@ def main() -> int:
         check_secrets_hygiene(),
         check_drift(),
         check_converse_health(),
+        check_aaron_voice_gate(),
         check_arch_scan(),
         check_vuln_scan(),
         check_priority_boot(),

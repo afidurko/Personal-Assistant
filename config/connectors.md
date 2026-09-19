@@ -52,6 +52,7 @@
 - Scaffold: `companions/ios/` · policy: `config/integrations/ios-companion.md`
 - Full design: `docs/IOS_IDENTITY.md`
 - **Granted:** Aaron face recognition, Aaron voice recognition, iPhone camera, iPhone mic
+- **Granted:** Aaron-only voice in noisy rooms (`config/identity/aaron-voice-gate.json`) — surrounding conversation ignored
 - **Granted:** full photos + files access to learn Aaron’s look/sound and photo↔video same-person match (`identity/persistence/AARON_MEDIA_ACCESS.md`)
 - **Live converse:** **ENABLED** by Aaron — `identity/persistence/CAM_CONVERSE_ENABLED.md`
 - Network: **Tailscale** — `docs/TAILSCALE.md`

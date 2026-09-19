@@ -26,7 +26,8 @@
     </header>
 
     <section class="status" id="status">Starting…</section>
-    <p class="hint" id="hint">Safari → Share → Add to Home Screen for best mic access.</p>
+    <p class="hint" id="hint">Enroll Aaron’s voice once, then talk — Cam ignores surrounding conversation.</p>
+    <p class="voice-score" id="voiceScore">Not enrolled</p>
 
     <section class="media">
       <video id="camPreview" playsinline muted autoplay></video>
@@ -40,6 +41,10 @@
 
     <section class="controls">
       <button type="button" id="btnMic" class="primary">Enable mic & talk</button>
+      <button type="button" id="btnEnroll">Enroll my voice (10s)</button>
+      <button type="button" id="btnExport" hidden>Export voice profile</button>
+      <button type="button" id="btnImport" hidden>Import voice profile</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden />
       <button type="button" id="btnCam">Enable camera</button>
       <button type="button" id="btnStop" disabled>Stop</button>
     </section>
@@ -49,6 +54,7 @@
       <button type="submit">Send</button>
     </form>
   </main>
+  <script src="voice-gate.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

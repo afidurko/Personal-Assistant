@@ -314,7 +314,33 @@
         "switch.autonomy",
         "motor.mesh"
       ],
-      "behavior": "verify_aaron_voice_for_tasking"
+      "behavior": "verify_aaron_voice_for_tasking",
+      "integration": "config/identity/aaron-voice-gate.json"
+    },
+    {
+      "id": "hotspot.aaron_voice_noise",
+      "area": "area.ofc",
+      "columns": [
+        "neuron.identity_gate",
+        "neuron.boundary",
+        "neuron.asr"
+      ],
+      "tracts": [
+        "tract.uncinate",
+        "tract.mdlf"
+      ],
+      "pathway": [
+        "sense.aaron.voice",
+        "area.ofc",
+        "switch.identity",
+        "switch.tasking",
+        "area.auditory",
+        "switch.ios_capture",
+        "switch.autonomy",
+        "motor.mesh"
+      ],
+      "behavior": "reject_non_aaron_speech_in_noise",
+      "integration": "config/identity/aaron-voice-gate.json"
     },
     {
       "id": "hotspot.ios_camera",
