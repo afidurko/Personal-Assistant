@@ -100,7 +100,9 @@
     "status": "applied",
     "authorized_at": "2026-09-17",
     "fast": "center.slm",
-    "slow": ["center.capability", "center.chief", "center.qa"]
+    "slow": ["center.capability", "center.chief", "center.qa"],
+    "reasoning_loop_plan": "config/enhancement/reasoning-logic.json",
+    "docs": "docs/CAM_REASONING.md"
   },
   "non_goals": [
     "Training unbounded foundation models in this repo",
