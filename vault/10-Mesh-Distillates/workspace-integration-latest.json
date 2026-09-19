@@ -4,11 +4,13 @@
   "soft_warnings": [
     "integration empty: integrations/jarvis (submodule init or create config)",
     "integration empty: integrations/paddledetection (submodule init or create config)",
-    "integration empty: integrations/pupil (submodule init or create config)",
     "integration empty: integrations/llmavatartalk (submodule init or create config)",
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
+    "integration empty: integrations/memorybear (submodule init or create config)",
     "integration empty: integrations/public-apis (submodule init or create config)",
     "integration empty: integrations/cline (submodule init or create config)",
+    "integration empty: integrations/pupil (submodule init or create config)",
+    "integration empty: integrations/inkbox (submodule init or create config)",
     "integration empty: integrations/voicestudio (submodule init or create config)",
     "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)"
   ],
@@ -16,6 +18,7 @@
     "daily_agi_research_scan": true,
     "cam_enhance_apply_requires_aaron": true,
     "google_scholar": true,
+    "memorybear": true,
     "public_apis": true,
     "inkbox": true,
     "unlimited_subagents": true,
@@ -37,12 +40,6 @@
       "policy_exists": true
     },
     {
-      "id": "pupil",
-      "path": "integrations/pupil",
-      "populated": false,
-      "policy_exists": true
-    },
-    {
       "id": "llmavatartalk",
       "path": "integrations/llmavatartalk",
       "populated": false,
@@ -51,6 +48,12 @@
     {
       "id": "smart-second-brain",
       "path": "integrations/smart-second-brain",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
+      "id": "memorybear",
+      "path": "integrations/memorybear",
       "populated": false,
       "policy_exists": true
     },
@@ -73,9 +76,21 @@
       "policy_exists": true
     },
     {
+      "id": "joshinator-analyzer",
+      "path": "integrations/joshinator-analyzer",
+      "populated": true,
+      "policy_exists": true
+    },
+    {
+      "id": "pupil",
+      "path": "integrations/pupil",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
       "id": "inkbox",
       "path": "integrations/inkbox",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {
@@ -94,7 +109,7 @@
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=31 edges=304"
+    "detail": "senses=32 edges=315"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",
