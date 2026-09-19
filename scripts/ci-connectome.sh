@@ -32,6 +32,12 @@ python3 scripts/test_public_apis_addons.py
 python3 scripts/public-apis-check.py
 python3 scripts/public-apis-addon.py doctor
 
+echo "== joshinator IP-safe embodiment =="
+PYTHONPATH=integrations/joshinator-analyzer/backend \
+  python3 -m unittest discover -s integrations/joshinator-analyzer/backend -p 'test_embodiment.py' -v
+python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
+  --out vault/10-Mesh-Distillates/qa-cycles/ci-embodiment-1m.json
+
 echo "== inkbox wiring =="
 python3 scripts/inkbox-check.py
 

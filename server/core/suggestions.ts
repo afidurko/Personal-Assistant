@@ -280,6 +280,21 @@ function fromAgentContext(
       relatedConceptIds: ['protocols-extensions'],
       sourceFindingIds: toolingRelated.findings.map((f) => f.id).slice(0, 3),
     });
+    out.push({
+      id: 'suggest-card-embodiment-ip-safe',
+      kind: 'card-embodiment',
+      title: 'Spawn IP-safe procedural 3D champions after card detect',
+      rationale:
+        'Joshinator embodiment must stay original/procedural — never ship franchise character meshes or logos.',
+      implementation:
+        'Resolve via integrations/joshinator-analyzer embodiment_service; fuzz with scripts/embodiment-billion-fuzz.py before merge.',
+      sketch:
+        'PYTHONPATH=integrations/joshinator-analyzer/backend python3 -m unittest backend.test_embodiment -v\npython3 scripts/embodiment-billion-fuzz.py --n 1000000',
+      priority: toolingRelated.score < 85 ? 64 : 50,
+      relatedWorkspaceIds: [toolingRelated.id],
+      relatedConceptIds: ['error-handling'],
+      sourceFindingIds: toolingRelated.findings.map((f) => f.id).slice(0, 2),
+    });
   }
 
   const agiWs = workspaces.find((w) => w.kind === 'agi_research');
