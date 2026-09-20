@@ -150,6 +150,15 @@
       "layer": "memory",
       "paths": ["identity/persistence/", "scripts/persist-export.py"],
       "feeds": ["piece.vault"]
+    },
+    {
+      "id": "piece.higgsfield",
+      "title": "Higgsfield Speak clips",
+      "layer": "presence",
+      "paths": ["config/integrations/higgsfield.json", "scripts/higgsfield.py", "server/avatar/higgsfield.ts"],
+      "check": "python3 scripts/higgsfield-check.py",
+      "depends_on": ["piece.converse"],
+      "feeds": ["piece.home_ui"]
     }
   ],
   "boot_order": [

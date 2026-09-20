@@ -121,6 +121,22 @@
         "motor.speak"
       ],
       "revise_to": "file_render_only_hold_audible"
+    },
+    {
+      "id": "higgsfield_live_is_outbound",
+      "description": "motor.higgsfield live Speak uploads Cam’s face; require outbound + presence",
+      "if_any_motors": [
+        "motor.higgsfield"
+      ],
+      "require_switch_act": [
+        "switch.outbound",
+        "switch.presence"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.higgsfield"
+      ],
+      "revise_to": "hold_higgsfield_dry_run"
     }
   ]
 }

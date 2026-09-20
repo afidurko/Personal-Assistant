@@ -21,7 +21,7 @@
     {
       "id": "switch.outbound",
       "default": "act_under_autonomy",
-      "act": ["motor.text", "motor.call", "motor.facetime", "motor.speak", "motor.inkbox"],
+      "act": ["motor.text", "motor.call", "motor.facetime", "motor.speak", "motor.inkbox", "motor.higgsfield"],
       "hold": "draft_only",
       "flipped_by": ["Aaron", "switch.kill"]
     },
@@ -35,7 +35,7 @@
     {
       "id": "switch.presence",
       "default": "studio_when_available",
-      "act": ["motor.speak", "sense.audio.transcript"],
+      "act": ["motor.speak", "sense.audio.transcript", "motor.higgsfield"],
       "hold": "text_and_still_portrait",
       "flipped_by": ["Aaron"]
     },

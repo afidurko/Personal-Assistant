@@ -1782,6 +1782,57 @@
       "to": "center.memory",
       "weight": 0.85,
       "notes": "feedback"
+    },
+    {
+      "from": "sense.higgsfield.health",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.higgsfield.result",
+      "to": "center.comms",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.higgsfield.result",
+      "to": "center.memory",
+      "weight": 0.8
+    },
+    {
+      "from": "center.comms",
+      "to": "switch.presence",
+      "weight": 0.9,
+      "notes": "higgsfield clips are presence"
+    },
+    {
+      "from": "center.comms",
+      "to": "switch.outbound",
+      "weight": 0.9,
+      "notes": "higgsfield live speak is outbound"
+    },
+    {
+      "from": "switch.outbound",
+      "to": "motor.higgsfield",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "motor.higgsfield",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.higgsfield",
+      "to": "area.mtl",
+      "weight": 0.9,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.higgsfield",
+      "to": "center.comms",
+      "weight": 0.7,
+      "notes": "feedback"
     }
   ]
 }

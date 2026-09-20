@@ -748,6 +748,38 @@
       "integration": "config/integrations/voicestudio.json"
     },
     {
+      "id": "hotspot.higgsfield",
+      "center": "center.comms",
+      "pathway": [
+        "sense.higgsfield.health",
+        "center.comms",
+        "switch.presence",
+        "switch.outbound",
+        "motor.higgsfield"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "higgsfield_speak_status_and_gated_clip",
+      "integration": "config/integrations/higgsfield.json"
+    },
+    {
+      "id": "hotspot.higgsfield_result",
+      "center": "center.comms",
+      "pathway": [
+        "sense.higgsfield.result",
+        "center.comms",
+        "switch.presence",
+        "switch.outbound",
+        "motor.higgsfield"
+      ],
+      "side_effects": [
+        "motor.vault"
+      ],
+      "behavior": "distill_higgsfield_speak_clip",
+      "integration": "config/integrations/higgsfield.json"
+    },
+    {
       "id": "hotspot.public_apis",
       "center": "center.tooling",
       "pathway": [

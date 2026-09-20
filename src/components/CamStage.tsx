@@ -50,6 +50,8 @@ export function CamStage({ onListeningChange }: CamStageProps) {
   } = useCamVoice();
 
   const [draft, setDraft] = useState('');
+  const [higgsClip, setHiggsClip] = useState<string | null>(null);
+  const [higgsNote, setHiggsNote] = useState<string | null>(null);
   const [typedCam, setTypedCam] = useState('');
   const [typingActive, setTypingActive] = useState(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
@@ -59,6 +61,18 @@ export function CamStage({ onListeningChange }: CamStageProps) {
   useEffect(() => {
     onListeningChange?.(listening);
   }, [listening, onListeningChange]);
+
+  useEffect(() => {
+    void fetch('/api/avatar/higgsfield')
+      .then((r) => r.json())
+      .then((j: { public_path?: string; credentials_present?: boolean; live_enabled?: boolean }) => {
+        setHiggsClip(j.public_path || null);
+        if (j.live_enabled && j.credentials_present) setHiggsNote('Higgsfield Speak ready');
+        else if (j.credentials_present) setHiggsNote('Higgsfield keys present — live off');
+        else setHiggsNote(null);
+      })
+      .catch(() => undefined);
+  }, []);
 
   // When a new Cam bubble arrives, type it out then speak
   useEffect(() => {
@@ -133,6 +147,7 @@ export function CamStage({ onListeningChange }: CamStageProps) {
               typing={typingActive && !speechFace.active}
               speakingText={speechFace.active ? speechFace.text : ''}
               speechProgress={speechFace.active ? speechFace.progress : -1}
+              clipUrl={higgsClip}
             />
           </div>
           <p className="cam-avatar-name">Cam</p>
@@ -140,6 +155,7 @@ export function CamStage({ onListeningChange }: CamStageProps) {
           {adaptiveRaised ? (
             <p className="cam-avatar-note">Noise gate raised — room chatter filtered</p>
           ) : null}
+          {higgsNote ? <p className="cam-avatar-note">{higgsNote}</p> : null}
         </div>
 
         <MiniBrain

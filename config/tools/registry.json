@@ -378,6 +378,57 @@
       "motor": "motor.inkbox"
     },
     {
+      "id": "tool.higgsfield.check",
+      "purpose": "Confirm Higgsfield Speak wiring (no API key / no upload)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/higgsfield-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/higgsfield.json",
+      "motor": "motor.higgsfield"
+    },
+    {
+      "id": "tool.higgsfield.speak",
+      "purpose": "Dry-run or Aaron-gated Higgsfield Speak clip (portrait + audio)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/higgsfield.py",
+      "kind": "local_script",
+      "inputs": {
+        "text": "string?",
+        "dry_run": "boolean",
+        "live": "boolean?"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "report": "object"
+      },
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.outbound",
+        "switch.presence",
+        "switch.kill"
+      ],
+      "risk": "high",
+      "status": "active",
+      "integration": "config/integrations/higgsfield.json",
+      "motor": "motor.higgsfield",
+      "notes": "Live mode spends money and uploads Cam’s face. Default dry-run."
+    },
+    {
       "id": "tool.memorybear.read",
       "purpose": "Recall cognitive memory via MemoryBear (offline fixture or live API)",
       "created_by_role": "memory-curator",

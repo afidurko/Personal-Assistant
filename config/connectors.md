@@ -88,6 +88,14 @@
 - Prefer for simple/local speak when RIVA studio is offline; full face presence still LLMAvatarTalk
 - Not a second brain — nullclaw remains executive
 
+## Higgsfield Speak (cinematic clips)
+
+- Policy: `config/integrations/higgsfield.md` · config: `config/integrations/higgsfield.json`
+- Portrait + WAV → short MP4 (Speak v2). Not the live A2F session.
+- Health: `python3 scripts/higgsfield-check.py` · client: `python3 scripts/higgsfield.py status --json`
+- Live jobs: `HIGGSFIELD_LIVE=1` + keys; gated by `switch.outbound`. Never auto-fire from `/api/turn`.
+- Cline does not spend money or upload Cam’s face.
+
 ## Knowledge cortex (smart-second-brain)
 
 - Submodule: `integrations/smart-second-brain`

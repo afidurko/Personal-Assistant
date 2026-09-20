@@ -1,0 +1,47 @@
+{
+  "id": "higgsfield",
+  "name": "Higgsfield Speak",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-20",
+  "role": "Cloud lip-sync clip renderer for Cam’s identity portrait (not the live brain)",
+  "policy": "config/integrations/higgsfield.md",
+  "homepage": "https://higgsfield.ai",
+  "docs": "https://docs.higgsfield.ai/docs",
+  "console": "https://console.higgsfield.ai",
+  "sense": "sense.higgsfield.result",
+  "health_sense": "sense.higgsfield.health",
+  "hotspots": ["hotspot.higgsfield", "hotspot.higgsfield_result"],
+  "motor": "motor.higgsfield",
+  "switch": ["switch.outbound", "switch.presence", "switch.kill"],
+  "center": "center.comms",
+  "mesh_namespace": "mesh/presence",
+  "portrait": "identity/persona/cam-face.jpg",
+  "provider": {
+    "primary": "higgsfield_speak_v2",
+    "api_base_env": "HIGGSFIELD_API_BASE",
+    "api_base_default": "https://platform.higgsfield.ai",
+    "speak_path": "/v1/speak/higgsfield",
+    "status_path": "/requests/{id}/status",
+    "key_id_env": "HIGGSFIELD_API_KEY_ID",
+    "key_secret_env": "HIGGSFIELD_API_KEY_SECRET",
+    "live_env": "HIGGSFIELD_LIVE",
+    "notes": "Authorization: Key KEY_ID:KEY_SECRET. Live jobs cost money and send Cam’s face off-box. Never commit keys."
+  },
+  "defaults": {
+    "quality": "mid",
+    "duration": 10,
+    "prompt": "Soft airy English. Calm, close-up talking portrait. Natural lip motion. No captions.",
+    "offline_ok": true,
+    "save_to_mesh": true,
+    "auto_on_turn": false
+  },
+  "scripts": {
+    "client": "scripts/higgsfield.py",
+    "check": "scripts/higgsfield-check.py"
+  },
+  "gates": {
+    "live_requires": ["credentials", "HIGGSFIELD_LIVE=1", "switch.outbound", "switch.presence"],
+    "auto_speak_on_turn": false
+  }
+}

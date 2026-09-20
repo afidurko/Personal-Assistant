@@ -9,7 +9,7 @@ Tools:
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
-  voicestudio_health
+  higgsfield_check, higgsfield_status, voicestudio_health
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -235,6 +235,19 @@ def tool_defs() -> list[dict]:
                 "Does not send email/SMS or require INKBOX_API_KEY. "
                 "Live outbound uses motor.inkbox under switch.outbound."
             ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "higgsfield_check",
+            "description": (
+                "Confirm Higgsfield Speak wiring (config, connectome, dry-run). "
+                "Does not upload Cam's face or spend money."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "higgsfield_status",
+            "description": "Higgsfield Speak status (credentials present, live gate, last clip). No upload.",
             "inputSchema": {"type": "object", "properties": {}},
         },
         {
@@ -488,6 +501,24 @@ def google_trends_addon(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def higgsfield_check(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/higgsfield-check.py")],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
+def higgsfield_status(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/higgsfield.py"), "status"],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
 def inkbox_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
@@ -561,6 +592,10 @@ def call_tool(name: str, arguments: dict) -> Any:
         return google_trends_search(arguments)
     if name == "google_trends_addon":
         return google_trends_addon(arguments)
+    if name == "higgsfield_check":
+        return higgsfield_check(arguments)
+    if name == "higgsfield_status":
+        return higgsfield_status(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
     if name == "voicestudio_health":

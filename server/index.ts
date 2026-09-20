@@ -13,6 +13,7 @@ import { CamAutonomy } from './core/cam-autonomy.js';
 import { RuntimeStore } from './core/runtime-store.js';
 import { SystemBridge } from './core/system-bridge.js';
 import { a2fStatus } from './avatar/a2f-bridge.js';
+import { higgsfieldStatus, runHiggsfield } from './avatar/higgsfield.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -199,6 +200,39 @@ app.post('/api/cam/autonomy/tick', async (_req, res) => {
 
 app.get('/api/avatar/a2f', async (_req, res) => {
   res.json(await a2fStatus());
+});
+
+app.get('/api/avatar/higgsfield', async (_req, res) => {
+  res.json(await higgsfieldStatus());
+});
+
+app.post('/api/avatar/higgsfield/speak', async (req, res) => {
+  const body = req.body as {
+    text?: string;
+    image_url?: string;
+    audio_url?: string;
+    live?: boolean;
+    quality?: string;
+    duration?: number;
+  };
+  const live = Boolean(body.live);
+  if (live && !['1', 'true', 'yes', 'on'].includes(String(process.env.HIGGSFIELD_LIVE || '').toLowerCase())) {
+    res.status(403).json({
+      ok: false,
+      error: 'higgsfield_live_disabled',
+      detail: 'Set HIGGSFIELD_LIVE=1 to spend. /api/turn never calls this.',
+    });
+    return;
+  }
+  const args = ['speak', '--text', String(body.text || '')];
+  if (!live) args.push('--dry-run');
+  else args.push('--live');
+  if (body.image_url) args.push('--image-url', String(body.image_url));
+  if (body.audio_url) args.push('--audio-url', String(body.audio_url));
+  if (body.quality) args.push('--quality', String(body.quality));
+  if (body.duration) args.push('--duration', String(body.duration));
+  const result = await runHiggsfield(args);
+  res.status(result.ok ? 200 : 400).json(result);
 });
 
 app.get('/api/session', (_req, res) => {
@@ -474,6 +508,7 @@ app.get('/favicon.ico', (_req, res) => {
   res.redirect(302, '/favicon.svg');
 });
 app.use(express.static(path.join(ROOT, 'public')));
+app.use('/higgsfield-clips', express.static(path.join(ROOT, 'data/higgsfield')));
 app.use('/identity', express.static(path.join(ROOT, 'identity')));
 app.use('/vault', express.static(path.join(ROOT, 'vault')));
 app.use('/config', express.static(path.join(ROOT, 'config')));

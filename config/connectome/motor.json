@@ -41,7 +41,8 @@
         "riva_tts",
         "audio2face",
         "metahuman_optional",
-        "voicestudio_local_tts"
+        "voicestudio_local_tts",
+        "higgsfield_speak_clip"
       ],
       "requires_switch": [
         "switch.presence",
@@ -50,7 +51,20 @@
         "switch.kill"
       ],
       "voice_profile": "config/persona/voice.json",
-      "notes": "Aaron-only audible speak (switch.identity). RIVA/Audio2Face for full presence; VoiceStudio for local-first TTS when studio offline."
+      "notes": "Aaron-only audible speak (switch.identity). RIVA/Audio2Face for full presence; VoiceStudio for local-first TTS when studio offline; Higgsfield for gated cinematic clips."
+    },
+    {
+      "id": "motor.higgsfield",
+      "channel": [
+        "higgsfield_speak"
+      ],
+      "config": "config/integrations/higgsfield.json",
+      "requires_switch": [
+        "switch.outbound",
+        "switch.presence",
+        "switch.kill"
+      ],
+      "notes": "Paid Speak clips of Cam’s portrait. Never auto-fire from /api/turn. Cline must not --live."
     },
     {
       "id": "motor.voicestudio",

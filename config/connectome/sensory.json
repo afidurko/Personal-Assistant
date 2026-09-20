@@ -372,6 +372,25 @@
         "spike.tool_result"
       ],
       "notes": "TTS/ASR/clone job result from VoiceStudio REST or MCP \u2014 not Aaron speaker-ID"
+    },
+    {
+      "id": "sense.higgsfield.health",
+      "modality": "presence_platform",
+      "source": "higgsfield_api",
+      "emits": [
+        "spike.tool_result"
+      ],
+      "notes": "Higgsfield Speak credentials / live-gate readiness — no upload"
+    },
+    {
+      "id": "sense.higgsfield.result",
+      "modality": "presence_platform",
+      "source": "higgsfield_speak",
+      "emits": [
+        "spike.tool_result",
+        "spike.video"
+      ],
+      "notes": "Completed Speak clip (portrait + WAV → MP4). Live jobs are outbound."
     }
   ]
 }

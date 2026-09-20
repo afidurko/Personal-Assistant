@@ -73,6 +73,7 @@ export default defineConfig({
       '/identity': 'http://127.0.0.1:8787',
       '/companions': 'http://127.0.0.1:8787',
       '/visualizations': 'http://127.0.0.1:8787',
+      '/higgsfield-clips': 'http://127.0.0.1:8787',
     },
   },
   build: {
