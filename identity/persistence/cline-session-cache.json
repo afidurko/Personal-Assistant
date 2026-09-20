@@ -43,6 +43,16 @@
       "at": "2026-09-20T14:58:30Z",
       "namespace": "mesh/projects",
       "note": "instinct: live=21 escalations=0 drafts=0 asks=0"
+    },
+    {
+      "at": "2026-09-20T15:00:00Z",
+      "namespace": "mesh/projects",
+      "note": "instinct: live=6 escalations=0 drafts=0 asks=0"
+    },
+    {
+      "at": "2026-09-20T15:00:00Z",
+      "namespace": "mesh/projects",
+      "note": "instinct: live=6 escalations=0 drafts=0 asks=0"
     }
   ],
   "notes": [
@@ -259,7 +269,7 @@
       "workspace_id": "personal-assistant"
     }
   ],
-  "schedules_synced_at": "2026-09-20T14:58:33.426677+00:00",
+  "schedules_synced_at": "2026-09-20T15:43:33.215187+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

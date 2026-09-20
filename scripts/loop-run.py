@@ -175,12 +175,30 @@ def action_scan_recent_merges() -> dict:
     }
 
 
+def action_connectors_pull() -> dict:
+    """Read-only connector pulls that feed the Instinct inbox: calendar (ICS,
+    $CAM_CALENDAR_ICS) and Inkbox inbound drops. Both are data-only senses —
+    they never write to the calendar or reply to anyone."""
+    return {
+        "calendar": run_py("scripts/calendar-sync.py", ["--write"]),
+        "inkbox_inbound": run_py("scripts/inkbox-inbound.py", ["--write"]),
+    }
+
+
 def action_instinct_sync() -> dict:
     """Fold inbox event drops (run-cline, senses) + the Needs Attention queue
     from all coding workspaces into the follow-through ledger."""
     return {
         "inbox": run_py("scripts/instinct.py", ["sync"]),
         "attention": run_py("scripts/instinct.py", ["attention-sync"]),
+    }
+
+
+def action_swarm_distill() -> dict:
+    """Counts-only agent-lineage distillate + invariant doctor."""
+    return {
+        "doctor": run_py("scripts/cam_swarm.py", ["doctor"]),
+        "distill": run_py("scripts/cam_swarm.py", ["distill"]),
     }
 
 
@@ -246,8 +264,12 @@ def run_pattern(pattern: dict, level: str, dry_run: bool) -> dict:
             results[act] = action_scan_recent_merges()
         elif act == "list_open_prs_report":
             results[act] = action_list_open_prs_report()
+        elif act == "connectors_pull":
+            results[act] = action_connectors_pull()
         elif act == "instinct_sync":
             results[act] = action_instinct_sync()
+        elif act == "swarm_distill":
+            results[act] = action_swarm_distill()
         elif act == "instinct_scan":
             results[act] = action_instinct_scan()
         elif act == "instinct_distill":

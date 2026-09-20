@@ -86,6 +86,8 @@ def smoke_checks() -> list[dict]:
     for name, cmd in [
         ("connectome-check", [sys.executable, "scripts/connectome-check.py"]),
         ("swarm-check", [sys.executable, "scripts/swarm-check.py"]),
+        ("connectors-check", [sys.executable, "scripts/connectors-check.py"]),
+        ("swarm-runtime-doctor", [sys.executable, "scripts/cam_swarm.py", "doctor"]),
         (
             "workspace-integration-check",
             [sys.executable, "scripts/workspace-integration-check.py"],

@@ -5,6 +5,8 @@ dist-server/
 data/*.json
 data/runtime/
 data/instinct/
+data/swarm/
+data/inkbox/
 data/voicestudio/
 !data/.gitkeep
 .DS_Store

@@ -776,6 +776,148 @@
       "status": "active",
       "integration": "config/integrations/instinct.json",
       "motor": "motor.instinct"
+    },
+    {
+      "created_by_role": "tool-creator",
+      "kind": "local_script",
+      "required_privileges": [
+        "spawn_subagents",
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.tooling",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.swarm.runtime",
+      "purpose": "File-backed synapse.spawn/assign_task/resolve_task/broadcast/terminate_lineage with privilege inheritance; unlimited; Aaron kill/resume",
+      "entrypoint": "scripts/cam_swarm.py",
+      "inputs": {
+        "cmd": "spawn|assign|resolve|send|broadcast|terminate|tree|stats|doctor|distill|kill|resume"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "agent|action|terminated": "object"
+      },
+      "integration": "config/swarm/primitives.json",
+      "motor": "motor.swarm"
+    },
+    {
+      "created_by_role": "tool-creator",
+      "kind": "local_script",
+      "required_privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.instinct.delegate",
+      "purpose": "Spawn one subagent per Instinct job and pin the lineage on the job",
+      "entrypoint": "scripts/instinct.py",
+      "inputs": {
+        "job": "id",
+        "role": "string?"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "agent": "string",
+        "action": "string"
+      },
+      "integration": "config/integrations/instinct.json",
+      "motor": "motor.instinct"
+    },
+    {
+      "created_by_role": "tool-creator",
+      "kind": "local_script",
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.connectors.check",
+      "purpose": "Validate config/connectors/registry.json against connectome, switches, scripts, MCP tools, roles; report credential presence (bool only)",
+      "entrypoint": "scripts/connectors-check.py",
+      "inputs": {
+        "json": "boolean"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]",
+        "findings": "string[]"
+      },
+      "integration": "config/connectors/registry.json",
+      "motor": null
+    },
+    {
+      "created_by_role": "tool-creator",
+      "kind": "local_script",
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.calendar.sync",
+      "purpose": "Read-only ICS → Instinct prep jobs (idempotent by ics:<uid>)",
+      "entrypoint": "scripts/calendar-sync.py",
+      "inputs": {
+        "ics": "path|url[]",
+        "horizon_days": "int",
+        "write": "boolean"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "planned": "object[]",
+        "dropped": "int"
+      },
+      "integration": "config/connectors/registry.json",
+      "motor": null,
+      "sense": "sense.calendar.event"
+    },
+    {
+      "created_by_role": "tool-creator",
+      "kind": "local_script",
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.inkbox.inbound",
+      "purpose": "Inkbox inbound events → Instinct thread as data only (links stripped; never executes content)",
+      "entrypoint": "scripts/inkbox-inbound.py",
+      "inputs": {
+        "write": "boolean",
+        "no_jobs": "boolean",
+        "reply_due": "+2d"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "planned": "int",
+        "dropped": "int"
+      },
+      "integration": "config/integrations/inkbox.json",
+      "motor": null,
+      "sense": "sense.inkbox.event"
     }
   ]
 }

@@ -123,9 +123,11 @@
       "schedule_id": "cam-nightly-instinct-scan",
       "neuron": "neuron.watch_loop",
       "actions": [
+        "connectors_pull",
         "instinct_sync",
         "instinct_scan",
         "instinct_distill",
+        "swarm_distill",
         "update_state",
         "append_run_log",
         "pack_mesh"
@@ -134,7 +136,8 @@
         "outbound-send"
       ],
       "cline_dispatch": false,
-      "notes": "Cross-workspace follow-through: fold run-cline drops + Needs Attention queue, draft-only scan, sanitized per-workspace mesh distillate. Sends stay gated behind switch.outbound via motor.inkbox."
+      "notes": "Cross-workspace follow-through: pull read-only connectors (calendar ICS, Inkbox inbound), fold run-cline drops + Needs Attention queue, draft-only scan, sanitized per-workspace mesh distillate, agent-lineage doctor/distillate. Sends stay gated behind switch.outbound via motor.inkbox.",
+      "team": "team.follow-through"
     }
   ]
 }

@@ -65,7 +65,8 @@ def main() -> int:
     engine_text = (ROOT / "scripts/instinct.py").read_text(encoding="utf-8")
     for needle in ("cmd_outbox", "cmd_stats", "cmd_find", "parse_when",
                    "cmd_workspaces", "cmd_dispatch", "cmd_attention_sync", "cmd_distill",
-                   "track_cline_run", "resolve_workspace"):
+                   "track_cline_run", "resolve_workspace",
+                   "cmd_delegate", "resolve_delegation", "pick_role"):
         if needle not in engine_text:
             errors.append(f"engine missing {needle}")
 
@@ -80,9 +81,35 @@ def main() -> int:
     ):
         if needle not in (ROOT / rel).read_text(encoding="utf-8"):
             errors.append(f"cross-workspace wiring missing {needle} in {rel}")
-    for tool in ("instinct_workspaces", "instinct_dispatch"):
+    for tool in ("instinct_workspaces", "instinct_dispatch", "instinct_delegate",
+                 "swarm_spawn", "swarm_tree", "connectors_list", "calendar_sync", "inkbox_inbound"):
         if f'"{tool}"' not in mcp_text:
             errors.append(f"cam-mcp-server missing tool {tool}")
+
+    # Agents + connectors upgrade: team, spawn runtime, bridges, registry
+    for rel in ("config/teams/follow-through.json", "config/connectors/registry.json",
+                "scripts/cam_swarm.py", "scripts/calendar-sync.py", "scripts/inkbox-inbound.py",
+                "scripts/connectors-check.py", "scripts/test_cam_swarm.py", "scripts/test_connectors.py"):
+        if not (ROOT / rel).exists():
+            errors.append(f"missing {rel}")
+    for role in ("follow-through-lead", "scheduler", "inbox-triage", "errand-runner", "negotiator", "watcher"):
+        if not (ROOT / "config/roles" / f"{role}.md").exists():
+            errors.append(f"missing role prompt {role}")
+    privs = load(ROOT / "config/swarm/privileges.json")
+    aaron_only = set(privs["privilege_catalog"]["aaron_only"])
+    for role, entry in privs["role_defaults"].items():
+        if role == "chief":
+            continue
+        if "outbound_send" in entry["privileges"]:
+            errors.append(f"role default {role} must not carry outbound_send (Aaron flips switch.outbound)")
+        if set(entry["privileges"]) & aaron_only:
+            errors.append(f"role default {role} carries Aaron-only privileges")
+    centers = load(ROOT / "config/connectome/centers.json")
+    if "team.follow-through" not in (centers.get("teams") or []):
+        errors.append("centers.teams missing team.follow-through")
+    for needle in ("connectors_pull", "swarm_distill"):
+        if needle not in (ROOT / "scripts/loop-run.py").read_text(encoding="utf-8"):
+            errors.append(f"loop-run missing action {needle}")
     reg_full = load(ROOT / "config/workspaces/registry.json")
     pa_signal = next((s for s in (reg_full.get("chooser") or {}).get("signals") or []
                       if s.get("id") == "personal-assistant"), {})
@@ -91,7 +118,7 @@ def main() -> int:
     pats_full = load(ROOT / "config/loops/patterns.json")
     pat_actions = next((p.get("actions") or [] for p in pats_full.get("patterns") or []
                         if p.get("id") == "instinct-followups"), [])
-    for act in ("instinct_sync", "instinct_scan", "instinct_distill"):
+    for act in ("connectors_pull", "instinct_sync", "instinct_scan", "instinct_distill", "swarm_distill"):
         if act not in pat_actions:
             errors.append(f"instinct-followups loop missing action {act}")
     # dispatch must be print-only: the engine must never invoke run-cline itself

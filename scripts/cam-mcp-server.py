@@ -20,6 +20,7 @@ Install into Cline (example):
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -389,7 +390,173 @@ def tool_defs() -> list[dict]:
                 },
             },
         },
+        {
+            "name": "instinct_delegate",
+            "description": (
+                "Spawn a subagent for one Instinct job (synapse.spawn + assign_task via "
+                "scripts/cam_swarm.py). Role is picked by job kind/title unless given. "
+                "Unlimited, no human gate; child privileges ⊆ chief — it can draft, never send."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "job": {"type": "string", "description": "job id (prefix ok)"},
+                    "role": {"type": "string"},
+                    "parent": {"type": "string", "description": "spawning agent id (default chief)"},
+                    "force": {"type": "boolean"},
+                    "now": {"type": "string"},
+                },
+                "required": ["job"],
+            },
+        },
+        {
+            "name": "swarm_spawn",
+            "description": (
+                "synapse.spawn — create a subagent at parent.level + 1 with privileges ⊆ parent. "
+                "Unlimited count/depth; never grants Aaron-only privileges; refused while switch.kill is act."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "role": {"type": "string"},
+                    "parent": {"type": "string", "description": "default chief"},
+                    "mandate": {"type": "string"},
+                    "job": {"type": "string", "description": "job:<instinct id>"},
+                    "team": {"type": "string", "description": "team.* for broadcast membership"},
+                    "privileges": {"type": "array", "items": {"type": "string"}},
+                    "now": {"type": "string"},
+                },
+                "required": ["role"],
+            },
+        },
+        {
+            "name": "swarm_assign",
+            "description": "synapse.assign_task — queue a task on an active agent (internal bus; not outbound).",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "assignee": {"type": "string"},
+                    "task": {"type": "string"},
+                    "caller": {"type": "string", "description": "default chief"},
+                    "parent_action": {"type": "string"},
+                    "job": {"type": "string"},
+                    "now": {"type": "string"},
+                },
+                "required": ["assignee", "task"],
+            },
+        },
+        {
+            "name": "swarm_resolve",
+            "description": "synapse.resolve_task — done | failed | blocked | cancelled with an optional distillate.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "action": {"type": "string"},
+                    "status": {"type": "string", "enum": ["done", "failed", "blocked", "cancelled"]},
+                    "caller": {"type": "string", "description": "default chief"},
+                    "distillate": {"type": "string"},
+                    "now": {"type": "string"},
+                },
+                "required": ["action", "status"],
+            },
+        },
+        {
+            "name": "swarm_tree",
+            "description": "Lineage tree (Aaron → chief → specialists → subagents) with open action counts.",
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "swarm_stats",
+            "description": "Swarm counts: active/terminated agents, max level, by role/team, actions, kill state.",
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "connectors_list",
+            "description": (
+                "Every app/connector Cam can reach (config/connectors/registry.json) with mode "
+                "(read/draft/act/via_brain), switch gate, connectome node, roles, and whether its "
+                "credential is present (bool only). Validated by scripts/connectors-check.py."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "mode": {"type": "string", "description": "filter: read | draft | act | via_brain"},
+                    "role": {"type": "string", "description": "only connectors this role may use"},
+                },
+            },
+        },
+        {
+            "name": "calendar_sync",
+            "description": (
+                "Read-only ICS calendar → Instinct prep jobs (source_ref ics:<uid>, idempotent). "
+                "Sources from $CAM_CALENDAR_ICS or `ics`. write=true drops events for `instinct sync`. "
+                "Never writes to the calendar."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "ics": {"type": "array", "items": {"type": "string"}},
+                    "horizon_days": {"type": "integer"},
+                    "write": {"type": "boolean"},
+                    "now": {"type": "string"},
+                },
+            },
+        },
+        {
+            "name": "inkbox_inbound",
+            "description": (
+                "Fold Inkbox inbound events (email/SMS/missed call JSON in data/inkbox/inbound) into "
+                "the Instinct thread as DATA ONLY — links stripped, content never executed. "
+                "write=true drops + archives; no_jobs=true keeps it to thread notes."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "write": {"type": "boolean"},
+                    "no_jobs": {"type": "boolean"},
+                    "reply_due": {"type": "string", "description": "default +2d"},
+                    "now": {"type": "string"},
+                },
+            },
+        },
     ]
+
+
+def script_cli(rel: str, argv: list[str], text_output: bool = False) -> Any:
+    proc = subprocess.run([sys.executable, str(ROOT / rel), *argv], cwd=str(ROOT),
+                          capture_output=True, text=True)
+    if text_output:
+        return {"ok": proc.returncode == 0, "text": proc.stdout, "stderr": proc.stderr or None}
+    try:
+        out = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {"ok": False, "stdout": proc.stdout, "stderr": proc.stderr, "exit_code": proc.returncode}
+    if proc.returncode != 0 and isinstance(out, dict) and "ok" not in out:
+        out["ok"] = False
+    if proc.returncode != 0 and proc.stderr:
+        out = {"ok": False, "error": proc.stderr.strip(), "result": out} if isinstance(out, dict) else out
+    return out
+
+
+def connectors_list(arguments: dict | None) -> dict:
+    arguments = arguments or {}
+    reg = cw.load_json(ROOT / "config" / "connectors" / "registry.json")
+    rows = []
+    for c in reg.get("connectors") or []:
+        if arguments.get("mode") and c.get("mode") != arguments["mode"]:
+            continue
+        role = arguments.get("role")
+        if role and c.get("roles") != "all" and role not in (c.get("roles") or []):
+            continue
+        rows.append({
+            "id": c["id"], "label": c.get("label"), "mode": c.get("mode"), "status": c.get("status"),
+            "switch": c.get("switch"), "sense": c.get("sense"), "motor": c.get("motor"),
+            "roles": c.get("roles"), "mcp_tools": c.get("mcp_tools") or [],
+            "credentials_present": {k: bool(os.environ.get(k)) for k in (c.get("credential_env") or [])},
+            "notes": c.get("notes"),
+        })
+    return {"ok": True, "count": len(rows), "modes": reg.get("modes"), "connectors": rows,
+            "policy": reg.get("policy")}
 
 
 def mesh_search(query: str, limit: int = 20) -> dict:
@@ -834,6 +1001,66 @@ def call_tool(name: str, arguments: dict) -> Any:
     if name == "instinct_dispatch":
         limit = arguments.get("limit")
         return instinct_cli(arguments, "dispatch", extra=["--limit", str(int(limit))] if limit else None)
+    if name == "instinct_delegate":
+        extra = [str(arguments["job"])]
+        if arguments.get("role"):
+            extra += ["--role", str(arguments["role"])]
+        if arguments.get("parent"):
+            extra += ["--parent", str(arguments["parent"])]
+        if arguments.get("force"):
+            extra.append("--force")
+        return instinct_cli(arguments, "delegate", extra=extra)
+    if name.startswith("swarm_"):
+        argv: list[str] = []
+        if arguments.get("now"):
+            argv += ["--now", str(arguments["now"])]
+        sub = name.split("_", 1)[1]
+        if sub == "spawn":
+            argv += ["spawn", str(arguments["role"])]
+            for key, flag in (("parent", "--parent"), ("mandate", "--mandate"), ("job", "--job"), ("team", "--team")):
+                if arguments.get(key):
+                    argv += [flag, str(arguments[key])]
+            for priv in arguments.get("privileges") or []:
+                argv += ["--privilege", str(priv)]
+        elif sub == "assign":
+            argv += ["assign", str(arguments["assignee"]), str(arguments["task"])]
+            for key, flag in (("caller", "--caller"), ("parent_action", "--parent-action"), ("job", "--job")):
+                if arguments.get(key):
+                    argv += [flag, str(arguments[key])]
+        elif sub == "resolve":
+            argv += ["resolve", str(arguments["action"]), str(arguments["status"])]
+            for key, flag in (("caller", "--caller"), ("distillate", "--distillate")):
+                if arguments.get(key):
+                    argv += [flag, str(arguments[key])]
+        elif sub in ("tree", "stats"):
+            argv += [sub]
+        else:
+            raise ValueError(f"unknown tool: {name}")
+        return script_cli("scripts/cam_swarm.py", argv, text_output=(sub == "tree"))
+    if name == "connectors_list":
+        return connectors_list(arguments)
+    if name == "calendar_sync":
+        argv = []
+        if arguments.get("now"):
+            argv += ["--now", str(arguments["now"])]
+        for src in arguments.get("ics") or []:
+            argv += ["--ics", str(src)]
+        if arguments.get("horizon_days"):
+            argv += ["--horizon-days", str(int(arguments["horizon_days"]))]
+        if arguments.get("write"):
+            argv.append("--write")
+        return script_cli("scripts/calendar-sync.py", argv)
+    if name == "inkbox_inbound":
+        argv = []
+        if arguments.get("now"):
+            argv += ["--now", str(arguments["now"])]
+        if arguments.get("write"):
+            argv.append("--write")
+        if arguments.get("no_jobs"):
+            argv.append("--no-jobs")
+        if arguments.get("reply_due"):
+            argv += ["--reply-due", str(arguments["reply_due"])]
+        return script_cli("scripts/inkbox-inbound.py", argv)
     raise ValueError(f"unknown tool: {name}")
 
 
