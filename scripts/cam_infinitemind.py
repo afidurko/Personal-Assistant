@@ -60,20 +60,25 @@ def available() -> bool:
     return (INFINITEMIND / "logic_engine.py").is_file()
 
 
+_ENGINES: dict[str, Any] | None = None
+
+
 def load_engines() -> dict[str, Any]:
-    """Import InfiniteMind engines (optional deps already guarded upstream)."""
+    """Import InfiniteMind engines once per process."""
+    global _ENGINES
+    if _ENGINES is not None:
+        return _ENGINES
     _ensure_path()
     from logic_engine import LogicEngine  # type: ignore
-    from meta_reasoning import MetaReasoning  # type: ignore
     from epistemic_confidence import EpistemicConfidence  # type: ignore
     from abductive_reasoning import AbductiveHypothesisGenerator  # type: ignore
 
-    return {
+    _ENGINES = {
         "LogicEngine": LogicEngine,
-        "MetaReasoning": MetaReasoning,
         "EpistemicConfidence": EpistemicConfidence,
         "AbductiveHypothesisGenerator": AbductiveHypothesisGenerator,
     }
+    return _ENGINES
 
 
 def pick_strategy(intents: list[str]) -> str:
@@ -182,7 +187,6 @@ def _enrich_raw(
 
     engines = load_engines()
     LogicEngine = engines["LogicEngine"]
-    MetaReasoning = engines["MetaReasoning"]
     EpistemicConfidence = engines["EpistemicConfidence"]
     AbductiveHypothesisGenerator = engines["AbductiveHypothesisGenerator"]
 
@@ -194,20 +198,13 @@ def _enrich_raw(
     chain = logic.forward_chain_to_fixpoint(max_iterations=8)
 
     strategy = pick_strategy(intents)
-    meta = MetaReasoning()
-    # Record strategy attempt without relying on RNG select_strategy
-    if strategy in meta.strategies:
-        meta.strategies[strategy]["attempts"] += 1
-    meta.update_cognitive_load(len(escalate_reasons) * 0.15 + (0.2 if escalate else 0.05))
-    deepen = meta.should_deepen()
-    refined = meta.refine(
-        {
-            "goal": (goal or "")[:200],
-            "intents": intents,
-            "strategy": strategy,
-            "escalate": escalate,
-        }
-    )
+    load = min(1.0, len(escalate_reasons) * 0.15 + (0.2 if escalate else 0.05))
+    refined = {
+        "goal": (goal or "")[:200],
+        "intents": intents,
+        "strategy": strategy,
+        "escalate": escalate,
+    }
 
     # Abductive: best explanation for path choice
     observations = {
@@ -252,9 +249,9 @@ def _enrich_raw(
         "source": "integrations/infinitemind",
         "strategy": strategy,
         "meta": {
-            "cognitive_load": float(meta.cognitive_load),
-            "should_deepen": bool(deepen),
-            "refined": refined if isinstance(refined, dict) else {"text": refined},
+            "cognitive_load": load,
+            "should_deepen": load < 0.3,
+            "refined": refined,
         },
         "logic": {
             "asserted": asserted,

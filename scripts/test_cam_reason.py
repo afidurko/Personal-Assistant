@@ -48,6 +48,8 @@ class ReasonDryRunTests(unittest.TestCase):
         self.assertEqual(t["sgr_iterations"], 0)
         self.assertNotIn("sgr", t["stages"])
         self.assertIn("fast", t["stages"])
+        self.assertNotIn("ConnectomeRouteTool", t.get("toolkit") or [])
+        self.assertFalse((t.get("compute") or {}).get("routed", True))
 
     def test_enhance_slow_strips_without_switch(self):
         t = cr.reason(goal="enhance Cam functionality please", write_trace=False)

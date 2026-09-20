@@ -12,7 +12,7 @@ Plan + **Phase B dry-run** + dual billion QA — merged.
 | Gate | Surface |
 |---|---|
 | Slow | `cam-infinitemind` / stage `logic` before SGR |
-| Fast | `cam-fast` — LRU + skip recall/logic/SGR; ~8ms budget |
+| Fast | `cam-fast` — classify once, skip connectome scan + recall/logic/SGR |
 
 ```bash
 python3 scripts/test_cam_fast.py

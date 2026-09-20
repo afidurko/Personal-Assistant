@@ -24,8 +24,6 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import trajectory_policies as tp  # noqa: E402
-import cam_infinitemind as cim  # noqa: E402
-import cam_fast as cf  # noqa: E402
 
 REASONING_CFG = ROOT / "config" / "enhancement" / "reasoning-logic.json"
 HMO_CFG = ROOT / "config" / "memory" / "hmo-tiers.json"
@@ -185,6 +183,22 @@ def mesh_recall(goal: str, personal_fact: bool) -> dict[str, Any]:
     }
 
 
+def _switch_state(*, kill: bool, enhance: bool) -> dict[str, str]:
+    key = f"sw:{int(kill)}:{int(enhance)}"
+    if key not in _CACHE:
+        cr = connectome_route()
+        _CACHE[key] = cr.resolve_switches(
+            _connectome_json("switches.json"),
+            kill=kill,
+            autonomy=True,
+            enhance=enhance,
+            research_scan=True,
+            slm=True,
+            dl=True,
+        )
+    return _CACHE[key]
+
+
 def connectome_route_tool(
     sense: str,
     goal: str,
@@ -196,12 +210,12 @@ def connectome_route_tool(
 ) -> dict[str, Any]:
     cr = connectome_route()
     sensory = _connectome_json("sensory.json")
-    switches = _connectome_json("switches.json")
     motor = _connectome_json("motor.json")
     hotspots = _connectome_json("hotspots.json")
 
-    sense_ids = {n["id"] for n in sensory["neurons"]}
-    if sense not in sense_ids:
+    if "sense_ids" not in _CACHE:
+        _CACHE["sense_ids"] = {n["id"] for n in sensory["neurons"]}
+    if sense not in _CACHE["sense_ids"]:
         return {"tool": "ConnectomeRouteTool", "error": f"unknown sense: {sense}", "motor_plan": []}
 
     if not_aaron:
@@ -212,16 +226,11 @@ def connectome_route_tool(
             "motor_plan": [],
         }
 
-    switch_state = cr.resolve_switches(
-        switches,
-        kill=kill,
-        autonomy=True,
-        enhance=enhance,
-        research_scan=True,
-        slm=True,
-        dl=True,
-    )
-    effector_reqs = {e["id"]: list(e.get("requires_switch") or []) for e in motor["effectors"]}
+    switch_state = _switch_state(kill=kill, enhance=enhance)
+    req_key = "effector_reqs"
+    if req_key not in _CACHE:
+        _CACHE[req_key] = {e["id"]: list(e.get("requires_switch") or []) for e in motor["effectors"]}
+    effector_reqs = _CACHE[req_key]
     candidates = cr.hotspots_for_sense(hotspots, sense)
     hotspot = cr.pick_hotspot(candidates, goal, hotspot_id)
     if hotspot:
@@ -335,6 +344,18 @@ def pick_stream_act(goal: str, intents: list[str]) -> str:
 
 # --- main loop ---------------------------------------------------------------
 
+def _trace(write: bool, **fields: Any) -> dict[str, Any]:
+    out = {
+        "kind": "reasoning_trace",
+        "persona": {"name": "Cam", "sole_operator": "Aaron"},
+        "ts": utc(),
+        **fields,
+    }
+    if write:
+        _write_trace(out)
+    return out
+
+
 def reason(
     *,
     goal: str = "",
@@ -346,279 +367,193 @@ def reason(
     write_trace: bool = True,
     force_path: str | None = None,
 ) -> dict[str, Any]:
+    """Single-pass loop: classify once → fast assemble or slow enrich. No double route."""
     cfg = load_reasoning_config()
-    stages: list[str] = ["accept"]
     classification = classify_intent(goal)
     escalate, esc_reasons = should_escalate(classification, cfg)
-
     if force_path == "fast":
         escalate, esc_reasons = False, ["forced_fast"]
     elif force_path == "slow":
         escalate, esc_reasons = True, list(dict.fromkeys(esc_reasons + ["forced_slow"]))
 
     if not_aaron:
-        trace = {
-            "kind": "reasoning_trace",
-            "sense": sense,
-            "goal": goal,
-            "path": "rejected",
-            "engine": None,
-            "accepted": False,
-            "reason": "switch.tasking hold — only Aaron may assign tasks",
-            "stages": ["accept"],
-            "motor_plan": [],
-            "violations": [],
-            "dry_run": dry_run,
-            "ts": utc(),
-        }
-        if write_trace:
-            _write_trace(trace)
-        return trace
+        return _trace(
+            write_trace,
+            sense=sense,
+            goal=goal,
+            path="rejected",
+            engine=None,
+            accepted=False,
+            reason="switch.tasking hold — only Aaron may assign tasks",
+            stages=["accept"],
+            motor_plan=[],
+            violations=[],
+            dry_run=dry_run,
+        )
 
-    stages.append("fast")
-    # Greetings: keep a light mesh plan — do not let "cam" token pick hotspot.cam_enhance
-    route_goal = goal
-    intents = classification.get("intents") or []
-    pure_fast = bool(intents) and set(intents) <= {
-        "greeting",
-        "ack",
-        "mic_check",
-        "presence_chatter",
-    }
-    if pure_fast:
-        route_goal = "capability complete task mesh"
-    route = connectome_route_tool(
-        sense,
-        route_goal,
-        kill=kill,
-        enhance=enhance,
-        not_aaron=False,
-        hotspot_id="hotspot.capability" if pure_fast else None,
-    )
-    # If capability hotspot missing from candidates, still fine — pick_hotspot falls through
-    if pure_fast and not route.get("hotspot_id"):
-        route = connectome_route_tool(sense, "", kill=kill, enhance=enhance)
-        # Prefer mesh-only for chatter
-        if not kill:
-            route["motor_plan"] = [m for m in (route.get("motor_plan") or []) if m == "motor.mesh"] or ["motor.mesh"]
-            route["hotspot_id"] = route.get("hotspot_id") or "fast_chatter"
-            route["behavior"] = "fast_presence_ack"
-    switch_state = route.get("switch_state") or {}
+    if kill:
+        return _trace(
+            write_trace,
+            sense=sense,
+            goal=goal,
+            path="killed",
+            engine=None,
+            accepted=False,
+            reason="switch.kill act — all motor silenced",
+            stages=["accept", "fast", "gate", "reflect", "motor"],
+            classification=classification,
+            escalation=esc_reasons,
+            hotspot_id=None,
+            motor_plan=[],
+            violations=[{"id": "kill_silences_all", "action": "clear_all_motors"}],
+            dry_run=dry_run,
+        )
 
-    if kill or switch_state.get("switch.kill") == "act":
-        stages.extend(["gate", "reflect", "motor"])
-        trace = {
-            "kind": "reasoning_trace",
-            "sense": sense,
-            "goal": goal,
-            "path": "killed",
-            "engine": None,
-            "accepted": False,
-            "reason": "switch.kill act — all motor silenced",
-            "stages": stages,
-            "classification": classification,
-            "escalation": esc_reasons,
-            "hotspot_id": route.get("hotspot_id"),
-            "motor_plan": [],
-            "violations": [{"id": "kill_silences_all", "action": "clear_all_motors"}],
-            "dry_run": dry_run,
-            "ts": utc(),
-        }
-        if write_trace:
-            _write_trace(trace)
-        return trace
+    # Fast gate: one classify already done — assemble, do not scan connectome.
+    if not escalate:
+        import cam_fast as cf  # noqa: PLC0415 — lazy so greetings skip InfiniteMind import
 
-    stages.append("gate")
-    path = "slow" if escalate else "fast"
-    toolkit_results: list[dict] = []
-    reasoning_schema = None
-    stream = "dorsal"
-    recall = None
-    im_result = None
-    fast_result = None
-    traj: dict[str, Any] = {"tool": "TrajectoryCheckTool", "motor_plan": [], "violations": []}
-
-    # --- System-1 fast gate: skip InfiniteMind + SGR + heavy I/O ---
-    if path == "fast":
         fast_result = cf.run_fast(
             goal=goal,
             sense=sense,
-            kill=kill,
+            kill=False,
             enhance=enhance,
+            classification=classification,
+            decided=True,
         )
-        toolkit_results.append(fast_result)
-        if fast_result.get("path") == "escalate_to_slow":
-            path = "slow"
-            escalate = True
-            esc_reasons = list(
-                dict.fromkeys(list(esc_reasons) + list(fast_result.get("escalation") or ["fast_recheck"]))
-            )
-        else:
-            stages = list(fast_result.get("stages") or ["accept", "fast", "gate", "stream", "motor", "distill"])
-            motor_plan = list(fast_result.get("motor_plan") or [])
-            stream = fast_result.get("stream") or "dorsal"
-            stream_act = fast_result.get("stream_act") or "speak"
-            summary = (
-                f"Fast path; hotspot={fast_result.get('hotspot_id')}; "
-                f"motors={motor_plan}; "
-                f"{(fast_result.get('compute') or {}).get('elapsed_ms')}ms"
-            )
-            answer = final_answer_tool(path, stream, summary)
-            toolkit_results.append(answer)
-            stages = list(stages)
-            if "distill" not in stages:
-                stages.append("distill")
-            trace = {
-                "kind": "reasoning_trace",
-                "sense": sense,
-                "goal": goal,
-                "path": "fast",
-                "engine": "system1_fast_heuristics",
-                "accepted": True,
-                "dry_run": dry_run,
-                "escalation": fast_result.get("escalation") or esc_reasons,
-                "stages": stages,
-                "stages_skipped": fast_result.get("stages_skipped"),
-                "classification": classification,
-                "hotspot_id": fast_result.get("hotspot_id"),
-                "area": route.get("area"),
-                "pathway": route.get("pathway"),
-                "stream": stream,
-                "stream_act": stream_act,
-                "reasoning_steps": None,
-                "switch_risks": [],
-                "sgr_iterations": 0,
-                "infinitemind": None,
-                "compute": fast_result.get("compute"),
-                "recall": None,
-                "motor_plan": motor_plan,
-                "violations": [],
-                "toolkit": [t.get("tool") for t in toolkit_results],
-                "toolkit_results": toolkit_results if dry_run else None,
-                "persona": {"name": "Cam", "sole_operator": "Aaron"},
-                "ts": utc(),
-            }
-            if write_trace:
-                _write_trace(trace)
-            return trace
+        toolkit = [fast_result, final_answer_tool("fast", "dorsal", f"Fast path; motors={fast_result.get('motor_plan')}")]
+        return _trace(
+            write_trace,
+            sense=sense,
+            goal=goal,
+            path="fast",
+            engine="system1_fast_heuristics",
+            accepted=True,
+            dry_run=dry_run,
+            escalation=fast_result.get("escalation") or esc_reasons,
+            stages=list(fast_result.get("stages") or ["accept", "fast", "gate", "stream", "motor", "distill"]),
+            stages_skipped=fast_result.get("stages_skipped"),
+            classification=classification,
+            hotspot_id=fast_result.get("hotspot_id"),
+            area=None,
+            pathway=None,
+            stream="dorsal",
+            stream_act="speak",
+            reasoning_steps=None,
+            switch_risks=[],
+            sgr_iterations=0,
+            infinitemind=None,
+            compute=fast_result.get("compute"),
+            recall=None,
+            motor_plan=list(fast_result.get("motor_plan") or []),
+            violations=[],
+            toolkit=[t.get("tool") for t in toolkit],
+            toolkit_results=toolkit if dry_run else None,
+        )
 
-    stream_act = pick_stream_act(goal, classification.get("intents") or [])
+    # Slow gate: route once, then recall → InfiniteMind → SGR stub → OCL.
+    import cam_infinitemind as cim  # noqa: PLC0415
+
+    stages = ["accept", "fast", "gate"]
+    route = connectome_route_tool(sense, goal, kill=False, enhance=enhance)
+    switch_state = route.get("switch_state") or {}
+    toolkit_results: list[dict] = []
+    intents = list(classification.get("intents") or [])
+
+    stream_act = pick_stream_act(goal, intents)
     dsr = dual_stream_router()
     stream_result = dsr.route_act(stream_act if stream_act in {"speak", "docs", "research", "careers"} else "speak")
     stream = stream_result.get("winner") or "dorsal"
 
-    if path == "slow":
-        stages.append("recall")
-        personal = "personal_fact" in (classification.get("intents") or [])
-        recall = mesh_recall(goal, personal_fact=personal)
-        toolkit_results.append(recall)
+    stages.append("recall")
+    recall = mesh_recall(goal, personal_fact="personal_fact" in intents)
+    toolkit_results.append(recall)
 
-        im_cfg = cfg.get("infinitemind") or {}
-        if im_cfg.get("enabled_dry_run", True):
-            stages.append("logic")
-            im_result = cim.enrich(
-                goal=goal,
-                intents=list(classification.get("intents") or []),
-                confidence=float(classification.get("confidence") or 0.7),
-                escalate=True,
-                escalate_reasons=esc_reasons,
-                recall=recall,
-                kill=kill,
-                enhance_intent="enhance" in (classification.get("intents") or []),
-                not_aaron=False,
-                threshold=float((cfg.get("escalation") or {}).get("confidence_below") or 0.65),
-            )
-            toolkit_results.append(im_result)
-
-        stages.append("sgr")
-        reasoning_schema = cam_reasoning_tool(
+    im_result = None
+    if (cfg.get("infinitemind") or {}).get("enabled_dry_run", True):
+        stages.append("logic")
+        im_result = cim.enrich(
             goal=goal,
-            hotspot_id=route.get("hotspot_id"),
-            switch_state=switch_state,
-            stream=stream,
-            path=path,
-            iteration=1,
+            intents=intents,
+            confidence=float(classification.get("confidence") or 0.7),
+            escalate=True,
+            escalate_reasons=esc_reasons,
+            recall=recall,
+            kill=False,
+            enhance_intent="enhance" in intents,
+            not_aaron=False,
+            threshold=float((cfg.get("escalation") or {}).get("confidence_below") or 0.65),
         )
-        if im_result and im_result.get("ok"):
-            reasoning_schema["infinitemind_strategy"] = im_result.get("strategy")
-            reasoning_schema["infinitemind_path_hint"] = (im_result.get("recommendation") or {}).get(
-                "path_hint"
-            )
-        toolkit_results.append(reasoning_schema)
-        max_iter = int(((cfg.get("sgr_limits") or {}).get("max_iterations_dry_run")) or 4)
-        reasoning_schema["max_iterations_cap"] = max_iter
+        toolkit_results.append(im_result)
+
+    stages.append("sgr")
+    reasoning_schema = cam_reasoning_tool(
+        goal=goal,
+        hotspot_id=route.get("hotspot_id"),
+        switch_state=switch_state,
+        stream=stream,
+        path="slow",
+        iteration=1,
+    )
+    if im_result and im_result.get("ok"):
+        reasoning_schema["infinitemind_strategy"] = im_result.get("strategy")
+        reasoning_schema["infinitemind_path_hint"] = (im_result.get("recommendation") or {}).get("path_hint")
+    reasoning_schema["max_iterations_cap"] = int(((cfg.get("sgr_limits") or {}).get("max_iterations_dry_run")) or 4)
+    toolkit_results.append(reasoning_schema)
 
     stages.append("stream")
     toolkit_results.append({"tool": "DualStream", **stream_result})
 
     stages.append("reflect")
     motor_plan = list(route.get("motor_plan") or [])
-    # Simulate enhance intent trying to sneak motor.enhance when switch held
-    if "enhance" in (classification.get("intents") or []) and enhance is False:
-        if "motor.enhance" not in motor_plan:
-            motor_plan = list(motor_plan) + ["motor.enhance"]
+    if "enhance" in intents and not enhance and "motor.enhance" not in motor_plan:
+        motor_plan.append("motor.enhance")
     traj = trajectory_check_tool(motor_plan, switch_state)
     toolkit_results.append(traj)
     motor_plan = list(traj.get("motor_plan") or [])
 
-    stages.append("switch")
-    stages.append("motor")
-    summary = (
-        f"{'Slow SGR stub' if path == 'slow' else 'Fast path'}; "
-        f"hotspot={route.get('hotspot_id')}; motors={motor_plan}"
-    )
+    stages.extend(["switch", "motor"])
+    summary = f"Slow SGR stub; hotspot={route.get('hotspot_id')}; motors={motor_plan}"
     if im_result and im_result.get("ok"):
         summary += f"; im_strategy={im_result.get('strategy')}"
-    answer = final_answer_tool(path, stream, summary)
-    toolkit_results.append(answer)
-
+    toolkit_results.append(final_answer_tool("slow", stream, summary))
     stages.append("distill")
-    if path == "slow":
-        engine = (
-            "sgr_tool_calling_agent_stub+infinitemind"
-            if im_result and im_result.get("ok")
-            else "sgr_tool_calling_agent_stub"
-        )
-    else:
-        engine = "system1_fast_heuristics"
-    trace = {
-        "kind": "reasoning_trace",
-        "sense": sense,
-        "goal": goal,
-        "path": path,
-        "engine": engine,
-        "accepted": True,
-        "dry_run": dry_run,
-        "escalation": esc_reasons,
-        "stages": stages,
-        "classification": classification,
-        "hotspot_id": route.get("hotspot_id"),
-        "area": route.get("area"),
-        "pathway": route.get("pathway"),
-        "stream": stream,
-        "stream_act": stream_act,
-        "reasoning_steps": (reasoning_schema or {}).get("reasoning_steps"),
-        "switch_risks": (reasoning_schema or {}).get("switch_risks"),
-        "sgr_iterations": 1 if path == "slow" else 0,
-        "infinitemind": {
-            "strategy": (im_result or {}).get("strategy"),
-            "recommendation": (im_result or {}).get("recommendation"),
-            "abduction_best": ((im_result or {}).get("abduction") or {}).get("best"),
+
+    return _trace(
+        write_trace,
+        sense=sense,
+        goal=goal,
+        path="slow",
+        engine="sgr_tool_calling_agent_stub+infinitemind"
+        if im_result and im_result.get("ok")
+        else "sgr_tool_calling_agent_stub",
+        accepted=True,
+        dry_run=dry_run,
+        escalation=esc_reasons,
+        stages=stages,
+        classification=classification,
+        hotspot_id=route.get("hotspot_id"),
+        area=route.get("area"),
+        pathway=route.get("pathway"),
+        stream=stream,
+        stream_act=stream_act,
+        reasoning_steps=reasoning_schema.get("reasoning_steps"),
+        switch_risks=reasoning_schema.get("switch_risks"),
+        sgr_iterations=1,
+        infinitemind={
+            "strategy": im_result.get("strategy"),
+            "recommendation": im_result.get("recommendation"),
+            "abduction_best": (im_result.get("abduction") or {}).get("best"),
         }
         if im_result and im_result.get("ok")
         else None,
-        "compute": (fast_result or {}).get("compute") if fast_result else None,
-        "recall": recall,
-        "motor_plan": motor_plan,
-        "violations": traj.get("violations") or [],
-        "toolkit": [t.get("tool") for t in toolkit_results],
-        "toolkit_results": toolkit_results if dry_run else None,
-        "persona": {"name": "Cam", "sole_operator": "Aaron"},
-        "ts": utc(),
-    }
-    if write_trace:
-        _write_trace(trace)
-    return trace
+        compute=None,
+        recall=recall,
+        motor_plan=motor_plan,
+        violations=traj.get("violations") or [],
+        toolkit=[t.get("tool") for t in toolkit_results],
+        toolkit_results=toolkit_results if dry_run else None,
+    )
 
 
 def _write_trace(trace: dict) -> Path:

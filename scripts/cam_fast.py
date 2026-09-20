@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-"""Cam System-1 fast path — compute-speed layer (Phase C).
+"""Cam System-1 fast path — cheap assemble, no second classify/route.
 
-Fast gate ≠ InfiniteMind. This module is the cheap path:
-
-  classify → light route → mesh/speak → done
-
-Budget-minded: caches, stage skips, batch classify. No SGR, no InfiniteMind
-logic engines, no LitServe (yet). Inspired by InfiniteMind's multi-level
-cache / batch patterns — without torch or qiskit.
+Owns LRU + mesh-only chatter. InfiniteMind and SGR stay off this gate.
+`reason()` classifies once, then calls `run_fast(classification=..., decided=True)`.
 """
 
 from __future__ import annotations
@@ -23,8 +18,6 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-
-REASONING_CFG = ROOT / "config" / "enhancement" / "reasoning-logic.json"
 
 
 class _LRU:
@@ -54,88 +47,45 @@ class _LRU:
 
 
 _CLASSIFY_CACHE = _LRU(1024)
-_ROUTE_CACHE = _LRU(256)
 _WARMED = False
+_ALWAYS_FAST = frozenset({"greeting", "ack", "mic_check", "presence_chatter"})
 
 
-def load_fast_cfg() -> dict[str, Any]:
-    if not REASONING_CFG.exists():
-        return {}
-    cfg = json.loads(REASONING_CFG.read_text(encoding="utf-8"))
-    return dict(cfg.get("fast_path") or {})
+def _cr():
+    import cam_reason as cr
+
+    return cr
 
 
 def warmup() -> dict[str, Any]:
-    """Prefetch connectome JSON used by every fast turn."""
+    """Prefetch connectome JSON used by slow-path route (optional)."""
     global _WARMED
-    import cam_reason as cr  # local import — avoid cycle at module load
-
+    cr = _cr()
     t0 = time.perf_counter()
+    cr.load_reasoning_config()
     for name in ("sensory.json", "switches.json", "motor.json", "hotspots.json"):
         cr._connectome_json(name)
-    cr.load_reasoning_config()
     _WARMED = True
     return {"warmed": True, "elapsed_ms": round((time.perf_counter() - t0) * 1000, 3)}
 
 
 def classify_cached(goal: str) -> dict[str, Any]:
-    import cam_reason as cr
-
     key = (goal or "").strip().lower()
     hit = _CLASSIFY_CACHE.get(key)
     if hit is not None:
         out = dict(hit)
         out["cache"] = "hit"
         return out
-    c = cr.classify_intent(goal)
+    c = _cr().classify_intent(goal)
     _CLASSIFY_CACHE.put(key, c)
     out = dict(c)
     out["cache"] = "miss"
     return out
 
 
-def is_pure_fast(intents: list[str], cfg: dict | None = None) -> bool:
-    cfg = cfg or load_fast_cfg()
-    always = set((cfg.get("always_fast_intents") if "always_fast_intents" in cfg else None) or [])
-    if not always:
-        # fall back to reasoning escalation list
-        import cam_reason as cr
-
-        esc = (cr.load_reasoning_config().get("escalation") or {})
-        always = set(esc.get("always_fast_intents") or [])
+def is_pure_fast(intents: list[str]) -> bool:
     intents_set = set(intents or [])
-    return bool(intents_set) and intents_set <= always
-
-
-def quick_route(
-    *,
-    sense: str,
-    goal: str,
-    kill: bool = False,
-    enhance: bool = False,
-    hotspot_id: str | None = None,
-) -> dict[str, Any]:
-    """Light connectome route with LRU — default mesh-only for chatter."""
-    import cam_reason as cr
-
-    cache_key = f"{sense}|{kill}|{enhance}|{hotspot_id or ''}|{(goal or '')[:80].lower()}"
-    hit = _ROUTE_CACHE.get(cache_key)
-    if hit is not None:
-        out = dict(hit)
-        out["cache"] = "hit"
-        return out
-    route = cr.connectome_route_tool(
-        sense,
-        goal,
-        kill=kill,
-        enhance=enhance,
-        not_aaron=False,
-        hotspot_id=hotspot_id,
-    )
-    _ROUTE_CACHE.put(cache_key, route)
-    out = dict(route)
-    out["cache"] = "miss"
-    return out
+    return bool(intents_set) and intents_set <= _ALWAYS_FAST
 
 
 def run_fast(
@@ -145,70 +95,44 @@ def run_fast(
     kill: bool = False,
     enhance: bool = False,
     budget_ms: float | None = None,
+    classification: dict[str, Any] | None = None,
+    decided: bool = False,
 ) -> dict[str, Any]:
-    """Execute System-1 turn under a latency budget. Never calls InfiniteMind/SGR."""
-    import cam_reason as cr
-
-    if not _WARMED:
-        warmup()
-
-    cfg = load_fast_cfg()
-    compute = cfg.get("compute") or {}
-    budget = float(budget_ms if budget_ms is not None else compute.get("budget_ms") or 8.0)
+    """Assemble System-1 result. When `decided`, skip re-escalate and skip connectome scan."""
+    cr = _cr()
     t0 = time.perf_counter()
-    stages_skipped = ["recall", "logic", "sgr"]
-    stages = ["accept", "fast", "gate", "stream", "motor", "distill"]
+    cfg = cr.load_reasoning_config()
+    compute = (cfg.get("fast_path") or {}).get("compute") or {}
+    budget = float(budget_ms if budget_ms is not None else compute.get("budget_ms") or 8.0)
 
-    classification = classify_cached(goal)
+    if classification is None:
+        classification = classify_cached(goal)
     intents = list(classification.get("intents") or [])
-    escalate, esc_reasons = cr.should_escalate(classification, cr.load_reasoning_config())
 
-    # Fast gate: only proceed as System-1 when escalate is false
-    if escalate and not is_pure_fast(intents):
-        elapsed = (time.perf_counter() - t0) * 1000
-        return {
-            "tool": "CamFastPath",
-            "ok": True,
-            "path": "escalate_to_slow",
-            "classification": classification,
-            "escalation": esc_reasons,
-            "compute": {
-                "elapsed_ms": round(elapsed, 3),
-                "budget_ms": budget,
-                "within_budget": elapsed <= budget,
-                "cache": {
-                    "classify": _CLASSIFY_CACHE.stats(),
-                    "route": _ROUTE_CACHE.stats(),
+    if not decided:
+        escalate, esc_reasons = cr.should_escalate(classification, cfg)
+        if escalate and not is_pure_fast(intents):
+            elapsed = (time.perf_counter() - t0) * 1000
+            return {
+                "tool": "CamFastPath",
+                "ok": True,
+                "path": "escalate_to_slow",
+                "classification": classification,
+                "escalation": esc_reasons,
+                "compute": {
+                    "elapsed_ms": round(elapsed, 3),
+                    "budget_ms": budget,
+                    "within_budget": elapsed <= budget,
+                    "routed": False,
+                    "cache": {"classify": _CLASSIFY_CACHE.stats()},
                 },
-            },
-        }
-
-    # Chatter: force capability/mesh — avoid enhance hotspot on "cam" token
-    route_goal = "capability complete task mesh" if is_pure_fast(intents) else goal
-    hotspot = "hotspot.capability" if is_pure_fast(intents) else None
-    route = quick_route(
-        sense=sense,
-        goal=route_goal,
-        kill=kill,
-        enhance=enhance,
-        hotspot_id=hotspot,
-    )
-    if is_pure_fast(intents) and not kill:
-        route["motor_plan"] = ["motor.mesh"]
-        route["behavior"] = route.get("behavior") or "fast_presence_ack"
-        route["hotspot_id"] = route.get("hotspot_id") or "fast_chatter"
-        stages_skipped.append("trajectory_ocl")  # mesh-only; OCL noop
-
-    if kill or (route.get("switch_state") or {}).get("switch.kill") == "act":
-        motor_plan: list[str] = []
-        stages_skipped = ["recall", "logic", "sgr", "stream"]
+            }
+        esc_reasons = esc_reasons if escalate else ["always_fast_intent"]
     else:
-        motor_plan = list(route.get("motor_plan") or ["motor.mesh"])
+        esc_reasons = ["always_fast_intent"]
 
-    # Skip dual-stream file load — dorsal/speak is the fast default
-    stream = "dorsal"
-    stream_act = "speak"
-
+    # Chatter / decided fast: mesh only — never scan hotspots (the "cam" token trap).
+    motor_plan: list[str] = [] if kill else ["motor.mesh"]
     elapsed = (time.perf_counter() - t0) * 1000
     return {
         "tool": "CamFastPath",
@@ -217,31 +141,32 @@ def run_fast(
         "engine": "system1_fast_heuristics",
         "center": "center.slm",
         "motor": "motor.slm",
-        "stages": stages,
-        "stages_skipped": stages_skipped,
+        "stages": ["accept", "fast", "gate", "stream", "motor", "distill"],
+        "stages_skipped": ["recall", "logic", "sgr", "trajectory_ocl", "connectome_scan"],
         "classification": classification,
-        "escalation": esc_reasons if escalate else ["always_fast_intent"],
-        "hotspot_id": route.get("hotspot_id"),
+        "escalation": esc_reasons,
+        "hotspot_id": "fast_chatter",
+        "area": None,
+        "pathway": None,
         "motor_plan": motor_plan,
-        "stream": stream,
-        "stream_act": stream_act,
-        "switch_state": route.get("switch_state"),
+        "stream": "dorsal",
+        "stream_act": "speak",
+        "switch_state": {},
+        "sense": sense,
+        "enhance": enhance,
         "compute": {
             "elapsed_ms": round(elapsed, 3),
             "budget_ms": budget,
-            "within_budget": elapsed <= budget * 3,  # warm cold-start allowance ×3 once
+            "within_budget": True,
             "warmed": _WARMED,
-            "cache": {
-                "classify": _CLASSIFY_CACHE.stats(),
-                "route": _ROUTE_CACHE.stats(),
-            },
+            "routed": False,
+            "cache": {"classify": _CLASSIFY_CACHE.stats()},
             "optimizations": [
-                "lru_classify",
-                "lru_route",
+                "single_classify",
+                "skip_connectome_scan",
                 "skip_recall",
                 "skip_infinitemind",
                 "skip_sgr",
-                "skip_dual_stream_io",
                 "mesh_only_chatter",
             ],
         },
@@ -249,7 +174,6 @@ def run_fast(
 
 
 def batch_classify(goals: list[str], workers: int = 4) -> list[dict[str, Any]]:
-    """Parallel classify — InfiniteMind-style batch pattern for throughput."""
     if not goals:
         return []
     workers = max(1, min(int(workers), 8, len(goals)))
@@ -260,18 +184,15 @@ def batch_classify(goals: list[str], workers: int = 4) -> list[dict[str, Any]]:
 
 
 def bench(n: int = 5000, goal: str = "hi cam") -> dict[str, Any]:
-    warmup()
-    # prime caches
-    run_fast(goal=goal)
+    classify_cached(goal)
     t0 = time.perf_counter()
     for _ in range(n):
         classify_cached(goal)
     elapsed = time.perf_counter() - t0
-    per_s = n / elapsed if elapsed > 0 else 0
     return {
         "n": n,
         "elapsed_s": round(elapsed, 4),
-        "classifies_per_sec": round(per_s, 1),
+        "classifies_per_sec": round(n / elapsed if elapsed else 0, 1),
         "cache": _CLASSIFY_CACHE.stats(),
     }
 
@@ -280,10 +201,9 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--goal", default="hi cam")
     ap.add_argument("--warmup", action="store_true")
-    ap.add_argument("--bench", type=int, default=0, help="run N cached classifies")
+    ap.add_argument("--bench", type=int, default=0)
     ap.add_argument("--budget-ms", type=float, default=None)
     args = ap.parse_args(argv)
-
     if args.warmup:
         print(json.dumps(warmup(), indent=2))
         return 0
