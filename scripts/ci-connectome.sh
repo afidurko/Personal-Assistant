@@ -5,6 +5,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 echo "== static gate (one process) =="
+# ci-static-gate covers connectome-check, workspace-integration, anatomy,
+# trajectory, voice, public-apis, trends, inkbox, higgsfield, loop, envelope.
 python3 scripts/ci-static-gate.py
 
 echo "== unit tests (one process) =="
