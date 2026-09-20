@@ -32,6 +32,7 @@ export default function App() {
   const connected = useMeshStore((s) => s.connected);
   const [listening, setListening] = useState(false);
   const [flatMap, setFlatMap] = useState(false);
+  const [meshOpen, setMeshOpen] = useState(false);
   const onListeningChange = useCallback((v: boolean) => setListening(v), []);
 
   const onFocusArea = useCallback(
@@ -56,36 +57,17 @@ export default function App() {
             title={connected ? 'Connected' : 'Reconnecting'}
             aria-hidden
           />
-          <span className="connection-label">
+          <span className="connection-label sr-only">
             {connected ? 'Live mesh' : 'Connecting…'}
           </span>
+          <span className={`hero-live${connected ? ' on' : ''}`} aria-hidden>
+            {connected ? 'with you' : 'waking…'}
+          </span>
         </div>
-        <h1 className="headline">Glass cortex lit — she listens when you open the mic.</h1>
+        <h1 className="headline">She listens when you open the mic.</h1>
         <p className="lede">
-          Speak and Cam answers. The near-clear brain stays live while she and her agents spawn
-          improve work in the background.
+          Soft airy English. Aaron only. Speak — or type — and Cam takes it from there.
         </p>
-        <div className="hero-cta">
-          <ScanControls
-            scanning={scanning}
-            cycleCount={cycleCount}
-            lastCycleAt={lastCycleAt}
-            connected={connected}
-            onStart={() => startScan()}
-            onStop={() => stopScan()}
-          />
-          <button type="button" className="btn btn-ghost" onClick={() => guideStart()}>
-            Swift Guide tour
-          </button>
-          <button
-            type="button"
-            className={`btn btn-ghost${flatMap ? ' active' : ''}`}
-            onClick={() => setFlatMap((v) => !v)}
-            aria-pressed={flatMap}
-          >
-            {flatMap ? '3D cortex' : '2D map'}
-          </button>
-        </div>
 
         <div className="hero-stage">
           {flatMap ? (
@@ -97,33 +79,73 @@ export default function App() {
         </div>
       </header>
 
-      <AgentSpawnBay
-        onFocusNode={(id) => focusNode(id)}
-        onRunAgentCycle={() => runAgentCycle()}
-        onStartIssueLoop={() => startIssueLoop()}
-        onStopIssueLoop={() => stopIssueLoop()}
-      />
+      <section className="mesh-ops" aria-label="Mesh and agents">
+        <button
+          type="button"
+          className={`mesh-ops-toggle${meshOpen ? ' open' : ''}`}
+          aria-expanded={meshOpen}
+          onClick={() => setMeshOpen((v) => !v)}
+        >
+          <span className="mesh-ops-label">{meshOpen ? 'Hide the mesh' : 'Open the mesh'}</span>
+          <span className="mesh-ops-hint">
+            agents · system pulse · workspaces · guide · memory
+          </span>
+        </button>
 
-      <SystemPulse />
+        {meshOpen ? (
+          <div className="mesh-ops-body">
+            <div className="mesh-ops-toolbar">
+              <ScanControls
+                scanning={scanning}
+                cycleCount={cycleCount}
+                lastCycleAt={lastCycleAt}
+                connected={connected}
+                onStart={() => startScan()}
+                onStop={() => stopScan()}
+              />
+              <button type="button" className="btn btn-ghost" onClick={() => guideStart()}>
+                Swift Guide tour
+              </button>
+              <button
+                type="button"
+                className={`btn btn-ghost${flatMap ? ' active' : ''}`}
+                onClick={() => setFlatMap((v) => !v)}
+                aria-pressed={flatMap}
+              >
+                {flatMap ? '3D cortex' : '2D map'}
+              </button>
+            </div>
 
-      <div className="detail-grid three">
-        <WorkspacePanel onOpenWorkspace={(id) => openWorkspace(id)} />
-        <SwiftGuidePanel
-          onOpenConcept={(id) => openConcept(id)}
-          onGuideStart={() => guideStart()}
-          onGuideNext={() => guideNext()}
-          onGuidePrev={() => guidePrev()}
-          onOpenWorkspace={(id) => openWorkspace(id)}
-        />
-        <SuggestionsPanel
-          onOpenWorkspace={(id) => openWorkspace(id)}
-          onOpenConcept={(id) => openConcept(id)}
-        />
-      </div>
+            <AgentSpawnBay
+              onFocusNode={(id) => focusNode(id)}
+              onRunAgentCycle={() => runAgentCycle()}
+              onStartIssueLoop={() => startIssueLoop()}
+              onStopIssueLoop={() => stopIssueLoop()}
+            />
 
-      <div className="detail-grid">
-        <MemoryRail />
-      </div>
+            <SystemPulse />
+
+            <div className="detail-grid three">
+              <WorkspacePanel onOpenWorkspace={(id) => openWorkspace(id)} />
+              <SwiftGuidePanel
+                onOpenConcept={(id) => openConcept(id)}
+                onGuideStart={() => guideStart()}
+                onGuideNext={() => guideNext()}
+                onGuidePrev={() => guidePrev()}
+                onOpenWorkspace={(id) => openWorkspace(id)}
+              />
+              <SuggestionsPanel
+                onOpenWorkspace={(id) => openWorkspace(id)}
+                onOpenConcept={(id) => openConcept(id)}
+              />
+            </div>
+
+            <div className="detail-grid">
+              <MemoryRail />
+            </div>
+          </div>
+        ) : null}
+      </section>
     </div>
   );
 }
