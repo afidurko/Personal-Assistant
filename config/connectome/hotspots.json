@@ -1040,9 +1040,19 @@
         "motor.vault"
       ],
       "behavior": "proactive_followups_persistent_jobs_draft_only",
-      "team": "team.capability",
+      "team": "team.follow-through",
       "available_to": "all_roles_and_subagents",
-      "integration": "config/integrations/instinct.json"
+      "integration": "config/integrations/instinct.json",
+      "related_teams": [
+        "team.capability",
+        "team.needs-attention"
+      ],
+      "subagents": "scripts/cam_swarm.py via `instinct delegate`",
+      "connectors_in": [
+        "sense.calendar.event",
+        "sense.inkbox.event",
+        "sense.cline.result"
+      ]
     }
   ]
 }

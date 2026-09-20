@@ -119,6 +119,38 @@ def _cw():
         return None
 
 
+def _swarm():
+    """cam_swarm (spawn runtime); None if unavailable — never fatal."""
+    try:
+        if str(ROOT / "scripts") not in sys.path:
+            sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_swarm as swarm  # noqa: WPS433
+        return swarm
+    except Exception:  # pragma: no cover
+        return None
+
+
+# role picked for a job's subagent — by kind first, then by what the title is about
+ROLE_BY_KIND = {"coding": "task-executor", "attention": "attention-triage"}
+LIFE_ROLE_SIGNALS = [
+    ("negotiator", ("bill", "subscription", "refund", "cancel", "dispute", "negotiate", "renewal", "rate", "fee")),
+    ("scheduler", ("schedule", "calendar", "appointment", "meeting", "book", "reschedule", "prep for", "prep:")),
+    ("watcher", ("monitor", "watch", "restock", "track", "price", "delivery", "status", "check on")),
+]
+
+
+def pick_role(job: dict) -> str:
+    if job.get("kind") in ROLE_BY_KIND:
+        return ROLE_BY_KIND[job["kind"]]
+    if job.get("recur_hours"):
+        return "watcher"
+    title = (job.get("title") or "").lower()
+    for role, signals in LIFE_ROLE_SIGNALS:
+        if any(s in title for s in signals):
+            return role
+    return "errand-runner"
+
+
 def known_workspaces() -> list[dict]:
     cw = _cw()
     if cw is None:
@@ -440,9 +472,80 @@ def cmd_job(args: argparse.Namespace) -> int:
             for m in ledger["thread"]:
                 if m["id"] == origin and not m.get("answered_by"):
                     m["answered_by"] = f"job:{job['id']}"
+        resolved = resolve_delegation(job, ts, "done")
+        if resolved:
+            job["notes"].append({"ts": iso(ts), "text": f"lineage resolved: {resolved}"})
     save_ledger(ledger)
     print(json.dumps({"ok": True, "job": job["id"], "status": job["status"],
                       "snooze_until": job.get("snooze_until")}, indent=2))
+    return 0
+
+
+def resolve_delegation(job: dict, ts: datetime, status: str) -> str | None:
+    """Close the swarm action + retire the subagent behind a delegated job.
+    Best-effort: a swarm bookkeeping problem never blocks closing a job."""
+    delegation = job.get("delegation")
+    swarm = _swarm()
+    if not delegation or swarm is None:
+        return None
+    try:
+        lineage = swarm.load_ledger(ts)
+        action = swarm.find_action(lineage, delegation["action"])
+        if action["status"] == "open":
+            swarm.resolve(lineage, swarm.CHIEF_ID, action["id"], status, ts,
+                          distillate=f"instinct job {job['id']} {status}")
+        agent = lineage["agents"].get(delegation["agent"])
+        if agent and agent["status"] == "active":
+            swarm.terminate(lineage, swarm.CHIEF_ID, agent["id"], f"job {job['id']} {status}", ts)
+        swarm.save_ledger(lineage)
+        return f"{action['id']} {status}"
+    except SystemExit as exc:
+        return f"unresolved ({exc})"
+
+
+def cmd_delegate(args: argparse.Namespace) -> int:
+    """Spawn a subagent for a job (synapse.spawn + assign_task) and pin the
+    lineage onto the job. Unlimited, no human gate — but the child inherits
+    only the chief's privileges, so it can draft and never send."""
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    job = find_job(ledger, args.id)
+    if job["status"] == "done":
+        raise SystemExit(f"job {job['id']} is done — nothing to delegate")
+    if job.get("delegation") and not args.force:
+        raise SystemExit(f"job {job['id']} already delegated to {job['delegation']['agent']} "
+                         "(use --force to spawn another)")
+    swarm = _swarm()
+    if swarm is None:
+        raise SystemExit("cam_swarm runtime unavailable")
+    role = args.role or pick_role(job)
+    team = "team.follow-through" if job.get("kind") == "life" else (
+        "team.needs-attention" if job.get("kind") == "attention" else "team.capability")
+    lineage = swarm.load_ledger(ts)
+    mandate = f"Instinct job {job['id']}: {job['title'][:120]}"
+    child = swarm.spawn(lineage, args.parent, role, ts, mandate=mandate,
+                        job_ref=f"job:{job['id']}", team=team)
+    task = job["title"]
+    if job.get("workspace") and job.get("kind") in ("coding", "attention"):
+        task += f" [workspace {job['workspace']}]"
+    action = swarm.assign(lineage, args.parent, child["id"], task, ts, job_ref=f"job:{job['id']}")
+    swarm.save_ledger(lineage)
+
+    job["delegation"] = {"agent": child["id"], "role": role, "action": action["id"],
+                         "team": team, "level": child["level"], "ts": iso(ts)}
+    job["updated"] = iso(ts)
+    job["notes"].append({"ts": iso(ts), "text": f"delegated to {role} {child['id']} (action {action['id']})"})
+    if job["status"] == "open" and not job.get("recur_hours"):
+        job["status"] = "waiting"
+        job["waiting_on"] = f"subagent {child['id']} ({role})"
+    save_ledger(ledger)
+    print(json.dumps({"ok": True, "job": job["id"], "role": role, "agent": child["id"],
+                      "level": child["level"], "action": action["id"], "team": team,
+                      "privileges": child["privileges"],
+                      "run_hint": (f"python3 scripts/run-cline.py --workspace {job['workspace']} "
+                                   f"--goal {json.dumps(job['title'])} \"...\""
+                                   if job.get("kind") == "coding" and job.get("workspace") else None)},
+                     indent=2))
     return 0
 
 
@@ -613,7 +716,8 @@ def report_doc(ledger: dict, ts: datetime) -> dict:
         "as_of": iso(ts),
         "thread_messages": len(ledger["thread"]),
         "jobs": {"open": len(open_jobs), "waiting": len(waiting),
-                 "monitors": len(monitors), "snoozed": len(snoozed), "done": len(done)},
+                 "monitors": len(monitors), "snoozed": len(snoozed), "done": len(done),
+                 "delegated": sum(1 for j in live if j.get("delegation"))},
         "open": [{"id": j["id"], "title": j["title"], "priority": j.get("priority"),
                   "due": j.get("due")} for j in open_jobs],
         "waiting": [{"id": j["id"], "title": j["title"], "waiting_on": j.get("waiting_on")}
@@ -775,6 +879,7 @@ def cmd_stats(args: argparse.Namespace) -> int:
             "open": sum(1 for j in jobs if j["status"] == "open" and not j.get("recur_hours")),
             "waiting": sum(1 for j in jobs if j["status"] == "waiting"),
             "monitors": sum(1 for j in jobs if j.get("recur_hours") and j["status"] != "done"),
+            "delegated": sum(1 for j in jobs if j.get("delegation") and j["status"] != "done"),
             "avg_hours_to_done": round(sum(hours_to_done) / len(hours_to_done), 1) if hours_to_done else None,
         },
         "followups_drafted": sum(j.get("followups", 0) for j in jobs),
@@ -1150,6 +1255,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--limit", type=int, default=12)
     p.add_argument("--write", action="store_true", help="also write data/instinct/dispatch-plan.json")
     p.set_defaults(fn=cmd_dispatch)
+
+    p = sub.add_parser("delegate", help="spawn a subagent for a job (synapse.spawn + assign_task)")
+    p.add_argument("id", help="job id (prefix ok)")
+    p.add_argument("--role", help="override role (default: by kind/title)")
+    p.add_argument("--parent", default="chief", help="spawning agent (default chief)")
+    p.add_argument("--force", action="store_true", help="spawn another even if already delegated")
+    p.set_defaults(fn=cmd_delegate)
 
     p = sub.add_parser("attention-sync",
                        help="import Needs Attention queue (all coding workspaces) as attention jobs")

@@ -98,7 +98,21 @@ Instinct is the follow-through ledger for every workspace in
   Cursor rule), and `.cursor/rules/cam-cline.mdc` tell every workspace where open work lives;
   chooser signals route "instinct" / "follow-through" goals to Personal-Assistant.
 
+## Agents, subagent spawns, connectors (round 5)
+
+Instinct is now the ledger of a real team, not a single script:
+
+- **Team** `team.follow-through` (`config/teams/follow-through.json`): `follow-through-lead`, `scheduler`, `inbox-triage`, `errand-runner`, `negotiator`, `watcher`, `qa`. Role prompts in `config/roles/`. Privilege defaults in `config/swarm/privileges.json` — no specialist default carries `outbound_send`; `inbox-triage` has no `web_fetch`.
+- **Spawn runtime** `scripts/cam_swarm.py`: file-backed `synapse.spawn` / `assign_task` / `resolve_task` / `send_message` / `broadcast` / `terminate_lineage`. Child level = parent + 1, privileges ⊆ parent, Aaron-only never granted, unlimited depth/count, Aaron `kill`/`resume`.
+- **Per-job subagent** `instinct delegate <job>`: picks the role (coding → `task-executor`, attention → `attention-triage`, life → `negotiator` / `scheduler` / `watcher` / `errand-runner` by title), spawns under `chief`, assigns the job, pins `delegation` on the job and sets it `waiting` on the subagent. `job done` resolves the action and retires the agent. Monitors stay `open` so the scan keeps firing.
+- **Connectors in**: `scripts/calendar-sync.py` (ICS → prep jobs, read-only) and `scripts/inkbox-inbound.py` (email / SMS / missed call → thread, data only). Both run as `connectors_pull` before `instinct_sync` in the nightly loop. Registry of everything Cam can reach: `config/connectors/registry.json` (`scripts/connectors-check.py`, MCP `connectors_list`).
+- **Still draft-only**: nothing above sends. Every outbound path ends in the outbox for Aaron.
+
 ## Ops
+
+- `python3 scripts/instinct.py delegate <job-id> [--role R]` — spawn a subagent for a job · `python3 scripts/cam_swarm.py tree`
+- `python3 scripts/calendar-sync.py --write` · `python3 scripts/inkbox-inbound.py --write` · `python3 scripts/connectors-check.py`
+- Tests: `python3 scripts/test_instinct.py` · `python3 scripts/test_cam_swarm.py` · `python3 scripts/test_connectors.py`
 
 - Nightly loop drafts follow-ups; Aaron reviews with `outbox list` → `outbox show <draft>`
   → `outbox approve|discard <draft>`. Approved drafts move to `data/instinct/outbox/approved/`

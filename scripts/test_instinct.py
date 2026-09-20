@@ -37,9 +37,11 @@ class InstinctBase(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         os.environ["INSTINCT_DATA_DIR"] = self._tmp.name
+        os.environ["CAM_SWARM_DIR"] = str(Path(self._tmp.name) / "swarm")
 
     def tearDown(self):
         os.environ.pop("INSTINCT_DATA_DIR", None)
+        os.environ.pop("CAM_SWARM_DIR", None)
         self._tmp.cleanup()
 
     def data(self) -> Path:
@@ -470,6 +472,90 @@ class CrossWorkspaceTests(InstinctBase):
         run("--now", "2026-09-22T09:00:00Z", "scan")
         handoff = json.loads((self.data() / "needs-attention.json").read_text())
         self.assertEqual(handoff["items"][0]["workspace"], "jarvis")
+
+
+class DelegationTests(InstinctBase):
+    """`instinct delegate` — one subagent per job via the swarm runtime."""
+
+    def swarm(self):
+        import cam_swarm
+        return cam_swarm
+
+    def test_delegate_picks_role_by_kind_and_title(self):
+        cases = [
+            (("job", "add", "Negotiate Comcast bill before renewal"), "negotiator"),
+            (("job", "add", "Reschedule dentist appointment"), "scheduler"),
+            (("job", "add", "Find a plumber for the kitchen leak"), "errand-runner"),
+            (("job", "add", "Watch Steam Deck restock", "--monitor", "24"), "watcher"),
+            (("job", "add", "Fix flaky voice test", "--coding", "--workspace", "voicestudio"), "task-executor"),
+        ]
+        for argv, expected in cases:
+            job = run("--now", T0, *argv)["job"]
+            out = run("--now", T0, "delegate", job)
+            self.assertEqual(out["role"], expected, argv)
+
+    def test_delegate_pins_lineage_and_child_cannot_send(self):
+        job = run("--now", T0, "job", "add", "Cancel gym membership")["job"]
+        out = run("--now", T0, "delegate", job)
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["level"], 2)
+        self.assertEqual(out["team"], "team.follow-through")
+        self.assertNotIn("outbound_send", out["privileges"])
+        self.assertIn("outbound_draft", out["privileges"])
+        ledger = instinct.load_ledger()
+        j = ledger["jobs"][0]
+        self.assertEqual(j["delegation"]["agent"], out["agent"])
+        self.assertEqual(j["status"], "waiting")
+        self.assertIn(out["agent"], j["waiting_on"])
+        lineage = self.swarm().load_ledger()
+        self.assertEqual(lineage["agents"][out["agent"]]["job_ref"], f"job:{job}")
+        self.assertEqual([a["status"] for a in lineage["actions"]], ["open"])
+
+    def test_monitor_stays_open_when_delegated(self):
+        job = run("--now", T0, "job", "add", "Watch price", "--monitor", "12")["job"]
+        run("--now", T0, "delegate", job)
+        self.assertEqual(instinct.load_ledger()["jobs"][0]["status"], "open")
+
+    def test_done_resolves_action_and_retires_agent(self):
+        job = run("--now", T0, "job", "add", "Cancel gym membership")["job"]
+        out = run("--now", T0, "delegate", job)
+        run("--now", T0, "job", "done", job)
+        lineage = self.swarm().load_ledger()
+        self.assertEqual(lineage["actions"][0]["status"], "done")
+        self.assertEqual(lineage["agents"][out["agent"]]["status"], "terminated")
+        notes = instinct.load_ledger()["jobs"][0]["notes"]
+        self.assertTrue(any("lineage resolved" in n["text"] for n in notes))
+
+    def test_double_delegate_needs_force(self):
+        job = run("--now", T0, "job", "add", "Cancel gym membership")["job"]
+        run("--now", T0, "delegate", job)
+        with self.assertRaises(SystemExit):
+            run("--now", T0, "delegate", job)
+        out = run("--now", T0, "delegate", job, "--force", "--role", "qa")
+        self.assertEqual(out["role"], "qa")
+
+    def test_delegate_done_job_refused(self):
+        job = run("--now", T0, "job", "add", "x")["job"]
+        run("--now", T0, "job", "done", job)
+        with self.assertRaises(SystemExit):
+            run("--now", T0, "delegate", job)
+
+    def test_kill_switch_blocks_delegate(self):
+        job = run("--now", T0, "job", "add", "x")["job"]
+        os.environ["CAM_SWITCH_KILL"] = "act"
+        try:
+            with self.assertRaises(SystemExit):
+                run("--now", T0, "delegate", job)
+        finally:
+            os.environ.pop("CAM_SWITCH_KILL", None)
+        self.assertNotIn("delegation", instinct.load_ledger()["jobs"][0])
+
+    def test_report_and_stats_count_delegated(self):
+        a = run("--now", T0, "job", "add", "a")["job"]
+        run("--now", T0, "job", "add", "b")
+        run("--now", T0, "delegate", a)
+        self.assertEqual(run("--now", T0, "report")["jobs"]["delegated"], 1)
+        self.assertEqual(run("--now", T0, "stats")["jobs"]["delegated"], 1)
 
 
 class ReportBriefDoctorTests(InstinctBase):

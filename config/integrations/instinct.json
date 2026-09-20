@@ -39,13 +39,20 @@
   },
   "teams": [
     "team.capability",
+    "team.follow-through",
     "team.tooling"
   ],
   "roles": [
-    "ops",
-    "task-executor",
     "chief",
-    "qa"
+    "errand-runner",
+    "follow-through-lead",
+    "inbox-triage",
+    "negotiator",
+    "ops",
+    "qa",
+    "scheduler",
+    "task-executor",
+    "watcher"
   ],
   "available_to": "all_roles_and_subagents",
   "outbound_handoff": "motor.inkbox under switch.outbound — this engine never sends",
@@ -57,7 +64,8 @@
     "instinct_brief",
     "instinct_stats",
     "instinct_workspaces",
-    "instinct_dispatch"
+    "instinct_dispatch",
+    "instinct_delegate"
   ],
   "needs_attention_handoff": "data/instinct/needs-attention.json",
   "outbox_review": "Aaron-only CLI (outbox list/show/approve/discard); approve stages, never sends",
@@ -72,5 +80,21 @@
       "scripts/install-cline-rules.py bundle",
       ".cursor/rules/cam-cline.mdc"
     ]
+  },
+  "agents": {
+    "team": "config/teams/follow-through.json",
+    "spawn_runtime": "scripts/cam_swarm.py (file-backed synapse.spawn/assign_task/resolve_task/terminate_lineage; unlimited; privileges ⊆ parent; Aaron kill/resume)",
+    "per_job": "instinct delegate <job> → role by kind/title (coding→task-executor, attention→attention-triage, life→negotiator/scheduler/watcher/errand-runner); job done resolves + retires",
+    "lineage_distillate": "vault/10-Mesh-Distillates/agent-lineage/latest.json (counts only)"
+  },
+  "connectors": {
+    "registry": "config/connectors/registry.json",
+    "check": "scripts/connectors-check.py",
+    "inbound_bridges": {
+      "calendar.ics": "scripts/calendar-sync.py — $CAM_CALENDAR_ICS (path/URL) → prep jobs (source_ref ics:<uid>); read-only",
+      "inkbox.inbound": "scripts/inkbox-inbound.py — data/inkbox/inbound/*.json → thread (data only; links stripped; optional reply jobs)"
+    },
+    "loop_action": "connectors_pull (runs before instinct_sync in instinct-followups)",
+    "outbound": "still only motor.inkbox under switch.outbound after Aaron approves an outbox draft"
   }
 }
