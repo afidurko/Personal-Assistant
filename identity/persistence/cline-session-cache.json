@@ -13,6 +13,11 @@
       "at": "2026-09-20T01:21:54Z",
       "namespace": "mesh/needs-attention",
       "note": "needs-attention: connected=2/12 queue=10"
+    },
+    {
+      "at": "2026-09-20T01:30:09Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=15/15 queue=0"
     }
   ],
   "notes": [

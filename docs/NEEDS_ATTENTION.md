@@ -22,6 +22,7 @@ Cursor’s Agents Window groups agents that need you (approvals, questions, unfi
 python3 scripts/needs-attention-check.py
 python3 scripts/needs-attention.py --connect
 python3 scripts/needs-attention.py --dispatch-plan --write
+python3 scripts/needs-attention.py --execute --write   # workspace-connector clears connectivity
 python3 scripts/needs-attention.py --json
 ```
 

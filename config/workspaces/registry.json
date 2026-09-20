@@ -638,6 +638,48 @@
         "install_rules": true,
         "cursor_bootstrap": true,
         "notes": "Agent loop patterns + audit CLI — shared via motor.loop (L1 report-only week one)"
+      },
+      {
+        "id": "sgr-agent-core",
+        "label": "SGR Agent Core (Schema-Guided Reasoning)",
+        "path": "integrations/sgr-agent-core",
+        "remote": "github.com/afidurko/sgr-agent-core",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "chief",
+          "capability-broker",
+          "researcher",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/sgr-agent-core",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Cam slow-path reasoner — see docs/CAM_REASONING.md"
+      },
+      {
+        "id": "litserve",
+        "label": "LitServe local inference host",
+        "path": "integrations/litserve",
+        "remote": "github.com/afidurko/LitServe",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "chief",
+          "slm-runtime",
+          "dl-enhance",
+          "ops"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/litserve",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
       }
     ]
   },

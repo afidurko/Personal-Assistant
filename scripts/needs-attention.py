@@ -136,6 +136,83 @@ def build_attention_items(rows: list[dict[str, Any]], team: dict[str, Any]) -> l
             "workspace_id": "inkbox",
         }
     )
+
+    # Open draft/ready PRs — surface for dispatcher (never auto-merge)
+    for pr in scan_open_prs():
+        items.append(pr)
+    return items
+
+
+def scan_open_prs() -> list[dict[str, Any]]:
+    """List open PRs that need attention (draft / no checks / conflicts). Never merges."""
+    try:
+        proc = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "list",
+                "--state",
+                "open",
+                "--limit",
+                "30",
+                "--json",
+                "number,title,url,isDraft,mergeable,headRefName,statusCheckRollup",
+            ],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        return [
+            {
+                "id": "pr-scan-unavailable",
+                "kind": "wiring",
+                "severity": "low",
+                "title": "PR attention scan unavailable",
+                "detail": str(exc),
+                "auto_clearable": False,
+                "aaron_gate": False,
+                "workspace_id": "personal-assistant",
+            }
+        ]
+    if proc.returncode != 0:
+        return []
+    try:
+        prs = json.loads(proc.stdout or "[]")
+    except json.JSONDecodeError:
+        return []
+    items: list[dict[str, Any]] = []
+    for pr in prs:
+        checks = pr.get("statusCheckRollup") or []
+        fails = [
+            c.get("name") or c.get("context")
+            for c in checks
+            if (c.get("conclusion") or "") in {"FAILURE", "CANCELLED"}
+        ]
+        severity = "medium"
+        if pr.get("mergeable") == "CONFLICTING" or fails:
+            severity = "high"
+        elif pr.get("isDraft"):
+            severity = "low"
+        items.append(
+            {
+                "id": f"pr-{pr['number']}",
+                "kind": "pr",
+                "severity": severity,
+                "title": f"Open PR #{pr['number']}: {pr.get('title')}",
+                "detail": (
+                    f"{pr.get('url')} draft={pr.get('isDraft')} "
+                    f"mergeable={pr.get('mergeable')} fails={fails or 'none'}"
+                ),
+                "auto_clearable": False,  # never auto-merge
+                "aaron_gate": True if pr.get("mergeable") == "MERGEABLE" and not pr.get("isDraft") else False,
+                "workspace_id": "personal-assistant",
+                "suggestion": "Progress on branch; do not merge unless Aaron asks",
+                "pr_number": pr.get("number"),
+                "head_ref": pr.get("headRefName"),
+            }
+        )
     return items
 
 
@@ -148,7 +225,15 @@ def dispatch_plan(items: list[dict[str, Any]], limit: int = 12) -> list[dict[str
         if item.get("kind") == "connectivity":
             item = {**item, "auto_clearable": True}
         goal = item.get("title") or item.get("id")
-        choice = cw.choose_workspace(goal=str(goal), workspace_id=item.get("workspace_id"))
+        ws_id = item.get("workspace_id")
+        try:
+            choice = cw.choose_workspace(goal=str(goal), workspace_id=ws_id)
+        except KeyError:
+            # Flat registry may list integrations not yet in coding_workspaces
+            choice = {
+                "workspace": {"id": ws_id, "path": item.get("detail")},
+                "path": None,
+            }
         ws = choice.get("workspace") or {}
         plan.append(
             {
@@ -158,7 +243,7 @@ def dispatch_plan(items: list[dict[str, Any]], limit: int = 12) -> list[dict[str
                 "kind": item.get("kind"),
                 "auto_clearable": bool(item.get("auto_clearable")),
                 "aaron_gate": bool(item.get("aaron_gate")),
-                "target_workspace": ws.get("id") or item.get("workspace_id"),
+                "target_workspace": ws.get("id") or ws_id,
                 "target_path": choice.get("path") or ws.get("path"),
                 "runner": "scripts/run-cline.py",
                 "hint": item.get("suggestion"),
