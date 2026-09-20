@@ -71,9 +71,23 @@ interface TurnResponse {
 
 type SpeakOpts = { rate?: number; pitch?: number; lang?: string };
 
-function speakCam(text: string, opts: SpeakOpts = {}, onEnd?: () => void) {
+export interface SpeechFaceState {
+  text: string;
+  progress: number; // 0..1, -1 when not speaking
+  active: boolean;
+}
+
+function speakCam(
+  text: string,
+  opts: SpeakOpts = {},
+  handlers: {
+    onEnd?: () => void;
+    onStart?: () => void;
+    onBoundary?: (charIndex: number) => void;
+  } = {},
+) {
   if (!window.speechSynthesis) {
-    onEnd?.();
+    handlers.onEnd?.();
     return;
   }
   window.speechSynthesis.cancel();
@@ -87,8 +101,12 @@ function speakCam(text: string, opts: SpeakOpts = {}, onEnd?: () => void) {
       /female|samantha|karen|moira|tessa|fiona|victoria|zira/i.test(v.name),
     ) || voices.find((v) => v.lang?.startsWith('en'));
   if (prefer) u.voice = prefer;
-  u.onend = () => onEnd?.();
-  u.onerror = () => onEnd?.();
+  u.onstart = () => handlers.onStart?.();
+  u.onboundary = (ev) => {
+    if (typeof ev.charIndex === 'number') handlers.onBoundary?.(ev.charIndex);
+  };
+  u.onend = () => handlers.onEnd?.();
+  u.onerror = () => handlers.onEnd?.();
   window.speechSynthesis.speak(u);
 }
 
@@ -166,6 +184,11 @@ export function useCamVoice() {
   });
   const [lastRoute, setLastRoute] = useState<CamRouteSummary | null>(null);
   const [bridgeBusy, setBridgeBusy] = useState(false);
+  const [speechFace, setSpeechFace] = useState<SpeechFaceState>({
+    text: '',
+    progress: -1,
+    active: false,
+  });
 
   const recognizingRef = useRef(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -404,9 +427,22 @@ export function useCamVoice() {
     if (!pending) return;
     pendingSpeakRef.current = null;
     setStatus('speaking');
-    speakCam(pending.text, pending.opts, () => {
-      if (recognizingRef.current) setStatus('listening');
-      else setStatus('idle');
+    setSpeechFace({ text: pending.text, progress: 0, active: true });
+    speakCam(pending.text, pending.opts, {
+      onStart: () => setSpeechFace((s) => ({ ...s, active: true, progress: 0 })),
+      onBoundary: (charIndex) => {
+        const len = Math.max(1, pending.text.length);
+        setSpeechFace((s) => ({
+          ...s,
+          active: true,
+          progress: Math.min(0.99, charIndex / len),
+        }));
+      },
+      onEnd: () => {
+        setSpeechFace({ text: '', progress: -1, active: false });
+        if (recognizingRef.current) setStatus('listening');
+        else setStatus('idle');
+      },
     });
   }, []);
 
@@ -434,6 +470,7 @@ export function useCamVoice() {
     setStatus('idle');
     pendingSpeakRef.current = null;
     setBridgeBusy(false);
+    setSpeechFace({ text: '', progress: -1, active: false });
     window.speechSynthesis?.cancel();
     void fetch('/api/spike/mic/stop', { method: 'POST' }).catch(() => undefined);
   }, []);
@@ -646,6 +683,7 @@ export function useCamVoice() {
     gateStats,
     lastRoute,
     bridgeBusy,
+    speechFace,
     aaronOnly: gateCfg.aaron_only,
     startListening,
     startEnroll,

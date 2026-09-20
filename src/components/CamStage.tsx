@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCamVoice, type CamVoiceStatus } from '@/hooks/useCamVoice';
 import { useTypewriter } from '@/hooks/useTypewriter';
 import { MiniBrain, type BrainPhase } from '@/components/MiniBrain';
+import { CamFace } from '@/components/CamFace';
 
 interface CamStageProps {
   onListeningChange?: (listening: boolean) => void;
@@ -40,6 +41,7 @@ export function CamStage({ onListeningChange }: CamStageProps) {
     adaptiveRaised,
     lastRoute,
     bridgeBusy,
+    speechFace,
     startListening,
     startEnroll,
     stop,
@@ -124,19 +126,14 @@ export function CamStage({ onListeningChange }: CamStageProps) {
           <div className="cam-avatar-glow" aria-hidden />
           <div className="cam-avatar-ring" aria-hidden />
           <div className="cam-avatar-face-wrap">
-            <img
-              className="cam-avatar-face"
-              src="/identity/persona/cam-face.jpg"
-              alt="Cam"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-              }}
+            <CamFace
+              status={status}
+              listening={listening}
+              level={level}
+              typing={typingActive}
+              speakingText={speechFace.active ? speechFace.text : ''}
+              speechProgress={speechFace.active ? speechFace.progress : -1}
             />
-            <div
-              className={`cam-avatar-mouth status-${status}${typingActive ? ' typing' : ''}`}
-              aria-hidden
-            />
-            <div className={`cam-avatar-eyes status-${status}`} aria-hidden />
           </div>
           <p className="cam-avatar-name">Cam</p>
           <p className="cam-avatar-status">{statusLine}</p>
