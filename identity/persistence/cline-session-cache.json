@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T15:11:29.721514+00:00",
+    "at": "2026-09-20T15:14:37.266403+00:00",
     "mode": "act",
-    "summary": "Single-pass reason: classify once, skip connectome scan on fast, lazy InfiniteMind, cached engines. 200 greetings ~1.9ms.",
+    "summary": "Stop spawning python per converse/MCP/Pupil route; cache dual-stream + OCL policies; fuzz classify once.",
     "workspace": "/workspace"
   },
   "mesh_notes": [
@@ -94,6 +94,11 @@
     {
       "at": "2026-09-20T15:11:29.721514+00:00",
       "text": "Remove double classify/route that was slowing Cam compute.",
+      "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-20T15:14:37.266403+00:00",
+      "text": "50 converse greetings 1.4ms in-process vs process-per-turn",
       "workspace": "/workspace"
     }
   ],

@@ -148,9 +148,10 @@ def should_escalate(classification: dict[str, Any], cfg: dict) -> tuple[bool, li
     return False, []
 
 
-def bar_allows_converse(goal: str, cfg: dict) -> bool:
+def bar_allows_converse(goal: str, cfg: dict, classification: dict | None = None) -> bool:
     """True when converse should invoke reasoner (not every mic turn)."""
-    classification = classify_intent(goal)
+    if classification is None:
+        classification = classify_intent(goal)
     escalate, _ = should_escalate(classification, cfg)
     return escalate
 
@@ -183,14 +184,14 @@ def mesh_recall(goal: str, personal_fact: bool) -> dict[str, Any]:
     }
 
 
-def _switch_state(*, kill: bool, enhance: bool) -> dict[str, str]:
-    key = f"sw:{int(kill)}:{int(enhance)}"
+def _switch_state(*, kill: bool, enhance: bool, autonomy: bool = True) -> dict[str, str]:
+    key = f"sw:{int(kill)}:{int(enhance)}:{int(autonomy)}"
     if key not in _CACHE:
         cr = connectome_route()
         _CACHE[key] = cr.resolve_switches(
             _connectome_json("switches.json"),
             kill=kill,
-            autonomy=True,
+            autonomy=autonomy,
             enhance=enhance,
             research_scan=True,
             slm=True,
@@ -207,6 +208,7 @@ def connectome_route_tool(
     enhance: bool = False,
     not_aaron: bool = False,
     hotspot_id: str | None = None,
+    autonomy: bool = True,
 ) -> dict[str, Any]:
     cr = connectome_route()
     sensory = _connectome_json("sensory.json")
@@ -226,7 +228,7 @@ def connectome_route_tool(
             "motor_plan": [],
         }
 
-    switch_state = _switch_state(kill=kill, enhance=enhance)
+    switch_state = _switch_state(kill=kill, enhance=enhance, autonomy=autonomy)
     req_key = "effector_reqs"
     if req_key not in _CACHE:
         _CACHE[req_key] = {e["id"]: list(e.get("requires_switch") or []) for e in motor["effectors"]}

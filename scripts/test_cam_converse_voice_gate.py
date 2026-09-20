@@ -90,6 +90,12 @@ class ConverseVoiceGateSmoke(unittest.TestCase):
         self.assertTrue(st["enrolled"])
         self.assertTrue(st["ready"])
 
+    def test_route_sense_greeting_in_process(self) -> None:
+        r = ccs.route_sense("sense.chat.aaron", "hi cam")
+        self.assertTrue(r.get("accepted"))
+        self.assertEqual(r.get("path"), "fast")
+        self.assertEqual(r.get("motor_plan"), ["motor.mesh"])
+
 
 if __name__ == "__main__":
     unittest.main()

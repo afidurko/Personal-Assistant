@@ -279,10 +279,15 @@ def _enrich_raw(
 
 
 def load_reasoning_infinitemind_cfg() -> dict[str, Any]:
-    if not REASONING_CFG.exists():
-        return {}
-    cfg = json.loads(REASONING_CFG.read_text(encoding="utf-8"))
-    return dict(cfg.get("infinitemind") or {})
+    try:
+        import cam_reason as cr
+
+        return dict((cr.load_reasoning_config().get("infinitemind") or {}))
+    except Exception:
+        if not REASONING_CFG.exists():
+            return {}
+        cfg = json.loads(REASONING_CFG.read_text(encoding="utf-8"))
+        return dict(cfg.get("infinitemind") or {})
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -404,22 +404,19 @@ def memorybear_write(message: str, offline: bool = True) -> dict:
 
 
 def connectome_route(args: dict) -> dict:
-    import subprocess
-
-    cmd = [sys.executable, str(ROOT / "scripts" / "connectome-route.py"), "--sense", args["sense"]]
-    if args.get("goal"):
-        cmd.extend(["--goal", args["goal"]])
-    if args.get("kill"):
-        cmd.append("--kill")
-    if args.get("no_autonomy"):
-        cmd.append("--no-autonomy")
-    if args.get("hotspot"):
-        cmd.extend(["--hotspot", args["hotspot"]])
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    """In-process connectome route — no python3 spawn per MCP call."""
     try:
-        return json.loads(proc.stdout or "{}")
-    except json.JSONDecodeError:
-        return {"error": "route_failed", "stdout": proc.stdout, "stderr": proc.stderr}
+        import cam_reason as cr
+
+        return cr.connectome_route_tool(
+            args["sense"],
+            args.get("goal") or "",
+            kill=bool(args.get("kill")),
+            hotspot_id=args.get("hotspot"),
+            autonomy=not bool(args.get("no_autonomy")),
+        )
+    except Exception as exc:
+        return {"error": "route_failed", "detail": str(exc)}
 
 
 def kill_switch_status() -> dict:

@@ -16,11 +16,19 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import activity_emit  # noqa: E402
 
 PARAMS = ROOT / "config" / "connectome" / "mesh-params.json"
+_DUAL: dict | None = None
+
+
+def _dual() -> dict:
+    global _DUAL
+    if _DUAL is None:
+        params = json.loads(PARAMS.read_text(encoding="utf-8")) if PARAMS.exists() else {}
+        _DUAL = params.get("language_dual_stream") or {}
+    return _DUAL
 
 
 def route_act(act: str) -> dict:
-    params = json.loads(PARAMS.read_text(encoding="utf-8")) if PARAMS.exists() else {}
-    dual = params.get("language_dual_stream") or {}
+    dual = _dual()
     policy = dual.get("conflict_policy") or {}
     winner = policy.get(act) or policy.get("default") or "dorsal"
     streams = {

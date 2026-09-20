@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -94,18 +93,13 @@ def pack_world(frame_meta: dict | None, gaze_samples: list, task: str) -> dict:
 
 
 def route_see(goal: str) -> dict:
-    cmd = [
-        sys.executable,
-        str(ROOT / "scripts" / "connectome-route.py"),
-        "--sense",
+    import cam_reason as cr
+
+    return cr.connectome_route_tool(
         "sense.vision.world",
-        "--goal",
         goal or "cam see via pupil",
-        "--hotspot",
-        "hotspot.pupil_see",
-    ]
-    out = subprocess.check_output(cmd, cwd=str(ROOT), text=True, timeout=15)
-    return json.loads(out)
+        hotspot_id="hotspot.pupil_see",
+    )
 
 
 def main() -> int:

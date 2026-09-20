@@ -29,9 +29,7 @@ echo "== cline workspace unit tests =="
 python3 scripts/test_cline_workspaces.py
 
 echo "== cam-reason / fast / infinitemind units =="
-python3 scripts/test_cam_reason.py
-python3 scripts/test_cam_fast.py
-python3 scripts/test_cam_infinitemind.py
+( cd scripts && python3 -m unittest test_cam_reason test_cam_fast test_cam_infinitemind )
 
 echo "== aaron voice gate unit tests =="
 AARON_VOICE_TEST=1 AARON_VOICE_ALLOW_DEV_BACKEND=1 python3 scripts/test_aaron_voice_gate.py
