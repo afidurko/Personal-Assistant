@@ -316,6 +316,7 @@ TRAFFIC_WEIGHT_MAP = {
     "sense.memorybear.hit": 2.5,
     "sense.catalog.public_apis": 2.0,
     "sense.inkbox.event": 2.0,
+    "sense.loop.tick": 2.0,
     "sense.slm.inference": 1.5,
     "sense.dl.embedding": 1.5,
     "sense.swarm.message": 1.2,

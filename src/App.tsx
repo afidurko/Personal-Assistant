@@ -7,6 +7,7 @@ import { MemoryRail } from '@/components/MemoryRail';
 import { ScanControls } from '@/components/ScanControls';
 import { SwiftGuidePanel } from '@/components/SwiftGuidePanel';
 import { SuggestionsPanel } from '@/components/SuggestionsPanel';
+import { NeedsAttentionPanel } from '@/components/NeedsAttentionPanel';
 import { AgentSpawnBay } from '@/components/AgentSpawnBay';
 import { SystemPulse } from '@/components/SystemPulse';
 import { useMeshSocket } from '@/hooks/useMeshSocket';
@@ -103,6 +104,14 @@ export default function App() {
         onStartIssueLoop={() => startIssueLoop()}
         onStopIssueLoop={() => stopIssueLoop()}
       />
+
+      <div className="detail-grid">
+        <NeedsAttentionPanel
+          onOpenWorkspace={(id) => openWorkspace(id)}
+          onFocusNode={(id) => focusNode(id)}
+          onRunAgentCycle={() => runAgentCycle()}
+        />
+      </div>
 
       <SystemPulse />
 

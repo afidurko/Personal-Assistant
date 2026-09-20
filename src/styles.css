@@ -1214,6 +1214,10 @@ h2,
   color: var(--scanning);
 }
 
+.suggestion-kind.needs-attention {
+  color: #f0a04b;
+}
+
 .suggestion-priority {
   font-size: 0.72rem;
   color: var(--text-dim);
@@ -1840,5 +1844,31 @@ h2,
     opacity: 1;
     transform: scale(1.15);
   }
+}
+
+.needs-attention-panel {
+  padding-bottom: 0.5rem;
+}
+
+.needs-attention-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.needs-attention-item {
+  border-left: 3px solid #f0a04b;
+  padding: 0.55rem 0.75rem 0.65rem;
+  background: linear-gradient(90deg, rgba(240, 160, 75, 0.08), transparent 70%);
+}
+
+.needs-attention-item.severity-critical {
+  border-left-color: var(--coral);
+}
+
+.needs-attention-item.severity-high {
+  border-left-color: #e69138;
 }
 

@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-20",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -108,6 +108,17 @@
         "hotspot": "hotspot.tooling",
         "status": "active_this_branch",
         "notes": "Privilege inheritance + lineage + boss/worker bus across all agents/workspaces"
+      },
+      {
+        "id": "scan.needs_attention",
+        "kind": "needs_attention",
+        "team": "team.needs-attention",
+        "module": "server/workspaces/needs-attention.ts",
+        "script": "scripts/needs-attention.py",
+        "hotspot": "hotspot.needs_attention",
+        "status": "active_this_branch",
+        "cross_workspace": true,
+        "notes": "Needs Attention queue + connect all coding workspaces"
       }
     ],
     "agent_teams": [
@@ -126,6 +137,10 @@
       {
         "id": "team.tooling",
         "config": "config/teams/tooling.json"
+      },
+      {
+        "id": "team.needs-attention",
+        "config": "config/teams/needs-attention.json"
       }
     ],
     "swarm_contracts": {
@@ -212,7 +227,7 @@
         "motor": "motor.google_trends",
         "remote": "github.com/GoogleTrends/data",
         "available_to": "all_roles_and_subagents",
-        "notes": "Open Trends datasets via GitHub trees API — do not submodule (~382MB)"
+        "notes": "Open Trends datasets via GitHub trees API \u2014 do not submodule (~382MB)"
       },
       {
         "id": "public-apis",
@@ -330,6 +345,37 @@
         ],
         "plan": "docs/CAM_REASONING.md",
         "status": "proposed"
+      },
+      {
+        "id": "higgsfield",
+        "path": "integrations/higgsfield",
+        "policy": "config/integrations/higgsfield.md",
+        "config": "config/integrations/higgsfield.json",
+        "remote": "github.com/afidurko/higgsfield",
+        "role": "multi_node_gpu_training",
+        "motor": "motor.higgsfield",
+        "sense": "sense.train.higgsfield",
+        "hotspot": "hotspot.higgsfield",
+        "script": "scripts/higgsfield-check.py",
+        "run": "scripts/higgsfield-run.py",
+        "pack": "scripts/pack-higgsfield-result.py",
+        "status": "active_dry_run",
+        "serves": [
+          "motor.dl"
+        ],
+        "notes": "Multi-node GPU train/fine-tune orchestrator; not the brain"
+      },
+      {
+        "id": "loop-engineering",
+        "path": "integrations/loop-engineering",
+        "policy": "config/integrations/loop-engineering.md",
+        "config": "config/integrations/loop-engineering.json",
+        "script": "scripts/loop-run.py",
+        "sense": "sense.loop.tick",
+        "hotspot": "hotspot.loop_engineering",
+        "motor": "motor.loop",
+        "remote": "github.com/afidurko/loop-engineering",
+        "available_to": "all_roles_and_subagents"
       }
     ],
     "parallel_prs": [
@@ -605,6 +651,86 @@
         "install_rules": true,
         "cursor_bootstrap": true,
         "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
+      },
+      {
+        "id": "higgsfield",
+        "label": "Higgsfield multi-node training",
+        "path": "integrations/higgsfield",
+        "remote": "github.com/afidurko/higgsfield",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "ops",
+          "chief",
+          "researcher",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/higgsfield",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Fault-tolerant GPU orchestration for large-model training"
+      },
+      {
+        "id": "loop-engineering",
+        "label": "Loop Engineering patterns",
+        "path": "integrations/loop-engineering",
+        "remote": "github.com/afidurko/loop-engineering",
+        "default_branch": "main",
+        "roles_allowed": [
+          "*"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/loop-engineering",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Agent loop patterns + audit CLI \u2014 shared via motor.loop (L1 report-only week one)"
+      },
+      {
+        "id": "sgr-agent-core",
+        "label": "SGR Agent Core (Schema-Guided Reasoning)",
+        "path": "integrations/sgr-agent-core",
+        "remote": "github.com/afidurko/sgr-agent-core",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "chief",
+          "capability-broker",
+          "researcher",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/sgr-agent-core",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
+      },
+      {
+        "id": "litserve",
+        "label": "LitServe local inference host",
+        "path": "integrations/litserve",
+        "remote": "github.com/afidurko/LitServe",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "chief",
+          "slm-runtime",
+          "dl-enhance",
+          "ops"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/litserve",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
       }
     ]
   },
@@ -632,7 +758,16 @@
     "inkbox_check": "scripts/inkbox-check.py",
     "memorybear_client": "scripts/memorybear.py",
     "memorybear_check": "scripts/memorybear-check.py",
-    "memorybear_pack": "scripts/pack-memorybear-result.py"
+    "memorybear_pack": "scripts/pack-memorybear-result.py",
+    "higgsfield_check": "scripts/higgsfield-check.py",
+    "higgsfield_run": "scripts/higgsfield-run.py",
+    "higgsfield_pack": "scripts/pack-higgsfield-result.py",
+    "loop_check": "scripts/loop-check.py",
+    "loop_audit": "scripts/loop-audit.py",
+    "loop_run": "scripts/loop-run.py",
+    "loop_pack": "scripts/pack-loop-result.py",
+    "needs_attention": "scripts/needs-attention.py",
+    "needs_attention_check": "scripts/needs-attention-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -808,6 +943,32 @@
             "lit serve",
             "integrations/litserve",
             "lightning litserve"
+          ]
+        },
+        {
+          "id": "higgsfield",
+          "match_any": [
+            "higgsfield",
+            "multi-node training",
+            "multi node training",
+            "zero-3",
+            "zeRO-3",
+            "integrations/higgsfield",
+            "gpu orchestration"
+          ]
+        },
+        {
+          "id": "loop-engineering",
+          "match_any": [
+            "loop-engineering",
+            "loop engineering",
+            "loop-audit",
+            "loop-init",
+            "loop-cost",
+            "loop-sync",
+            "LOOP.md",
+            "integrations/loop-engineering",
+            "motor.loop"
           ]
         }
       ]
@@ -1114,6 +1275,44 @@
       "install_rules": true,
       "cursor_bootstrap": true,
       "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
+    },
+    {
+      "id": "higgsfield",
+      "label": "Higgsfield multi-node training",
+      "path": "integrations/higgsfield",
+      "remote": "github.com/afidurko/higgsfield",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "chief",
+        "researcher",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/higgsfield",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Fault-tolerant GPU orchestration for large-model training"
+    },
+    {
+      "id": "loop-engineering",
+      "label": "Loop Engineering patterns",
+      "path": "integrations/loop-engineering",
+      "remote": "github.com/afidurko/loop-engineering",
+      "default_branch": "main",
+      "roles_allowed": [
+        "*"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/loop-engineering",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Agent loop patterns + audit CLI \u2014 shared via motor.loop (L1 report-only week one)"
     }
   ],
   "chooser": {
@@ -1286,6 +1485,32 @@
           "lit serve",
           "integrations/litserve",
           "lightning litserve"
+        ]
+      },
+      {
+        "id": "higgsfield",
+        "match_any": [
+          "higgsfield",
+          "multi-node training",
+          "multi node training",
+          "zero-3",
+          "zeRO-3",
+          "integrations/higgsfield",
+          "gpu orchestration"
+        ]
+      },
+      {
+        "id": "loop-engineering",
+        "match_any": [
+          "loop-engineering",
+          "loop engineering",
+          "loop-audit",
+          "loop-init",
+          "loop-cost",
+          "loop-sync",
+          "LOOP.md",
+          "integrations/loop-engineering",
+          "motor.loop"
         ]
       }
     ]

@@ -44,3 +44,11 @@
 [submodule "integrations/infinitemind"]
 	path = integrations/infinitemind
 	url = https://github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms.git
+[submodule "integrations/higgsfield"]
+	path = integrations/higgsfield
+	url = https://github.com/afidurko/higgsfield.git
+	branch = main
+[submodule "integrations/loop-engineering"]
+	path = integrations/loop-engineering
+	url = https://github.com/afidurko/loop-engineering.git
+	branch = main

@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "source": "integrations/loop-engineering/patterns/registry.yaml",
+  "week_one_mode": "L1",
+  "cam_defaults": {
+    "auto_fix": false,
+    "auto_merge": false,
+    "update_state": true,
+    "append_run_log": true,
+    "mirror_mesh": true
+  },
+  "patterns": [
+    {
+      "id": "daily-triage",
+      "name": "Daily Triage",
+      "level": "L1",
+      "cadence": "1d",
+      "enabled": true,
+      "schedule_id": "cam-daily-loop-triage",
+      "neuron": "neuron.loop_triage",
+      "actions": [
+        "connectome_check",
+        "system_health",
+        "loop_audit",
+        "update_state",
+        "append_run_log",
+        "pack_mesh"
+      ],
+      "human_gates": ["design-decisions", "multi-file-refactors"],
+      "cline_dispatch": false
+    },
+    {
+      "id": "qa-cycle",
+      "name": "QA Cycle Bridge",
+      "level": "L1",
+      "cadence": "standing",
+      "enabled": true,
+      "neuron": "neuron.qa_cycle",
+      "bridge_script": "scripts/qa-loop.py",
+      "actions": [
+        "bridge_qa_status",
+        "update_state",
+        "append_run_log",
+        "pack_mesh"
+      ],
+      "human_gates": [],
+      "cline_dispatch": false,
+      "notes": "Does not re-run billion sims by default — reports latest QA mesh + optional smoke."
+    },
+    {
+      "id": "pr-babysitter",
+      "name": "PR Babysitter",
+      "level": "L1",
+      "cadence": "15m",
+      "enabled": false,
+      "schedule_id": "cam-loop-pr-babysitter",
+      "neuron": "neuron.loop_pr_babysitter",
+      "actions": [
+        "list_open_prs_report",
+        "update_state",
+        "append_run_log",
+        "pack_mesh"
+      ],
+      "human_gates": ["security", "payments", "auth", "auto-merge"],
+      "cline_dispatch": false,
+      "notes": "Enable after Aaron raises trust. L1 = report only."
+    },
+    {
+      "id": "post-merge-cleanup",
+      "name": "Post-Merge Cleanup",
+      "level": "L1",
+      "cadence": "1d",
+      "enabled": true,
+      "schedule_id": "cam-weekly-loop-post-merge",
+      "neuron": "neuron.loop_post_merge",
+      "actions": [
+        "scan_recent_merges",
+        "suggest_cleanup",
+        "update_state",
+        "append_run_log",
+        "pack_mesh"
+      ],
+      "human_gates": ["architectural-debt", "large-diffs"],
+      "cline_dispatch": false
+    },
+    {
+      "id": "issue-triage",
+      "name": "Issue Triage",
+      "level": "L1",
+      "cadence": "1d",
+      "enabled": true,
+      "neuron": "neuron.loop_issue_triage",
+      "actions": [
+        "scan_findings",
+        "propose_only",
+        "update_state",
+        "append_run_log",
+        "pack_mesh"
+      ],
+      "human_gates": ["label-mutations", "auto-close"],
+      "cline_dispatch": false
+    }
+  ]
+}

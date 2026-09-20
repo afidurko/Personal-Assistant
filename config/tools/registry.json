@@ -427,6 +427,171 @@
       ],
       "risk": "medium",
       "status": "active"
+    },
+    {
+      "id": "tool.higgsfield.check",
+      "purpose": "Smoke-check Higgsfield Cam wiring (no GPU)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/higgsfield-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/higgsfield.json",
+      "motor": "motor.higgsfield"
+    },
+    {
+      "id": "tool.higgsfield.run",
+      "purpose": "Dry-run / gated Higgsfield train plan (default dry-run; no SSH/GPU)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/higgsfield-run.py",
+      "kind": "local_script",
+      "inputs": {
+        "experiment": "string",
+        "nodes": "string?",
+        "enhance": "boolean",
+        "live": "boolean",
+        "doctor": "boolean",
+        "out": "string?"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "mode": "string",
+        "experiments": "object[]",
+        "litserve_handoff": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.cam_enhance",
+        "switch.kill"
+      ],
+      "risk": "high",
+      "status": "active",
+      "integration": "config/integrations/higgsfield.json",
+      "motor": "motor.higgsfield",
+      "notes": "Live intent also needs CAM_HIGGSFIELD_LIVE=1; remote exec not implemented"
+    },
+    {
+      "id": "tool.higgsfield.pack",
+      "purpose": "Pack Higgsfield run-plan JSON into mesh/runs distillate",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/pack-higgsfield-result.py",
+      "kind": "local_script",
+      "inputs": {
+        "results": "string",
+        "goal": "string?",
+        "out": "string?"
+      },
+      "outputs": {
+        "mesh_doc": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/higgsfield.json",
+      "motor": "motor.higgsfield"
+    },
+    {
+      "id": "tool.loop.check",
+      "purpose": "Confirm Loop Engineering connectome + submodule wiring",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/loop-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/loop-engineering.json",
+      "motor": "motor.loop",
+      "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.loop.audit",
+      "purpose": "Compute Loop Ready score for Personal-Assistant",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/loop-audit.py",
+      "kind": "local_script",
+      "inputs": {
+        "suggest": "boolean"
+      },
+      "outputs": {
+        "score": "number",
+        "output": "string"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/loop-engineering.json",
+      "motor": "motor.loop",
+      "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.loop.run",
+      "purpose": "Run a Cam L1 loop pattern (daily-triage, qa-cycle, \u2026)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/loop-run.py",
+      "kind": "local_script",
+      "inputs": {
+        "pattern": "string",
+        "level": "string"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "status": "string",
+        "mesh": "string"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/loop-engineering.json",
+      "motor": "motor.loop",
+      "available_to": "all_roles_and_subagents"
     }
   ]
 }

@@ -28,6 +28,11 @@
       "role": "info-retriever"
     },
     {
+      "id": "loop_engineering",
+      "title": "Loop Engineering standing automations (L1 triage + QA bridge)",
+      "role": "qa"
+    },
+    {
       "id": "public_apis",
       "title": "Public APIs free-API catalog (all agents)",
       "role": "tool-user"
@@ -79,7 +84,7 @@
     },
     {
       "id": "agi_research_scan_daily",
-      "title": "Daily AI/AGI research scan \u2192 Cam enhancement proposals",
+      "title": "Daily AI/AGI research scan → Cam enhancement proposals",
       "role": "agi-scout",
       "team": "team.agi-research-scan",
       "enabled": true

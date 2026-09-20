@@ -124,6 +124,20 @@ def pick_hotspot(
         if any(
             tok in g
             for tok in (
+                "loop engineering",
+                "loop-engineering",
+                "loop audit",
+                "loop-audit",
+                "daily triage",
+                "pr babysitter",
+                "loop run",
+                "motor.loop",
+            )
+        ) and ("loop" in blob or "triage" in blob or "qa" in blob or "cingulate" in blob):
+            score += 5
+        if any(
+            tok in g
+            for tok in (
                 "code",
                 "coding",
                 "cline",
