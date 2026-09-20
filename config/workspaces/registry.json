@@ -1,9 +1,9 @@
 {
   "version": 1,
   "title": "Cam unified workspace registry",
-  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
+  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts — so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-20",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -108,6 +108,17 @@
         "hotspot": "hotspot.tooling",
         "status": "active_this_branch",
         "notes": "Privilege inheritance + lineage + boss/worker bus across all agents/workspaces"
+      },
+      {
+        "id": "scan.needs_attention",
+        "kind": "needs_attention",
+        "team": "team.needs-attention",
+        "module": "server/workspaces/needs-attention.ts",
+        "script": "scripts/needs-attention.py",
+        "hotspot": "hotspot.needs_attention",
+        "status": "active_this_branch",
+        "cross_workspace": true,
+        "notes": "Needs Attention queue + connect all coding workspaces"
       }
     ],
     "agent_teams": [
@@ -126,6 +137,10 @@
       {
         "id": "team.tooling",
         "config": "config/teams/tooling.json"
+      },
+      {
+        "id": "team.needs-attention",
+        "config": "config/teams/needs-attention.json"
       }
     ],
     "swarm_contracts": {
@@ -440,7 +455,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Cognitive memory engine \u2014 prefer API client scripts/memorybear.py for Cam runtime"
+        "notes": "Cognitive memory engine — prefer API client scripts/memorybear.py for Cam runtime"
       },
       {
         "id": "jarvis",
@@ -511,7 +526,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+        "notes": "Curated free API index — shared by all agents via motor.public_apis"
       },
       {
         "id": "joshinator-analyzer",
@@ -550,7 +565,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
+        "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
       },
       {
         "id": "inkbox",
@@ -572,7 +587,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+        "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
       },
       {
         "id": "voicestudio",
@@ -621,7 +636,9 @@
     "inkbox_check": "scripts/inkbox-check.py",
     "memorybear_client": "scripts/memorybear.py",
     "memorybear_check": "scripts/memorybear-check.py",
-    "memorybear_pack": "scripts/pack-memorybear-result.py"
+    "memorybear_pack": "scripts/pack-memorybear-result.py",
+    "needs_attention": "scripts/needs-attention.py",
+    "needs_attention_check": "scripts/needs-attention-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -640,7 +657,10 @@
             "nullclaw",
             "nulltickets",
             "personal-assistant",
-            "persist"
+            "persist",
+            "needs attention",
+            "attention tab",
+            "needs-attention"
           ]
         },
         {
@@ -874,7 +894,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Cognitive memory engine \u2014 prefer API client scripts/memorybear.py for Cam runtime"
+      "notes": "Cognitive memory engine — prefer API client scripts/memorybear.py for Cam runtime"
     },
     {
       "id": "jarvis",
@@ -945,7 +965,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+      "notes": "Curated free API index — shared by all agents via motor.public_apis"
     },
     {
       "id": "joshinator-analyzer",
@@ -984,7 +1004,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
+      "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
     },
     {
       "id": "inkbox",
@@ -1006,7 +1026,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+      "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
     },
     {
       "id": "voicestudio",
@@ -1048,7 +1068,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
+      "notes": "Cam slow-path reasoner — see docs/CAM_REASONING.md"
     },
     {
       "id": "litserve",
@@ -1085,7 +1105,10 @@
           "nullclaw",
           "nulltickets",
           "personal-assistant",
-          "persist"
+          "persist",
+          "needs attention",
+          "attention tab",
+          "needs-attention"
         ]
       },
       {

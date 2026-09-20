@@ -41,6 +41,16 @@
       "timeout": 1200,
       "tags": ["cam", "cline", "doctor"],
       "enabled": false
+    },
+    {
+      "id": "cam-daily-needs-attention",
+      "name": "Cam daily Needs Attention sweep",
+      "workspace_id": "personal-assistant",
+      "cron": "15 7 * * *",
+      "prompt": "Run python3 scripts/needs-attention-check.py then python3 scripts/needs-attention.py --connect --dispatch-plan --write. Summarize connected/disconnected coding workspaces and the attention queue. Auto-clear only non-Aaron-gated items via choose-workspace routing notes; do not outbound-message, spend money, or apply Cam enhance. Do not push commits unless Aaron asked.",
+      "timeout": 1800,
+      "tags": ["cam", "needs-attention", "workspaces", "triage"],
+      "enabled": true
     }
   ]
 }

@@ -90,6 +90,7 @@ DEFAULT_INCLUDE = [
     "config/teams/capability.json",
     "config/teams/info.json",
     "config/teams/tooling.json",
+    "config/teams/needs-attention.json",
     "config/swarm/privileges.json",
     "config/swarm/primitives.json",
     "config/swarm/autonomy-triad.json",

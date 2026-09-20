@@ -622,12 +622,18 @@ export class NeuralMesh {
       if (agent.layer === 'issue-loop') {
         ensure(agentId, layerHubId('persistence'), 'loops', 0.5, 'loop ↔ persist');
       }
+      if (agent.layer === 'attention') {
+        ensure(agentId, layerHubId('issue-loop'), 'loops', 0.55, 'attention ↔ issue-loop');
+        ensure(agentId, layerHubId('commute'), 'commutes', 0.45, 'attention ↔ commute');
+        ensure(agentId, `ws-needs_attention`, 'suggests', 0.65, 'attention ↔ needs tab');
+      }
       if (agent.layer === 'commute') {
         ensure(agentId, layerHubId('memory'), 'commutes', 0.4, 'commute ↔ memory');
       }
       if (agent.layer === 'swarm') {
         ensure(agentId, layerHubId('persistence'), 'inherits', 0.45, 'swarm ↔ persist');
         ensure(agentId, layerHubId('commute'), 'assigns', 0.4, 'swarm ↔ commute');
+        ensure(agentId, layerHubId('attention'), 'assigns', 0.35, 'swarm ↔ attention');
       }
     }
   }

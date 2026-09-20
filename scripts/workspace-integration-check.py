@@ -27,6 +27,7 @@ HARD_PATHS = [
     "config/teams/capability.json",
     "config/teams/info.json",
     "config/teams/tooling.json",
+    "config/teams/needs-attention.json",
     "config/swarm/privileges.json",
     "config/swarm/primitives.json",
     "config/swarm/autonomy-triad.json",
@@ -85,6 +86,8 @@ HARD_PATHS = [
     "scripts/flight-envelope.py",
     "scripts/inkbox-check.py",
     "scripts/swarm-check.py",
+    "scripts/needs-attention.py",
+    "scripts/needs-attention-check.py",
     "scripts/persist-export.py",
     "scripts/persist-import.py",
     "scripts/trajectory-policy-check.py",
@@ -97,6 +100,7 @@ HARD_PATHS = [
     "server/core/motor-executor.ts",
     "server/core/trajectory-policies.ts",
     "server/workspaces/swarm.ts",
+    "server/workspaces/needs-attention.ts",
     "shared/swarmPrivileges.ts",
     "shared/agentLayers.ts",
 ]
@@ -111,6 +115,7 @@ PERSIST_MUST_INCLUDE = [
     "config/teams/capability.json",
     "config/teams/info.json",
     "config/teams/tooling.json",
+    "config/teams/needs-attention.json",
     "config/swarm/privileges.json",
     "config/enhancement/slm-dl.json",
     "config/enhancement/dual-process.json",
@@ -126,6 +131,7 @@ PERSIST_MUST_INCLUDE = [
     "docs/WORKSPACES_WORKFLOW.md",
     "docs/HAAS_CAM_PATTERNS.md",
     "docs/SYSTEM_INTEGRATION.md",
+    "docs/NEEDS_ATTENTION.md",
     "config/system/pieces.json",
 ]
 
@@ -383,6 +389,11 @@ def main() -> int:
         types_txt = (ROOT / "shared/types.ts").read_text(encoding="utf-8")
         if "agi_research" not in types_txt:
             hard_errors.append("missing_workspace_kind:agi_research")
+        if "needs_attention" not in types_txt:
+            hard_errors.append("missing_workspace_kind:needs_attention")
+        na_mod = ROOT / "server/workspaces/needs-attention.ts"
+        if not na_mod.exists():
+            hard_errors.append("missing:server/workspaces/needs-attention.ts")
     for integ in integrations:
         if not integ["populated"]:
             soft.append(f"integration empty: {integ['path']} (submodule init or create config)")

@@ -460,6 +460,30 @@ function fromAgentContext(
     });
   }
 
+  const attentionWs = workspaces.find((w) => w.kind === 'needs_attention');
+  if (attentionWs) {
+    const triage = MESH_AGENTS.find((a) => a.id === 'attention-triage')!;
+    const connector = MESH_AGENTS.find((a) => a.id === 'workspace-connector')!;
+    const dispatcher = MESH_AGENTS.find((a) => a.id === 'attention-dispatcher')!;
+    const disconnected =
+      Number(attentionWs.metrics.missingWorkspaces ?? 0) +
+      Number(attentionWs.metrics.emptyWorkspaces ?? 0);
+    const queueDepth = Number(attentionWs.metrics.queueDepth ?? attentionWs.findings.length);
+    out.push({
+      id: 'suggest-needs-attention-sweep',
+      kind: 'needs-attention',
+      title: 'Run Needs Attention sweep across all coding workspaces',
+      rationale: `${attentionWs.name} score ${attentionWs.score}; queue depth ${queueDepth}; ${disconnected} workspace(s) not fully connected.`,
+      implementation: `Focus hex “${triage.name}”, connect via “${connector.name}”, then let “${dispatcher.name}” route auto-clearable items. Escalate only kill/enhance/outbound to Aaron.`,
+      sketch:
+        'python3 scripts/needs-attention.py --connect --write\npython3 scripts/needs-attention.py --dispatch-plan --json\nPOST /api/agents/cycle',
+      priority: attentionWs.score < 70 ? 86 : 58,
+      relatedWorkspaceIds: [attentionWs.id],
+      relatedConceptIds: ['error-handling', 'concurrency'],
+      sourceFindingIds: attentionWs.findings.map((f) => f.id).slice(0, 5),
+    });
+  }
+
   return out;
 }
 
@@ -486,6 +510,9 @@ function fromFinding(ws: WorkspaceSnapshot, finding: Finding): SuggestiveImpleme
 }
 
 function mapKind(wsKind: WorkspaceSnapshot['kind'], category: string): SuggestionKind {
+  if (wsKind === 'needs_attention' || category.includes('connectivity') || category === 'queue') {
+    return 'needs-attention';
+  }
   if (wsKind === 'vulnerability' || category.includes('secret') || category.includes('cors')) {
     return 'security';
   }
@@ -512,6 +539,9 @@ function sketchFor(finding: Finding): string | undefined {
   if (t.includes('test')) return 'npm test -- --run';
   if (t.includes('loop') || t.includes('regress')) {
     return 'POST /api/agents/issue-loop/start && POST /api/agents/cycle';
+  }
+  if (t.includes('attention') || t.includes('connect coding') || t.includes('workspace')) {
+    return 'python3 scripts/needs-attention.py --connect --dispatch-plan --write';
   }
   return undefined;
 }
