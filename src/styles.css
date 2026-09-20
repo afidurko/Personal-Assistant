@@ -2211,65 +2211,97 @@ h2,
   left: auto;
 }
 
+.cam-face-mouth-cover {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 28%;
+  height: 10%;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(214, 176, 156, 0.92),
+    rgba(214, 176, 156, 0.55) 55%,
+    transparent 75%
+  );
+  z-index: 4;
+  pointer-events: none;
+  filter: blur(1.5px);
+  opacity: calc(0.55 + var(--mouth-open, 0) * 0.45);
+}
+
 .cam-face-mouth {
   position: absolute;
   left: 50%;
-  top: var(--mouth-y, 68%);
-  width: var(--mouth-w, 16%);
-  height: var(--mouth-h, 3%);
-  translate: -50% -40%;
+  top: var(--mouth-y, 61%);
+  width: var(--mouth-w, 20%);
+  height: var(--mouth-h, 4%);
+  translate: -50% -35%;
   border-radius: var(--mouth-round, 50%);
-  background: #1a0a0e;
-  box-shadow:
-    inset 0 3px 4px rgba(0, 0, 0, 0.55),
-    0 1px 3px rgba(255, 200, 180, 0.2);
+  background: #2a1016;
   z-index: 5;
   overflow: hidden;
-  opacity: 0.92;
+  opacity: 1;
+  box-shadow:
+    0 0 0 1.5px rgba(176, 96, 110, 0.75),
+    0 0 0 3px rgba(214, 160, 150, 0.35),
+    inset 0 3px 5px rgba(0, 0, 0, 0.55);
   transition:
     width 0.04s linear,
     height 0.04s linear,
     border-radius 0.04s linear,
-    top 0.04s linear,
-    opacity 0.15s ease;
+    top 0.04s linear;
+}
+
+.cam-face-lips {
+  position: absolute;
+  inset: -18%;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px rgba(190, 100, 115, 0.55);
+  pointer-events: none;
 }
 
 .cam-face-live.expr-idle .cam-face-mouth,
 .cam-face-live.expr-listen .cam-face-mouth {
-  opacity: 0.35;
-  height: max(1.6%, var(--mouth-h, 2%));
+  opacity: 0.85;
+  height: max(2.2%, var(--mouth-h, 3%));
+  box-shadow:
+    0 0 0 1px rgba(176, 96, 110, 0.55),
+    inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .cam-face-live.expr-speak .cam-face-mouth,
 .cam-face-live.mouth-open .cam-face-mouth {
   opacity: 1;
-  background: #2c0f16;
+  background: #3a121c;
   box-shadow:
-    inset 0 3px 5px rgba(0, 0, 0, 0.6),
-    0 0 10px rgba(180, 60, 80, 0.25);
+    0 0 0 2px rgba(200, 110, 125, 0.85),
+    0 0 12px rgba(180, 70, 90, 0.35),
+    inset 0 4px 6px rgba(0, 0, 0, 0.55);
 }
 
 .cam-face-mouth-inner {
   position: absolute;
   left: 50%;
-  top: 45%;
-  width: 55%;
-  height: 55%;
+  top: 48%;
+  width: 62%;
+  height: 58%;
   translate: -50% -40%;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, #8a3040, #4a1520 70%);
+  background: radial-gradient(circle at 50% 25%, #a04050, #4a1520 72%);
 }
 
 .cam-face-teeth {
   position: absolute;
   left: 50%;
-  top: 12%;
-  width: 70%;
-  height: 28%;
+  top: 8%;
+  width: 78%;
+  height: 32%;
   translate: -50% 0;
-  border-radius: 20% / 40%;
-  background: linear-gradient(180deg, #f2ebe3, #d8cfc4);
-  box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.15);
+  border-radius: 18% / 45%;
+  background: linear-gradient(180deg, #fff8f0, #e6ddd2 70%, #cfc4b8);
+  box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .cam-face-mouth.viseme-smile {

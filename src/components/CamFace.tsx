@@ -153,25 +153,26 @@ function mixPose(a: FacePose, b: FacePose, t: number): FacePose {
 
 /** Viseme → mouth ellipse geometry (percent of face). */
 function mouthGeom(v: VisemeId, open: number, spread: number, smile: number) {
-  const baseW = 18 * spread;
-  const baseH = 2.8 + open * 20;
+  // Tuned for cam-face.jpg circular cover crop — lips sit ~61% down
+  const baseW = 22 * spread;
+  const baseH = 3.5 + open * 22;
   switch (v) {
     case 'closed':
-      return { w: baseW * 0.85, h: 1.4, round: 50, y: 69 };
+      return { w: baseW * 0.9, h: 2.2, round: 50, y: 61.5 };
     case 'smile':
-      return { w: baseW * 1.2, h: 3.2 + smile * 2.5, round: 60, y: 68.5 };
+      return { w: baseW * 1.2, h: 3.5 + smile * 2, round: 55, y: 61.2 };
     case 'wide':
-      return { w: baseW * 1.3, h: Math.max(6, baseH * 0.8), round: 42, y: 68 };
+      return { w: baseW * 1.35, h: Math.max(7, baseH * 0.75), round: 40, y: 60.8 };
     case 'round':
-      return { w: baseW * 0.72, h: Math.max(9, baseH), round: 50, y: 68 };
+      return { w: baseW * 0.7, h: Math.max(11, baseH), round: 50, y: 60.5 };
     case 'narrow':
-      return { w: baseW * 0.68, h: Math.max(5, baseH * 0.55), round: 50, y: 68.5 };
+      return { w: baseW * 0.65, h: Math.max(6, baseH * 0.5), round: 50, y: 61 };
     case 'teeth':
-      return { w: baseW * 1.1, h: Math.max(5, baseH * 0.6), round: 28, y: 68 };
+      return { w: baseW * 1.15, h: Math.max(6, baseH * 0.55), round: 28, y: 60.8 };
     case 'open':
-      return { w: baseW * 1.05, h: Math.max(10, baseH), round: 46, y: 67.5 };
+      return { w: baseW * 1.05, h: Math.max(12, baseH), round: 44, y: 60.2 };
     default:
-      return { w: baseW * 0.95, h: Math.max(2.2, baseH * 0.35), round: 50, y: 69 };
+      return { w: baseW * 0.95, h: Math.max(2.8, baseH * 0.3), round: 50, y: 61.5 };
   }
 }
 
@@ -300,8 +301,8 @@ export function CamFace({
   }, [expr, level, speakingText, speechProgress, schedule, blink]);
 
   const geom = mouthGeom(pose.viseme, pose.mouthOpen, pose.mouthSpread, pose.smile);
-  const showTeeth = pose.viseme === 'teeth' || pose.mouthOpen > 0.35;
-  const showInner = pose.mouthOpen > 0.2;
+  const showTeeth = pose.viseme === 'teeth' || pose.mouthOpen > 0.28;
+  const showInner = pose.mouthOpen > 0.18;
 
   return (
     <div
@@ -354,8 +355,12 @@ export function CamFace({
         <span className="cam-face-cheek left" aria-hidden />
         <span className="cam-face-cheek right" aria-hidden />
 
+        {/* Skin patch hides the still photo smile so the animated mouth reads clearly */}
+        <span className="cam-face-mouth-cover" aria-hidden />
+
         {/* Mouth */}
         <div className={`cam-face-mouth viseme-${pose.viseme}`} aria-hidden>
+          <span className="cam-face-lips" />
           {showInner ? <span className="cam-face-mouth-inner" /> : null}
           {showTeeth ? <span className="cam-face-teeth" /> : null}
         </div>
