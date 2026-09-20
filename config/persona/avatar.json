@@ -1,12 +1,12 @@
 {
   "avatar": {
-    "engine": "talkinghead",
-    "url": "/avatars/cam.glb",
-    "source": "TalkingHead brunette.glb (browser presence stand-in)",
-    "body": "F",
-    "lipsyncLang": "en",
-    "notes": "Full desk presence remains LLMAvatarTalk + RIVA + Audio2Face. Replace cam.glb with a Cam-matched Ready Player Me / Avaturn GLB (ARKit + Oculus Visemes) when ready."
-  },
-  "portrait_still": "identity/persona/cam-face.jpg",
-  "studio": "integrations/llmavatartalk"
+    "engine": "audio2face",
+    "portrait": "identity/persona/cam-face.jpg",
+    "mesh": "/avatars/cam-a2f-mesh.json",
+    "contract": "NVIDIA Audio2Face-3D ARKit blendshapes",
+    "studio": "integrations/llmavatartalk",
+    "push": "scripts/a2f-push.py",
+    "instance": "/World/audio2face/PlayerStreaming",
+    "notes": "Cam is her real portrait fitted to MediaPipe/A2F topology. Desk Omniverse or A2F-3D NIM (A2F_URL) streams audio via the NVIDIA gRPC client. Browser applies the same ARKit weights when the studio is offline."
+  }
 }

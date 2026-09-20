@@ -1,16 +1,18 @@
 /**
- * CamFace — TalkingHead 3D presence (ARKit / Oculus visemes).
- * Browser path while RIVA+Audio2Face desk studio is offline.
- * Avatar GLB: public/avatars/cam.glb (TalkingHead brunette stand-in).
- *
- * LipsyncEn is imported statically — Vite pre-bundling breaks TalkingHead's
- * dynamic import('./lipsync-en.mjs') and leaves the mouth frozen.
+ * CamFace — Cam’s actual portrait as an Audio2Face ARKit mesh.
+ * Desk: NVIDIA A2F / A2F-3D NIM (integrations/llmavatartalk gRPC).
+ * Browser: same ARKit weights on the photo-fitted MediaPipe mesh.
  */
-import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { TalkingHead } from '@met4citizen/talkinghead';
-import { LipsyncEn } from '@met4citizen/talkinghead/modules/lipsync-en.mjs';
-import { estimateSpeechMs, expressionFromStatus, type FaceExpression } from '@/lib/visemes';
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import * as THREE from 'three';
+import { applyA2FDisplacements, headPoseFromWeights } from '@/lib/a2f/displace';
+import { LIPS_INNER_LOOP, type CamA2FMesh } from '@/lib/a2f/landmarks';
+import { buildA2FSchedule, composeA2F } from '@/lib/a2f/weights';
+import { expressionFromStatus } from '@/lib/visemes';
 import type { CamVoiceStatus } from '@/hooks/useCamVoice';
+
+const PHOTO = '/identity/persona/cam-face.jpg';
+const MESH_URL = '/avatars/cam-a2f-mesh.json';
 
 interface CamFaceProps {
   status: CamVoiceStatus;
@@ -19,56 +21,6 @@ interface CamFaceProps {
   typing?: boolean;
   speakingText?: string;
   speechProgress?: number;
-  /** Optional override; default /avatars/cam.glb */
-  avatarUrl?: string;
-}
-
-const AVATAR_URL = '/avatars/cam.glb';
-
-function moodFor(expr: FaceExpression): string {
-  switch (expr) {
-    case 'speak':
-      return 'happy';
-    case 'concern':
-    case 'ignored':
-      return 'sad';
-    default:
-      return 'neutral';
-  }
-}
-
-/** Word timings for TalkingHead speakAudio (drives real viseme blendshapes). */
-function wordsTiming(text: string, durationMs: number) {
-  const words = text
-    .replace(/[^\w\s'’-]/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean);
-  if (!words.length) {
-    return { words: ['.'], wtimes: [0], wdurations: [durationMs] };
-  }
-  const totalChars = words.reduce((n, w) => n + w.length, 0) || 1;
-  const wtimes: number[] = [];
-  const wdurations: number[] = [];
-  let t = 60;
-  const usable = Math.max(400, durationMs - 160);
-  for (const w of words) {
-    const dur = Math.max(90, (w.length / totalChars) * usable);
-    wtimes.push(t);
-    wdurations.push(dur);
-    t += dur + 25;
-  }
-  return { words, wtimes, wdurations };
-}
-
-function makeSilentBuffer(ctx: AudioContext, durationMs: number): AudioBuffer {
-  const sampleRate = ctx.sampleRate || 22050;
-  const len = Math.max(1, Math.floor((durationMs / 1000) * sampleRate));
-  const buffer = ctx.createBuffer(1, len, sampleRate);
-  // Near-silent — browser speechSynthesis carries the audible voice;
-  // TalkingHead uses this timeline for blendshape lip-sync.
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < len; i++) data[i] = 0;
-  return buffer;
 }
 
 export const CamFace = memo(function CamFace({
@@ -77,90 +29,127 @@ export const CamFace = memo(function CamFace({
   level,
   typing = false,
   speakingText = '',
-  avatarUrl = AVATAR_URL,
+  speechProgress = -1,
 }: CamFaceProps) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const headRef = useRef<TalkingHead | null>(null);
-  const lastSpokenRef = useRef('');
+  const weightsApi = useRef<{
+    set: (w: ReturnType<typeof composeA2F>) => void;
+  } | null>(null);
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [loadPct, setLoadPct] = useState(0);
   const expr = expressionFromStatus(status, typing);
+  const schedule = useMemo(() => buildA2FSchedule(speakingText), [speakingText]);
 
-  // Boot TalkingHead
   useEffect(() => {
     const node = mountRef.current;
     if (!node) return;
     let cancelled = false;
-    let head: TalkingHead | null = null;
+    let renderer: THREE.WebGLRenderer | null = null;
+    let raf = 0;
 
     (async () => {
       try {
-        head = new TalkingHead(node, {
-          lipsyncModules: ['en'],
-          lipsyncLang: 'en',
-          cameraView: 'head',
-          cameraDistance: 0,
-          cameraZoomEnable: false,
-          cameraRotateEnable: false,
-          cameraPanEnable: false,
-          modelFPS: 30,
-          avatarIdleEyeContact: 0.4,
-          avatarSpeakingEyeContact: 0.65,
-          avatarIdleHeadMove: 0.45,
-          avatarSpeakingHeadMove: 0.6,
-          lightAmbientIntensity: 2.2,
-          lightDirectIntensity: 18,
-          lightSpotIntensity: 8,
-        });
-        // Force English lipsync even if Vite breaks the dynamic module path.
-        head.lipsync = head.lipsync || {};
-        head.lipsync.en = new LipsyncEn();
-
-        if (cancelled) {
-          head.stopSpeaking?.();
-          head.stop?.();
-          return;
-        }
-        headRef.current = head;
-
-        // Unlock AudioContext on first user gesture (required for speakAudio).
-        const unlock = () => {
-          try {
-            void head?.audioCtx?.resume?.();
-          } catch {
-            /* ignore */
-          }
-        };
-        window.addEventListener('pointerdown', unlock, { once: true });
-        window.addEventListener('keydown', unlock, { once: true });
-
-        await head.showAvatar(
-          {
-            url: avatarUrl,
-            body: 'F',
-            avatarMood: 'neutral',
-            lipsyncLang: 'en',
-            lipsyncHeadMovement: true,
-          },
-          (ev) => {
-            if (ev?.lengthComputable && ev.total) {
-              setLoadPct(Math.min(100, Math.round((ev.loaded / ev.total) * 100)));
-            }
-          },
-        );
+        const meshRes = await fetch(MESH_URL);
+        if (!meshRes.ok) throw new Error('Cam A2F mesh missing — run scripts/build-cam-a2f-mesh.mjs');
+        const mesh = (await meshRes.json()) as CamA2FMesh;
         if (cancelled) return;
-        try {
-          void head.audioCtx?.resume?.();
-        } catch {
-          /* ignore */
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(28, 1, 0.05, 10);
+        camera.position.set(0, 0.02, 1.15);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        renderer.setSize(node.clientWidth, node.clientHeight);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.setClearColor(0x000000, 0);
+        node.replaceChildren(renderer.domElement);
+
+        const tex = await new THREE.TextureLoader().loadAsync(PHOTO);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.minFilter = THREE.LinearFilter;
+        tex.generateMipmaps = false;
+
+        const rest = new Float32Array(mesh.positions);
+        const live = new Float32Array(mesh.positions);
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(live, 3));
+        geo.setAttribute('uv', new THREE.Float32BufferAttribute(mesh.uvs, 2));
+        geo.setIndex(mesh.indices);
+        geo.computeVertexNormals();
+
+        const faceMat = new THREE.MeshBasicMaterial({
+          map: tex,
+          transparent: false,
+          side: THREE.DoubleSide,
+        });
+        const face = new THREE.Mesh(geo, faceMat);
+
+        const loop = mesh.mouthLoop?.length ? mesh.mouthLoop : LIPS_INNER_LOOP;
+        const cavityPos: number[] = [];
+        const cavityIdx: number[] = [];
+        for (const i of loop) {
+          cavityPos.push(rest[i * 3] ?? 0, rest[i * 3 + 1] ?? 0, (rest[i * 3 + 2] ?? 0) - 0.04);
         }
-        setReady(true);
-        setLoadError(null);
+        for (let i = 1; i < loop.length - 1; i++) cavityIdx.push(0, i, i + 1);
+        const cavityGeo = new THREE.BufferGeometry();
+        cavityGeo.setAttribute('position', new THREE.Float32BufferAttribute(cavityPos, 3));
+        cavityGeo.setIndex(cavityIdx);
+        const cavity = new THREE.Mesh(
+          cavityGeo,
+          new THREE.MeshBasicMaterial({ color: 0x2a1410, side: THREE.DoubleSide }),
+        );
+
+        const teeth = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.09, 0.028),
+          new THREE.MeshBasicMaterial({ color: 0xe8dcd0, side: THREE.DoubleSide }),
+        );
+        teeth.position.set(0, 0.01, -0.03);
+
+        const head = new THREE.Group();
+        head.add(cavity);
+        head.add(teeth);
+        head.add(face);
+        scene.add(head);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+        const current = { weights: composeA2F({ expr: 'idle', speaking: false, progress: -1, schedule: [], timeSec: 0 }) };
+        weightsApi.current = {
+          set: (w) => {
+            current.weights = w;
+          },
+        };
+
+        const tick = () => {
+          if (cancelled || !renderer) return;
+          const w = current.weights;
+          applyA2FDisplacements(rest, w, live);
+          (geo.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true;
+          const pose = headPoseFromWeights(w);
+          head.rotation.set(pose.pitch, pose.yaw, pose.roll);
+          const jaw = w.JawOpen ?? 0;
+          teeth.position.y = 0.012 - jaw * 0.03;
+          teeth.scale.set(1 + jaw * 0.15, 1 + jaw * 0.8, 1);
+          teeth.visible = jaw > 0.12;
+          renderer.render(scene, camera);
+          raf = requestAnimationFrame(tick);
+        };
+        tick();
+
+        const onResize = () => {
+          if (!renderer || !node) return;
+          const s = Math.max(1, node.clientWidth);
+          renderer.setSize(s, s);
+        };
+        window.addEventListener('resize', onResize);
+
+        if (!cancelled) setReady(true);
+        return () => window.removeEventListener('resize', onResize);
       } catch (e) {
-        console.error('Cam TalkingHead boot failed', e);
+        console.error('Cam A2F avatar failed', e);
         if (!cancelled) {
-          setLoadError(e instanceof Error ? e.message : 'Avatar failed to load');
+          setLoadError(e instanceof Error ? e.message : 'Avatar failed');
           setReady(false);
         }
       }
@@ -168,74 +157,36 @@ export const CamFace = memo(function CamFace({
 
     return () => {
       cancelled = true;
+      cancelAnimationFrame(raf);
+      weightsApi.current = null;
       try {
-        headRef.current?.stopSpeaking?.();
-        headRef.current?.stop?.();
+        renderer?.dispose();
       } catch {
         /* ignore */
       }
-      headRef.current = null;
       if (node) node.replaceChildren();
     };
-  }, [avatarUrl]);
+  }, []);
 
-  // Mood from Cam status
   useEffect(() => {
-    const head = headRef.current;
-    if (!head || !ready) return;
-    try {
-      head.setMood?.(moodFor(expr));
-    } catch {
-      /* mood optional */
-    }
-  }, [expr, ready]);
-
-  // Speak → real viseme lip-sync (timed silent buffer + word visemes)
-  useEffect(() => {
-    const head = headRef.current;
-    if (!head || !ready || !speakingText) return;
-    if (speakingText === lastSpokenRef.current) return;
-    lastSpokenRef.current = speakingText;
-
-    const durationMs = estimateSpeechMs(speakingText);
-    const timing = wordsTiming(speakingText, durationMs);
-
-    (async () => {
-      try {
-        await head.audioCtx?.resume?.();
-        // Re-assert lipsync in case dynamic import raced and failed
-        if (!head.lipsync?.en) {
-          head.lipsync = head.lipsync || {};
-          head.lipsync.en = new LipsyncEn();
-        }
-        const audio = makeSilentBuffer(head.audioCtx, durationMs);
-        head.stopSpeaking?.();
-        head.speakAudio(
-          {
-            audio,
-            words: timing.words,
-            wtimes: timing.wtimes,
-            wdurations: timing.wdurations,
-          },
-          { lipsyncLang: 'en' },
-        );
-      } catch (e) {
-        console.warn('Cam TalkingHead speakAudio failed', e);
-      }
-    })();
-  }, [speakingText, ready]);
-
-  // Reset spoken ref when utterance ends
-  useEffect(() => {
-    if (!speakingText) {
-      lastSpokenRef.current = '';
-      try {
-        headRef.current?.stopSpeaking?.();
-      } catch {
-        /* ignore */
-      }
-    }
-  }, [speakingText]);
+    let raf = 0;
+    const t0 = performance.now();
+    const loop = () => {
+      const timeSec = (performance.now() - t0) / 1000;
+      weightsApi.current?.set(
+        composeA2F({
+          expr,
+          speaking: Boolean(speakingText) && speechProgress >= 0,
+          progress: speechProgress,
+          schedule,
+          timeSec,
+        }),
+      );
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, [expr, speakingText, speechProgress, schedule]);
 
   return (
     <div
@@ -246,15 +197,12 @@ export const CamFace = memo(function CamFace({
       role="img"
       aria-label={`Cam, ${expr}`}
     >
-      <div className="cam-face-live-inner cam-face-talkinghead">
+      <div className="cam-face-live-inner cam-face-a2f">
         <div ref={mountRef} className="cam-face-th-mount" />
-        {!ready && !loadError ? (
-          <p className="cam-face-loading">Loading Cam… {loadPct ? `${loadPct}%` : ''}</p>
-        ) : null}
+        {!ready && !loadError ? <p className="cam-face-loading">Fitting Cam…</p> : null}
         {loadError ? (
           <div className="cam-face-fallback">
-            <img src="/identity/persona/cam-face.jpg" alt="Cam" />
-            <p>3D presence unavailable — still portrait</p>
+            <img src={PHOTO} alt="Cam" />
           </div>
         ) : null}
       </div>

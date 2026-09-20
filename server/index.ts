@@ -12,6 +12,7 @@ import { CamConverse } from './core/cam-converse.js';
 import { CamAutonomy } from './core/cam-autonomy.js';
 import { RuntimeStore } from './core/runtime-store.js';
 import { SystemBridge } from './core/system-bridge.js';
+import { a2fStatus } from './avatar/a2f-bridge.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -194,6 +195,10 @@ app.post('/api/cam/autonomy/tick', async (_req, res) => {
     listening: micListeningHint,
   });
   res.json(result);
+});
+
+app.get('/api/avatar/a2f', async (_req, res) => {
+  res.json(await a2fStatus());
 });
 
 app.get('/api/session', (_req, res) => {

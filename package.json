@@ -21,6 +21,7 @@
   "dependencies": {
     "@met4citizen/talkinghead": "^1.7.0",
     "cors": "^2.8.5",
+    "delaunator": "^5.1.0",
     "express": "^4.21.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
+    "@types/delaunator": "^5.0.3",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
