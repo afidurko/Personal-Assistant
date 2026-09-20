@@ -86,6 +86,17 @@ def gate_mic_turn(payload: dict) -> dict:
 
     status = voice_gate_status()
     if not status.get("enrolled"):
+        # Open-mic fallback: a missing enrollment must not leave Cam deaf.
+        # Aaron can tighten this by setting open_mic_when_not_enrolled=false.
+        if _open_mic_allowed():
+            return {
+                "required": True,
+                "accepted": True,
+                "reason": "open_mic_not_enrolled",
+                "aaron_score": 0.0,
+                "status": status,
+                "hint": "Enroll with aaron-voice-enroll.py to enable Aaron-only verification",
+            }
         return {
             "required": True,
             "accepted": False,
@@ -157,6 +168,16 @@ def gate_mic_turn(payload: dict) -> dict:
     }
 
 
+def _open_mic_allowed() -> bool:
+    """True when mic turns may proceed without an enrolled voice profile."""
+    policy = load_voice_gate()
+    if "open_mic_when_not_enrolled" in policy:
+        return bool(policy.get("open_mic_when_not_enrolled"))
+    if isinstance(VOICE_CFG, dict) and "open_mic_when_not_enrolled" in VOICE_CFG:
+        return bool(VOICE_CFG.get("open_mic_when_not_enrolled"))
+    return True
+
+
 def load_voice_gate() -> dict:
     if not VOICE_GATE_PATH.exists():
         return {
@@ -220,6 +241,19 @@ def evaluate_voice_gate(payload: dict, source: str, *, note: bool = True) -> dic
         if note:
             VOICE_ADDONS.accepts += 1
         return {"accept": True, "reason": "non_mic_source", "score": score_f, "threshold": 0.0}
+    # Open-mic fallback: without an enrolled/spectral profile there is no
+    # meaningful score — accept instead of leaving Cam deaf (Aaron can
+    # disable via open_mic_when_not_enrolled=false in aaron-voice-gate.json).
+    no_profile = enrolled is False or (score is None and enrolled is None)
+    if no_profile and _open_mic_allowed():
+        if note:
+            VOICE_ADDONS.accepts += 1
+        return {
+            "accept": True,
+            "reason": "open_mic_no_profile",
+            "score": score_f,
+            "threshold": 0.0,
+        }
     if policy.get("require_enrollment_for_mic", True) and enrolled is False:
         gate = {
             "accept": False,
@@ -503,8 +537,44 @@ def route_sense(sense: str, goal: str = "") -> dict:
         return {"accepted": False, "error": str(e), "motor_plan": []}
 
 
+_BRAIN = None
+_BRAIN_LOCK = None
+
+
+def _get_brain():
+    """Lazy CamBrain singleton — the real reasoning core (scripts/cam_brain.py)."""
+    global _BRAIN, _BRAIN_LOCK
+    if _BRAIN_LOCK is None:
+        import threading
+
+        _BRAIN_LOCK = threading.Lock()
+    with _BRAIN_LOCK:
+        if _BRAIN is None:
+            try:
+                from cam_brain import CamBrain
+
+                _BRAIN = CamBrain()
+            except Exception:  # pragma: no cover — canned replies still work
+                _BRAIN = False
+    return _BRAIN or None
+
+
 def cam_reply(aaron_text: str, history: list[dict]) -> str:
-    """Soft airy Cam reply. Prefer short, warm, fluent English."""
+    """Real reply via CamBrain (LLM or local cortex); canned lines as last resort."""
+    brain = _get_brain()
+    if brain is not None:
+        try:
+            turn = brain.respond(aaron_text or "", source="converse")
+            reply = (turn or {}).get("cam")
+            if reply:
+                return reply
+        except Exception:
+            pass
+    return _cam_reply_canned(aaron_text, history)
+
+
+def _cam_reply_canned(aaron_text: str, history: list[dict]) -> str:
+    """Legacy keyword replies — only used if CamBrain is unavailable."""
     t = (aaron_text or "").strip()
     low = t.lower()
     if not t:

@@ -12,6 +12,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Agent loops: **loop-engineering** via `motor.loop` (`integrations/loop-engineering`) — L1 report automations
 - Policy: [`.clinerules`](.clinerules)
 - Workspace registry: [`config/workspaces/registry.json`](config/workspaces/registry.json)
+- Cam Live (daily assistant app): `python3 scripts/cam-live-server.py` → http://127.0.0.1:8899 — brain/teams/messages/vision, stdlib-only ([docs/CAM_LIVE.md](docs/CAM_LIVE.md)); tests: `python3 -m unittest scripts.test_cam_live`
 - Runner: `python3 scripts/run-cline.py --goal "..." "prompt"`
 - Chooser: `python3 scripts/choose-workspace.py --goal "..."`
 - System: `python3 scripts/cam-system.py --smoke` — all pieces on one bus
