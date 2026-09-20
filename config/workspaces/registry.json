@@ -307,6 +307,17 @@
         "status": "proposed"
       },
       {
+        "id": "infinitemind",
+        "path": "integrations/infinitemind",
+        "policy": "config/integrations/infinitemind.md",
+        "remote": "github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms",
+        "role": "formal_meta_reasoning_substrate",
+        "plan": "docs/CAM_REASONING.md",
+        "config": "config/enhancement/reasoning-logic.json",
+        "adapter": "scripts/cam_infinitemind.py",
+        "status": "phase_c_thin_slice"
+      },
+      {
         "id": "litserve",
         "path": "integrations/litserve",
         "policy": "config/integrations/litserve.md",
@@ -779,6 +790,18 @@
           ]
         },
         {
+          "id": "infinitemind",
+          "match_any": [
+            "infinitemind",
+            "infinite mind",
+            "advanced-logic-reason",
+            "advanced logic reason",
+            "integrations/infinitemind",
+            "logic_engine",
+            "abductive reasoning"
+          ]
+        },
+        {
           "id": "litserve",
           "match_any": [
             "litserve",
@@ -1051,6 +1074,27 @@
       "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
     },
     {
+      "id": "infinitemind",
+      "label": "InfiniteMind (advanced logic / idea / learning)",
+      "path": "integrations/infinitemind",
+      "remote": "github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "chief",
+        "capability-broker",
+        "researcher",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/infinitemind",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Formal/meta substrate under Cam slow path; scripts/cam_infinitemind.py"
+    },
+    {
       "id": "litserve",
       "label": "LitServe local inference host",
       "path": "integrations/litserve",
@@ -1221,6 +1265,18 @@
           "schema-guided reasoning",
           "schema guided reasoning",
           "integrations/sgr-agent-core"
+        ]
+      },
+      {
+        "id": "infinitemind",
+        "match_any": [
+          "infinitemind",
+          "infinite mind",
+          "advanced-logic-reason",
+          "advanced logic reason",
+          "integrations/infinitemind",
+          "logic_engine",
+          "abductive reasoning"
         ]
       },
       {

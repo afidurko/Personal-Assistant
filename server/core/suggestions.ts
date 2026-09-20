@@ -344,6 +344,21 @@ function fromAgentContext(
       relatedConceptIds: ['error-handling', 'protocols-extensions'],
       sourceFindingIds: [],
     });
+    out.push({
+      id: 'suggest-cam-infinitemind',
+      kind: 'cam-reason',
+      title: 'Keep InfiniteMind logic stage green on slow path',
+      rationale:
+        'InfiniteMind (logic/meta/epistemic/abductive) enriches SGR; torch RL, qiskit override, and OpenAI idea spam stay cut.',
+      implementation:
+        'Run test_cam_infinitemind + cam-reason slow-path; submodule integrations/infinitemind must stay present.',
+      sketch:
+        'python3 scripts/test_cam_infinitemind.py\npython3 scripts/cam-infinitemind.py --goal "make a plan"\npython3 scripts/cam-reason.py --goal "think carefully" --no-write',
+      priority: 74,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['error-handling', 'protocols-extensions'],
+      sourceFindingIds: [],
+    });
   }
 
   // Aaron-only voice gate — always suggest when identity / converse surfaces are present

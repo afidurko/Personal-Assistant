@@ -41,3 +41,6 @@
 	path = integrations/pupil
 	url = https://github.com/afidurko/pupil.git
 	branch = master
+[submodule "integrations/infinitemind"]
+	path = integrations/infinitemind
+	url = https://github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms.git

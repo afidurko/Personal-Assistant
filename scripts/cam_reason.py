@@ -5,6 +5,9 @@ Accept → fast heuristics → escalate bar → recall → stub SGR Reason schem
 → dual-stream → trajectory reflect → motor plan → reasoning_trace.
 
 Does not call LitServe, converse, or live LLMs. See docs/CAM_REASONING.md.
+
+Phase C: optional InfiniteMind logic/meta/epistemic/abductive enrichment on
+the slow path (integrations/infinitemind) — still dry-run, no motors fired.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import trajectory_policies as tp  # noqa: E402
+import cam_infinitemind as cim  # noqa: E402
 
 REASONING_CFG = ROOT / "config" / "enhancement" / "reasoning-logic.json"
 HMO_CFG = ROOT / "config" / "memory" / "hmo-tiers.json"
@@ -435,11 +439,29 @@ def reason(
     stream_result = dsr.route_act(stream_act if stream_act in {"speak", "docs", "research", "careers"} else "speak")
     stream = stream_result.get("winner") or "dorsal"
 
+    im_result = None
     if path == "slow":
         stages.append("recall")
         personal = "personal_fact" in (classification.get("intents") or [])
         recall = mesh_recall(goal, personal_fact=personal)
         toolkit_results.append(recall)
+
+        im_cfg = cfg.get("infinitemind") or {}
+        if im_cfg.get("enabled_dry_run", True):
+            stages.append("logic")
+            im_result = cim.enrich(
+                goal=goal,
+                intents=list(classification.get("intents") or []),
+                confidence=float(classification.get("confidence") or 0.7),
+                escalate=True,
+                escalate_reasons=esc_reasons,
+                recall=recall,
+                kill=kill,
+                enhance_intent="enhance" in (classification.get("intents") or []),
+                not_aaron=False,
+                threshold=float((cfg.get("escalation") or {}).get("confidence_below") or 0.65),
+            )
+            toolkit_results.append(im_result)
 
         stages.append("sgr")
         reasoning_schema = cam_reasoning_tool(
@@ -450,6 +472,11 @@ def reason(
             path=path,
             iteration=1,
         )
+        if im_result and im_result.get("ok"):
+            reasoning_schema["infinitemind_strategy"] = im_result.get("strategy")
+            reasoning_schema["infinitemind_path_hint"] = (im_result.get("recommendation") or {}).get(
+                "path_hint"
+            )
         toolkit_results.append(reasoning_schema)
         max_iter = int(((cfg.get("sgr_limits") or {}).get("max_iterations_dry_run")) or 4)
         reasoning_schema["max_iterations_cap"] = max_iter
@@ -473,16 +500,26 @@ def reason(
         f"{'Slow SGR stub' if path == 'slow' else 'Fast path'}; "
         f"hotspot={route.get('hotspot_id')}; motors={motor_plan}"
     )
+    if im_result and im_result.get("ok"):
+        summary += f"; im_strategy={im_result.get('strategy')}"
     answer = final_answer_tool(path, stream, summary)
     toolkit_results.append(answer)
 
     stages.append("distill")
+    if path == "slow":
+        engine = (
+            "sgr_tool_calling_agent_stub+infinitemind"
+            if im_result and im_result.get("ok")
+            else "sgr_tool_calling_agent_stub"
+        )
+    else:
+        engine = "fast_heuristics"
     trace = {
         "kind": "reasoning_trace",
         "sense": sense,
         "goal": goal,
         "path": path,
-        "engine": "sgr_tool_calling_agent_stub" if path == "slow" else "fast_heuristics",
+        "engine": engine,
         "accepted": True,
         "dry_run": dry_run,
         "escalation": esc_reasons,
@@ -496,6 +533,13 @@ def reason(
         "reasoning_steps": (reasoning_schema or {}).get("reasoning_steps"),
         "switch_risks": (reasoning_schema or {}).get("switch_risks"),
         "sgr_iterations": 1 if path == "slow" else 0,
+        "infinitemind": {
+            "strategy": (im_result or {}).get("strategy"),
+            "recommendation": (im_result or {}).get("recommendation"),
+            "abduction_best": ((im_result or {}).get("abduction") or {}).get("best"),
+        }
+        if im_result and im_result.get("ok")
+        else None,
         "recall": recall,
         "motor_plan": motor_plan,
         "violations": traj.get("violations") or [],

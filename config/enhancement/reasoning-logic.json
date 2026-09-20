@@ -36,9 +36,32 @@
     "config/memory/hmo-tiers.json",
     "config/memory/mesh-claim-schema.json",
     "integrations/sgr-agent-core",
-    "integrations/litserve"
+    "integrations/litserve",
+    "integrations/infinitemind"
   ],
-  "version": 5,
+  "version": 6,
+  "infinitemind": {
+    "remote": "https://github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms",
+    "path": "integrations/infinitemind",
+    "policy": "config/integrations/infinitemind.md",
+    "enabled_dry_run": true,
+    "stage": "logic",
+    "engines": [
+      "logic_engine",
+      "meta_reasoning",
+      "epistemic_confidence",
+      "abductive_reasoning"
+    ],
+    "deferred": [
+      "idea_generator",
+      "agent_rl",
+      "conscious_override_qiskit",
+      "quantum_backends",
+      "virtue_ethics"
+    ],
+    "adapter": "scripts/cam_infinitemind.py",
+    "cli": "scripts/cam-infinitemind.py"
+  },
   "phase_b_scope": {
     "include": [
       "cam-reason.py dry-run",
@@ -64,6 +87,7 @@
     "fast",
     "gate",
     "recall",
+    "logic",
     "sgr",
     "stream",
     "reflect",
@@ -87,13 +111,14 @@
       "center.chief",
       "center.qa"
     ],
-    "engine": "sgr",
+    "engine": "sgr+infinitemind",
     "require_stages": [
       "recall",
+      "logic",
       "sgr",
       "reflect"
     ],
-    "analogy": "System-2 Schema-Guided Reasoning"
+    "analogy": "System-2 Schema-Guided Reasoning + InfiniteMind formal/meta substrate"
   },
   "escalation": {
     "confidence_below": 0.65,
@@ -145,7 +170,8 @@
     "FinalAnswerTool",
     "MeshRecallTool",
     "ConnectomeRouteTool",
-    "TrajectoryCheckTool"
+    "TrajectoryCheckTool",
+    "InfiniteMindEnrich"
   ],
   "cam_toolkit_later": [
     "GeneratePlanTool",
@@ -253,5 +279,6 @@
       "note": "Only remaining open question that blocks live (non-dry-run) SGR"
     }
   ],
-  "phase_b_status": "implemented_dry_run"
+  "phase_b_status": "implemented_dry_run",
+  "phase_c_status": "infinitemind_thin_slice_dry_run"
 }
