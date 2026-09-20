@@ -1118,6 +1118,24 @@
       "notes": "when AGI/info work needs public interest time-series context"
     },
     {
+      "from": "sense.train.higgsfield",
+      "to": "center.dl",
+      "weight": 1.0,
+      "notes": "GPU train status → DL cortex"
+    },
+    {
+      "from": "sense.train.higgsfield",
+      "to": "center.enhance",
+      "weight": 0.9,
+      "notes": "train/fine-tune proposals need enhance gate"
+    },
+    {
+      "from": "sense.train.higgsfield",
+      "to": "center.qa",
+      "weight": 0.7,
+      "notes": "QA watches train job health"
+    },
+    {
       "from": "center.research",
       "to": "switch.autonomy",
       "weight": 0.75,
@@ -1396,6 +1414,13 @@
       "weight": 1.0
     },
     {
+      "from": "switch.cam_enhance",
+      "to": "motor.higgsfield",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Aaron-gated multi-node GPU train via Higgsfield"
+    },
+    {
       "from": "switch.slm_local",
       "to": "motor.slm",
       "when": "act",
@@ -1590,6 +1615,30 @@
       "to": "sense.tool.result",
       "weight": 0.7,
       "notes": "Trends catalog search/fetch result loop"
+    },
+    {
+      "from": "motor.higgsfield",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — train/fine-tune outcomes into memory periphery"
+    },
+    {
+      "from": "motor.higgsfield",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.higgsfield",
+      "to": "center.dl",
+      "weight": 0.75,
+      "notes": "feedback — train job result to DL cortex"
+    },
+    {
+      "from": "motor.higgsfield",
+      "to": "sense.tool.result",
+      "weight": 0.7,
+      "notes": "Higgsfield experiment result loop"
     },
     {
       "from": "motor.inkbox",

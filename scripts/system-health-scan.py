@@ -76,6 +76,7 @@ def check_integrations() -> dict:
         "integrations/cline",
         "integrations/joshinator-analyzer",
         "integrations/inkbox",
+        "integrations/higgsfield",
         "integrations/loop-engineering",
     ]
     present = [p for p in expected if (ROOT / p).exists()]
@@ -92,6 +93,7 @@ def check_integrations() -> dict:
             / "integrations/joshinator-analyzer/backend/app/services/embodiment_service.py"
         ).exists(),
         "integrations/inkbox": (ROOT / "config/integrations/inkbox.json").exists(),
+        "integrations/higgsfield": (ROOT / "config/integrations/higgsfield.json").exists(),
         "integrations/loop-engineering": (
             ROOT / "config/integrations/loop-engineering.json"
         ).exists(),

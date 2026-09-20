@@ -224,6 +224,20 @@
       "notes": "Invoke Cam DL cortex (embed/rerank/cluster/identity vectors)"
     },
     {
+      "id": "motor.higgsfield",
+      "channel": [
+        "gpu_train",
+        "multi_node",
+        "deepspeed",
+        "fsdp"
+      ],
+      "requires_switch": [
+        "switch.cam_enhance",
+        "switch.kill"
+      ],
+      "notes": "Launch multi-node Higgsfield training / fine-tune experiments (Aaron-gated)"
+    },
+    {
       "id": "motor.tool",
       "channel": [
         "tool_registry",

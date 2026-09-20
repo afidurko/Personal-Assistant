@@ -302,6 +302,20 @@
       "notes": "Google Trends open datasets (GoogleTrends/data) — CSV/XLSX behind Trends graphics; indexed via GitHub, no submodule"
     },
     {
+      "id": "sense.train.higgsfield",
+      "modality": "tool",
+      "source": [
+        "higgsfield_orchestrator",
+        "afidurko_higgsfield"
+      ],
+      "emits": [
+        "spike.tool_result",
+        "spike.route_hint",
+        "spike.finding"
+      ],
+      "notes": "Higgsfield multi-node GPU train/fine-tune status — integrations/higgsfield; Aaron-gated"
+    },
+    {
       "id": "sense.inkbox.event",
       "modality": "comms",
       "source": [

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "title": "Higgsfield node inventory example",
+  "notes": "Example only — real hosts/credentials stay in env/secrets, never commit secrets",
+  "nodes": [
+    {
+      "id": "lab-a",
+      "host": "127.0.0.1",
+      "user": "ubuntu",
+      "gpus": 0,
+      "notes": "placeholder — dry-run inventory"
+    }
+  ]
+}
