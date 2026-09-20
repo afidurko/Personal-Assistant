@@ -39,6 +39,18 @@ def run_main(filename: str, argv: list[str] | None = None) -> int:
         sys.argv = old
 
 
+def run_main_captured(filename: str, argv: list[str] | None = None) -> tuple[int, str]:
+    """Like run_main, but swallow stdout/stderr so JSON hosts stay clean."""
+    import io
+    from contextlib import redirect_stderr, redirect_stdout
+
+    out = io.StringIO()
+    err = io.StringIO()
+    with redirect_stdout(out), redirect_stderr(err):
+        code = run_main(filename, argv)
+    return code, ((out.getvalue() or "") + (err.getvalue() or "")).strip()
+
+
 def route(**kwargs) -> dict:
     """Full connectome-route plan (trajectory + workspace). In-process."""
     return load_script("connectome-route.py").route(**kwargs)

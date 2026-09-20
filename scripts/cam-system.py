@@ -81,13 +81,13 @@ def smoke_checks() -> list[dict]:
         ("workspace-integration-check", "workspace-integration-check.py", []),
     ]:
         try:
-            code = cam_inproc.run_main(filename, argv)
+            code, preview = cam_inproc.run_main_captured(filename, argv)
             checks.append(
                 {
                     "id": name,
                     "ok": code == 0,
                     "exit": code,
-                    "preview": "in-process",
+                    "preview": (preview or "in-process")[:240],
                 }
             )
         except Exception as exc:  # noqa: BLE001
