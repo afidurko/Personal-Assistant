@@ -9,7 +9,7 @@ Tools:
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
-  loop_check, loop_audit, loop_run,
+  loop_check, loop_audit, loop_run, higgsfield_check, presence_check,
   voicestudio_health, needs_attention
 
 Install into Cline (example):
@@ -279,6 +279,22 @@ def tool_defs() -> list[dict]:
             },
         },
         {
+            "name": "presence_check",
+            "description": (
+                "Confirm Cam home presence is her identity portrait + Audio2Face. "
+                "Fails if Higgsfield Speak clips are wired onto the face."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "higgsfield_check",
+            "description": (
+                "Confirm Higgsfield multi-node GPU training wiring (config, connectome, dry-run). "
+                "Does not launch GPU jobs or spend."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
             "name": "voicestudio_health",
             "description": "Probe Cam's VoiceStudio local backend /health (default http://localhost:3900).",
             "inputSchema": {
@@ -545,6 +561,24 @@ def google_trends_addon(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def presence_check(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/presence-check.py")],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
+def higgsfield_check(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/higgsfield-check.py")],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
 def inkbox_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
@@ -696,6 +730,10 @@ def call_tool(name: str, arguments: dict) -> Any:
         return google_trends_search(arguments)
     if name == "google_trends_addon":
         return google_trends_addon(arguments)
+    if name == "presence_check":
+        return presence_check(arguments)
+    if name == "higgsfield_check":
+        return higgsfield_check(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
     if name == "loop_check":

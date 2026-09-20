@@ -26,6 +26,7 @@ CHECKS: list[tuple[str, str, list[str]]] = [
     ("google-trends-addon-doctor", "google-trends-addon.py", ["doctor"]),
     ("inkbox-check", "inkbox-check.py", []),
     ("higgsfield-check", "higgsfield-check.py", []),
+    ("presence-check", "presence-check.py", []),
     ("loop-check", "loop-check.py", []),
     ("loop-run-dry", "loop-run.py", ["--pattern", "daily-triage", "--level", "L1", "--dry-run"]),
     ("flight-envelope", "flight-envelope.py", ["--offline-only"]),

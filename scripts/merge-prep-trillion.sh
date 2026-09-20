@@ -16,6 +16,10 @@ python3 scripts/connectome-anatomy-check.py
 python3 scripts/trajectory-policy-check.py
 python3 scripts/memory-tier-check.py
 
+echo "== merge-prep-trillion: presence portrait + Higgsfield train wiring =="
+python3 scripts/presence-check.py
+python3 scripts/higgsfield-check.py
+
 echo "== merge-prep-trillion: workspace units =="
 python3 scripts/test_cline_workspaces.py
 

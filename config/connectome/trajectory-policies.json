@@ -180,6 +180,14 @@
         "motor.enhance"
       ],
       "revise_to": "loop_report_only"
+    },
+    {
+      "id": "higgsfield_rejected_for_cam_face",
+      "description": "Aaron rejected Speak clips on Cam’s face — strip motor.higgsfield from presence speak plans",
+      "if_all_motors": ["motor.speak", "motor.higgsfield"],
+      "on_violate": "strip",
+      "strip_motors": ["motor.higgsfield"],
+      "revise_to": "portrait_a2f_speak_only"
     }
   ]
 }

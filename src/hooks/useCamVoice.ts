@@ -15,6 +15,7 @@ import {
   type GateDecision,
   type VoiceProfile,
 } from '@/lib/aaronVoiceGate';
+import { estimateSpeechMs } from '@/lib/visemes';
 
 export type CamVoiceStatus =
   | 'idle'
@@ -39,6 +40,14 @@ export interface VoiceGateClientStats {
   multiSpeakerStreak: number;
 }
 
+export interface CamRouteSummary {
+  behavior: string;
+  pathway: string[];
+  tracts: string[];
+  hotspot_id: string | null;
+  dual_stream?: { winner: string; tracts: string[] };
+}
+
 interface TurnResponse {
   cam: string;
   speak?: { rate?: number; pitch?: number; lang?: string };
@@ -50,10 +59,38 @@ interface TurnResponse {
     adaptive_raised?: boolean;
     multi_speaker_streak?: number;
   };
+  bridge?: {
+    route?: {
+      behavior?: string;
+      pathway?: string[];
+      tracts?: string[];
+      hotspot_id?: string | null;
+      dual_stream?: { winner?: string; tracts?: string[] };
+    };
+  };
 }
 
-function speakCam(text: string, opts: { rate?: number; pitch?: number; lang?: string } = {}) {
-  if (!window.speechSynthesis) return;
+type SpeakOpts = { rate?: number; pitch?: number; lang?: string };
+
+export interface SpeechFaceState {
+  text: string;
+  progress: number; // 0..1, -1 when not speaking
+  active: boolean;
+}
+
+function speakCam(
+  text: string,
+  opts: SpeakOpts = {},
+  handlers: {
+    onEnd?: () => void;
+    onStart?: () => void;
+    onBoundary?: (charIndex: number) => void;
+  } = {},
+) {
+  if (!window.speechSynthesis) {
+    handlers.onEnd?.();
+    return;
+  }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = opts.lang || 'en-US';
@@ -65,7 +102,30 @@ function speakCam(text: string, opts: { rate?: number; pitch?: number; lang?: st
       /female|samantha|karen|moira|tessa|fiona|victoria|zira/i.test(v.name),
     ) || voices.find((v) => v.lang?.startsWith('en'));
   if (prefer) u.voice = prefer;
+  u.onstart = () => handlers.onStart?.();
+  u.onboundary = (ev) => {
+    if (typeof ev.charIndex === 'number') handlers.onBoundary?.(ev.charIndex);
+  };
+  u.onend = () => handlers.onEnd?.();
+  u.onerror = () => handlers.onEnd?.();
   window.speechSynthesis.speak(u);
+}
+
+function summarizeRoute(route: TurnResponse['bridge']): CamRouteSummary | null {
+  const r = route?.route;
+  if (!r) return null;
+  return {
+    behavior: String(r.behavior || 'reply'),
+    pathway: Array.isArray(r.pathway) ? r.pathway.map(String) : [],
+    tracts: Array.isArray(r.tracts) ? r.tracts.map(String) : [],
+    hotspot_id: r.hotspot_id ?? null,
+    dual_stream: r.dual_stream
+      ? {
+          winner: String(r.dual_stream.winner || 'dorsal'),
+          tracts: Array.isArray(r.dual_stream.tracts) ? r.dual_stream.tracts.map(String) : [],
+        }
+      : undefined,
+  };
 }
 
 async function fetchVoiceGateConfig(): Promise<AaronVoiceGateConfig> {
@@ -123,6 +183,13 @@ export function useCamVoice() {
     adaptiveRaised: false,
     multiSpeakerStreak: 0,
   });
+  const [lastRoute, setLastRoute] = useState<CamRouteSummary | null>(null);
+  const [bridgeBusy, setBridgeBusy] = useState(false);
+  const [speechFace, setSpeechFace] = useState<SpeechFaceState>({
+    text: '',
+    progress: -1,
+    active: false,
+  });
 
   const recognizingRef = useRef(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -139,6 +206,9 @@ export function useCamVoice() {
   const adaptiveRef = useRef(false);
   const streakRef = useRef(0);
   const acceptsSinceRaiseRef = useRef(0);
+  const pendingSpeakRef = useRef<{ text: string; opts: SpeakOpts } | null>(null);
+  const speechTimerRef = useRef(0);
+  const speechTickRef = useRef(0);
 
   useEffect(() => {
     cfgRef.current = gateCfg;
@@ -294,6 +364,7 @@ export function useCamVoice() {
       }
 
       busyRef.current = true;
+      setBridgeBusy(true);
       setBubbles((b) => [...b, { who: 'aaron', text: trimmed, at: new Date().toISOString() }]);
       setPartial('');
       setStatus('thinking');
@@ -323,6 +394,8 @@ export function useCamVoice() {
           multiSpeakerHint: multi,
         });
         applyServerStats(turn.voice_stats);
+        const route = summarizeRoute(turn.bridge);
+        if (route) setLastRoute(route);
         if (turn.rejected) {
           setStatus('ignored');
           setBubbles((b) => [
@@ -335,22 +408,75 @@ export function useCamVoice() {
           ]);
           return;
         }
+        // Queue speech — CamStage types first, then flushSpeak()
+        pendingSpeakRef.current = { text: turn.cam, opts: turn.speak || {} };
         setBubbles((b) => [...b, { who: 'cam', text: turn.cam, at: new Date().toISOString() }]);
         setStatus('speaking');
-        speakCam(turn.cam, turn.speak);
-        setTimeout(() => {
-          if (recognizingRef.current) setStatus('listening');
-          else setStatus('idle');
-        }, Math.min(8000, 600 + turn.cam.length * 45));
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Turn failed');
         setStatus('error');
+        pendingSpeakRef.current = null;
       } finally {
         busyRef.current = false;
+        setBridgeBusy(false);
       }
     },
     [applyServerStats, noteClientReject],
   );
+
+  /** Called by CamStage after typewriter finishes — Cam speaks the typed reply. */
+  const flushSpeak = useCallback(() => {
+    const pending = pendingSpeakRef.current;
+    if (!pending) return;
+    pendingSpeakRef.current = null;
+    setStatus('speaking');
+
+    if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+    if (speechTickRef.current) window.clearInterval(speechTickRef.current);
+
+    const dur = estimateSpeechMs(pending.text, pending.opts.rate ?? 0.95);
+    const started = performance.now();
+    setSpeechFace({ text: pending.text, progress: 0, active: true });
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+      if (speechTickRef.current) window.clearInterval(speechTickRef.current);
+      speechTimerRef.current = 0;
+      speechTickRef.current = 0;
+      setSpeechFace({ text: '', progress: -1, active: false });
+      if (recognizingRef.current) setStatus('listening');
+      else setStatus('idle');
+    };
+
+    // Keep visemes moving even when the browser skips boundary events
+    speechTickRef.current = window.setInterval(() => {
+      const p = Math.min(0.995, (performance.now() - started) / dur);
+      setSpeechFace((s) => (s.active ? { ...s, progress: Math.max(s.progress, p) } : s));
+    }, 40);
+
+    speakCam(pending.text, pending.opts, {
+      onStart: () => setSpeechFace((s) => ({ ...s, active: true })),
+      onBoundary: (charIndex) => {
+        const len = Math.max(1, pending.text.length);
+        const p = Math.min(0.99, charIndex / len);
+        setSpeechFace((s) => ({
+          ...s,
+          active: true,
+          progress: Math.max(s.progress, p),
+        }));
+      },
+      onEnd: () => {
+        const remain = dur - (performance.now() - started);
+        if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+        speechTimerRef.current = window.setTimeout(finish, Math.max(80, remain));
+      },
+    });
+    // Hard stop if TTS never fires onend
+    speechTimerRef.current = window.setTimeout(finish, dur + 1200);
+  }, []);
 
   const stop = useCallback(() => {
     recognizingRef.current = false;
@@ -374,6 +500,13 @@ export function useCamVoice() {
     setLevel(0);
     setPartial('');
     setStatus('idle');
+    pendingSpeakRef.current = null;
+    setBridgeBusy(false);
+    if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+    if (speechTickRef.current) window.clearInterval(speechTickRef.current);
+    speechTimerRef.current = 0;
+    speechTickRef.current = 0;
+    setSpeechFace({ text: '', progress: -1, active: false });
     window.speechSynthesis?.cancel();
     void fetch('/api/spike/mic/stop', { method: 'POST' }).catch(() => undefined);
   }, []);
@@ -584,6 +717,9 @@ export function useCamVoice() {
     lastGate,
     adaptiveRaised,
     gateStats,
+    lastRoute,
+    bridgeBusy,
+    speechFace,
     aaronOnly: gateCfg.aaron_only,
     startListening,
     startEnroll,
@@ -592,6 +728,7 @@ export function useCamVoice() {
     importProfile,
     stop,
     sendTurn,
+    flushSpeak,
   };
 }
 

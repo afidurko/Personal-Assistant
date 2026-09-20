@@ -157,6 +157,20 @@ def main() -> int:
         errors.append("higgsfield_route_missing_when_enhance")
     demos.append({"case": "higgsfield_route_act", "motor_plan": r_hf_act.get("motor_plan")})
 
+    # Speak + train must never share a presence plan (Aaron rejected Speak clips)
+    face_state = dict(r1.get("switch_state") or {})
+    face_state["switch.cam_enhance"] = "act"
+    face_state["switch.outbound"] = "act"
+    face_state["switch.presence"] = "act"
+    plan11, v11 = tp.apply_policies(
+        ["motor.speak", "motor.higgsfield", "motor.mesh"], face_state
+    )
+    if "motor.higgsfield" in plan11:
+        errors.append("higgsfield_not_stripped_from_presence_speak")
+    if "motor.speak" not in plan11 or "motor.mesh" not in plan11:
+        errors.append("speak_and_mesh_should_remain_without_higgsfield")
+    demos.append({"case": "higgsfield_rejected_for_cam_face", "motor_plan": plan11, "violations": v11})
+
     if cfg.get("status") != "applied":
         errors.append("policies_not_applied")
 

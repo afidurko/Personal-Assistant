@@ -88,6 +88,13 @@
 - Prefer for simple/local speak when RIVA studio is offline; full face presence still LLMAvatarTalk
 - Not a second brain — nullclaw remains executive
 
+## Higgsfield (GPU train) — not Cam’s face
+
+- Canonical IDs (`motor.higgsfield`, `hotspot.higgsfield`, `sense.train.higgsfield`) are multi-node GPU training under `switch.cam_enhance`.
+- Policy: `config/integrations/higgsfield.md` · config: `config/integrations/higgsfield.json` (`active_dry_run`).
+- Doctor: `python3 scripts/higgsfield-run.py --doctor` — no GPU spend from Cline.
+- Higgsfield Speak clips stay off Cam’s face (looks creepy). Presence is her identity portrait + Audio2Face (`python3 scripts/presence-check.py`).
+
 ## Knowledge cortex (smart-second-brain)
 
 - Submodule: `integrations/smart-second-brain`

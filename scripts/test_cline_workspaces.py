@@ -182,6 +182,8 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertIn("loop_check", tools)
         self.assertIn("loop_run", tools)
         self.assertIn("voicestudio_health", tools)
+        self.assertIn("higgsfield_check", tools)
+        self.assertIn("presence_check", tools)
 
     def test_voicestudio_speak_dry_run(self):
         proc = self._run(
@@ -311,6 +313,7 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("three-trillion-campaign", body)
         self.assertTrue((ROOT / "scripts" / "three-trillion-campaign.py").is_file())
         self.assertTrue((ROOT / "scripts" / "trillion_scale.py").is_file())
+        self.assertTrue((ROOT / "scripts" / "presence-check.py").is_file())
         campaign = (ROOT / "scripts" / "three-trillion-campaign.py").read_text(
             encoding="utf-8"
         )
@@ -322,6 +325,7 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("aaron-voice-billion-fuzz.py", campaign)
         self.assertIn("public-apis-billion-fuzz.py", campaign)
         self.assertIn("test_cam_converse_voice_gate", campaign)
+        self.assertIn("presence-check.py", campaign)
 
     def test_cloud_agent_environment_json_present(self):
         env = ROOT / ".cursor" / "environment.json"

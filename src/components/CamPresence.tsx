@@ -88,11 +88,6 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
               Adaptive noise gate raised after surrounding speech
             </p>
           ) : null}
-          {gateStats.rejects > 0 ? (
-            <p className="cam-gate-stats">
-              Gate rejects {gateStats.rejects} · accepts {gateStats.accepts}
-            </p>
-          ) : null}
         </div>
       </div>
 
@@ -109,9 +104,8 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
       <div className="cam-transcript" ref={transcriptRef} aria-live="polite">
         {bubbles.length === 0 ? (
           <p className="cam-empty">
-            Enroll your voice once (quiet ~10s), then enable the mic. Cam will accept{' '}
-            <strong>only Aaron</strong> — surrounding conversation is ignored. Typing still works
-            anytime.
+            Enroll once in a quiet room, then enable the mic. Only Aaron gets through — typing
+            always works.
           </p>
         ) : (
           bubbles.map((b, i) => (
@@ -136,7 +130,7 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
               Enable mic & talk
             </button>
             <button type="button" className="btn btn-ghost" onClick={() => void startEnroll()}>
-              {enrolled ? 'Re-enroll my voice' : 'Enroll my voice (10s)'}
+              {enrolled ? 'Re-enroll voice' : 'Enroll my voice'}
             </button>
           </>
         ) : (
@@ -144,36 +138,45 @@ export function CamPresence({ onListeningChange }: CamPresenceProps) {
             Pause listening
           </button>
         )}
-        {enrolled && !listening ? (
-          <>
+      </div>
+
+      {enrolled && !listening ? (
+        <details className="cam-voice-advanced">
+          <summary>Voice profile</summary>
+          <div className="cam-controls">
             <button type="button" className="btn btn-ghost" onClick={() => exportProfile()}>
-              Export voice profile
+              Export
             </button>
             <button
               type="button"
               className="btn btn-ghost"
               onClick={() => importRef.current?.click()}
             >
-              Import voice profile
+              Import
             </button>
             <button type="button" className="btn btn-ghost" onClick={clearEnrollment}>
-              Clear voice print
+              Clear
             </button>
-          </>
-        ) : null}
-        <input
-          ref={importRef}
-          type="file"
-          accept="application/json,.json"
-          hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            void file.text().then((raw) => importProfile(raw));
-            e.target.value = '';
-          }}
-        />
-      </div>
+          </div>
+          {gateStats.rejects > 0 ? (
+            <p className="cam-gate-stats">
+              Rejects {gateStats.rejects} · accepts {gateStats.accepts}
+            </p>
+          ) : null}
+        </details>
+      ) : null}
+      <input
+        ref={importRef}
+        type="file"
+        accept="application/json,.json"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          void file.text().then((raw) => importProfile(raw));
+          e.target.value = '';
+        }}
+      />
 
       <form
         className="cam-text-form"

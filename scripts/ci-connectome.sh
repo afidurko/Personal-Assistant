@@ -51,6 +51,9 @@ echo "== embodiment fuzz (1M strict) =="
 python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-embodiment-1m.json
 
+echo "== presence portrait (no Speak clips) =="
+python3 scripts/presence-check.py
+
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \
   --n 1000000 \

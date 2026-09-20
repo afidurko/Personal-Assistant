@@ -40,6 +40,7 @@ APIs:   public-apis (`integrations/public-apis`) as shared free-API catalog for 
 ```
 
 - Presence I/O: `integrations/llmavatartalk`
+- Higgsfield Speak clips: rejected for presence (looks creepy)
 - Local speech: `integrations/voicestudio` · `config/integrations/voicestudio.md`
 - Second brain: `integrations/smart-second-brain`
 - Cognitive memory: `integrations/memorybear` (`motor.memorybear`)

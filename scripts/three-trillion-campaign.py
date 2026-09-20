@@ -114,6 +114,14 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Public-apis 3T + expanded allowlisted add-ons (frankfurter / advice slip) from #42",
         "- CI: install pydantic before joshinator embodiment unit tests",
         "- Embodiment 3T: pydantic-free `embodiment_lite` catalog path when pypi is blocked",
+        "- 3T campaign auto-installs `integrations/joshinator-analyzer/backend/requirements-ci.txt` before embodiment fuzz",
+        "- connectome-simulate v4-exhaustive-scaled for N≥1e11",
+        "- Companion fuzzers: modular_period_scaled via trillion_scale.py",
+        "- Codified Aaron test protocol (this entrypoint + CONTINUOUS_QA)",
+        "- Google Trends: `scripts/google-trends-check.py` + curated add-ons (`trends.search_*`)",
+        "- Presence: Higgsfield Speak clips rejected — portrait + A2F only (`scripts/presence-check.py`)",
+        "- Trajectory: `higgsfield_rejected_for_cam_face` strips Speak clips from speak plans",
+        "- Higgsfield IDs are GPU train (`switch.cam_enhance`); Speak never owns `motor.higgsfield`",
         "",
         "## Suggested add-ons",
         "- `config/persona/converse-overlays.json` — move camera/pupil/voice lines out of the server so new presence phrases do not fork `speak_from_trace`",
@@ -137,6 +145,7 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Higgsfield train jobs stay enhance-gated; never free-spend GPU from Cline",
         "- `git submodule update --init integrations/higgsfield` before any live train intent",
         "- Allowlist `pypi.org` / `files.pythonhosted.org` if you want full embodiment resolve in Cloud Agent",
+        "- Presence add-on: `python3 scripts/presence-check.py` (no Speak overlay on Cam’s face)",
         "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
         "- ILLA desktop: `python3 scripts/illa-desktop-billion-fuzz.py --n 3000000000000`",
         "- ILLA unit: `python3 scripts/test_illa_desktop.py`",
@@ -220,6 +229,10 @@ def one_pass(
     )
     results.append(
         run([sys.executable, "scripts/test_embodiment_lite.py"], "embodiment-lite")
+    )
+    results.append(run([sys.executable, "scripts/presence-check.py"], "presence-check"))
+    results.append(
+        run([sys.executable, "scripts/trajectory-policy-check.py"], "trajectory-policy-check")
     )
 
     conn_out = OUT / f"connectome-sim-3t-{out_tag}.json"

@@ -28,6 +28,7 @@ Upstream `main.py` runs its own LangChain/NIM LLM loop for demos. For Cam:
 |---|---|---|
 | **Simple** | Everyday chat, no GPU studio | Still portrait + light TTS (`config/persona/voice.json`) |
 | **Full Cam presence** | Desk avatar / call presence | LLMAvatarTalk + RIVA + Audio2Face (+ UE optional) |
+| **Higgsfield clip** | **Do not use** | Aaron rejected Speak clips on Cam’s face (looks creepy) |
 
 Prefer simple unless Aaron starts a presence session.
 

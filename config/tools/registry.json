@@ -378,6 +378,27 @@
       "motor": "motor.inkbox"
     },
     {
+      "id": "tool.presence.check",
+      "purpose": "Confirm Cam home presence is her portrait + Audio2Face (no Speak clips)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/presence-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "motor": "motor.speak"
+    },
+    {
       "id": "tool.memorybear.read",
       "purpose": "Recall cognitive memory via MemoryBear (offline fixture or live API)",
       "created_by_role": "memory-curator",
