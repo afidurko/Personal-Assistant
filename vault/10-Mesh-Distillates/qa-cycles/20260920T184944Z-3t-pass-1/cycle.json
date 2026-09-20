@@ -1,0 +1,157 @@
+{
+  "pass": "1",
+  "n": 3000000000000,
+  "physical": 10000000,
+  "seed": 142,
+  "status": "green",
+  "results": [
+    {
+      "label": "connectome-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.039501504001236754
+    },
+    {
+      "label": "workspace-integration",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/workspace-integration-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.26252025500070886
+    },
+    {
+      "label": "workspace-unit-tests",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cline_workspaces.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.4920732020000287
+    },
+    {
+      "label": "presence-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/presence-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.018191210998338647
+    },
+    {
+      "label": "higgsfield-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/higgsfield-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.4053890439972747
+    },
+    {
+      "label": "trajectory-policy-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/trajectory-policy-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.11247497799922712
+    },
+    {
+      "label": "connectome-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-simulate.py",
+        "--n",
+        "3000000000000",
+        "--strict-edges",
+        "--scale",
+        "exhaustive",
+        "--physical",
+        "10000000",
+        "--seed",
+        "142",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/connectome-sim-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 6.7319508050022705
+    },
+    {
+      "label": "trajectory-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/trajectory-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "159",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/trajectory-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 3.0056859819997044
+    },
+    {
+      "label": "embodiment-deps",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "pip",
+        "install",
+        "-q",
+        "-r",
+        "/workspace/integrations/joshinator-analyzer/backend/requirements-ci.txt"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.3766543739984627
+    },
+    {
+      "label": "embodiment-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/embodiment-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "173",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/embodiment-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 4.220047177001106
+    },
+    {
+      "label": "cam-reason-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/cam-reason-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "153",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/cam-reason-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 17.304984298996715
+    }
+  ],
+  "at": "20260920T185017Z"
+}
