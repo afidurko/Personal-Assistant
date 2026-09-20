@@ -30,14 +30,44 @@ def main() -> int:
         "integrations/illa-desktop/package.json",
         "integrations/illa-desktop/src/main.js",
         "integrations/illa-desktop/src/preload.js",
+        "integrations/illa-desktop/src/url-contract.js",
         "integrations/illa-desktop/scripts/assert-builder-pin.mjs",
+        "integrations/illa-desktop/scripts/contract-selftest.js",
         "integrations/illa-desktop/build/icon.png",
         "scripts/promote-illa-desktop.py",
+        "scripts/illa-desktop-billion-fuzz.py",
+        "scripts/test_illa_desktop.py",
         "patches/illa-builder-desktop/README.md",
         "vault/03-Projects/ILLA-Electron-Desktop.md",
     ):
         if not (ROOT / rel).exists():
             errors.append(f"missing:{rel}")
+
+    # packaging author contract (required for .deb)
+    pkg_path = ROOT / "integrations/illa-desktop/package.json"
+    if pkg_path.exists():
+        pkg = load(pkg_path)
+        author = pkg.get("author") or {}
+        email = author.get("email") if isinstance(author, dict) else ""
+        if "@" not in str(email):
+            errors.append("illa-desktop package.json missing author.email")
+        maint = ((pkg.get("build") or {}).get("linux") or {}).get("maintainer")
+        if "@" not in str(maint or ""):
+            errors.append("illa-desktop package.json missing build.linux.maintainer")
+
+    # node contract selftest
+    selftest = ROOT / "integrations/illa-desktop/scripts/contract-selftest.js"
+    if selftest.exists():
+        import subprocess
+
+        proc = subprocess.run(
+            ["node", str(selftest)],
+            cwd=str(ROOT / "integrations/illa-desktop"),
+            capture_output=True,
+            text=True,
+        )
+        if proc.returncode != 0:
+            errors.append(f"contract-selftest:{proc.stderr or proc.stdout}")
 
     eb = load(ROOT / "config/integrations/electron-builder.json") if (ROOT / "config/integrations/electron-builder.json").exists() else {}
     pin = ((eb.get("pin") or {}).get("version")) or ""

@@ -78,6 +78,10 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Higgsfield: `python3 scripts/higgsfield-run.py --doctor` then pack to `mesh/runs`",
         "- Higgsfield train jobs stay enhance-gated; never free-spend GPU from Cline",
         "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
+        "- ILLA desktop: `python3 scripts/illa-desktop-billion-fuzz.py --n 3000000000000`",
+        "- ILLA unit: `python3 scripts/test_illa_desktop.py`",
+        "- Keep electron-builder pin exact `26.16.1` (not fork master / v27)",
+        "- After packaging edits: `npm --prefix integrations/illa-desktop run check:pin`",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
@@ -133,10 +137,18 @@ def one_pass(
         )
     )
 
+    results.append(
+        run([sys.executable, "scripts/test_illa_desktop.py"], "illa-desktop-unit")
+    )
+    results.append(
+        run([sys.executable, "scripts/illa-electron-check.py"], "illa-electron-check")
+    )
+
     for script, name, extra_seed in (
         ("scripts/trajectory-billion-fuzz.py", "trajectory-3t", 17),
         ("scripts/embodiment-billion-fuzz.py", "embodiment-3t", 31),
         ("scripts/cam-reason-billion-fuzz.py", "cam-reason-3t", 11),
+        ("scripts/illa-desktop-billion-fuzz.py", "illa-desktop-3t", 26),
     ):
         if name == "embodiment-3t":
             req = ROOT / "integrations/joshinator-analyzer/backend/requirements-ci.txt"

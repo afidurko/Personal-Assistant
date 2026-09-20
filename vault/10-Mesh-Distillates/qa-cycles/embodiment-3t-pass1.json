@@ -7,8 +7,8 @@
   "skipped": 195312,
   "full_checks": 10000,
   "first_error": null,
-  "elapsed_s": 2.478365473000167,
-  "checks_per_sec": 1210475223562.7185,
+  "elapsed_s": 2.4314741440002763,
+  "checks_per_sec": 1233819412557.8408,
   "seed": 173,
   "ok": true,
   "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
@@ -26,7 +26,7 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.44800133800004
+      "elapsed_s": 2.4164887830002044
     },
     {
       "worker_id": 1,
@@ -37,7 +37,7 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.455461233000051
+      "elapsed_s": 2.419341334000819
     },
     {
       "worker_id": 3,
@@ -48,7 +48,7 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4663865560000886
+      "elapsed_s": 2.4210221840003214
     },
     {
       "worker_id": 0,
@@ -59,7 +59,7 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4696551270001237
+      "elapsed_s": 2.423385897999651
     }
   ]
 }

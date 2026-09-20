@@ -24,3 +24,13 @@ npm --prefix electron run dist:dir
 ### Security
 
 Any PAT pasted into chat must be **revoked** immediately at https://github.com/settings/personal-access-tokens
+
+## 3T QA (2026-09-20)
+
+Dual three-trillion campaign **READY** after fixes:
+- XSS/HTML escape in offline page (`url-contract.js`)
+- `.deb` author/maintainer asserts
+- `illa-desktop-billion-fuzz.py` wired into `three-trillion-campaign.py`
+- `higgsfield-check` soft when submodule empty
+
+Evidence: `vault/10-Mesh-Distillates/MERGE_READINESS_THREE_TRILLION.md`, `ILLA_DESKTOP_3T_SUGGESTIONS.md`, qa-cycles `*3t-pass-*`.

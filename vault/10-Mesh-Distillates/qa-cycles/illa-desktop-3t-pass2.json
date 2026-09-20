@@ -1,25 +1,23 @@
 {
-  "n": 3000000000000,
-  "workers": 4,
-  "passed": 3000000000000,
-  "failed": 0,
-  "first_error": null,
-  "elapsed_s": 1.6962573720002183,
-  "checks_per_sec": 1768599535377.3555,
-  "policy_count": 11,
-  "seed": 159,
   "ok": true,
-  "sampler": "inline_modular_plus_1pct_full_apply:modular_period_scaled",
-  "physical_n": 10000000,
-  "scaled_n": 2999990000000,
-  "workers_detail": [
+  "n": 3000000000000,
+  "physical": 10000000,
+  "scaled": 2999990000000,
+  "sampler": "modular_period_scaled",
+  "pin": "26.16.1",
+  "app_id": "com.afidurko.illa-builder",
+  "physical_failed": 0,
+  "first_error": null,
+  "workers": 4,
+  "elapsed_s": 2.6312075099995127,
+  "results": [
     {
       "worker_id": 1,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 1.6640129710003748
+      "elapsed_s": 2.605006205999416
     },
     {
       "worker_id": 3,
@@ -27,7 +25,7 @@
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 1.6681765630000882
+      "elapsed_s": 2.605623704000209
     },
     {
       "worker_id": 0,
@@ -35,7 +33,7 @@
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 1.6830257970004823
+      "elapsed_s": 2.6070950789999188
     },
     {
       "worker_id": 2,
@@ -43,7 +41,7 @@
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 1.6876935710006364
+      "elapsed_s": 2.6111195209996367
     }
   ]
 }
