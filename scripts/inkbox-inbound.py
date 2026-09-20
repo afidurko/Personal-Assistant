@@ -42,7 +42,9 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import instinct  # noqa: E402
 
 GIST_LIMIT = 200
+DEFAULT_MAX_JOBS = 10  # per run — a spam burst becomes thread notes, not a ledger flood
 CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+HEADER_FORBIDDEN = re.compile(r"[\[\]\u2014|]")  # header fields cannot forge our own "[kind] … — …" framing
 URL = re.compile(r"(?:https?://|www\.)\S+", re.IGNORECASE)
 KINDS = {
     "email.received": ("email", "Reply to"),
@@ -79,11 +81,15 @@ def as_name(value) -> str:
     return str(value)
 
 
-def scrub(text: str, limit: int = GIST_LIMIT) -> tuple[str, int]:
+def scrub(text: str, limit: int = GIST_LIMIT, header: bool = False) -> tuple[str, int]:
     """Control chars out, URLs replaced by [link], whitespace collapsed, capped.
+    Header fields (sender / subject) additionally lose the characters that
+    build our own framing, so a sender cannot forge "[system] …" tags.
     Returns (gist, links_removed)."""
     text = CONTROL.sub("", str(text or ""))
     text, links = URL.subn("[link]", text)
+    if header:
+        text = HEADER_FORBIDDEN.sub(" ", text)
     text = re.sub(r"\s+", " ", text).strip()
     if len(text) > limit:
         text = text[:limit] + "…"
@@ -93,8 +99,9 @@ def scrub(text: str, limit: int = GIST_LIMIT) -> tuple[str, int]:
 def normalize(raw: dict) -> dict:
     etype = str(first(raw, "type", "event", "kind") or "message.received").lower()
     label, verb = KINDS.get(etype, ("message", "Reply to"))
-    sender, _ = scrub(as_name(first(raw, "from", "sender", "from_address", "from_number") or "unknown"), 80)
-    subject, _ = scrub(first(raw, "subject", "title") or "", 120)
+    sender, _ = scrub(as_name(first(raw, "from", "sender", "from_address", "from_number") or "unknown"), 80,
+                      header=True)
+    subject, _ = scrub(first(raw, "subject", "title") or "", 120, header=True)
     gist, links = scrub(first(raw, "text", "body", "message", "content", "transcript", "snippet") or "")
     attachments = first(raw, "attachments") or []
     ts_raw = first(raw, "received_at", "timestamp", "ts", "created_at")
@@ -178,6 +185,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--write", action="store_true", help="write Instinct events + archive processed files")
     parser.add_argument("--no-jobs", action="store_true", help="thread notes only; never open reply jobs")
     parser.add_argument("--reply-due", default="+2d", help="due for reply jobs (default +2d)")
+    parser.add_argument("--max-jobs", type=int, default=DEFAULT_MAX_JOBS,
+                        help=f"cap on reply jobs opened per run; the rest become thread notes (default {DEFAULT_MAX_JOBS})")
     args = parser.parse_args(argv)
 
     src = Path(args.dir) if args.dir else inbound_dir()
@@ -202,6 +211,19 @@ def main(argv: list[str] | None = None) -> int:
         except (json.JSONDecodeError, ValueError, OSError) as exc:
             skipped.append({"file": path.name, "reason": str(exc)})
 
+    jobs_capped = 0
+    if args.max_jobs >= 0:
+        opened = 0
+        for _, event in planned:
+            if not event.get("job"):
+                continue
+            opened += 1
+            if opened > args.max_jobs:
+                for key in ("job", "due", "priority", "kind", "workspace"):
+                    event.pop(key, None)
+                event["text"] += " (reply owed — job cap reached this run; review inbox)"
+                jobs_capped += 1
+
     dropped = 0
     if args.write:
         archive = src / "processed"
@@ -219,7 +241,8 @@ def main(argv: list[str] | None = None) -> int:
 
     print(json.dumps({
         "ok": True, "dir": str(src), "files": len(files), "planned": len(planned),
-        "jobs": sum(1 for _, e in planned if e.get("job")), "dropped": dropped,
+        "jobs": sum(1 for _, e in planned if e.get("job")), "jobs_capped": jobs_capped,
+        "max_jobs": args.max_jobs, "dropped": dropped,
         "skipped": skipped, "write": args.write,
         "events": [{"text": e["text"], "job": e.get("job"), "due": e.get("due")} for _, e in planned],
         "next": "python3 scripts/instinct.py sync" if dropped else None,

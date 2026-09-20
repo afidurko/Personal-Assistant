@@ -14,9 +14,15 @@ Idempotent: each event carries `source_ref: ics:<UID>`; events already in
 the ledger (any status) are skipped. Description / location text is stored as
 data only — never interpreted as an instruction.
 
-Only stdlib: ICS folding (RFC 5545 §3.1), DATE and DATE-TIME (Z, TZID, or
-floating → UTC), RRULE-free. Recurring master events are surfaced once with
-their first DTSTART; expanding RRULEs is out of scope for a prep-job bridge.
+Only stdlib: ICS folding (RFC 5545 §3.1), DATE and DATE-TIME (Z, TZID via
+zoneinfo, floating → UTC), RRULE-free. Recurring master events are surfaced
+once with their first DTSTART; expanding RRULEs is out of scope for a
+prep-job bridge.
+
+Trust: URL sources are fetched only when they appear in Aaron's
+CAM_CALENDAR_ICS (or with the CLI-only --trust-url). Anything else that
+looks like a URL is refused, so no agent can turn this bridge into a
+free-form HTTP / exfiltration channel. The MCP tool never forwards `ics`.
 """
 from __future__ import annotations
 
@@ -28,6 +34,7 @@ import sys
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -57,15 +64,22 @@ def unescape(value: str) -> str:
 
 
 def parse_dt(value: str, params: dict[str, str]) -> tuple[datetime, bool]:
-    """Return (utc datetime, all_day). Floating and TZID times are taken as
-    UTC — precise enough for a prep-job due date; the bridge never schedules."""
+    """Return (utc datetime, all_day). `Z` is UTC; TZID resolves through
+    zoneinfo (unknown zones fall back to UTC and are flagged by the caller);
+    floating times are taken as UTC."""
     value = value.strip()
     if params.get("VALUE") == "DATE" or re.fullmatch(r"\d{8}", value):
         return datetime.strptime(value, "%Y%m%d").replace(tzinfo=timezone.utc), True
-    utc = value.endswith("Z")
-    core = value[:-1] if utc else value
-    dt = datetime.strptime(core, "%Y%m%dT%H%M%S").replace(tzinfo=timezone.utc)
-    return dt, False
+    if value.endswith("Z"):
+        return datetime.strptime(value[:-1], "%Y%m%dT%H%M%S").replace(tzinfo=timezone.utc), False
+    naive = datetime.strptime(value, "%Y%m%dT%H%M%S")
+    tzid = params.get("TZID")
+    if tzid:
+        try:
+            return naive.replace(tzinfo=ZoneInfo(tzid)).astimezone(timezone.utc), False
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError(f"unknown TZID {tzid}")
+    return naive.replace(tzinfo=timezone.utc), False
 
 
 def parse_ics(text: str) -> list[dict]:
@@ -116,11 +130,21 @@ def clean(text: str) -> str:
 
 # --- sources ------------------------------------------------------------------
 
-def read_source(src: str) -> str:
-    if re.match(r"^https?://", src):
-        with urllib.request.urlopen(src, timeout=20) as resp:  # noqa: S310 — Aaron-provided ICS URL
-            return resp.read().decode("utf-8", errors="replace")
-    return Path(src).expanduser().read_text(encoding="utf-8", errors="replace")
+URL_RE = re.compile(r"^[a-z][a-z0-9+.-]*://", re.IGNORECASE)
+
+
+def read_source(src: str, trusted_urls: set[str]) -> str:
+    if URL_RE.match(src):
+        if not re.match(r"^https?://", src, re.IGNORECASE):
+            raise PermissionError(f"only http(s) ICS URLs are supported: {src}")
+        if src not in trusted_urls:
+            raise PermissionError("untrusted URL source — add it to CAM_CALENDAR_ICS or pass --trust-url at the CLI")
+        with urllib.request.urlopen(src, timeout=20) as resp:  # noqa: S310 — Aaron-trusted ICS URL
+            return resp.read(5_000_000).decode("utf-8", errors="replace")
+    path = Path(src).expanduser()
+    if path.suffix.lower() not in (".ics", ".ical", ".icalendar", ".txt"):
+        raise PermissionError(f"refusing non-calendar file {path.name} (expected .ics)")
+    return path.read_text(encoding="utf-8", errors="replace")
 
 
 def sources_from_env() -> list[str]:
@@ -200,12 +224,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--horizon-days", type=int, default=14)
     parser.add_argument("--now", help="ISO8601 clock override")
     parser.add_argument("--write", action="store_true", help="drop events into the Instinct inbox")
+    parser.add_argument("--trust-url", action="store_true",
+                        help="CLI only: allow --ics URLs not listed in CAM_CALENDAR_ICS")
+    parser.add_argument("--note-ignored-ics", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
 
-    sources = args.ics or sources_from_env()
+    env_sources = sources_from_env()
+    sources = args.ics or env_sources
+    trusted_urls = {s for s in env_sources if URL_RE.match(s)}
+    if args.trust_url:
+        trusted_urls |= {s for s in sources if URL_RE.match(s)}
     now = instinct.now_utc(args.now)
     if not sources:
         print(json.dumps({"ok": True, "sources": 0, "events": 0, "planned": 0,
+                          "ignored_ics_argument": bool(args.note_ignored_ics) or None,
                           "note": "set CAM_CALENDAR_ICS (path or private ICS URL) or pass --ics"}, indent=2))
         return 0
 
@@ -213,9 +245,10 @@ def main(argv: list[str] | None = None) -> int:
     errors: list[str] = []
     for src in sources:
         try:
-            events.extend(parse_ics(read_source(src)))
+            events.extend(parse_ics(read_source(src, trusted_urls)))
         except Exception as exc:  # noqa: BLE001 — report per source, keep going
             errors.append(f"{src}: {exc.__class__.__name__}: {exc}")
+    broken = [f"{e['uid']}: {e['broken']}" for e in events if e.get("broken")]
 
     planned = plan(events, now, args.horizon_days, existing_source_refs())
     dropped = 0
@@ -227,6 +260,8 @@ def main(argv: list[str] | None = None) -> int:
         "ok": not errors, "sources": len(sources), "events": len(events),
         "in_horizon_new": len(planned), "dropped": dropped, "write": args.write,
         "errors": errors,
+        "broken_fields": broken,
+        "ignored_ics_argument": bool(args.note_ignored_ics) or None,
         "planned": [{"job": p["job"], "due": p["due"], "priority": p["priority"],
                      "source_ref": p["source_ref"]} for p in planned],
         "next": "python3 scripts/instinct.py sync" if dropped else None,

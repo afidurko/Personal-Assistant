@@ -8,7 +8,9 @@
     "Privilege inheritance does NOT cap spawn count — it only prevents privilege escalation.",
     "Agents never receive Aaron-only privileges (task_giver, kill_master, cam_enhance_apply).",
     "outbound_send / careers_submit are never in a role default — they are granted per task by Aaron flipping switch.outbound / switch.careers_submit.",
-    "Runtime: scripts/cam_swarm.py enforces these defaults at spawn (child ⊆ parent, level = parent + 1, unlimited count)."
+    "Runtime: scripts/cam_swarm.py enforces these defaults at spawn (child ⊆ parent, level = parent + 1, unlimited count).",
+    "non_inheritable: privileges only the chief may hold (live use is decided by switch.outbound / switch.careers_submit). They are stripped at spawn even though child ⊆ parent would allow them; cam_swarm doctor flags any other holder.",
+    "Reserved roles: chief, aaron, human, human.aaron cannot be spawned. Spawning under human.aaron and acting as human.aaron require the CLI --aaron flag; the MCP server never passes it."
   ],
   "levels": {
     "0": {
@@ -70,6 +72,10 @@
       "outbound_draft",
       "outbound_send",
       "careers_draft",
+      "careers_submit"
+    ],
+    "non_inheritable": [
+      "outbound_send",
       "careers_submit"
     ]
   },

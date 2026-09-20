@@ -209,6 +209,8 @@ class TerminateAndKillTests(SwarmBase):
         out = run("--now", T0, "terminate", "chief", "--caller", a["id"])
         self.assertEqual(out["_exit"], 1)
         out = run("--now", T0, "terminate", "chief", "--caller", "human.aaron", "--reason", "kill")
+        self.assertEqual(out["_exit"], 1)  # claiming to be Aaron without --aaron is refused
+        out = run("--now", T0, "--aaron", "terminate", "chief", "--caller", "human.aaron", "--reason", "kill")
         self.assertIn("chief", out["terminated"])
 
     def test_kill_silences_spawn_and_assign_but_keeps_records(self):
@@ -218,7 +220,8 @@ class TerminateAndKillTests(SwarmBase):
         self.assertEqual(run("--now", T0, "assign", w["id"], "x")["_exit"], 1)
         self.assertTrue(run("stats")["kill_active"])
         self.assertEqual(len(run("agents")), 3)  # aaron + chief + watcher retained
-        run("--now", T0, "resume")
+        self.assertEqual(run("--now", T0, "resume")["_exit"], 1)  # resume needs --aaron
+        run("--now", T0, "--aaron", "resume")
         self.assertTrue(run("--now", T0, "spawn", "qa")["ok"])
 
     def test_env_kill_honoured(self):
@@ -280,6 +283,70 @@ class DoctorAndDistillTests(SwarmBase):
         self.assertIn("human.aaron (aaron, L0)", text)
         self.assertIn("    " + a["id"], text)
         self.assertIn("job:zz", text)
+
+
+class ExploitRegressionTests(SwarmBase):
+    """Each test replays an attack from the round-5 red-team pass
+    (docs/SWARM_CONNECTORS_SECURITY_REVIEW.md) and asserts it now fails."""
+
+    def test_x1_role_chief_cannot_inherit_outbound_send(self):
+        out = run("--now", T0, "spawn", "chief")
+        self.assertEqual(out["_exit"], 1)
+        # even a legit role under chief never receives chief-only privileges
+        child = self.spawn("errand-runner")
+        self.assertNotIn("outbound_send", child["privileges"])
+        self.assertNotIn("careers_submit", child["privileges"])
+        out = run("--now", T0, "spawn", "qa", "--privilege", "outbound_send")
+        self.assertEqual(out["_exit"], 1)
+
+    def test_x2_agents_cannot_spawn_under_human_root(self):
+        out = run("--now", T0, "spawn", "shadow-chief", "--parent", "human.aaron")
+        self.assertEqual(out["_exit"], 1)
+        self.assertIn("only Aaron", out["error"])
+        ok = run("--now", T0, "--aaron", "spawn", "specialist", "--parent", "human.aaron")
+        self.assertTrue(ok["ok"])
+        self.assertEqual(ok["agent"]["level"], 1)
+        self.assertNotIn("outbound_send", ok["agent"]["privileges"])
+
+    def test_x3_prefix_cannot_impersonate_aaron_or_chief(self):
+        w = self.spawn("watcher")
+        act = run("--now", T0, "assign", w["id"], "x")["action"]["id"]
+        for who in ("hum", "human", "human.aaron", "chi", "aaron"):
+            out = run("--now", T0, "resolve", act, "failed", "--caller", who)
+            self.assertEqual(out["_exit"], 1, who)
+        out = run("--now", T0, "terminate", "chief", "--caller", "human")
+        self.assertEqual(out["_exit"], 1)
+        self.assertEqual(run("agents")[1]["status"], "active")  # chief untouched
+        # prefix convenience still works for spawned role-hex ids
+        short = w["id"][: len(w["id"]) - 3]
+        self.assertTrue(run("--now", T0, "assign", short, "y")["ok"])
+
+    def test_x5_cycle_in_tampered_ledger_terminates_and_is_reported(self):
+        a = self.spawn("qa")
+        b = self.spawn("qa", parent=a["id"])
+        ledger = swarm.load_ledger()
+        ledger["agents"][a["id"]]["parent"] = b["id"]
+        swarm.save_ledger(ledger)
+        out = run("--now", T0, "terminate", b["id"])  # must return, not hang
+        self.assertIn("_exit", out)
+        doc = run("doctor")
+        self.assertFalse(doc["ok"])
+        self.assertTrue(any("lineage cycle" in p for p in doc["problems"]))
+
+    def test_x8_reserved_and_malformed_roles_refused(self):
+        for role in ("chief", "aaron", "human.aaron", "Human", "a", "x" * 40, "qa;rm", "chi ef"):
+            self.assertEqual(run("--now", T0, "spawn", role)["_exit"], 1, role)
+        self.spawn("chie")  # legal role; must not shadow `chief` lookups
+        self.assertEqual(run("--now", T0, "assign", "chie", "x")["_exit"], 1)  # no dash → no prefix match
+        self.assertTrue(run("--now", T0, "assign", "chief", "x")["ok"])
+
+    def test_doctor_flags_chief_only_privilege_on_specialist(self):
+        w = self.spawn("watcher")
+        ledger = swarm.load_ledger()
+        ledger["agents"][w["id"]]["privileges"].append("outbound_send")
+        swarm.save_ledger(ledger)
+        doc = run("doctor")
+        self.assertTrue(any("chief-only" in p for p in doc["problems"]))
 
 
 if __name__ == "__main__":

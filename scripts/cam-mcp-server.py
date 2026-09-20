@@ -413,7 +413,8 @@ def tool_defs() -> list[dict]:
             "name": "swarm_spawn",
             "description": (
                 "synapse.spawn — create a subagent at parent.level + 1 with privileges ⊆ parent. "
-                "Unlimited count/depth; never grants Aaron-only privileges; refused while switch.kill is act."
+                "Unlimited count/depth; never grants Aaron-only or chief-only (outbound_send) privileges; "
+                "parent must be an agent (never human.aaron); reserved roles refused; refused while switch.kill is act."
             ),
             "inputSchema": {
                 "type": "object",
@@ -489,13 +490,13 @@ def tool_defs() -> list[dict]:
             "name": "calendar_sync",
             "description": (
                 "Read-only ICS calendar → Instinct prep jobs (source_ref ics:<uid>, idempotent). "
-                "Sources from $CAM_CALENDAR_ICS or `ics`. write=true drops events for `instinct sync`. "
+                "Sources come ONLY from Aaron's $CAM_CALENDAR_ICS; an `ics` argument is ignored "
+                "(no agent-supplied URLs). write=true drops events for `instinct sync`. "
                 "Never writes to the calendar."
             ),
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "ics": {"type": "array", "items": {"type": "string"}},
                     "horizon_days": {"type": "integer"},
                     "write": {"type": "boolean"},
                     "now": {"type": "string"},
@@ -1001,6 +1002,15 @@ def call_tool(name: str, arguments: dict) -> Any:
     if name == "instinct_dispatch":
         limit = arguments.get("limit")
         return instinct_cli(arguments, "dispatch", extra=["--limit", str(int(limit))] if limit else None)
+    if name in ("instinct_delegate", "swarm_spawn", "swarm_assign", "swarm_resolve"):
+        # Agent bus guards: nobody on MCP is Aaron, nobody backdates the ledger.
+        for key in ("caller", "parent", "sender"):
+            val = str(arguments.get(key) or "")
+            if val and (val == "human.aaron" or val.startswith("human") or val == "aaron"):
+                return {"ok": False, "error": f"{key}={val!r} refused: agents never act as Aaron over MCP "
+                                              "(Aaron uses the CLI with --aaron)"}
+        if arguments.get("now"):
+            arguments = {k: v for k, v in arguments.items() if k != "now"}
     if name == "instinct_delegate":
         extra = [str(arguments["job"])]
         if arguments.get("role"):
@@ -1043,8 +1053,11 @@ def call_tool(name: str, arguments: dict) -> Any:
         argv = []
         if arguments.get("now"):
             argv += ["--now", str(arguments["now"])]
-        for src in arguments.get("ics") or []:
-            argv += ["--ics", str(src)]
+        if arguments.get("ics"):
+            # Sources are Aaron's ($CAM_CALENDAR_ICS). Agent-supplied URLs would be a
+            # free-form HTTP / exfiltration channel, so they are ignored, not fetched.
+            arguments = {k: v for k, v in arguments.items() if k != "ics"}
+            argv += ["--note-ignored-ics"]
         if arguments.get("horizon_days"):
             argv += ["--horizon-days", str(int(arguments["horizon_days"]))]
         if arguments.get("write"):
