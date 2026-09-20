@@ -7,13 +7,18 @@ Plan + **Phase B dry-run** + dual billion QA — merged.
 - Tests: `python3 scripts/test_cam_reason.py`
 - Billion: `python3 scripts/cam-reason-billion-fuzz.py --n 1000000000`
 
-## Phase C — InfiniteMind
+## Phase C — InfiniteMind (slow) + Fast path (speed)
 
-Build on [Advanced-logic-reason-idea-and-learning-algorithms](https://github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms):
+| Gate | Surface |
+|---|---|
+| Slow | `cam-infinitemind` / stage `logic` before SGR |
+| Fast | `cam-fast` — LRU + skip recall/logic/SGR; ~8ms budget |
 
-- Project: `vault/03-Projects/Cam-InfiniteMind.md`
-- Adapter: `python3 scripts/cam-infinitemind.py --goal "…"`
-- Tests: `python3 scripts/test_cam_infinitemind.py`
-- Slow-path stage `logic` before SGR stub
+```bash
+python3 scripts/test_cam_fast.py
+python3 scripts/cam-fast.py --bench 5000
+python3 scripts/cam-reason.py --goal "hi cam" --no-write
+```
 
-Next: LitServe thin proxy + converse bar-only; mesh KnowledgeBase; gated idea gen.
+Next: LitServe sLM classify on fast path (`switch.slm_local`); converse bar-only.
+

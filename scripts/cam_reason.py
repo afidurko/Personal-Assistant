@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import trajectory_policies as tp  # noqa: E402
 import cam_infinitemind as cim  # noqa: E402
+import cam_fast as cf  # noqa: E402
 
 REASONING_CFG = ROOT / "config" / "enhancement" / "reasoning-logic.json"
 HMO_CFG = ROOT / "config" / "memory" / "hmo-tiers.json"
@@ -433,13 +434,79 @@ def reason(
     reasoning_schema = None
     stream = "dorsal"
     recall = None
+    im_result = None
+    fast_result = None
+    traj: dict[str, Any] = {"tool": "TrajectoryCheckTool", "motor_plan": [], "violations": []}
+
+    # --- System-1 fast gate: skip InfiniteMind + SGR + heavy I/O ---
+    if path == "fast":
+        fast_result = cf.run_fast(
+            goal=goal,
+            sense=sense,
+            kill=kill,
+            enhance=enhance,
+        )
+        toolkit_results.append(fast_result)
+        if fast_result.get("path") == "escalate_to_slow":
+            path = "slow"
+            escalate = True
+            esc_reasons = list(
+                dict.fromkeys(list(esc_reasons) + list(fast_result.get("escalation") or ["fast_recheck"]))
+            )
+        else:
+            stages = list(fast_result.get("stages") or ["accept", "fast", "gate", "stream", "motor", "distill"])
+            motor_plan = list(fast_result.get("motor_plan") or [])
+            stream = fast_result.get("stream") or "dorsal"
+            stream_act = fast_result.get("stream_act") or "speak"
+            summary = (
+                f"Fast path; hotspot={fast_result.get('hotspot_id')}; "
+                f"motors={motor_plan}; "
+                f"{(fast_result.get('compute') or {}).get('elapsed_ms')}ms"
+            )
+            answer = final_answer_tool(path, stream, summary)
+            toolkit_results.append(answer)
+            stages = list(stages)
+            if "distill" not in stages:
+                stages.append("distill")
+            trace = {
+                "kind": "reasoning_trace",
+                "sense": sense,
+                "goal": goal,
+                "path": "fast",
+                "engine": "system1_fast_heuristics",
+                "accepted": True,
+                "dry_run": dry_run,
+                "escalation": fast_result.get("escalation") or esc_reasons,
+                "stages": stages,
+                "stages_skipped": fast_result.get("stages_skipped"),
+                "classification": classification,
+                "hotspot_id": fast_result.get("hotspot_id"),
+                "area": route.get("area"),
+                "pathway": route.get("pathway"),
+                "stream": stream,
+                "stream_act": stream_act,
+                "reasoning_steps": None,
+                "switch_risks": [],
+                "sgr_iterations": 0,
+                "infinitemind": None,
+                "compute": fast_result.get("compute"),
+                "recall": None,
+                "motor_plan": motor_plan,
+                "violations": [],
+                "toolkit": [t.get("tool") for t in toolkit_results],
+                "toolkit_results": toolkit_results if dry_run else None,
+                "persona": {"name": "Cam", "sole_operator": "Aaron"},
+                "ts": utc(),
+            }
+            if write_trace:
+                _write_trace(trace)
+            return trace
 
     stream_act = pick_stream_act(goal, classification.get("intents") or [])
     dsr = dual_stream_router()
     stream_result = dsr.route_act(stream_act if stream_act in {"speak", "docs", "research", "careers"} else "speak")
     stream = stream_result.get("winner") or "dorsal"
 
-    im_result = None
     if path == "slow":
         stages.append("recall")
         personal = "personal_fact" in (classification.get("intents") or [])
@@ -513,7 +580,7 @@ def reason(
             else "sgr_tool_calling_agent_stub"
         )
     else:
-        engine = "fast_heuristics"
+        engine = "system1_fast_heuristics"
     trace = {
         "kind": "reasoning_trace",
         "sense": sense,
@@ -540,6 +607,7 @@ def reason(
         }
         if im_result and im_result.get("ok")
         else None,
+        "compute": (fast_result or {}).get("compute") if fast_result else None,
         "recall": recall,
         "motor_plan": motor_plan,
         "violations": traj.get("violations") or [],

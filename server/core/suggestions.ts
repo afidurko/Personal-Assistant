@@ -359,6 +359,21 @@ function fromAgentContext(
       relatedConceptIds: ['error-handling', 'protocols-extensions'],
       sourceFindingIds: [],
     });
+    out.push({
+      id: 'suggest-cam-fast-path',
+      kind: 'cam-reason',
+      title: 'Keep System-1 fast path under latency budget',
+      rationale:
+        'Cam day-to-day speed is the fast gate (cam_fast): LRU + stage skips. InfiniteMind/SGR must stay off greetings.',
+      implementation:
+        'Run test_cam_fast; bench classify throughput; wire LitServe sLM classify later behind switch.slm_local.',
+      sketch:
+        'python3 scripts/test_cam_fast.py\npython3 scripts/cam-fast.py --bench 5000\npython3 scripts/cam-reason.py --goal "hi cam" --no-write',
+      priority: 75,
+      relatedWorkspaceIds: [agiWs.id],
+      relatedConceptIds: ['error-handling', 'protocols-extensions'],
+      sourceFindingIds: [],
+    });
   }
 
   // Aaron-only voice gate — always suggest when identity / converse surfaces are present

@@ -72,4 +72,7 @@ python3 scripts/cam-reason-billion-fuzz.py \
 echo "== cam-infinitemind unit =="
 python3 scripts/test_cam_infinitemind.py
 
+echo "== cam-fast unit =="
+python3 scripts/test_cam_fast.py
+
 echo "CI OK"

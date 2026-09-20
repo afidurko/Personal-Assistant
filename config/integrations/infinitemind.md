@@ -5,9 +5,14 @@ Path: [`integrations/infinitemind`](../../integrations/infinitemind) (git submod
 Cam adapter: `scripts/cam_infinitemind.py`  
 Policy status: **Phase C thin slice** — dry-run engines only
 
-## Role in the team
+## Fast vs slow
 
-InfiniteMind supplies Cam’s **formal + metacognitive substrate** under the SGR slow path:
+| Gate | Owner | Speed | Engines |
+|---|---|---|---|
+| **Fast (System-1)** | `scripts/cam_fast.py` · `center.slm` | Budget ~8ms, LRU, skip heavy stages | Heuristic classify + light route |
+| **Slow (System-2)** | InfiniteMind + SGR | Deliberate | Logic / meta / epistemic / abductive + ReasoningTool |
+
+InfiniteMind is **not** on the fast gate. Putting QELR/RMA/QCS on every greeting would hurt Cam’s response speed. Speed enhancements belong in `cam_fast` (+ later LitServe sLM); depth belongs here.
 
 | Engine | InfiniteMind module | Cam use |
 |---|---|---|

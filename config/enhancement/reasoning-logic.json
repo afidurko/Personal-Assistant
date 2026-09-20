@@ -99,11 +99,31 @@
     "center": "center.slm",
     "motor": "motor.slm",
     "inference_host": "litserve",
+    "adapter": "scripts/cam_fast.py",
+    "cli": "scripts/cam-fast.py",
     "skip_stages": [
+      "recall",
+      "logic",
       "sgr"
     ],
     "light_plan": true,
-    "analogy": "System-1"
+    "analogy": "System-1",
+    "jobs": [
+      "intent_classify",
+      "hotspot_route_suggest",
+      "query_rewrite",
+      "brief_compress"
+    ],
+    "compute": {
+      "budget_ms": 8,
+      "warmup_on_first_turn": true,
+      "lru_classify_cap": 1024,
+      "lru_route_cap": 256,
+      "batch_classify_workers": 4,
+      "skip_dual_stream_io": true,
+      "mesh_only_chatter": true,
+      "note": "Speed lives here — InfiniteMind/SGR stay on slow gate only"
+    }
   },
   "slow_path": {
     "centers": [
