@@ -12,14 +12,18 @@
   "path": null,
   "desktop_shell": "integrations/illa-desktop",
   "desktop_promote": {
-    "status": "ready_blocked_on_push",
+    "status": "promoted",
     "target_path": "electron/",
     "target_branch": "cursor/desktop-electron-26-16-1",
     "base_branch": "beta",
     "script": "scripts/promote-illa-desktop.py",
     "patch_bundle": "patches/illa-builder-desktop",
     "token_env": "ILLA_BUILDER_GITHUB_TOKEN",
-    "app_id": "com.afidurko.illa-builder"
+    "app_id": "com.afidurko.illa-builder",
+    "promoted_at": "2026-09-20T03:27:26Z",
+    "pr_url": "https://github.com/afidurko/illa-builder/pull/1",
+    "source_of_truth": "github.com/afidurko/illa-builder/electron",
+    "pr_number": 1
   },
   "packager": {
     "id": "electron-builder",

@@ -313,9 +313,11 @@
       "vault": "vault/03-Projects/ILLA-Electron-Desktop.md",
       "workspace_id": "illa-desktop",
       "shell": "integrations/illa-desktop",
-      "promote_status": "ready_blocked_on_push",
+      "promote_status": "promoted",
       "promote_script": "scripts/promote-illa-desktop.py",
-      "patch_bundle": "patches/illa-builder-desktop"
+      "patch_bundle": "patches/illa-builder-desktop",
+      "target_branch": "cursor/desktop-electron-26-16-1",
+      "source_of_truth": "github.com/afidurko/illa-builder/electron"
     }
   },
   "mesh/research": {
