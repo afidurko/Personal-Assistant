@@ -331,11 +331,12 @@
         "sense": "sense.train.higgsfield",
         "hotspot": "hotspot.higgsfield",
         "script": "scripts/higgsfield-check.py",
+        "run": "scripts/higgsfield-run.py",
+        "pack": "scripts/pack-higgsfield-result.py",
+        "status": "active_dry_run",
         "serves": [
           "motor.dl"
         ],
-        "plan": "config/enhancement/slm-dl.json",
-        "status": "proposed",
         "notes": "Multi-node GPU train/fine-tune orchestrator; not the brain"
       }
     ],
@@ -661,7 +662,9 @@
     "memorybear_client": "scripts/memorybear.py",
     "memorybear_check": "scripts/memorybear-check.py",
     "memorybear_pack": "scripts/pack-memorybear-result.py",
-    "higgsfield_check": "scripts/higgsfield-check.py"
+    "higgsfield_check": "scripts/higgsfield-check.py",
+    "higgsfield_run": "scripts/higgsfield-run.py",
+    "higgsfield_pack": "scripts/pack-higgsfield-result.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",

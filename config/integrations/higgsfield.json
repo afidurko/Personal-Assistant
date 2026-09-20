@@ -9,11 +9,20 @@
   "motor": "motor.higgsfield",
   "sense": "sense.train.higgsfield",
   "hotspot": "hotspot.higgsfield",
-  "script": "scripts/higgsfield-check.py",
   "role": "multi_node_gpu_training",
-  "status": "proposed",
+  "status": "active_dry_run",
   "pip": "higgsfield==0.0.3",
+  "fixture": "scripts/testdata/sample-higgsfield-experiment.py",
+  "nodes_example": "config/integrations/higgsfield-nodes.example.json",
+  "scripts": {
+    "check": "scripts/higgsfield-check.py",
+    "run": "scripts/higgsfield-run.py",
+    "pack": "scripts/pack-higgsfield-result.py",
+    "test": "scripts/test_higgsfield.py"
+  },
   "available_to": ["coding", "ops", "chief", "researcher", "qa"],
   "requires_switch": ["switch.cam_enhance", "switch.kill"],
-  "notes": "Fault-tolerant GPU orchestration for large-model training; not the brain"
+  "live_env": "CAM_HIGGSFIELD_LIVE",
+  "litserve_handoff": "integrations/litserve",
+  "notes": "Fault-tolerant GPU orchestration for large-model training; dry-run default; not the brain"
 }

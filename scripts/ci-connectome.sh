@@ -58,6 +58,7 @@ python3 scripts/inkbox-check.py
 
 echo "== higgsfield wiring =="
 python3 scripts/higgsfield-check.py
+python3 scripts/test_higgsfield.py
 
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \

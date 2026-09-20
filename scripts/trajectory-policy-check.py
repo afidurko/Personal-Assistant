@@ -114,6 +114,63 @@ def main() -> int:
         errors.append("mesh_should_remain_when_identity_held")
     demos.append({"case": "identity_hold_speak", "motor_plan": plan7, "violations": v7})
 
+    # Higgsfield GPU train requires enhance; strip when held
+    hf_hold = dict(r1.get("switch_state") or {})
+    hf_hold["switch.cam_enhance"] = "hold"
+    plan8, v8 = tp.apply_policies(
+        ["motor.higgsfield", "motor.mesh", "motor.vault"], hf_hold
+    )
+    if "motor.higgsfield" in plan8:
+        errors.append("higgsfield_not_stripped_without_enhance")
+    if "motor.mesh" not in plan8:
+        errors.append("mesh_should_remain_when_higgsfield_held")
+    demos.append({"case": "higgsfield_hold", "motor_plan": plan8, "violations": v8})
+
+    hf_act = dict(r1.get("switch_state") or {})
+    hf_act["switch.cam_enhance"] = "act"
+    plan9, v9 = tp.apply_policies(
+        ["motor.higgsfield", "motor.mesh"], hf_act
+    )
+    if "motor.higgsfield" not in plan9:
+        errors.append("higgsfield_missing_when_enhance_act")
+    demos.append({"case": "higgsfield_act", "motor_plan": plan9, "violations": v9})
+
+    # Composition: jobs + higgsfield → strip train
+    plan10, v10 = tp.apply_policies(
+        ["motor.jobs", "motor.higgsfield", "motor.mesh"], hf_act
+    )
+    if "motor.higgsfield" in plan10:
+        errors.append("cpv_higgsfield_jobs_not_stripped")
+    if "motor.jobs" not in plan10:
+        errors.append("cpv_jobs_should_remain_with_higgsfield")
+    demos.append({"case": "higgsfield_plus_jobs", "motor_plan": plan10, "violations": v10})
+
+    # Route: hotspot without --enhance must not fire motor.higgsfield
+    r_hf = route(
+        sense="sense.train.higgsfield",
+        goal="fine-tune",
+        hotspot="hotspot.higgsfield",
+    )
+    if "motor.higgsfield" in (r_hf.get("motor_plan") or []):
+        errors.append("higgsfield_route_fired_without_enhance")
+    demos.append(
+        {
+            "case": "higgsfield_route_hold",
+            "motor_plan": r_hf.get("motor_plan"),
+            "violations": r_hf.get("trajectory_violations"),
+        }
+    )
+
+    r_hf_act = route(
+        sense="sense.train.higgsfield",
+        goal="fine-tune",
+        hotspot="hotspot.higgsfield",
+        enhance=True,
+    )
+    if "motor.higgsfield" not in (r_hf_act.get("motor_plan") or []):
+        errors.append("higgsfield_route_missing_when_enhance")
+    demos.append({"case": "higgsfield_route_act", "motor_plan": r_hf_act.get("motor_plan")})
+
     if cfg.get("status") != "applied":
         errors.append("policies_not_applied")
 

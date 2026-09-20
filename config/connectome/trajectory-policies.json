@@ -121,6 +121,47 @@
         "motor.speak"
       ],
       "revise_to": "file_render_only_hold_audible"
+    },
+    {
+      "id": "no_higgsfield_without_aaron",
+      "description": "motor.higgsfield only when switch.cam_enhance is act (GPU spend risk)",
+      "if_any_motors": [
+        "motor.higgsfield"
+      ],
+      "require_switch_act": [
+        "switch.cam_enhance"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.higgsfield"
+      ],
+      "revise_to": "higgsfield_dry_run_propose_only"
+    },
+    {
+      "id": "no_higgsfield_with_jobs_burst",
+      "description": "Do not launch multi-node train in the same unsupervised plan as job submit",
+      "if_all_motors": [
+        "motor.higgsfield",
+        "motor.jobs"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.higgsfield"
+      ],
+      "revise_to": "jobs_ok_higgsfield_held"
+    },
+    {
+      "id": "no_higgsfield_with_outbound_burst",
+      "description": "Train plans must not also fire outbound channels in one unsupervised burst",
+      "if_all_motors": [
+        "motor.higgsfield",
+        "motor.inkbox"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.higgsfield"
+      ],
+      "revise_to": "comms_ok_higgsfield_held"
     }
   ]
 }

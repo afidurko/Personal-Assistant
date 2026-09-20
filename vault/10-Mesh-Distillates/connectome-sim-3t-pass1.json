@@ -1,8 +1,8 @@
 {
   "n": 3000000000000,
   "workers": 4,
-  "elapsed_s": 4.593681936999928,
-  "sims_per_sec": 653070900672.6006,
+  "elapsed_s": 4.228635458000099,
+  "sims_per_sec": 709448716919.8612,
   "passed": 3000000000000,
   "failed": 0,
   "kill_holds": 19880,
@@ -18,30 +18,19 @@
   "traffic_weighted": true,
   "options_checked": 46,
   "physical_n": 10000000,
-  "physical_elapsed_s": 4.59357981800008,
+  "physical_elapsed_s": 4.228533478000145,
   "scaled_n": 2999990000000,
   "workers_detail": [
     {
-      "worker_id": 0,
+      "worker_id": 1,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
-      "kill_holds": 4905,
-      "non_aaron_holds": 279,
-      "feedback_ok": 2494816,
+      "kill_holds": 5025,
+      "non_aaron_holds": 291,
+      "feedback_ok": 2494684,
       "first_error": null,
-      "elapsed_s": 4.294048325000176
-    },
-    {
-      "worker_id": 2,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "kill_holds": 5000,
-      "non_aaron_holds": 298,
-      "feedback_ok": 2494702,
-      "first_error": null,
-      "elapsed_s": 4.4056928079999125
+      "elapsed_s": 4.1666866210000535
     },
     {
       "worker_id": 3,
@@ -52,18 +41,29 @@
       "non_aaron_holds": 291,
       "feedback_ok": 2494759,
       "first_error": null,
-      "elapsed_s": 4.416055449000169
+      "elapsed_s": 4.190476776999958
     },
     {
-      "worker_id": 1,
+      "worker_id": 2,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
-      "kill_holds": 5025,
-      "non_aaron_holds": 291,
-      "feedback_ok": 2494684,
+      "kill_holds": 5000,
+      "non_aaron_holds": 298,
+      "feedback_ok": 2494702,
       "first_error": null,
-      "elapsed_s": 4.585754059999999
+      "elapsed_s": 4.193930860999899
+    },
+    {
+      "worker_id": 0,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "kill_holds": 4905,
+      "non_aaron_holds": 279,
+      "feedback_ok": 2494816,
+      "first_error": null,
+      "elapsed_s": 4.221409139000116
     }
   ]
 }

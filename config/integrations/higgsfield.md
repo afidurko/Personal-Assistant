@@ -27,7 +27,7 @@ an outbound channel.
 - Keeps a normal PyTorch-style loop (`@experiment`) instead of YAML hell  
 - CI-friendly: deploy to nodes and launch runs from GitHub Actions  
 
-## Runtime surface (planned)
+## Runtime surface
 
 | Piece | Path |
 |---|---|
@@ -38,6 +38,25 @@ an outbound channel.
 | Sense | `sense.train.higgsfield` |
 | Hotspot | `hotspot.higgsfield` |
 | Check | `python3 scripts/higgsfield-check.py` |
+| Dry-run | `python3 scripts/higgsfield-run.py --doctor` |
+| Pack | `python3 scripts/pack-higgsfield-result.py --results plan.json` |
+| Fixture | `scripts/testdata/sample-higgsfield-experiment.py` |
+
+## Dry-run vs live
+
+```bash
+# Default — AST-validate experiment + inventory; no SSH / no GPU
+python3 scripts/higgsfield-run.py --doctor
+python3 scripts/higgsfield-run.py --experiment path/to/train.py --out /tmp/hf-plan.json
+python3 scripts/pack-higgsfield-result.py --results /tmp/hf-plan.json --goal "alpaca" --out /tmp/hf-mesh.json
+
+# Live intent only (still no remote exec in phase-1):
+# requires --enhance + CAM_HIGGSFIELD_LIVE=1
+CAM_HIGGSFIELD_LIVE=1 python3 scripts/higgsfield-run.py --experiment path/to/train.py --enhance --live
+```
+
+Trajectory policies strip `motor.higgsfield` unless `switch.cam_enhance` is act,
+and refuse train+jobs / train+inkbox bursts.
 
 ## Install
 
@@ -59,6 +78,10 @@ Serve / classify / embed locally → LitServe (motor.slm / motor.dl)
 
 Prefer Higgsfield only when Aaron authorizes a training run (enhance / explicit
 train goal). Prefer LitServe for day-to-day local inference.
+
+After a successful train, pack emits a **LitServe handoff stub**
+(`litserve_handoff`) — adapters are never auto-loaded; Aaron confirms path +
+`switch.dl_local`.
 
 ## Non-goals
 
