@@ -378,6 +378,27 @@
       "motor": "motor.inkbox"
     },
     {
+      "id": "tool.presence.check",
+      "purpose": "Confirm Cam home presence is her portrait + Audio2Face (no Speak clips)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/presence-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "motor": "motor.speak"
+    },
+    {
       "id": "tool.higgsfield.check",
       "purpose": "Confirm Higgsfield Speak wiring (no API key / no upload)",
       "created_by_role": "tool-creator",
@@ -421,14 +442,13 @@
       ],
       "requires_switch": [
         "switch.outbound",
-        "switch.presence",
         "switch.kill"
       ],
       "risk": "high",
-      "status": "active",
+      "status": "rejected",
       "integration": "config/integrations/higgsfield.json",
       "motor": "motor.higgsfield",
-      "notes": "Live mode spends money and uploads Cam’s face via /files/generate-upload-url. Default dry-run uses local portrait + planned WAV. Official HF_* env names accepted."
+      "notes": "Rejected for Cam’s face (looks creepy). CLI dry-run only. Cline must not --live."
     },
     {
       "id": "tool.memorybear.read",

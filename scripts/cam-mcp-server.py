@@ -9,7 +9,7 @@ Tools:
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
-  higgsfield_check, higgsfield_status, higgsfield_preview, voicestudio_health
+  higgsfield_check, higgsfield_status, higgsfield_preview, presence_check, voicestudio_health
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -234,6 +234,14 @@ def tool_defs() -> list[dict]:
                 "Confirm Inkbox wiring (connectome, registry, submodule). "
                 "Does not send email/SMS or require INKBOX_API_KEY. "
                 "Live outbound uses motor.inkbox under switch.outbound."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "presence_check",
+            "description": (
+                "Confirm Cam home presence is her identity portrait + Audio2Face. "
+                "Fails if Higgsfield Speak clips are wired onto the face."
             ),
             "inputSchema": {"type": "object", "properties": {}},
         },
@@ -513,6 +521,15 @@ def google_trends_addon(arguments: dict) -> Any:
     return json.loads(out)
 
 
+def presence_check(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/presence-check.py")],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
 def higgsfield_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/higgsfield-check.py")],
@@ -614,6 +631,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return google_trends_search(arguments)
     if name == "google_trends_addon":
         return google_trends_addon(arguments)
+    if name == "presence_check":
+        return presence_check(arguments)
     if name == "higgsfield_check":
         return higgsfield_check(arguments)
     if name == "higgsfield_status":

@@ -114,6 +114,29 @@ def main() -> int:
         errors.append("mesh_should_remain_when_identity_held")
     demos.append({"case": "identity_hold_speak", "motor_plan": plan7, "violations": v7})
 
+    # Higgsfield Speak clips rejected for Cam's face — never ride along with speak
+    face_state = dict(r1.get("switch_state") or {})
+    face_state["switch.outbound"] = "act"
+    face_state["switch.presence"] = "act"
+    plan8, v8 = tp.apply_policies(
+        ["motor.speak", "motor.higgsfield", "motor.mesh"], face_state
+    )
+    if "motor.higgsfield" in plan8:
+        errors.append("higgsfield_not_stripped_from_presence_speak")
+    if "motor.speak" not in plan8 or "motor.mesh" not in plan8:
+        errors.append("speak_and_mesh_should_remain_without_higgsfield")
+    demos.append({"case": "higgsfield_rejected_for_cam_face", "motor_plan": plan8, "violations": v8})
+
+    hold_hf = dict(r1.get("switch_state") or {})
+    hold_hf["switch.outbound"] = "hold"
+    hold_hf["switch.presence"] = "hold"
+    plan9, v9 = tp.apply_policies(["motor.higgsfield", "motor.mesh"], hold_hf)
+    if "motor.higgsfield" in plan9:
+        errors.append("higgsfield_not_stripped_when_outbound_held")
+    if "motor.mesh" not in plan9:
+        errors.append("mesh_should_remain_when_higgsfield_held")
+    demos.append({"case": "higgsfield_outbound_hold", "motor_plan": plan9, "violations": v9})
+
     if cfg.get("status") != "applied":
         errors.append("policies_not_applied")
 

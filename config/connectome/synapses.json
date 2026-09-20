@@ -1802,7 +1802,7 @@
       "from": "center.comms",
       "to": "switch.presence",
       "weight": 0.9,
-      "notes": "higgsfield clips are presence"
+      "notes": "presence is Cam portrait + A2F; Higgsfield Speak clips are rejected"
     },
     {
       "from": "center.comms",

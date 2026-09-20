@@ -124,19 +124,26 @@
     },
     {
       "id": "higgsfield_live_is_outbound",
-      "description": "motor.higgsfield live Speak uploads Cam’s face; require outbound + presence",
+      "description": "motor.higgsfield live Speak uploads Cam’s face; require outbound (not presence)",
       "if_any_motors": [
         "motor.higgsfield"
       ],
       "require_switch_act": [
-        "switch.outbound",
-        "switch.presence"
+        "switch.outbound"
       ],
       "on_violate": "strip",
       "strip_motors": [
         "motor.higgsfield"
       ],
       "revise_to": "hold_higgsfield_dry_run"
+    },
+    {
+      "id": "higgsfield_rejected_for_cam_face",
+      "description": "Aaron rejected Speak clips on Cam’s face — strip motor.higgsfield from presence speak plans",
+      "if_all_motors": ["motor.speak", "motor.higgsfield"],
+      "on_violate": "strip",
+      "strip_motors": ["motor.higgsfield"],
+      "revise_to": "portrait_a2f_speak_only"
     }
   ]
 }

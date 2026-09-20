@@ -35,7 +35,7 @@
     {
       "id": "switch.presence",
       "default": "studio_when_available",
-      "act": ["motor.speak", "sense.audio.transcript", "motor.higgsfield"],
+      "act": ["motor.speak", "sense.audio.transcript"],
       "hold": "text_and_still_portrait",
       "flipped_by": ["Aaron"]
     },

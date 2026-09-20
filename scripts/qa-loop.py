@@ -342,6 +342,9 @@ def write_suggestions(
         "- Suggest: `voicestudio-speak.py` for motor.voicestudio file renders; audible still uses motor.speak gates",
         "- Suggest: enroll Aaron voice (`aaron-voice-enroll.py`) before live mic; keep fail-closed",
         "- Suggest: `speak_requires_aaron_identity` — motor.speak stripped when switch.identity holds",
+        "- Suggest: Cam presence is portrait + A2F only — `python3 scripts/presence-check.py`",
+        "- Suggest: Higgsfield Speak clips stay rejected (creepy) — do not overlay on Cam’s face",
+        "- Suggest: `higgsfield_rejected_for_cam_face` keeps motor.higgsfield off speak plans",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")

@@ -64,6 +64,8 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Companion fuzzers: modular_period_scaled via trillion_scale.py",
         "- Codified Aaron test protocol (this entrypoint + CONTINUOUS_QA)",
         "- Google Trends: `scripts/google-trends-check.py` + curated add-ons (`trends.search_*`)",
+        "- Presence: Higgsfield Speak clips rejected — portrait + A2F only (`scripts/presence-check.py`)",
+        "- Trajectory: `higgsfield_rejected_for_cam_face` strips Speak clips from speak plans",
         "",
         "## Standing suggestions",
         "- Keep `bash scripts/ci-connectome.sh` as the push gate",
@@ -73,6 +75,8 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Slim CI deps: `integrations/joshinator-analyzer/backend/requirements-ci.txt`",
         "- After registry edits: `python3 scripts/test_cline_workspaces.py`",
         "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
+        "- Presence add-on: `python3 scripts/presence-check.py` (no Speak overlay on Cam’s face)",
+        "- Higgsfield stays rejected: `python3 scripts/higgsfield-check.py`",
         "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
         "",
     ]
@@ -100,6 +104,11 @@ def one_pass(
     )
     results.append(
         run([sys.executable, "scripts/test_cline_workspaces.py"], "workspace-unit-tests")
+    )
+    results.append(run([sys.executable, "scripts/presence-check.py"], "presence-check"))
+    results.append(run([sys.executable, "scripts/higgsfield-check.py"], "higgsfield-check"))
+    results.append(
+        run([sys.executable, "scripts/trajectory-policy-check.py"], "trajectory-policy-check")
     )
 
     conn_out = OUT / f"connectome-sim-3t-{out_tag}.json"

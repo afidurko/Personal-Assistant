@@ -152,13 +152,22 @@
       "feeds": ["piece.vault"]
     },
     {
+      "id": "piece.presence_portrait",
+      "title": "Cam identity portrait + Audio2Face",
+      "layer": "presence",
+      "paths": ["identity/persona/cam-face.jpg", "config/persona/avatar.json", "src/components/CamFace.tsx", "scripts/presence-check.py"],
+      "check": "python3 scripts/presence-check.py",
+      "depends_on": ["piece.converse"],
+      "feeds": ["piece.home_ui"]
+    },
+    {
       "id": "piece.higgsfield",
-      "title": "Higgsfield Speak clips",
+      "title": "Higgsfield Speak clips (rejected)",
       "layer": "presence",
       "paths": ["config/integrations/higgsfield.json", "scripts/higgsfield.py", "server/avatar/higgsfield.ts"],
       "check": "python3 scripts/higgsfield-check.py",
       "depends_on": ["piece.converse"],
-      "feeds": ["piece.home_ui"]
+      "feeds": []
     }
   ],
   "boot_order": [
@@ -171,6 +180,7 @@
     "piece.neural_mesh",
     "piece.system_bridge",
     "piece.converse",
+    "piece.presence_portrait",
     "piece.autonomy",
     "piece.home_ui",
     "piece.home_cortex",

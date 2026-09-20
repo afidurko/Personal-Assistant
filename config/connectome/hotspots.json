@@ -753,14 +753,13 @@
       "pathway": [
         "sense.higgsfield.health",
         "center.comms",
-        "switch.presence",
         "switch.outbound",
         "motor.higgsfield"
       ],
       "side_effects": [
         "motor.mesh"
       ],
-      "behavior": "higgsfield_speak_status_and_gated_clip",
+      "behavior": "higgsfield_unused_rejected_clip_status",
       "integration": "config/integrations/higgsfield.json"
     },
     {
@@ -769,14 +768,13 @@
       "pathway": [
         "sense.higgsfield.result",
         "center.comms",
-        "switch.presence",
         "switch.outbound",
         "motor.higgsfield"
       ],
       "side_effects": [
         "motor.vault"
       ],
-      "behavior": "distill_higgsfield_speak_clip",
+      "behavior": "hold_rejected_higgsfield_clip",
       "integration": "config/integrations/higgsfield.json"
     },
     {

@@ -56,6 +56,10 @@ python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
 echo "== inkbox wiring =="
 python3 scripts/inkbox-check.py
 
+echo "== presence portrait (no Higgsfield clips) =="
+python3 scripts/presence-check.py
+python3 scripts/higgsfield-check.py
+
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \
   --n 1000000 \
