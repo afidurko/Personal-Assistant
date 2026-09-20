@@ -1,0 +1,244 @@
+{
+  "pass": "2",
+  "n": 3000000000000,
+  "physical": 10000000,
+  "seed": 242,
+  "status": "green",
+  "results": [
+    {
+      "label": "ci-static-gate",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/ci-static-gate.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.2806625470002473
+    },
+    {
+      "label": "workspace-unit-tests",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cline_workspaces.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.4595933929995226
+    },
+    {
+      "label": "cloud-agent-install",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cloud_agent_install.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.08941364699785481
+    },
+    {
+      "label": "cam-system-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cam_system.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.06473419200119679
+    },
+    {
+      "label": "cam-reason-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test_cam_reason",
+        "test_cam_fast",
+        "test_cam_infinitemind"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.29029653899851837
+    },
+    {
+      "label": "converse-voice-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test_aaron_voice_gate",
+        "test_cam_converse_voice_gate"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.18930329299837467
+    },
+    {
+      "label": "higgsfield-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/higgsfield-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.050066545001755
+    },
+    {
+      "label": "higgsfield-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_higgsfield.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.26985971799877007
+    },
+    {
+      "label": "embodiment-lite",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_embodiment_lite.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.21004175400230451
+    },
+    {
+      "label": "connectome-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-simulate.py",
+        "--n",
+        "3000000000000",
+        "--strict-edges",
+        "--scale",
+        "exhaustive",
+        "--physical",
+        "10000000",
+        "--seed",
+        "242",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/connectome-sim-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 4.141957107000053
+    },
+    {
+      "label": "illa-desktop-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_illa_desktop.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.13689380700088805
+    },
+    {
+      "label": "illa-electron-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/illa-electron-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.040791611001623096
+    },
+    {
+      "label": "trajectory-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/trajectory-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "259",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/trajectory-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.7074088219997066
+    },
+    {
+      "label": "embodiment-deps",
+      "cmd": [
+        "/usr/bin/python3",
+        "-c",
+        "import pydantic"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.0,
+      "note": "pydantic already importable"
+    },
+    {
+      "label": "embodiment-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/embodiment-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "273",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/embodiment-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.625523851998878
+    },
+    {
+      "label": "cam-reason-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/cam-reason-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "253",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/cam-reason-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 10.209125699999277
+    },
+    {
+      "label": "illa-desktop-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/illa-desktop-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "268",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/illa-desktop-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.6577028419997077
+    },
+    {
+      "label": "aaron-voice-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/aaron-voice-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "261",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/aaron-voice-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 1.0123098120020586
+    }
+  ],
+  "at": "20260920T163341Z"
+}
