@@ -1,0 +1,176 @@
+{
+  "pass": "1",
+  "n": 3000000000000,
+  "physical": 10000000,
+  "seed": 142,
+  "status": "failed",
+  "results": [
+    {
+      "label": "connectome-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.046169944000212126
+    },
+    {
+      "label": "workspace-integration",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/workspace-integration-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.3061419259993272
+    },
+    {
+      "label": "workspace-unit-tests",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cline_workspaces.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.5600659829997312
+    },
+    {
+      "label": "higgsfield-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/higgsfield-check.py"
+      ],
+      "exit_code": 1,
+      "wall_s": 0.051059563999842794
+    },
+    {
+      "label": "connectome-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-simulate.py",
+        "--n",
+        "3000000000000",
+        "--strict-edges",
+        "--scale",
+        "exhaustive",
+        "--physical",
+        "10000000",
+        "--seed",
+        "142",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/connectome-sim-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 4.196768957000131
+    },
+    {
+      "label": "illa-desktop-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_illa_desktop.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.1344949619997351
+    },
+    {
+      "label": "illa-electron-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/illa-electron-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.04489129699959449
+    },
+    {
+      "label": "trajectory-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/trajectory-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "159",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/trajectory-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 1.7258622949993878
+    },
+    {
+      "label": "embodiment-deps",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "pip",
+        "install",
+        "-q",
+        "-r",
+        "/workspace/integrations/joshinator-analyzer/backend/requirements-ci.txt"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.4626603429996976
+    },
+    {
+      "label": "embodiment-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/embodiment-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "173",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/embodiment-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.6282909150004343
+    },
+    {
+      "label": "cam-reason-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/cam-reason-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "153",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/cam-reason-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 10.81568187799985
+    },
+    {
+      "label": "illa-desktop-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/illa-desktop-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "168",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/illa-desktop-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.699595527999918
+    }
+  ],
+  "at": "20260920T041000Z"
+}

@@ -5,40 +5,28 @@
   "failed": 0,
   "spawned": 9804687,
   "skipped": 195313,
-  "full_checks": 0,
+  "full_checks": 10000,
   "first_error": null,
-  "elapsed_s": 2.168695770999875,
-  "checks_per_sec": 1383319892128.9236,
+  "elapsed_s": 2.4177945069995985,
+  "checks_per_sec": 1240800238115.7275,
   "seed": 273,
   "ok": true,
-  "full_resolve": false,
-  "sampler": "modular_catalog_only:modular_period_scaled",
+  "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
   "ip_policy": "original_procedural_only",
   "catalog_size": 6,
   "physical_n": 10000000,
   "scaled_n": 2999990000000,
   "workers_detail": [
     {
-      "worker_id": 0,
+      "worker_id": 1,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 0,
+      "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.1285643739997795
-    },
-    {
-      "worker_id": 2,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451171,
-      "skipped": 48829,
-      "full_checks": 0,
-      "first_error": null,
-      "elapsed_s": 2.1338706829997136
+      "elapsed_s": 2.4012199420003526
     },
     {
       "worker_id": 3,
@@ -47,20 +35,31 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 0,
+      "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.1433758670000316
+      "elapsed_s": 2.4029264430000694
     },
     {
-      "worker_id": 1,
+      "worker_id": 2,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451171,
+      "skipped": 48829,
+      "full_checks": 2500,
+      "first_error": null,
+      "elapsed_s": 2.408808363999924
+    },
+    {
+      "worker_id": 0,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 0,
+      "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.1620064329999877
+      "elapsed_s": 2.4107477460001974
     }
   ]
 }

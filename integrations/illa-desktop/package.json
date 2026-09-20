@@ -17,7 +17,8 @@
     "dist": "electron-builder",
     "dist:dir": "electron-builder --dir",
     "dist:linux": "electron-builder --linux",
-    "check:pin": "node scripts/assert-builder-pin.mjs"
+    "check:pin": "node scripts/assert-builder-pin.mjs",
+    "test:contract": "node scripts/contract-selftest.js"
   },
   "devDependencies": {
     "electron": "^37.2.0",

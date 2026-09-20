@@ -100,7 +100,7 @@ def main() -> int:
     if checkout != "ok":
         soft.append("integrations/higgsfield empty (submodule init)")
 
-    # Dry-run smoke (no GPU)
+    # Dry-run smoke (no GPU). Empty checkout → soft only (wiring still valid offline).
     try:
         out = subprocess.check_output(
             [sys.executable, str(ROOT / scripts["run"]), "--doctor"],
@@ -109,13 +109,21 @@ def main() -> int:
         )
         plan = json.loads(out)
         if not plan.get("ok"):
-            errors.append(f"dry-run failed: {plan.get('errors')}")
+            msg = f"dry-run failed: {plan.get('errors')}"
+            if checkout != "ok":
+                soft.append(msg)
+            else:
+                errors.append(msg)
         if plan.get("mode") != "dry_run":
             errors.append("doctor must stay dry_run")
         for w in plan.get("warnings") or []:
             soft.append(f"doctor: {w}")
     except Exception as e:  # noqa: BLE001
-        errors.append(f"dry-run exception: {e}")
+        msg = f"dry-run exception: {e}"
+        if checkout != "ok":
+            soft.append(msg)
+        else:
+            errors.append(msg)
 
     report = {
         "ok": not errors,

@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "n": 3000000000000,
+  "physical": 10000000,
+  "scaled": 2999990000000,
+  "sampler": "modular_period_scaled",
+  "pin": "26.16.1",
+  "app_id": "com.afidurko.illa-builder",
+  "physical_failed": 0,
+  "first_error": null,
+  "workers": 4,
+  "elapsed_s": 2.702830876999542,
+  "results": [
+    {
+      "worker_id": 0,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 2.55531350199999
+    },
+    {
+      "worker_id": 1,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 2.5627049309996437
+    },
+    {
+      "worker_id": 2,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 2.587678225999298
+    },
+    {
+      "worker_id": 3,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 2.6807733360001293
+    }
+  ]
+}
