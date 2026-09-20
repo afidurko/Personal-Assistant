@@ -1,13 +1,14 @@
 /**
- * CamFace — Cam’s actual portrait as an Audio2Face ARKit mesh.
- * Desk: NVIDIA A2F / A2F-3D NIM (integrations/llmavatartalk gRPC).
- * Browser: same ARKit weights on the photo-fitted MediaPipe mesh.
+ * CamFace — Cam’s real portrait driven by NVIDIA Audio2Face ARKit weights.
+ * Desk studio: integrations/llmavatartalk PushAudio → Omniverse / A2F-3D NIM.
+ * Browser: same blendshape vector on the identity photo (not a stock doll).
  */
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import * as THREE from 'three';
-import { applyA2FDisplacements, headPoseFromWeights } from '@/lib/a2f/displace';
-import { LIPS_INNER_LOOP, type CamA2FMesh } from '@/lib/a2f/landmarks';
+import { fitFromMesh } from '@/lib/a2f/fit';
+import { CAM_A2F_FRAG, CAM_A2F_VERT } from '@/lib/a2f/shader';
 import { buildA2FSchedule, composeA2F } from '@/lib/a2f/weights';
+import type { CamA2FMesh } from '@/lib/a2f/landmarks';
 import { expressionFromStatus } from '@/lib/visemes';
 import type { CamVoiceStatus } from '@/hooks/useCamVoice';
 
@@ -32,9 +33,7 @@ export const CamFace = memo(function CamFace({
   speechProgress = -1,
 }: CamFaceProps) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const weightsApi = useRef<{
-    set: (w: ReturnType<typeof composeA2F>) => void;
-  } | null>(null);
+  const apiRef = useRef<{ set: (w: ReturnType<typeof composeA2F>) => void } | null>(null);
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const expr = expressionFromStatus(status, typing);
@@ -49,14 +48,13 @@ export const CamFace = memo(function CamFace({
 
     (async () => {
       try {
-        const meshRes = await fetch(MESH_URL);
-        if (!meshRes.ok) throw new Error('Cam A2F mesh missing — run scripts/build-cam-a2f-mesh.mjs');
-        const mesh = (await meshRes.json()) as CamA2FMesh;
+        const mesh = (await (await fetch(MESH_URL)).json()) as CamA2FMesh;
+        const fit = fitFromMesh(mesh);
         if (cancelled) return;
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(28, 1, 0.05, 10);
-        camera.position.set(0, 0.02, 1.15);
+        const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 10);
+        camera.position.set(0, 0.02, 1.28);
 
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
@@ -70,82 +68,54 @@ export const CamFace = memo(function CamFace({
         tex.minFilter = THREE.LinearFilter;
         tex.generateMipmaps = false;
 
-        const rest = new Float32Array(mesh.positions);
-        const live = new Float32Array(mesh.positions);
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.BufferAttribute(live, 3));
-        geo.setAttribute('uv', new THREE.Float32BufferAttribute(mesh.uvs, 2));
-        geo.setIndex(mesh.indices);
-        geo.computeVertexNormals();
+        const uniforms = {
+          map: { value: tex },
+          jawOpen: { value: 0 },
+          smile: { value: 0.08 },
+          blinkL: { value: 0 },
+          blinkR: { value: 0 },
+          funnel: { value: 0 },
+          pucker: { value: 0 },
+          headYaw: { value: 0 },
+          headPitch: { value: 0 },
+          mouthCenter: { value: new THREE.Vector2(fit.mouthCenter.x, fit.mouthCenter.y) },
+          mouthSize: { value: new THREE.Vector2(fit.mouthSize.x, fit.mouthSize.y) },
+          eyeL: { value: new THREE.Vector2(fit.eyeL.x, fit.eyeL.y) },
+          eyeR: { value: new THREE.Vector2(fit.eyeR.x, fit.eyeR.y) },
+          eyeSize: { value: new THREE.Vector2(fit.eyeSize.x, fit.eyeSize.y) },
+        };
 
-        const faceMat = new THREE.MeshBasicMaterial({
-          map: tex,
-          transparent: false,
-          side: THREE.DoubleSide,
+        const mat = new THREE.ShaderMaterial({
+          uniforms,
+          vertexShader: CAM_A2F_VERT,
+          fragmentShader: CAM_A2F_FRAG,
         });
-        const face = new THREE.Mesh(geo, faceMat);
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 32, 32), mat);
+        scene.add(plane);
 
-        const loop = mesh.mouthLoop?.length ? mesh.mouthLoop : LIPS_INNER_LOOP;
-        const cavityPos: number[] = [];
-        const cavityIdx: number[] = [];
-        for (const i of loop) {
-          cavityPos.push(rest[i * 3] ?? 0, rest[i * 3 + 1] ?? 0, (rest[i * 3 + 2] ?? 0) - 0.04);
-        }
-        for (let i = 1; i < loop.length - 1; i++) cavityIdx.push(0, i, i + 1);
-        const cavityGeo = new THREE.BufferGeometry();
-        cavityGeo.setAttribute('position', new THREE.Float32BufferAttribute(cavityPos, 3));
-        cavityGeo.setIndex(cavityIdx);
-        const cavity = new THREE.Mesh(
-          cavityGeo,
-          new THREE.MeshBasicMaterial({ color: 0x2a1410, side: THREE.DoubleSide }),
-        );
-
-        const teeth = new THREE.Mesh(
-          new THREE.PlaneGeometry(0.09, 0.028),
-          new THREE.MeshBasicMaterial({ color: 0xe8dcd0, side: THREE.DoubleSide }),
-        );
-        teeth.position.set(0, 0.01, -0.03);
-
-        const head = new THREE.Group();
-        head.add(cavity);
-        head.add(teeth);
-        head.add(face);
-        scene.add(head);
-
-        scene.add(new THREE.AmbientLight(0xffffff, 1));
-
-        const current = { weights: composeA2F({ expr: 'idle', speaking: false, progress: -1, schedule: [], timeSec: 0 }) };
-        weightsApi.current = {
+        apiRef.current = {
           set: (w) => {
-            current.weights = w;
+            uniforms.jawOpen.value = Math.min(0.72, w.JawOpen ?? 0);
+            uniforms.smile.value =
+              ((w.MouthSmileLeft ?? 0) + (w.MouthSmileRight ?? 0)) * 0.5;
+            uniforms.blinkL.value = w.EyeBlinkLeft ?? 0;
+            uniforms.blinkR.value = w.EyeBlinkRight ?? 0;
+            uniforms.funnel.value = w.MouthFunnel ?? 0;
+            uniforms.pucker.value = w.MouthPucker ?? 0;
+            uniforms.headYaw.value = w.HeadYaw ?? 0;
+            uniforms.headPitch.value = w.HeadPitch ?? 0;
+            plane.rotation.y = (w.HeadYaw ?? 0) * 0.18;
+            plane.rotation.x = (w.HeadPitch ?? 0) * 0.12;
           },
         };
 
         const tick = () => {
           if (cancelled || !renderer) return;
-          const w = current.weights;
-          applyA2FDisplacements(rest, w, live);
-          (geo.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true;
-          const pose = headPoseFromWeights(w);
-          head.rotation.set(pose.pitch, pose.yaw, pose.roll);
-          const jaw = w.JawOpen ?? 0;
-          teeth.position.y = 0.012 - jaw * 0.03;
-          teeth.scale.set(1 + jaw * 0.15, 1 + jaw * 0.8, 1);
-          teeth.visible = jaw > 0.12;
           renderer.render(scene, camera);
           raf = requestAnimationFrame(tick);
         };
         tick();
-
-        const onResize = () => {
-          if (!renderer || !node) return;
-          const s = Math.max(1, node.clientWidth);
-          renderer.setSize(s, s);
-        };
-        window.addEventListener('resize', onResize);
-
         if (!cancelled) setReady(true);
-        return () => window.removeEventListener('resize', onResize);
       } catch (e) {
         console.error('Cam A2F avatar failed', e);
         if (!cancelled) {
@@ -158,7 +128,7 @@ export const CamFace = memo(function CamFace({
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
-      weightsApi.current = null;
+      apiRef.current = null;
       try {
         renderer?.dispose();
       } catch {
@@ -172,14 +142,13 @@ export const CamFace = memo(function CamFace({
     let raf = 0;
     const t0 = performance.now();
     const loop = () => {
-      const timeSec = (performance.now() - t0) / 1000;
-      weightsApi.current?.set(
+      apiRef.current?.set(
         composeA2F({
           expr,
           speaking: Boolean(speakingText) && speechProgress >= 0,
           progress: speechProgress,
           schedule,
-          timeSec,
+          timeSec: (performance.now() - t0) / 1000,
         }),
       );
       raf = requestAnimationFrame(loop);
