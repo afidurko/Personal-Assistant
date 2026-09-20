@@ -2,9 +2,10 @@
   "name": "illa-desktop",
   "version": "0.1.0",
   "private": true,
-  "description": "Cam Electron shell for ILLA Builder — packaged with electron-builder@26.16.1",
+  "description": "Electron shell for ILLA Builder — packaged with electron-builder@26.16.1",
   "author": "Aaron Fidurko",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/afidurko/illa-builder",
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",
@@ -20,7 +21,7 @@
     "electron-builder": "26.16.1"
   },
   "build": {
-    "appId": "com.afidurko.illa-desktop",
+    "appId": "com.afidurko.illa-builder",
     "productName": "ILLA Builder",
     "copyright": "Copyright © ILLA Cloud / Aaron Fidurko",
     "directories": {
@@ -33,22 +34,18 @@
     ],
     "asar": true,
     "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
+      "icon": "build/icon.png",
+      "target": ["AppImage", "deb"],
       "category": "Development"
     },
     "mac": {
-      "target": [
-        "dmg"
-      ],
+      "icon": "build/icon.png",
+      "target": ["dmg"],
       "category": "public.app-category.developer-tools"
     },
     "win": {
-      "target": [
-        "nsis"
-      ]
+      "icon": "build/icon.ico",
+      "target": ["nsis"]
     }
   }
 }

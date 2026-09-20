@@ -26,21 +26,26 @@ Brain stays nullclaw/Cam. ILLA is a tool surface, not an orchestrator.
 ## Desktop bring-up
 
 ```bash
-# 1) Run ILLA (Docker / CLI / local turbo) so the UI is reachable
-# 2) Point the shell at it
-export ILLA_DESKTOP_URL=http://127.0.0.1:48080
-
+# 1) ILLA web (illa-builder checkout): pnpm install && pnpm dev  → :3000
+# 2) Shell
+export ILLA_DESKTOP_URL=http://127.0.0.1:3000   # or ILLA_DESKTOP_MODE=cloud
 cd integrations/illa-desktop
-npm install
-npm run dev          # electron window
-npm run dist:dir     # unpackaged build via electron-builder@26.16.1
+npm install && npm run check:pin && npm run dev
+npm run dist:dir
 ```
 
-Default URL is `http://127.0.0.1:48080`. Override with `ILLA_DESKTOP_URL` (or cloud: `https://cloud.illacloud.com`).
+## Promote into the fork
+
+```bash
+export ILLA_BUILDER_GITHUB_TOKEN=...   # Contents + PR write on afidurko/illa-builder
+python3 scripts/promote-illa-desktop.py --push
+```
+
+Manual fallback: [`patches/illa-builder-desktop/`](../../patches/illa-builder-desktop/README.md)
 
 ## Boundaries
 
-- Cloud agent token **cannot push** to `afidurko/illa-builder` / `afidurko/electron-builder` yet — packaging kit stays in Personal-Assistant until Aaron grants write or applies a patch PR manually.
+- Promotion push is blocked until `ILLA_BUILDER_GITHUB_TOKEN` or GitHub App write on the fork.
 - Do not package against electron-builder fork `master` (v27 alpha).
 - No outbound ILLA Cloud account automation from Cline.
 

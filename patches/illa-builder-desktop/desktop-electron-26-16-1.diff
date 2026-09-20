@@ -1,0 +1,341 @@
+diff --git a/electron/.clinerules b/electron/.clinerules
+new file mode 100644
+index 0000000..33d5a8b
+--- /dev/null
++++ b/electron/.clinerules
+@@ -0,0 +1,6 @@
++# Cam workspace rules for ILLA desktop packaging
++
++- Sole operator: Aaron
++- Packaging pin: electron-builder@26.16.1 (not fork master / v27 alpha)
++- ILLA web source: github.com/afidurko/illa-builder @ beta
++- Do not outbound-message or spend from this workspace
+diff --git a/electron/.gitignore b/electron/.gitignore
+new file mode 100644
+index 0000000..be31997
+--- /dev/null
++++ b/electron/.gitignore
+@@ -0,0 +1,5 @@
++node_modules/
++release/
++dist/
++*.log
++.DS_Store
+diff --git a/electron/PROMOTE.md b/electron/PROMOTE.md
+new file mode 100644
+index 0000000..2218bce
+--- /dev/null
++++ b/electron/PROMOTE.md
+@@ -0,0 +1,8 @@
++# Promoted from Personal-Assistant
++
++Source: `integrations/illa-desktop`  
++Packager pin: electron-builder@26.16.1  
++Base branch: `beta`  
++Feature branch: `cursor/desktop-electron-26-16-1`
++
++Do not bump to electron-builder v27 / fork master without an explicit migrate.
+diff --git a/electron/README.md b/electron/README.md
+new file mode 100644
+index 0000000..bea24f8
+--- /dev/null
++++ b/electron/README.md
+@@ -0,0 +1,44 @@
++# ILLA Desktop (Electron)
++
++Electron shell for [afidurko/illa-builder](https://github.com/afidurko/illa-builder/tree/beta).
++
++| Contract | Value |
++|---|---|
++| Packager | **`electron-builder@26.16.1`** (exact) |
++| Release | https://github.com/electron-userland/electron-builder/releases/tag/electron-builder%4026.16.1 |
++| Default URL | `http://127.0.0.1:3000` (Vite `apps/builder` / `turbo run dev`) |
++| Cloud mode | `ILLA_DESKTOP_MODE=cloud` → `https://cloud.illacloud.com` |
++| Override | `ILLA_DESKTOP_URL=https://…` |
++| appId | `com.afidurko.illa-builder` |
++| Promote target | `illa-builder` repo path **`electron/`** on branch `cursor/desktop-electron-26-16-1` |
++
++## Dev
++
++```bash
++# terminal A — ILLA web (from illa-builder checkout)
++pnpm install && pnpm dev   # builder on :3000
++
++# terminal B — this shell
++export ILLA_DESKTOP_URL=http://127.0.0.1:3000
++npm install
++npm run check:pin
++npm run dev
++```
++
++## Package
++
++```bash
++npm run dist:dir   # electron-builder@26.16.1 --dir
++```
++
++## Promote into illa-builder
++
++From Personal-Assistant:
++
++```bash
++python3 scripts/promote-illa-desktop.py --dry-run
++# needs write: ILLA_BUILDER_GITHUB_TOKEN or gh auth with push
++python3 scripts/promote-illa-desktop.py --push
++```
++
++That copies this tree to `electron/`, adds root scripts `desktop` / `desktop:dist`, and opens a PR off `beta`.
+diff --git a/electron/build/icon.ico b/electron/build/icon.ico
+new file mode 100644
+index 0000000..c165036
+Binary files /dev/null and b/electron/build/icon.ico differ
+diff --git a/electron/build/icon.png b/electron/build/icon.png
+new file mode 100644
+index 0000000..6c07823
+Binary files /dev/null and b/electron/build/icon.png differ
+diff --git a/electron/package.json b/electron/package.json
+new file mode 100644
+index 0000000..9b65207
+--- /dev/null
++++ b/electron/package.json
+@@ -0,0 +1,51 @@
++{
++  "name": "illa-desktop",
++  "version": "0.1.0",
++  "private": true,
++  "description": "Electron shell for ILLA Builder — packaged with electron-builder@26.16.1",
++  "author": "Aaron Fidurko",
++  "license": "Apache-2.0",
++  "homepage": "https://github.com/afidurko/illa-builder",
++  "main": "src/main.js",
++  "scripts": {
++    "dev": "electron .",
++    "start": "electron .",
++    "pack": "electron-builder --dir",
++    "dist": "electron-builder",
++    "dist:dir": "electron-builder --dir",
++    "dist:linux": "electron-builder --linux",
++    "check:pin": "node scripts/assert-builder-pin.mjs"
++  },
++  "devDependencies": {
++    "electron": "^37.2.0",
++    "electron-builder": "26.16.1"
++  },
++  "build": {
++    "appId": "com.afidurko.illa-builder",
++    "productName": "ILLA Builder",
++    "copyright": "Copyright © ILLA Cloud / Aaron Fidurko",
++    "directories": {
++      "output": "release",
++      "buildResources": "build"
++    },
++    "files": [
++      "src/**/*",
++      "package.json"
++    ],
++    "asar": true,
++    "linux": {
++      "icon": "build/icon.png",
++      "target": ["AppImage", "deb"],
++      "category": "Development"
++    },
++    "mac": {
++      "icon": "build/icon.png",
++      "target": ["dmg"],
++      "category": "public.app-category.developer-tools"
++    },
++    "win": {
++      "icon": "build/icon.ico",
++      "target": ["nsis"]
++    }
++  }
++}
+diff --git a/electron/scripts/assert-builder-pin.mjs b/electron/scripts/assert-builder-pin.mjs
+new file mode 100644
+index 0000000..5a1c833
+--- /dev/null
++++ b/electron/scripts/assert-builder-pin.mjs
+@@ -0,0 +1,42 @@
++#!/usr/bin/env node
++/**
++ * Fail if package.json drifts off electron-builder@26.16.1.
++ */
++import fs from "node:fs";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++
++const PIN = "26.16.1";
++const here = path.dirname(fileURLToPath(import.meta.url));
++const pkgPath = path.join(here, "..", "package.json");
++const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
++const version = (pkg.devDependencies && pkg.devDependencies["electron-builder"]) || "";
++
++if (version !== PIN) {
++  console.error(
++    JSON.stringify(
++      {
++        ok: false,
++        expected: PIN,
++        actual: version,
++        message: "ILLA desktop must pin electron-builder exactly to 26.16.1",
++      },
++      null,
++      2
++    )
++  );
++  process.exit(1);
++}
++
++console.log(
++  JSON.stringify(
++    {
++      ok: true,
++      electron_builder: version,
++      release:
++        "https://github.com/electron-userland/electron-builder/releases/tag/electron-builder%4026.16.1",
++    },
++    null,
++    2
++  )
++);
+diff --git a/electron/src/main.js b/electron/src/main.js
+new file mode 100644
+index 0000000..12f1038
+--- /dev/null
++++ b/electron/src/main.js
+@@ -0,0 +1,106 @@
++const { app, BrowserWindow, shell } = require("electron");
++const path = require("path");
++
++/** Vite `apps/builder` default (`pnpm/turbo dev`). Override with ILLA_DESKTOP_URL. */
++const DEFAULT_SELF_HOST = "http://127.0.0.1:3000";
++const CLOUD_URL = "https://cloud.illacloud.com";
++
++function targetUrl() {
++  const mode = (process.env.ILLA_DESKTOP_MODE || "self").trim().toLowerCase();
++  if (mode === "cloud") return CLOUD_URL;
++
++  const raw = (process.env.ILLA_DESKTOP_URL || DEFAULT_SELF_HOST).trim();
++  try {
++    const u = new URL(raw);
++    if (u.protocol !== "http:" && u.protocol !== "https:") {
++      throw new Error("unsupported protocol");
++    }
++    return u.toString();
++  } catch {
++    console.error(
++      `[illa-desktop] invalid ILLA_DESKTOP_URL=${raw}; falling back to ${DEFAULT_SELF_HOST}`
++    );
++    return DEFAULT_SELF_HOST;
++  }
++}
++
++function offlineHtml(url, detail) {
++  const safeUrl = String(url).replace(/[<>&"]/g, "");
++  const safeDetail = String(detail || "").replace(/[<>&]/g, "");
++  return `<!doctype html>
++<html lang="en">
++<head>
++  <meta charset="utf-8" />
++  <title>ILLA Builder — offline</title>
++  <style>
++    :root { color-scheme: light; }
++    body { font: 16px/1.45 system-ui, sans-serif; margin: 0; min-height: 100vh;
++      display: grid; place-items: center; background: #f4f6f8; color: #1a1d21; }
++    main { max-width: 36rem; padding: 2rem; }
++    h1 { font-size: 1.35rem; margin: 0 0 .5rem; }
++    code { background: #e8ecf0; padding: .1rem .35rem; border-radius: 4px; }
++    p { margin: .6rem 0; color: #3a4149; }
++  </style>
++</head>
++<body>
++  <main>
++    <h1>ILLA Builder is not reachable</h1>
++    <p>Tried <code>${safeUrl}</code>.</p>
++    <p>${safeDetail}</p>
++    <p>Start the web app (<code>pnpm dev</code> on port 3000), or set
++      <code>ILLA_DESKTOP_URL</code> / <code>ILLA_DESKTOP_MODE=cloud</code>.</p>
++  </main>
++</body>
++</html>`;
++}
++
++function createWindow() {
++  const url = targetUrl();
++  const win = new BrowserWindow({
++    width: 1440,
++    height: 900,
++    minWidth: 960,
++    minHeight: 640,
++    title: "ILLA Builder",
++    icon: path.join(__dirname, "..", "build", "icon.png"),
++    webPreferences: {
++      preload: path.join(__dirname, "preload.js"),
++      contextIsolation: true,
++      nodeIntegration: false,
++      sandbox: true,
++    },
++  });
++
++  win.loadURL(url).catch((err) => {
++    win.loadURL(
++      `data:text/html;charset=utf-8,${encodeURIComponent(
++        offlineHtml(url, err && err.message)
++      )}`
++    );
++  });
++
++  win.webContents.on("did-fail-load", (_e, code, desc, validatedURL, isMainFrame) => {
++    if (!isMainFrame || code === -3) return; // -3 = aborted
++    win.loadURL(
++      `data:text/html;charset=utf-8,${encodeURIComponent(
++        offlineHtml(validatedURL || url, `${desc} (${code})`)
++      )}`
++    );
++  });
++
++  win.webContents.setWindowOpenHandler(({ url: openUrl }) => {
++    shell.openExternal(openUrl);
++    return { action: "deny" };
++  });
++}
++
++app.whenReady().then(() => {
++  createWindow();
++  app.on("activate", () => {
++    if (BrowserWindow.getAllWindows().length === 0) createWindow();
++  });
++});
++
++app.on("window-all-closed", () => {
++  if (process.platform !== "darwin") app.quit();
++});
+diff --git a/electron/src/preload.js b/electron/src/preload.js
+new file mode 100644
+index 0000000..b05d71a
+--- /dev/null
++++ b/electron/src/preload.js
+@@ -0,0 +1,6 @@
++const { contextBridge } = require("electron");
++
++contextBridge.exposeInMainWorld("illaDesktop", {
++  shell: "illa-desktop",
++  packager: "electron-builder@26.16.1",
++});
+diff --git a/package.json b/package.json
+index 7a5bc01..2fd40df 100644
+--- a/package.json
++++ b/package.json
+@@ -16,7 +16,11 @@
+     "lint": "eslint \"apps/**/src/**/**.{ts,tsx}\" --config \".eslintrc.js\"",
+     "lint:fix": "eslint --fix \"apps/**/src/**/**.{ts,tsx}\" --config \".eslintrc.js\"",
+     "test": "turbo run test",
+-    "ts-check": "turbo run ts-check"
++    "ts-check": "turbo run ts-check",
++    "desktop": "npm --prefix electron run dev",
++    "desktop:dist": "npm --prefix electron run dist",
++    "desktop:dist:dir": "npm --prefix electron run dist:dir",
++    "desktop:check:pin": "npm --prefix electron run check:pin"
+   },
+   "dependencies": {
+     "@emotion/react": "^11.11.1",

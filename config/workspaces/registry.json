@@ -715,7 +715,8 @@
     "memorybear_client": "scripts/memorybear.py",
     "memorybear_check": "scripts/memorybear-check.py",
     "memorybear_pack": "scripts/pack-memorybear-result.py",
-    "illa_electron_check": "scripts/illa-electron-check.py"
+    "illa_electron_check": "scripts/illa-electron-check.py",
+    "illa_desktop_promote": "scripts/promote-illa-desktop.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",

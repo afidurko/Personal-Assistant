@@ -67,6 +67,8 @@ HARD_PATHS = [
     "config/integrations/illa-builder.md",
     "integrations/illa-desktop/package.json",
     "scripts/illa-electron-check.py",
+    "scripts/promote-illa-desktop.py",
+    "patches/illa-builder-desktop/README.md",
     "docs/CAM_BRAIN.md",
     "docs/AGI_RESEARCH_TEAM.md",
     "docs/WORKSPACES_WORKFLOW.md",

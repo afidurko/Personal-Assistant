@@ -31,6 +31,9 @@ def main() -> int:
         "integrations/illa-desktop/src/main.js",
         "integrations/illa-desktop/src/preload.js",
         "integrations/illa-desktop/scripts/assert-builder-pin.mjs",
+        "integrations/illa-desktop/build/icon.png",
+        "scripts/promote-illa-desktop.py",
+        "patches/illa-builder-desktop/README.md",
         "vault/03-Projects/ILLA-Electron-Desktop.md",
     ):
         if not (ROOT / rel).exists():
@@ -81,6 +84,15 @@ def main() -> int:
     if workflow.get("illa_electron_check") != "scripts/illa-electron-check.py":
         soft.append("workflow.illa_electron_check not registered")
 
+    illa = load(ROOT / "config/integrations/illa-builder.json") if (ROOT / "config/integrations/illa-builder.json").exists() else {}
+    promote = illa.get("desktop_promote") or {}
+    if promote.get("status") == "ready_blocked_on_push":
+        soft.append("promotion ready; needs ILLA_BUILDER_GITHUB_TOKEN or fork write to --push")
+
+    default_url = ((illa.get("defaults") or {}).get("illa_url_default")) or ""
+    if default_url and "3000" not in default_url:
+        soft.append(f"unexpected default URL {default_url!r} (expected :3000 for Vite dev)")
+
     report = {
         "ok": not errors,
         "errors": errors,
@@ -90,6 +102,7 @@ def main() -> int:
         "illa_fork": "https://github.com/afidurko/illa-builder/tree/beta",
         "electron_builder_fork": "https://github.com/afidurko/electron-builder",
         "desktop_shell": "integrations/illa-desktop",
+        "promote": promote,
     }
     print(json.dumps(report, indent=2))
     return 0 if not errors else 1

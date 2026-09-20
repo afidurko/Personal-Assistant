@@ -312,7 +312,10 @@
       "pin": "26.16.1",
       "vault": "vault/03-Projects/ILLA-Electron-Desktop.md",
       "workspace_id": "illa-desktop",
-      "shell": "integrations/illa-desktop"
+      "shell": "integrations/illa-desktop",
+      "promote_status": "ready_blocked_on_push",
+      "promote_script": "scripts/promote-illa-desktop.py",
+      "patch_bundle": "patches/illa-builder-desktop"
     }
   },
   "mesh/research": {
@@ -364,7 +367,9 @@
     "illa_builder": true,
     "illa_builder_config": "config/integrations/illa-builder.json",
     "illa_desktop": true,
-    "illa_desktop_path": "integrations/illa-desktop"
+    "illa_desktop_path": "integrations/illa-desktop",
+    "illa_desktop_promote": true,
+    "illa_desktop_promote_script": "scripts/promote-illa-desktop.py"
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",

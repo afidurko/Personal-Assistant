@@ -10,13 +10,23 @@ Aaron forked and tasked Cam (2026-09-20):
 
 | Piece | State |
 |---|---|
-| Cam configs | `config/integrations/illa-builder.*` + `electron-builder.*` |
-| Desktop shell | `integrations/illa-desktop` (pin exact `26.16.1`) |
-| Check | `python3 scripts/illa-electron-check.py` |
-| Push to forks | Blocked for cloud agent (`cursor[bot]` 403) — promote shell into ILLA fork when write lands |
+| Cam staging shell | `integrations/illa-desktop` — ready to promote |
+| Packager pin | exact `26.16.1` (asserted by `check:pin` + `dist:dir`) |
+| Load contract | default `http://127.0.0.1:3000`; `ILLA_DESKTOP_MODE=cloud` or `ILLA_DESKTOP_URL` |
+| appId | `com.afidurko.illa-builder` |
+| Icons | `build/icon.png` / `icon.ico` from ILLA favicon |
+| Promote script | `python3 scripts/promote-illa-desktop.py --push` → `electron/` on `cursor/desktop-electron-26-16-1` |
+| Push to fork | **Blocked** — needs `ILLA_BUILDER_GITHUB_TOKEN` (Contents + PR write) or GitHub App write on the fork |
 
-## Next (Aaron)
+## Before / after promote
 
-1. Grant write on the two forks **or** apply the desktop tree as a PR from a machine with access
-2. Self-host ILLA (`ILLA_DESKTOP_URL`) and run `npm run dist:dir` in `integrations/illa-desktop`
-3. Optionally bump VoiceStudio from `^26.15.3` → `26.16.1` on the same pin
+**Done (Cam):** pin, URL contract, icons/appId, offline fail page, promote script, dry-run tree.
+
+**Aaron (unblock):** add secret `ILLA_BUILDER_GITHUB_TOKEN` or grant the cloud agent push on `afidurko/illa-builder`, then re-run:
+
+```bash
+python3 scripts/promote-illa-desktop.py --push
+# open PR: beta ← cursor/desktop-electron-26-16-1
+```
+
+**After push:** Cam keeps check/chooser; shell source of truth becomes `illa-builder/electron/`.
