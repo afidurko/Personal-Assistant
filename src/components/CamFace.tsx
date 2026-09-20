@@ -6,7 +6,7 @@
  * LipsyncEn is imported statically — Vite pre-bundling breaks TalkingHead's
  * dynamic import('./lipsync-en.mjs') and leaves the mouth frozen.
  */
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { TalkingHead } from '@met4citizen/talkinghead';
 import { LipsyncEn } from '@met4citizen/talkinghead/modules/lipsync-en.mjs';
 import { estimateSpeechMs, expressionFromStatus, type FaceExpression } from '@/lib/visemes';
@@ -71,7 +71,7 @@ function makeSilentBuffer(ctx: AudioContext, durationMs: number): AudioBuffer {
   return buffer;
 }
 
-export function CamFace({
+export const CamFace = memo(function CamFace({
   status,
   listening,
   level,
@@ -260,4 +260,4 @@ export function CamFace({
       </div>
     </div>
   );
-}
+});

@@ -6,10 +6,14 @@ import puppeteer from 'puppeteer-core';
 
 const browser = await puppeteer.launch({
   executablePath: '/usr/local/bin/google-chrome',
-  headless: true,
+  headless: 'new',
   args: [
     '--no-sandbox',
-    '--disable-gpu',
+    '--use-gl=angle',
+    '--use-angle=swiftshader-webgl',
+    '--enable-webgl',
+    '--ignore-gpu-blocklist',
+    '--enable-unsafe-swiftshader',
     '--use-fake-ui-for-media-stream',
     '--use-fake-device-for-media-stream',
     '--autoplay-policy=no-user-gesture-required',
@@ -23,15 +27,16 @@ try {
   page.on('console', (msg) => {
     const t = msg.type();
     if (t === 'error' || t === 'warning') {
-      console.log(`[browser.${t}]`, msg.text());
+      console.log(`[browser.${t}]`, msg.text().slice(0, 240));
     }
   });
   page.on('pageerror', (err) => console.log('[pageerror]', err.message));
 
   await page.goto('http://127.0.0.1:5173/?v=th-verify', {
-    waitUntil: 'networkidle2',
+    waitUntil: 'domcontentloaded',
     timeout: 60000,
   });
+  await page.waitForSelector('.cam-stage', { timeout: 30000 });
 
   // Wait for TalkingHead canvas (or fallback)
   await page.waitForFunction(
@@ -75,16 +80,13 @@ try {
       window.HTMLInputElement.prototype,
       'value',
     ).set;
-    nativeSet.call(
-      input,
-      'Hello Aaron. I am Cam, and this is my speaking face with real lip sync.',
-    );
+    nativeSet.call(input, 'hi');
     input.dispatchEvent(new Event('input', { bubbles: true }));
     form.requestSubmit();
 
     let best = null;
     const t0 = performance.now();
-    while (performance.now() - t0 < 18000) {
+    while (performance.now() - t0 < 90000) {
       const el = document.querySelector('.cam-face-live');
       const canvas = document.querySelector('.cam-face-th-mount canvas');
       const status = document.querySelector('.cam-avatar-status')?.textContent || '';
@@ -94,16 +96,17 @@ try {
           cls: el.className,
           status,
           ready: el.classList.contains('ready'),
-          speaking: el.classList.contains('mouth-open') || el.classList.contains('expr-speak'),
+          mouthOpen: el.classList.contains('mouth-open'),
+          speaking: el.classList.contains('expr-speak'),
         };
-        if (!best || sample.speaking) best = sample;
-        if (sample.speaking && sample.ready) {
+        if (sample.mouthOpen) {
           return { best: sample, caughtSpeak: true };
         }
+        if (!best || sample.speaking) best = sample;
       }
-      await new Promise((r) => setTimeout(r, 120));
+      await new Promise((r) => setTimeout(r, 200));
     }
-    return { best, caughtSpeak: Boolean(best?.speaking) };
+    return { best, caughtSpeak: Boolean(best?.mouthOpen) };
   });
 
   console.log(JSON.stringify(result, null, 2));

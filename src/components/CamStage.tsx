@@ -70,7 +70,7 @@ export function CamStage({ onListeningChange }: CamStageProps) {
     setTypingActive(true);
   }, [bubbles]);
 
-  const { shown: typedOut, done: typedDone } = useTypewriter(typedCam, typingActive, 32);
+  const { shown: typedOut, done: typedDone } = useTypewriter(typedCam, typingActive, 56);
 
   useEffect(() => {
     const justFinished = typedDone && !prevTypedDoneRef.current;
