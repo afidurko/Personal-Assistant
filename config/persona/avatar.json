@@ -1,0 +1,12 @@
+{
+  "avatar": {
+    "engine": "talkinghead",
+    "url": "/avatars/cam.glb",
+    "source": "TalkingHead brunette.glb (browser presence stand-in)",
+    "body": "F",
+    "lipsyncLang": "en",
+    "notes": "Full desk presence remains LLMAvatarTalk + RIVA + Audio2Face. Replace cam.glb with a Cam-matched Ready Player Me / Avaturn GLB (ARKit + Oculus Visemes) when ready."
+  },
+  "portrait_still": "identity/persona/cam-face.jpg",
+  "studio": "integrations/llmavatartalk"
+}

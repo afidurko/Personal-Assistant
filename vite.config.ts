@@ -28,7 +28,18 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['three', 'three/addons/controls/OrbitControls.js', 'three/addons/renderers/CSS2DRenderer.js'],
+    // TalkingHead loads lipsync-*.mjs via dynamic import(); pre-bundling breaks those paths.
+    exclude: ['@met4citizen/talkinghead'],
+    include: [
+      'three',
+      'three/addons/controls/OrbitControls.js',
+      'three/addons/renderers/CSS2DRenderer.js',
+      'three/addons/loaders/GLTFLoader.js',
+      'three/addons/loaders/DRACOLoader.js',
+      'three/addons/loaders/FBXLoader.js',
+      'three/addons/environments/RoomEnvironment.js',
+      'three/addons/libs/stats.module.js',
+    ],
     entries: ['index.html', 'src/**/*.{ts,tsx,js}'],
   },
   server: {
