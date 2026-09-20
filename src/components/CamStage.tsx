@@ -52,7 +52,7 @@ export function CamStage({ onListeningChange }: CamStageProps) {
   const [typingActive, setTypingActive] = useState(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const lastCamRef = useRef('');
-  const speakArmedRef = useRef(false);
+  const prevTypedDoneRef = useRef(true);
 
   useEffect(() => {
     onListeningChange?.(listening);
@@ -63,16 +63,17 @@ export function CamStage({ onListeningChange }: CamStageProps) {
     const lastCam = [...bubbles].reverse().find((b) => b.who === 'cam');
     if (!lastCam || lastCam.text === lastCamRef.current) return;
     lastCamRef.current = lastCam.text;
+    prevTypedDoneRef.current = true; // reset; speak only after done flips false→true
     setTypedCam(lastCam.text);
     setTypingActive(true);
-    speakArmedRef.current = true;
   }, [bubbles]);
 
-  const { shown: typedOut, done: typedDone } = useTypewriter(typedCam, typingActive, 42);
+  const { shown: typedOut, done: typedDone } = useTypewriter(typedCam, typingActive, 32);
 
   useEffect(() => {
-    if (!typedDone || !speakArmedRef.current) return;
-    speakArmedRef.current = false;
+    const justFinished = typedDone && !prevTypedDoneRef.current;
+    prevTypedDoneRef.current = typedDone;
+    if (!justFinished) return;
     setTypingActive(false);
     flushSpeak();
   }, [typedDone, flushSpeak]);

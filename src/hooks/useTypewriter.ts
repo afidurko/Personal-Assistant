@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
-/** Type out text; optional sync to speech duration. */
+/** Type out text; done flips false→true only after a full pass. */
 export function useTypewriter(text: string, active: boolean, cps = 38) {
   const [shown, setShown] = useState('');
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(true);
 
-  useEffect(() => {
+  // Sync reset before paint so the UI never flashes the full prior reply
+  useLayoutEffect(() => {
     if (!active) {
       setShown(text);
       setDone(true);
@@ -18,6 +19,10 @@ export function useTypewriter(text: string, active: boolean, cps = 38) {
     }
     setShown('');
     setDone(false);
+  }, [text, active]);
+
+  useEffect(() => {
+    if (!active || !text) return;
     let i = 0;
     const id = window.setInterval(() => {
       i += 1;
@@ -26,7 +31,7 @@ export function useTypewriter(text: string, active: boolean, cps = 38) {
         window.clearInterval(id);
         setDone(true);
       }
-    }, Math.max(12, 1000 / cps));
+    }, Math.max(16, 1000 / cps));
     return () => window.clearInterval(id);
   }, [text, active, cps]);
 
