@@ -15,6 +15,7 @@ import {
   type GateDecision,
   type VoiceProfile,
 } from '@/lib/aaronVoiceGate';
+import { estimateSpeechMs } from '@/lib/visemes';
 
 export type CamVoiceStatus =
   | 'idle'
@@ -206,6 +207,8 @@ export function useCamVoice() {
   const streakRef = useRef(0);
   const acceptsSinceRaiseRef = useRef(0);
   const pendingSpeakRef = useRef<{ text: string; opts: SpeakOpts } | null>(null);
+  const speechTimerRef = useRef(0);
+  const speechTickRef = useRef(0);
 
   useEffect(() => {
     cfgRef.current = gateCfg;
@@ -427,23 +430,52 @@ export function useCamVoice() {
     if (!pending) return;
     pendingSpeakRef.current = null;
     setStatus('speaking');
+
+    if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+    if (speechTickRef.current) window.clearInterval(speechTickRef.current);
+
+    const dur = estimateSpeechMs(pending.text, pending.opts.rate ?? 0.95);
+    const started = performance.now();
     setSpeechFace({ text: pending.text, progress: 0, active: true });
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+      if (speechTickRef.current) window.clearInterval(speechTickRef.current);
+      speechTimerRef.current = 0;
+      speechTickRef.current = 0;
+      setSpeechFace({ text: '', progress: -1, active: false });
+      if (recognizingRef.current) setStatus('listening');
+      else setStatus('idle');
+    };
+
+    // Keep visemes moving even when the browser skips boundary events
+    speechTickRef.current = window.setInterval(() => {
+      const p = Math.min(0.995, (performance.now() - started) / dur);
+      setSpeechFace((s) => (s.active ? { ...s, progress: Math.max(s.progress, p) } : s));
+    }, 40);
+
     speakCam(pending.text, pending.opts, {
-      onStart: () => setSpeechFace((s) => ({ ...s, active: true, progress: 0 })),
+      onStart: () => setSpeechFace((s) => ({ ...s, active: true })),
       onBoundary: (charIndex) => {
         const len = Math.max(1, pending.text.length);
+        const p = Math.min(0.99, charIndex / len);
         setSpeechFace((s) => ({
           ...s,
           active: true,
-          progress: Math.min(0.99, charIndex / len),
+          progress: Math.max(s.progress, p),
         }));
       },
       onEnd: () => {
-        setSpeechFace({ text: '', progress: -1, active: false });
-        if (recognizingRef.current) setStatus('listening');
-        else setStatus('idle');
+        const remain = dur - (performance.now() - started);
+        if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+        speechTimerRef.current = window.setTimeout(finish, Math.max(80, remain));
       },
     });
+    // Hard stop if TTS never fires onend
+    speechTimerRef.current = window.setTimeout(finish, dur + 1200);
   }, []);
 
   const stop = useCallback(() => {
@@ -470,6 +502,10 @@ export function useCamVoice() {
     setStatus('idle');
     pendingSpeakRef.current = null;
     setBridgeBusy(false);
+    if (speechTimerRef.current) window.clearTimeout(speechTimerRef.current);
+    if (speechTickRef.current) window.clearInterval(speechTickRef.current);
+    speechTimerRef.current = 0;
+    speechTickRef.current = 0;
     setSpeechFace({ text: '', progress: -1, active: false });
     window.speechSynthesis?.cancel();
     void fetch('/api/spike/mic/stop', { method: 'POST' }).catch(() => undefined);
