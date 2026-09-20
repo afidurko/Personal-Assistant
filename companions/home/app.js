@@ -235,6 +235,9 @@ function playTimeline(tl) {
   requestAnimationFrame(step);
 }
 
+const sayParam = new URLSearchParams(location.search).get("say");
+if (sayParam) $("speakText").value = sayParam;
+
 $("speakForm").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const text = $("speakText").value.trim();
