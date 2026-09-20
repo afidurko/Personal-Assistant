@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T02:35:51.672717+00:00",
+    "at": "2026-09-20T15:11:29.721514+00:00",
     "mode": "act",
-    "summary": "Landed PR #31: InfiniteMind slow gate + cam_fast System-1 on main (8210b8d)",
+    "summary": "Single-pass reason: classify once, skip connectome scan on fast, lazy InfiniteMind, cached engines. 200 greetings ~1.9ms.",
     "workspace": "/workspace"
   },
   "mesh_notes": [
@@ -89,6 +89,11 @@
     {
       "at": "2026-09-20T02:35:51.672717+00:00",
       "text": "Aaron: Land it",
+      "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-20T15:11:29.721514+00:00",
+      "text": "Remove double classify/route that was slowing Cam compute.",
       "workspace": "/workspace"
     }
   ],

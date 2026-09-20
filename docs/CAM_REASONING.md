@@ -117,9 +117,9 @@ Policy: [`config/integrations/infinitemind.md`](../config/integrations/infinitem
 
 ## Escalation (fast → slow / SGR)
 
-**Fast gate (System-1)** — `center.slm` / `scripts/cam_fast.py`: classify + light route + mesh/speak.  
-Skips recall, InfiniteMind, and SGR. Latency budget ~8ms (heuristics); LRU caches + stage skips.  
-This is where Cam’s **processing speed** lives day-to-day.
+**Fast gate (System-1)** — `center.slm` / `scripts/cam_fast.py`: classify **once** → mesh/speak.  
+No second classify, no connectome scan on chatter (avoids the “cam” → enhance hotspot trap).  
+Skips recall, InfiniteMind, and SGR. This is where Cam’s **processing speed** lives day-to-day.
 
 **Slow gate (System-2)** — InfiniteMind logic/meta/epistemic + SGR: deliberate, inspectable, gated.  
 Correctness over speed; never every mic turn.

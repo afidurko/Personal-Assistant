@@ -28,8 +28,10 @@ python3 scripts/aaron-voice-gate-check.py
 echo "== cline workspace unit tests =="
 python3 scripts/test_cline_workspaces.py
 
-echo "== cam-reason unit tests =="
+echo "== cam-reason / fast / infinitemind units =="
 python3 scripts/test_cam_reason.py
+python3 scripts/test_cam_fast.py
+python3 scripts/test_cam_infinitemind.py
 
 echo "== aaron voice gate unit tests =="
 AARON_VOICE_TEST=1 AARON_VOICE_ALLOW_DEV_BACKEND=1 python3 scripts/test_aaron_voice_gate.py
@@ -88,11 +90,5 @@ python3 scripts/cam-reason-billion-fuzz.py \
   --n 1000000 \
   --seed 11 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-cam-reason-1m.json
-
-echo "== cam-infinitemind unit =="
-python3 scripts/test_cam_infinitemind.py
-
-echo "== cam-fast unit =="
-python3 scripts/test_cam_fast.py
 
 echo "CI OK"
