@@ -5,31 +5,17 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+import cam_inproc  # noqa: E402
 import trajectory_policies as tp  # noqa: E402
 
 
 def route(**kwargs) -> dict:
-    cmd = [
-        sys.executable,
-        str(ROOT / "scripts" / "connectome-route.py"),
-        "--sense",
-        kwargs.get("sense", "sense.chat.aaron"),
-    ]
-    if kwargs.get("goal"):
-        cmd += ["--goal", kwargs["goal"]]
-    if kwargs.get("hotspot"):
-        cmd += ["--hotspot", kwargs["hotspot"]]
-    if kwargs.get("enhance"):
-        cmd.append("--enhance")
-    if kwargs.get("kill"):
-        cmd.append("--kill")
-    return json.loads(subprocess.check_output(cmd, text=True))
+    return cam_inproc.route(**kwargs)
 
 
 def main() -> int:

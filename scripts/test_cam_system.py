@@ -43,6 +43,23 @@ class CamSystemTests(unittest.TestCase):
         self.assertTrue((ROOT / "server/core/system-bridge.ts").exists())
         self.assertTrue((ROOT / "docs/SYSTEM_INTEGRATION.md").exists())
 
+    def test_inproc_route_chat(self) -> None:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        doc = cam_inproc.route(sense="sense.chat.aaron", goal="system smoke")
+        self.assertTrue(doc.get("accepted"))
+        self.assertIn("motor_plan", doc)
+
+    def test_ci_static_gate_inventory(self) -> None:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        gate = cam_inproc.load_script("ci-static-gate.py")
+        row = gate.cam_system_inventory()
+        self.assertTrue(row["ok"], row)
+        self.assertGreaterEqual(row.get("piece_count") or 0, 10)
+
 
 if __name__ == "__main__":
     unittest.main()

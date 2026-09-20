@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -85,20 +84,13 @@ def main() -> int:
         hard.append("ios_contract_missing_score_field")
 
     try:
-        route = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.aaron.voice",
-                    "--hotspot",
-                    "hotspot.aaron_voice_noise",
-                    "--goal",
-                    "filter room noise",
-                ],
-                text=True,
-            )
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        route = cam_inproc.route(
+            sense="sense.aaron.voice",
+            hotspot="hotspot.aaron_voice_noise",
+            goal="filter room noise",
         )
         if route.get("hotspot_id") != "hotspot.aaron_voice_noise":
             hard.append("route_hotspot_mismatch")

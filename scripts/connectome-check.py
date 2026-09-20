@@ -23,17 +23,14 @@ sim = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sim)
 
 
-def main() -> int:
-    p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--json", action="store_true")
-    args = p.parse_args()
+def build_report() -> dict:
     sense_ids, by_sense, known, motors, edges, hard, soft = sim.build_tables()
     missing = [
         e
         for e in soft
         if e.startswith("missing_edge:") or e.startswith("missing_feedback_edge:")
     ]
-    report = {
+    return {
         "senses": len(sense_ids),
         "hotspot_options": sum(len(v) for v in by_sense.values()),
         "known_nodes": len(known),
@@ -44,6 +41,13 @@ def main() -> int:
         "soft_warnings": soft,
         "ok": not hard and not missing,
     }
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--json", action="store_true")
+    args = p.parse_args()
+    report = build_report()
     if args.json:
         print(json.dumps(report, indent=2))
     else:
@@ -51,11 +55,12 @@ def main() -> int:
         print(f"connectome-check: {status}")
         print(
             f"  senses={report['senses']} options={report['hotspot_options']} "
-            f"edges={report['edges']} hard={len(hard)} missing={len(missing)}"
+            f"edges={report['edges']} hard={len(report['hard_errors'])} "
+            f"missing={len(report['missing_edges'])}"
         )
-        for e in hard[:20]:
+        for e in report["hard_errors"][:20]:
             print(f"  HARD {e}")
-        for e in missing[:20]:
+        for e in report["missing_edges"][:20]:
             print(f"  MISS {e}")
     out = (
         ROOT

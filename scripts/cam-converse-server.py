@@ -508,22 +508,8 @@ def route_sense(sense: str, goal: str = "") -> dict:
         return {"accepted": False, "error": str(e), "motor_plan": []}
 
 
-def cam_reply(aaron_text: str, history: list[dict]) -> str:
-    """Soft airy Cam reply. Prefer short, warm, fluent English."""
-    t = (aaron_text or "").strip()
-    low = t.lower()
-    if not t:
-        return "I'm here, Aaron. Whenever you're ready — I'm listening."
-    if any(w in low for w in ("hello", "hi cam", "hey cam", "hi ", "hey ")):
-        return (
-            "Hi Aaron. Soft and clear on my side. "
-            "I can hear you through the companion when the mic is on."
-        )
-    if "mic" in low or "microphone" in low or "hear me" in low or "working" in low:
-        return (
-            "Yes — I'm listening for your voice only. "
-            "Surrounding conversation is filtered out once you're enrolled."
-        )
+def _overlay_reply(low: str) -> str | None:
+    """Spoken lines reason() would miss (camera/pupil/voice classify as general/fast)."""
     if "only my voice" in low or "my voice only" in low or (
         "ignore" in low
         and any(w in low for w in ("other", "people", "room", "noise", "surround"))
@@ -557,12 +543,75 @@ def cam_reply(aaron_text: str, history: list[dict]) -> str:
         )
     if "thank" in low:
         return "Of course. I'm right here."
-    # Default: acknowledge + invite next beat
+    return None
+
+
+def speak_from_trace(aaron_text: str, trace: dict, history: list[dict] | None = None) -> str:
+    """Warm spoken reply from one reason() trace. Overlays keep camera/pupil/voice lines."""
+    t = (aaron_text or "").strip()
+    if not t:
+        return "I'm here, Aaron. Whenever you're ready — I'm listening."
+    low = t.lower()
+    overlay = _overlay_reply(low)
+    if overlay:
+        return overlay
+    intents = set((trace.get("classification") or {}).get("intents") or [])
+    if "greeting" in intents:
+        return (
+            "Hi Aaron. Soft and clear on my side. "
+            "I can hear you through the companion when the mic is on."
+        )
+    if "mic_check" in intents:
+        return (
+            "Yes — I'm listening for your voice only. "
+            "Surrounding conversation is filtered out once you're enrolled."
+        )
+    if "ack" in intents:
+        return "Of course. I'm right here."
+    if "presence_chatter" in intents:
+        return "I'm right here, Aaron."
+    if (trace.get("path") or "") == "slow":
+        hotspot = trace.get("hotspot_id") or "capability"
+        motors = ", ".join(trace.get("motor_plan") or ["motor.mesh"])
+        return (
+            f"I have a plan — {hotspot}, motors {motors}. "
+            "Tell me the next step and I'll take it from there."
+        )
     short = t if len(t) < 120 else t[:117] + "…"
     return (
         f"I heard you: “{short}”. "
         "Tell me the next step and I'll take it from there."
     )
+
+
+def converse_turn(
+    aaron_text: str,
+    *,
+    sense: str = "sense.chat.aaron",
+    history: list[dict] | None = None,
+) -> dict:
+    """One cam_reason.reason() per turn. Spoken text from the trace + overlays."""
+    import cam_reason as cr
+
+    text = (aaron_text or "").strip()
+    trace = cr.reason(goal=text, sense=sense, write_trace=False, dry_run=True)
+    reply = speak_from_trace(text, trace, history)
+    return {
+        "trace": trace,
+        "reply": reply,
+        "route": {
+            "sense": sense,
+            "hotspot_id": trace.get("hotspot_id"),
+            "motor_plan": trace.get("motor_plan"),
+            "accepted": trace.get("accepted", True),
+            "path": trace.get("path"),
+        },
+    }
+
+
+def cam_reply(aaron_text: str, history: list[dict] | None = None) -> str:
+    """Spoken line from one reason() turn (overlays for camera/pupil/voice)."""
+    return converse_turn(aaron_text, history=history)["reply"]
 
 
 class State:
@@ -906,8 +955,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
 
             sense = "sense.ios.mic" if source in {"mic", "speech"} else "sense.chat.aaron"
-            route = route_sense(sense, goal=text)
-            reply = cam_reply(text, STATE.history)
+            decided = converse_turn(text, sense=sense, history=STATE.history)
+            route = decided["route"]
+            reply = decided["reply"]
             mesh = emit_converse_activity(
                 kind="turn",
                 source=source,

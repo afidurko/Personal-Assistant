@@ -19,8 +19,13 @@ import cam_workspaces as cw  # noqa: E402
 import trajectory_policies as tp  # noqa: E402
 
 
+_LOAD_CACHE: dict[str, object] = {}
+
+
 def load(name: str):
-    return json.loads((CFG / name).read_text(encoding="utf-8"))
+    if name not in _LOAD_CACHE:
+        _LOAD_CACHE[name] = json.loads((CFG / name).read_text(encoding="utf-8"))
+    return _LOAD_CACHE[name]
 
 
 def hotspots_for_sense(hotspots: dict, sense_id: str) -> list[dict]:
@@ -256,26 +261,22 @@ def motors_from_pathway(
     return out
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sense", required=True, help="sense.* id")
-    parser.add_argument("--not-aaron", action="store_true", help="simulate unauthorized spike")
-    parser.add_argument("--kill", action="store_true")
-    parser.add_argument("--no-autonomy", action="store_true")
-    parser.add_argument("--goal", default="", help="optional Aaron goal text")
-    parser.add_argument("--hotspot", default="", help="explicit hotspot id when sense collides")
-    parser.add_argument("--workspace-id", default="", help="force coding workspace id")
-    parser.add_argument("--role", default="", help="Cam role for workspace allowlist")
-    parser.add_argument(
-        "--enhance",
-        action="store_true",
-        help="Aaron enables switch.cam_enhance (apply functionality changes)",
-    )
-    parser.add_argument("--no-research-scan", action="store_true")
-    parser.add_argument("--no-slm", action="store_true")
-    parser.add_argument("--no-dl", action="store_true")
-    args = parser.parse_args()
-
+def route(
+    *,
+    sense: str,
+    goal: str = "",
+    hotspot: str | None = None,
+    kill: bool = False,
+    enhance: bool = False,
+    not_aaron: bool = False,
+    no_autonomy: bool = False,
+    workspace_id: str = "",
+    role: str = "",
+    research_scan: bool = True,
+    slm: bool = True,
+    dl: bool = True,
+) -> dict:
+    """In-process connectome route. Same payload as the CLI."""
     sensory = load("sensory.json")
     switches = load("switches.json")
     motor = load("motor.json")
@@ -283,51 +284,45 @@ def main() -> int:
     synapses = load("synapses.json")
 
     sense_ids = {n["id"] for n in sensory["neurons"]}
-    if args.sense not in sense_ids:
-        raise SystemExit(f"unknown sense id: {args.sense}")
+    if sense not in sense_ids:
+        raise ValueError(f"unknown sense id: {sense}")
 
-    if args.not_aaron:
-        print(
-            json.dumps(
-                {
-                    "accepted": False,
-                    "reason": "switch.tasking hold — only Aaron may assign tasks",
-                    "motor_plan": [],
-                },
-                indent=2,
-            )
-        )
-        return 0
+    if not_aaron:
+        return {
+            "accepted": False,
+            "reason": "switch.tasking hold — only Aaron may assign tasks",
+            "motor_plan": [],
+        }
 
     switch_state = resolve_switches(
         switches,
-        kill=args.kill,
-        autonomy=not args.no_autonomy,
-        enhance=args.enhance,
-        research_scan=not args.no_research_scan,
-        slm=not args.no_slm,
-        dl=not args.no_dl,
+        kill=kill,
+        autonomy=not no_autonomy,
+        enhance=enhance,
+        research_scan=research_scan,
+        slm=slm,
+        dl=dl,
     )
     effector_reqs = {
         e["id"]: list(e.get("requires_switch") or []) for e in motor["effectors"]
     }
-    candidates = hotspots_for_sense(hotspots, args.sense)
-    hotspot = pick_hotspot(candidates, args.goal, args.hotspot or None)
+    candidates = hotspots_for_sense(hotspots, sense)
+    picked = pick_hotspot(candidates, goal, hotspot or None)
 
-    if hotspot:
-        pathway = list(hotspot["pathway"])
+    if picked:
+        pathway = list(picked["pathway"])
         planned_motors = motors_from_pathway(pathway, switch_state, effector_reqs)
-        for side in hotspot.get("side_effects") or []:
+        for side in picked.get("side_effects") or []:
             if side in planned_motors:
                 continue
             if motor_allowed(side, effector_reqs, switch_state):
                 planned_motors.append(side)
-        behavior = hotspot["behavior"]
-        center = hotspot.get("area") or hotspot.get("center")
-        columns = hotspot.get("columns") or []
-        tracts = hotspot.get("tracts") or []
+        behavior = picked["behavior"]
+        center = picked.get("area") or picked.get("center")
+        columns = picked.get("columns") or []
+        tracts = picked.get("tracts") or []
     else:
-        pathway = [args.sense, "area.wernicke", "area.dlpfc", "area.mtl", "switch.autonomy", "motor.mesh"]
+        pathway = [sense, "area.wernicke", "area.dlpfc", "area.mtl", "switch.autonomy", "motor.mesh"]
         planned_motors = (
             ["motor.mesh"]
             if motor_allowed("motor.mesh", effector_reqs, switch_state)
@@ -352,16 +347,16 @@ def main() -> int:
 
     result = {
         "accepted": True,
-        "sense": args.sense,
-        "goal": args.goal,
+        "sense": sense,
+        "goal": goal,
         "area": center,
         "center": center,
         "columns": columns,
         "tracts": tracts,
         "behavior": behavior,
-        "hotspot_id": hotspot.get("id") if hotspot else None,
+        "hotspot_id": picked.get("id") if picked else None,
         "alt_hotspots": [
-            h["id"] for h in candidates if not hotspot or h["id"] != hotspot.get("id")
+            h["id"] for h in candidates if not picked or h["id"] != picked.get("id")
         ],
         "pathway": pathway,
         "switch_state": switch_state,
@@ -382,13 +377,13 @@ def main() -> int:
     }
     # When coding motor is planned, attach workspace resolution for run-cline.py
     if "motor.cline" in planned_motors or (
-        hotspot and hotspot.get("id") in {"hotspot.coding", "hotspot.cline_result"}
+        picked and picked.get("id") in {"hotspot.coding", "hotspot.cline_result"}
     ):
         try:
             choice = cw.choose_workspace(
-                goal=args.goal,
-                workspace_id=args.workspace_id or None,
-                role=args.role or None,
+                goal=goal,
+                workspace_id=workspace_id or None,
+                role=role or None,
             )
             result["workspace"] = {
                 "id": choice["workspace"].get("id"),
@@ -398,16 +393,56 @@ def main() -> int:
                 "alternates": choice.get("alternates"),
                 "runner": (
                     f"python3 scripts/run-cline.py --workspace-id {choice['workspace'].get('id')} "
-                    f"--goal {json.dumps(args.goal)} \"...\""
+                    f"--goal {json.dumps(goal)} \"...\""
                 ),
             }
         except Exception as exc:  # noqa: BLE001
             result["workspace_error"] = str(exc)
 
-    if args.kill:
+    if kill:
         result["accepted"] = False
         result["reason"] = "switch.kill act — all motor silenced"
         result["motor_plan"] = []
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--sense", required=True, help="sense.* id")
+    parser.add_argument("--not-aaron", action="store_true", help="simulate unauthorized spike")
+    parser.add_argument("--kill", action="store_true")
+    parser.add_argument("--no-autonomy", action="store_true")
+    parser.add_argument("--goal", default="", help="optional Aaron goal text")
+    parser.add_argument("--hotspot", default="", help="explicit hotspot id when sense collides")
+    parser.add_argument("--workspace-id", default="", help="force coding workspace id")
+    parser.add_argument("--role", default="", help="Cam role for workspace allowlist")
+    parser.add_argument(
+        "--enhance",
+        action="store_true",
+        help="Aaron enables switch.cam_enhance (apply functionality changes)",
+    )
+    parser.add_argument("--no-research-scan", action="store_true")
+    parser.add_argument("--no-slm", action="store_true")
+    parser.add_argument("--no-dl", action="store_true")
+    args = parser.parse_args()
+
+    try:
+        result = route(
+            sense=args.sense,
+            goal=args.goal,
+            hotspot=args.hotspot or None,
+            kill=args.kill,
+            enhance=args.enhance,
+            not_aaron=args.not_aaron,
+            no_autonomy=args.no_autonomy,
+            workspace_id=args.workspace_id,
+            role=args.role,
+            research_scan=not args.no_research_scan,
+            slm=not args.no_slm,
+            dl=not args.no_dl,
+        )
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     print(json.dumps(result, indent=2))
     return 0
 

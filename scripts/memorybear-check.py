@@ -76,18 +76,12 @@ def main() -> int:
     route_ok = True
     route_notes: list[str] = []
     try:
-        recall = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.memorybear.hit",
-                    "--goal",
-                    "memorybear recall",
-                ],
-                text=True,
-            )
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        recall = cam_inproc.route(
+            sense="sense.memorybear.hit",
+            goal="memorybear recall",
         )
         if "motor.memorybear" not in recall.get("motor_plan", []):
             route_ok = False

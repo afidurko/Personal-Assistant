@@ -96,6 +96,28 @@ class ConverseVoiceGateSmoke(unittest.TestCase):
         self.assertEqual(r.get("path"), "fast")
         self.assertEqual(r.get("motor_plan"), ["motor.mesh"])
 
+    def test_converse_turn_uses_reason(self) -> None:
+        out = ccs.converse_turn("hi cam")
+        self.assertEqual(out["route"]["path"], "fast")
+        self.assertTrue(out["route"]["accepted"])
+        self.assertEqual(out["trace"]["path"], "fast")
+        self.assertIn("greeting", (out["trace"].get("classification") or {}).get("intents") or [])
+        self.assertIn("Aaron", out["reply"])
+
+    def test_speak_overlay_keeps_pupil_line(self) -> None:
+        # "can you see me" classifies as general/fast — overlay must keep pupil/camera line
+        out = ccs.converse_turn("can you see me")
+        self.assertEqual(out["trace"]["path"], "fast")
+        self.assertIn("Camera", out["reply"])
+
+    def test_speak_overlay_pupil(self) -> None:
+        out = ccs.converse_turn("what do you see on pupil")
+        self.assertIn("Pupil", out["reply"])
+
+    def test_cam_reply_is_reason_turn(self) -> None:
+        reply = ccs.cam_reply("thanks")
+        self.assertEqual(reply, "Of course. I'm right here.")
+
 
 if __name__ == "__main__":
     unittest.main()

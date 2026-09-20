@@ -78,18 +78,12 @@ class MemoryBearWiringTests(unittest.TestCase):
             self.assertGreaterEqual(doc["count"], 1)
 
     def test_connectome_route(self) -> None:
-        route = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.memorybear.hit",
-                    "--goal",
-                    "memorybear recall",
-                ],
-                text=True,
-            )
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        route = cam_inproc.route(
+            sense="sense.memorybear.hit",
+            goal="memorybear recall",
         )
         self.assertEqual(route.get("hotspot_id"), "hotspot.memorybear_recall")
         self.assertIn("motor.memorybear", route.get("motor_plan") or [])
