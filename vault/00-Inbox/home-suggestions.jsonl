@@ -1,3 +1,2 @@
-{"id": "9f46c6ec", "at": "2026-09-20T16:20:06Z", "author": "Aaron", "text": "unit-test suggestion 1789921206.7461414", "status": "queued", "queued_for": "nulltickets (phase 1) \u2014 until then triaged by daily loop"}
-{"id": "6f706750", "at": "2026-09-20T16:20:17Z", "author": "Aaron", "text": "unit-test suggestion 1789921217.8210862", "status": "queued", "queued_for": "nulltickets (phase 1) \u2014 until then triaged by daily loop"}
 {"id": "6bbca16d", "at": "2026-09-20T16:20:54Z", "author": "Aaron", "text": "Live smoke: add registry.npmjs.org to cloud agent allowlist for full React home", "status": "queued", "queued_for": "nulltickets (phase 1) \u2014 until then triaged by daily loop"}
+{"id": "cd10ace3", "at": "2026-09-20T16:23:32Z", "author": "Aaron", "text": "Bring avatar tier 1 online once model weights land", "status": "queued", "queued_for": "nulltickets (phase 1) \u2014 until then triaged by daily loop"}

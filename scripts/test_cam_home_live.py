@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import tempfile
 import threading
 import time
 import unittest
@@ -20,6 +21,9 @@ spec = importlib.util.spec_from_file_location(
 )
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
+
+# Keep unit-test suggestions out of the real inbox queue.
+mod.SUGGESTIONS = Path(tempfile.mkdtemp()) / "home-suggestions.jsonl"
 
 
 class CamHomeLiveTests(unittest.TestCase):

@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T14:59:12.782040+00:00",
-    "mode": "plan",
-    "summary": "Auto-sync from all projects/repos added as a must: scripts/auto-sync.py motor (report-first, ff-only pull, never auto-merge), auto_sync contract in build-plan.json, piece.auto_sync on the bus",
+    "at": "2026-09-20T16:30:49.431941+00:00",
+    "mode": "act",
+    "summary": "3T dual campaign green (ready=True); infinitemind submodule init fixed 7 test failures (135/135 green); landed avatar-check + avatar-fetch-models add-ons; shipped Cam Home Live zero-dep mission control app (panels + suggestion queue + presence) live on :8790; npm registry fully egress-blocked - React home needs allowlist",
     "workspace": "."
   },
   "mesh_notes": [
@@ -99,6 +99,11 @@
     {
       "at": "2026-09-20T14:59:12.782040+00:00",
       "text": "sources: home repo drift, 22 integration submodules, 19 coding workspaces, mesh/cline, mesh/jarvis",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-20T16:30:49.431941+00:00",
+      "text": "companions/home + scripts/cam-home-live.py; demo video recorded",
       "workspace": "."
     }
   ],
@@ -237,7 +242,7 @@
       "workspace_id": "personal-assistant"
     }
   ],
-  "schedules_synced_at": "2026-09-20T16:20:18.898789+00:00",
+  "schedules_synced_at": "2026-09-20T16:30:47.702113+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
