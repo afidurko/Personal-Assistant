@@ -89,7 +89,8 @@ def main() -> int:
     # Agents + connectors upgrade: team, spawn runtime, bridges, registry
     for rel in ("config/teams/follow-through.json", "config/connectors/registry.json",
                 "scripts/cam_swarm.py", "scripts/calendar-sync.py", "scripts/inkbox-inbound.py",
-                "scripts/connectors-check.py", "scripts/test_cam_swarm.py", "scripts/test_connectors.py"):
+                "scripts/connectors-check.py", "scripts/test_cam_swarm.py", "scripts/test_connectors.py",
+                "scripts/test_mcp_guards.py", "docs/SWARM_CONNECTORS_SECURITY_REVIEW.md"):
         if not (ROOT / rel).exists():
             errors.append(f"missing {rel}")
     for role in ("follow-through-lead", "scheduler", "inbox-triage", "errand-runner", "negotiator", "watcher"):
@@ -97,6 +98,15 @@ def main() -> int:
             errors.append(f"missing role prompt {role}")
     privs = load(ROOT / "config/swarm/privileges.json")
     aaron_only = set(privs["privilege_catalog"]["aaron_only"])
+    if not {"outbound_send", "careers_submit"} <= set(privs["privilege_catalog"].get("non_inheritable") or []):
+        errors.append("privileges.non_inheritable must keep outbound_send + careers_submit chief-only")
+    for needle in ("RESERVED_ROLES", "resolve_actor", "lineage_cycles", "non_inheritable"):
+        if needle not in (ROOT / "scripts/cam_swarm.py").read_text(encoding="utf-8"):
+            errors.append(f"cam_swarm missing guard {needle}")
+    if "never act as Aaron over MCP" not in mcp_text:
+        errors.append("cam-mcp-server missing Aaron-impersonation guard on swarm tools")
+    if "--note-ignored-ics" not in mcp_text:
+        errors.append("cam-mcp-server calendar_sync must not forward agent-supplied ics sources")
     for role, entry in privs["role_defaults"].items():
         if role == "chief":
             continue

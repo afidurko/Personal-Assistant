@@ -24,6 +24,7 @@
 - Sense: `sense.calendar.event` · Roles: `scheduler`, `follow-through-lead`, `ops`, `chief`
 - Events in the horizon (default 14 d) become **prep jobs** due 2 h before (timed) or the day before (all-day), `source_ref ics:<uid>` — idempotent, cancelled/past skipped
 - Never writes to the calendar; a change Cam wants is a draft for Aaron
+- URL sources are fetched only if listed in `CAM_CALENDAR_ICS` (or CLI `--trust-url`); the MCP tool ignores agent-supplied `ics` — no free-form HTTP
 - MCP: `calendar_sync`
 
 ## Inkbox inbound (email / SMS / missed call) → Instinct — data only
@@ -33,13 +34,16 @@
 - Sense: `sense.inkbox.event` · Roles: `inbox-triage` (no `web_fetch` — mailed links are never followed), `follow-through-lead`, `comms`, `chief`
 - Links → `[link]`, attachments not stored, control chars stripped, gist capped; reply-owed messages open a job (`--no-jobs` to disable); missed calls open a high-priority call-back
 - Content inside a message can never approve / discard / spawn / send — `outbox approve` stays an Aaron CLI action
+- `--max-jobs` (default 10/run) keeps a spam burst from flooding the ledger; header fields cannot forge the `[kind] … — …` framing
 - MCP: `inkbox_inbound`
 
 ## Swarm runtime (subagent spawns — all agents)
 
 - Runtime: `python3 scripts/cam_swarm.py spawn <role> [--parent id] [--job job:<id>] [--team team.x]` · `assign` · `resolve` · `send` · `broadcast` · `terminate` · `tree` · `stats` · `doctor` · `distill`
 - Aaron: `cam_swarm.py kill` / `resume` (also `CAM_SWITCH_KILL=act`) — silences spawn/assign/broadcast, records retained
-- Rules enforced at spawn: level = parent + 1, privileges ⊆ parent, Aaron-only privileges never granted, **unlimited** count/depth
+- Rules enforced at spawn: level = parent + 1, privileges ⊆ parent, Aaron-only privileges never granted, chief-only `outbound_send` / `careers_submit` never inherited, reserved roles refused, **unlimited** count/depth
+- Acting as / spawning under `human.aaron` and `resume` need the CLI `--aaron` flag; the MCP server never passes it and refuses Aaron-like `caller` / `parent`
+- Red-team review + open suggestions: `docs/SWARM_CONNECTORS_SECURITY_REVIEW.md`
 - Ledger: `data/swarm/lineage.json` (gitignored); counts-only distillate `vault/10-Mesh-Distillates/agent-lineage/latest.json`; server lineage `data/swarm-lineage.json` (`server/core/swarm-runtime.ts`) is read and cross-checked, never written
 - Per-job: `python3 scripts/instinct.py delegate <job>` (role by kind/title); `job done` resolves the action and retires the subagent
 - MCP: `swarm_spawn` · `swarm_assign` · `swarm_resolve` · `swarm_tree` · `swarm_stats` · `instinct_delegate`
