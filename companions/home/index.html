@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a2228" />
+  <title>Cam — home live</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="stage">
+    <header class="hero">
+      <div class="presence">
+        <div class="portrait">
+          <img id="camFace" src="/face.jpg" alt="Cam" />
+          <div class="lids" aria-hidden="true"></div>
+        </div>
+        <div class="brand">
+          <h1>Cam</h1>
+          <p class="tag">home live · mission control</p>
+          <p class="who">operator: <strong>Aaron</strong> · kill switch always wins</p>
+        </div>
+      </div>
+      <nav class="links">
+        <a href="/converse/">converse</a>
+        <a href="/connectome/">cortex 3D</a>
+        <button id="refreshBtn" type="button">refresh</button>
+      </nav>
+    </header>
+
+    <section class="grid">
+      <article class="panel" id="panelSystem">
+        <h2>What's running</h2>
+        <p class="meta" id="systemMeta">loading…</p>
+        <ul class="list" id="systemList"></ul>
+      </article>
+
+      <article class="panel" id="panelPlan">
+        <h2>Build plan</h2>
+        <p class="meta" id="planMeta">loading…</p>
+        <ul class="list" id="planList"></ul>
+      </article>
+
+      <article class="panel" id="panelSync">
+        <h2>Auto-sync</h2>
+        <p class="meta" id="syncMeta">loading…</p>
+        <ul class="list" id="syncList"></ul>
+      </article>
+
+      <article class="panel" id="panelAttention">
+        <h2>Needs help</h2>
+        <p class="meta" id="attentionMeta">loading…</p>
+        <ul class="list" id="attentionList"></ul>
+      </article>
+
+      <article class="panel" id="panelAvatar">
+        <h2>Avatar contract</h2>
+        <p class="meta" id="avatarMeta">loading…</p>
+        <ul class="list" id="avatarList"></ul>
+      </article>
+
+      <article class="panel" id="panelEvents">
+        <h2>Recent activity</h2>
+        <p class="meta" id="eventsMeta">loading…</p>
+        <ul class="list" id="eventsList"></ul>
+      </article>
+    </section>
+
+    <section class="panel suggest">
+      <h2>Suggest a change</h2>
+      <p class="meta">Queued to the inbox and triaged into tickets — you have ultimate say.</p>
+      <form id="suggestForm">
+        <textarea id="suggestText" rows="3" placeholder="What should Cam change, build, or look into?"></textarea>
+        <div class="row">
+          <button type="submit">queue suggestion</button>
+          <span id="suggestNote" class="meta"></span>
+        </div>
+      </form>
+      <ul class="list" id="suggestList"></ul>
+    </section>
+
+    <footer class="meta foot" id="footNote">—</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

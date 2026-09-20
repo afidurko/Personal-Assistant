@@ -51,6 +51,8 @@
       "title": "Aaron sees running/working/needs-help, suggests changes; living Cam avatar at human grade; auto-enhancement",
       "enforced_by": [
         "src/App.tsx",
+        "scripts/cam-home-live.py",
+        "companions/home",
         "scripts/needs-attention.py",
         "scripts/apply-cam-enhancements.py"
       ]
@@ -226,7 +228,8 @@
       "id": "phase4_interactivity_avatar",
       "priority": 4,
       "title": "Mission panels + suggest-changes queue; avatar hf_realtime tier; auto-enhancement closed loop",
-      "status": "planned",
+      "status": "in_progress",
+      "landed": "cam-home-live zero-dependency mission control (panels + suggestion queue + presence portrait); avatar weights blocked on egress",
       "exit_check": "Aaron sees live status, files a suggestion that becomes a ticket, and Cam avatar passes muscle-grade believability check"
     },
     {

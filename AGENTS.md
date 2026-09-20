@@ -17,6 +17,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - System: `python3 scripts/cam-system.py --smoke` — all pieces on one bus
 - Home build plan (priorities · avatar tiers · auto-update): [`docs/CAM_HOME_BUILD.md`](docs/CAM_HOME_BUILD.md) — `python3 scripts/build-plan-check.py`
 - Auto-sync from all projects/repos (report-first, never auto-merge): `python3 scripts/auto-sync.py` · pull: `--pull` (ff-only, gated)
+- Home Live app (zero-dep mission control + converse + cortex on one port): `python3 scripts/cam-home-live.py` → http://127.0.0.1:8790
 - MCP: `python3 scripts/cam-mcp-server.py` (stdio) — install with `cline mcp install cam -- ...`
 - Schedules: `python3 scripts/sync-cline-schedules.py --apply-cache --print-commands`
 - Cognitive memory: `python3 scripts/memorybear.py --doctor --offline` · `python3 scripts/memorybear-check.py`
