@@ -5,18 +5,30 @@
   "failed": 0,
   "spawned": 9804688,
   "skipped": 195312,
-  "full_checks": 10000,
+  "full_checks": 0,
   "first_error": null,
-  "elapsed_s": 2.478365473000167,
-  "checks_per_sec": 1210475223562.7185,
+  "elapsed_s": 2.218143923000298,
+  "checks_per_sec": 1352482122053.7173,
   "seed": 173,
   "ok": true,
-  "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
+  "full_resolve": false,
+  "sampler": "modular_catalog_only:modular_period_scaled",
   "ip_policy": "original_procedural_only",
   "catalog_size": 6,
   "physical_n": 10000000,
   "scaled_n": 2999990000000,
   "workers_detail": [
+    {
+      "worker_id": 0,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451172,
+      "skipped": 48828,
+      "full_checks": 0,
+      "first_error": null,
+      "elapsed_s": 2.095543392000309
+    },
     {
       "worker_id": 2,
       "attempted": 2500000,
@@ -24,9 +36,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.44800133800004
+      "elapsed_s": 2.0969847920000575
     },
     {
       "worker_id": 1,
@@ -35,9 +47,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.455461233000051
+      "elapsed_s": 2.104903553999975
     },
     {
       "worker_id": 3,
@@ -46,20 +58,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.4663865560000886
-    },
-    {
-      "worker_id": 0,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
-      "full_checks": 2500,
-      "first_error": null,
-      "elapsed_s": 2.4696551270001237
+      "elapsed_s": 2.2107514069998615
     }
   ]
 }
