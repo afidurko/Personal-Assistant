@@ -3,13 +3,13 @@
   "workers": 4,
   "passed": 3000000000000,
   "failed": 0,
-  "spawned": 9804688,
-  "skipped": 195312,
+  "spawned": 9804687,
+  "skipped": 195313,
   "full_checks": 10000,
   "first_error": null,
-  "elapsed_s": 2.4873685810002826,
-  "checks_per_sec": 1206093870814.0977,
-  "seed": 173,
+  "elapsed_s": 2.531011155000215,
+  "checks_per_sec": 1185297028056.6565,
+  "seed": 273,
   "ok": true,
   "full_resolve": true,
   "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
@@ -19,17 +19,6 @@
   "scaled_n": 2999990000000,
   "workers_detail": [
     {
-      "worker_id": 2,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
-      "full_checks": 2500,
-      "first_error": null,
-      "elapsed_s": 2.402818032000141
-    },
-    {
       "worker_id": 1,
       "attempted": 2500000,
       "passed": 2500000,
@@ -38,18 +27,18 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4182349190000423
+      "elapsed_s": 2.4681408240003293
     },
     {
-      "worker_id": 0,
+      "worker_id": 2,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
+      "spawned": 2451171,
+      "skipped": 48829,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4383933899998738
+      "elapsed_s": 2.4744542380003622
     },
     {
       "worker_id": 3,
@@ -60,7 +49,18 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4798523330000535
+      "elapsed_s": 2.4969717580001998
+    },
+    {
+      "worker_id": 0,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451172,
+      "skipped": 48828,
+      "full_checks": 2500,
+      "first_error": null,
+      "elapsed_s": 2.5238553989997854
     }
   ]
 }
