@@ -145,6 +145,24 @@
       "feeds": []
     },
     {
+      "id": "piece.build_plan",
+      "title": "Home build plan (priority ladder + avatar + auto-update)",
+      "layer": "ops",
+      "paths": ["config/system/build-plan.json", "docs/CAM_HOME_BUILD.md", "scripts/build-plan-check.py"],
+      "check": "python3 scripts/build-plan-check.py",
+      "depends_on": ["piece.connectome"],
+      "feeds": ["piece.health"]
+    },
+    {
+      "id": "piece.auto_sync",
+      "title": "Auto-sync from all projects and repos",
+      "layer": "ops",
+      "paths": ["scripts/auto-sync.py", "config/workspaces/registry.json"],
+      "check": "python3 scripts/auto-sync.py --fetch-timeout 8",
+      "depends_on": ["piece.workspaces"],
+      "feeds": ["piece.health", "piece.build_plan"]
+    },
+    {
       "id": "piece.persistence",
       "title": "Persistence bundle",
       "layer": "memory",

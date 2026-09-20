@@ -1,0 +1,240 @@
+{
+  "version": 1,
+  "id": "cam-home-build",
+  "title": "Cam home build — one home for all agents and environments",
+  "assistant": "Cam",
+  "human": "Aaron",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-20",
+  "doc": "docs/CAM_HOME_BUILD.md",
+  "stakes": "Foundation home for all agents and environments; every phase gated by a hard exit check",
+  "priorities": [
+    {
+      "rank": 1,
+      "id": "real_world_execution",
+      "title": "Assistant works with real-life integrations — execute and receive",
+      "enforced_by": [
+        "server/core/motor-executor.ts",
+        "config/connectome/motor.json",
+        "config/integrations/inkbox.json"
+      ]
+    },
+    {
+      "rank": 2,
+      "id": "agi_assist",
+      "title": "Superman/AGI abilities assist priority 1 — never an end in themselves",
+      "enforced_by": [
+        "config/teams",
+        "config/enhancement",
+        "config/integrations/higgsfield.json"
+      ]
+    },
+    {
+      "rank": 3,
+      "id": "human_ultimate_say",
+      "title": "Aaron has ultimate say; Cam and all spawned subagents inherit Aaron's morals and ethics",
+      "enforced_by": [
+        "config/swarm/privileges.json",
+        "config/connectome/switches.json",
+        "identity"
+      ],
+      "hard_rules": [
+        "privileges inherit only as a subset; aaron_only never transfers",
+        "switch.kill silences every motor instantly",
+        "requires_human stages cannot transition without Aaron",
+        "only Aaron may assign work"
+      ]
+    },
+    {
+      "rank": 4,
+      "id": "interactivity_presence",
+      "title": "Aaron sees running/working/needs-help, suggests changes; living Cam avatar at human grade; auto-enhancement",
+      "enforced_by": [
+        "src/App.tsx",
+        "scripts/needs-attention.py",
+        "scripts/apply-cam-enhancements.py"
+      ]
+    }
+  ],
+  "home": {
+    "registry": "config/workspaces/registry.json",
+    "bus": "config/system/pieces.json",
+    "connectome": "config/connectome",
+    "memory": ["vault", "identity/persistence", "config/memory"],
+    "docking_rule": "registered in registry or pieces + connectome node + distills to mesh/vault"
+  },
+  "avatar": {
+    "persona": "config/persona/voice.json",
+    "face_asset": "identity/persona/cam-face.jpg",
+    "brain_rule": "ASR text -> Cam brain (nullclaw/kernel) -> TTS; avatar services never run their own LLM in production",
+    "muscle_spec": {
+      "blendshapes": "arkit_52",
+      "action_units": "facs",
+      "visemes_min": 15,
+      "target_fps_min": 25,
+      "first_lip_latency_ms_max": 500,
+      "blink_per_min": [12, 20],
+      "grade": "human_believable",
+      "exit_check": "Aaron judges 60s side-by-side speech + facial muscles believable"
+    },
+    "frame_contract": {
+      "input": "text + emotion tag",
+      "output": "AvatarFrame { blendshapes: arkit key -> 0..1, viseme, audio_pts }"
+    },
+    "tiers": [
+      {
+        "id": "hf_realtime",
+        "role": "primary",
+        "source": "huggingface",
+        "models": {
+          "face_lipsync": "TMElyralab/MuseTalk",
+          "face_expression": "KwaiVGI/LivePortrait",
+          "asr": "openai/whisper-large-v3",
+          "tts_fallback": "hexgrad/Kokoro-82M"
+        },
+        "tts_primary": "integrations/voicestudio",
+        "identity_gate": "config/identity/aaron-voice.json",
+        "requires_switch": ["switch.presence"],
+        "planned_paths": [
+          "scripts/avatar-fetch-models.py",
+          "scripts/cam-avatar-server.py",
+          "scripts/avatar-check.py"
+        ]
+      },
+      {
+        "id": "studio_full_presence",
+        "role": "high_fidelity",
+        "source": "nvidia_studio",
+        "integration": "integrations/llmavatartalk",
+        "policy": "config/integrations/llmavatartalk.md",
+        "stack": ["riva_asr", "riva_tts", "audio2face", "optional_metahuman"],
+        "requires_switch": ["switch.presence"]
+      },
+      {
+        "id": "custom_finetune",
+        "role": "identity_training",
+        "source": "higgsfield",
+        "integration": "integrations/higgsfield",
+        "policy": "config/integrations/higgsfield.md",
+        "serving_handoff": "integrations/litserve",
+        "requires_switch": ["switch.cam_enhance", "switch.kill"],
+        "live_env": "CAM_HIGGSFIELD_LIVE"
+      }
+    ]
+  },
+  "auto_update": {
+    "channels": [
+      {
+        "id": "cloud_environments",
+        "mechanism": "environment builds of main; install runs cloud-agent-install",
+        "paths": [".cursor/environment.json", "scripts/cloud-agent-install.sh"]
+      },
+      {
+        "id": "workspace_persistence",
+        "mechanism": "persistence bundle export/import + rules sync",
+        "paths": [
+          "scripts/persist-export.py",
+          "scripts/persist-import.py",
+          "scripts/install-cline-rules.py"
+        ]
+      },
+      {
+        "id": "schedules_loops",
+        "mechanism": "schedule re-sync + L1 daily-triage drift report",
+        "paths": ["scripts/sync-cline-schedules.py", "scripts/loop-run.py"]
+      },
+      {
+        "id": "model_weights",
+        "mechanism": "pinned HF revisions re-resolved from this manifest",
+        "planned_paths": ["scripts/avatar-fetch-models.py"]
+      }
+    ]
+  },
+  "auto_sync": {
+    "requirement": "must",
+    "direction": "inbound — all projects and repos sync into this home",
+    "policy": {
+      "report_first": true,
+      "never_auto_merge": true,
+      "pull_mode": "ff-only + submodule re-pin, refuses on dirty tree",
+      "pull_requires_switch": ["switch.autonomy"],
+      "kill_switch_wins": "switch.kill"
+    },
+    "motor": "scripts/auto-sync.py",
+    "sources": {
+      "home_repo": "origin/main drift (ahead/behind)",
+      "integration_repos": "all git submodules under integrations/ (22 registered)",
+      "coding_workspaces": "config/workspaces/registry.json coding_workspaces layer",
+      "session_memory": "mesh/cline distillates from every workspace",
+      "local_memories": "Jarvis memory.json cache -> mesh/jarvis"
+    },
+    "channels": [
+      {
+        "id": "repo_drift_sync",
+        "mechanism": "auto-sync motor: home fetch + submodule survey; --pull ff-only under gate",
+        "paths": ["scripts/auto-sync.py", "config/workspaces/registry.json"]
+      },
+      {
+        "id": "workspace_connectivity",
+        "mechanism": "needs-attention survey + auto-clear submodule init across all coding workspaces",
+        "paths": ["scripts/needs-attention.py"]
+      },
+      {
+        "id": "session_distillates",
+        "mechanism": "cline session export/import across workspaces into mesh/cline",
+        "paths": ["scripts/sync-cline-session.py"]
+      },
+      {
+        "id": "local_memory_sync",
+        "mechanism": "jarvis local memory cache into mesh/jarvis",
+        "paths": ["scripts/sync-jarvis-memory.py"]
+      }
+    ],
+    "cadence": "standing loop (daily-triage L1) + on every environment boot via piece.auto_sync",
+    "distillate": "vault/10-Mesh-Distillates/auto-sync/latest.json"
+  },
+  "phases": [
+    {
+      "id": "phase0_home_foundation",
+      "priority": 1,
+      "title": "Encode plan: manifest + checker + tests + bus wiring + auto-sync motor",
+      "status": "in_progress",
+      "exit_check": "build-plan-check green; cam-system smoke green; auto-sync report runs offline; unit tests pass"
+    },
+    {
+      "id": "phase1_execute_receive",
+      "priority": 1,
+      "title": "Null stack up; MemoryBear live; gated motors flip dry-run -> live; inbound receive loop",
+      "status": "planned",
+      "exit_check": "one real round trip: execute outbound under switch, receive real reply into mesh + home UI"
+    },
+    {
+      "id": "phase2_agi_assist",
+      "priority": 2,
+      "title": "sLM/DL weights; daily AGI scan -> proposals; Higgsfield first real fine-tune; capability teams",
+      "status": "planned",
+      "exit_check": "a priority-1 metric measurably improves because of a priority-2 component, recorded in STATE.md"
+    },
+    {
+      "id": "phase3_human_say_ethics",
+      "priority": 3,
+      "title": "Ethics inheritance manifest; requires_human stages everywhere gated; kill drill in CI",
+      "status": "planned",
+      "exit_check": "drill proves lineage terminate, no motor fires with switch off, enhance-apply blocks without Aaron"
+    },
+    {
+      "id": "phase4_interactivity_avatar",
+      "priority": 4,
+      "title": "Mission panels + suggest-changes queue; avatar hf_realtime tier; auto-enhancement closed loop",
+      "status": "planned",
+      "exit_check": "Aaron sees live status, files a suggestion that becomes a ticket, and Cam avatar passes muscle-grade believability check"
+    },
+    {
+      "id": "phase5_full_presence",
+      "priority": 4,
+      "title": "Studio full presence + Higgsfield custom avatar identity",
+      "status": "planned",
+      "exit_check": "per-session tier swap is seamless under one AvatarFrame contract"
+    }
+  ]
+}
