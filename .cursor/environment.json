@@ -1,0 +1,4 @@
+{
+  "name": "Personal-Assistant",
+  "install": "./scripts/cloud-agent-install.sh"
+}
