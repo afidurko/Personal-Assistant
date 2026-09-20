@@ -9,8 +9,14 @@ ROOT = Path(__file__).resolve().parents[1]
 POL_PATH = ROOT / "config" / "connectome" / "trajectory-policies.json"
 
 
+_POLICIES: dict | None = None
+
+
 def load_policies() -> dict:
-    return json.loads(POL_PATH.read_text(encoding="utf-8"))
+    global _POLICIES
+    if _POLICIES is None:
+        _POLICIES = json.loads(POL_PATH.read_text(encoding="utf-8"))
+    return _POLICIES
 
 
 def apply_policies(

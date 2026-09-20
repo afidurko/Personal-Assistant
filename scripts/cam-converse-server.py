@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 import time
 import uuid
@@ -488,17 +487,23 @@ def utc_now() -> str:
 
 
 def route_sense(sense: str, goal: str = "") -> dict:
-    cmd = [
-        sys.executable,
-        str(ROOT / "scripts" / "connectome-route.py"),
-        "--sense",
-        sense,
-    ]
-    if goal:
-        cmd.extend(["--goal", goal])
+    """In-process route. Greetings skip the connectome scan (same as cam_reason fast gate)."""
     try:
-        out = subprocess.check_output(cmd, cwd=str(ROOT), text=True, timeout=10)
-        return json.loads(out)
+        import cam_reason as cr
+
+        text = goal or ""
+        classification = cr.classify_intent(text)
+        escalate, _ = cr.should_escalate(classification, cr.load_reasoning_config())
+        if not escalate:
+            return {
+                "accepted": True,
+                "sense": sense,
+                "goal": text,
+                "hotspot_id": "fast_chatter",
+                "motor_plan": ["motor.mesh"],
+                "path": "fast",
+            }
+        return cr.connectome_route_tool(sense, text)
     except Exception as e:
         return {"accepted": False, "error": str(e), "motor_plan": []}
 

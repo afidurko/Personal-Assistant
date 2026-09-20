@@ -86,7 +86,7 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
                 g = FAST_GOALS[(i + seed) % len(FAST_GOALS)]
                 c = cr.classify_intent(g)
                 esc, _ = cr.should_escalate(c, cfg)
-                if esc or cr.bar_allows_converse(g, cfg):
+                if esc or cr.bar_allows_converse(g, cfg, c):
                     raise AssertionError(f"fast_bar_broken:{g}")
             elif mode == 1:
                 c = cr.classify_intent("enhance Cam functionality please")
