@@ -347,6 +347,20 @@ def tool_defs() -> list[dict]:
                 },
             },
         },
+        {
+            "name": "instinct_stats",
+            "description": (
+                "Cam Instinct follow-through scorecard: jobs done, avg time-to-done, "
+                "follow-ups drafted, ask answer rate, draft review counts. Read-only. "
+                "(Outbox approve/discard stays Aaron-only via the CLI.)"
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "now": {"type": "string", "description": "ISO8601 clock override"},
+                },
+            },
+        },
     ]
 
 
@@ -782,6 +796,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return instinct_cli(arguments, "report")
     if name == "instinct_brief":
         return instinct_cli(arguments, "brief", write_flag=True, text_output=True)
+    if name == "instinct_stats":
+        return instinct_cli(arguments, "stats")
     raise ValueError(f"unknown tool: {name}")
 
 

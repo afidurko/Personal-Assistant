@@ -669,6 +669,60 @@
       "status": "active",
       "integration": "config/integrations/instinct.json",
       "motor": "motor.instinct"
+    },
+    {
+      "id": "tool.instinct.stats",
+      "purpose": "Cam Instinct follow-through scorecard (done rate, time-to-done, ask answer rate)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/instinct.py",
+      "kind": "local_script",
+      "inputs": {
+        "now": "iso8601?"
+      },
+      "outputs": {
+        "jobs": "object",
+        "asks": "object",
+        "drafts": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/instinct.json",
+      "motor": "motor.instinct"
+    },
+    {
+      "id": "tool.instinct.outbox",
+      "purpose": "Aaron-only review lane for drafted nudges: list/show/approve/discard (approve stages for gated send, never sends)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/instinct.py",
+      "kind": "local_script",
+      "inputs": {
+        "action": "list|show|approve|discard",
+        "name": "string?"
+      },
+      "outputs": {
+        "pending": "string[]",
+        "approved": "string[]",
+        "discarded": "string[]"
+      },
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/instinct.json",
+      "motor": "motor.instinct",
+      "notes": "Approval is Aaron's act via CLI; not exposed over MCP. Send stays with motor.inkbox under switch.outbound."
     }
   ]
 }

@@ -52,11 +52,20 @@ def main() -> int:
         if needle not in text:
             errors.append(f"missing {needle} in {rel}")
 
-    # MCP server must expose all three instinct tools
+    # MCP server must expose the instinct tools (outbox review stays Aaron-only CLI)
     mcp_text = (ROOT / "scripts/cam-mcp-server.py").read_text(encoding="utf-8")
-    for tool in ("instinct_scan", "instinct_report", "instinct_brief"):
+    for tool in ("instinct_scan", "instinct_report", "instinct_brief", "instinct_stats"):
         if f'"{tool}"' not in mcp_text:
             errors.append(f"cam-mcp-server missing tool {tool}")
+    for banned in ("instinct_outbox_approve", "instinct_approve"):
+        if banned in mcp_text:
+            errors.append("outbox approval must not be exposed over MCP (Aaron-only CLI)")
+
+    # Engine must ship the add-on commands
+    engine_text = (ROOT / "scripts/instinct.py").read_text(encoding="utf-8")
+    for needle in ("cmd_outbox", "cmd_stats", "cmd_find", "parse_when"):
+        if needle not in engine_text:
+            errors.append(f"engine missing {needle}")
 
     # Guardrails: motor.instinct must NOT be an outbound-capable effector, and
     # the config must keep drafts-only + no credential + no spend.

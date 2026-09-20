@@ -234,6 +234,112 @@ class RegressionTests(InstinctBase):
             self.assertNotEqual(ctx.exception.code, 0)
 
 
+class ValidationAndRobustnessTests(InstinctBase):
+    def test_bad_due_rejected_at_creation(self):
+        with self.assertRaises(SystemExit):
+            run("--now", T0, "job", "add", "Poisoned", "--due", "next tuesday")
+        self.assertEqual(run("job", "list"), [])
+
+    def test_bad_due_in_sync_event_skipped_cleanly(self):
+        inbox = self.data() / "inbox"
+        inbox.mkdir(parents=True)
+        (inbox / "bad-due.json").write_text(json.dumps({
+            "from": "sense.x", "text": "hi", "job": "Poisoned", "due": "whenever",
+        }))
+        out = run("--now", T0, "sync")
+        self.assertEqual(len(out["skipped"]), 1)
+        self.assertEqual(run("job", "list"), [])
+
+    def test_corrupt_ledger_fails_with_clear_message(self):
+        (self.data()).mkdir(parents=True, exist_ok=True)
+        (self.data() / "ledger.json").write_text("{broken")
+        with self.assertRaises(SystemExit) as ctx:
+            run("report")
+        self.assertIn("ledger corrupt", str(ctx.exception))
+
+    def test_ambiguous_reply_to_rejected(self):
+        # Force two messages whose ids share a prefix, then reply with that prefix
+        run("--now", T0, "ingest", "--text", "first")
+        run("--now", T0, "ingest", "--text", "second")
+        ledger = json.loads((self.data() / "ledger.json").read_text())
+        ledger["thread"][0]["id"] = "aaaa1111"
+        ledger["thread"][1]["id"] = "aaaa2222"
+        (self.data() / "ledger.json").write_text(json.dumps(ledger))
+        with self.assertRaises(SystemExit) as ctx:
+            run("--now", T0, "ingest", "--from", "cam", "--text", "reply", "--reply-to", "aaaa")
+        self.assertIn("ambiguous", str(ctx.exception))
+
+    def test_atomic_save_leaves_no_temp_file(self):
+        run("--now", T0, "job", "add", "Anything")
+        self.assertFalse(list(self.data().glob("*.tmp")))
+        self.assertTrue((self.data() / "ledger.json").exists())
+
+
+class AddOnTests(InstinctBase):
+    def test_relative_due_and_snooze(self):
+        add = run("--now", T0, "job", "add", "Relative due", "--due", "+3d")
+        jobs = run("job", "list")
+        self.assertEqual(jobs[0]["due"], "2026-09-17T09:00:00Z")
+        run("--now", T0, "job", "snooze", add["job"], "--until", "+12h")
+        jobs = run("job", "list")
+        self.assertEqual(jobs[0]["snooze_until"], "2026-09-14T21:00:00Z")
+
+    def test_outbox_review_lifecycle(self):
+        run("--now", T0, "job", "add", "Job A")
+        run("--now", T0, "job", "add", "Job B")
+        run("--now", "2026-09-16T09:00:00Z", "scan", "--write")
+        listing = run("outbox", "list")
+        self.assertEqual(len(listing["pending"]), 2)
+        a, b = listing["pending"]
+        approved = run("--now", "2026-09-16T10:00:00Z", "outbox", "approve", a)
+        self.assertIn("approved", approved["moved_to"])
+        self.assertIn("nothing was sent", approved["note"])
+        run("--now", "2026-09-16T10:01:00Z", "outbox", "discard", b)
+        listing = run("outbox", "list")
+        self.assertEqual(listing["pending"], [])
+        self.assertEqual(len(listing["approved"]), 1)
+        self.assertEqual(len(listing["discarded"]), 1)
+        # approved draft carries the review stamp
+        text = (self.data() / "outbox/approved" / a).read_text()
+        self.assertIn("approved: 2026-09-16T10:00:00Z", text)
+
+    def test_outbox_requires_name_and_rejects_unknown(self):
+        with self.assertRaises(SystemExit):
+            run("outbox", "approve")
+        with self.assertRaises(SystemExit):
+            run("outbox", "approve", "nope.md")
+
+    def test_stats_scorecard(self):
+        msg = run("--now", T0, "ingest", "--text", "Can you fix the sink?", "--job", "Fix sink")
+        run("--now", "2026-09-15T09:00:00Z", "job", "done", msg["job"])
+        run("--now", T0, "ingest", "--text", "Can you also book flights?")
+        stats = run("--now", "2026-09-16T09:00:00Z", "stats")
+        self.assertEqual(stats["jobs"]["done"], 1)
+        self.assertEqual(stats["jobs"]["avg_hours_to_done"], 24.0)
+        self.assertEqual(stats["asks"], {"tracked": 2, "answered": 1, "answer_rate": 0.5})
+
+    def test_find_searches_thread_jobs_and_notes(self):
+        run("--now", T0, "ingest", "--text", "The sink is leaking again")
+        add = run("--now", T0, "job", "add", "Call plumber")
+        run("--now", T0, "job", "note", add["job"], "plumber quoted 200 for the sink")
+        out = run("find", "sink")
+        self.assertEqual(len(out["messages"]), 1)
+        self.assertEqual(len(out["jobs"]), 1)
+        self.assertIn("plumber quoted 200 for the sink", out["jobs"][0]["matched_notes"])
+
+    def test_brief_vault_distillation(self):
+        vault = Path(self._tmp.name) / "vault-briefs"
+        os.environ["INSTINCT_VAULT_DIR"] = str(vault)
+        try:
+            run("--now", T0, "job", "add", "Fix the sink")
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                instinct.main(["--now", "2026-09-15T09:00:00Z", "brief", "--vault"])
+            self.assertTrue((vault / "2026-09-15.md").exists())
+        finally:
+            os.environ.pop("INSTINCT_VAULT_DIR", None)
+
+
 class ReportBriefDoctorTests(InstinctBase):
     def test_report_counts_and_sections(self):
         run("--now", T0, "ingest", "--text", "Can you book the dentist?")

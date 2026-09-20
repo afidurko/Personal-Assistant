@@ -30,7 +30,11 @@ launch-week record showed risk.
 | Connected senses feed it | `sync` folds event drops from `data/instinct/inbox/*.json` (Inkbox, calendar, loops — any sense writes drops; the engine never fetches) |
 | Persistent cloud computer | Nightly L1 loop `instinct-followups` + schedule `cam-nightly-instinct-scan` run the scan unattended |
 | Text-first interface | Thread `ingest` from any Cam surface; MCP tools `instinct_scan` / `instinct_report` / `instinct_brief`; no new UI |
-| Daily texture summaries | `brief` renders a markdown daily brief (`data/instinct/briefs/YYYY-MM-DD.md`) |
+| Daily texture summaries | `brief` renders a markdown daily brief (`data/instinct/briefs/`, `--vault` distills to `vault/06-Life-Ops/instinct/briefs/`) |
+| Human-in-the-loop send review | `outbox list/show/approve/discard` — Aaron's review lane; approve stages a draft for the gated comms pathway, never sends |
+| Assistant scorecard | `stats` — done rate, avg time-to-done, follow-ups drafted, ask answer rate |
+| Recall across the thread | `find` — case-insensitive search over thread, job titles, and notes |
+| Natural time expressions | `--due` / `--until` accept relative durations: `+12h`, `+3d`, `+2w` |
 
 ## Deliberate divergences (the missing 0.08%)
 
@@ -69,7 +73,15 @@ These Instinct behaviors are excluded **by design** per `.clinerules`:
 
 ## Ops
 
-- Nightly loop drafts follow-ups; Aaron reviews the outbox before anything sends.
-- `brief --write` produces the daily markdown brief; distill durable outcomes to mesh/vault.
+- Nightly loop drafts follow-ups; Aaron reviews with `outbox list` → `outbox show <draft>`
+  → `outbox approve|discard <draft>`. Approved drafts move to `data/instinct/outbox/approved/`
+  where the gated comms pathway (`motor.inkbox` under `switch.outbound`) picks them up.
+  **Approving is not sending** — and approval is Aaron-only CLI, not exposed over MCP.
+- `brief --write` produces the daily markdown brief; `brief --vault` distills it to
+  `vault/06-Life-Ops/instinct/briefs/` for durable memory.
+- `stats` is the follow-through scorecard; `find` searches the whole ledger.
 - Senses integrate by dropping event JSON into `data/instinct/inbox/`:
   `{"from","text"[,"ts","job","due","priority","reply_to"]}` — then `sync` folds them in.
+  Due dates are validated at creation; malformed events are skipped and rolled back.
+- Ledger writes are atomic (temp file + rename); a corrupt ledger fails with a clear
+  message instead of a traceback.

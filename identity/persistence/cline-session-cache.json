@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T14:39:19.936954+00:00",
+    "at": "2026-09-20T14:46:35.820197+00:00",
     "mode": "act",
-    "summary": "Instinct bug-fix pass: naive-UTC timestamps, sync job-leak rollback, note/wait validation, snooze double-count, overdue nudge cooldown; 25 tests green",
+    "summary": "Instinct round 3: due validation, atomic ledger writes, corrupt-ledger guard, ambiguous reply-to; add-ons: outbox review lane, relative times, stats scorecard, find search, vault briefs, instinct_stats MCP; 36 tests green",
     "workspace": "."
   },
   "mesh_notes": [

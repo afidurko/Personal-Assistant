@@ -22,7 +22,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Public APIs: `python3 scripts/public-apis-search.py --query "weather"`
 - Google Trends: `python3 scripts/google-trends-search.py --query "election" --offline`
 - Inkbox: `python3 scripts/inkbox-check.py`
-- Instinct: `python3 scripts/instinct.py scan --write` · `python3 scripts/instinct.py brief` · `python3 scripts/instinct-check.py` · tests: `python3 -m unittest scripts.test_instinct`
+- Instinct: `python3 scripts/instinct.py scan --write` · `python3 scripts/instinct.py brief` · `python3 scripts/instinct.py outbox list` · `python3 scripts/instinct.py stats` · `python3 scripts/instinct-check.py` · tests: `python3 -m unittest scripts.test_instinct`
 - Needs Attention (all coding workspaces): `python3 scripts/needs-attention.py --connect --dispatch-plan --write`
 - Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
 

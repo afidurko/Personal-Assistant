@@ -54,7 +54,9 @@
   "mcp_tools": [
     "instinct_scan",
     "instinct_report",
-    "instinct_brief"
+    "instinct_brief",
+    "instinct_stats"
   ],
-  "needs_attention_handoff": "data/instinct/needs-attention.json"
+  "needs_attention_handoff": "data/instinct/needs-attention.json",
+  "outbox_review": "Aaron-only CLI (outbox list/show/approve/discard); approve stages, never sends"
 }

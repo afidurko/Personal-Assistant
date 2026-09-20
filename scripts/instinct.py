@@ -17,10 +17,16 @@ Commands
            the sensing seam for Inkbox / calendar / any Cam sense
   scan     detect unanswered asks, stale/overdue jobs, due monitor checks;
            emit spikes; --write drafts follow-ups; escalate needs_aaron items
+  outbox   review drafted nudges: list / show / approve / discard
+           (approve stages for motor.inkbox under switch.outbound — never sends)
   report   structured brief: jobs, asks, monitors, drafts, escalations
-  brief    human-readable markdown daily brief (--write to data/instinct/briefs/)
+  brief    human-readable markdown daily brief (--write / --vault)
+  stats    follow-through scorecard: done rate, time-to-done, ask answer rate
+  find     search thread, job titles, and notes
   thread   show the continuous thread tail
   doctor   ledger + config sanity (offline, no key required)
+
+Times accept ISO8601 or relative durations (+12h, +3d, +2w) against --now.
 
 State lives in $INSTINCT_DATA_DIR (default data/instinct/): ledger.json,
 spikes.jsonl, outbox/, inbox/, briefs/, needs-attention.json.
@@ -81,6 +87,11 @@ def escalations_path() -> Path:
     return data_dir() / "needs-attention.json"
 
 
+def vault_briefs_dir() -> Path:
+    override = os.environ.get("INSTINCT_VAULT_DIR")
+    return Path(override) if override else ROOT / "vault/06-Life-Ops/instinct/briefs"
+
+
 # --- time / io helpers ----------------------------------------------------
 
 
@@ -102,6 +113,23 @@ def parse_ts(s: str) -> datetime:
     return dt.astimezone(timezone.utc)
 
 
+REL_RE = re.compile(r"^\+(\d+(?:\.\d+)?)([hdw])$")
+REL_UNITS = {"h": 1.0, "d": 24.0, "w": 168.0}
+
+
+def parse_when(s: str, ref: datetime) -> datetime:
+    """Absolute ISO8601 or relative to ref: +12h, +3d, +2w."""
+    m = REL_RE.match(s.strip())
+    if m:
+        return ref + timedelta(hours=float(m.group(1)) * REL_UNITS[m.group(2)])
+    try:
+        return parse_ts(s)
+    except ValueError:
+        raise SystemExit(
+            f"invalid time '{s}' — use ISO8601 (2026-09-18T09:00:00Z) or relative (+12h, +3d, +2w)"
+        )
+
+
 def load_config() -> dict:
     if CONFIG.exists():
         return json.loads(CONFIG.read_text(encoding="utf-8"))
@@ -121,7 +149,12 @@ def defaults() -> dict:
 def load_ledger() -> dict:
     p = ledger_path()
     if p.exists():
-        ledger = json.loads(p.read_text(encoding="utf-8"))
+        try:
+            ledger = json.loads(p.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise SystemExit(
+                f"ledger corrupt at {p} ({exc}) — restore from git/backup or move the file aside"
+            )
         ledger.setdefault("version", 2)
         return ledger
     return {
@@ -134,8 +167,11 @@ def load_ledger() -> dict:
 
 
 def save_ledger(ledger: dict) -> None:
+    """Atomic write (temp file + rename) so a crash mid-write never tears the ledger."""
     data_dir().mkdir(parents=True, exist_ok=True)
-    ledger_path().write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
+    tmp = ledger_path().with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, ledger_path())
 
 
 def emit_spike(kind: str, payload: dict, ts: datetime) -> None:
@@ -168,7 +204,8 @@ def new_job(title: str, ts: datetime, due: str | None = None, priority: str = "n
         "status": "open",
         "created": iso(ts),
         "updated": iso(ts),
-        "due": due,
+        # Validate + normalize at creation so a bad due date can never poison scans.
+        "due": iso(parse_when(due, ts)) if due else None,
         "waiting_on": None,
         "priority": priority,
         "snooze_until": None,
@@ -188,13 +225,16 @@ def append_message(ledger: dict, sender: str, text: str, ts: datetime,
     if sender == "aaron" and ASK_RE.search(text):
         msg["ask"] = True
     if reply_to:
-        for m in ledger["thread"]:
-            if m["id"] == reply_to or m["id"].startswith(reply_to):
-                m["answered_by"] = msg["id"]
-                msg["reply_to"] = m["id"]
-                break
-        else:
+        matches = [m for m in ledger["thread"]
+                   if m["id"] == reply_to or m["id"].startswith(reply_to)]
+        if not matches:
             raise SystemExit(f"no thread message matching '{reply_to}'")
+        if len(matches) > 1:
+            raise SystemExit(
+                f"ambiguous reply-to '{reply_to}' ({', '.join(m['id'] for m in matches)})"
+            )
+        matches[0]["answered_by"] = msg["id"]
+        msg["reply_to"] = matches[0]["id"]
     ledger["thread"].append(msg)
     return msg
 
@@ -303,8 +343,8 @@ def cmd_job(args: argparse.Namespace) -> int:
         job["updated"] = iso(ts)
     elif args.action == "snooze":
         if not args.until:
-            raise SystemExit("job snooze requires --until ISO8601")
-        job["snooze_until"] = iso(parse_ts(args.until))
+            raise SystemExit("job snooze requires --until (ISO8601 or +12h/+3d/+2w)")
+        job["snooze_until"] = iso(parse_when(args.until, ts))
         job["updated"] = iso(ts)
     elif args.action == "done":
         job["status"] = "done"
@@ -546,6 +586,11 @@ def cmd_brief(args: argparse.Namespace) -> int:
         briefs_dir().mkdir(parents=True, exist_ok=True)
         out = briefs_dir() / f"{ts.strftime('%Y-%m-%d')}.md"
         out.write_text(text, encoding="utf-8")
+    if args.vault:
+        # Durable distillate for Aaron's vault (config vault_dir) — review before commit.
+        vault_briefs_dir().mkdir(parents=True, exist_ok=True)
+        out = vault_briefs_dir() / f"{ts.strftime('%Y-%m-%d')}.md"
+        out.write_text(text, encoding="utf-8")
     print(text)
     return 0
 
@@ -553,6 +598,118 @@ def cmd_brief(args: argparse.Namespace) -> int:
 def cmd_thread(args: argparse.Namespace) -> int:
     ledger = load_ledger()
     print(json.dumps(ledger["thread"][-args.tail:], indent=2))
+    return 0
+
+
+def outbox_match(name: str) -> Path:
+    drafts = sorted(outbox_dir().glob("*.md")) if outbox_dir().exists() else []
+    matches = [p for p in drafts if p.name == name or p.name.startswith(name) or name in p.name]
+    if not matches:
+        raise SystemExit(f"no pending draft matching '{name}'")
+    if len(matches) > 1:
+        raise SystemExit(f"ambiguous draft '{name}' ({', '.join(p.name for p in matches)})")
+    return matches[0]
+
+
+def cmd_outbox(args: argparse.Namespace) -> int:
+    """Aaron's review lane for drafted nudges. approve moves a draft to
+    outbox/approved/ for the gated comms pathway (motor.inkbox under
+    switch.outbound) to pick up — approving still does NOT send anything."""
+    ts = now_utc(args.now)
+    if args.action == "list":
+        pending = sorted(p.name for p in outbox_dir().glob("*.md")) if outbox_dir().exists() else []
+        approved_d = outbox_dir() / "approved"
+        discarded_d = outbox_dir() / "discarded"
+        print(json.dumps({
+            "ok": True,
+            "pending": pending,
+            "approved": sorted(p.name for p in approved_d.glob("*.md")) if approved_d.exists() else [],
+            "discarded": sorted(p.name for p in discarded_d.glob("*.md")) if discarded_d.exists() else [],
+            "send_path": "approved drafts await motor.inkbox under switch.outbound (never sent from here)",
+        }, indent=2))
+        return 0
+    draft = outbox_match(args.name)
+    if args.action == "show":
+        print(draft.read_text(encoding="utf-8"))
+        return 0
+    dest_dir = outbox_dir() / ("approved" if args.action == "approve" else "discarded")
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / draft.name
+    text = draft.read_text(encoding="utf-8")
+    stamp = f"{args.action}d: {iso(ts)}\n"
+    text = text.replace("---\n\n# Follow-up draft:", f"{stamp}---\n\n# Follow-up draft:", 1)
+    dest.write_text(text, encoding="utf-8")
+    draft.unlink()
+    emit_spike(f"draft_{args.action}d", {"draft": draft.name}, ts)
+    print(json.dumps({
+        "ok": True,
+        "draft": draft.name,
+        "moved_to": str(dest.relative_to(data_dir())),
+        "note": ("approved drafts are handed to motor.inkbox under switch.outbound — "
+                 "nothing was sent" if args.action == "approve" else "draft discarded"),
+    }, indent=2))
+    return 0
+
+
+def cmd_stats(args: argparse.Namespace) -> int:
+    """Follow-through statistics from the ledger — the assistant's scorecard."""
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    jobs = ledger["jobs"]
+    done = [j for j in jobs if j["status"] == "done"]
+    hours_to_done = [
+        (parse_ts(j["updated"]) - parse_ts(j["created"])).total_seconds() / 3600
+        for j in done
+    ]
+    asks = [m for m in ledger["thread"] if m.get("ask")]
+    answered = [m for m in asks if m.get("answered_by")
+                or (m.get("job") and any(j["id"] == m["job"] and j["status"] == "done"
+                                         for j in jobs))]
+    approved_d = outbox_dir() / "approved"
+    discarded_d = outbox_dir() / "discarded"
+    print(json.dumps({
+        "ok": True,
+        "as_of": iso(ts),
+        "jobs": {
+            "total": len(jobs),
+            "done": len(done),
+            "open": sum(1 for j in jobs if j["status"] == "open" and not j.get("recur_hours")),
+            "waiting": sum(1 for j in jobs if j["status"] == "waiting"),
+            "monitors": sum(1 for j in jobs if j.get("recur_hours") and j["status"] != "done"),
+            "avg_hours_to_done": round(sum(hours_to_done) / len(hours_to_done), 1) if hours_to_done else None,
+        },
+        "followups_drafted": sum(j.get("followups", 0) for j in jobs),
+        "asks": {
+            "tracked": len(asks),
+            "answered": len(answered),
+            "answer_rate": round(len(answered) / len(asks), 2) if asks else None,
+        },
+        "drafts": {
+            "pending": len(list(outbox_dir().glob("*.md"))) if outbox_dir().exists() else 0,
+            "approved": len(list(approved_d.glob("*.md"))) if approved_d.exists() else 0,
+            "discarded": len(list(discarded_d.glob("*.md"))) if discarded_d.exists() else 0,
+        },
+        "thread_messages": len(ledger["thread"]),
+    }, indent=2))
+    return 0
+
+
+def cmd_find(args: argparse.Namespace) -> int:
+    """Case-insensitive search across the thread, job titles, and notes."""
+    ledger = load_ledger()
+    needle = args.query.lower()
+    messages = [
+        {"id": m["id"], "ts": m["ts"], "from": m["from"], "text": m["text"]}
+        for m in ledger["thread"] if needle in m["text"].lower()
+    ]
+    jobs = []
+    for j in ledger["jobs"]:
+        hit_notes = [n for n in (j.get("notes") or []) if needle in (n.get("text") or "").lower()]
+        if needle in j["title"].lower() or hit_notes:
+            jobs.append({"id": j["id"], "title": j["title"], "status": j["status"],
+                         "matched_notes": [n["text"] for n in hit_notes]})
+    print(json.dumps({"ok": True, "query": args.query,
+                      "messages": messages, "jobs": jobs}, indent=2))
     return 0
 
 
@@ -628,7 +785,21 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("brief", help="markdown daily brief")
     p.add_argument("--write", action="store_true", help="also write to data/instinct/briefs/")
+    p.add_argument("--vault", action="store_true",
+                   help="also distill to the vault (vault/06-Life-Ops/instinct/briefs/)")
     p.set_defaults(fn=cmd_brief)
+
+    p = sub.add_parser("outbox", help="review drafted nudges: list / show / approve / discard")
+    p.add_argument("action", choices=["list", "show", "approve", "discard"])
+    p.add_argument("name", nargs="?", help="draft filename (or unique prefix/substring)")
+    p.set_defaults(fn=cmd_outbox)
+
+    p = sub.add_parser("stats", help="follow-through scorecard from the ledger")
+    p.set_defaults(fn=cmd_stats)
+
+    p = sub.add_parser("find", help="search thread, job titles, and notes")
+    p.add_argument("query")
+    p.set_defaults(fn=cmd_find)
 
     p = sub.add_parser("thread", help="show thread tail")
     p.add_argument("--tail", type=int, default=10)
@@ -650,6 +821,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("job note requires the note text")
     if args.cmd == "job" and args.action == "wait" and not args.title:
         parser.error("job wait requires what the job is waiting on")
+    if args.cmd == "outbox" and args.action in ("show", "approve", "discard") and not args.name:
+        parser.error(f"outbox {args.action} requires a draft name")
     return args.fn(args)
 
 
