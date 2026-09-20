@@ -90,29 +90,7 @@ def build_attention_items(rows: list[dict[str, Any]], team: dict[str, Any]) -> l
             }
         )
 
-    for row in rows:
-        if row["connected"]:
-            continue
-        items.append(
-            {
-                "id": f"ws-{row['id']}",
-                "kind": "connectivity",
-                "severity": "high" if row.get("primary") else "medium",
-                "title": f"Connect coding workspace: {row['id']}",
-                "detail": f"{row['label']} @ {row['path']} ({row['attention']})",
-                "auto_clearable": True,
-                "aaron_gate": False,
-                "workspace_id": row["id"],
-                "remote": row.get("remote"),
-                "suggestion": (
-                    f"git submodule update --init --recursive {row['path']}"
-                    if row.get("path") not in (None, ".")
-                    else "Restore primary Personal-Assistant checkout"
-                ),
-            }
-        )
-
-    # Aaron's Home Live suggestions become dispatchable attention items
+    # Aaron's Home Live suggestions surface first — they outrank plumbing
     if SUGGESTIONS_PATH.exists():
         for line in SUGGESTIONS_PATH.read_text(encoding="utf-8").splitlines():
             try:
@@ -134,6 +112,28 @@ def build_attention_items(rows: list[dict[str, Any]], team: dict[str, Any]) -> l
                     "suggestion": "triage into a ticket; report back on the home queue",
                 }
             )
+
+    for row in rows:
+        if row["connected"]:
+            continue
+        items.append(
+            {
+                "id": f"ws-{row['id']}",
+                "kind": "connectivity",
+                "severity": "high" if row.get("primary") else "medium",
+                "title": f"Connect coding workspace: {row['id']}",
+                "detail": f"{row['label']} @ {row['path']} ({row['attention']})",
+                "auto_clearable": True,
+                "aaron_gate": False,
+                "workspace_id": row["id"],
+                "remote": row.get("remote"),
+                "suggestion": (
+                    f"git submodule update --init --recursive {row['path']}"
+                    if row.get("path") not in (None, ".")
+                    else "Restore primary Personal-Assistant checkout"
+                ),
+            }
+        )
 
     # Standing Aaron-gated reminders (never auto-clear)
     items.append(
