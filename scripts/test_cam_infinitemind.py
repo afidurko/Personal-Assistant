@@ -14,11 +14,26 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import cam_infinitemind as ci  # noqa: E402
 import cam_reason as cr  # noqa: E402
 
+HAVE_INFINITEMIND = ci.available()
+NEEDS_SUBMODULE = unittest.skipUnless(
+    HAVE_INFINITEMIND,
+    "integrations/infinitemind empty — git submodule update --init",
+)
+
 
 class InfiniteMindAdapterTests(unittest.TestCase):
-    def test_submodule_present(self):
-        self.assertTrue(ci.available(), "integrations/infinitemind missing")
+    def test_available_or_graceful_skip(self):
+        """Empty submodule must degrade to a skipped result, never crash."""
+        if HAVE_INFINITEMIND:
+            self.assertTrue(ci.available())
+            return
+        r = ci.enrich(goal="plan research", intents=["explicit_plan"])
+        self.assertEqual(r["tool"], "InfiniteMindEnrich")
+        self.assertFalse(r["ok"])
+        self.assertTrue(r["skipped"])
+        self.assertIn("git submodule update --init", r["error"])
 
+    @NEEDS_SUBMODULE
     def test_enrich_plan_slow(self):
         r = ci.enrich(
             goal="think carefully and make a plan for research",
@@ -39,11 +54,13 @@ class InfiniteMindAdapterTests(unittest.TestCase):
         self.assertEqual(r["recommendation"]["path_hint"], "slow")
         self.assertTrue(r["epistemic"]["accepted"])
 
+    @NEEDS_SUBMODULE
     def test_kill_silences(self):
         r = ci.enrich(goal="hi", intents=["greeting"], confidence=0.9, escalate=False, kill=True)
         self.assertTrue(r["logic"]["motors_silenced"])
         self.assertEqual(r["recommendation"]["path_hint"], "killed")
 
+    @NEEDS_SUBMODULE
     def test_non_aaron_rejects(self):
         r = ci.enrich(
             goal="do something",
@@ -55,6 +72,7 @@ class InfiniteMindAdapterTests(unittest.TestCase):
         self.assertTrue(r["logic"]["reject_task"])
         self.assertEqual(r["recommendation"]["path_hint"], "reject")
 
+    @NEEDS_SUBMODULE
     def test_enhance_needs_switch_flag(self):
         r = ci.enrich(
             goal="enhance Cam",
@@ -80,7 +98,10 @@ class InfiniteMindAdapterTests(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
         data = json.loads(proc.stdout)
-        self.assertTrue(data.get("ok"))
+        if HAVE_INFINITEMIND:
+            self.assertTrue(data.get("ok"))
+        else:
+            self.assertTrue(data.get("skipped"))
 
 
 class ReasonIntegrationTests(unittest.TestCase):
@@ -90,8 +111,11 @@ class ReasonIntegrationTests(unittest.TestCase):
         self.assertIn("logic", t["stages"])
         tools = {r.get("tool"): r for r in (t.get("toolkit_results") or [])}
         self.assertIn("InfiniteMindEnrich", tools)
-        self.assertTrue(tools["InfiniteMindEnrich"].get("ok"))
-        self.assertIn("infinitemind", t.get("engine", ""))
+        if HAVE_INFINITEMIND:
+            self.assertTrue(tools["InfiniteMindEnrich"].get("ok"))
+            self.assertIn("infinitemind", t.get("engine", ""))
+        else:
+            self.assertTrue(tools["InfiniteMindEnrich"].get("skipped"))
 
     def test_fast_path_skips_logic(self):
         t = cr.reason(goal="hi cam", write_trace=False)

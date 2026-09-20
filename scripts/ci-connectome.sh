@@ -5,13 +5,12 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 echo "== cam system integration =="
+# --smoke already covers connectome-check, swarm-check,
+# workspace-integration-check, and a connectome route probe.
 python3 scripts/cam-system.py --smoke
 python3 scripts/test_cam_system.py
 python3 scripts/test_cloud_agent_install.py
 python3 scripts/flight-envelope.py --offline-only
-
-echo "== connectome-check =="
-python3 scripts/connectome-check.py
 
 echo "== connectome-anatomy-check (glass cortex asset) =="
 python3 scripts/connectome-anatomy-check.py
