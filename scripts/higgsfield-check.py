@@ -42,6 +42,19 @@ def main() -> int:
         errors.append("provider.files_base_default must be api.higgsfield.ai")
     if "HF_CREDENTIALS" not in json.dumps(provider.get("credential_aliases") or []):
         errors.append("provider.credential_aliases must include official HF_CREDENTIALS")
+    if cfg.get("status") != "rejected" or cfg.get("presence") is not False:
+        errors.append("higgsfield.json must stay rejected and presence=false (Aaron: looks creepy)")
+
+    avatar = load(ROOT / "config/persona/avatar.json")
+    clips = (avatar.get("avatar") or {}).get("clips") or {}
+    if clips.get("engine") == "higgsfield":
+        errors.append("avatar.json must not use higgsfield as a presence clip engine")
+
+    for rel in ("src/components/CamStage.tsx", "src/components/CamFace.tsx"):
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for banned in ("higgsfield", "clipUrl", "clipActive", "Render Speak clip", "Play Speak clip"):
+            if banned.lower() in text.lower():
+                errors.append(f"{rel} must not surface Higgsfield ({banned})")
 
     for rel, needle in (
         ("config/connectome/sensory.json", "sense.higgsfield.health"),
@@ -52,9 +65,6 @@ def main() -> int:
         ("config/connectome/switches.json", "motor.higgsfield"),
         ("config/connectome/trajectory-policies.json", "motor.higgsfield"),
         ("config/system/pieces.json", "piece.higgsfield"),
-        ("config/persona/avatar.json", "higgsfield"),
-        ("src/components/CamStage.tsx", "Render Speak clip"),
-        ("src/components/CamFace.tsx", "clipActive"),
         ("scripts/higgsfield.py", "generate-upload-url"),
         ("scripts/higgsfield.py", "HF_CREDENTIALS"),
     ):

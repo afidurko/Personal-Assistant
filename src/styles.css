@@ -2124,17 +2124,6 @@ h2,
   height: 100%;
 }
 
-.cam-face-higgsfield {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-  z-index: 2;
-  pointer-events: none;
-}
-
 .cam-face-th-mount canvas {
   width: 100% !important;
   height: 100% !important;
@@ -2213,22 +2202,6 @@ h2,
   font-size: 0.75rem;
   color: var(--text-dim);
   z-index: 1;
-}
-
-.cam-higgs-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  justify-content: center;
-  margin-top: 0.65rem;
-  z-index: 1;
-  max-width: 28rem;
-}
-
-.cam-higgs-controls .btn {
-  min-width: 0;
-  font-size: 0.78rem;
-  padding: 0.4rem 0.7rem;
 }
 
 /* Mini brain */

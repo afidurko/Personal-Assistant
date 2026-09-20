@@ -1,20 +1,25 @@
-# Higgsfield integration — Cam lip-sync clips
+# Higgsfield integration — rejected for Cam presence
 
 Homepage: [higgsfield.ai](https://higgsfield.ai)  
 API: [docs.higgsfield.ai](https://docs.higgsfield.ai/docs)  
 Uploads: [file uploads](https://docs.higgsfield.ai/docs/concepts/file-uploads)  
 Config: [`config/integrations/higgsfield.json`](higgsfield.json)
 
-## Role
+**Aaron rejected this for Cam’s face (2026-09-20): it looks creepy.**  
+Home presence is Cam’s identity portrait + NVIDIA Audio2Face only. Do not overlay Speak clips. Do not put Preview/Render/Play controls on the stage.
 
-Higgsfield **Speak** turns Cam’s identity portrait + a short WAV into a photoreal talking-head clip (5 / 10 / 15 s). It is **not** the brain and **not** the live Audio2Face session.
+The CLI/motor stay gated and unused. Cline must not `--live`.
+
+## Role (unused)
+
+Higgsfield **Speak** can turn a still + WAV into a 5 / 10 / 15 s talking-head clip. That is **not** Cam.
 
 | Piece | Owner |
 |---|---|
 | Think | nullclaw / Cam |
 | Live face (desk) | LLMAvatarTalk + NVIDIA Audio2Face |
 | Live face (browser) | Cam portrait + A2F ARKit weights |
-| Cinematic clip | **Higgsfield Speak** (gated, paid) |
+| Cloud clip | Rejected — not on the home face |
 
 ## Why the first wiring failed in real life
 

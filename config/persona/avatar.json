@@ -7,11 +7,6 @@
     "studio": "integrations/llmavatartalk",
     "push": "scripts/a2f-push.py",
     "instance": "/World/audio2face/PlayerStreaming",
-    "notes": "Cam is her real portrait fitted to MediaPipe/A2F topology. Desk Omniverse or A2F-3D NIM (A2F_URL) streams audio via the NVIDIA gRPC client. Browser applies the same ARKit weights when the studio is offline.",
-    "clips": {
-      "engine": "higgsfield",
-      "config": "config/integrations/higgsfield.json",
-      "auto_on_turn": false
-    }
+    "notes": "Cam is her real portrait fitted to MediaPipe/A2F topology. Desk Omniverse or A2F-3D NIM (A2F_URL) streams audio via the NVIDIA gRPC client. Browser applies the same ARKit weights when the studio is offline. Higgsfield Speak clips are rejected for presence — they look wrong on Cam."
   }
 }

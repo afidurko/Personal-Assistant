@@ -88,14 +88,12 @@
 - Prefer for simple/local speak when RIVA studio is offline; full face presence still LLMAvatarTalk
 - Not a second brain — nullclaw remains executive
 
-## Higgsfield Speak (cinematic clips)
+## Higgsfield Speak (rejected for presence)
 
-- Policy: `config/integrations/higgsfield.md` · config: `config/integrations/higgsfield.json`
-- Local portrait + local WAV (TTS if needed) → upload ticket → Speak v2 MP4. Not the live A2F session.
-- Health: `python3 scripts/higgsfield-check.py` · client: `python3 scripts/higgsfield.py speak --text "Hello Aaron" --dry-run`
-- Official keys: `HF_API_KEY_ID` / `HF_API_KEY_SECRET` (aliases `HIGGSFIELD_*`, `HF_CREDENTIALS`).
-- Live jobs: `HIGGSFIELD_LIVE=1` + keys; gated by `switch.outbound`. Never auto-fire from `/api/turn`.
-- Cline does not spend money or upload Cam’s face.
+- Aaron rejected Speak clips on Cam’s face — they look creepy.
+- Policy: `config/integrations/higgsfield.md` · config status: `rejected`
+- Home UI must not overlay clips or show Render/Preview controls.
+- CLI remains gated and unused. Cline does not `--live`.
 
 ## Knowledge cortex (smart-second-brain)
 
