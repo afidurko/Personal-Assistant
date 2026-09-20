@@ -1,5 +1,6 @@
 /**
- * Capture Cam speaking face frames → mp4 demo.
+ * Capture illustrated Cam speaking face frames → mp4 demo.
+ * Requires: npm i -D puppeteer-core
  * Usage: node scripts/capture-cam-face-demo.mjs
  */
 import puppeteer from 'puppeteer-core';
@@ -8,8 +9,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const FRAMES = '/tmp/cam-face-frames';
-const OUT_MP4 = '/opt/cursor/artifacts/cam_face_speech_expressions.mp4';
-const OUT_SHOT = '/opt/cursor/artifacts/screenshots/cam_face_speaking_open.png';
+const OUT_MP4 = '/opt/cursor/artifacts/cam_illustrated_face_speak.mp4';
+const OUT_IDLE = '/opt/cursor/artifacts/screenshots/cam_illustrated_idle.png';
+const OUT_SPEAK = '/opt/cursor/artifacts/screenshots/cam_illustrated_speaking.png';
 
 fs.rmSync(FRAMES, { recursive: true, force: true });
 fs.mkdirSync(FRAMES, { recursive: true });
@@ -24,11 +26,14 @@ const browser = await puppeteer.launch({
 
 try {
   const page = await browser.newPage();
-  await page.goto('http://127.0.0.1:5173/?v=facedemo', {
+  await page.goto('http://127.0.0.1:5173/?v=illustrated', {
     waitUntil: 'networkidle2',
     timeout: 30000,
   });
-  await page.waitForSelector('.cam-face-live', { timeout: 15000 });
+  await page.waitForSelector('.cam-face-svg', { timeout: 15000 });
+
+  const wrap = await page.$('.cam-avatar-face-wrap');
+  if (wrap) await wrap.screenshot({ path: OUT_IDLE, type: 'png' });
 
   await page.evaluate(() => {
     const input = document.querySelector('.cam-stage-form input');
@@ -48,29 +53,28 @@ try {
   let i = 0;
   let savedOpen = false;
   const t0 = Date.now();
-  while (Date.now() - t0 < 12000) {
-    const face = await page.$('.cam-avatar-stage');
-    if (face) {
+  while (Date.now() - t0 < 13000) {
+    const stage = await page.$('.cam-avatar-stage');
+    if (stage) {
       const file = path.join(FRAMES, `f_${String(i).padStart(4, '0')}.png`);
-      await face.screenshot({ path: file, type: 'png' });
+      await stage.screenshot({ path: file, type: 'png' });
       i += 1;
     }
     const info = await page.evaluate(() => {
       const el = document.querySelector('.cam-face-live');
-      const mouth = document.querySelector('.cam-face-mouth');
-      if (!el || !mouth) return null;
-      return {
-        cls: el.className,
-        h: mouth.getBoundingClientRect().height,
-        open: Number(getComputedStyle(el).getPropertyValue('--mouth-open') || 0),
-      };
+      return el
+        ? {
+            cls: el.className,
+            status: document.querySelector('.cam-avatar-status')?.textContent || '',
+          }
+        : null;
     });
-    if (info && !savedOpen && info.cls.includes('mouth-open') && info.h > 16) {
-      const wrap = await page.$('.cam-avatar-face-wrap');
-      if (wrap) await wrap.screenshot({ path: OUT_SHOT, type: 'png' });
+    if (info && !savedOpen && info.cls.includes('mouth-open')) {
+      const face = await page.$('.cam-avatar-face-wrap');
+      if (face) await face.screenshot({ path: OUT_SPEAK, type: 'png' });
       savedOpen = true;
     }
-    await new Promise((r) => setTimeout(r, 120));
+    await new Promise((r) => setTimeout(r, 110));
   }
 
   const ff = spawnSync(
@@ -78,7 +82,7 @@ try {
     [
       '-y',
       '-framerate',
-      '8',
+      '9',
       '-i',
       path.join(FRAMES, 'f_%04d.png'),
       '-c:v',
@@ -100,7 +104,8 @@ try {
       frames: i,
       savedOpen,
       mp4: OUT_MP4,
-      shot: savedOpen ? OUT_SHOT : null,
+      idle: OUT_IDLE,
+      speak: savedOpen ? OUT_SPEAK : null,
       size: fs.statSync(OUT_MP4).size,
     }),
   );

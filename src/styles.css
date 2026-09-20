@@ -2068,12 +2068,12 @@ h2,
 
 .cam-avatar-face-wrap {
   position: relative;
-  width: min(58vw, 240px);
-  height: min(58vw, 240px);
+  width: min(62vw, 280px);
+  height: min(62vw, 280px);
   z-index: 1;
 }
 
-/* Live facial layer — photo jaw warp + bold mouth / brows / lids */
+/* Live illustrated Cam face — SVG character, no photo */
 .cam-face-live {
   position: relative;
   width: 100%;
@@ -2089,10 +2089,10 @@ h2,
   overflow: hidden;
   border: 2px solid var(--border-strong);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-  transform: rotate(var(--head-tilt, 0deg)) translateY(var(--head-nod, 0px));
-  transition: border-color 0.25s ease;
-  will-change: transform;
-  background: #1a1512;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(61, 184, 168, 0.18), transparent 55%),
+    linear-gradient(165deg, #1a2e36 0%, #0c181c 100%);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .cam-face-live.live .cam-face-live-inner {
@@ -2100,214 +2100,35 @@ h2,
 }
 
 .cam-face-live.expr-speak .cam-face-live-inner {
-  border-color: rgba(61, 184, 168, 0.8);
+  border-color: rgba(61, 184, 168, 0.85);
   box-shadow:
     0 18px 48px rgba(0, 0, 0, 0.45),
-    0 0 32px rgba(61, 184, 168, 0.28);
+    0 0 36px rgba(61, 184, 168, 0.3);
 }
 
 .cam-face-live.expr-think .cam-face-live-inner {
   border-color: rgba(61, 184, 255, 0.5);
 }
 
-.cam-face-photo-stack {
-  position: absolute;
-  inset: 0;
+.cam-face-live.expr-listen .cam-face-live-inner {
+  animation: cam-face-listen-ring 2s var(--ease-pulse) infinite;
 }
 
-.cam-face-photo {
-  position: absolute;
-  inset: 0;
+.cam-face-svg {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
-  transform-origin: 50% 42%;
+  overflow: visible;
 }
 
-/* Soft jaw stretch layer over the mouth region while speaking */
-.cam-face-jaw-warp {
-  position: absolute;
-  inset: 0;
-  clip-path: inset(58% 8% 8% 8%);
-  z-index: 1;
-  pointer-events: none;
-  opacity: calc(0.35 + var(--jaw, 0) * 0.65);
-  transform: translateY(calc(var(--jaw, 0) * 4%)) scaleY(calc(1 + var(--jaw, 0) * 0.14));
-  transform-origin: 50% 62%;
-}
-
-.cam-face-jaw {
-  filter: blur(0.3px);
-}
-
-.cam-face-live.expr-speak .cam-face-jaw-warp {
-  opacity: calc(0.5 + var(--jaw, 0) * 0.5);
-}
-
-.cam-face-brow {
-  position: absolute;
-  top: 36%;
-  width: 14%;
-  height: 1.8%;
-  border-radius: 50%;
-  background: rgba(32, 22, 16, 0.45);
-  z-index: 3;
-  transform: translateY(calc(var(--brow, 0) * -5px)) rotate(calc(var(--brow, 0) * -8deg));
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.cam-face-brow.left {
-  left: 28%;
-  transform: translateY(calc(var(--brow, 0) * -5px)) rotate(calc(var(--brow, 0) * -10deg));
-}
-
-.cam-face-brow.right {
-  right: 28%;
-  left: auto;
-  transform: translateY(calc(var(--brow, 0) * -5px)) rotate(calc(var(--brow, 0) * 10deg));
-}
-
-.cam-face-lid {
-  position: absolute;
-  top: 42%;
-  width: 13%;
-  height: calc(3% + var(--lid, 0) * 7%);
-  border-radius: 50%;
-  background: linear-gradient(180deg, rgba(20, 14, 12, 0.55), rgba(20, 14, 12, 0.15));
-  z-index: 3;
-  opacity: calc(0.15 + var(--lid, 0) * 0.85);
-  transform: translateX(calc(var(--gaze-x, 0) * 4px));
-  pointer-events: none;
-}
-
-.cam-face-lid.left {
-  left: 28.5%;
-}
-
-.cam-face-lid.right {
-  right: 28.5%;
-  left: auto;
-}
-
-.cam-face-cheek {
-  position: absolute;
-  top: 54%;
-  width: 12%;
-  height: 8%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(220, 110, 110, 0.35), transparent 70%);
-  z-index: 2;
-  opacity: calc(0.2 + var(--smile, 0) * 0.5 + var(--mouth-open, 0) * 0.25);
-  pointer-events: none;
-}
-
-.cam-face-cheek.left {
-  left: 20%;
-}
-
-.cam-face-cheek.right {
-  right: 20%;
-  left: auto;
-}
-
-.cam-face-mouth-cover {
-  position: absolute;
-  left: 50%;
-  top: 55.5%;
-  width: 30%;
-  height: 9%;
-  translate: -50% 0;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 50% 40%,
-    rgba(214, 176, 156, 0.95),
-    rgba(214, 176, 156, 0.5) 55%,
-    transparent 78%
-  );
-  z-index: 4;
-  pointer-events: none;
-  filter: blur(2px);
-  opacity: calc(0.65 + var(--mouth-open, 0) * 0.35);
-}
-
-.cam-face-mouth {
-  position: absolute;
-  left: 50%;
-  top: var(--mouth-y, 59%);
-  width: var(--mouth-w, 22%);
-  height: var(--mouth-h, 3%);
-  translate: -50% -40%;
-  border-radius: var(--mouth-round, 40%);
-  background: #2a1016;
-  z-index: 5;
-  overflow: hidden;
-  opacity: 1;
-  box-shadow:
-    0 0 0 1px rgba(168, 90, 100, 0.7),
-    0 1px 2px rgba(0, 0, 0, 0.25),
-    inset 0 2px 4px rgba(0, 0, 0, 0.5);
-  transition:
-    width 0.04s linear,
-    height 0.04s linear,
-    border-radius 0.04s linear,
-    top 0.04s linear;
-}
-
-.cam-face-lips {
-  position: absolute;
-  inset: -18%;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 2px rgba(190, 100, 115, 0.55);
-  pointer-events: none;
-}
-
-.cam-face-live.expr-idle .cam-face-mouth,
-.cam-face-live.expr-listen .cam-face-mouth {
-  opacity: 0.85;
-  height: max(2.2%, var(--mouth-h, 3%));
-  box-shadow:
-    0 0 0 1px rgba(176, 96, 110, 0.55),
-    inset 0 1px 2px rgba(0, 0, 0, 0.35);
-}
-
-.cam-face-live.expr-speak .cam-face-mouth,
-.cam-face-live.mouth-open .cam-face-mouth {
-  opacity: 1;
-  background: #3a121c;
-  box-shadow:
-    0 0 0 2px rgba(200, 110, 125, 0.85),
-    0 0 12px rgba(180, 70, 90, 0.35),
-    inset 0 4px 6px rgba(0, 0, 0, 0.55);
-}
-
-.cam-face-mouth-inner {
-  position: absolute;
-  left: 50%;
-  top: 48%;
-  width: 62%;
-  height: 58%;
-  translate: -50% -40%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 25%, #a04050, #4a1520 72%);
-}
-
-.cam-face-teeth {
-  position: absolute;
-  left: 50%;
-  top: 8%;
-  width: 78%;
-  height: 32%;
-  translate: -50% 0;
-  border-radius: 18% / 45%;
-  background: linear-gradient(180deg, #fff8f0, #e6ddd2 70%, #cfc4b8);
-  box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.2);
-}
-
-.cam-face-mouth.viseme-smile {
-  box-shadow:
-    inset 0 2px 3px rgba(0, 0, 0, 0.35),
-    0 2px 0 rgba(180, 80, 90, 0.15);
+@keyframes cam-face-listen-ring {
+  0%,
+  100% {
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(61, 184, 168, 0.25);
+  }
+  50% {
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), 0 0 0 6px rgba(61, 184, 168, 0.12);
+  }
 }
 
 .cam-avatar-face {
@@ -2318,48 +2139,11 @@ h2,
   border: 2px solid var(--border-strong);
   display: block;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-  animation: cam-idle-sway 6s var(--ease-pulse) infinite;
 }
 
-.cam-avatar-stage.live .cam-avatar-face {
-  border-color: var(--teal-soft);
-  animation: cam-listen-bob 1.8s var(--ease-pulse) infinite;
-}
-
-.cam-avatar-stage.status-speaking .cam-avatar-face {
-  animation: cam-speak-bob 0.42s var(--ease-pulse) infinite;
-}
-
-.cam-avatar-stage.typing .cam-avatar-face {
-  animation: cam-type-nod 0.7s var(--ease-pulse) infinite;
-}
-
-.cam-avatar-mouth {
-  display: none;
-}
-
+.cam-avatar-mouth,
 .cam-avatar-eyes {
   display: none;
-}
-
-@keyframes cam-face-speak-micro {
-  0%,
-  100% {
-    transform: scale(1) translateY(0);
-  }
-  50% {
-    transform: scale(1.012) translateY(-1px);
-  }
-}
-
-@keyframes cam-face-listen-micro {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-2px);
-  }
 }
 
 .cam-avatar-name {
