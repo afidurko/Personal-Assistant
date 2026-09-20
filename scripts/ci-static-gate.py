@@ -15,6 +15,7 @@ import cam_inproc  # noqa: E402
 
 CHECKS: list[tuple[str, str, list[str]]] = [
     ("connectome-check", "connectome-check.py", []),
+    ("workspace-integration-check", "workspace-integration-check.py", []),
     ("connectome-anatomy-check", "connectome-anatomy-check.py", []),
     ("trajectory-policy-check", "trajectory-policy-check.py", []),
     ("memory-tier-check", "memory-tier-check.py", []),

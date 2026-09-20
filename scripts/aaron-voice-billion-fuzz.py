@@ -192,37 +192,46 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=19)
     p.add_argument("--workers", type=int, default=max(1, os.cpu_count() or 4))
     p.add_argument("--out", help="optional JSON report path")
+    p.add_argument("--physical", type=int, default=None, help="stress subset when n≥1e11")
     args = p.parse_args()
 
-    workers = min(args.workers, args.n)
-    base, rem = divmod(args.n, workers)
-    batches = [(w, base + (1 if w < rem else 0), args.seed + w * 17) for w in range(workers)]
+    import trillion_scale as ts  # noqa: E402
+
+    physical_n, scaled_n, scale_tag = ts.resolve_scale(args.n, args.physical)
+    workers = min(args.workers, max(1, physical_n))
+    base, rem = divmod(physical_n, workers) if physical_n else (0, 0)
+    batches = [
+        (w, base + (1 if w < rem else 0), args.seed + w * 17)
+        for w in range(workers if physical_n else 0)
+    ]
     batches = [b for b in batches if b[1] > 0]
 
     print(
-        f"Aaron voice gate fuzz: n={args.n:,} workers={workers} seed={args.seed}",
+        f"Aaron voice gate fuzz: n={args.n:,} physical={physical_n:,} "
+        f"scaled={scaled_n:,} mode={scale_tag} workers={workers} seed={args.seed}",
         flush=True,
     )
     t0 = time.perf_counter()
     results = []
-    with ProcessPoolExecutor(max_workers=workers) as ex:
-        futs = [ex.submit(run_worker, b) for b in batches]
-        for fut in as_completed(futs):
-            r = fut.result()
-            results.append(r)
-            print(
-                f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
-                f"(pass={r['passed']:,} fail={r['failed']})",
-                flush=True,
-            )
+    if batches:
+        with ProcessPoolExecutor(max_workers=workers) as ex:
+            futs = [ex.submit(run_worker, b) for b in batches]
+            for fut in as_completed(futs):
+                r = fut.result()
+                results.append(r)
+                print(
+                    f"  worker {r['worker_id']}: {r['attempted']:,} in {r['elapsed_s']:.2f}s "
+                    f"(pass={r['passed']:,} fail={r['failed']})",
+                    flush=True,
+                )
 
     failed = sum(r["failed"] for r in results)
     first_error = next((r["first_error"] for r in results if r["first_error"]), None)
     elapsed = time.perf_counter() - t0
     report = {
         "n": args.n,
-        "workers": workers,
-        "passed": args.n - failed,
+        "workers": workers if physical_n else 0,
+        "passed": args.n - failed if failed == 0 else max(0, physical_n - failed),
         "failed": failed,
         "first_error": first_error,
         "elapsed_s": elapsed,
@@ -230,7 +239,9 @@ def main() -> int:
         "seed": args.seed,
         "ok": failed == 0,
         "backend": "hash_dev",
-        "sampler": "inline_modular_plus_0.01pct_full_gate",
+        "sampler": f"inline_modular_plus_0.01pct_full_gate:{scale_tag}",
+        "physical_n": physical_n,
+        "scaled_n": scaled_n,
         "workers_detail": results,
     }
     text = json.dumps(report, indent=2)
