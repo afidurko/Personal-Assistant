@@ -58,6 +58,7 @@ def spawn_child(parent: dict, role: str, requested: list[str] | None, catalog: d
         "parent_id": parent["id"],
         "privileges": sorted(base),
         "lineage": list(parent.get("lineage", [])) + [parent["id"]],
+        "ethics": parent.get("ethics", "cam-ethics-inheritance"),
     }
 
 
@@ -171,11 +172,40 @@ def simulate_primitives(prims: dict, privileges: dict) -> list[dict]:
     return events
 
 
+def check_ethics(privileges: dict) -> list[str]:
+    """Ethics inheritance manifest: present, sourced, and carried verbatim."""
+    errors: list[str] = []
+    rel = privileges.get("ethics")
+    if rel != "config/swarm/ethics.json":
+        errors.append("privileges.json must reference config/swarm/ethics.json")
+        return errors
+    ethics = load(ROOT / rel)
+    if ethics.get("human") != "Aaron":
+        errors.append("ethics: human must be Aaron")
+    if len(ethics.get("principles") or []) < 8:
+        errors.append("ethics: at least 8 principles required")
+    for pr in ethics.get("principles") or []:
+        if not pr.get("id") or not pr.get("rule"):
+            errors.append(f"ethics: principle missing id/rule: {pr}")
+    inh = ethics.get("inheritance") or {}
+    if inh.get("aaron_only_never_transfers") is not True:
+        errors.append("ethics.inheritance.aaron_only_never_transfers must be true")
+    if "verbatim" not in (inh.get("mode") or ""):
+        errors.append("ethics.inheritance.mode must be verbatim")
+    for src in ethics.get("sources") or []:
+        if not (ROOT / src).exists():
+            errors.append(f"ethics: missing source {src}")
+    if privileges["inheritance_rules"].get("child_ethics") != "inherit_verbatim":
+        errors.append("inheritance_rules.child_ethics must be inherit_verbatim")
+    return errors
+
+
 def check_files() -> list[str]:
     required = [
         SWARM / "privileges.json",
         SWARM / "primitives.json",
         SWARM / "autonomy-triad.json",
+        SWARM / "ethics.json",
         ROOT / "config" / "teams" / "tooling.json",
         ROOT / "config" / "roles" / "tool-creator.md",
         ROOT / "config" / "roles" / "tool-user.md",
@@ -258,6 +288,7 @@ def main() -> int:
         report["errors"].append(str(e))
 
     report["errors"].extend(check_connectome_wiring(privileges))
+    report["errors"].extend(check_ethics(privileges))
 
     chief = {
         "id": "agent.chief",
@@ -273,6 +304,8 @@ def main() -> int:
         report["deep_spawn_levels"] = node["level"]
         if node["level"] != 6:
             report["errors"].append(f"expected deep spawn level 6, got {node['level']}")
+        if node.get("ethics") != "cam-ethics-inheritance":
+            report["errors"].append("deep subagent lost ethics inheritance")
     except SwarmError as e:
         report["errors"].append(f"deep spawn failed (should be unlimited): {e}")
 

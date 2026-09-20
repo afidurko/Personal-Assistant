@@ -94,8 +94,11 @@ Integration process (each step lands as its own PR with an exit check):
    checksums, refuses when egress is blocked (offline mode reports what is
    missing). Weights are opt-in downloads, like VoiceStudio's OmniVoice rule.
 2. **Avatar service** — `scripts/cam-avatar-server.py` (localhost, sibling of
-   `scripts/cam-converse-server.py`): `POST /avatar/speak {text}` → returns a
-   stream id; WebSocket streams frames/blendshape packets to the home UI.
+   `scripts/cam-converse-server.py`): `POST /avatar/speak {text}` → AvatarFrame
+   timeline to the home UI. **Landed at tier 0**: `scripts/cam_avatar.py`
+   procedural engine (15 visemes, co-articulation, blink/gaze/brow micro-life,
+   ARKit-52 sparse frames) drives the Home Live SVG rig today; MuseTalk /
+   LivePortrait upgrade the same endpoints in place when weights land.
 3. **Connectome wiring** — new nodes `motor.avatar` (channel `hf_realtime`),
    `sense.avatar.state`, `hotspot.avatar`; gated by `switch.presence`, silenced
    by `switch.kill`. Mirrors the VoiceStudio motor pattern.
@@ -226,6 +229,9 @@ Tier 2 studio bring-up on Aaron's GPU machine; Tier 3 Higgsfield fine-tune of th
 python3 scripts/build-plan-check.py            # plan ↔ repo consistency
 python3 scripts/build-plan-check.py --json     # machine-readable report
 python3 scripts/auto-sync.py                   # inbound drift from all projects/repos
-python3 -m unittest scripts.test_build_plan    # unit tests
-python3 scripts/cam-system.py --smoke          # whole organism, includes piece.build_plan + piece.auto_sync
+python3 scripts/swarm-check.py                 # privileges + ethics inheritance drill
+python3 scripts/cam-home-live.py               # live app → http://127.0.0.1:8790
+python3 scripts/cam-avatar-server.py           # AvatarFrame service → :8791
+python3 -m unittest scripts.test_build_plan scripts.test_cam_avatar scripts.test_cam_home_live
+python3 scripts/cam-system.py --smoke          # whole organism, includes piece.build_plan + piece.auto_sync + piece.avatar
 ```

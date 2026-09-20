@@ -194,9 +194,11 @@
       ]
     }
   },
+  "ethics": "config/swarm/ethics.json",
   "inheritance_rules": {
     "child_level": "parent.level + 1",
     "child_privileges": "subset_of_parent",
+    "child_ethics": "inherit_verbatim",
     "cannot_escalate": true,
     "cannot_grant_aaron_only": true,
     "spawn_one_level_below_only": true,

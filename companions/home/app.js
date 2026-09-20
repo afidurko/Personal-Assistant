@@ -184,6 +184,79 @@ $("refreshBtn").addEventListener("click", async () => {
   setTimeout(loadStatus, 8000);
 });
 
+/* ---- AvatarFrame rig (tier 0 procedural) ---- */
+
+const rig = {
+  browL: $("browL"), browR: $("browR"),
+  lidL: $("lidL"), lidR: $("lidR"),
+  irisL: $("irisL"), irisR: $("irisR"),
+  mouth: $("mouth"), teeth: $("teeth"),
+  caption: $("rigCaption"),
+};
+let speaking = false;
+
+function applyFrame(bs) {
+  const g = (k) => bs[k] || 0;
+  const blink = Math.max(g("eyeBlinkLeft"), g("eyeBlinkRight"));
+  rig.lidL.setAttribute("transform", `scale(1,${blink})`);
+  rig.lidR.setAttribute("transform", `scale(1,${blink})`);
+  const browUp = g("browInnerUp") * 3.2 - Math.max(g("browDownLeft"), g("browDownRight")) * 2.2;
+  rig.browL.setAttribute("transform", `translate(0,${-browUp})`);
+  rig.browR.setAttribute("transform", `translate(0,${-browUp})`);
+  const gaze = (g("eyeLookOutRight") - g("eyeLookOutLeft")) * 10;
+  rig.irisL.setAttribute("cx", 35 + gaze);
+  rig.irisR.setAttribute("cx", 65 + gaze);
+  const jaw = g("jawOpen");
+  const pucker = g("mouthPucker") + g("mouthFunnel") * 0.6;
+  const stretch = Math.max(g("mouthStretchLeft"), g("mouthStretchRight"));
+  const smile = Math.max(g("mouthSmileLeft"), g("mouthSmileRight"));
+  rig.mouth.setAttribute("ry", (2.2 + jaw * 14).toFixed(2));
+  rig.mouth.setAttribute("rx", (11 - pucker * 4.5 + stretch * 3 + smile * 1.5).toFixed(2));
+  rig.mouth.setAttribute("cy", (80 + jaw * 2.5).toFixed(2));
+  rig.teeth.setAttribute("opacity", jaw > 0.3 ? "0.9" : "0");
+}
+
+function playTimeline(tl) {
+  speaking = true;
+  $("portrait").classList.add("speaking");
+  rig.caption.textContent = `speaking · ${tl.fps} fps · ${tl.duration_s}s`;
+  const t0 = performance.now();
+  function step(now) {
+    const idx = Math.min(Math.floor(((now - t0) / 1000) * tl.fps), tl.frames.length - 1);
+    applyFrame(tl.frames[idx].blendshapes);
+    if (idx < tl.frames.length - 1) requestAnimationFrame(step);
+    else {
+      speaking = false;
+      $("portrait").classList.remove("speaking");
+      rig.caption.textContent = "idle";
+      applyFrame({});
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+$("speakForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const text = $("speakText").value.trim();
+  if (!text || speaking) return;
+  const r = await fetch("/api/avatar/speak", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text, emotion: "warm" }),
+  });
+  const tl = await r.json();
+  if (tl.frames) playTimeline(tl);
+});
+
+/* idle micro-life: blink every 3–5 s when not speaking */
+(function idleBlink() {
+  if (!speaking) {
+    applyFrame({ eyeBlinkLeft: 1, eyeBlinkRight: 1 });
+    setTimeout(() => { if (!speaking) applyFrame({}); }, 130);
+  }
+  setTimeout(idleBlink, 3000 + Math.random() * 2000);
+})();
+
 loadStatus();
 loadSuggestions();
 setInterval(loadStatus, 90000);

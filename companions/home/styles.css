@@ -41,6 +41,18 @@ html, body {
   97.5%, 98.5% { transform: scaleY(1); }
 }
 
+.rig { margin: 0; width: 96px; text-align: center; }
+.rig svg { width: 92px; height: 101px; filter: drop-shadow(0 4px 14px rgba(0,0,0,.35)); }
+.rig .meta { margin: .1rem 0 0; font-size: .72rem; }
+.portrait.speaking { box-shadow: 0 0 0 3px rgba(111,184,176,.35), 0 6px 24px rgba(0,0,0,.35); }
+
+.speakrow { display: flex; gap: .45rem; margin-top: .45rem; }
+.speakrow input { background: rgba(243,239,230,.06); border: 1px solid var(--line); color: var(--ink);
+  border-radius: .5rem; padding: .32rem .55rem; font: inherit; font-size: .85rem; width: 15rem; }
+.speakrow button { background: var(--teal); color: #14201e; border: none; border-radius: .5rem;
+  padding: .32rem .8rem; font: inherit; font-weight: 700; cursor: pointer; }
+.speakrow button:hover { filter: brightness(1.08); }
+
 .brand h1 { margin: 0; font-size: 1.9rem; letter-spacing: .02em; }
 .tag { margin: .1rem 0 0; color: var(--accent); font-size: .95rem; }
 .who { margin: .15rem 0 0; color: var(--mute); font-size: .85rem; }

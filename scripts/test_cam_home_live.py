@@ -97,6 +97,18 @@ class CamHomeLiveTests(unittest.TestCase):
         texts = [s["text"] for s in json.loads(body)["suggestions"]]
         self.assertIn(marker, texts)
 
+    def test_avatar_speak_endpoint(self) -> None:
+        status, out = self._post(
+            "/api/avatar/speak", {"text": "Hello Aaron", "emotion": "warm"}
+        )
+        self.assertEqual(status, 200)
+        self.assertEqual(out["contract"], "AvatarFrame")
+        self.assertGreaterEqual(out["fps"], 25)
+        self.assertTrue(out["frames"])
+        status, body = self._get("/api/avatar/contract")
+        self.assertEqual(status, 200)
+        self.assertEqual(len(json.loads(body)["blendshape_keys"]), 52)
+
     def test_traversal_blocked(self) -> None:
         try:
             status, _ = self._get("/../package.json")

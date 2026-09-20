@@ -11,14 +11,46 @@
   <main class="stage">
     <header class="hero">
       <div class="presence">
-        <div class="portrait">
+        <div class="portrait" id="portrait">
           <img id="camFace" src="/face.jpg" alt="Cam" />
           <div class="lids" aria-hidden="true"></div>
         </div>
+        <figure class="rig" title="AvatarFrame rig — tier 0 procedural">
+          <svg id="rigSvg" viewBox="0 0 100 110" aria-label="Cam avatar rig">
+            <ellipse cx="50" cy="58" rx="34" ry="40" fill="#e8c39e"/>
+            <path d="M14 52 Q10 14 50 10 Q90 14 86 52 Q84 30 50 24 Q16 30 14 52 Z" fill="#5b4232"/>
+            <path d="M14 52 Q12 70 20 82 L22 60 Q16 56 14 52 Z" fill="#5b4232"/>
+            <path d="M86 52 Q88 70 80 82 L78 60 Q84 56 86 52 Z" fill="#5b4232"/>
+            <rect id="browL" x="27" y="42" width="16" height="3.2" rx="1.6" fill="#4a352a"/>
+            <rect id="browR" x="57" y="42" width="16" height="3.2" rx="1.6" fill="#4a352a"/>
+            <g>
+              <ellipse cx="35" cy="53" rx="7.5" ry="4.6" fill="#fff"/>
+              <circle id="irisL" cx="35" cy="53" r="3.1" fill="#4f7fb5"/>
+              <circle cx="35" cy="53" r="1.3" fill="#1a2228"/>
+              <rect id="lidL" x="27" y="47.5" width="16" height="11" fill="#e8c39e" transform="scale(1,0)" transform-origin="35 48"/>
+            </g>
+            <g>
+              <ellipse cx="65" cy="53" rx="7.5" ry="4.6" fill="#fff"/>
+              <circle id="irisR" cx="65" cy="53" r="3.1" fill="#4f7fb5"/>
+              <circle cx="65" cy="53" r="1.3" fill="#1a2228"/>
+              <rect id="lidR" x="57" y="47.5" width="16" height="11" fill="#e8c39e" transform="scale(1,0)" transform-origin="65 48"/>
+            </g>
+            <path d="M48 62 Q50 66 52 62" stroke="#c99b76" stroke-width="1.6" fill="none"/>
+            <g id="mouthG">
+              <ellipse id="mouth" cx="50" cy="80" rx="11" ry="2.2" fill="#8f4a44"/>
+              <rect id="teeth" x="42" y="76.5" width="16" height="2.6" rx="1.2" fill="#f6f1e6" opacity="0"/>
+            </g>
+          </svg>
+          <figcaption class="meta" id="rigCaption">idle</figcaption>
+        </figure>
         <div class="brand">
           <h1>Cam</h1>
           <p class="tag">home live · mission control</p>
           <p class="who">operator: <strong>Aaron</strong> · kill switch always wins</p>
+          <form id="speakForm" class="speakrow">
+            <input id="speakText" type="text" placeholder="Have Cam mouth a line… (tier 0)" />
+            <button type="submit">speak</button>
+          </form>
         </div>
       </div>
       <nav class="links">

@@ -28,6 +28,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import cam_avatar  # noqa: E402
+
 HOME_WEB = ROOT / "companions" / "home"
 CONVERSE_WEB = ROOT / "companions" / "web"
 CONNECTOME_WEB = ROOT / "visualizations" / "connectome"
@@ -180,6 +183,8 @@ class Handler(BaseHTTPRequestHandler):
         p = urlparse(self.path).path
         if p == "/api/home/status":
             self._json(get_status())
+        elif p == "/api/avatar/contract":
+            self._json(cam_avatar.contract())
         elif p == "/api/home/suggestions":
             self._json({"suggestions": list_suggestions()})
         elif p == "/api/home/health":
@@ -201,7 +206,13 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(raw.decode("utf-8"))
         except Exception:
             body = {}
-        if p == "/api/home/suggest":
+        if p == "/api/avatar/speak":
+            text = (body.get("text") or "").strip()
+            if not text:
+                self._json({"ok": False, "error": "text required"}, 400)
+                return
+            self._json(cam_avatar.timeline(text[:1200], body.get("emotion", "warm")))
+        elif p == "/api/home/suggest":
             text = (body.get("text") or "").strip()
             if not text:
                 self._json({"ok": False, "error": "text required"}, 400)

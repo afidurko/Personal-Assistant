@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import cam_workspaces as cw  # noqa: E402
 
 TEAM_PATH = ROOT / "config" / "teams" / "needs-attention.json"
+SUGGESTIONS_PATH = ROOT / "vault" / "00-Inbox" / "home-suggestions.jsonl"
 OUT_DEFAULT = ROOT / "vault" / "10-Mesh-Distillates" / "needs-attention" / "latest.json"
 MESH_NS = "mesh/needs-attention"
 COMPLETED_DEFAULT = (
@@ -110,6 +111,29 @@ def build_attention_items(rows: list[dict[str, Any]], team: dict[str, Any]) -> l
                 ),
             }
         )
+
+    # Aaron's Home Live suggestions become dispatchable attention items
+    if SUGGESTIONS_PATH.exists():
+        for line in SUGGESTIONS_PATH.read_text(encoding="utf-8").splitlines():
+            try:
+                sug = json.loads(line)
+            except Exception:
+                continue
+            if sug.get("status") != "queued":
+                continue
+            items.append(
+                {
+                    "id": f"suggestion-{sug.get('id')}",
+                    "kind": "suggestion",
+                    "severity": "high",
+                    "title": f"Aaron suggestion: {str(sug.get('text', ''))[:80]}",
+                    "detail": f"queued {sug.get('at')} via Cam Home Live",
+                    "auto_clearable": False,
+                    "aaron_gate": False,
+                    "workspace_id": "personal-assistant",
+                    "suggestion": "triage into a ticket; report back on the home queue",
+                }
+            )
 
     # Standing Aaron-gated reminders (never auto-clear)
     items.append(
