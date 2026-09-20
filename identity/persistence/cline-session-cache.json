@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T04:14:44.860406+00:00",
+    "at": "2026-09-20T14:39:19.936954+00:00",
     "mode": "act",
-    "summary": "Instinct v2: ask tracking, monitors, snooze/priority, sync inbox seam, markdown brief, 20 unit tests, MCP tools, L1 loop + nightly schedule, Needs Attention escalations; all checks green",
+    "summary": "Instinct bug-fix pass: naive-UTC timestamps, sync job-leak rollback, note/wait validation, snooze double-count, overdue nudge cooldown; 25 tests green",
     "workspace": "."
   },
   "mesh_notes": [

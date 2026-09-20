@@ -181,6 +181,59 @@ class SyncTests(InstinctBase):
         self.assertTrue((inbox / "bad.json").exists())  # left for inspection
 
 
+class RegressionTests(InstinctBase):
+    def test_naive_timestamps_are_utc_regardless_of_host_tz(self):
+        import time
+        old_tz = os.environ.get("TZ")
+        os.environ["TZ"] = "America/New_York"
+        time.tzset()
+        try:
+            dt = instinct.parse_ts("2026-09-18T00:00:00")
+            self.assertEqual((dt.hour, dt.utcoffset().total_seconds()), (0, 0))
+        finally:
+            if old_tz is None:
+                os.environ.pop("TZ", None)
+            else:
+                os.environ["TZ"] = old_tz
+            time.tzset()
+
+    def test_sync_bad_reply_to_does_not_leak_job(self):
+        inbox = self.data() / "inbox"
+        inbox.mkdir(parents=True)
+        (inbox / "bad.json").write_text(json.dumps({
+            "from": "sense.x", "text": "hi",
+            "job": "Leaky job", "reply_to": "nonexistent",
+        }))
+        out = run("--now", T0, "sync")
+        self.assertEqual(len(out["skipped"]), 1)
+        self.assertEqual(run("job", "list"), [])
+
+    def test_overdue_draft_respects_cooldown_but_stays_in_findings(self):
+        run("--now", T0, "job", "add", "Overdue thing", "--due", "2026-09-14T10:00:00Z")
+        first = run("--now", "2026-09-14T11:00:00Z", "scan", "--write")
+        self.assertEqual(len(first["drafts"]), 1)
+        soon = run("--now", "2026-09-14T12:00:00Z", "scan", "--write")
+        self.assertEqual(soon["drafts"], [])  # cooldown: no second nudge 1h later
+        self.assertEqual(soon["findings"][0]["kind"], "overdue")  # still reported
+        later = run("--now", "2026-09-16T09:00:00Z", "scan", "--write")
+        self.assertEqual(len(later["drafts"]), 1)
+
+    def test_snoozed_job_not_double_counted_as_open(self):
+        add = run("--now", T0, "job", "add", "Snoozed thing")
+        run("--now", T0, "job", "snooze", add["job"], "--until", "2026-09-20T00:00:00Z")
+        rep = run("--now", "2026-09-15T09:00:00Z", "report")
+        self.assertEqual(rep["open"], [])
+        self.assertEqual(rep["jobs"]["snoozed"], 1)
+        self.assertEqual(rep["snoozed"][0]["until"], "2026-09-20T00:00:00Z")
+
+    def test_job_note_and_wait_require_text(self):
+        add = run("--now", T0, "job", "add", "Some job")
+        for action in ("note", "wait"):
+            with self.assertRaises(SystemExit) as ctx:
+                run("--now", T0, "job", action, add["job"])
+            self.assertNotEqual(ctx.exception.code, 0)
+
+
 class ReportBriefDoctorTests(InstinctBase):
     def test_report_counts_and_sections(self):
         run("--now", T0, "ingest", "--text", "Can you book the dentist?")

@@ -86,7 +86,7 @@ def escalations_path() -> Path:
 
 def now_utc(override: str | None = None) -> datetime:
     if override:
-        return datetime.fromisoformat(override.replace("Z", "+00:00")).astimezone(timezone.utc)
+        return parse_ts(override)
     return datetime.now(timezone.utc)
 
 
@@ -95,7 +95,11 @@ def iso(dt: datetime) -> str:
 
 
 def parse_ts(s: str) -> datetime:
-    return datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(timezone.utc)
+    dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        # Naive inputs (e.g. --until 2026-09-18) are UTC, never host-local time.
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 def load_config() -> dict:
@@ -241,6 +245,7 @@ def cmd_sync(args: argparse.Namespace) -> int:
     processed_dir = inbox / "processed"
     folded, skipped = [], []
     for path in sorted(inbox.glob("*.json")):
+        jobs_checkpoint = len(ledger["jobs"])
         try:
             event = json.loads(path.read_text(encoding="utf-8"))
             sender = str(event.get("from") or "sense")
@@ -256,6 +261,8 @@ def cmd_sync(args: argparse.Namespace) -> int:
                                  reply_to=event.get("reply_to"))
             folded.append({"file": path.name, "message": msg["id"], "job": job_id})
         except (KeyError, ValueError, SystemExit) as exc:
+            # Roll back any job created before the event failed — no partial folds.
+            del ledger["jobs"][jobs_checkpoint:]
             skipped.append({"file": path.name, "error": str(exc)})
             continue
         processed_dir.mkdir(parents=True, exist_ok=True)
@@ -403,7 +410,11 @@ def scan_findings(ledger: dict, ts: datetime, write: bool) -> tuple[list[dict], 
         kind = "overdue" if overdue else "stale"
         findings.append({"job": job["id"], "title": job["title"], "kind": kind, "detail": reason})
         emit_spike(kind, {"job": job["id"], "title": job["title"]}, ts)
-        if write:
+        # Nudge cooldown: overdue jobs stay in findings every scan, but a new
+        # draft is written only once per window — no nightly nagging spiral.
+        cooled_down = (job.get("last_followup") is None
+                       or ts - parse_ts(job["last_followup"]) >= window)
+        if write and cooled_down:
             path = draft_followup(ledger, job, reason, ts)
             drafts.append(str(path))
             job["followups"] += 1
@@ -452,12 +463,16 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
 
 def report_doc(ledger: dict, ts: datetime) -> dict:
-    monitors = [j for j in ledger["jobs"] if j.get("recur_hours") and j["status"] != "done"]
-    open_jobs = [j for j in ledger["jobs"] if j["status"] == "open" and not j.get("recur_hours")]
-    waiting = [j for j in ledger["jobs"] if j["status"] == "waiting"]
+    def is_snoozed(j: dict) -> bool:
+        return bool(j.get("snooze_until")) and parse_ts(j["snooze_until"]) > ts
+
+    live = [j for j in ledger["jobs"] if j["status"] != "done"]
+    snoozed = [j for j in live if is_snoozed(j)]
+    monitors = [j for j in live if j.get("recur_hours") and not is_snoozed(j)]
+    open_jobs = [j for j in live
+                 if j["status"] == "open" and not j.get("recur_hours") and not is_snoozed(j)]
+    waiting = [j for j in live if j["status"] == "waiting" and not is_snoozed(j)]
     done = [j for j in ledger["jobs"] if j["status"] == "done"]
-    snoozed = [j for j in ledger["jobs"]
-               if j.get("snooze_until") and parse_ts(j["snooze_until"]) > ts and j["status"] != "done"]
     pending_drafts = sorted(p.name for p in outbox_dir().glob("*.md")) if outbox_dir().exists() else []
     escalations = []
     if escalations_path().exists():
@@ -475,6 +490,8 @@ def report_doc(ledger: dict, ts: datetime) -> dict:
                     for j in waiting],
         "monitors": [{"id": j["id"], "title": j["title"], "every_hours": j.get("recur_hours")}
                      for j in monitors],
+        "snoozed": [{"id": j["id"], "title": j["title"], "until": j.get("snooze_until")}
+                    for j in snoozed],
         "unanswered_asks": asks,
         "escalations": escalations,
         "pending_drafts": pending_drafts,
@@ -514,6 +531,8 @@ def cmd_brief(args: argparse.Namespace) -> int:
         lines.append(f"- waiting: {j['title']} — on {j.get('waiting_on')}")
     for j in doc["monitors"]:
         lines.append(f"- monitor: {j['title']} (every {j.get('every_hours')}h)")
+    for j in doc["snoozed"]:
+        lines.append(f"- snoozed: {j['title']} (until {j.get('until')})")
     lines.append("")
     if doc["pending_drafts"]:
         lines.append("## Pending follow-up drafts (review before any send)")
@@ -627,6 +646,10 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("job add requires a title")
     if args.cmd == "job" and args.action in ("note", "wait", "snooze", "done") and not args.id:
         parser.error(f"job {args.action} requires a job id")
+    if args.cmd == "job" and args.action == "note" and not args.title:
+        parser.error("job note requires the note text")
+    if args.cmd == "job" and args.action == "wait" and not args.title:
+        parser.error("job wait requires what the job is waiting on")
     return args.fn(args)
 
 
