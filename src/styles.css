@@ -2214,39 +2214,39 @@ h2,
 .cam-face-mouth-cover {
   position: absolute;
   left: 50%;
-  top: 58%;
-  width: 28%;
-  height: 10%;
+  top: 55.5%;
+  width: 30%;
+  height: 9%;
   translate: -50% 0;
   border-radius: 50%;
   background: radial-gradient(
     ellipse at 50% 40%,
-    rgba(214, 176, 156, 0.92),
-    rgba(214, 176, 156, 0.55) 55%,
-    transparent 75%
+    rgba(214, 176, 156, 0.95),
+    rgba(214, 176, 156, 0.5) 55%,
+    transparent 78%
   );
   z-index: 4;
   pointer-events: none;
-  filter: blur(1.5px);
-  opacity: calc(0.55 + var(--mouth-open, 0) * 0.45);
+  filter: blur(2px);
+  opacity: calc(0.65 + var(--mouth-open, 0) * 0.35);
 }
 
 .cam-face-mouth {
   position: absolute;
   left: 50%;
-  top: var(--mouth-y, 61%);
-  width: var(--mouth-w, 20%);
-  height: var(--mouth-h, 4%);
-  translate: -50% -35%;
-  border-radius: var(--mouth-round, 50%);
+  top: var(--mouth-y, 59%);
+  width: var(--mouth-w, 22%);
+  height: var(--mouth-h, 3%);
+  translate: -50% -40%;
+  border-radius: var(--mouth-round, 40%);
   background: #2a1016;
   z-index: 5;
   overflow: hidden;
   opacity: 1;
   box-shadow:
-    0 0 0 1.5px rgba(176, 96, 110, 0.75),
-    0 0 0 3px rgba(214, 160, 150, 0.35),
-    inset 0 3px 5px rgba(0, 0, 0, 0.55);
+    0 0 0 1px rgba(168, 90, 100, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px rgba(0, 0, 0, 0.5);
   transition:
     width 0.04s linear,
     height 0.04s linear,

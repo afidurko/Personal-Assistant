@@ -153,26 +153,26 @@ function mixPose(a: FacePose, b: FacePose, t: number): FacePose {
 
 /** Viseme → mouth ellipse geometry (percent of face). */
 function mouthGeom(v: VisemeId, open: number, spread: number, smile: number) {
-  // Tuned for cam-face.jpg circular cover crop — lips sit ~61% down
-  const baseW = 22 * spread;
-  const baseH = 3.5 + open * 22;
+  // Tuned for cam-face.jpg circular cover crop — natural lips ~58–60% down
+  const baseW = 24 * spread;
+  const baseH = 2.8 + open * 16;
   switch (v) {
     case 'closed':
-      return { w: baseW * 0.9, h: 2.2, round: 50, y: 61.5 };
+      return { w: baseW * 0.92, h: 2.0, round: 45, y: 59.2 };
     case 'smile':
-      return { w: baseW * 1.2, h: 3.5 + smile * 2, round: 55, y: 61.2 };
+      return { w: baseW * 1.18, h: 2.8 + smile * 1.5, round: 48, y: 58.8 };
     case 'wide':
-      return { w: baseW * 1.35, h: Math.max(7, baseH * 0.75), round: 40, y: 60.8 };
+      return { w: baseW * 1.32, h: Math.max(5.5, baseH * 0.7), round: 38, y: 58.5 };
     case 'round':
-      return { w: baseW * 0.7, h: Math.max(11, baseH), round: 50, y: 60.5 };
+      return { w: baseW * 0.62, h: Math.max(8, baseH * 0.95), round: 50, y: 58.2 };
     case 'narrow':
-      return { w: baseW * 0.65, h: Math.max(6, baseH * 0.5), round: 50, y: 61 };
+      return { w: baseW * 0.58, h: Math.max(4.5, baseH * 0.45), round: 48, y: 58.8 };
     case 'teeth':
-      return { w: baseW * 1.15, h: Math.max(6, baseH * 0.55), round: 28, y: 60.8 };
+      return { w: baseW * 1.12, h: Math.max(4.8, baseH * 0.5), round: 30, y: 58.5 };
     case 'open':
-      return { w: baseW * 1.05, h: Math.max(12, baseH), round: 44, y: 60.2 };
+      return { w: baseW * 1.02, h: Math.max(9, baseH), round: 40, y: 58.0 };
     default:
-      return { w: baseW * 0.95, h: Math.max(2.8, baseH * 0.3), round: 50, y: 61.5 };
+      return { w: baseW * 0.95, h: Math.max(2.2, baseH * 0.28), round: 46, y: 59.0 };
   }
 }
 
