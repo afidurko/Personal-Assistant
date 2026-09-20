@@ -9,28 +9,21 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import cam_inproc  # noqa: E402
 
 
 def route(enhance: bool) -> dict:
-    cmd = [
-        sys.executable,
-        str(ROOT / "scripts" / "connectome-route.py"),
-        "--sense",
-        "sense.chat.aaron",
-        "--goal",
-        "apply cam enhance functionality from AGI scan proposal",
-        "--hotspot",
-        "hotspot.cam_enhance",
-    ]
-    if enhance:
-        cmd.append("--enhance")
-    out = subprocess.check_output(cmd, text=True)
-    return json.loads(out)
+    return cam_inproc.route(
+        sense="sense.chat.aaron",
+        goal="apply cam enhance functionality from AGI scan proposal",
+        hotspot="hotspot.cam_enhance",
+        enhance=enhance,
+    )
 
 
 def main() -> int:

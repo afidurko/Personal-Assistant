@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -259,110 +258,54 @@ def main() -> int:
         )
 
     pr2_scan_server = (ROOT / "server/workspaces/index.ts").exists()
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import cam_inproc
+
     connectome_ok = False
     connectome_detail = ""
     try:
-        out = subprocess.check_output(
-            [sys.executable, str(ROOT / "scripts" / "connectome-check.py"), "--json"],
-            text=True,
-        )
-        report = json.loads(out)
+        report = cam_inproc.load_script("connectome-check.py").build_report()
         connectome_ok = bool(report.get("ok"))
         connectome_detail = f"senses={report.get('senses')} edges={report.get('edges')}"
     except Exception as exc:  # noqa: BLE001
         connectome_detail = str(exc)
 
-    # Route smoke for daily AGI + enhance gate
+    # Route smoke for daily AGI + enhance gate (in-process)
     route_ok = True
     route_notes = []
     try:
-        daily = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.clock.daily",
-                    "--goal",
-                    "daily agi scan",
-                ],
-                text=True,
-            )
-        )
+        daily = cam_inproc.route(sense="sense.clock.daily", goal="daily agi scan")
         if "motor.web_fetch" not in daily.get("motor_plan", []):
             route_ok = False
             route_notes.append("daily scan missing motor.web_fetch")
         if daily.get("switch_state", {}).get("switch.cam_enhance") != "hold":
             route_ok = False
             route_notes.append("cam_enhance should default hold")
-        hold = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.chat.aaron",
-                    "--hotspot",
-                    "hotspot.cam_enhance",
-                    "--goal",
-                    "apply enhance",
-                ],
-                text=True,
-            )
+        hold = cam_inproc.route(
+            sense="sense.chat.aaron",
+            hotspot="hotspot.cam_enhance",
+            goal="apply enhance",
         )
         if "motor.enhance" in hold.get("motor_plan", []):
             route_ok = False
             route_notes.append("enhance motor fired without --enhance")
-        scholar = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.web.scholar",
-                    "--goal",
-                    "scholar search",
-                ],
-                text=True,
-            )
-        )
+        scholar = cam_inproc.route(sense="sense.web.scholar", goal="scholar search")
         if "motor.web_fetch" not in scholar.get("motor_plan", []):
             route_ok = False
             route_notes.append("scholar pathway missing motor.web_fetch")
         if scholar.get("hotspot_id") != "hotspot.google_scholar":
             route_ok = False
             route_notes.append("scholar sense should hit hotspot.google_scholar")
-        mb = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.memorybear.hit",
-                    "--goal",
-                    "memorybear recall",
-                ],
-                text=True,
-            )
-        )
+        mb = cam_inproc.route(sense="sense.memorybear.hit", goal="memorybear recall")
         if "motor.memorybear" not in mb.get("motor_plan", []):
             route_ok = False
             route_notes.append("memorybear pathway missing motor.memorybear")
         if mb.get("hotspot_id") != "hotspot.memorybear_recall":
             route_ok = False
             route_notes.append("memorybear sense should hit hotspot.memorybear_recall")
-        public_apis = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.catalog.public_apis",
-                    "--goal",
-                    "find free weather api",
-                ],
-                text=True,
-            )
+        public_apis = cam_inproc.route(
+            sense="sense.catalog.public_apis",
+            goal="find free weather api",
         )
         if "motor.public_apis" not in public_apis.get("motor_plan", []):
             route_ok = False
@@ -370,18 +313,9 @@ def main() -> int:
         if public_apis.get("hotspot_id") != "hotspot.public_apis":
             route_ok = False
             route_notes.append("public-apis sense should hit hotspot.public_apis")
-        google_trends = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.catalog.google_trends",
-                    "--goal",
-                    "google trends election dataset",
-                ],
-                text=True,
-            )
+        google_trends = cam_inproc.route(
+            sense="sense.catalog.google_trends",
+            goal="google trends election dataset",
         )
         if "motor.google_trends" not in google_trends.get("motor_plan", []):
             route_ok = False
@@ -389,18 +323,9 @@ def main() -> int:
         if google_trends.get("hotspot_id") != "hotspot.google_trends":
             route_ok = False
             route_notes.append("google-trends sense should hit hotspot.google_trends")
-        inkbox = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.inkbox.event",
-                    "--goal",
-                    "inkbox agent identity email",
-                ],
-                text=True,
-            )
+        inkbox = cam_inproc.route(
+            sense="sense.inkbox.event",
+            goal="inkbox agent identity email",
         )
         if "motor.inkbox" not in inkbox.get("motor_plan", []):
             route_ok = False
@@ -408,18 +333,9 @@ def main() -> int:
         if inkbox.get("hotspot_id") != "hotspot.inkbox":
             route_ok = False
             route_notes.append("inkbox sense should hit hotspot.inkbox")
-        loop = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.loop.tick",
-                    "--goal",
-                    "daily triage loop engineering",
-                ],
-                text=True,
-            )
+        loop = cam_inproc.route(
+            sense="sense.loop.tick",
+            goal="daily triage loop engineering",
         )
         if "motor.loop" not in loop.get("motor_plan", []):
             route_ok = False

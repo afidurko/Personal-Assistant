@@ -118,18 +118,12 @@ def main() -> int:
         errors.append(f"search_smoke:{exc}")
 
     try:
-        route = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.catalog.google_trends",
-                    "--goal",
-                    "google trends election dataset",
-                ],
-                text=True,
-            )
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        route = cam_inproc.route(
+            sense="sense.catalog.google_trends",
+            goal="google trends election dataset",
         )
         if "motor.google_trends" not in route.get("motor_plan", []):
             errors.append("route missing motor.google_trends")

@@ -318,6 +318,10 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("_maybe_install_embodiment_deps", campaign)
         self.assertIn("embodiment_lite", campaign)
         self.assertIn("test_embodiment_lite.py", campaign)
+        self.assertIn("ci-static-gate.py", campaign)
+        self.assertIn("aaron-voice-billion-fuzz.py", campaign)
+        self.assertIn("public-apis-billion-fuzz.py", campaign)
+        self.assertIn("test_cam_converse_voice_gate", campaign)
 
     def test_cloud_agent_environment_json_present(self):
         env = ROOT / ".cursor" / "environment.json"

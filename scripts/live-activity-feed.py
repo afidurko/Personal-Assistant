@@ -59,7 +59,7 @@ def recent_event_rows(max_age_s: float = 120.0) -> list[dict]:
     return rows[-40:]
 
 
-def main() -> int:
+def write_live_activity() -> dict:
     neurons = load(CFG / "neurons.json", {}).get("neurons", [])
     tracts = load(CFG / "tracts.json", {}).get("tracts", [])
     health = load(HEALTH, {})
@@ -184,6 +184,11 @@ def main() -> int:
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    return report
+
+
+def main() -> int:
+    report = write_live_activity()
     print(f"live-activity: {report['firing_count']} firing · health={report['health_overall']}")
     print(f"wrote {OUT.relative_to(ROOT)}")
     return 0

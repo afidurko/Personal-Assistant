@@ -79,6 +79,52 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
             "elapsed_s": 0.0,
         }
 
+    # In-process route + converse overlays (finite space; once per worker).
+    try:
+        import cam_inproc
+
+        coding = cam_inproc.route(
+            sense="sense.chat.aaron",
+            goal="implement coding refactor with cline",
+        )
+        if coding.get("hotspot_id") != "hotspot.coding":
+            raise AssertionError("inproc_coding_hotspot")
+        if "motor.cline" not in (coding.get("motor_plan") or []):
+            raise AssertionError("inproc_coding_motor")
+        held = cam_inproc.route(
+            sense="sense.chat.aaron",
+            goal="apply enhance",
+            hotspot="hotspot.cam_enhance",
+        )
+        if "motor.enhance" in (held.get("motor_plan") or []):
+            raise AssertionError("inproc_enhance_leaked")
+
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "cam_converse_server", ROOT / "scripts" / "cam-converse-server.py"
+        )
+        if spec is None or spec.loader is None:
+            raise AssertionError("converse_load")
+        ccs = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ccs)
+        hi = ccs.converse_turn("hi cam")
+        if hi.get("route", {}).get("path") != "fast":
+            raise AssertionError("converse_greeting_not_fast")
+        see = ccs.converse_turn("can you see me")
+        if "Camera" not in (see.get("reply") or ""):
+            raise AssertionError("converse_see_me_overlay")
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "worker_id": worker_id,
+            "attempted": 0,
+            "passed": 0,
+            "failed": 1,
+            "first_error": f"inproc_converse:{type(exc).__name__}:{exc}",
+            "full_samples": 0,
+            "elapsed_s": 0.0,
+        }
+
     for i in range(count):
         mode = (i + seed) % 8
         try:

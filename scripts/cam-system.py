@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,16 +20,6 @@ OUT = ROOT / "vault" / "10-Mesh-Distillates" / "system-integration-latest.json"
 
 def utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def run(cmd: list[str], timeout: int = 90) -> tuple[int, str]:
-    try:
-        p = subprocess.run(
-            cmd, cwd=str(ROOT), capture_output=True, text=True, timeout=timeout
-        )
-        return p.returncode, ((p.stdout or "") + (p.stderr or "")).strip()
-    except Exception as e:
-        return 1, str(e)
 
 
 def path_status(rel: str) -> str:
@@ -82,33 +71,56 @@ def inventory() -> dict:
 
 
 def smoke_checks() -> list[dict]:
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import cam_inproc
+
     checks = []
-    for name, cmd in [
-        ("connectome-check", [sys.executable, "scripts/connectome-check.py"]),
-        ("swarm-check", [sys.executable, "scripts/swarm-check.py"]),
-        (
-            "workspace-integration-check",
-            [sys.executable, "scripts/workspace-integration-check.py"],
-        ),
-        (
-            "connectome-route-chat",
-            [
-                sys.executable,
-                "scripts/connectome-route.py",
-                "--sense",
-                "sense.chat.aaron",
-                "--goal",
-                "system smoke",
-            ],
-        ),
+    for name, filename, argv in [
+        ("connectome-check", "connectome-check.py", []),
+        ("swarm-check", "swarm-check.py", []),
+        ("workspace-integration-check", "workspace-integration-check.py", []),
     ]:
-        code, out = run(cmd)
+        try:
+            code, preview = cam_inproc.run_main_captured(filename, argv)
+            checks.append(
+                {
+                    "id": name,
+                    "ok": code == 0,
+                    "exit": code,
+                    "preview": (preview or "in-process")[:240],
+                }
+            )
+        except Exception as exc:  # noqa: BLE001
+            checks.append(
+                {
+                    "id": name,
+                    "ok": False,
+                    "exit": 1,
+                    "preview": str(exc)[:240],
+                }
+            )
+    try:
+        doc = cam_inproc.route(sense="sense.chat.aaron", goal="system smoke")
         checks.append(
             {
-                "id": name,
-                "ok": code == 0,
-                "exit": code,
-                "preview": out[:240],
+                "id": "connectome-route-chat",
+                "ok": bool(doc.get("accepted")),
+                "exit": 0 if doc.get("accepted") else 1,
+                "preview": json.dumps(
+                    {
+                        "hotspot_id": doc.get("hotspot_id"),
+                        "motor_plan": doc.get("motor_plan"),
+                    }
+                )[:240],
+            }
+        )
+    except Exception as exc:  # noqa: BLE001
+        checks.append(
+            {
+                "id": "connectome-route-chat",
+                "ok": False,
+                "exit": 1,
+                "preview": str(exc)[:240],
             }
         )
     return checks

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -47,27 +46,25 @@ def http_json(method: str, url: str, body: dict | None = None) -> tuple[int, dic
 
 
 def local_kernel_checks() -> list[dict]:
-    """Offline checks via Node vitest-equivalent: python route + cam-system."""
+    """Offline checks: in-process route + cam-system inventory."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import cam_inproc
+
     steps = []
-    code, out = subprocess.getstatusoutput(
-        f"{sys.executable} {ROOT / 'scripts/connectome-route.py'} "
-        f"--sense sense.chat.aaron --goal 'envelope'"
-    )
     try:
-        doc = json.loads(out)
+        doc = cam_inproc.route(sense="sense.chat.aaron", goal="envelope")
         ok = bool(doc.get("accepted"))
-    except json.JSONDecodeError:
+    except Exception:
         ok = False
     steps.append({"id": "python_route_chat", "ok": ok, "detail": "connectome-route accepted"})
 
-    code, out = subprocess.getstatusoutput(
-        f"{sys.executable} {ROOT / 'scripts/cam-system.py'} --json --no-write"
-    )
     try:
-        doc = json.loads(out)
-        ok = bool(doc.get("ok"))
-    except json.JSONDecodeError:
-        ok = code == 0
+        sys_mod = cam_inproc.load_script("cam-system.py")
+        inv = sys_mod.inventory()
+        missing = sys_mod.hard_paths()
+        ok = bool(inv.get("ok")) and not missing
+    except Exception:
+        ok = False
     steps.append({"id": "cam_system_inventory", "ok": ok, "detail": "pieces inventory"})
     return steps
 

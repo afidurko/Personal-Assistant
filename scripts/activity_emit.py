@@ -8,7 +8,6 @@ refreshes live-activity.json so the 3D mesh sees real agent/task fire.
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EVENTS = ROOT / "vault" / "10-Mesh-Distillates" / "activity-events.jsonl"
 FEED = ROOT / "scripts" / "live-activity-feed.py"
+_DUAL_CACHE: dict | None = None
 
 
 def utc() -> str:
@@ -52,28 +52,29 @@ def emit(
 
 
 def refresh_live_activity() -> None:
+    """Rebuild live-activity.json in-process (no python3 spawn)."""
     if not FEED.exists():
         return
     try:
-        subprocess.run(
-            [sys.executable, str(FEED)],
-            cwd=str(ROOT),
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        cam_inproc.load_script("live-activity-feed.py").write_live_activity()
     except Exception:
         pass
 
 
 def dual_stream(act: str) -> dict:
-    """Resolve dorsal/ventral winner from mesh-params."""
-    params_path = ROOT / "config" / "connectome" / "mesh-params.json"
-    try:
-        params = json.loads(params_path.read_text(encoding="utf-8"))
-    except Exception:
-        params = {}
-    dual = params.get("language_dual_stream") or {}
+    """Resolve dorsal/ventral winner from mesh-params (cached)."""
+    global _DUAL_CACHE
+    if _DUAL_CACHE is None:
+        params_path = ROOT / "config" / "connectome" / "mesh-params.json"
+        try:
+            params = json.loads(params_path.read_text(encoding="utf-8"))
+        except Exception:
+            params = {}
+        _DUAL_CACHE = params.get("language_dual_stream") or {}
+    dual = _DUAL_CACHE
     policy = dual.get("conflict_policy") or {}
     winner = policy.get(act) or policy.get("default") or "dorsal"
     chosen = dual.get(winner) or {}

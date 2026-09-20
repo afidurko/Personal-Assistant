@@ -75,10 +75,16 @@ def _maybe_install_embodiment_deps() -> dict:
     return result
 
 
-def run(cmd: list[str], label: str) -> dict:
+def run(
+    cmd: list[str],
+    label: str,
+    *,
+    env: dict | None = None,
+    cwd: str | None = None,
+) -> dict:
     print(f"[3T] {label}: {' '.join(cmd)}", flush=True)
     t0 = time.perf_counter()
-    proc = subprocess.run(cmd, cwd=str(ROOT))
+    proc = subprocess.run(cmd, cwd=cwd or str(ROOT), env=env)
     wall = time.perf_counter() - t0
     return {"label": label, "cmd": cmd, "exit_code": proc.returncode, "wall_s": wall}
 
@@ -98,24 +104,32 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
     lines += [
         "",
         "## Fixes applied this cycle",
+        "- Converse `/api/turn` is one `cam_reason.reason()` + `speak_from_trace` (camera/pupil/voice overlays)",
+        "- In-process `connectome-route.route()` + `cam_inproc` (no python3 spawn per check/route)",
+        "- `ci-static-gate.py` one-process static CI; 1M fuzz stays isolated",
+        "- 3T campaign now runs `ci-static-gate` + converse/reason units + Aaron-voice 3T",
+        "- `aaron-voice-billion-fuzz.py` honors `--physical` / modular_period_scaled (N≥1e11)",
+        "- cam-reason 3T workers assert in-process coding route + converse greeting/see-me overlay",
+        "- workspace-integration-check is inside the static gate (was campaign-only)",
+        "- Public-apis 3T + expanded allowlisted add-ons (frankfurter / advice slip) from #42",
         "- CI: install pydantic before joshinator embodiment unit tests",
-        "- 3T campaign auto-installs `integrations/joshinator-analyzer/backend/requirements-ci.txt` before embodiment fuzz",
-        "- connectome-simulate v4-exhaustive-scaled for N≥1e11",
-        "- Companion fuzzers: modular_period_scaled via trillion_scale.py",
-        "- Codified Aaron test protocol (this entrypoint + CONTINUOUS_QA)",
-        "- Google Trends: `scripts/google-trends-check.py` + curated add-ons (`trends.search_*`)",
-        "- Higgsfield: `scripts/higgsfield-check.py` + dry-run `higgsfield-run.py` + mesh pack",
-        "- Higgsfield OCL: `no_higgsfield_without_aaron` / jobs / outbound burst policies",
-        "- Cloud Agent install: `scripts/test_cloud_agent_install.py` + `.cursor/environment.json`",
-        "- 3T campaign + CI run cloud-agent-install and cam-system unit gates",
-        "- Higgsfield dry-run / doctor: empty submodule is a warning, not a campaign-fail",
         "- Embodiment 3T: pydantic-free `embodiment_lite` catalog path when pypi is blocked",
         "",
+        "## Suggested add-ons",
+        "- `config/persona/converse-overlays.json` — move camera/pupil/voice lines out of the server so new presence phrases do not fork `speak_from_trace`",
+        "- `scripts/converse-billion-fuzz.py` — modular overlay/intent matrix at 3T (companion to cam-reason fuzz)",
+        "- `public-apis` add-on: offline fixture for `sense.catalog.public_apis` smoke without subprocess search",
+        "- `google-trends` add-on: same in-process search helper as `cam_inproc.route`",
+        "- Voice add-on: FunASR enroll checksum in aaron-voice 3T (hash_dev already covers contract)",
+        "- Activity add-on: quiet `write_live_activity()` already exists; emit converse refresh only on last row (done) — add a mesh-params dual_stream cache invalidation hook",
+        "",
         "## Standing suggestions",
-        "- Keep `bash scripts/ci-connectome.sh` as the push gate",
+        "- Keep `python3 scripts/ci-static-gate.py` as the fast static gate; `bash scripts/ci-connectome.sh` still owns 1M fuzz",
         "- Dual three-trillion: `python3 scripts/three-trillion-campaign.py --passes 2`",
         "- Merge prep: `bash scripts/merge-prep-trillion.sh`",
         "- Raise `--physical 1000000000` when you want a full 1B physical stress under 3T",
+        "- Aaron voice 3T: `python3 scripts/aaron-voice-billion-fuzz.py --n 3000000000000`",
+        "- Converse units: `AARON_VOICE_TEST=1 AARON_VOICE_ALLOW_DEV_BACKEND=1 python3 scripts/test_cam_converse_voice_gate.py`",
         "- Slim CI deps: `integrations/joshinator-analyzer/backend/requirements-ci.txt`",
         "- After registry edits: `python3 scripts/test_cline_workspaces.py`",
         "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
@@ -154,13 +168,7 @@ def one_pass(
     results: list[dict] = []
     out_tag = f"pass{pass_id}"
 
-    results.append(run([sys.executable, "scripts/connectome-check.py"], "connectome-check"))
-    results.append(
-        run(
-            [sys.executable, "scripts/workspace-integration-check.py"],
-            "workspace-integration",
-        )
-    )
+    results.append(run([sys.executable, "scripts/ci-static-gate.py"], "ci-static-gate"))
     results.append(
         run([sys.executable, "scripts/test_cline_workspaces.py"], "workspace-unit-tests")
     )
@@ -172,6 +180,37 @@ def one_pass(
     )
     results.append(
         run([sys.executable, "scripts/test_cam_system.py"], "cam-system-unit")
+    )
+    results.append(
+        run(
+            [
+                sys.executable,
+                "-m",
+                "unittest",
+                "test_cam_reason",
+                "test_cam_fast",
+                "test_cam_infinitemind",
+            ],
+            "cam-reason-unit",
+            cwd=str(ROOT / "scripts"),
+        )
+    )
+    env_voice = dict(os.environ)
+    env_voice["AARON_VOICE_TEST"] = "1"
+    env_voice["AARON_VOICE_ALLOW_DEV_BACKEND"] = "1"
+    results.append(
+        run(
+            [
+                sys.executable,
+                "-m",
+                "unittest",
+                "test_aaron_voice_gate",
+                "test_cam_converse_voice_gate",
+            ],
+            "converse-voice-unit",
+            env=env_voice,
+            cwd=str(ROOT / "scripts"),
+        )
     )
     results.append(
         run([sys.executable, "scripts/higgsfield-check.py"], "higgsfield-check")
@@ -231,7 +270,8 @@ def one_pass(
         ("scripts/embodiment-billion-fuzz.py", "embodiment-3t", 31),
         ("scripts/cam-reason-billion-fuzz.py", "cam-reason-3t", 11),
         ("scripts/illa-desktop-billion-fuzz.py", "illa-desktop-3t", 26),
-        ("scripts/public-apis-billion-fuzz.py", "public-apis-3t", 19),
+        ("scripts/aaron-voice-billion-fuzz.py", "aaron-voice-3t", 19),
+        ("scripts/public-apis-billion-fuzz.py", "public-apis-3t", 23),
     ):
         if name == "embodiment-3t":
             results.append(_maybe_install_embodiment_deps())

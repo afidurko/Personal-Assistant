@@ -129,20 +129,14 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001
         errors.append(f"search_smoke:{exc}")
 
-    # Route smoke
+    # Route smoke (in-process)
     try:
-        route = json.loads(
-            subprocess.check_output(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/connectome-route.py"),
-                    "--sense",
-                    "sense.catalog.public_apis",
-                    "--goal",
-                    "find free weather api",
-                ],
-                text=True,
-            )
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_inproc
+
+        route = cam_inproc.route(
+            sense="sense.catalog.public_apis",
+            goal="find free weather api",
         )
         if "motor.public_apis" not in route.get("motor_plan", []):
             errors.append("route missing motor.public_apis")
