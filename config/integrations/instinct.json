@@ -25,11 +25,17 @@
     "offline_ok": true,
     "live_send_requires_outbound": true,
     "no_spend": true,
-    "no_training_on_aaron_data": true
+    "no_training_on_aaron_data": true,
+    "priority_windows": {
+      "high": 0.5,
+      "normal": 1.0,
+      "low": 2.0
+    }
   },
   "scripts": {
     "engine": "scripts/instinct.py",
-    "check": "scripts/instinct-check.py"
+    "check": "scripts/instinct-check.py",
+    "tests": "scripts/test_instinct.py"
   },
   "teams": [
     "team.capability",
@@ -42,5 +48,13 @@
     "qa"
   ],
   "available_to": "all_roles_and_subagents",
-  "outbound_handoff": "motor.inkbox under switch.outbound — this engine never sends"
+  "outbound_handoff": "motor.inkbox under switch.outbound — this engine never sends",
+  "loop_pattern": "instinct-followups",
+  "schedule_id": "cam-nightly-instinct-scan",
+  "mcp_tools": [
+    "instinct_scan",
+    "instinct_report",
+    "instinct_brief"
+  ],
+  "needs_attention_handoff": "data/instinct/needs-attention.json"
 }

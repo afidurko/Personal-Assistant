@@ -175,6 +175,11 @@ def action_scan_recent_merges() -> dict:
     }
 
 
+def action_instinct_scan() -> dict:
+    """Draft-only follow-through scan (motor.instinct); never sends."""
+    return run_py("scripts/instinct.py", ["scan", "--write"])
+
+
 def action_list_open_prs_report() -> dict:
     proc = subprocess.run(
         ["gh", "pr", "list", "--limit", "10", "--json", "number,title,url,isDraft"],
@@ -227,6 +232,8 @@ def run_pattern(pattern: dict, level: str, dry_run: bool) -> dict:
             results[act] = action_scan_recent_merges()
         elif act == "list_open_prs_report":
             results[act] = action_list_open_prs_report()
+        elif act == "instinct_scan":
+            results[act] = action_instinct_scan()
         elif act in {"update_state", "append_run_log", "pack_mesh"}:
             continue
         else:

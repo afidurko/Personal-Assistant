@@ -137,9 +137,51 @@ def build_attention_items(rows: list[dict[str, Any]], team: dict[str, Any]) -> l
         }
     )
 
+    # Instinct follow-through escalations (jobs that outlived max follow-ups)
+    for esc in scan_instinct_escalations():
+        items.append(esc)
+
     # Open draft/ready PRs — surface for dispatcher (never auto-merge)
     for pr in scan_open_prs():
         items.append(pr)
+    return items
+
+
+def scan_instinct_escalations() -> list[dict[str, Any]]:
+    """Surface motor.instinct needs_aaron items (draft-only engine, never sends)."""
+    path = ROOT / "data/instinct/needs-attention.json"
+    if not path.exists():
+        return []
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return [
+            {
+                "id": "instinct-handoff-unreadable",
+                "kind": "followup",
+                "severity": "medium",
+                "title": "Instinct escalation handoff unreadable",
+                "detail": str(path),
+                "auto_clearable": False,
+                "aaron_gate": True,
+                "workspace_id": "personal-assistant",
+            }
+        ]
+    items: list[dict[str, Any]] = []
+    for row in doc.get("items") or []:
+        items.append(
+            {
+                "id": f"instinct-{row.get('job')}",
+                "kind": "followup",
+                "severity": "medium",
+                "title": f"Instinct escalation: {row.get('title')}",
+                "detail": f"{row.get('detail')} (job {row.get('job')}, generated {doc.get('generated')})",
+                "auto_clearable": False,
+                "aaron_gate": True,
+                "workspace_id": "personal-assistant",
+                "suggestion": "python3 scripts/instinct.py report",
+            }
+        )
     return items
 
 

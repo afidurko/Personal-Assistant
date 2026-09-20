@@ -10,7 +10,8 @@ Tools:
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   loop_check, loop_audit, loop_run,
-  voicestudio_health, needs_attention
+  voicestudio_health, needs_attention,
+  instinct_scan, instinct_report, instinct_brief
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -301,6 +302,48 @@ def tool_defs() -> list[dict]:
                     "dispatch_plan": {"type": "boolean"},
                     "write": {"type": "boolean"},
                     "limit": {"type": "integer"},
+                },
+            },
+        },
+        {
+            "name": "instinct_scan",
+            "description": (
+                "Run Cam Instinct follow-through scan: unanswered Aaron asks, stale/overdue "
+                "jobs, due monitor checks. write=true drafts follow-ups to data/instinct/outbox "
+                "(draft-only — live send stays behind switch.outbound via motor.inkbox)."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "write": {"type": "boolean"},
+                    "now": {"type": "string", "description": "ISO8601 clock override"},
+                },
+            },
+        },
+        {
+            "name": "instinct_report",
+            "description": (
+                "Cam Instinct structured brief: open/waiting/monitor/snoozed jobs, unanswered "
+                "asks, escalations, pending drafts."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "now": {"type": "string", "description": "ISO8601 clock override"},
+                },
+            },
+        },
+        {
+            "name": "instinct_brief",
+            "description": (
+                "Cam Instinct markdown daily brief. write=true also saves to "
+                "data/instinct/briefs/YYYY-MM-DD.md."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "write": {"type": "boolean"},
+                    "now": {"type": "string", "description": "ISO8601 clock override"},
                 },
             },
         },
@@ -605,6 +648,29 @@ def loop_run(arguments: dict | None = None) -> Any:
         }
 
 
+def instinct_cli(arguments: dict | None, command: str,
+                 write_flag: bool = False, text_output: bool = False) -> Any:
+    arguments = arguments or {}
+    cmd = [sys.executable, str(ROOT / "scripts/instinct.py")]
+    if arguments.get("now"):
+        cmd.extend(["--now", str(arguments["now"])])
+    cmd.append(command)
+    if write_flag and arguments.get("write"):
+        cmd.append("--write")
+    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+    if text_output:
+        return {"ok": proc.returncode == 0, "brief": proc.stdout, "stderr": proc.stderr or None}
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+            "exit_code": proc.returncode,
+        }
+
+
 def voicestudio_health(base_url: str | None = None, timeout: float = 5.0) -> dict:
     cmd = [sys.executable, str(ROOT / "scripts" / "voicestudio-health.py"), "--json"]
     if base_url:
@@ -710,6 +776,12 @@ def call_tool(name: str, arguments: dict) -> Any:
         )
     if name == "needs_attention":
         return needs_attention(arguments)
+    if name == "instinct_scan":
+        return instinct_cli(arguments, "scan", write_flag=True)
+    if name == "instinct_report":
+        return instinct_cli(arguments, "report")
+    if name == "instinct_brief":
+        return instinct_cli(arguments, "brief", write_flag=True, text_output=True)
     raise ValueError(f"unknown tool: {name}")
 
 

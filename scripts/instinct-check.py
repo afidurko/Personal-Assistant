@@ -41,10 +41,22 @@ def main() -> int:
         ("config/connectome/hotspots.json", "hotspot.instinct"),
         ("config/connectome/synapses.json", "sense.instinct.followup"),
         ("config/connectome/trajectory-policies.json", "instinct_followup_draft_only"),
+        ("config/loops/patterns.json", "instinct-followups"),
+        ("config/workspaces/schedules.json", "cam-nightly-instinct-scan"),
+        ("scripts/loop-run.py", "instinct_scan"),
+        ("scripts/needs-attention.py", "scan_instinct_escalations"),
+        ("scripts/cam-mcp-server.py", "instinct_scan"),
+        ("scripts/test_instinct.py", "InstinctBase"),
     ):
         text = (ROOT / rel).read_text(encoding="utf-8")
         if needle not in text:
             errors.append(f"missing {needle} in {rel}")
+
+    # MCP server must expose all three instinct tools
+    mcp_text = (ROOT / "scripts/cam-mcp-server.py").read_text(encoding="utf-8")
+    for tool in ("instinct_scan", "instinct_report", "instinct_brief"):
+        if f'"{tool}"' not in mcp_text:
+            errors.append(f"cam-mcp-server missing tool {tool}")
 
     # Guardrails: motor.instinct must NOT be an outbound-capable effector, and
     # the config must keep drafts-only + no credential + no spend.
@@ -65,6 +77,17 @@ def main() -> int:
         errors.append("instinct defaults must keep no_spend=true")
     if cfg.get("credential_env"):
         errors.append("instinct must not require a credential (local-first)")
+
+    # The nightly loop must stay report/draft-only (no cline dispatch, no auto-fix)
+    pats = load(ROOT / "config/loops/patterns.json")
+    pat = next((p for p in pats.get("patterns") or [] if p.get("id") == "instinct-followups"), None)
+    if pat is None:
+        errors.append("loops patterns missing instinct-followups")
+    else:
+        if pat.get("cline_dispatch"):
+            errors.append("instinct-followups loop must not dispatch cline")
+        if pat.get("level") != "L1":
+            errors.append("instinct-followups loop must stay L1 report-only")
 
     reg = load(ROOT / "config/workspaces/registry.json")
     integ_ids = [i.get("id") for i in (reg.get("layers") or {}).get("integrations") or []]

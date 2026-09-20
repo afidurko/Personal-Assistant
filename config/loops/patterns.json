@@ -26,7 +26,10 @@
         "append_run_log",
         "pack_mesh"
       ],
-      "human_gates": ["design-decisions", "multi-file-refactors"],
+      "human_gates": [
+        "design-decisions",
+        "multi-file-refactors"
+      ],
       "cline_dispatch": false
     },
     {
@@ -61,7 +64,12 @@
         "append_run_log",
         "pack_mesh"
       ],
-      "human_gates": ["security", "payments", "auth", "auto-merge"],
+      "human_gates": [
+        "security",
+        "payments",
+        "auth",
+        "auto-merge"
+      ],
       "cline_dispatch": false,
       "notes": "Enable after Aaron raises trust. L1 = report only."
     },
@@ -80,7 +88,10 @@
         "append_run_log",
         "pack_mesh"
       ],
-      "human_gates": ["architectural-debt", "large-diffs"],
+      "human_gates": [
+        "architectural-debt",
+        "large-diffs"
+      ],
       "cline_dispatch": false
     },
     {
@@ -97,8 +108,31 @@
         "append_run_log",
         "pack_mesh"
       ],
-      "human_gates": ["label-mutations", "auto-close"],
+      "human_gates": [
+        "label-mutations",
+        "auto-close"
+      ],
       "cline_dispatch": false
+    },
+    {
+      "id": "instinct-followups",
+      "name": "Instinct Follow-through",
+      "level": "L1",
+      "cadence": "1d",
+      "enabled": true,
+      "schedule_id": "cam-nightly-instinct-scan",
+      "neuron": "neuron.watch_loop",
+      "actions": [
+        "instinct_scan",
+        "update_state",
+        "append_run_log",
+        "pack_mesh"
+      ],
+      "human_gates": [
+        "outbound-send"
+      ],
+      "cline_dispatch": false,
+      "notes": "Draft-only follow-ups (motor.instinct); sends stay gated behind switch.outbound via motor.inkbox."
     }
   ]
 }

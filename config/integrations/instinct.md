@@ -22,11 +22,15 @@ launch-week record showed risk.
 | --- | --- |
 | One continuous thread | `data/instinct/ledger.json` `thread[]` — single append-only conversation |
 | Persistent worker state | Job ledger survives between invocations (`jobs[]`: open / waiting / done) |
-| Follows up on dropped threads | `scan` detects Aaron's unanswered asks past `reply_hours` |
-| Proactive outreach | `scan --write` drafts follow-up nudges into `data/instinct/outbox/` |
-| Finishes jobs, doesn't re-ask | Jobs escalate `needs_aaron` only after `max_followups` drafted nudges |
-| Persistent cloud computer | Cam's own workspace + schedules (`sync-cline-schedules.py`) run the scan |
-| Text-first interface | Thread `ingest` from any Cam surface; no new UI |
+| Follows up on dropped threads | Every Aaron ask is tracked until answered (`--reply-to` or job completion); `scan` surfaces all asks unanswered past `reply_hours` |
+| Proactive outreach | `scan --write` drafts follow-up nudges (with job context) into `data/instinct/outbox/` |
+| Finishes jobs, doesn't re-ask | Follow-up cadence respects `last_followup`; jobs escalate `needs_aaron` after `max_followups` drafted nudges and surface in Needs Attention sweeps |
+| Ticket / restock monitoring | Monitor jobs (`job add --monitor HOURS`) — recurring watch nudges, never escalate |
+| Priorities and texture of life | `--priority high/normal/low` halves/doubles the stale window; `job snooze --until` parks a job |
+| Connected senses feed it | `sync` folds event drops from `data/instinct/inbox/*.json` (Inkbox, calendar, loops — any sense writes drops; the engine never fetches) |
+| Persistent cloud computer | Nightly L1 loop `instinct-followups` + schedule `cam-nightly-instinct-scan` run the scan unattended |
+| Text-first interface | Thread `ingest` from any Cam surface; MCP tools `instinct_scan` / `instinct_report` / `instinct_brief`; no new UI |
+| Daily texture summaries | `brief` renders a markdown daily brief (`data/instinct/briefs/YYYY-MM-DD.md`) |
 
 ## Deliberate divergences (the missing 0.08%)
 
@@ -48,15 +52,24 @@ These Instinct behaviors are excluded **by design** per `.clinerules`:
 
 ## Wiring
 
-- Engine: `scripts/instinct.py` (ingest / job / scan / report / thread / doctor)
+- Engine: `scripts/instinct.py` (ingest / sync / job / scan / report / brief / thread / doctor)
+- Tests: `scripts/test_instinct.py` (`python3 -m unittest scripts.test_instinct`)
 - Check: `scripts/instinct-check.py`
-- Sense: `sense.instinct.followup` → `center.exec`
+- Sense: `sense.instinct.followup` → `center.ops`
 - Motor: `motor.instinct` under `switch.autonomy` (+ `switch.kill`)
 - Outbound handoff: drafts only; `motor.inkbox` under `switch.outbound`
-- State: `data/instinct/` (ledger, spikes, outbox) — never commit PII
+  (`instinct_followup_draft_only` trajectory policy strips violations)
+- Loop: `instinct-followups` L1 pattern (`scripts/loop-run.py --pattern instinct-followups`)
+- Schedule: `cam-nightly-instinct-scan` (03:00 UTC, report/draft-only)
+- MCP: `instinct_scan` / `instinct_report` / `instinct_brief` in `scripts/cam-mcp-server.py`
+- Needs Attention: `needs_aaron` escalations land in `data/instinct/needs-attention.json`
+  and surface through `scripts/needs-attention.py` sweeps (aaron_gate, never auto-clear)
+- State: `data/instinct/` (ledger, spikes, outbox, inbox, briefs) — gitignored; never commit PII
+- Tests isolate state via `INSTINCT_DATA_DIR`
 
 ## Ops
 
-- Nightly `scan --write` is a natural L1 loop candidate (`daily-triage` sibling).
-- `report` feeds STATE.md-style briefs; distill durable outcomes to mesh/vault.
-- Escalations (`needs_aaron`) surface via Needs Attention sweeps.
+- Nightly loop drafts follow-ups; Aaron reviews the outbox before anything sends.
+- `brief --write` produces the daily markdown brief; distill durable outcomes to mesh/vault.
+- Senses integrate by dropping event JSON into `data/instinct/inbox/`:
+  `{"from","text"[,"ts","job","due","priority","reply_to"]}` — then `sync` folds them in.

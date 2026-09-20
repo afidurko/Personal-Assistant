@@ -4,19 +4,26 @@
 An original, local-first implementation of the behavior model popularized by
 Instinct (Spear Street Technology): one continuous thread, a persistent job
 ledger that survives between messages, and proactive follow-ups on dropped
-threads. Differences are deliberate (see config/integrations/instinct.md):
+threads. Divergences are deliberate (see config/integrations/instinct.md):
 follow-ups are ALWAYS draft-only from this engine — live send hands off to
-motor.inkbox under switch.outbound; no data leaves the workspace; no spend.
+motor.inkbox under switch.outbound; nothing leaves the workspace; no spend.
 
 Commands
-  ingest   append a message to the single continuous thread (optionally open a job)
-  job      add / note / wait / done / list persistent jobs
-  scan     find dropped threads + stale/overdue jobs; emit spikes; write draft follow-ups
-  report   one-thread brief: open jobs, waiting-on, pending drafts, escalations
+  ingest   append a message to the single continuous thread
+           (Aaron asks are tracked until answered; --reply-to closes an ask)
+  job      add / note / wait / snooze / done / list persistent jobs
+           (priorities tighten scan windows; --monitor makes a recurring watch)
+  sync     fold event drops from data/instinct/inbox/*.json into the thread —
+           the sensing seam for Inkbox / calendar / any Cam sense
+  scan     detect unanswered asks, stale/overdue jobs, due monitor checks;
+           emit spikes; --write drafts follow-ups; escalate needs_aaron items
+  report   structured brief: jobs, asks, monitors, drafts, escalations
+  brief    human-readable markdown daily brief (--write to data/instinct/briefs/)
   thread   show the continuous thread tail
   doctor   ledger + config sanity (offline, no key required)
 
-All state lives in data/instinct/ (ledger.json, spikes.jsonl, outbox/).
+State lives in $INSTINCT_DATA_DIR (default data/instinct/): ledger.json,
+spikes.jsonl, outbox/, inbox/, briefs/, needs-attention.json.
 Deterministic: pass --now ISO8601 to override the clock for tests/demos.
 """
 
@@ -24,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import uuid
@@ -31,14 +39,49 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT / "data/instinct"
-LEDGER = DATA_DIR / "ledger.json"
-SPIKES = DATA_DIR / "spikes.jsonl"
-OUTBOX = DATA_DIR / "outbox"
 CONFIG = ROOT / "config/integrations/instinct.json"
 
 SENSE = "sense.instinct.followup"
 MOTOR = "motor.instinct"
+
+ASK_RE = re.compile(r"\?|\b(can you|could you|please|need to|remind me|don't forget|make sure)\b", re.I)
+
+PRIORITY_WINDOW = {"high": 0.5, "normal": 1.0, "low": 2.0}
+
+
+# --- paths (env-overridable so tests never touch real state) --------------
+
+
+def data_dir() -> Path:
+    override = os.environ.get("INSTINCT_DATA_DIR")
+    return Path(override) if override else ROOT / "data/instinct"
+
+
+def ledger_path() -> Path:
+    return data_dir() / "ledger.json"
+
+
+def spikes_path() -> Path:
+    return data_dir() / "spikes.jsonl"
+
+
+def outbox_dir() -> Path:
+    return data_dir() / "outbox"
+
+
+def inbox_dir() -> Path:
+    return data_dir() / "inbox"
+
+
+def briefs_dir() -> Path:
+    return data_dir() / "briefs"
+
+
+def escalations_path() -> Path:
+    return data_dir() / "needs-attention.json"
+
+
+# --- time / io helpers ----------------------------------------------------
 
 
 def now_utc(override: str | None = None) -> datetime:
@@ -67,15 +110,18 @@ def defaults() -> dict:
         "stale_hours": d.get("stale_hours", 24),
         "reply_hours": d.get("reply_hours", 4),
         "max_followups": d.get("max_followups", 3),
-        "draft_only": d.get("draft_only", True),
+        "draft_only": True,  # non-negotiable, not configurable
     }
 
 
 def load_ledger() -> dict:
-    if LEDGER.exists():
-        return json.loads(LEDGER.read_text(encoding="utf-8"))
+    p = ledger_path()
+    if p.exists():
+        ledger = json.loads(p.read_text(encoding="utf-8"))
+        ledger.setdefault("version", 2)
+        return ledger
     return {
-        "version": 1,
+        "version": 2,
         "created": iso(now_utc()),
         "thread": [],
         "jobs": [],
@@ -84,14 +130,14 @@ def load_ledger() -> dict:
 
 
 def save_ledger(ledger: dict) -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    LEDGER.write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
+    data_dir().mkdir(parents=True, exist_ok=True)
+    ledger_path().write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
 
 
 def emit_spike(kind: str, payload: dict, ts: datetime) -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    data_dir().mkdir(parents=True, exist_ok=True)
     spike = {"ts": iso(ts), "sense": SENSE, "kind": kind, **payload}
-    with SPIKES.open("a", encoding="utf-8") as fh:
+    with spikes_path().open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(spike) + "\n")
 
 
@@ -100,43 +146,122 @@ def short_id() -> str:
 
 
 def find_job(ledger: dict, job_id: str) -> dict:
-    for job in ledger["jobs"]:
-        if job["id"] == job_id or job["id"].startswith(job_id):
-            return job
-    raise SystemExit(f"no job matching id '{job_id}'")
+    matches = [j for j in ledger["jobs"] if j["id"] == job_id or j["id"].startswith(job_id)]
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise SystemExit(f"no job matching id '{job_id}'")
+    raise SystemExit(f"ambiguous job id '{job_id}' ({', '.join(j['id'] for j in matches)})")
 
 
-# --- commands -----------------------------------------------------------
+def new_job(title: str, ts: datetime, due: str | None = None, priority: str = "normal",
+            recur_hours: float | None = None, origin_msg: str | None = None) -> dict:
+    if priority not in PRIORITY_WINDOW:
+        raise SystemExit(f"priority must be one of {sorted(PRIORITY_WINDOW)}")
+    return {
+        "id": short_id(),
+        "title": title,
+        "status": "open",
+        "created": iso(ts),
+        "updated": iso(ts),
+        "due": due,
+        "waiting_on": None,
+        "priority": priority,
+        "snooze_until": None,
+        "recur_hours": recur_hours,
+        "followups": 0,
+        "last_followup": None,
+        "notes": [],
+        "origin_msg": origin_msg,
+    }
+
+
+def append_message(ledger: dict, sender: str, text: str, ts: datetime,
+                   job_id: str | None = None, reply_to: str | None = None) -> dict:
+    msg = {"id": short_id(), "ts": iso(ts), "from": sender, "text": text}
+    if job_id:
+        msg["job"] = job_id
+    if sender == "aaron" and ASK_RE.search(text):
+        msg["ask"] = True
+    if reply_to:
+        for m in ledger["thread"]:
+            if m["id"] == reply_to or m["id"].startswith(reply_to):
+                m["answered_by"] = msg["id"]
+                msg["reply_to"] = m["id"]
+                break
+        else:
+            raise SystemExit(f"no thread message matching '{reply_to}'")
+    ledger["thread"].append(msg)
+    return msg
+
+
+def open_asks(ledger: dict) -> list[dict]:
+    """Aaron messages that expect a response and were never answered or tied off."""
+    asks = []
+    for m in ledger["thread"]:
+        if not m.get("ask") or m.get("answered_by"):
+            continue
+        # An ask that opened a job is tracked through the job, not double-counted;
+        # it re-surfaces here only if the job was somehow deleted.
+        if m.get("job") and any(j["id"] == m["job"] for j in ledger["jobs"]):
+            continue
+        asks.append(m)
+    return asks
+
+
+# --- commands -------------------------------------------------------------
 
 
 def cmd_ingest(args: argparse.Namespace) -> int:
     ledger = load_ledger()
     ts = now_utc(args.now)
-    msg = {
-        "id": short_id(),
-        "ts": iso(ts),
-        "from": args.sender,
-        "text": args.text,
-    }
+    job_id = None
     if args.job:
-        job = {
-            "id": short_id(),
-            "title": args.job,
-            "status": "open",
-            "created": iso(ts),
-            "updated": iso(ts),
-            "due": args.due,
-            "waiting_on": None,
-            "followups": 0,
-            "last_followup": None,
-            "notes": [],
-        }
+        job = new_job(args.job, ts, due=args.due, priority=args.priority or "normal")
         ledger["jobs"].append(job)
-        msg["job"] = job["id"]
-    ledger["thread"].append(msg)
+        job_id = job["id"]
+    msg = append_message(ledger, args.sender, args.text, ts, job_id=job_id, reply_to=args.reply_to)
+    if job_id:
+        for j in ledger["jobs"]:
+            if j["id"] == job_id:
+                j["origin_msg"] = msg["id"]
     save_ledger(ledger)
-    out = {"ok": True, "message": msg["id"], "job": msg.get("job")}
-    print(json.dumps(out, indent=2))
+    print(json.dumps({"ok": True, "message": msg["id"], "job": job_id,
+                      "tracked_ask": bool(msg.get("ask"))}, indent=2))
+    return 0
+
+
+def cmd_sync(args: argparse.Namespace) -> int:
+    """Fold external event drops into the thread. Each *.json file in the inbox
+    is one event: {"from","text"[,"ts","job","due","priority","reply_to"]}.
+    Senses (Inkbox, calendar, loops) write drops; this engine never fetches."""
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    inbox = inbox_dir()
+    processed_dir = inbox / "processed"
+    folded, skipped = [], []
+    for path in sorted(inbox.glob("*.json")):
+        try:
+            event = json.loads(path.read_text(encoding="utf-8"))
+            sender = str(event.get("from") or "sense")
+            text = str(event["text"])
+            ev_ts = parse_ts(event["ts"]) if event.get("ts") else ts
+            job_id = None
+            if event.get("job"):
+                job = new_job(str(event["job"]), ev_ts, due=event.get("due"),
+                              priority=event.get("priority") or "normal")
+                ledger["jobs"].append(job)
+                job_id = job["id"]
+            msg = append_message(ledger, sender, text, ev_ts, job_id=job_id,
+                                 reply_to=event.get("reply_to"))
+            folded.append({"file": path.name, "message": msg["id"], "job": job_id})
+        except (KeyError, ValueError, SystemExit) as exc:
+            skipped.append({"file": path.name, "error": str(exc)})
+            continue
+        processed_dir.mkdir(parents=True, exist_ok=True)
+        path.rename(processed_dir / path.name)
+    save_ledger(ledger)
+    print(json.dumps({"ok": True, "folded": folded, "skipped": skipped}, indent=2))
     return 0
 
 
@@ -144,25 +269,17 @@ def cmd_job(args: argparse.Namespace) -> int:
     ledger = load_ledger()
     ts = now_utc(args.now)
     if args.action == "add":
-        job = {
-            "id": short_id(),
-            "title": args.title,
-            "status": "open",
-            "created": iso(ts),
-            "updated": iso(ts),
-            "due": args.due,
-            "waiting_on": None,
-            "followups": 0,
-            "last_followup": None,
-            "notes": [],
-        }
+        job = new_job(args.title, ts, due=args.due, priority=args.priority or "normal",
+                      recur_hours=args.monitor)
         ledger["jobs"].append(job)
         save_ledger(ledger)
-        print(json.dumps({"ok": True, "job": job["id"], "title": job["title"]}, indent=2))
+        print(json.dumps({"ok": True, "job": job["id"], "title": job["title"],
+                          "monitor": bool(args.monitor)}, indent=2))
         return 0
     if args.action == "list":
         rows = [
-            {k: j.get(k) for k in ("id", "title", "status", "due", "waiting_on", "updated", "followups")}
+            {k: j.get(k) for k in ("id", "title", "status", "priority", "due", "waiting_on",
+                                    "snooze_until", "recur_hours", "updated", "followups")}
             for j in ledger["jobs"]
             if args.all or j["status"] != "done"
         ]
@@ -177,24 +294,52 @@ def cmd_job(args: argparse.Namespace) -> int:
         job["status"] = "waiting"
         job["waiting_on"] = args.title
         job["updated"] = iso(ts)
+    elif args.action == "snooze":
+        if not args.until:
+            raise SystemExit("job snooze requires --until ISO8601")
+        job["snooze_until"] = iso(parse_ts(args.until))
+        job["updated"] = iso(ts)
     elif args.action == "done":
         job["status"] = "done"
         job["updated"] = iso(ts)
+        origin = job.get("origin_msg")
+        if origin:
+            for m in ledger["thread"]:
+                if m["id"] == origin and not m.get("answered_by"):
+                    m["answered_by"] = f"job:{job['id']}"
     save_ledger(ledger)
-    print(json.dumps({"ok": True, "job": job["id"], "status": job["status"]}, indent=2))
+    print(json.dumps({"ok": True, "job": job["id"], "status": job["status"],
+                      "snooze_until": job.get("snooze_until")}, indent=2))
     return 0
 
 
-def draft_followup(job: dict, reason: str, ts: datetime) -> Path:
+def job_context(ledger: dict, job: dict, limit: int = 2) -> list[str]:
+    lines = [f"note {n['ts']}: {n['text']}" for n in (job.get("notes") or [])[-limit:]]
+    for m in ledger["thread"]:
+        if m.get("job") == job["id"]:
+            lines.append(f"thread {m['ts']} ({m['from']}): {m['text']}")
+    return lines[-3:]
+
+
+def draft_followup(ledger: dict, job: dict, reason: str, ts: datetime) -> Path:
     """Write a draft-only follow-up to the outbox. Never sends anything."""
-    OUTBOX.mkdir(parents=True, exist_ok=True)
+    outbox_dir().mkdir(parents=True, exist_ok=True)
     stamp = ts.strftime("%Y%m%dT%H%M%SZ")
-    path = OUTBOX / f"{stamp}-{job['id']}.md"
+    path = outbox_dir() / f"{stamp}-{job['id']}.md"
     waiting = f"\n- waiting on: {job['waiting_on']}" if job.get("waiting_on") else ""
+    context = job_context(ledger, job)
+    context_block = ("\nContext:\n" + "\n".join(f"- {c}" for c in context) + "\n") if context else ""
+    if job.get("recur_hours"):
+        nudge = (f"Monitor check for \u201c{job['title']}\u201d \u2014 {reason}. "
+                 f"Anything changed since last look?")
+    else:
+        nudge = (f"Checking in on \u201c{job['title']}\u201d \u2014 {reason}. "
+                 f"Want me to keep pushing, park it, or close it out?")
     body = (
         f"---\n"
         f"kind: instinct-followup-draft\n"
         f"job: {job['id']}\n"
+        f"priority: {job.get('priority', 'normal')}\n"
         f"reason: {reason}\n"
         f"drafted: {iso(ts)}\n"
         f"send_via: motor.inkbox\n"
@@ -203,98 +348,192 @@ def draft_followup(job: dict, reason: str, ts: datetime) -> Path:
         f"# Follow-up draft: {job['title']}\n\n"
         f"- status: {job['status']}{waiting}\n"
         f"- last activity: {job['updated']}\n"
-        f"- follow-ups so far: {job['followups']}\n\n"
+        f"- follow-ups so far: {job['followups']}\n"
+        f"{context_block}\n"
         f"Suggested nudge (Aaron reviews before any send):\n\n"
-        f"> Checking in on \u201c{job['title']}\u201d \u2014 {reason}. "
-        f"Want me to keep pushing, park it, or close it out?\n"
+        f"> {nudge}\n"
     )
     path.write_text(body, encoding="utf-8")
     return path
 
 
-def cmd_scan(args: argparse.Namespace) -> int:
+def scan_findings(ledger: dict, ts: datetime, write: bool) -> tuple[list[dict], list[str]]:
     cfg = defaults()
-    ledger = load_ledger()
-    ts = now_utc(args.now)
-    stale_cutoff = ts - timedelta(hours=cfg["stale_hours"])
-    reply_cutoff = ts - timedelta(hours=cfg["reply_hours"])
-
     findings: list[dict] = []
     drafts: list[str] = []
+    escalations: list[dict] = []
 
     for job in ledger["jobs"]:
         if job["status"] == "done":
             continue
+        snooze = job.get("snooze_until")
+        if snooze and parse_ts(snooze) > ts:
+            continue
         updated = parse_ts(job["updated"])
+        last_touch = max(updated, parse_ts(job["last_followup"])) if job.get("last_followup") else updated
+
+        if job.get("recur_hours"):
+            # Monitor job: recurring watch, nudges on its own interval, never escalates.
+            if ts - last_touch >= timedelta(hours=float(job["recur_hours"])):
+                reason = f"recurring check every {job['recur_hours']}h"
+                findings.append({"job": job["id"], "title": job["title"],
+                                 "kind": "monitor_check", "detail": reason})
+                emit_spike("monitor_check", {"job": job["id"], "title": job["title"]}, ts)
+                if write:
+                    path = draft_followup(ledger, job, reason, ts)
+                    drafts.append(str(path))
+                    job["followups"] += 1
+                    job["last_followup"] = iso(ts)
+            continue
+
+        window = timedelta(hours=cfg["stale_hours"] * PRIORITY_WINDOW.get(job.get("priority", "normal"), 1.0))
         overdue = bool(job.get("due")) and parse_ts(job["due"]) < ts
-        stale = updated < stale_cutoff
+        stale = ts - last_touch >= window
         if not (overdue or stale):
             continue
         if job["followups"] >= cfg["max_followups"]:
-            findings.append({"job": job["id"], "title": job["title"], "kind": "needs_aaron",
-                             "detail": f"{job['followups']} follow-ups without resolution"})
+            detail = f"{job['followups']} follow-ups without resolution"
+            findings.append({"job": job["id"], "title": job["title"],
+                             "kind": "needs_aaron", "detail": detail})
+            escalations.append({"job": job["id"], "title": job["title"],
+                                "followups": job["followups"], "detail": detail})
             emit_spike("needs_aaron", {"job": job["id"], "title": job["title"]}, ts)
             continue
-        reason = "past its due date" if overdue else f"no activity for {cfg['stale_hours']}h+"
+        reason = "past its due date" if overdue else f"no activity in its {window.total_seconds() / 3600:.0f}h window"
         kind = "overdue" if overdue else "stale"
         findings.append({"job": job["id"], "title": job["title"], "kind": kind, "detail": reason})
         emit_spike(kind, {"job": job["id"], "title": job["title"]}, ts)
-        if args.write:
-            path = draft_followup(job, reason, ts)
-            drafts.append(str(path.relative_to(ROOT)))
+        if write:
+            path = draft_followup(ledger, job, reason, ts)
+            drafts.append(str(path))
             job["followups"] += 1
             job["last_followup"] = iso(ts)
 
-    # Dropped thread: the last message is from Aaron, looks like it expects a
-    # response (question or open ask), and has sat unanswered past reply_hours.
-    thread = ledger["thread"]
-    if thread:
-        last = thread[-1]
-        last_ts = parse_ts(last["ts"])
-        expects_reply = bool(re.search(r"\?|can you|please|need to|remind", last["text"], re.I))
-        if last["from"] == "aaron" and expects_reply and last_ts < reply_cutoff:
-            findings.append({"kind": "dropped_thread", "message": last["id"],
-                             "detail": f"Aaron's last message unanswered since {last['ts']}"})
-            emit_spike("dropped_thread", {"message": last["id"], "text": last["text"][:120]}, ts)
+    # Every unanswered Aaron ask past the reply window — not just the last message.
+    reply_cutoff = ts - timedelta(hours=cfg["reply_hours"])
+    for msg in open_asks(ledger):
+        if parse_ts(msg["ts"]) < reply_cutoff:
+            findings.append({"kind": "dropped_ask", "message": msg["id"],
+                             "detail": f"Aaron's ask unanswered since {msg['ts']}",
+                             "text": msg["text"][:120]})
+            emit_spike("dropped_ask", {"message": msg["id"], "text": msg["text"][:120]}, ts)
 
+    # Escalation handoff for Needs Attention sweeps (read-only surface, no send).
+    if escalations or escalations_path().exists():
+        data_dir().mkdir(parents=True, exist_ok=True)
+        escalations_path().write_text(json.dumps({
+            "generated": iso(ts),
+            "source": MOTOR,
+            "items": escalations,
+        }, indent=2) + "\n", encoding="utf-8")
+
+    return findings, drafts
+
+
+def cmd_scan(args: argparse.Namespace) -> int:
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    findings, drafts = scan_findings(ledger, ts, write=args.write)
     ledger["last_scan"] = iso(ts)
     save_ledger(ledger)
-
+    rel_drafts = []
+    for d in drafts:
+        p = Path(d)
+        rel_drafts.append(str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p))
     print(json.dumps({
         "ok": True,
         "scanned_at": iso(ts),
         "findings": findings,
-        "drafts": drafts,
+        "drafts": rel_drafts,
         "draft_only": True,
         "send_path": "motor.inkbox under switch.outbound (never from this engine)",
     }, indent=2))
     return 0
 
 
-def cmd_report(args: argparse.Namespace) -> int:
-    ledger = load_ledger()
-    ts = now_utc(args.now)
-    open_jobs = [j for j in ledger["jobs"] if j["status"] == "open"]
+def report_doc(ledger: dict, ts: datetime) -> dict:
+    monitors = [j for j in ledger["jobs"] if j.get("recur_hours") and j["status"] != "done"]
+    open_jobs = [j for j in ledger["jobs"] if j["status"] == "open" and not j.get("recur_hours")]
     waiting = [j for j in ledger["jobs"] if j["status"] == "waiting"]
     done = [j for j in ledger["jobs"] if j["status"] == "done"]
-    pending_drafts = sorted(p.name for p in OUTBOX.glob("*.md")) if OUTBOX.exists() else []
-    print(json.dumps({
+    snoozed = [j for j in ledger["jobs"]
+               if j.get("snooze_until") and parse_ts(j["snooze_until"]) > ts and j["status"] != "done"]
+    pending_drafts = sorted(p.name for p in outbox_dir().glob("*.md")) if outbox_dir().exists() else []
+    escalations = []
+    if escalations_path().exists():
+        escalations = (json.loads(escalations_path().read_text(encoding="utf-8")).get("items") or [])
+    asks = [{"id": m["id"], "ts": m["ts"], "text": m["text"]} for m in open_asks(ledger)]
+    return {
         "ok": True,
         "as_of": iso(ts),
         "thread_messages": len(ledger["thread"]),
-        "jobs": {"open": len(open_jobs), "waiting": len(waiting), "done": len(done)},
-        "open": [{"id": j["id"], "title": j["title"], "due": j.get("due")} for j in open_jobs],
-        "waiting": [{"id": j["id"], "title": j["title"], "waiting_on": j.get("waiting_on")} for j in waiting],
+        "jobs": {"open": len(open_jobs), "waiting": len(waiting),
+                 "monitors": len(monitors), "snoozed": len(snoozed), "done": len(done)},
+        "open": [{"id": j["id"], "title": j["title"], "priority": j.get("priority"),
+                  "due": j.get("due")} for j in open_jobs],
+        "waiting": [{"id": j["id"], "title": j["title"], "waiting_on": j.get("waiting_on")}
+                    for j in waiting],
+        "monitors": [{"id": j["id"], "title": j["title"], "every_hours": j.get("recur_hours")}
+                     for j in monitors],
+        "unanswered_asks": asks,
+        "escalations": escalations,
         "pending_drafts": pending_drafts,
         "last_scan": ledger.get("last_scan"),
-    }, indent=2))
+    }
+
+
+def cmd_report(args: argparse.Namespace) -> int:
+    ledger = load_ledger()
+    print(json.dumps(report_doc(ledger, now_utc(args.now)), indent=2))
+    return 0
+
+
+def cmd_brief(args: argparse.Namespace) -> int:
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    doc = report_doc(ledger, ts)
+    lines = [f"# Instinct brief — {ts.strftime('%Y-%m-%d')} ({iso(ts)})", ""]
+    if doc["escalations"]:
+        lines.append("## Needs Aaron")
+        for e in doc["escalations"]:
+            lines.append(f"- **{e['title']}** (`{e['job']}`) — {e['detail']}")
+        lines.append("")
+    if doc["unanswered_asks"]:
+        lines.append("## Dropped asks")
+        for a in doc["unanswered_asks"]:
+            lines.append(f"- {a['ts']} — \u201c{a['text']}\u201d (`{a['id']}`)")
+        lines.append("")
+    lines.append("## Jobs")
+    counts = doc["jobs"]
+    lines.append(f"- open {counts['open']} · waiting {counts['waiting']} · monitors "
+                 f"{counts['monitors']} · snoozed {counts['snoozed']} · done {counts['done']}")
+    for j in doc["open"]:
+        due = f" (due {j['due']})" if j.get("due") else ""
+        lines.append(f"- open: {j['title']} [{j.get('priority')}]{due}")
+    for j in doc["waiting"]:
+        lines.append(f"- waiting: {j['title']} — on {j.get('waiting_on')}")
+    for j in doc["monitors"]:
+        lines.append(f"- monitor: {j['title']} (every {j.get('every_hours')}h)")
+    lines.append("")
+    if doc["pending_drafts"]:
+        lines.append("## Pending follow-up drafts (review before any send)")
+        for d in doc["pending_drafts"]:
+            lines.append(f"- data/instinct/outbox/{d}")
+        lines.append("")
+    lines.append(f"_Draft-only engine; sends require switch.outbound via motor.inkbox. "
+                 f"Last scan: {doc['last_scan']}_")
+    text = "\n".join(lines) + "\n"
+    if args.write:
+        briefs_dir().mkdir(parents=True, exist_ok=True)
+        out = briefs_dir() / f"{ts.strftime('%Y-%m-%d')}.md"
+        out.write_text(text, encoding="utf-8")
+    print(text)
     return 0
 
 
 def cmd_thread(args: argparse.Namespace) -> int:
     ledger = load_ledger()
-    tail = ledger["thread"][-args.tail:]
-    print(json.dumps(tail, indent=2))
+    print(json.dumps(ledger["thread"][-args.tail:], indent=2))
     return 0
 
 
@@ -310,12 +549,20 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     for job in ledger["jobs"]:
         if job["status"] not in ("open", "waiting", "done"):
             problems.append(f"job {job['id']} has unknown status {job['status']}")
+        if job.get("priority") not in PRIORITY_WINDOW:
+            problems.append(f"job {job['id']} has unknown priority {job.get('priority')}")
+    msg_ids = {m["id"] for m in ledger["thread"]}
+    for m in ledger["thread"]:
+        answered = m.get("answered_by")
+        if answered and not answered.startswith("job:") and answered not in msg_ids:
+            problems.append(f"message {m['id']} answered_by unknown message {answered}")
     report = {
         "ok": not problems,
         "problems": problems,
-        "ledger": str(LEDGER.relative_to(ROOT)),
+        "data_dir": str(data_dir()),
         "jobs": len(ledger["jobs"]),
         "thread_messages": len(ledger["thread"]),
+        "open_asks": len(open_asks(ledger)),
         "defaults": defaults(),
         "motor": MOTOR,
         "sense": SENSE,
@@ -324,7 +571,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0 if not problems else 1
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Cam Instinct — proactive follow-through engine")
     parser.add_argument("--now", help="override clock (ISO8601) for deterministic runs")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -334,22 +581,35 @@ def main() -> int:
     p.add_argument("--text", required=True)
     p.add_argument("--job", help="open a persistent job from this message")
     p.add_argument("--due", help="job due date ISO8601")
+    p.add_argument("--priority", choices=sorted(PRIORITY_WINDOW))
+    p.add_argument("--reply-to", help="mark an earlier message answered by this one")
     p.set_defaults(fn=cmd_ingest)
 
+    p = sub.add_parser("sync", help="fold event drops from the inbox into the thread")
+    p.set_defaults(fn=cmd_sync)
+
     p = sub.add_parser("job", help="manage persistent jobs")
-    p.add_argument("action", choices=["add", "note", "wait", "done", "list"])
-    p.add_argument("id", nargs="?", help="job id (for note/wait/done)")
+    p.add_argument("action", choices=["add", "note", "wait", "snooze", "done", "list"])
+    p.add_argument("id", nargs="?", help="job id (for note/wait/snooze/done)")
     p.add_argument("title", nargs="?", help="title (add) / note text (note) / waiting-on (wait)")
     p.add_argument("--due")
+    p.add_argument("--priority", choices=sorted(PRIORITY_WINDOW))
+    p.add_argument("--monitor", type=float, metavar="HOURS",
+                   help="recurring watch: nudge every HOURS, never escalates")
+    p.add_argument("--until", help="snooze until ISO8601")
     p.add_argument("--all", action="store_true")
     p.set_defaults(fn=cmd_job)
 
-    p = sub.add_parser("scan", help="find dropped threads and stale/overdue jobs")
+    p = sub.add_parser("scan", help="find dropped asks and stale/overdue/monitor jobs")
     p.add_argument("--write", action="store_true", help="write draft follow-ups to the outbox")
     p.set_defaults(fn=cmd_scan)
 
-    p = sub.add_parser("report", help="one-thread brief")
+    p = sub.add_parser("report", help="structured brief")
     p.set_defaults(fn=cmd_report)
+
+    p = sub.add_parser("brief", help="markdown daily brief")
+    p.add_argument("--write", action="store_true", help="also write to data/instinct/briefs/")
+    p.set_defaults(fn=cmd_brief)
 
     p = sub.add_parser("thread", help="show thread tail")
     p.add_argument("--tail", type=int, default=10)
@@ -358,13 +618,15 @@ def main() -> int:
     p = sub.add_parser("doctor", help="ledger + config sanity")
     p.set_defaults(fn=cmd_doctor)
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     # `job add TITLE` arrives with the title in the id slot
     if args.cmd == "job" and args.action == "add" and args.title is None:
         args.title = args.id
         args.id = None
     if args.cmd == "job" and args.action == "add" and not args.title:
         parser.error("job add requires a title")
+    if args.cmd == "job" and args.action in ("note", "wait", "snooze", "done") and not args.id:
+        parser.error(f"job {args.action} requires a job id")
     return args.fn(args)
 
 
