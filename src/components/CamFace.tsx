@@ -95,7 +95,7 @@ export const CamFace = memo(function CamFace({
 
         apiRef.current = {
           set: (w) => {
-            uniforms.jawOpen.value = Math.min(0.72, w.JawOpen ?? 0);
+            uniforms.jawOpen.value = Math.min(0.5, w.JawOpen ?? 0);
             uniforms.smile.value =
               ((w.MouthSmileLeft ?? 0) + (w.MouthSmileRight ?? 0)) * 0.5;
             uniforms.blinkL.value = w.EyeBlinkLeft ?? 0;

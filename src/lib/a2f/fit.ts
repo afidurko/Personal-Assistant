@@ -44,7 +44,7 @@ export function fitFromMesh(mesh: CamA2FMesh): CamA2FFit {
   const mouthSize = spanUv(mesh, loop);
   return {
     mouthCenter,
-    mouthSize: { x: mouthSize.x * 1.15, y: mouthSize.y * 1.35 },
+    mouthSize: { x: mouthSize.x * 0.98, y: Math.max(0.018, mouthSize.y) },
     eyeL: meanUv(mesh, LEFT_EYE),
     eyeR: meanUv(mesh, RIGHT_EYE),
     eyeSize: { x: 0.07, y: 0.045 },

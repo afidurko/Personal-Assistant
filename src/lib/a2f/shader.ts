@@ -9,11 +9,10 @@ uniform vec2 mouthCenter;
 void main() {
   vUv = uv;
   vec3 p = position;
-  float lower = smoothstep(mouthCenter.y + 0.08, mouthCenter.y - 0.18, uv.y);
-  p.y -= jawOpen * 0.045 * lower;
-  p.z += jawOpen * 0.01 * lower;
-  p.x += headYaw * 0.04;
-  p.y += headPitch * 0.03;
+  float lower = smoothstep(mouthCenter.y + 0.06, mouthCenter.y - 0.16, uv.y);
+  p.y -= jawOpen * 0.02 * lower;
+  p.x += headYaw * 0.03;
+  p.y += headPitch * 0.02;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
 }
 `;
@@ -36,37 +35,35 @@ uniform vec2 eyeSize;
 void main() {
   vec2 uv = vUv;
 
-  // Eye close — squash lids toward the iris
   vec2 dL = (uv - eyeL) / eyeSize;
-  float inL = smoothstep(1.15, 0.35, length(dL));
-  uv.y -= (uv.y - eyeL.y) * blinkL * inL * 0.85;
+  float inL = smoothstep(1.05, 0.32, length(dL));
+  uv.y -= (uv.y - eyeL.y) * blinkL * inL * 0.75;
 
   vec2 dR = (uv - eyeR) / eyeSize;
-  float inR = smoothstep(1.15, 0.35, length(dR));
-  uv.y -= (uv.y - eyeR.y) * blinkR * inR * 0.85;
+  float inR = smoothstep(1.05, 0.32, length(dR));
+  uv.y -= (uv.y - eyeR.y) * blinkR * inR * 0.75;
 
-  // Mouth ellipse in UV
-  vec2 msz = mouthSize * vec2(1.0 + smile * 0.18 - pucker * 0.12, 1.0);
-  vec2 dm = (uv - mouthCenter) / msz;
-  float er = length(vec2(dm.x, dm.y * 1.55));
-  float inMouth = smoothstep(1.15, 0.42, er);
+  float open = clamp(jawOpen, 0.0, 0.5);
+  // Inner aperture — lip-shaped oval, not a wide bar
+  vec2 msz = vec2(
+    mouthSize.x * (0.48 + smile * 0.06 - pucker * 0.08),
+    mix(0.009, 0.034, open) + funnel * 0.006
+  );
+  vec2 dm = (vUv - mouthCenter) / max(msz, vec2(0.001));
+  float er = length(dm);
+  float lips = smoothstep(1.25, 0.7, er);
+  float inner = smoothstep(0.92, 0.28, er);
 
-  // Peel lips apart (upper up, lower down) instead of stretching skin
-  float split = jawOpen * 0.28 * inMouth;
-  split += funnel * 0.06 * inMouth;
-  if (uv.y >= mouthCenter.y) uv.y += split * 0.40;
-  else uv.y -= split * 0.72;
+  float split = (open * 0.09 + funnel * 0.02) * lips;
+  if (uv.y >= mouthCenter.y) uv.y += split * 0.35;
+  else uv.y -= split * 0.5;
 
   uv = clamp(uv, 0.001, 0.999);
   vec4 photo = texture2D(map, uv);
 
-  vec3 cavity = vec3(0.18, 0.08, 0.07);
-  vec3 teeth = vec3(0.93, 0.88, 0.82);
-  float gap = inMouth * smoothstep(0.06, 0.2, jawOpen);
-  float mid = (vUv.y - mouthCenter.y) + jawOpen * 0.008;
-  float teethBand = gap * (1.0 - smoothstep(0.008, 0.034, abs(mid - 0.006)));
-  vec3 hole = mix(cavity, teeth, teethBand);
-  vec3 color = mix(photo.rgb, hole, gap * 0.94);
+  float gap = inner * smoothstep(0.05, 0.22, open);
+  vec3 cavity = vec3(0.17, 0.07, 0.07);
+  vec3 color = mix(photo.rgb, cavity, gap * 0.78);
 
   gl_FragColor = vec4(color, 1.0);
 }
