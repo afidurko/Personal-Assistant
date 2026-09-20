@@ -4,6 +4,19 @@ Cam is Aaron’s always-on Argentine assistant (32, blue eyes, brown hair, soft 
 for life automation, source-backed research, documents, LinkedIn/Indeed jobs, and
 talking presence — with a smart second brain, **agent teams**, and a **sLM/DL cortex**.
 
+## Cam Live — daily-driver assistant (start here)
+
+```bash
+python3 scripts/cam-live-server.py
+# → http://127.0.0.1:8899 — chat + voice + camera object identification +
+#   agent teams (parallel subagents) + messages/reminders. No build, no deps.
+```
+
+Real reasoning core (`scripts/cam_brain.py`): connects to Ollama /
+OpenAI-compatible / OpenAI / Anthropic when configured, and falls back to a
+grounded local cortex (memory + vault retrieval + skills) offline.
+Full guide: [docs/CAM_LIVE.md](docs/CAM_LIVE.md)
+
 ## Home (Cam + live 3D cortex)
 
 ```bash

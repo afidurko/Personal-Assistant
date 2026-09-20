@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Cam · Live Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header id="topbar">
+    <img id="face" src="face.jpg" alt="Cam" onerror="this.style.display='none'" />
+    <div class="who">
+      <h1>Cam</h1>
+      <div id="statusline" class="sub">connecting…</div>
+    </div>
+    <div class="pills">
+      <span class="pill" id="pill-brain" title="Reasoning engine">brain: …</span>
+      <span class="pill" id="pill-ears" title="Voice gate">ears: …</span>
+      <span class="pill" id="pill-eyes" title="Vision">eyes: off</span>
+      <span class="pill" id="pill-unread" title="Unread messages">✉ 0</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Chat -->
+    <section class="panel" id="panel-chat">
+      <h2>Talk to Cam</h2>
+      <div id="chatlog" class="scroll"></div>
+      <form id="chatform" autocomplete="off">
+        <button type="button" id="micbtn" title="Hold conversation by voice">🎙</button>
+        <input id="chatinput" placeholder="Say or type anything… (remember…, remind me…, task: …, what do you see?)" />
+        <button type="submit">Send</button>
+      </form>
+      <label class="tts"><input type="checkbox" id="ttsbox" checked /> Cam speaks replies aloud</label>
+    </section>
+
+    <!-- Camera / vision -->
+    <section class="panel" id="panel-vision">
+      <h2>Cam's Eyes <span id="vision-mode" class="sub"></span></h2>
+      <div id="stage">
+        <video id="video" playsinline muted></video>
+        <canvas id="overlay"></canvas>
+      </div>
+      <div class="row">
+        <button id="cambtn">Start camera</button>
+        <button id="snapbtn" disabled>Identify objects</button>
+        <label class="filebtn">Analyze image…<input type="file" id="filepick" accept="image/*" hidden /></label>
+        <label class="tts"><input type="checkbox" id="livebox" /> live</label>
+      </div>
+      <div id="visionout" class="scroll small"></div>
+    </section>
+
+    <!-- Teams & tasks -->
+    <section class="panel" id="panel-tasks">
+      <h2>Agent Teams <span class="sub">Cam is head · leads spawn parallel subagents</span></h2>
+      <form id="taskform" autocomplete="off">
+        <input id="taskinput" placeholder="Give the swarm a goal…" />
+        <button type="submit">Dispatch</button>
+      </form>
+      <div id="tasklist" class="scroll"></div>
+    </section>
+
+    <!-- Inbox -->
+    <section class="panel" id="panel-inbox">
+      <h2>Messages from Cam <button id="readall" class="mini">mark all read</button></h2>
+      <div id="inbox" class="scroll"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
