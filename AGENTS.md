@@ -10,6 +10,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Agent identity / outbound channels: **Inkbox** via `motor.inkbox` (`integrations/inkbox`) — gated by `switch.outbound`
 - Multi-node GPU training: **higgsfield** via `motor.higgsfield` (`integrations/higgsfield`) — gated by `switch.cam_enhance`
 - Agent loops: **loop-engineering** via `motor.loop` (`integrations/loop-engineering`) — L1 report automations
+- Proactive follow-through: **Cam Instinct** via `motor.instinct` (`scripts/instinct.py`) — persistent job ledger + draft-only follow-ups
 - Policy: [`.clinerules`](.clinerules)
 - Workspace registry: [`config/workspaces/registry.json`](config/workspaces/registry.json)
 - Runner: `python3 scripts/run-cline.py --goal "..." "prompt"`
@@ -21,6 +22,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Public APIs: `python3 scripts/public-apis-search.py --query "weather"`
 - Google Trends: `python3 scripts/google-trends-search.py --query "election" --offline`
 - Inkbox: `python3 scripts/inkbox-check.py`
+- Instinct: `python3 scripts/instinct.py scan --write` · `python3 scripts/instinct-check.py`
 - Needs Attention (all coding workspaces): `python3 scripts/needs-attention.py --connect --dispatch-plan --write`
 - Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
 

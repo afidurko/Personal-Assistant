@@ -318,6 +318,20 @@
         "switch.kill"
       ],
       "notes": "Loop Engineering patterns — audit/run/state spine (scripts/loop-run.py); week-one L1 report-only; not the brain"
+    },
+    {
+      "id": "motor.instinct",
+      "channel": [
+        "instinct_ledger",
+        "local_script",
+        "cline_schedule"
+      ],
+      "path": "scripts/instinct.py",
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "notes": "Cam Instinct follow-through engine — thread/job ledger + draft-only follow-ups; live send hands to motor.inkbox under switch.outbound"
     }
   ],
   "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"

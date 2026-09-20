@@ -1016,6 +1016,33 @@
       "team": "team.needs-attention",
       "script": "scripts/needs-attention.py",
       "notes": "Cursor Needs Attention tab automation — connect all workspaces; Aaron gates enhance/outbound/kill"
+    },
+    {
+      "id": "hotspot.instinct",
+      "center": "center.ops",
+      "area": "area.cingulate",
+      "columns": [
+        "neuron.ops",
+        "neuron.watch_loop",
+        "neuron.qa"
+      ],
+      "tracts": [
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.instinct.followup",
+        "center.ops",
+        "switch.autonomy",
+        "motor.instinct"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "proactive_followups_persistent_jobs_draft_only",
+      "team": "team.capability",
+      "available_to": "all_roles_and_subagents",
+      "integration": "config/integrations/instinct.json"
     }
   ]
 }

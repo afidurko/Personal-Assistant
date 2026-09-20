@@ -1884,6 +1884,35 @@
       "to": "switch.autonomy",
       "weight": 0.9,
       "notes": "needs-attention plan → autonomy"
+    },
+    {
+      "from": "sense.instinct.followup",
+      "to": "center.ops",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.instinct.followup",
+      "to": "center.memory",
+      "weight": 0.7
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.instinct",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "Instinct scan/draft under standing autonomy; sends stay with motor.inkbox"
+    },
+    {
+      "from": "motor.instinct",
+      "to": "center.comms",
+      "weight": 0.8,
+      "notes": "follow-up drafts offered to comms for gated outbound handoff"
+    },
+    {
+      "from": "motor.instinct",
+      "to": "area.mtl",
+      "weight": 0.75,
+      "notes": "feedback — job outcomes into memory"
     }
   ]
 }

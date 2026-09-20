@@ -14,7 +14,9 @@
     "integration empty: integrations/voicestudio (submodule init or create config)",
     "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)",
     "integration empty: integrations/sgr-agent-core (submodule init or create config)",
+    "integration empty: integrations/infinitemind (submodule init or create config)",
     "integration empty: integrations/litserve (submodule init or create config)",
+    "integration empty: integrations/higgsfield (submodule init or create config)",
     "integration empty: integrations/loop-engineering (submodule init or create config)"
   ],
   "mesh_flags": {
@@ -123,6 +125,12 @@
       "policy_exists": true
     },
     {
+      "id": "infinitemind",
+      "path": "integrations/infinitemind",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
       "id": "litserve",
       "path": "integrations/litserve",
       "populated": false,
@@ -131,7 +139,7 @@
     {
       "id": "higgsfield",
       "path": "integrations/higgsfield",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {
@@ -139,12 +147,18 @@
       "path": "integrations/loop-engineering",
       "populated": false,
       "policy_exists": true
+    },
+    {
+      "id": "instinct",
+      "path": "scripts/instinct.py",
+      "populated": true,
+      "policy_exists": true
     }
   ],
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=35 edges=340"
+    "detail": "senses=36 edges=345"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

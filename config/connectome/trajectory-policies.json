@@ -180,6 +180,22 @@
         "motor.enhance"
       ],
       "revise_to": "loop_report_only"
+    },
+    {
+      "id": "instinct_followup_draft_only",
+      "description": "Instinct follow-ups are draft-only; any live send must hand off to motor.inkbox under switch.outbound act",
+      "if_all_motors": [
+        "motor.instinct",
+        "motor.inkbox"
+      ],
+      "require_switch_act": [
+        "switch.outbound"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.inkbox"
+      ],
+      "revise_to": "draft_only"
     }
   ]
 }

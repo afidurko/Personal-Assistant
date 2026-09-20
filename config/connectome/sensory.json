@@ -404,6 +404,20 @@
         "spike.fact"
       ],
       "notes": "Loop Engineering cadence tick — daily triage / QA bridge / PR babysitter (integrations/loop-engineering)"
+    },
+    {
+      "id": "sense.instinct.followup",
+      "modality": "exec",
+      "source": [
+        "instinct_ledger",
+        "local_script"
+      ],
+      "emits": [
+        "spike.followup",
+        "spike.needs_aaron",
+        "spike.dropped_thread"
+      ],
+      "notes": "Cam Instinct scan findings — stale/overdue jobs, dropped threads (scripts/instinct.py)"
     }
   ]
 }

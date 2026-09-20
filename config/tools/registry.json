@@ -26,7 +26,7 @@
     },
     {
       "id": "tool.connectome.route",
-      "purpose": "Dry-run a sense\u2192motor plan via connectome-route.py",
+      "purpose": "Dry-run a sense→motor plan via connectome-route.py",
       "created_by_role": "tool-creator",
       "entrypoint": "scripts/connectome-route.py",
       "kind": "local_script",
@@ -565,7 +565,7 @@
     },
     {
       "id": "tool.loop.run",
-      "purpose": "Run a Cam L1 loop pattern (daily-triage, qa-cycle, \u2026)",
+      "purpose": "Run a Cam L1 loop pattern (daily-triage, qa-cycle, …)",
       "created_by_role": "tool-creator",
       "entrypoint": "scripts/loop-run.py",
       "kind": "local_script",
@@ -592,6 +592,57 @@
       "integration": "config/integrations/loop-engineering.json",
       "motor": "motor.loop",
       "available_to": "all_roles_and_subagents"
+    },
+    {
+      "id": "tool.instinct.check",
+      "purpose": "Confirm Cam Instinct connectome + config wiring (offline, no key required)",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/instinct-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/instinct.json",
+      "motor": "motor.instinct"
+    },
+    {
+      "id": "tool.instinct.scan",
+      "purpose": "Scan job ledger + thread for stale/overdue/dropped items; write draft-only follow-ups",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/instinct.py",
+      "kind": "local_script",
+      "inputs": {
+        "write": "boolean",
+        "now": "iso8601?"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "findings": "object[]",
+        "drafts": "string[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/instinct.json",
+      "motor": "motor.instinct"
     }
   ]
 }

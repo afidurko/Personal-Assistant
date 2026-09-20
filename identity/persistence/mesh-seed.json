@@ -350,7 +350,11 @@
     "inkbox_motor": "motor.inkbox",
     "loop_engineering": true,
     "loop_run": "scripts/loop-run.py",
-    "loop_audit": "scripts/loop-audit.py"
+    "loop_audit": "scripts/loop-audit.py",
+    "instinct": true,
+    "instinct_config": "config/integrations/instinct.json",
+    "instinct_script": "scripts/instinct-check.py",
+    "instinct_motor": "motor.instinct"
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",

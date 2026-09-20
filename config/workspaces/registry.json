@@ -1,7 +1,7 @@
 {
   "version": 1,
   "title": "Cam unified workspace registry",
-  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
+  "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts — so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
   "updated_at": "2026-09-20",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
@@ -227,7 +227,7 @@
         "motor": "motor.google_trends",
         "remote": "github.com/GoogleTrends/data",
         "available_to": "all_roles_and_subagents",
-        "notes": "Open Trends datasets via GitHub trees API \u2014 do not submodule (~382MB)"
+        "notes": "Open Trends datasets via GitHub trees API — do not submodule (~382MB)"
       },
       {
         "id": "public-apis",
@@ -376,6 +376,19 @@
         "motor": "motor.loop",
         "remote": "github.com/afidurko/loop-engineering",
         "available_to": "all_roles_and_subagents"
+      },
+      {
+        "id": "instinct",
+        "path": "scripts/instinct.py",
+        "policy": "config/integrations/instinct.md",
+        "config": "config/integrations/instinct.json",
+        "script": "scripts/instinct-check.py",
+        "sense": "sense.instinct.followup",
+        "hotspot": "hotspot.instinct",
+        "motor": "motor.instinct",
+        "remote": null,
+        "available_to": "all_roles_and_subagents",
+        "notes": "First-party Cam module (behavior model inspired by instinct.com) — no submodule, no credential, draft-only outbound"
       }
     ],
     "parallel_prs": [
@@ -497,7 +510,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Cognitive memory engine \u2014 prefer API client scripts/memorybear.py for Cam runtime"
+        "notes": "Cognitive memory engine — prefer API client scripts/memorybear.py for Cam runtime"
       },
       {
         "id": "jarvis",
@@ -568,7 +581,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+        "notes": "Curated free API index — shared by all agents via motor.public_apis"
       },
       {
         "id": "joshinator-analyzer",
@@ -607,7 +620,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
+        "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
       },
       {
         "id": "inkbox",
@@ -629,7 +642,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+        "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
       },
       {
         "id": "voicestudio",
@@ -688,7 +701,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Agent loop patterns + audit CLI \u2014 shared via motor.loop (L1 report-only week one)"
+        "notes": "Agent loop patterns + audit CLI — shared via motor.loop (L1 report-only week one)"
       },
       {
         "id": "sgr-agent-core",
@@ -709,7 +722,7 @@
         ],
         "install_rules": true,
         "cursor_bootstrap": true,
-        "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
+        "notes": "Cam slow-path reasoner — see docs/CAM_REASONING.md"
       },
       {
         "id": "litserve",
@@ -1058,7 +1071,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Cognitive memory engine \u2014 prefer API client scripts/memorybear.py for Cam runtime"
+      "notes": "Cognitive memory engine — prefer API client scripts/memorybear.py for Cam runtime"
     },
     {
       "id": "jarvis",
@@ -1129,7 +1142,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Curated free API index \u2014 shared by all agents via motor.public_apis"
+      "notes": "Curated free API index — shared by all agents via motor.public_apis"
     },
     {
       "id": "joshinator-analyzer",
@@ -1168,7 +1181,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Gaze / pupil Capture\u00b7Player\u00b7Service \u2014 not always-on surveillance"
+      "notes": "Gaze / pupil Capture·Player·Service — not always-on surveillance"
     },
     {
       "id": "inkbox",
@@ -1190,7 +1203,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Agent email/phone/identity SDK \u2014 outbound gated via motor.inkbox / switch.outbound"
+      "notes": "Agent email/phone/identity SDK — outbound gated via motor.inkbox / switch.outbound"
     },
     {
       "id": "voicestudio",
@@ -1232,7 +1245,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
+      "notes": "Cam slow-path reasoner — see docs/CAM_REASONING.md"
     },
     {
       "id": "infinitemind",
@@ -1312,7 +1325,7 @@
       ],
       "install_rules": true,
       "cursor_bootstrap": true,
-      "notes": "Agent loop patterns + audit CLI \u2014 shared via motor.loop (L1 report-only week one)"
+      "notes": "Agent loop patterns + audit CLI — shared via motor.loop (L1 report-only week one)"
     }
   ],
   "chooser": {

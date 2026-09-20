@@ -1,0 +1,46 @@
+{
+  "id": "instinct",
+  "name": "Cam Instinct follow-through engine",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-20",
+  "role": "Proactive follow-through: single continuous thread, persistent job ledger, dropped-thread detection, draft-only follow-ups",
+  "policy": "config/integrations/instinct.md",
+  "inspired_by": "Instinct (Spear Street Technology, instinct.com) — behavior model only; original local implementation, no shared code or data",
+  "path": "scripts/instinct.py",
+  "data_dir": "data/instinct",
+  "sense": "sense.instinct.followup",
+  "hotspot": "hotspot.instinct",
+  "motor": "motor.instinct",
+  "switch": "switch.autonomy",
+  "center": "center.ops",
+  "mesh_namespace": "mesh/projects",
+  "vault_dir": "vault/06-Life-Ops/instinct",
+  "credential_env": null,
+  "defaults": {
+    "stale_hours": 24,
+    "reply_hours": 4,
+    "max_followups": 3,
+    "draft_only": true,
+    "offline_ok": true,
+    "live_send_requires_outbound": true,
+    "no_spend": true,
+    "no_training_on_aaron_data": true
+  },
+  "scripts": {
+    "engine": "scripts/instinct.py",
+    "check": "scripts/instinct-check.py"
+  },
+  "teams": [
+    "team.capability",
+    "team.tooling"
+  ],
+  "roles": [
+    "ops",
+    "task-executor",
+    "chief",
+    "qa"
+  ],
+  "available_to": "all_roles_and_subagents",
+  "outbound_handoff": "motor.inkbox under switch.outbound — this engine never sends"
+}
