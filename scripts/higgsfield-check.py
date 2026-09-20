@@ -116,6 +116,8 @@ def main() -> int:
                 errors.append(msg)
         if plan.get("mode") != "dry_run":
             errors.append("doctor must stay dry_run")
+        for w in plan.get("warnings") or []:
+            soft.append(f"doctor: {w}")
     except Exception as e:  # noqa: BLE001
         msg = f"dry-run exception: {e}"
         if checkout != "ok":
