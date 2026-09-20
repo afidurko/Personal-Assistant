@@ -47,6 +47,41 @@ class BuildPlanTests(unittest.TestCase):
         self.assertIn("workspace_persistence", ids)
         self.assertIn("schedules_loops", ids)
 
+    def test_auto_sync_is_a_must_and_safe(self) -> None:
+        auto_sync = self.plan["auto_sync"]
+        self.assertEqual(auto_sync["requirement"], "must")
+        self.assertTrue(auto_sync["policy"]["never_auto_merge"])
+        self.assertTrue(auto_sync["policy"]["report_first"])
+        self.assertEqual(auto_sync["motor"], "scripts/auto-sync.py")
+        self.assertGreaterEqual(len(auto_sync["sources"]), 4)
+        ids = {c["id"] for c in auto_sync["channels"]}
+        self.assertIn("repo_drift_sync", ids)
+        self.assertIn("workspace_connectivity", ids)
+        self.assertIn("session_distillates", ids)
+
+    def test_auto_sync_motor_reports_offline(self) -> None:
+        p = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/auto-sync.py"),
+                "--json",
+                "--fetch-timeout",
+                "8",
+            ],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        report = json.loads(p.stdout)
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(report["mode"], "report")
+        self.assertTrue(report["policy"]["never_auto_merge"])
+        self.assertGreaterEqual(report["registry"]["integrations_registered"], 20)
+        self.assertGreaterEqual(len(report["submodules"]), 10)
+        self.assertEqual(report["registry"]["missing_paths"], [])
+
     def test_phases_have_exit_checks(self) -> None:
         phases = self.plan["phases"]
         self.assertGreaterEqual(len(phases), 5)

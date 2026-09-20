@@ -146,13 +146,33 @@ Drift detector: `python3 scripts/build-plan-check.py` runs inside
 `cam-system.py --smoke` (piece `piece.build_plan`), so any environment whose
 checkout no longer matches the plan reports it at boot.
 
+### 4b. Auto-sync **from** all projects and repos (inbound — a must)
+
+The mirror direction: everything the home registers syncs back **into** it.
+Motor: `scripts/auto-sync.py` (piece `piece.auto_sync`, runs at every boot and
+on the daily L1 loop). Report-first; `--pull` fast-forwards only and re-pins
+submodules; it refuses on a dirty tree and **never auto-merges** — merges stay
+Aaron-gated per `.clinerules`.
+
+| Source | Channel |
+|---|---|
+| Home repo itself | `origin/main` fetch → ahead/behind drift report; `--pull` ff-only under `switch.autonomy` |
+| All 22 integration repos (`integrations/*` submodules) | `git submodule status` survey (uninitialized / drifted-from-pin / conflict) + `--pull` re-pin; `needs-attention.py --execute` auto-clears missing inits |
+| All 19 coding workspaces | `config/workspaces/registry.json` coverage check + `needs-attention.py --connect` connectivity |
+| Session memory from every workspace | `sync-cline-session.py export/import` → `mesh/cline` |
+| Local tool memories | `sync-jarvis-memory.py` → `mesh/jarvis` |
+
+Distillate lands in `vault/10-Mesh-Distillates/auto-sync/latest.json` so the
+home UI and health scan can show sync state. A registered path that has gone
+missing fails the check (exit 1) — that is drift the bus must not hide.
+
 ---
 
 ## 5. Build phases (technical order, each with a hard exit check)
 
 ### Phase 0 — Home foundation (this PR)
-Encode the plan: manifest + checker + tests + bus wiring.
-**Exit:** `python3 scripts/build-plan-check.py` green · `cam-system.py --smoke` still green · unit tests pass.
+Encode the plan: manifest + checker + tests + bus wiring + the auto-sync motor.
+**Exit:** `python3 scripts/build-plan-check.py` green · `cam-system.py --smoke` still green · `auto-sync.py` report runs offline · unit tests pass.
 
 ### Phase 1 — Real-world execute + receive (priority 1)
 1. Stand up the null stack locally (nulltickets → nullclaw → nullboiler → nullhub) — durable synapses across process death (known blocker in `pieces.json`).
@@ -205,6 +225,7 @@ Tier 2 studio bring-up on Aaron's GPU machine; Tier 3 Higgsfield fine-tune of th
 ```bash
 python3 scripts/build-plan-check.py            # plan ↔ repo consistency
 python3 scripts/build-plan-check.py --json     # machine-readable report
+python3 scripts/auto-sync.py                   # inbound drift from all projects/repos
 python3 -m unittest scripts.test_build_plan    # unit tests
-python3 scripts/cam-system.py --smoke          # whole organism, includes piece.build_plan
+python3 scripts/cam-system.py --smoke          # whole organism, includes piece.build_plan + piece.auto_sync
 ```

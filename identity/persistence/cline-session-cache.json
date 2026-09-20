@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T14:55:20.138375+00:00",
+    "at": "2026-09-20T14:59:12.782040+00:00",
     "mode": "plan",
-    "summary": "Cam home build master plan: priority ladder P1-P4 encoded, avatar tiers (HF MuseTalk+LivePortrait primary, LLMAvatarTalk studio, Higgsfield finetune), auto-update channels, phase exit checks; build-plan-check wired into cam-system bus",
+    "summary": "Auto-sync from all projects/repos added as a must: scripts/auto-sync.py motor (report-first, ff-only pull, never auto-merge), auto_sync contract in build-plan.json, piece.auto_sync on the bus",
     "workspace": "."
   },
   "mesh_notes": [
@@ -94,6 +94,11 @@
     {
       "at": "2026-09-20T14:55:20.138375+00:00",
       "text": "docs/CAM_HOME_BUILD.md + config/system/build-plan.json + piece.build_plan",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-20T14:59:12.782040+00:00",
+      "text": "sources: home repo drift, 22 integration submodules, 19 coding workspaces, mesh/cline, mesh/jarvis",
       "workspace": "."
     }
   ],

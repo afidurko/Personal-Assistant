@@ -143,6 +143,27 @@ def check(plan: dict) -> dict:
         require_paths(ch.get("paths") or [], where)
         note_planned(ch.get("planned_paths") or [], where)
 
+    auto_sync = plan.get("auto_sync") or {}
+    if auto_sync.get("requirement") != "must":
+        failures.append("auto_sync: requirement must be 'must'")
+    sync_policy = auto_sync.get("policy") or {}
+    if sync_policy.get("never_auto_merge") is not True:
+        failures.append("auto_sync.policy: never_auto_merge must be true")
+    if sync_policy.get("report_first") is not True:
+        failures.append("auto_sync.policy: report_first must be true")
+    for sw in sync_policy.get("pull_requires_switch") or []:
+        if sw not in switch_ids:
+            failures.append(f"auto_sync.policy: unknown switch {sw}")
+    require_paths([auto_sync.get("motor", "")], "auto_sync.motor")
+    if len((auto_sync.get("sources") or {})) < 4:
+        failures.append("auto_sync: at least 4 sources required (all projects + repos)")
+    sync_channels = auto_sync.get("channels") or []
+    if len(sync_channels) < 4:
+        failures.append("auto_sync: at least 4 channels required")
+    for ch in sync_channels:
+        where = f"auto_sync.{ch.get('id')}"
+        require_paths(ch.get("paths") or [], where)
+
     phases = plan.get("phases") or []
     if len(phases) < 5:
         failures.append("phases: at least 5 phases required")

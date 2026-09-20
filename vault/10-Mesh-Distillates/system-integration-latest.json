@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-20T14:54:52Z",
+  "at": "2026-09-20T14:58:59Z",
   "overall": "warning",
   "ok": true,
   "assistant": "Cam",
@@ -217,6 +217,16 @@
       }
     },
     {
+      "id": "piece.auto_sync",
+      "title": "Auto-sync from all projects and repos",
+      "layer": "ops",
+      "status": "healthy",
+      "paths": {
+        "scripts/auto-sync.py": "ok",
+        "config/workspaces/registry.json": "ok"
+      }
+    },
+    {
       "id": "piece.persistence",
       "title": "Persistence bundle",
       "layer": "memory",
@@ -227,7 +237,7 @@
       }
     }
   ],
-  "piece_count": 19,
+  "piece_count": 20,
   "hard_missing": [],
   "smokes": [
     {

@@ -150,13 +150,56 @@
       }
     ]
   },
+  "auto_sync": {
+    "requirement": "must",
+    "direction": "inbound — all projects and repos sync into this home",
+    "policy": {
+      "report_first": true,
+      "never_auto_merge": true,
+      "pull_mode": "ff-only + submodule re-pin, refuses on dirty tree",
+      "pull_requires_switch": ["switch.autonomy"],
+      "kill_switch_wins": "switch.kill"
+    },
+    "motor": "scripts/auto-sync.py",
+    "sources": {
+      "home_repo": "origin/main drift (ahead/behind)",
+      "integration_repos": "all git submodules under integrations/ (22 registered)",
+      "coding_workspaces": "config/workspaces/registry.json coding_workspaces layer",
+      "session_memory": "mesh/cline distillates from every workspace",
+      "local_memories": "Jarvis memory.json cache -> mesh/jarvis"
+    },
+    "channels": [
+      {
+        "id": "repo_drift_sync",
+        "mechanism": "auto-sync motor: home fetch + submodule survey; --pull ff-only under gate",
+        "paths": ["scripts/auto-sync.py", "config/workspaces/registry.json"]
+      },
+      {
+        "id": "workspace_connectivity",
+        "mechanism": "needs-attention survey + auto-clear submodule init across all coding workspaces",
+        "paths": ["scripts/needs-attention.py"]
+      },
+      {
+        "id": "session_distillates",
+        "mechanism": "cline session export/import across workspaces into mesh/cline",
+        "paths": ["scripts/sync-cline-session.py"]
+      },
+      {
+        "id": "local_memory_sync",
+        "mechanism": "jarvis local memory cache into mesh/jarvis",
+        "paths": ["scripts/sync-jarvis-memory.py"]
+      }
+    ],
+    "cadence": "standing loop (daily-triage L1) + on every environment boot via piece.auto_sync",
+    "distillate": "vault/10-Mesh-Distillates/auto-sync/latest.json"
+  },
   "phases": [
     {
       "id": "phase0_home_foundation",
       "priority": 1,
-      "title": "Encode plan: manifest + checker + tests + bus wiring",
+      "title": "Encode plan: manifest + checker + tests + bus wiring + auto-sync motor",
       "status": "in_progress",
-      "exit_check": "build-plan-check green; cam-system smoke green; unit tests pass"
+      "exit_check": "build-plan-check green; cam-system smoke green; auto-sync report runs offline; unit tests pass"
     },
     {
       "id": "phase1_execute_receive",
