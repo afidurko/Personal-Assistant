@@ -1,7 +1,6 @@
 /**
- * Verify illustrated Cam face speech animation (dev only).
+ * Verify portrait canvas face speaks (dev only).
  * Requires: npm i -D puppeteer-core
- * Usage: node scripts/verify-cam-face.mjs
  */
 import puppeteer from 'puppeteer-core';
 
@@ -14,11 +13,11 @@ const browser = await puppeteer.launch({
 
 try {
   const page = await browser.newPage();
-  await page.goto('http://127.0.0.1:5173/?v=faceverify2', {
+  await page.goto('http://127.0.0.1:5173/?v=portrait-verify', {
     waitUntil: 'networkidle2',
     timeout: 30000,
   });
-  await page.waitForSelector('.cam-face-svg', { timeout: 15000 });
+  await page.waitForSelector('.cam-face-canvas', { timeout: 15000 });
 
   const result = await page.evaluate(async () => {
     const input = document.querySelector('.cam-stage-form input');
@@ -36,12 +35,12 @@ try {
     const t0 = performance.now();
     while (performance.now() - t0 < 14000) {
       const el = document.querySelector('.cam-face-live');
-      const svg = document.querySelector('.cam-face-svg');
-      if (el && svg) {
+      const canvas = document.querySelector('.cam-face-canvas');
+      if (el && canvas) {
         const sample = {
           t: Math.round(performance.now() - t0),
           cls: el.className,
-          hasSvg: true,
+          hasCanvas: true,
           status: document.querySelector('.cam-avatar-status')?.textContent || '',
         };
         if (!best || sample.cls.includes('mouth-open')) best = sample;

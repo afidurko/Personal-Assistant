@@ -2073,7 +2073,7 @@ h2,
   z-index: 1;
 }
 
-/* Live illustrated Cam face — SVG character, no photo */
+/* Cam portrait — canvas-warped photo (no cartoon, no sticker mouth) */
 .cam-face-live {
   position: relative;
   width: 100%;
@@ -2089,9 +2089,7 @@ h2,
   overflow: hidden;
   border: 2px solid var(--border-strong);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-  background:
-    radial-gradient(ellipse at 50% 30%, rgba(61, 184, 168, 0.18), transparent 55%),
-    linear-gradient(165deg, #1a2e36 0%, #0c181c 100%);
+  background: #1a1512;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -2103,7 +2101,7 @@ h2,
   border-color: rgba(61, 184, 168, 0.85);
   box-shadow:
     0 18px 48px rgba(0, 0, 0, 0.45),
-    0 0 36px rgba(61, 184, 168, 0.3);
+    0 0 36px rgba(61, 184, 168, 0.28);
 }
 
 .cam-face-live.expr-think .cam-face-live-inner {
@@ -2114,11 +2112,11 @@ h2,
   animation: cam-face-listen-ring 2s var(--ease-pulse) infinite;
 }
 
-.cam-face-svg {
+.cam-face-canvas {
   width: 100%;
   height: 100%;
   display: block;
-  overflow: visible;
+  border-radius: 50%;
 }
 
 @keyframes cam-face-listen-ring {

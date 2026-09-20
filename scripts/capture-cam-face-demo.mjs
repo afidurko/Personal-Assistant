@@ -1,7 +1,6 @@
 /**
- * Capture illustrated Cam speaking face frames → mp4 demo.
+ * Capture Cam portrait speech warp frames → mp4.
  * Requires: npm i -D puppeteer-core
- * Usage: node scripts/capture-cam-face-demo.mjs
  */
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
@@ -9,9 +8,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const FRAMES = '/tmp/cam-face-frames';
-const OUT_MP4 = '/opt/cursor/artifacts/cam_illustrated_face_speak.mp4';
-const OUT_IDLE = '/opt/cursor/artifacts/screenshots/cam_illustrated_idle.png';
-const OUT_SPEAK = '/opt/cursor/artifacts/screenshots/cam_illustrated_speaking.png';
+const OUT_MP4 = '/opt/cursor/artifacts/cam_portrait_speak.mp4';
+const OUT_IDLE = '/opt/cursor/artifacts/screenshots/cam_portrait_idle.png';
+const OUT_SPEAK = '/opt/cursor/artifacts/screenshots/cam_portrait_speaking.png';
 
 fs.rmSync(FRAMES, { recursive: true, force: true });
 fs.mkdirSync(FRAMES, { recursive: true });
@@ -26,11 +25,12 @@ const browser = await puppeteer.launch({
 
 try {
   const page = await browser.newPage();
-  await page.goto('http://127.0.0.1:5173/?v=illustrated', {
+  await page.goto('http://127.0.0.1:5173/?v=portrait', {
     waitUntil: 'networkidle2',
     timeout: 30000,
   });
-  await page.waitForSelector('.cam-face-svg', { timeout: 15000 });
+  await page.waitForSelector('.cam-face-canvas', { timeout: 15000 });
+  await new Promise((r) => setTimeout(r, 600));
 
   const wrap = await page.$('.cam-avatar-face-wrap');
   if (wrap) await wrap.screenshot({ path: OUT_IDLE, type: 'png' });
@@ -56,8 +56,10 @@ try {
   while (Date.now() - t0 < 13000) {
     const stage = await page.$('.cam-avatar-stage');
     if (stage) {
-      const file = path.join(FRAMES, `f_${String(i).padStart(4, '0')}.png`);
-      await stage.screenshot({ path: file, type: 'png' });
+      await stage.screenshot({
+        path: path.join(FRAMES, `f_${String(i).padStart(4, '0')}.png`),
+        type: 'png',
+      });
       i += 1;
     }
     const info = await page.evaluate(() => {
