@@ -498,7 +498,9 @@ class CamBrain:
         if m:
             fact = self.memory.remember(m.group(1))
             turn["actions"].append({"kind": "remember", "fact_id": fact["id"]})
-            return f"Got it — I'll remember: “{fact['text']}”. That's {len(self.memory.facts)} facts I'm keeping for you."
+            n = len(self.memory.facts)
+            return (f"Got it — I'll remember: “{fact['text']}”. "
+                    f"That's {n} {'fact' if n == 1 else 'facts'} I'm keeping for you.")
 
         m = _FORGET_RE.match(text)
         if m:
