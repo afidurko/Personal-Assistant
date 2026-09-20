@@ -77,4 +77,10 @@ python3 scripts/cam-reason-billion-fuzz.py \
   --seed 11 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-cam-reason-1m.json
 
+echo "== cam-infinitemind unit =="
+python3 scripts/test_cam_infinitemind.py
+
+echo "== cam-fast unit =="
+python3 scripts/test_cam_fast.py
+
 echo "CI OK"
