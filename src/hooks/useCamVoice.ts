@@ -39,6 +39,14 @@ export interface VoiceGateClientStats {
   multiSpeakerStreak: number;
 }
 
+export interface CamRouteSummary {
+  behavior: string;
+  pathway: string[];
+  tracts: string[];
+  hotspot_id: string | null;
+  dual_stream?: { winner: string; tracts: string[] };
+}
+
 interface TurnResponse {
   cam: string;
   speak?: { rate?: number; pitch?: number; lang?: string };
@@ -50,10 +58,24 @@ interface TurnResponse {
     adaptive_raised?: boolean;
     multi_speaker_streak?: number;
   };
+  bridge?: {
+    route?: {
+      behavior?: string;
+      pathway?: string[];
+      tracts?: string[];
+      hotspot_id?: string | null;
+      dual_stream?: { winner?: string; tracts?: string[] };
+    };
+  };
 }
 
-function speakCam(text: string, opts: { rate?: number; pitch?: number; lang?: string } = {}) {
-  if (!window.speechSynthesis) return;
+type SpeakOpts = { rate?: number; pitch?: number; lang?: string };
+
+function speakCam(text: string, opts: SpeakOpts = {}, onEnd?: () => void) {
+  if (!window.speechSynthesis) {
+    onEnd?.();
+    return;
+  }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = opts.lang || 'en-US';
@@ -65,7 +87,26 @@ function speakCam(text: string, opts: { rate?: number; pitch?: number; lang?: st
       /female|samantha|karen|moira|tessa|fiona|victoria|zira/i.test(v.name),
     ) || voices.find((v) => v.lang?.startsWith('en'));
   if (prefer) u.voice = prefer;
+  u.onend = () => onEnd?.();
+  u.onerror = () => onEnd?.();
   window.speechSynthesis.speak(u);
+}
+
+function summarizeRoute(route: TurnResponse['bridge']): CamRouteSummary | null {
+  const r = route?.route;
+  if (!r) return null;
+  return {
+    behavior: String(r.behavior || 'reply'),
+    pathway: Array.isArray(r.pathway) ? r.pathway.map(String) : [],
+    tracts: Array.isArray(r.tracts) ? r.tracts.map(String) : [],
+    hotspot_id: r.hotspot_id ?? null,
+    dual_stream: r.dual_stream
+      ? {
+          winner: String(r.dual_stream.winner || 'dorsal'),
+          tracts: Array.isArray(r.dual_stream.tracts) ? r.dual_stream.tracts.map(String) : [],
+        }
+      : undefined,
+  };
 }
 
 async function fetchVoiceGateConfig(): Promise<AaronVoiceGateConfig> {
@@ -123,6 +164,8 @@ export function useCamVoice() {
     adaptiveRaised: false,
     multiSpeakerStreak: 0,
   });
+  const [lastRoute, setLastRoute] = useState<CamRouteSummary | null>(null);
+  const [bridgeBusy, setBridgeBusy] = useState(false);
 
   const recognizingRef = useRef(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -139,6 +182,7 @@ export function useCamVoice() {
   const adaptiveRef = useRef(false);
   const streakRef = useRef(0);
   const acceptsSinceRaiseRef = useRef(0);
+  const pendingSpeakRef = useRef<{ text: string; opts: SpeakOpts } | null>(null);
 
   useEffect(() => {
     cfgRef.current = gateCfg;
@@ -294,6 +338,7 @@ export function useCamVoice() {
       }
 
       busyRef.current = true;
+      setBridgeBusy(true);
       setBubbles((b) => [...b, { who: 'aaron', text: trimmed, at: new Date().toISOString() }]);
       setPartial('');
       setStatus('thinking');
@@ -323,6 +368,8 @@ export function useCamVoice() {
           multiSpeakerHint: multi,
         });
         applyServerStats(turn.voice_stats);
+        const route = summarizeRoute(turn.bridge);
+        if (route) setLastRoute(route);
         if (turn.rejected) {
           setStatus('ignored');
           setBubbles((b) => [
@@ -335,22 +382,33 @@ export function useCamVoice() {
           ]);
           return;
         }
+        // Queue speech — CamStage types first, then flushSpeak()
+        pendingSpeakRef.current = { text: turn.cam, opts: turn.speak || {} };
         setBubbles((b) => [...b, { who: 'cam', text: turn.cam, at: new Date().toISOString() }]);
         setStatus('speaking');
-        speakCam(turn.cam, turn.speak);
-        setTimeout(() => {
-          if (recognizingRef.current) setStatus('listening');
-          else setStatus('idle');
-        }, Math.min(8000, 600 + turn.cam.length * 45));
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Turn failed');
         setStatus('error');
+        pendingSpeakRef.current = null;
       } finally {
         busyRef.current = false;
+        setBridgeBusy(false);
       }
     },
     [applyServerStats, noteClientReject],
   );
+
+  /** Called by CamStage after typewriter finishes — Cam speaks the typed reply. */
+  const flushSpeak = useCallback(() => {
+    const pending = pendingSpeakRef.current;
+    if (!pending) return;
+    pendingSpeakRef.current = null;
+    setStatus('speaking');
+    speakCam(pending.text, pending.opts, () => {
+      if (recognizingRef.current) setStatus('listening');
+      else setStatus('idle');
+    });
+  }, []);
 
   const stop = useCallback(() => {
     recognizingRef.current = false;
@@ -374,6 +432,8 @@ export function useCamVoice() {
     setLevel(0);
     setPartial('');
     setStatus('idle');
+    pendingSpeakRef.current = null;
+    setBridgeBusy(false);
     window.speechSynthesis?.cancel();
     void fetch('/api/spike/mic/stop', { method: 'POST' }).catch(() => undefined);
   }, []);
@@ -584,6 +644,8 @@ export function useCamVoice() {
     lastGate,
     adaptiveRaised,
     gateStats,
+    lastRoute,
+    bridgeBusy,
     aaronOnly: gateCfg.aaron_only,
     startListening,
     startEnroll,
@@ -592,6 +654,7 @@ export function useCamVoice() {
     importProfile,
     stop,
     sendTurn,
+    flushSpeak,
   };
 }
 

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { BrainMap } from '@/components/BrainMap';
 import { CortexStage } from '@/components/CortexStage';
-import { CamPresence } from '@/components/CamPresence';
+import { CamStage } from '@/components/CamStage';
 import { WorkspacePanel } from '@/components/WorkspacePanel';
 import { MemoryRail } from '@/components/MemoryRail';
 import { ScanControls } from '@/components/ScanControls';
@@ -49,7 +49,7 @@ export default function App() {
 
   return (
     <div className="app-atmosphere cam-home">
-      <header className="hero cam-hero">
+      <header className="hero cam-hero cam-hero-presence">
         <div className="hero-brand-row">
           <p className="brand">Cam</p>
           <span
@@ -66,17 +66,10 @@ export default function App() {
         </div>
         <h1 className="headline">She listens when you open the mic.</h1>
         <p className="lede">
-          Soft airy English. Aaron only. Speak — or type — and Cam takes it from there.
+          Soft airy English. Aaron only. Watch the cortex run, then Cam types and speaks back.
         </p>
 
-        <div className="hero-stage">
-          {flatMap ? (
-            <BrainMap onFocusNode={(id) => focusNode(id)} />
-          ) : (
-            <CortexStage listening={listening} onFocusArea={onFocusArea} />
-          )}
-          <CamPresence onListeningChange={onListeningChange} />
-        </div>
+        <CamStage onListeningChange={onListeningChange} />
       </header>
 
       <section className="mesh-ops" aria-label="Mesh and agents">
@@ -88,7 +81,7 @@ export default function App() {
         >
           <span className="mesh-ops-label">{meshOpen ? 'Hide the mesh' : 'Open the mesh'}</span>
           <span className="mesh-ops-hint">
-            agents · system pulse · workspaces · guide · memory
+            3D cortex · agents · system pulse · workspaces · guide · memory
           </span>
         </button>
 
@@ -114,6 +107,14 @@ export default function App() {
               >
                 {flatMap ? '3D cortex' : '2D map'}
               </button>
+            </div>
+
+            <div className={`mesh-cortex-embed${listening ? ' listening' : ''}`}>
+              {flatMap ? (
+                <BrainMap onFocusNode={(id) => focusNode(id)} />
+              ) : (
+                <CortexStage listening={listening} onFocusArea={onFocusArea} />
+              )}
             </div>
 
             <AgentSpawnBay
