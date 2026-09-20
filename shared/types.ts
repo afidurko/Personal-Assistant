@@ -7,7 +7,8 @@ export type WorkspaceKind =
   | 'updates'
   | 'improvements'
   | 'agi_research'
-  | 'swarm';
+  | 'swarm'
+  | 'needs_attention';
 
 export type ScanStatus = 'idle' | 'scanning' | 'healthy' | 'warning' | 'critical' | 'stale';
 
@@ -200,7 +201,8 @@ export type SuggestionKind =
   | 'card-embodiment'
   | 'identity-voice'
   | 'presence-voice'
-  | 'identity';
+  | 'identity'
+  | 'needs-attention';
 export interface SuggestiveImplementation {
   id: string;
   kind: SuggestionKind;
@@ -312,5 +314,12 @@ export const WORKSPACE_META: Record<
       'Privilege inheritance, lineage terminate, and boss/worker bus across all agents and workspaces.',
     region: 'swarm_bus',
     defaultColor: '#1abc9c',
+  },
+  needs_attention: {
+    name: 'Needs Attention',
+    description:
+      'Cross-workspace attention queue: connectivity debt, high-severity findings, and Aaron-gated escalations.',
+    region: 'prefrontal',
+    defaultColor: '#f0a04b',
   },
 };

@@ -18,6 +18,7 @@ describe('shared status palette', () => {
         'improvements',
         'agi_research',
         'swarm',
+        'needs_attention',
       ]),
     );
     for (const meta of Object.values(WORKSPACE_META)) {

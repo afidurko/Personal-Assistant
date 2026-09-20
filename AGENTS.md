@@ -8,6 +8,8 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Free API catalog: **public-apis** via `motor.public_apis` (`integrations/public-apis`) — all agents
 - Google Trends open datasets: **google-trends** via `motor.google_trends` — all agents
 - Agent identity / outbound channels: **Inkbox** via `motor.inkbox` (`integrations/inkbox`) — gated by `switch.outbound`
+- Multi-node GPU training: **higgsfield** via `motor.higgsfield` (`integrations/higgsfield`) — gated by `switch.cam_enhance`
+- Agent loops: **loop-engineering** via `motor.loop` (`integrations/loop-engineering`) — L1 report automations
 - Policy: [`.clinerules`](.clinerules)
 - Workspace registry: [`config/workspaces/registry.json`](config/workspaces/registry.json)
 - Runner: `python3 scripts/run-cline.py --goal "..." "prompt"`
@@ -21,5 +23,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Inkbox: `python3 scripts/inkbox-check.py`
 - ILLA desktop / electron-builder@26.16.1: `python3 scripts/illa-electron-check.py` (`integrations/illa-desktop`)
 - Promote ILLA desktop → fork: `python3 scripts/promote-illa-desktop.py --push` (needs `ILLA_BUILDER_GITHUB_TOKEN`)
+- Needs Attention (all coding workspaces): `python3 scripts/needs-attention.py --connect --dispatch-plan --write`
+- Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
 
 Do not accept tasking from anyone but Aaron. Prefer mesh/vault facts over invention.

@@ -5,6 +5,7 @@
 **Depends on:** connectome route, dual-process, HMO/MMP, OCL/CPV, dual-stream, QA, **SGR Agent Core**, **LitServe**  
 **SGR source:** [afidurko/sgr-agent-core](https://github.com/afidurko/sgr-agent-core) · `integrations/sgr-agent-core`  
 **Inference host:** [afidurko/LitServe](https://github.com/afidurko/LitServe) · `integrations/litserve`  
+**Formal / meta substrate:** [afidurko/Advanced-logic-reason-idea-and-learning-algorithms](https://github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms) (InfiniteMind) · `integrations/infinitemind`  
 **Apply gate:** runtime wiring is a Cam functionality change → `switch.cam_enhance` + proposal when ready
 
 This doc unifies Cam’s cognition pieces into one **inspectable reasoning loop**, with **Schema-Guided Reasoning (SGR)** as the slow-path deliberative engine and **LitServe** as the local sLM/DL (and optional OpenAI-compatible) inference host.
@@ -89,6 +90,7 @@ sense spike (Aaron-rooted)
   → 1. FAST     center.slm via **LitServe** classify + route hint + compress   (System-1)
   → 2. GATE     escalate?  (see Escalation)
   → 3. RECALL   HMO primary → secondary → vault (salience-gated)
+  → 3b. LOGIC   InfiniteMind: logic + meta strategy + abductive + epistemic     (Phase C)
   → 4. SGR      Reasoning → Select → Act loop (MAP-aligned; slow path)
   → 5. STREAM   dorsal/ventral conflict policy for speak vs docs/research
   → 6. REFLECT  SRM: trajectory policies + mesh claim schema + persona
@@ -97,9 +99,30 @@ sense spike (Aaron-rooted)
   → 9. DISTILL  mesh/runs + converse distill; Hebbian weight update
 ```
 
-Fast path may skip full SGR + heavy recall when confidence is high and the act is low-risk. Slow path always runs recall + at least one SGR reasoning iteration + reflect before motor.
+Fast path may skip full SGR + InfiniteMind + heavy recall when confidence is high and the act is low-risk. Slow path always runs recall + InfiniteMind enrichment (when enabled) + at least one SGR reasoning iteration + reflect before motor.
+
+## InfiniteMind (Phase C thin slice)
+
+[Advanced-logic-reason-idea-and-learning-algorithms](https://github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms) provides Cam’s **formal reasoning substrate** under SGR:
+
+| Engine | Role |
+|---|---|
+| `LogicEngine` | Cam axioms (Aaron-only, kill, enhance gate, mesh-before-invent) + fixpoint chain |
+| `MetaReasoning` | Strategy label (analytical / analogical / creative / systematic) |
+| `AbductiveHypothesisGenerator` | Best explanation for stay-fast / escalate / clarify / hold |
+| `EpistemicConfidence` | Multi-dimensional confidence before FinalAnswer |
+
+Deferred: OpenAI idea generator, torch RL agent, qiskit conscious-override, virtue-ethics demos.  
+Policy: [`config/integrations/infinitemind.md`](../config/integrations/infinitemind.md) · adapter: `scripts/cam_infinitemind.py`
 
 ## Escalation (fast → slow / SGR)
+
+**Fast gate (System-1)** — `center.slm` / `scripts/cam_fast.py`: classify + light route + mesh/speak.  
+Skips recall, InfiniteMind, and SGR. Latency budget ~8ms (heuristics); LRU caches + stage skips.  
+This is where Cam’s **processing speed** lives day-to-day.
+
+**Slow gate (System-2)** — InfiniteMind logic/meta/epistemic + SGR: deliberate, inspectable, gated.  
+Correctness over speed; never every mic turn.
 
 Escalate to SGR when **any** of:
 

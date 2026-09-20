@@ -15,8 +15,7 @@
     "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)",
     "integration empty: integrations/sgr-agent-core (submodule init or create config)",
     "integration empty: integrations/litserve (submodule init or create config)",
-    "integration empty: https://github.com/afidurko/electron-builder (submodule init or create config)",
-    "integration empty: https://github.com/afidurko/illa-builder (submodule init or create config)"
+    "integration empty: integrations/loop-engineering (submodule init or create config)"
   ],
   "mesh_flags": {
     "daily_agi_research_scan": true,
@@ -26,6 +25,7 @@
     "memorybear": true,
     "public_apis": true,
     "inkbox": true,
+    "loop_engineering": true,
     "unlimited_subagents": true,
     "slm_cortex_enabled": true,
     "dl_cortex_enabled": true,
@@ -129,28 +129,22 @@
       "policy_exists": true
     },
     {
-      "id": "electron-builder",
-      "path": "https://github.com/afidurko/electron-builder",
-      "populated": false,
-      "policy_exists": true
-    },
-    {
-      "id": "illa-builder",
-      "path": "https://github.com/afidurko/illa-builder",
-      "populated": false,
-      "policy_exists": true
-    },
-    {
-      "id": "illa-desktop",
-      "path": "integrations/illa-desktop",
+      "id": "higgsfield",
+      "path": "integrations/higgsfield",
       "populated": true,
+      "policy_exists": true
+    },
+    {
+      "id": "loop-engineering",
+      "path": "integrations/loop-engineering",
+      "populated": false,
       "policy_exists": true
     }
   ],
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=33 edges=323"
+    "detail": "senses=35 edges=340"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

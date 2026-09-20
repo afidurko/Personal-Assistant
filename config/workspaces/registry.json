@@ -108,6 +108,17 @@
         "hotspot": "hotspot.tooling",
         "status": "active_this_branch",
         "notes": "Privilege inheritance + lineage + boss/worker bus across all agents/workspaces"
+      },
+      {
+        "id": "scan.needs_attention",
+        "kind": "needs_attention",
+        "team": "team.needs-attention",
+        "module": "server/workspaces/needs-attention.ts",
+        "script": "scripts/needs-attention.py",
+        "hotspot": "hotspot.needs_attention",
+        "status": "active_this_branch",
+        "cross_workspace": true,
+        "notes": "Needs Attention queue + connect all coding workspaces"
       }
     ],
     "agent_teams": [
@@ -126,6 +137,10 @@
       {
         "id": "team.tooling",
         "config": "config/teams/tooling.json"
+      },
+      {
+        "id": "team.needs-attention",
+        "config": "config/teams/needs-attention.json"
       }
     ],
     "swarm_contracts": {
@@ -307,6 +322,17 @@
         "status": "proposed"
       },
       {
+        "id": "infinitemind",
+        "path": "integrations/infinitemind",
+        "policy": "config/integrations/infinitemind.md",
+        "remote": "github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms",
+        "role": "formal_meta_reasoning_substrate",
+        "plan": "docs/CAM_REASONING.md",
+        "config": "config/enhancement/reasoning-logic.json",
+        "adapter": "scripts/cam_infinitemind.py",
+        "status": "phase_c_thin_slice"
+      },
+      {
         "id": "litserve",
         "path": "integrations/litserve",
         "policy": "config/integrations/litserve.md",
@@ -319,6 +345,37 @@
         ],
         "plan": "docs/CAM_REASONING.md",
         "status": "proposed"
+      },
+      {
+        "id": "higgsfield",
+        "path": "integrations/higgsfield",
+        "policy": "config/integrations/higgsfield.md",
+        "config": "config/integrations/higgsfield.json",
+        "remote": "github.com/afidurko/higgsfield",
+        "role": "multi_node_gpu_training",
+        "motor": "motor.higgsfield",
+        "sense": "sense.train.higgsfield",
+        "hotspot": "hotspot.higgsfield",
+        "script": "scripts/higgsfield-check.py",
+        "run": "scripts/higgsfield-run.py",
+        "pack": "scripts/pack-higgsfield-result.py",
+        "status": "active_dry_run",
+        "serves": [
+          "motor.dl"
+        ],
+        "notes": "Multi-node GPU train/fine-tune orchestrator; not the brain"
+      },
+      {
+        "id": "loop-engineering",
+        "path": "integrations/loop-engineering",
+        "policy": "config/integrations/loop-engineering.md",
+        "config": "config/integrations/loop-engineering.json",
+        "script": "scripts/loop-run.py",
+        "sense": "sense.loop.tick",
+        "hotspot": "hotspot.loop_engineering",
+        "motor": "motor.loop",
+        "remote": "github.com/afidurko/loop-engineering",
+        "available_to": "all_roles_and_subagents"
       },
       {
         "id": "electron-builder",
@@ -338,7 +395,7 @@
         "script": "scripts/illa-electron-check.py",
         "remote": "github.com/afidurko/illa-builder",
         "default_branch": "beta",
-        "notes": "Low-code builder fork @ beta; desktop shell in integrations/illa-desktop"
+        "notes": "Low-code builder fork @ beta; desktop shell promoted to electron/"
       },
       {
         "id": "illa-desktop",
@@ -348,7 +405,7 @@
         "script": "scripts/illa-electron-check.py",
         "remote": "github.com/afidurko/Personal-Assistant",
         "packager": "electron-builder@26.16.1",
-        "notes": "Electron shell for ILLA; lives in PA until illa-builder fork is writable"
+        "notes": "Cam staging mirror; source of truth is illa-builder/electron"
       }
     ],
     "parallel_prs": [
@@ -626,6 +683,86 @@
         "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
       },
       {
+        "id": "higgsfield",
+        "label": "Higgsfield multi-node training",
+        "path": "integrations/higgsfield",
+        "remote": "github.com/afidurko/higgsfield",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "ops",
+          "chief",
+          "researcher",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/higgsfield",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Fault-tolerant GPU orchestration for large-model training"
+      },
+      {
+        "id": "loop-engineering",
+        "label": "Loop Engineering patterns",
+        "path": "integrations/loop-engineering",
+        "remote": "github.com/afidurko/loop-engineering",
+        "default_branch": "main",
+        "roles_allowed": [
+          "*"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/loop-engineering",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Agent loop patterns + audit CLI \u2014 shared via motor.loop (L1 report-only week one)"
+      },
+      {
+        "id": "sgr-agent-core",
+        "label": "SGR Agent Core (Schema-Guided Reasoning)",
+        "path": "integrations/sgr-agent-core",
+        "remote": "github.com/afidurko/sgr-agent-core",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "chief",
+          "capability-broker",
+          "researcher",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/sgr-agent-core",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
+      },
+      {
+        "id": "litserve",
+        "label": "LitServe local inference host",
+        "path": "integrations/litserve",
+        "remote": "github.com/afidurko/LitServe",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "chief",
+          "slm-runtime",
+          "dl-enhance",
+          "ops"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/litserve",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
+      },
+      {
         "id": "electron-builder",
         "label": "electron-builder (v26.16.1 pin)",
         "path": "https://github.com/afidurko/electron-builder",
@@ -665,7 +802,7 @@
         ],
         "install_rules": false,
         "cursor_bootstrap": false,
-        "notes": "Web monorepo fork; pair with illa-desktop for Electron packaging"
+        "notes": "Web monorepo + electron/ desktop shell"
       },
       {
         "id": "illa-desktop",
@@ -715,6 +852,15 @@
     "memorybear_client": "scripts/memorybear.py",
     "memorybear_check": "scripts/memorybear-check.py",
     "memorybear_pack": "scripts/pack-memorybear-result.py",
+    "higgsfield_check": "scripts/higgsfield-check.py",
+    "higgsfield_run": "scripts/higgsfield-run.py",
+    "higgsfield_pack": "scripts/pack-higgsfield-result.py",
+    "loop_check": "scripts/loop-check.py",
+    "loop_audit": "scripts/loop-audit.py",
+    "loop_run": "scripts/loop-run.py",
+    "loop_pack": "scripts/pack-loop-result.py",
+    "needs_attention": "scripts/needs-attention.py",
+    "needs_attention_check": "scripts/needs-attention-check.py",
     "illa_electron_check": "scripts/illa-electron-check.py",
     "illa_desktop_promote": "scripts/promote-illa-desktop.py"
   },
@@ -874,12 +1020,50 @@
           ]
         },
         {
+          "id": "infinitemind",
+          "match_any": [
+            "infinitemind",
+            "infinite mind",
+            "advanced-logic-reason",
+            "advanced logic reason",
+            "integrations/infinitemind",
+            "logic_engine",
+            "abductive reasoning"
+          ]
+        },
+        {
           "id": "litserve",
           "match_any": [
             "litserve",
             "lit serve",
             "integrations/litserve",
             "lightning litserve"
+          ]
+        },
+        {
+          "id": "higgsfield",
+          "match_any": [
+            "higgsfield",
+            "multi-node training",
+            "multi node training",
+            "zero-3",
+            "zeRO-3",
+            "integrations/higgsfield",
+            "gpu orchestration"
+          ]
+        },
+        {
+          "id": "loop-engineering",
+          "match_any": [
+            "loop-engineering",
+            "loop engineering",
+            "loop-audit",
+            "loop-init",
+            "loop-cost",
+            "loop-sync",
+            "LOOP.md",
+            "integrations/loop-engineering",
+            "motor.loop"
           ]
         },
         {
@@ -1175,6 +1359,27 @@
       "notes": "Cam slow-path reasoner \u2014 see docs/CAM_REASONING.md"
     },
     {
+      "id": "infinitemind",
+      "label": "InfiniteMind (advanced logic / idea / learning)",
+      "path": "integrations/infinitemind",
+      "remote": "github.com/afidurko/Advanced-logic-reason-idea-and-learning-algorithms",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "chief",
+        "capability-broker",
+        "researcher",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/infinitemind",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Formal/meta substrate under Cam slow path; scripts/cam_infinitemind.py"
+    },
+    {
       "id": "litserve",
       "label": "LitServe local inference host",
       "path": "integrations/litserve",
@@ -1194,6 +1399,44 @@
       "install_rules": true,
       "cursor_bootstrap": true,
       "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
+    },
+    {
+      "id": "higgsfield",
+      "label": "Higgsfield multi-node training",
+      "path": "integrations/higgsfield",
+      "remote": "github.com/afidurko/higgsfield",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "chief",
+        "researcher",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/higgsfield",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Fault-tolerant GPU orchestration for large-model training"
+    },
+    {
+      "id": "loop-engineering",
+      "label": "Loop Engineering patterns",
+      "path": "integrations/loop-engineering",
+      "remote": "github.com/afidurko/loop-engineering",
+      "default_branch": "main",
+      "roles_allowed": [
+        "*"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/loop-engineering",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Agent loop patterns + audit CLI \u2014 shared via motor.loop (L1 report-only week one)"
     },
     {
       "id": "electron-builder",
@@ -1235,7 +1478,7 @@
       ],
       "install_rules": false,
       "cursor_bootstrap": false,
-      "notes": "Web monorepo fork; pair with illa-desktop for Electron packaging"
+      "notes": "Web monorepo + electron/ desktop shell"
     },
     {
       "id": "illa-desktop",
@@ -1411,12 +1654,50 @@
         ]
       },
       {
+        "id": "infinitemind",
+        "match_any": [
+          "infinitemind",
+          "infinite mind",
+          "advanced-logic-reason",
+          "advanced logic reason",
+          "integrations/infinitemind",
+          "logic_engine",
+          "abductive reasoning"
+        ]
+      },
+      {
         "id": "litserve",
         "match_any": [
           "litserve",
           "lit serve",
           "integrations/litserve",
           "lightning litserve"
+        ]
+      },
+      {
+        "id": "higgsfield",
+        "match_any": [
+          "higgsfield",
+          "multi-node training",
+          "multi node training",
+          "zero-3",
+          "zeRO-3",
+          "integrations/higgsfield",
+          "gpu orchestration"
+        ]
+      },
+      {
+        "id": "loop-engineering",
+        "match_any": [
+          "loop-engineering",
+          "loop engineering",
+          "loop-audit",
+          "loop-init",
+          "loop-cost",
+          "loop-sync",
+          "LOOP.md",
+          "integrations/loop-engineering",
+          "motor.loop"
         ]
       },
       {

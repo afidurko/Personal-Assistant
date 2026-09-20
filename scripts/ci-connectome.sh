@@ -56,6 +56,14 @@ python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
 echo "== inkbox wiring =="
 python3 scripts/inkbox-check.py
 
+echo "== higgsfield wiring =="
+python3 scripts/higgsfield-check.py
+python3 scripts/test_higgsfield.py
+
+echo "== loop-engineering wiring =="
+python3 scripts/loop-check.py
+python3 scripts/loop-run.py --pattern daily-triage --level L1 --dry-run
+
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \
   --n 1000000 \
@@ -68,5 +76,11 @@ python3 scripts/cam-reason-billion-fuzz.py \
   --n 1000000 \
   --seed 11 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-cam-reason-1m.json
+
+echo "== cam-infinitemind unit =="
+python3 scripts/test_cam_infinitemind.py
+
+echo "== cam-fast unit =="
+python3 scripts/test_cam_fast.py
 
 echo "CI OK"

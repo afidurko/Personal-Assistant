@@ -280,6 +280,27 @@ def mirror_mesh_qa(cycle_dir: Path, record: dict) -> None:
         / "mesh-mirror-latest.json"
     )
     out.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    # Bridge into loop-engineering spine (assistant-side automation)
+    try:
+        bridge = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts" / "loop-run.py"),
+                "--pattern",
+                "qa-cycle",
+                "--level",
+                "L1",
+            ],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        doc["loop_bridge_exit"] = bridge.returncode
+    except Exception as exc:  # noqa: BLE001 — never fail QA on loop bridge
+        doc["loop_bridge_error"] = str(exc)[:200]
+        path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+        out.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
 
 
 def write_suggestions(
@@ -318,6 +339,7 @@ def write_suggestions(
         "- Public APIs catalog: `python3 scripts/public-apis-check.py` + `test_public_apis.py`",
         "- Joshinator embodiment: `unittest backend.test_embodiment` + `embodiment-billion-fuzz.py`",
         "- Inkbox identity: `python3 scripts/inkbox-check.py` (outbound gated via motor.inkbox)",
+        "- Loop Engineering: `python3 scripts/loop-check.py` + `loop-run.py --pattern daily-triage --level L1`",
         "- When Mac is available: flip Tailscale preferred host to aaron-mac",
         "- Suggest: bind `run-cline.py` tickets into live nulltickets when stack is up",
         "- Suggest: `cline mcp install cam` on each Aaron machine after persist-import",

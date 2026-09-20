@@ -32,6 +32,7 @@ MOTORS = (
     "motor.inkbox",
     "motor.public_apis",
     "motor.google_trends",
+    "motor.loop",
     "motor.slm",
     "motor.dl",
 )

@@ -157,7 +157,8 @@
     "inkbox_submodule": "integrations/inkbox",
     "memorybear_cognitive_memory": true,
     "memorybear_available_to_all_agents": true,
-    "memorybear_submodule": "integrations/memorybear"
+    "memorybear_submodule": "integrations/memorybear",
+    "loop_engineering": true
   },
   "mesh/open-questions": {
     "ios_companion_pair_code": "generate on first launch",
@@ -292,6 +293,8 @@
     "inkbox_outbound_gated": true,
     "memorybear_enabled": true,
     "memorybear_offline_ok": true,
+    "loop_engineering": true,
+    "loop_week_one_l1": true,
     "electron_builder": true,
     "electron_builder_pin": "26.16.1",
     "illa_builder": true,
@@ -317,7 +320,8 @@
       "promote_script": "scripts/promote-illa-desktop.py",
       "patch_bundle": "patches/illa-builder-desktop",
       "target_branch": "cursor/desktop-electron-26-16-1",
-      "source_of_truth": "github.com/afidurko/illa-builder/electron"
+      "source_of_truth": "github.com/afidurko/illa-builder/electron",
+      "pr_url": "https://github.com/afidurko/illa-builder/pull/1"
     }
   },
   "mesh/research": {
@@ -362,6 +366,9 @@
     "inkbox_config": "config/integrations/inkbox.json",
     "inkbox_script": "scripts/inkbox-check.py",
     "inkbox_motor": "motor.inkbox",
+    "loop_engineering": true,
+    "loop_run": "scripts/loop-run.py",
+    "loop_audit": "scripts/loop-audit.py",
     "electron_builder": true,
     "electron_builder_pin": "26.16.1",
     "electron_builder_config": "config/integrations/electron-builder.json",
@@ -457,5 +464,27 @@
   "mesh/memory": {
     "memorybear": true,
     "memorybear_config": "config/integrations/memorybear.json"
+  },
+  "mesh/loops": {
+    "enabled": true,
+    "source": "https://github.com/afidurko/loop-engineering",
+    "submodule": "integrations/loop-engineering",
+    "config": "config/integrations/loop-engineering.json",
+    "patterns": "config/loops/patterns.json",
+    "runner": "scripts/loop-run.py",
+    "audit": "scripts/loop-audit.py",
+    "check": "scripts/loop-check.py",
+    "motor": "motor.loop",
+    "sense": "sense.loop.tick",
+    "hotspot": "hotspot.loop_engineering",
+    "week_one_mode": "L1",
+    "spine": [
+      "LOOP.md",
+      "STATE.md",
+      "loop-budget.md",
+      "loop-run-log.md"
+    ],
+    "status": "wired",
+    "available_to": "all_roles_and_subagents"
   }
 }

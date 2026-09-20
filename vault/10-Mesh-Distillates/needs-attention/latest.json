@@ -1,0 +1,401 @@
+{
+  "at": "2026-09-20T01:31:55Z",
+  "attention_items": [
+    {
+      "aaron_gate": true,
+      "auto_clearable": false,
+      "detail": "switch.cam_enhance \u2014 attention agents may propose, not apply.",
+      "id": "gate-enhance",
+      "kind": "policy",
+      "severity": "info",
+      "title": "Cam enhance remains Aaron-gated",
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "aaron_gate": true,
+      "auto_clearable": false,
+      "detail": "switch.outbound \u2014 never free-send from Cline attention sweeps.",
+      "id": "gate-outbound",
+      "kind": "policy",
+      "severity": "info",
+      "title": "Outbound Inkbox remains gated",
+      "workspace_id": "inkbox"
+    },
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "detail": "https://github.com/afidurko/Personal-Assistant/pull/30 draft=True mergeable=MERGEABLE fails=none",
+      "head_ref": "cursor/cam-home-visual-5c46",
+      "id": "pr-30",
+      "kind": "pr",
+      "pr_number": 30,
+      "severity": "low",
+      "suggestion": "Progress on branch; do not merge unless Aaron asks",
+      "title": "Open PR #30: Cam home visual: brand-first hero, mesh below fold",
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "detail": "https://github.com/afidurko/Personal-Assistant/pull/29 draft=True mergeable=MERGEABLE fails=none",
+      "head_ref": "cursor/needs-attention-agents-b474",
+      "id": "pr-29",
+      "kind": "pr",
+      "pr_number": 29,
+      "severity": "low",
+      "suggestion": "Progress on branch; do not merge unless Aaron asks",
+      "title": "Open PR #29: Add Needs Attention agents across all coding workspaces",
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "aaron_gate": true,
+      "auto_clearable": false,
+      "detail": "https://github.com/afidurko/Personal-Assistant/pull/28 draft=False mergeable=MERGEABLE fails=none",
+      "head_ref": "cursor/cam-trillion-qa-99b0",
+      "id": "pr-28",
+      "kind": "pr",
+      "pr_number": 28,
+      "severity": "medium",
+      "suggestion": "Progress on branch; do not merge unless Aaron asks",
+      "title": "Open PR #28: Triple-trillion QA campaign (3e12 \u00d7 2) \u2014 READY TO MERGE",
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "detail": "https://github.com/afidurko/Personal-Assistant/pull/27 draft=True mergeable=MERGEABLE fails=none",
+      "head_ref": "cursor/add-higgsfield-integration-a436",
+      "id": "pr-27",
+      "kind": "pr",
+      "pr_number": 27,
+      "severity": "low",
+      "suggestion": "Progress on branch; do not merge unless Aaron asks",
+      "title": "Open PR #27: Add higgsfield multi-node GPU training integration",
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "detail": "https://github.com/afidurko/Personal-Assistant/pull/26 draft=True mergeable=MERGEABLE fails=none",
+      "head_ref": "cursor/integrate-loop-engineering-5c62",
+      "id": "pr-26",
+      "kind": "pr",
+      "pr_number": 26,
+      "severity": "low",
+      "suggestion": "Progress on branch; do not merge unless Aaron asks",
+      "title": "Open PR #26: Integrate loop-engineering for Cam standing automations",
+      "workspace_id": "personal-assistant"
+    }
+  ],
+  "cleared": 0,
+  "coding_workspace_count": 15,
+  "connected": 15,
+  "cross_workspace": true,
+  "disconnected": 0,
+  "dispatch_plan": [
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "hint": "Progress on branch; do not merge unless Aaron asks",
+      "item_id": "pr-30",
+      "kind": "pr",
+      "runner": "scripts/run-cline.py",
+      "severity": "low",
+      "target_path": "/workspace",
+      "target_workspace": "personal-assistant",
+      "title": "Open PR #30: Cam home visual: brand-first hero, mesh below fold"
+    },
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "hint": "Progress on branch; do not merge unless Aaron asks",
+      "item_id": "pr-29",
+      "kind": "pr",
+      "runner": "scripts/run-cline.py",
+      "severity": "low",
+      "target_path": "/workspace",
+      "target_workspace": "personal-assistant",
+      "title": "Open PR #29: Add Needs Attention agents across all coding workspaces"
+    },
+    {
+      "aaron_gate": true,
+      "auto_clearable": false,
+      "hint": "Progress on branch; do not merge unless Aaron asks",
+      "item_id": "pr-28",
+      "kind": "pr",
+      "runner": "scripts/run-cline.py",
+      "severity": "medium",
+      "target_path": "/workspace",
+      "target_workspace": "personal-assistant",
+      "title": "Open PR #28: Triple-trillion QA campaign (3e12 \u00d7 2) \u2014 READY TO MERGE"
+    },
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "hint": "Progress on branch; do not merge unless Aaron asks",
+      "item_id": "pr-27",
+      "kind": "pr",
+      "runner": "scripts/run-cline.py",
+      "severity": "low",
+      "target_path": "/workspace",
+      "target_workspace": "personal-assistant",
+      "title": "Open PR #27: Add higgsfield multi-node GPU training integration"
+    },
+    {
+      "aaron_gate": false,
+      "auto_clearable": false,
+      "hint": "Progress on branch; do not merge unless Aaron asks",
+      "item_id": "pr-26",
+      "kind": "pr",
+      "runner": "scripts/run-cline.py",
+      "severity": "low",
+      "target_path": "/workspace",
+      "target_workspace": "personal-assistant",
+      "title": "Open PR #26: Integrate loop-engineering for Cam standing automations"
+    }
+  ],
+  "executed": [],
+  "failed": 0,
+  "ok": true,
+  "queue_depth": 5,
+  "team": "team.needs-attention",
+  "workspaces": [
+    {
+      "abs_path": "/workspace",
+      "attention": "ok",
+      "connected": true,
+      "id": "personal-assistant",
+      "label": "Personal-Assistant (Cam)",
+      "path": ".",
+      "primary": true,
+      "remote": "github.com/afidurko/Personal-Assistant",
+      "roles_allowed": [
+        "*"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/cline",
+      "attention": "ok",
+      "connected": true,
+      "id": "cline",
+      "label": "Cline coding agent",
+      "path": "integrations/cline",
+      "primary": false,
+      "remote": "github.com/afidurko/cline",
+      "roles_allowed": [
+        "coding",
+        "docs",
+        "ops",
+        "chief",
+        "qa",
+        "researcher"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/smart-second-brain",
+      "attention": "ok",
+      "connected": true,
+      "id": "smart-second-brain",
+      "label": "Smart Second Brain",
+      "path": "integrations/smart-second-brain",
+      "primary": false,
+      "remote": "github.com/afidurko/smart-second-brain",
+      "roles_allowed": [
+        "coding",
+        "memory-curator",
+        "docs",
+        "chief"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/memorybear",
+      "attention": "ok",
+      "connected": true,
+      "id": "memorybear",
+      "label": "MemoryBear cognitive memory",
+      "path": "integrations/memorybear",
+      "primary": false,
+      "remote": "github.com/afidurko/MemoryBear",
+      "roles_allowed": [
+        "coding",
+        "memory-curator",
+        "docs",
+        "chief",
+        "researcher",
+        "ops",
+        "qa"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/jarvis",
+      "attention": "ok",
+      "connected": true,
+      "id": "jarvis",
+      "label": "Jarvis CLI utilities",
+      "path": "integrations/jarvis",
+      "primary": false,
+      "remote": "github.com/afidurko/Jarvis",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "chief"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/paddledetection",
+      "attention": "ok",
+      "connected": true,
+      "id": "paddledetection",
+      "label": "PaddleDetection vision",
+      "path": "integrations/paddledetection",
+      "primary": false,
+      "remote": "github.com/afidurko/PaddleDetection",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "chief"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/llmavatartalk",
+      "attention": "ok",
+      "connected": true,
+      "id": "llmavatartalk",
+      "label": "LLMAvatarTalk presence",
+      "path": "integrations/llmavatartalk",
+      "primary": false,
+      "remote": "github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "chief"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/public-apis",
+      "attention": "ok",
+      "connected": true,
+      "id": "public-apis",
+      "label": "Public APIs catalog",
+      "path": "integrations/public-apis",
+      "primary": false,
+      "remote": "github.com/afidurko/public-apis",
+      "roles_allowed": [
+        "*"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/joshinator-analyzer",
+      "attention": "ok",
+      "connected": true,
+      "id": "joshinator-analyzer",
+      "label": "Joshinator card analyzer + 3D embodiment",
+      "path": "integrations/joshinator-analyzer",
+      "primary": false,
+      "remote": "github.com/afidurko/joshinator-analyzer",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "ops",
+        "chief"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/pupil",
+      "attention": "ok",
+      "connected": true,
+      "id": "pupil",
+      "label": "Pupil eye tracking",
+      "path": "integrations/pupil",
+      "primary": false,
+      "remote": "github.com/afidurko/pupil",
+      "roles_allowed": [
+        "coding",
+        "vision",
+        "chief"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/inkbox",
+      "attention": "ok",
+      "connected": true,
+      "id": "inkbox",
+      "label": "Inkbox agent identity",
+      "path": "integrations/inkbox",
+      "primary": false,
+      "remote": "github.com/afidurko/inkbox",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "ops",
+        "docs",
+        "chief",
+        "qa"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/voicestudio",
+      "attention": "ok",
+      "connected": true,
+      "id": "voicestudio",
+      "label": "VoiceStudio local speech",
+      "path": "integrations/voicestudio",
+      "primary": false,
+      "remote": "github.com/afidurko/VoiceStudio",
+      "roles_allowed": [
+        "coding",
+        "comms",
+        "ops",
+        "chief",
+        "qa"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/sgr-agent-core",
+      "attention": "ok",
+      "connected": true,
+      "id": "sgr-agent-core",
+      "label": "SGR Agent Core (Schema-Guided Reasoning)",
+      "path": "integrations/sgr-agent-core",
+      "primary": false,
+      "remote": "github.com/afidurko/sgr-agent-core",
+      "roles_allowed": [
+        "coding",
+        "chief",
+        "capability-broker",
+        "researcher",
+        "qa"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/litserve",
+      "attention": "ok",
+      "connected": true,
+      "id": "litserve",
+      "label": "LitServe local inference host",
+      "path": "integrations/litserve",
+      "primary": false,
+      "remote": "github.com/afidurko/LitServe",
+      "roles_allowed": [
+        "coding",
+        "chief",
+        "slm-runtime",
+        "dl-enhance",
+        "ops"
+      ]
+    },
+    {
+      "abs_path": "/workspace/integrations/loop-engineering",
+      "attention": "ok",
+      "connected": true,
+      "id": "loop-engineering",
+      "label": "Loop Engineering patterns",
+      "path": "integrations/loop-engineering",
+      "primary": false,
+      "remote": "github.com/afidurko/loop-engineering",
+      "roles_allowed": [
+        "*"
+      ]
+    }
+  ]
+}

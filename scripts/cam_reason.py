@@ -5,6 +5,9 @@ Accept → fast heuristics → escalate bar → recall → stub SGR Reason schem
 → dual-stream → trajectory reflect → motor plan → reasoning_trace.
 
 Does not call LitServe, converse, or live LLMs. See docs/CAM_REASONING.md.
+
+Phase C: optional InfiniteMind logic/meta/epistemic/abductive enrichment on
+the slow path (integrations/infinitemind) — still dry-run, no motors fired.
 """
 
 from __future__ import annotations
@@ -21,6 +24,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import trajectory_policies as tp  # noqa: E402
+import cam_infinitemind as cim  # noqa: E402
+import cam_fast as cf  # noqa: E402
 
 REASONING_CFG = ROOT / "config" / "enhancement" / "reasoning-logic.json"
 HMO_CFG = ROOT / "config" / "memory" / "hmo-tiers.json"
@@ -429,6 +434,73 @@ def reason(
     reasoning_schema = None
     stream = "dorsal"
     recall = None
+    im_result = None
+    fast_result = None
+    traj: dict[str, Any] = {"tool": "TrajectoryCheckTool", "motor_plan": [], "violations": []}
+
+    # --- System-1 fast gate: skip InfiniteMind + SGR + heavy I/O ---
+    if path == "fast":
+        fast_result = cf.run_fast(
+            goal=goal,
+            sense=sense,
+            kill=kill,
+            enhance=enhance,
+        )
+        toolkit_results.append(fast_result)
+        if fast_result.get("path") == "escalate_to_slow":
+            path = "slow"
+            escalate = True
+            esc_reasons = list(
+                dict.fromkeys(list(esc_reasons) + list(fast_result.get("escalation") or ["fast_recheck"]))
+            )
+        else:
+            stages = list(fast_result.get("stages") or ["accept", "fast", "gate", "stream", "motor", "distill"])
+            motor_plan = list(fast_result.get("motor_plan") or [])
+            stream = fast_result.get("stream") or "dorsal"
+            stream_act = fast_result.get("stream_act") or "speak"
+            summary = (
+                f"Fast path; hotspot={fast_result.get('hotspot_id')}; "
+                f"motors={motor_plan}; "
+                f"{(fast_result.get('compute') or {}).get('elapsed_ms')}ms"
+            )
+            answer = final_answer_tool(path, stream, summary)
+            toolkit_results.append(answer)
+            stages = list(stages)
+            if "distill" not in stages:
+                stages.append("distill")
+            trace = {
+                "kind": "reasoning_trace",
+                "sense": sense,
+                "goal": goal,
+                "path": "fast",
+                "engine": "system1_fast_heuristics",
+                "accepted": True,
+                "dry_run": dry_run,
+                "escalation": fast_result.get("escalation") or esc_reasons,
+                "stages": stages,
+                "stages_skipped": fast_result.get("stages_skipped"),
+                "classification": classification,
+                "hotspot_id": fast_result.get("hotspot_id"),
+                "area": route.get("area"),
+                "pathway": route.get("pathway"),
+                "stream": stream,
+                "stream_act": stream_act,
+                "reasoning_steps": None,
+                "switch_risks": [],
+                "sgr_iterations": 0,
+                "infinitemind": None,
+                "compute": fast_result.get("compute"),
+                "recall": None,
+                "motor_plan": motor_plan,
+                "violations": [],
+                "toolkit": [t.get("tool") for t in toolkit_results],
+                "toolkit_results": toolkit_results if dry_run else None,
+                "persona": {"name": "Cam", "sole_operator": "Aaron"},
+                "ts": utc(),
+            }
+            if write_trace:
+                _write_trace(trace)
+            return trace
 
     stream_act = pick_stream_act(goal, classification.get("intents") or [])
     dsr = dual_stream_router()
@@ -441,6 +513,23 @@ def reason(
         recall = mesh_recall(goal, personal_fact=personal)
         toolkit_results.append(recall)
 
+        im_cfg = cfg.get("infinitemind") or {}
+        if im_cfg.get("enabled_dry_run", True):
+            stages.append("logic")
+            im_result = cim.enrich(
+                goal=goal,
+                intents=list(classification.get("intents") or []),
+                confidence=float(classification.get("confidence") or 0.7),
+                escalate=True,
+                escalate_reasons=esc_reasons,
+                recall=recall,
+                kill=kill,
+                enhance_intent="enhance" in (classification.get("intents") or []),
+                not_aaron=False,
+                threshold=float((cfg.get("escalation") or {}).get("confidence_below") or 0.65),
+            )
+            toolkit_results.append(im_result)
+
         stages.append("sgr")
         reasoning_schema = cam_reasoning_tool(
             goal=goal,
@@ -450,6 +539,11 @@ def reason(
             path=path,
             iteration=1,
         )
+        if im_result and im_result.get("ok"):
+            reasoning_schema["infinitemind_strategy"] = im_result.get("strategy")
+            reasoning_schema["infinitemind_path_hint"] = (im_result.get("recommendation") or {}).get(
+                "path_hint"
+            )
         toolkit_results.append(reasoning_schema)
         max_iter = int(((cfg.get("sgr_limits") or {}).get("max_iterations_dry_run")) or 4)
         reasoning_schema["max_iterations_cap"] = max_iter
@@ -473,16 +567,26 @@ def reason(
         f"{'Slow SGR stub' if path == 'slow' else 'Fast path'}; "
         f"hotspot={route.get('hotspot_id')}; motors={motor_plan}"
     )
+    if im_result and im_result.get("ok"):
+        summary += f"; im_strategy={im_result.get('strategy')}"
     answer = final_answer_tool(path, stream, summary)
     toolkit_results.append(answer)
 
     stages.append("distill")
+    if path == "slow":
+        engine = (
+            "sgr_tool_calling_agent_stub+infinitemind"
+            if im_result and im_result.get("ok")
+            else "sgr_tool_calling_agent_stub"
+        )
+    else:
+        engine = "system1_fast_heuristics"
     trace = {
         "kind": "reasoning_trace",
         "sense": sense,
         "goal": goal,
         "path": path,
-        "engine": "sgr_tool_calling_agent_stub" if path == "slow" else "fast_heuristics",
+        "engine": engine,
         "accepted": True,
         "dry_run": dry_run,
         "escalation": esc_reasons,
@@ -496,6 +600,14 @@ def reason(
         "reasoning_steps": (reasoning_schema or {}).get("reasoning_steps"),
         "switch_risks": (reasoning_schema or {}).get("switch_risks"),
         "sgr_iterations": 1 if path == "slow" else 0,
+        "infinitemind": {
+            "strategy": (im_result or {}).get("strategy"),
+            "recommendation": (im_result or {}).get("recommendation"),
+            "abduction_best": ((im_result or {}).get("abduction") or {}).get("best"),
+        }
+        if im_result and im_result.get("ok")
+        else None,
+        "compute": (fast_result or {}).get("compute") if fast_result else None,
         "recall": recall,
         "motor_plan": motor_plan,
         "violations": traj.get("violations") or [],

@@ -3,11 +3,33 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-19T21:48:54.395432+00:00",
+    "at": "2026-09-20T02:35:51.672717+00:00",
     "mode": "act",
-    "summary": "Dual 3T green for google-trends PR #24 \u2014 READY TO MERGE",
-    "workspace": "."
+    "summary": "Landed PR #31: InfiniteMind slow gate + cam_fast System-1 on main (8210b8d)",
+    "workspace": "/workspace"
   },
+  "mesh_notes": [
+    {
+      "at": "2026-09-20T01:21:54Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=2/12 queue=10"
+    },
+    {
+      "at": "2026-09-20T01:30:09Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=15/15 queue=0"
+    },
+    {
+      "at": "2026-09-20T01:30:37Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=15/15 queue=5"
+    },
+    {
+      "at": "2026-09-20T01:31:55Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=15/15 queue=5"
+    }
+  ],
   "notes": [
     {
       "at": "2026-09-17T00:00:00+00:00",
@@ -53,6 +75,21 @@
       "at": "2026-09-19T21:48:54.395432+00:00",
       "text": "fixed pydantic dep in 3T campaign; curated trends add-ons",
       "workspace": "."
+    },
+    {
+      "at": "2026-09-20T01:38:58.859623+00:00",
+      "text": "Source: afidurko/Advanced-logic-reason-idea-and-learning-algorithms; deferred torch/qiskit/idea_generator",
+      "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-20T01:45:03.279232+00:00",
+      "text": "Aaron asked: if InfiniteMind is slow gate, what is fast? Processing speed enhanced via cam_fast.",
+      "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-20T02:35:51.672717+00:00",
+      "text": "Aaron: Land it",
+      "workspace": "/workspace"
     }
   ],
   "rules": ".clinerules",
@@ -118,11 +155,79 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": false,
+      "workspace_exists": true,
       "workspace_id": "cline"
+    },
+    {
+      "cron": "0 6 * * *",
+      "enabled": true,
+      "id": "cam-daily-loop-triage",
+      "name": "Cam daily loop triage (L1)",
+      "prompt": "Run python3 scripts/loop-run.py --pattern daily-triage --level L1. Summarize STATE.md High Priority and any connectome/health failures. Do not auto-fix or push commits. L1 report-only.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "loop",
+        "triage",
+        "l1"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "30 9 * * SUN",
+      "enabled": true,
+      "id": "cam-weekly-loop-post-merge",
+      "name": "Cam weekly loop post-merge cleanup (L1)",
+      "prompt": "Run python3 scripts/loop-run.py --pattern post-merge-cleanup --level L1. List suggested cleanup items only. Do not edit code or push.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "loop",
+        "post-merge",
+        "l1"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "*/30 * * * *",
+      "enabled": false,
+      "id": "cam-loop-pr-babysitter",
+      "name": "Cam PR babysitter (L1 report \u2014 opt-in)",
+      "prompt": "Run python3 scripts/loop-run.py --pattern pr-babysitter --level L1. Report open PRs/CI only. Never merge. Never push.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "loop",
+        "pr",
+        "l1"
+      ],
+      "timeout": 1200,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "15 7 * * *",
+      "enabled": true,
+      "id": "cam-daily-needs-attention",
+      "name": "Cam daily Needs Attention sweep",
+      "prompt": "Run python3 scripts/needs-attention-check.py then python3 scripts/needs-attention.py --connect --dispatch-plan --write. Summarize connected/disconnected coding workspaces and the attention queue. Auto-clear only non-Aaron-gated items via choose-workspace routing notes; do not outbound-message, spend money, or apply Cam enhance. Do not push commits unless Aaron asked.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "needs-attention",
+        "workspaces",
+        "triage"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
     }
   ],
-  "schedules_synced_at": "2026-09-19T21:48:21.098810+00:00",
+  "schedules_synced_at": "2026-09-20T01:31:19.619261+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

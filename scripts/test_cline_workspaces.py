@@ -37,6 +37,10 @@ class WorkspaceRegistryTests(unittest.TestCase):
         c = cw.choose_workspace(goal="inkbox sdk identity email")
         self.assertEqual(c["workspace"]["id"], "inkbox")
 
+    def test_choose_loop_engineering(self):
+        c = cw.choose_workspace(goal="loop-engineering loop-audit daily triage")
+        self.assertEqual(c["workspace"]["id"], "loop-engineering")
+
     def test_choose_voicestudio(self):
         c = cw.choose_workspace(goal="voicestudio voice cloning local tts")
         self.assertEqual(c["workspace"]["id"], "voicestudio")
@@ -175,6 +179,8 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertIn("mesh_search", tools)
         self.assertIn("connectome_route", tools)
         self.assertIn("inkbox_check", tools)
+        self.assertIn("loop_check", tools)
+        self.assertIn("loop_run", tools)
         self.assertIn("voicestudio_health", tools)
 
     def test_voicestudio_speak_dry_run(self):
