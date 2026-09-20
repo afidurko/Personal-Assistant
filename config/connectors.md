@@ -176,6 +176,20 @@
 - Coding workspace id: `inkbox` (SDK/CLI work via Cline)
 - Distills to `mesh/comms` + `vault/06-Life-Ops/inkbox/`
 
+## Loop Engineering (agent loops — all agents)
+
+- Source: [afidurko/loop-engineering](https://github.com/afidurko/loop-engineering)
+- Policy: `config/integrations/loop-engineering.md`
+- Config: `config/integrations/loop-engineering.json` · Patterns: `config/loops/patterns.json`
+- Path: `integrations/loop-engineering` (git submodule)
+- Sense: `sense.loop.tick` · Hotspot: `hotspot.loop_engineering` · Motor: `motor.loop`
+- Spine: `LOOP.md` · `STATE.md` · `loop-budget.md` · `loop-run-log.md`
+- **Week-one L1 report-only** — no auto-fix / no auto-merge
+- Scripts: `scripts/loop-check.py`, `scripts/loop-audit.py`, `scripts/loop-run.py`, `scripts/pack-loop-result.py`
+- MCP: `loop_check` · `loop_audit` · `loop_run` via `scripts/cam-mcp-server.py`
+- Schedules: `cam-daily-loop-triage`, `cam-weekly-loop-post-merge` (PR babysitter opt-in)
+- Distills to `mesh/loops` + `vault/03-Projects/loop-engineering/`
+
 ## Bridge later (OpenClaw-inspired external plugins)
 
 - SMS via phone companion

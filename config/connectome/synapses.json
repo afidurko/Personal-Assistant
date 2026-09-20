@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "analogy": "Allowed synapses \u2014 Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
+  "analogy": "Allowed synapses — Brodmann area hops + switch gates + motor; tracts annotate long-range coupling",
   "rules": [
     "Every motor fire needs an Aaron-rooted task or standing goal spike",
     "Non-Aaron tasking spikes die at switch.tasking (OFC identity gate)",
@@ -178,7 +178,7 @@
       "from": "area.visual",
       "to": "area.auditory",
       "weight": 0.6,
-      "notes": "photo\u2194voice enrollment bridge"
+      "notes": "photo↔voice enrollment bridge"
     },
     {
       "from": "area.visual",
@@ -502,7 +502,7 @@
       "to": "switch.identity",
       "when": "act",
       "weight": 1.0,
-      "notes": "Aaron-only speak gate \u2014 identity after outbound for presence path"
+      "notes": "Aaron-only speak gate — identity after outbound for presence path"
     },
     {
       "from": "switch.identity",
@@ -1559,7 +1559,7 @@
       "from": "motor.public_apis",
       "to": "area.mtl",
       "weight": 0.85,
-      "notes": "feedback \u2014 catalog hits into memory periphery"
+      "notes": "feedback — catalog hits into memory periphery"
     },
     {
       "from": "motor.public_apis",
@@ -1595,7 +1595,7 @@
       "from": "motor.inkbox",
       "to": "area.mtl",
       "weight": 0.85,
-      "notes": "feedback \u2014 identity/outbound events into memory"
+      "notes": "feedback — identity/outbound events into memory"
     },
     {
       "from": "motor.inkbox",
@@ -1607,7 +1607,7 @@
       "from": "motor.inkbox",
       "to": "center.comms",
       "weight": 0.75,
-      "notes": "feedback \u2014 outbound result to comms"
+      "notes": "feedback — outbound result to comms"
     },
     {
       "from": "motor.tool",
@@ -1782,6 +1782,59 @@
       "to": "center.memory",
       "weight": 0.85,
       "notes": "feedback"
+    },
+    {
+      "from": "sense.loop.tick",
+      "to": "area.cingulate",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.loop.tick",
+      "to": "center.qa",
+      "weight": 0.95
+    },
+    {
+      "from": "sense.loop.tick",
+      "to": "center.ops",
+      "weight": 0.7,
+      "notes": "ops visibility on standing loops"
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.loop",
+      "when": "act",
+      "weight": 1.0,
+      "notes": "loop-engineering motor for all agents"
+    },
+    {
+      "from": "motor.loop",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — loop distillates into memory"
+    },
+    {
+      "from": "motor.loop",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "feedback"
+    },
+    {
+      "from": "motor.loop",
+      "to": "sense.tool.result",
+      "weight": 0.7,
+      "notes": "loop audit/run result loop"
+    },
+    {
+      "from": "sense.clock.daily",
+      "to": "area.dlpfc",
+      "weight": 0.85,
+      "notes": "needs-attention daily triage via DLPFC"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "needs-attention plan → autonomy"
     }
   ]
 }
