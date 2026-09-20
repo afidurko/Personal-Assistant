@@ -9,31 +9,23 @@
   "physical_failed": 0,
   "first_error": null,
   "workers": 4,
-  "elapsed_s": 2.702830876999542,
+  "elapsed_s": 2.574118549999639,
   "results": [
-    {
-      "worker_id": 0,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "first_error": null,
-      "elapsed_s": 2.55531350199999
-    },
     {
       "worker_id": 1,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 2.5627049309996437
+      "elapsed_s": 2.515372313000171
     },
     {
-      "worker_id": 2,
+      "worker_id": 0,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 2.587678225999298
+      "elapsed_s": 2.5383957140002167
     },
     {
       "worker_id": 3,
@@ -41,7 +33,15 @@
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 2.6807733360001293
+      "elapsed_s": 2.548340456999995
+    },
+    {
+      "worker_id": 2,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 2.558289693000006
     }
   ]
 }
