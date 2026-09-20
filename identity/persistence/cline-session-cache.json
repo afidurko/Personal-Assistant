@@ -8,6 +8,13 @@
     "summary": "Dual 3T green for google-trends PR #24 \u2014 READY TO MERGE",
     "workspace": "."
   },
+  "mesh_notes": [
+    {
+      "at": "2026-09-20T01:21:54Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=2/12 queue=10"
+    }
+  ],
   "notes": [
     {
       "at": "2026-09-17T00:00:00+00:00",

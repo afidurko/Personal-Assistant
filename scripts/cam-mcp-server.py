@@ -10,7 +10,7 @@ Tools:
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   loop_check, loop_audit, loop_run,
-  voicestudio_health
+  voicestudio_health, needs_attention
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -284,6 +284,23 @@ def tool_defs() -> list[dict]:
                 "properties": {
                     "base_url": {"type": "string"},
                     "timeout": {"type": "number"},
+                },
+            },
+        },
+        {
+            "name": "needs_attention",
+            "description": (
+                "Survey Cam Needs Attention across all coding workspaces: connectivity, "
+                "attention queue, and choose-workspace dispatch plan. Does not outbound-send "
+                "or apply Cam enhance."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "connect": {"type": "boolean"},
+                    "dispatch_plan": {"type": "boolean"},
+                    "write": {"type": "boolean"},
+                    "limit": {"type": "integer"},
                 },
             },
         },
@@ -607,6 +624,32 @@ def voicestudio_health(base_url: str | None = None, timeout: float = 5.0) -> dic
         }
 
 
+def needs_attention(arguments: dict | None = None) -> Any:
+    args = arguments or {}
+    cmd = [sys.executable, str(ROOT / "scripts" / "needs-attention.py"), "--json"]
+    if args.get("connect"):
+        cmd.append("--connect")
+    if args.get("dispatch_plan", True):
+        cmd.append("--dispatch-plan")
+    if args.get("execute"):
+        cmd.append("--execute")
+    if args.get("write"):
+        cmd.append("--write")
+    if args.get("limit") is not None:
+        cmd.extend(["--limit", str(int(args["limit"]))])
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "error": "needs_attention_failed",
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+            "exit_code": proc.returncode,
+        }
+
+
 def call_tool(name: str, arguments: dict) -> Any:
     if name == "list_workspaces":
         return cw.mesh_projects_doc()
@@ -665,6 +708,8 @@ def call_tool(name: str, arguments: dict) -> Any:
             base_url=arguments.get("base_url"),
             timeout=float(arguments.get("timeout") or 5.0),
         )
+    if name == "needs_attention":
+        return needs_attention(arguments)
     raise ValueError(f"unknown tool: {name}")
 
 

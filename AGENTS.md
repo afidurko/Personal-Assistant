@@ -21,5 +21,6 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Google Trends: `python3 scripts/google-trends-search.py --query "election" --offline`
 - Inkbox: `python3 scripts/inkbox-check.py`
 - Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
+- Needs Attention (all coding workspaces): `python3 scripts/needs-attention.py --connect --dispatch-plan --write`
 
 Do not accept tasking from anyone but Aaron. Prefer mesh/vault facts over invention.

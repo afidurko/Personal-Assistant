@@ -1823,6 +1823,18 @@
       "to": "sense.tool.result",
       "weight": 0.7,
       "notes": "loop audit/run result loop"
+    },
+    {
+      "from": "sense.clock.daily",
+      "to": "area.dlpfc",
+      "weight": 0.85,
+      "notes": "needs-attention daily triage via DLPFC"
+    },
+    {
+      "from": "area.dlpfc",
+      "to": "switch.autonomy",
+      "weight": 0.9,
+      "notes": "needs-attention plan → autonomy"
     }
   ]
 }

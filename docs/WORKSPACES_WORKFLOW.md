@@ -12,7 +12,7 @@ Aaron runs Cam across **repo checkouts**, **scan workspaces**, **integration sub
 | **Integration submodules** | Jarvis · PaddleDetection · Pupil · LLMAvatarTalk · VoiceStudio · smart-second-brain · MemoryBear · public-apis · Cline · **Inkbox** · SwiftGuide | **Declared; init with `git submodule update --init --recursive`** |
 | **Scan workspaces (PR #2)** | health · architecture · vulnerability · updates · improvements · **agi_research** · **swarm** | **Merged to main** + AGI + swarm scanners on this branch |
 | **Brodmann / 3D cortex (PR #3)** | Plasticity + human brain viz + health conductor | Lives on `cursor/swiftguide-brain-map-0f2c` — overlaps connectome viz |
-| **Agent teams (PR #4 / this)** | AGI Research Scan · Capability · Information + sLM/DL | This branch |
+| **Agent teams (PR #4 / this)** | AGI Research Scan · Capability · Information + sLM/DL · **Needs Attention** | This branch |
 | **Cline effector (PR #5)** | Shared coding effector + `layers.coding_workspaces` | Merged to main |
 | **HAAS→Cam swarm (PR #6)** | Privilege inheritance + lineage + boss/worker bus in neural mesh memory | `cursor/haas-cam-patterns-d308` |
 
@@ -39,6 +39,7 @@ Aaron (sole task-giver / kill / enhance-approve)
 │  Information team → vault → mesh → web citations
 │  AGI Research Scan (daily) → propose enhancements
 │  Tooling / Swarm bus → privilege inheritance + assign/broadcast/resolve across all workspaces
+│  Needs Attention → connect all coding workspaces; triage / dispatch auto-clearable queue
 │  sLM / DL cortex → local assists (not schedulers)
 └───────────────┬─────────────────────────────────┘
                 │

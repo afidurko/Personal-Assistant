@@ -220,6 +220,8 @@ describe('integration after suggestive implementations', () => {
       expect(state.workspaces.length).toBe(7);
       expect(state.workspaces.some((w) => w.kind === 'agi_research')).toBe(true);
       expect(state.workspaces.some((w) => w.kind === 'swarm')).toBe(true);
+      expect(state.workspaces.some((w) => w.kind === 'needs_attention')).toBe(true);
+      expect(state.nodes.some((n) => n.id === 'layer-attention')).toBe(true);
       expect(state.suggestions?.length ?? 0).toBeGreaterThan(0);
       expect(state.nodes.some((n) => n.kind === 'concept')).toBe(true);
       expect(state.nodes.some((n) => n.id === 'layer-swarm')).toBe(true);

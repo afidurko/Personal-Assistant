@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts — so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-20",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -108,6 +108,17 @@
         "hotspot": "hotspot.tooling",
         "status": "active_this_branch",
         "notes": "Privilege inheritance + lineage + boss/worker bus across all agents/workspaces"
+      },
+      {
+        "id": "scan.needs_attention",
+        "kind": "needs_attention",
+        "team": "team.needs-attention",
+        "module": "server/workspaces/needs-attention.ts",
+        "script": "scripts/needs-attention.py",
+        "hotspot": "hotspot.needs_attention",
+        "status": "active_this_branch",
+        "cross_workspace": true,
+        "notes": "Needs Attention queue + connect all coding workspaces"
       }
     ],
     "agent_teams": [
@@ -126,6 +137,10 @@
       {
         "id": "team.tooling",
         "config": "config/teams/tooling.json"
+      },
+      {
+        "id": "team.needs-attention",
+        "config": "config/teams/needs-attention.json"
       }
     ],
     "swarm_contracts": {
@@ -654,7 +669,9 @@
     "loop_check": "scripts/loop-check.py",
     "loop_audit": "scripts/loop-audit.py",
     "loop_run": "scripts/loop-run.py",
-    "loop_pack": "scripts/pack-loop-result.py"
+    "loop_pack": "scripts/pack-loop-result.py",
+    "needs_attention": "scripts/needs-attention.py",
+    "needs_attention_check": "scripts/needs-attention-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -673,7 +690,10 @@
             "nullclaw",
             "nulltickets",
             "personal-assistant",
-            "persist"
+            "persist",
+            "needs attention",
+            "attention tab",
+            "needs-attention"
           ]
         },
         {
@@ -1149,7 +1169,10 @@
           "nullclaw",
           "nulltickets",
           "personal-assistant",
-          "persist"
+          "persist",
+          "needs attention",
+          "attention tab",
+          "needs-attention"
         ]
       },
       {
