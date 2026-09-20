@@ -33,6 +33,8 @@ class PublicApisAddonTests(unittest.TestCase):
         self.assertIn("weather.open_meteo", ids)
         self.assertIn("geo.open_meteo", ids)
         self.assertIn("facts.catfact", ids)
+        self.assertIn("fx.frankfurter", ids)
+        self.assertIn("air.open_meteo", ids)
 
     def test_call_weather_offline(self) -> None:
         payload = self._run(
@@ -64,8 +66,27 @@ class PublicApisAddonTests(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("unknown addon", (proc.stderr + proc.stdout).lower())
 
+    def test_call_fx_offline(self) -> None:
+        payload = self._run(
+            "call", "fx.frankfurter", "--base", "USD", "--quote", "EUR", "--offline"
+        )
+        self.assertTrue(payload.get("ok"))
+        self.assertIn("rates", payload.get("result") or {})
+
+    def test_call_air_offline(self) -> None:
+        payload = self._run(
+            "call",
+            "air.open_meteo",
+            "--latitude",
+            "40.7",
+            "--longitude",
+            "-74.0",
+            "--offline",
+        )
+        self.assertTrue(payload.get("ok"))
+        self.assertIn("current", payload.get("result") or {})
+
     def test_free_form_url_not_in_cli(self) -> None:
-        # Guardrail: argparse has no --url; allowlist only.
         help_out = subprocess.check_output(
             [sys.executable, str(ADDON), "call", "-h"],
             text=True,

@@ -1,9 +1,7 @@
 {
   "ok": true,
   "hard_errors": [],
-  "soft_warnings": [
-    "submodule README empty \u2014 using fixture until git submodule update --init"
-  ],
+  "soft_warnings": [],
   "integration": "public-apis",
   "available_to": "all_roles_and_subagents",
   "teams": [

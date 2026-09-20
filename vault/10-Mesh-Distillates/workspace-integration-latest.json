@@ -7,7 +7,6 @@
     "integration empty: integrations/llmavatartalk (submodule init or create config)",
     "integration empty: integrations/smart-second-brain (submodule init or create config)",
     "integration empty: integrations/memorybear (submodule init or create config)",
-    "integration empty: integrations/public-apis (submodule init or create config)",
     "integration empty: integrations/cline (submodule init or create config)",
     "integration empty: integrations/pupil (submodule init or create config)",
     "integration empty: integrations/inkbox (submodule init or create config)",
@@ -81,7 +80,7 @@
     {
       "id": "public-apis",
       "path": "integrations/public-apis",
-      "populated": false,
+      "populated": true,
       "policy_exists": true
     },
     {
