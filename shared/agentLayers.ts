@@ -7,6 +7,7 @@ export type AgentLayerId =
   | 'memory'
   | 'persistence'
   | 'issue-loop'
+  | 'attention'
   | 'swarm';
 
 export type AgentRoleId =
@@ -18,6 +19,9 @@ export type AgentRoleId =
   | 'completion-guardian'
   | 'issue-fix-loop'
   | 'regression-sentinel'
+  | 'attention-triage'
+  | 'workspace-connector'
+  | 'attention-dispatcher'
   | 'privilege-broker'
   | 'lineage-guardian'
   | 'boss-router'
@@ -85,9 +89,18 @@ export const AGENT_LAYERS: AgentLayerMeta[] = [
       'Dedicated looping agents that detect regressions and findings, attempt fixes, re-verify, and persist outcomes.',
   },
   {
+    id: 'attention',
+    name: 'Needs Attention Layer',
+    depth: 5,
+    region: 'prefrontal',
+    color: '#f0a04b',
+    purpose:
+      'Triage and clear Needs Attention items across every coding workspace; escalate only Aaron-gated decisions.',
+  },
+  {
     id: 'swarm',
     name: 'Swarm Privilege & Bus Layer',
-    depth: 5,
+    depth: 6,
     region: 'swarm_bus',
     color: '#1abc9c',
     purpose:
@@ -176,8 +189,56 @@ export const MESH_AGENTS: MeshAgentDef[] = [
     enhances: ['repair', 'commute'],
     region: 'repair_loop',
     color: '#f4511e',
-    relatedWorkspaceKinds: ['health', 'updates', 'vulnerability', 'swarm'],
+    relatedWorkspaceKinds: ['health', 'updates', 'vulnerability', 'swarm', 'needs_attention'],
     maxLoopAttempts: 3,
+  },
+  {
+    id: 'attention-triage',
+    layer: 'attention',
+    name: 'Attention Triage',
+    mandate:
+      'Rank Needs Attention queue items: auto-clearable vs Aaron-gated (kill, enhance, outbound).',
+    enhances: ['repair', 'commute'],
+    region: 'prefrontal',
+    color: '#f6b26b',
+    relatedWorkspaceKinds: [
+      'needs_attention',
+      'improvements',
+      'health',
+      'vulnerability',
+      'swarm',
+    ],
+    maxLoopAttempts: 4,
+  },
+  {
+    id: 'workspace-connector',
+    layer: 'attention',
+    name: 'Workspace Connector',
+    mandate:
+      'Verify every registry coding workspace is connected; report empty submodules without inventing remotes.',
+    enhances: ['commute', 'persistence'],
+    region: 'prefrontal',
+    color: '#e69138',
+    relatedWorkspaceKinds: ['needs_attention', 'health', 'updates', 'swarm'],
+  },
+  {
+    id: 'attention-dispatcher',
+    layer: 'attention',
+    name: 'Attention Dispatcher',
+    mandate:
+      'Route auto-clearable attention items via choose-workspace / issue-loop / swarm assign across all workspaces.',
+    enhances: ['repair', 'commute', 'swarm'],
+    region: 'prefrontal',
+    color: '#d0791c',
+    relatedWorkspaceKinds: [
+      'needs_attention',
+      'improvements',
+      'architecture',
+      'vulnerability',
+      'agi_research',
+      'swarm',
+    ],
+    maxLoopAttempts: 5,
   },
   {
     id: 'privilege-broker',
