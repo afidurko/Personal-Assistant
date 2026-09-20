@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-19T21:36:19Z",
+  "at": "2026-09-20T14:54:52Z",
   "overall": "warning",
   "ok": true,
   "assistant": "Cam",
@@ -206,6 +206,17 @@
       }
     },
     {
+      "id": "piece.build_plan",
+      "title": "Home build plan (priority ladder + avatar + auto-update)",
+      "layer": "ops",
+      "status": "healthy",
+      "paths": {
+        "config/system/build-plan.json": "ok",
+        "docs/CAM_HOME_BUILD.md": "ok",
+        "scripts/build-plan-check.py": "ok"
+      }
+    },
+    {
       "id": "piece.persistence",
       "title": "Persistence bundle",
       "layer": "memory",
@@ -216,14 +227,14 @@
       }
     }
   ],
-  "piece_count": 18,
+  "piece_count": 19,
   "hard_missing": [],
   "smokes": [
     {
       "id": "connectome-check",
       "ok": true,
       "exit": 0,
-      "preview": "connectome-check: PASS\n  senses=32 options=44 edges=315 hard=0 missing=0"
+      "preview": "connectome-check: PASS\n  senses=35 options=48 edges=340 hard=0 missing=0"
     },
     {
       "id": "swarm-check",

@@ -15,6 +15,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Runner: `python3 scripts/run-cline.py --goal "..." "prompt"`
 - Chooser: `python3 scripts/choose-workspace.py --goal "..."`
 - System: `python3 scripts/cam-system.py --smoke` — all pieces on one bus
+- Home build plan (priorities · avatar tiers · auto-update): [`docs/CAM_HOME_BUILD.md`](docs/CAM_HOME_BUILD.md) — `python3 scripts/build-plan-check.py`
 - MCP: `python3 scripts/cam-mcp-server.py` (stdio) — install with `cline mcp install cam -- ...`
 - Schedules: `python3 scripts/sync-cline-schedules.py --apply-cache --print-commands`
 - Cognitive memory: `python3 scripts/memorybear.py --doctor --offline` · `python3 scripts/memorybear-check.py`

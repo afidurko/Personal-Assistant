@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T02:35:51.672717+00:00",
-    "mode": "act",
-    "summary": "Landed PR #31: InfiniteMind slow gate + cam_fast System-1 on main (8210b8d)",
-    "workspace": "/workspace"
+    "at": "2026-09-20T14:55:20.138375+00:00",
+    "mode": "plan",
+    "summary": "Cam home build master plan: priority ladder P1-P4 encoded, avatar tiers (HF MuseTalk+LivePortrait primary, LLMAvatarTalk studio, Higgsfield finetune), auto-update channels, phase exit checks; build-plan-check wired into cam-system bus",
+    "workspace": "."
   },
   "mesh_notes": [
     {
@@ -90,6 +90,11 @@
       "at": "2026-09-20T02:35:51.672717+00:00",
       "text": "Aaron: Land it",
       "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-20T14:55:20.138375+00:00",
+      "text": "docs/CAM_HOME_BUILD.md + config/system/build-plan.json + piece.build_plan",
+      "workspace": "."
     }
   ],
   "rules": ".clinerules",
