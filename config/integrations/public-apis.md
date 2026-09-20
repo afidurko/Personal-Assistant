@@ -85,6 +85,9 @@ First-wave allowlist lives in [`public-apis-addons.json`](public-apis-addons.jso
 | `facts.catfact` | Smoke / presence demo |
 | `dogs.ceo` | Random dog image URL |
 | `crypto.coingecko_simple` | Simple crypto USD prices |
+| `fx.frankfurter` | Live FX rates (USD→EUR default) |
+| `advice.slip` | Random advice (presence/demo) |
+| `air.open_meteo` | PM2.5 / European AQI by lat/lon |
 
 Rules: only allowlisted endpoints; prefer Auth=No HTTPS; kill switch pauses live calls; fixtures for CI/`--offline`.
 

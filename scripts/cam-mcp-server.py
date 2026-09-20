@@ -173,7 +173,7 @@ def tool_defs() -> list[dict]:
             "name": "public_apis_addon",
             "description": (
                 "Call an allowlisted public-apis thin-wrapper add-on "
-                "(weather, geocode, ip, cat facts, dogs, coingecko). "
+                "(weather, geocode, FX, air quality, ip, demos). "
                 "No free-form URLs — only curated add-on ids."
             ),
             "inputSchema": {
@@ -189,6 +189,8 @@ def tool_defs() -> list[dict]:
                     "count": {"type": "integer"},
                     "ids": {"type": "string"},
                     "vs": {"type": "string"},
+                    "base": {"type": "string"},
+                    "quote": {"type": "string"},
                 },
             },
         },
@@ -492,6 +494,8 @@ def public_apis_addon(arguments: dict) -> Any:
         ("--count", "count"),
         ("--ids", "ids"),
         ("--vs", "vs"),
+        ("--base", "base"),
+        ("--quote", "quote"),
     ):
         if arguments.get(key) is not None:
             cmd.extend([flag, str(arguments[key])])

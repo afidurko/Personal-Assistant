@@ -229,6 +229,8 @@ def main() -> int:
     call_p.add_argument("--count", type=int)
     call_p.add_argument("--ids")
     call_p.add_argument("--vs")
+    call_p.add_argument("--base")
+    call_p.add_argument("--quote")
     call_p.add_argument("--json-params", help="extra JSON object of params")
 
     args = p.parse_args()
@@ -241,7 +243,7 @@ def main() -> int:
         return 0 if report.get("ok") else 1
 
     raw: dict[str, Any] = {}
-    for key in ("latitude", "longitude", "days", "name", "count", "ids", "vs"):
+    for key in ("latitude", "longitude", "days", "name", "count", "ids", "vs", "base", "quote"):
         val = getattr(args, key, None)
         if val is not None:
             raw[key] = val

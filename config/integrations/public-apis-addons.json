@@ -125,6 +125,57 @@
       },
       "fixture": "scripts/testdata/addons/crypto.coingecko_simple.json",
       "roles": ["researcher", "info-retriever", "ops", "tool-user"]
+    },
+    {
+      "id": "fx.frankfurter",
+      "name": "Frankfurter FX",
+      "catalog_name": "Frankfurter",
+      "catalog_url": "https://www.frankfurter.app/docs",
+      "category": "Currency Exchange",
+      "auth": "No",
+      "https": true,
+      "purpose": "Live FX rates without an API key (ops / research)",
+      "method": "GET",
+      "url_template": "https://api.frankfurter.app/latest?from={base}&to={quote}",
+      "params": {
+        "base": {"type": "string", "default": "USD"},
+        "quote": {"type": "string", "default": "EUR"}
+      },
+      "fixture": "scripts/testdata/addons/fx.frankfurter.json",
+      "roles": ["ops", "researcher", "info-retriever", "tool-user"]
+    },
+    {
+      "id": "advice.slip",
+      "name": "Advice Slip",
+      "catalog_name": "Advice Slip",
+      "catalog_url": "https://api.adviceslip.com/",
+      "category": "Personality",
+      "auth": "No",
+      "https": true,
+      "purpose": "Random advice slip for presence/demo smoke tests",
+      "method": "GET",
+      "url_template": "https://api.adviceslip.com/advice",
+      "params": {},
+      "fixture": "scripts/testdata/addons/advice.slip.json",
+      "roles": ["comms", "tool-user", "qa"]
+    },
+    {
+      "id": "air.open_meteo",
+      "name": "Open-Meteo air quality",
+      "catalog_name": "Open-Meteo",
+      "catalog_url": "https://open-meteo.com/",
+      "category": "Environment",
+      "auth": "No",
+      "https": true,
+      "purpose": "PM2.5 / European AQI by lat/lon (ops / life health)",
+      "method": "GET",
+      "url_template": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&current=pm10,pm2_5,european_aqi",
+      "params": {
+        "latitude": {"type": "number", "required": true},
+        "longitude": {"type": "number", "required": true}
+      },
+      "fixture": "scripts/testdata/addons/air.open_meteo.json",
+      "roles": ["ops", "info-retriever", "chief", "tool-user"]
     }
   ]
 }

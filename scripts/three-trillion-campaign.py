@@ -111,6 +111,7 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- `aaron-voice-billion-fuzz.py` honors `--physical` / modular_period_scaled (N≥1e11)",
         "- cam-reason 3T workers assert in-process coding route + converse greeting/see-me overlay",
         "- workspace-integration-check is inside the static gate (was campaign-only)",
+        "- Public-apis 3T + expanded allowlisted add-ons (frankfurter / advice slip) from #42",
         "- CI: install pydantic before joshinator embodiment unit tests",
         "- Embodiment 3T: pydantic-free `embodiment_lite` catalog path when pypi is blocked",
         "",
@@ -139,12 +140,17 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
         "- ILLA desktop: `python3 scripts/illa-desktop-billion-fuzz.py --n 3000000000000`",
         "- ILLA unit: `python3 scripts/test_illa_desktop.py`",
+        "- Public APIs: `python3 scripts/public-apis-billion-fuzz.py --n 3000000000000`",
+        "- Public APIs unit: `python3 scripts/test_public_apis.py` + `test_public_apis_addons.py`",
+        "- Public APIs add-ons: `python3 scripts/public-apis-addon.py list`",
         "- Keep electron-builder pin exact `26.16.1` (not fork master / v27)",
         "- After packaging edits: `npm --prefix integrations/illa-desktop run check:pin`",
         "- Cloud Agent: install must be a real command (`./scripts/cloud-agent-install.sh`); never `build` / `promote`",
         "- Do not add `npm ci` to Cloud Agent install until `registry.npmjs.org` is allowlisted",
         "- After merge, start a new Cloud Agent so `.cursor/environment.json` overrides the dashboard",
         "- Dashboard Save is on the agent Environment panel; if Save is missing, merge this PR so repo JSON wins",
+        "- Suggest: add `quotes.quotable` / `exchange.open_er_api` allowlisted add-ons when ops asks",
+        "- Suggest: MCP `public_apis_addon` for weather/geo before inventing HTTP helpers",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
@@ -246,6 +252,18 @@ def one_pass(
     results.append(
         run([sys.executable, "scripts/illa-electron-check.py"], "illa-electron-check")
     )
+    results.append(
+        run([sys.executable, "scripts/test_public_apis.py"], "public-apis-unit")
+    )
+    results.append(
+        run(
+            [sys.executable, "scripts/test_public_apis_addons.py"],
+            "public-apis-addons-unit",
+        )
+    )
+    results.append(
+        run([sys.executable, "scripts/public-apis-check.py"], "public-apis-check")
+    )
 
     for script, name, extra_seed in (
         ("scripts/trajectory-billion-fuzz.py", "trajectory-3t", 17),
@@ -253,6 +271,7 @@ def one_pass(
         ("scripts/cam-reason-billion-fuzz.py", "cam-reason-3t", 11),
         ("scripts/illa-desktop-billion-fuzz.py", "illa-desktop-3t", 26),
         ("scripts/aaron-voice-billion-fuzz.py", "aaron-voice-3t", 19),
+        ("scripts/public-apis-billion-fuzz.py", "public-apis-3t", 23),
     ):
         if name == "embodiment-3t":
             results.append(_maybe_install_embodiment_deps())
