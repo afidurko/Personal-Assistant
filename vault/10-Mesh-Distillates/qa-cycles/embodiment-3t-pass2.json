@@ -7,8 +7,8 @@
   "skipped": 195313,
   "full_checks": 10000,
   "first_error": null,
-  "elapsed_s": 2.446439242001361,
-  "checks_per_sec": 1226272023639.462,
+  "elapsed_s": 2.46635428800073,
+  "checks_per_sec": 1216370257345.2466,
   "seed": 273,
   "ok": true,
   "full_resolve": true,
@@ -27,7 +27,7 @@
       "skipped": 48829,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4068368320004083
+      "elapsed_s": 2.4276570030015137
     },
     {
       "worker_id": 3,
@@ -38,7 +38,7 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4124160449973715
+      "elapsed_s": 2.428036710000015
     },
     {
       "worker_id": 1,
@@ -49,7 +49,7 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.4140400600008434
+      "elapsed_s": 2.430976613999519
     },
     {
       "worker_id": 0,
@@ -60,7 +60,7 @@
       "skipped": 48828,
       "full_checks": 2500,
       "first_error": null,
-      "elapsed_s": 2.43762836300084
+      "elapsed_s": 2.4587084999984654
     }
   ]
 }
