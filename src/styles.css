@@ -2215,6 +2215,22 @@ h2,
   z-index: 1;
 }
 
+.cam-higgs-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  margin-top: 0.65rem;
+  z-index: 1;
+  max-width: 28rem;
+}
+
+.cam-higgs-controls .btn {
+  min-width: 0;
+  font-size: 0.78rem;
+  padding: 0.4rem 0.7rem;
+}
+
 /* Mini brain */
 .mini-brain {
   width: 100%;

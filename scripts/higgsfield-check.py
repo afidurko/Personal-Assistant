@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Confirm Higgsfield wiring for Cam (no network / no API key required)."""
+"""Confirm Higgsfield wiring for Cam (no paid API call required)."""
 
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -34,6 +35,14 @@ def main() -> int:
         if not (ROOT / rel).exists():
             errors.append(f"missing:{rel}")
 
+    provider = cfg.get("provider") or {}
+    if provider.get("upload_path") != "/files/generate-upload-url":
+        errors.append("provider.upload_path must be /files/generate-upload-url")
+    if "api.higgsfield.ai" not in str(provider.get("files_base_default") or ""):
+        errors.append("provider.files_base_default must be api.higgsfield.ai")
+    if "HF_CREDENTIALS" not in json.dumps(provider.get("credential_aliases") or []):
+        errors.append("provider.credential_aliases must include official HF_CREDENTIALS")
+
     for rel, needle in (
         ("config/connectome/sensory.json", "sense.higgsfield.health"),
         ("config/connectome/sensory.json", "sense.higgsfield.result"),
@@ -44,6 +53,10 @@ def main() -> int:
         ("config/connectome/trajectory-policies.json", "motor.higgsfield"),
         ("config/system/pieces.json", "piece.higgsfield"),
         ("config/persona/avatar.json", "higgsfield"),
+        ("src/components/CamStage.tsx", "Render Speak clip"),
+        ("src/components/CamFace.tsx", "clipActive"),
+        ("scripts/higgsfield.py", "generate-upload-url"),
+        ("scripts/higgsfield.py", "HF_CREDENTIALS"),
     ):
         text = (ROOT / rel).read_text(encoding="utf-8")
         if needle not in text:
@@ -54,11 +67,15 @@ def main() -> int:
     if "tool.higgsfield.check" not in tool_ids:
         errors.append("tools registry missing tool.higgsfield.check")
 
+    env = os.environ.copy()
+    env.pop("HIGGSFIELD_IMAGE_URL", None)
+    env.pop("HIGGSFIELD_AUDIO_URL", None)
     dry = subprocess.run(
-        [sys.executable, str(ROOT / "scripts/higgsfield.py"), "speak", "--text", "hi", "--dry-run"],
+        [sys.executable, str(ROOT / "scripts/higgsfield.py"), "speak", "--text", "Hello Aaron", "--dry-run"],
         cwd=str(ROOT),
         capture_output=True,
         text=True,
+        env=env,
     )
     if dry.returncode != 0:
         errors.append(f"dry-run failed: {dry.stderr or dry.stdout}")
@@ -67,8 +84,27 @@ def main() -> int:
             payload = json.loads(dry.stdout)
             if not payload.get("ok") or not payload.get("dry_run"):
                 errors.append("dry-run did not report ok/dry_run")
+            if not payload.get("local_image"):
+                errors.append("dry-run did not resolve local portrait (the real-life failure)")
+            steps = " ".join(payload.get("planned_steps") or [])
+            if "generate-upload-url" not in steps:
+                errors.append("dry-run planned_steps missing generate-upload-url")
+            if payload.get("body", {}).get("input_image", {}).get("image_url") not in {
+                "(upload local portrait)",
+                "(set)",
+            }:
+                errors.append("dry-run should not require a public image URL")
         except json.JSONDecodeError:
             errors.append("dry-run did not return JSON")
+
+    tests = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/test_higgsfield.py")],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    if tests.returncode != 0:
+        errors.append(f"test_higgsfield failed: {tests.stderr or tests.stdout}")
 
     report = {"ok": not errors, "errors": errors, "soft": soft}
     print(json.dumps(report, indent=2))

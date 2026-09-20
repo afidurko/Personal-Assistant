@@ -407,6 +407,8 @@
       "kind": "local_script",
       "inputs": {
         "text": "string?",
+        "image": "string?",
+        "audio": "string?",
         "dry_run": "boolean",
         "live": "boolean?"
       },
@@ -426,7 +428,7 @@
       "status": "active",
       "integration": "config/integrations/higgsfield.json",
       "motor": "motor.higgsfield",
-      "notes": "Live mode spends money and uploads Cam’s face. Default dry-run."
+      "notes": "Live mode spends money and uploads Cam’s face via /files/generate-upload-url. Default dry-run uses local portrait + planned WAV. Official HF_* env names accepted."
     },
     {
       "id": "tool.memorybear.read",

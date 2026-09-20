@@ -8,6 +8,7 @@
   "policy": "config/integrations/higgsfield.md",
   "homepage": "https://higgsfield.ai",
   "docs": "https://docs.higgsfield.ai/docs",
+  "uploads": "https://docs.higgsfield.ai/docs/concepts/file-uploads",
   "console": "https://console.higgsfield.ai",
   "sense": "sense.higgsfield.result",
   "health_sense": "sense.higgsfield.health",
@@ -21,12 +22,21 @@
     "primary": "higgsfield_speak_v2",
     "api_base_env": "HIGGSFIELD_API_BASE",
     "api_base_default": "https://platform.higgsfield.ai",
+    "files_base_env": "HIGGSFIELD_FILES_BASE",
+    "files_base_default": "https://api.higgsfield.ai",
     "speak_path": "/v1/speak/higgsfield",
     "status_path": "/requests/{id}/status",
+    "upload_path": "/files/generate-upload-url",
     "key_id_env": "HIGGSFIELD_API_KEY_ID",
     "key_secret_env": "HIGGSFIELD_API_KEY_SECRET",
+    "credential_aliases": [
+      "HF_API_KEY_ID+HF_API_KEY_SECRET",
+      "HF_CREDENTIALS",
+      "HF_KEY",
+      "HF_API_KEY+HF_SECRET"
+    ],
     "live_env": "HIGGSFIELD_LIVE",
-    "notes": "Authorization: Key KEY_ID:KEY_SECRET. Live jobs cost money and send Cam’s face off-box. Never commit keys."
+    "notes": "Authorization: Key KEY_ID:KEY_SECRET. Upload local media via api.higgsfield.ai/files/generate-upload-url, then Speak on platform.higgsfield.ai. Live jobs cost money and send Cam’s face off-box. Never commit keys."
   },
   "defaults": {
     "quality": "mid",
@@ -34,7 +44,8 @@
     "prompt": "Soft airy English. Calm, close-up talking portrait. Natural lip motion. No captions.",
     "offline_ok": true,
     "save_to_mesh": true,
-    "auto_on_turn": false
+    "auto_on_turn": false,
+    "tts": ["voicestudio", "espeak-ng", "espeak", "pico2wave", "say"]
   },
   "scripts": {
     "client": "scripts/higgsfield.py",

@@ -9,7 +9,7 @@ Tools:
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
-  higgsfield_check, higgsfield_status, voicestudio_health
+  higgsfield_check, higgsfield_status, higgsfield_preview, voicestudio_health
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -249,6 +249,18 @@ def tool_defs() -> list[dict]:
             "name": "higgsfield_status",
             "description": "Higgsfield Speak status (credentials present, live gate, last clip). No upload.",
             "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "higgsfield_preview",
+            "description": (
+                "Dry-run a Higgsfield Speak request for a line of text. "
+                "Resolves Cam's local portrait and planned WAV/upload steps. "
+                "Never uploads, never spends."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {"text": {"type": "string"}},
+            },
         },
         {
             "name": "voicestudio_health",
@@ -519,6 +531,16 @@ def higgsfield_status(_arguments: dict | None = None) -> Any:
     return json.loads(out)
 
 
+def higgsfield_preview(arguments: dict | None = None) -> Any:
+    text = str((arguments or {}).get("text") or "Hello Aaron")
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/higgsfield.py"), "speak", "--text", text, "--dry-run"],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
 def inkbox_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
@@ -596,6 +618,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return higgsfield_check(arguments)
     if name == "higgsfield_status":
         return higgsfield_status(arguments)
+    if name == "higgsfield_preview":
+        return higgsfield_preview(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
     if name == "voicestudio_health":

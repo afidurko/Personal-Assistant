@@ -91,8 +91,9 @@
 ## Higgsfield Speak (cinematic clips)
 
 - Policy: `config/integrations/higgsfield.md` · config: `config/integrations/higgsfield.json`
-- Portrait + WAV → short MP4 (Speak v2). Not the live A2F session.
-- Health: `python3 scripts/higgsfield-check.py` · client: `python3 scripts/higgsfield.py status --json`
+- Local portrait + local WAV (TTS if needed) → upload ticket → Speak v2 MP4. Not the live A2F session.
+- Health: `python3 scripts/higgsfield-check.py` · client: `python3 scripts/higgsfield.py speak --text "Hello Aaron" --dry-run`
+- Official keys: `HF_API_KEY_ID` / `HF_API_KEY_SECRET` (aliases `HIGGSFIELD_*`, `HF_CREDENTIALS`).
 - Live jobs: `HIGGSFIELD_LIVE=1` + keys; gated by `switch.outbound`. Never auto-fire from `/api/turn`.
 - Cline does not spend money or upload Cam’s face.
 

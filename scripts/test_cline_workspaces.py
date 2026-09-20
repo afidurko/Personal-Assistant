@@ -176,6 +176,8 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertIn("connectome_route", tools)
         self.assertIn("inkbox_check", tools)
         self.assertIn("voicestudio_health", tools)
+        self.assertIn("higgsfield_check", tools)
+        self.assertIn("higgsfield_preview", tools)
 
     def test_voicestudio_speak_dry_run(self):
         proc = self._run(

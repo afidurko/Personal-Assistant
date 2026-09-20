@@ -22,8 +22,10 @@ interface CamFaceProps {
   typing?: boolean;
   speakingText?: string;
   speechProgress?: number;
-  /** Optional Higgsfield Speak clip (never auto-fetched live). */
+  /** Optional Higgsfield Speak clip (Aaron-started; play with sound). */
   clipUrl?: string | null;
+  clipActive?: boolean;
+  onClipEnded?: () => void;
 }
 
 export const CamFace = memo(function CamFace({
@@ -34,6 +36,8 @@ export const CamFace = memo(function CamFace({
   speakingText = '',
   speechProgress = -1,
   clipUrl = null,
+  clipActive = false,
+  onClipEnded,
 }: CamFaceProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<{ set: (w: ReturnType<typeof composeA2F>) => void } | null>(null);
@@ -171,15 +175,15 @@ export const CamFace = memo(function CamFace({
     >
       <div className="cam-face-live-inner cam-face-a2f">
         <div ref={mountRef} className="cam-face-th-mount" />
-        {clipUrl && speakingText ? (
+        {clipUrl && clipActive ? (
           <video
+            key={clipUrl}
             className="cam-face-higgsfield"
             src={clipUrl}
             autoPlay
-            muted
             playsInline
-            loop
-            aria-hidden
+            onEnded={() => onClipEnded?.()}
+            onError={() => onClipEnded?.()}
           />
         ) : null}
         {!ready && !loadError ? <p className="cam-face-loading">Fitting Cam…</p> : null}

@@ -52,6 +52,10 @@ export function CamStage({ onListeningChange }: CamStageProps) {
   const [draft, setDraft] = useState('');
   const [higgsClip, setHiggsClip] = useState<string | null>(null);
   const [higgsNote, setHiggsNote] = useState<string | null>(null);
+  const [higgsReady, setHiggsReady] = useState(false);
+  const [higgsHasKeys, setHiggsHasKeys] = useState(false);
+  const [higgsBusy, setHiggsBusy] = useState(false);
+  const [higgsPlaying, setHiggsPlaying] = useState(false);
   const [typedCam, setTypedCam] = useState('');
   const [typingActive, setTypingActive] = useState(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
@@ -65,14 +69,72 @@ export function CamStage({ onListeningChange }: CamStageProps) {
   useEffect(() => {
     void fetch('/api/avatar/higgsfield')
       .then((r) => r.json())
-      .then((j: { public_path?: string; credentials_present?: boolean; live_enabled?: boolean }) => {
-        setHiggsClip(j.public_path || null);
-        if (j.live_enabled && j.credentials_present) setHiggsNote('Higgsfield Speak ready');
-        else if (j.credentials_present) setHiggsNote('Higgsfield keys present — live off');
-        else setHiggsNote(null);
-      })
+      .then(
+        (j: {
+          public_path?: string;
+          credentials_present?: boolean;
+          live_enabled?: boolean;
+          ready_to_render?: boolean;
+          last_error?: string | null;
+        }) => {
+          setHiggsClip(j.public_path || null);
+          setHiggsHasKeys(Boolean(j.credentials_present));
+          setHiggsReady(Boolean(j.ready_to_render));
+          if (j.last_error) setHiggsNote(j.last_error);
+          else if (j.ready_to_render) setHiggsNote('Higgsfield Speak ready — render a line to play a clip');
+          else if (j.credentials_present)
+            setHiggsNote('Keys present — set HIGGSFIELD_LIVE=1 to render. Preview is free.');
+          else setHiggsNote('Speak needs HF_API_KEY_ID + HF_API_KEY_SECRET (or HIGGSFIELD_* aliases).');
+        },
+      )
       .catch(() => undefined);
   }, []);
+
+  const runHiggsSpeak = (live: boolean) => {
+    const text = typedCam || lastCamRef.current || 'Hello Aaron';
+    setHiggsBusy(true);
+    setHiggsPlaying(false);
+    setHiggsNote(live ? 'Uploading portrait + WAV, then Speak…' : 'Previewing Speak request (no upload)…');
+    void fetch('/api/avatar/higgsfield/speak', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, live }),
+      signal: AbortSignal.timeout(live ? 240_000 : 30_000),
+    })
+      .then(async (r) => {
+        const j = (await r.json()) as {
+          ok?: boolean;
+          report?: {
+            ok?: boolean;
+            error?: string;
+            last?: { public_path?: string; error?: string };
+            notes?: string;
+            local_image?: string;
+            audio_plan?: { engine?: { id?: string } };
+            planned_steps?: string[];
+          };
+          error?: string;
+          detail?: string;
+        };
+        const report = j.report || {};
+        const clip = report.last?.public_path;
+        if (live && (j.ok || report.ok) && clip) {
+          setHiggsClip(clip);
+          setHiggsNote('Clip ready — press Play Speak clip');
+        } else if (!live && (j.ok || report.ok)) {
+          const engine = report.audio_plan?.engine?.id || 'local TTS';
+          setHiggsNote(
+            `Dry-run ok. Portrait ${report.local_image ? 'found' : 'missing'}; WAV via ${engine}. Live still gated.`,
+          );
+        } else {
+          setHiggsNote(report.last?.error || report.error || j.detail || j.error || 'Speak request failed');
+        }
+      })
+      .catch((e: unknown) => {
+        setHiggsNote(e instanceof Error ? e.message : 'Speak request failed');
+      })
+      .finally(() => setHiggsBusy(false));
+  };
 
   // When a new Cam bubble arrives, type it out then speak
   useEffect(() => {
@@ -148,6 +210,8 @@ export function CamStage({ onListeningChange }: CamStageProps) {
               speakingText={speechFace.active ? speechFace.text : ''}
               speechProgress={speechFace.active ? speechFace.progress : -1}
               clipUrl={higgsClip}
+              clipActive={higgsPlaying}
+              onClipEnded={() => setHiggsPlaying(false)}
             />
           </div>
           <p className="cam-avatar-name">Cam</p>
@@ -156,6 +220,40 @@ export function CamStage({ onListeningChange }: CamStageProps) {
             <p className="cam-avatar-note">Noise gate raised — room chatter filtered</p>
           ) : null}
           {higgsNote ? <p className="cam-avatar-note">{higgsNote}</p> : null}
+          <div className="cam-higgs-controls">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={higgsBusy}
+              onClick={() => runHiggsSpeak(false)}
+            >
+              {higgsBusy && !higgsReady ? 'Previewing…' : 'Preview Speak request'}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              disabled={higgsBusy || !higgsReady}
+              onClick={() => runHiggsSpeak(true)}
+              title={higgsReady ? 'Uploads Cam’s face and spends credits' : 'Needs keys + HIGGSFIELD_LIVE=1'}
+            >
+              {higgsBusy && higgsReady ? 'Rendering…' : 'Render Speak clip'}
+            </button>
+            {higgsClip ? (
+              <button
+                type="button"
+                className="btn btn-ghost"
+                disabled={higgsBusy}
+                onClick={() => setHiggsPlaying(true)}
+              >
+                Play Speak clip
+              </button>
+            ) : null}
+          </div>
+          {!higgsHasKeys ? (
+            <p className="cam-avatar-note">
+              Official names work: HF_API_KEY_ID / HF_API_KEY_SECRET or HF_CREDENTIALS.
+            </p>
+          ) : null}
         </div>
 
         <MiniBrain

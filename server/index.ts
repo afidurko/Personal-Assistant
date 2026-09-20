@@ -13,7 +13,7 @@ import { CamAutonomy } from './core/cam-autonomy.js';
 import { RuntimeStore } from './core/runtime-store.js';
 import { SystemBridge } from './core/system-bridge.js';
 import { a2fStatus } from './avatar/a2f-bridge.js';
-import { higgsfieldStatus, runHiggsfield } from './avatar/higgsfield.js';
+import { higgsfieldStatus, runHiggsfield, underRoot } from './avatar/higgsfield.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -209,6 +209,8 @@ app.get('/api/avatar/higgsfield', async (_req, res) => {
 app.post('/api/avatar/higgsfield/speak', async (req, res) => {
   const body = req.body as {
     text?: string;
+    image?: string;
+    audio?: string;
     image_url?: string;
     audio_url?: string;
     live?: boolean;
@@ -224,9 +226,13 @@ app.post('/api/avatar/higgsfield/speak', async (req, res) => {
     });
     return;
   }
-  const args = ['speak', '--text', String(body.text || '')];
+  const args = ['speak', '--text', String(body.text || 'Hello Aaron')];
   if (!live) args.push('--dry-run');
   else args.push('--live');
+  const image = underRoot(body.image);
+  const audio = underRoot(body.audio);
+  if (image) args.push('--image', image);
+  if (audio) args.push('--audio', audio);
   if (body.image_url) args.push('--image-url', String(body.image_url));
   if (body.audio_url) args.push('--audio-url', String(body.audio_url));
   if (body.quality) args.push('--quality', String(body.quality));
