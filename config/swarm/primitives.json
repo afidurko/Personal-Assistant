@@ -19,7 +19,10 @@
         "Queue message on assignee",
         "Log synapse to mesh/runs"
       ],
-      "requires_switch": ["switch.autonomy", "switch.kill"]
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ]
     },
     {
       "id": "synapse.broadcast",
@@ -38,9 +41,14 @@
         "team.info",
         "team.agi-research-scan",
         "team.tooling",
+        "team.follow-through",
+        "team.needs-attention",
         "mesh.all"
       ],
-      "requires_switch": ["switch.autonomy", "switch.kill"]
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ]
     },
     {
       "id": "synapse.resolve_task",
@@ -56,7 +64,10 @@
         "Write distillate to mesh/runs",
         "Notify parent via send_message if present"
       ],
-      "requires_switch": ["switch.autonomy", "switch.kill"]
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ]
     },
     {
       "id": "synapse.send_message",
@@ -71,7 +82,10 @@
         "Point-to-point agent message (internal — not outbound motor.text)",
         "Log to mesh/agent-commute"
       ],
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "notes": "Internal agent bus only; human-facing outbound uses motor.text after switch.outbound"
     },
     {
@@ -88,7 +102,9 @@
         "Register in mesh/agent-lineage",
         "Inherit boundaries (Aaron-only tasking, kill switch)"
       ],
-      "requires_switch": ["switch.kill"],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "human_gate": false,
       "unlimited": true
     },
@@ -105,7 +121,9 @@
         "Cancel descendant tree",
         "Log termination in mesh/agent-lineage"
       ],
-      "requires_switch": ["switch.kill"],
+      "requires_switch": [
+        "switch.kill"
+      ],
       "notes": "Aaron kill_master terminates everyone without privilege check"
     }
   ],
@@ -116,5 +134,6 @@
     "send_message": "nulltickets.store append mesh/agent-commute",
     "spawn": "nulltickets.store put mesh/agent-lineage/{id}",
     "terminate_lineage": "nulltickets.cancel descendants + lineage update"
-  }
+  },
+  "runtime_local": "scripts/cam_swarm.py — file-backed lineage (data/swarm/lineage.json) when nulltickets is offline; distills to vault/10-Mesh-Distillates/agent-lineage/"
 }

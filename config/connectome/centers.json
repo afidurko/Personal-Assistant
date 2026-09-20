@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "analogy": "Compatibility shim \u2014 Brodmann areas are the primary higher cortex (see areas.json). Legacy center.* ids alias into areas.",
+  "analogy": "Compatibility shim — Brodmann areas are the primary higher cortex (see areas.json). Legacy center.* ids alias into areas.",
   "centers": [
     {
       "id": "center.chief",
@@ -44,7 +44,7 @@
     {
       "id": "center.cartography",
       "role": "researcher",
-      "function": "knowledge cartography \u2014 hierarchical mind maps (SwiftGuide pattern)",
+      "function": "knowledge cartography — hierarchical mind maps (SwiftGuide pattern)",
       "maps_to": "area.apfc",
       "accepts": [
         "spike.note_ref",
@@ -169,7 +169,7 @@
     {
       "id": "center.router",
       "role": "nullboiler",
-      "function": "policy neuropil \u2014 who runs what",
+      "function": "policy neuropil — who runs what",
       "maps_to": "area.dlpfc",
       "accepts": [
         "spike.task"
@@ -195,7 +195,7 @@
     {
       "id": "center.coding",
       "role": "coding",
-      "function": "shared coding hotspot \u2014 Cline effector for all agents/workspaces",
+      "function": "shared coding hotspot — Cline effector for all agents/workspaces",
       "accepts": [
         "spike.task",
         "spike.tool_result",
@@ -271,7 +271,7 @@
     {
       "id": "center.info",
       "role": "info-retriever",
-      "function": "vault\u2192mesh\u2192Scholar\u2192Trends-data\u2192public-apis\u2192web information gather with citations",
+      "function": "vault→mesh→Scholar→Trends-data→public-apis→web information gather with citations",
       "accepts": [
         "spike.question",
         "spike.fact",
@@ -294,7 +294,7 @@
     {
       "id": "center.slm",
       "role": "slm-runtime",
-      "function": "small language model cortex \u2014 route/compress/draft assists",
+      "function": "small language model cortex — route/compress/draft assists",
       "accepts": [
         "spike.task",
         "spike.question",
@@ -313,7 +313,7 @@
     {
       "id": "center.dl",
       "role": "dl-enhance",
-      "function": "deep learning cortex \u2014 embeddings, rerank, identity/paper vectors",
+      "function": "deep learning cortex — embeddings, rerank, identity/paper vectors",
       "accepts": [
         "spike.task",
         "spike.visual",
@@ -332,7 +332,7 @@
     {
       "id": "center.tooling",
       "role": "tool-creator",
-      "function": "tool-creator \u2192 tool-user; privilege-aware tool registry + public-apis catalog for motors",
+      "function": "tool-creator → tool-user; privilege-aware tool registry + public-apis catalog for motors",
       "accepts": [
         "spike.task",
         "spike.tool_result",
@@ -362,14 +362,16 @@
     "team.agi-research-scan",
     "team.capability",
     "team.info",
-    "team.tooling"
+    "team.tooling",
+    "team.needs-attention",
+    "team.follow-through"
   ],
   "recursion": {
     "max_delegate_depth": null,
     "max_subagents": null,
     "unlimited": true,
     "human_gate_to_spawn": false,
-    "analogy": "unbounded interneuron recruitment with privilege inheritance \u2014 count/depth uncapped; privileges never escalate",
+    "analogy": "unbounded interneuron recruitment with privilege inheritance — count/depth uncapped; privileges never escalate",
     "authorized_by": "Aaron",
     "authorized_at": "2026-09-16",
     "all_teams_may_spawn_subagents": true,
@@ -377,6 +379,7 @@
     "lineage_terminate": true,
     "spawn_one_level_below_only": true,
     "reaffirmed_at": "2026-09-17",
-    "swarm_config": "config/swarm/privileges.json"
+    "swarm_config": "config/swarm/privileges.json",
+    "runtime": "scripts/cam_swarm.py"
   }
 }

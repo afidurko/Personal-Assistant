@@ -1,0 +1,713 @@
+#!/usr/bin/env python3
+"""Cam swarm runtime — file-backed lineage for the HAAS-style synapse
+primitives in config/swarm/primitives.json.
+
+This is the offline / local-first implementation of `synapse.spawn`,
+`assign_task`, `resolve_task`, `send_message`, `broadcast` and
+`terminate_lineage`. When the Null stack (nulltickets + mesh) is live the
+same records mirror into `mesh/agent-lineage` and `mesh/agent-commute`; when
+it is not, this ledger *is* the lineage.
+
+Invariants (checked by `doctor` and by scripts/test_cam_swarm.py):
+
+- Aaron is level 0 and the only root task-giver; `chief` is level 1.
+- Every child is exactly `parent.level + 1` (spawn one level below only).
+- Child privileges are a subset of the parent's — never escalate.
+- No agent ever holds an Aaron-only privilege.
+- Spawn count / depth are unbounded (identity/persistence/UNLIMITED_SUBAGENTS.md).
+- `switch.kill` (Aaron) silences spawn / assign / broadcast; records stay.
+- Only an ancestor — or Aaron — may terminate a lineage.
+- Internal bus only: nothing here talks to a human channel. Outbound stays
+  behind switch.outbound via motor.inkbox; drafts flow through Instinct.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+PRIVILEGES = ROOT / "config/swarm/privileges.json"
+PRIMITIVES = ROOT / "config/swarm/primitives.json"
+
+AARON_ID = "human.aaron"
+CHIEF_ID = "chief"
+ACTION_STATUSES = ("open", "done", "failed", "blocked", "cancelled")
+
+
+# --- paths ------------------------------------------------------------------
+
+def data_dir() -> Path:
+    override = os.environ.get("CAM_SWARM_DIR")
+    return Path(override) if override else ROOT / "data/swarm"
+
+
+def lineage_path() -> Path:
+    return data_dir() / "lineage.json"
+
+
+def kill_flag_path() -> Path:
+    return data_dir() / "KILL"
+
+
+def mesh_out_path() -> Path:
+    override = os.environ.get("CAM_SWARM_MESH_OUT")
+    return Path(override) if override else ROOT / "vault/10-Mesh-Distillates/agent-lineage/latest.json"
+
+
+# --- time / ids -------------------------------------------------------------
+
+def now_utc(override: str | None = None) -> datetime:
+    if override:
+        dt = datetime.fromisoformat(override.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    return datetime.now(timezone.utc)
+
+
+def iso(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def short_id(prefix: str) -> str:
+    return f"{prefix}-{uuid.uuid4().hex[:8]}"
+
+
+# --- config -----------------------------------------------------------------
+
+def load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def privileges_config() -> dict:
+    return load_json(PRIVILEGES)
+
+
+def primitives_config() -> dict:
+    return load_json(PRIMITIVES)
+
+
+def aaron_only() -> set[str]:
+    return set(privileges_config()["privilege_catalog"]["aaron_only"])
+
+
+def agent_grantable() -> set[str]:
+    return set(privileges_config()["privilege_catalog"]["agent_grantable"])
+
+
+def role_default_privileges(role: str) -> list[str]:
+    defaults = privileges_config()["role_defaults"]
+    entry = defaults.get(role) or defaults["default_subagent"]
+    return list(entry["privileges"])
+
+
+def broadcast_channels() -> list[str]:
+    for prim in primitives_config()["primitives"]:
+        if prim["id"] == "synapse.broadcast":
+            return list(prim.get("channels") or [])
+    return []
+
+
+# --- ledger -----------------------------------------------------------------
+
+def empty_ledger(ts: datetime) -> dict:
+    """Seed Aaron (level 0, human) and chief (level 1) — the two fixed roots."""
+    grantable = sorted(agent_grantable())
+    return {
+        "version": 1,
+        "created": iso(ts),
+        "agents": {
+            AARON_ID: {
+                "id": AARON_ID, "kind": "human", "role": "aaron", "level": 0,
+                "parent": None, "status": "active", "privileges": sorted(agent_grantable() | aaron_only()),
+                "created": iso(ts), "mandate": "sole operator / root task-giver / kill master",
+            },
+            CHIEF_ID: {
+                "id": CHIEF_ID, "kind": "agent", "role": "chief", "level": 1,
+                "parent": AARON_ID, "status": "active",
+                "privileges": [p for p in role_default_privileges("chief") if p in grantable],
+                "created": iso(ts), "mandate": "Cam chief — finishes Aaron's tasks end-to-end",
+            },
+        },
+        "actions": [],
+        "commute": [],
+        "events": [],
+    }
+
+
+def load_ledger(ts: datetime | None = None) -> dict:
+    path = lineage_path()
+    if not path.exists():
+        return empty_ledger(ts or now_utc())
+    try:
+        ledger = load_json(path)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"swarm lineage is corrupt: {path} ({exc}). "
+                         "Fix or move it aside; a fresh lineage is seeded on next write.")
+    ledger.setdefault("agents", {})
+    ledger.setdefault("actions", [])
+    ledger.setdefault("commute", [])
+    ledger.setdefault("events", [])
+    return ledger
+
+
+def save_ledger(ledger: dict) -> None:
+    path = lineage_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def log_event(ledger: dict, ts: datetime, kind: str, **fields) -> None:
+    ledger["events"].append({"ts": iso(ts), "kind": kind, **fields})
+
+
+# --- kill switch ------------------------------------------------------------
+
+def kill_active() -> bool:
+    if os.environ.get("CAM_SWITCH_KILL", "").lower() == "act":
+        return True
+    return kill_flag_path().exists()
+
+
+def require_motor(primitive: str) -> None:
+    if kill_active():
+        raise SystemExit(f"switch.kill act — {primitive} silenced (records retained; `resume` to re-arm)")
+
+
+# --- core primitives --------------------------------------------------------
+
+def get_agent(ledger: dict, agent_id: str) -> dict:
+    agent = ledger["agents"].get(agent_id)
+    if not agent:
+        matches = [a for a in ledger["agents"].values() if a["id"].startswith(agent_id)]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise SystemExit(f"ambiguous agent id prefix {agent_id!r}: {[m['id'] for m in matches]}")
+        raise SystemExit(f"unknown agent: {agent_id}")
+    return agent
+
+
+def is_ancestor(ledger: dict, ancestor_id: str, agent_id: str) -> bool:
+    cur = ledger["agents"].get(agent_id)
+    while cur and cur.get("parent"):
+        if cur["parent"] == ancestor_id:
+            return True
+        cur = ledger["agents"].get(cur["parent"])
+    return False
+
+
+def descendants(ledger: dict, agent_id: str) -> list[dict]:
+    out: list[dict] = []
+    frontier = [agent_id]
+    while frontier:
+        pid = frontier.pop()
+        for a in ledger["agents"].values():
+            if a.get("parent") == pid:
+                out.append(a)
+                frontier.append(a["id"])
+    return out
+
+
+def spawn(ledger: dict, parent_id: str, role: str, ts: datetime,
+          privileges: list[str] | None = None, mandate: str | None = None,
+          job_ref: str | None = None, team: str | None = None) -> dict:
+    """synapse.spawn — child at parent.level + 1 with privileges ⊆ parent."""
+    require_motor("synapse.spawn")
+    parent = get_agent(ledger, parent_id)
+    if parent["status"] != "active":
+        raise SystemExit(f"parent {parent['id']} is {parent['status']} — cannot spawn")
+    if parent["kind"] == "agent" and "spawn_subagents" not in parent["privileges"]:
+        raise SystemExit(f"parent {parent['id']} lacks spawn_subagents")
+
+    parent_grantable = set(parent["privileges"]) - aaron_only()
+    requested = set(privileges) if privileges else set(role_default_privileges(role))
+    forbidden = requested & aaron_only()
+    if forbidden:
+        raise SystemExit(f"refusing to grant Aaron-only privileges {sorted(forbidden)} to an agent")
+    if privileges and not requested <= parent_grantable:
+        raise SystemExit(f"privilege escalation: {sorted(requested - parent_grantable)} "
+                         f"not held by parent {parent['id']}")
+    granted = sorted(requested & parent_grantable)
+
+    child = {
+        "id": short_id(role.replace(" ", "-").lower()[:24]),
+        "kind": "agent",
+        "role": role,
+        "level": int(parent["level"]) + 1,
+        "parent": parent["id"],
+        "status": "active",
+        "privileges": granted,
+        "created": iso(ts),
+        "mandate": mandate or f"{role} subagent",
+        "job_ref": job_ref,
+        "team": team,
+        "boundaries": ["aaron_only_tasking", "switch.kill", "no_outbound_from_agent_bus"],
+    }
+    ledger["agents"][child["id"]] = child
+    log_event(ledger, ts, "spawn", agent=child["id"], parent=parent["id"], role=role,
+              level=child["level"], job_ref=job_ref)
+    return child
+
+
+def assign(ledger: dict, caller_id: str, assignee_id: str, task: str, ts: datetime,
+           parent_action_id: str | None = None, job_ref: str | None = None) -> dict:
+    """synapse.assign_task — child ticket / mesh job queued on assignee."""
+    require_motor("synapse.assign_task")
+    caller = get_agent(ledger, caller_id)
+    assignee = get_agent(ledger, assignee_id)
+    if caller["kind"] == "agent" and "assign_task" not in caller["privileges"]:
+        raise SystemExit(f"{caller['id']} lacks assign_task")
+    if assignee["status"] != "active":
+        raise SystemExit(f"assignee {assignee['id']} is {assignee['status']}")
+    if parent_action_id and not any(a["id"] == parent_action_id for a in ledger["actions"]):
+        raise SystemExit(f"unknown parent action: {parent_action_id}")
+    action = {
+        "id": short_id("act"),
+        "task": task.strip(),
+        "from": caller["id"],
+        "assignee": assignee["id"],
+        "status": "open",
+        "parent_action": parent_action_id,
+        "job_ref": job_ref,
+        "created": iso(ts),
+        "updated": iso(ts),
+        "distillate": None,
+    }
+    ledger["actions"].append(action)
+    log_event(ledger, ts, "assign_task", action=action["id"], assignee=assignee["id"], by=caller["id"])
+    return action
+
+
+def find_action(ledger: dict, action_id: str) -> dict:
+    for a in ledger["actions"]:
+        if a["id"] == action_id:
+            return a
+    matches = [a for a in ledger["actions"] if a["id"].startswith(action_id)]
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        raise SystemExit(f"ambiguous action id prefix {action_id!r}")
+    raise SystemExit(f"unknown action: {action_id}")
+
+
+def resolve(ledger: dict, caller_id: str, action_id: str, status: str, ts: datetime,
+            distillate: str | None = None) -> dict:
+    """synapse.resolve_task — close/transition; notify parent action holder."""
+    if status not in ACTION_STATUSES[1:]:
+        raise SystemExit(f"status must be one of {ACTION_STATUSES[1:]}")
+    caller = get_agent(ledger, caller_id)
+    action = find_action(ledger, action_id)
+    if caller["kind"] == "agent" and "resolve_task" not in caller["privileges"]:
+        raise SystemExit(f"{caller['id']} lacks resolve_task")
+    if caller["kind"] == "agent" and caller["id"] not in (action["assignee"], action["from"]) \
+            and not is_ancestor(ledger, caller["id"], action["assignee"]):
+        raise SystemExit(f"{caller['id']} is neither party nor ancestor of action {action['id']}")
+    action["status"] = status
+    action["updated"] = iso(ts)
+    action["distillate"] = (distillate or "").strip() or None
+    log_event(ledger, ts, "resolve_task", action=action["id"], status=status, by=caller["id"])
+    if action["from"] != caller["id"]:
+        ledger["commute"].append({
+            "ts": iso(ts), "kind": "send_message", "from": caller["id"], "to": action["from"],
+            "action": action["id"], "message": f"resolved {status}: {action['task'][:80]}",
+        })
+    return action
+
+
+def send_message(ledger: dict, sender_id: str, to_id: str, message: str, ts: datetime,
+                 action_id: str | None = None) -> dict:
+    """synapse.send_message — internal agent bus only (never motor.text)."""
+    require_motor("synapse.send_message")
+    sender = get_agent(ledger, sender_id)
+    target = get_agent(ledger, to_id)
+    if sender["kind"] == "agent" and "send_message" not in sender["privileges"]:
+        raise SystemExit(f"{sender['id']} lacks send_message")
+    entry = {"ts": iso(ts), "kind": "send_message", "from": sender["id"], "to": target["id"],
+             "action": action_id, "message": message.strip()}
+    ledger["commute"].append(entry)
+    return entry
+
+
+def broadcast(ledger: dict, sender_id: str, channel: str, message: str, ts: datetime) -> dict:
+    """synapse.broadcast — fan-out to a team channel; sender excluded."""
+    require_motor("synapse.broadcast")
+    sender = get_agent(ledger, sender_id)
+    if sender["kind"] == "agent" and "broadcast" not in sender["privileges"]:
+        raise SystemExit(f"{sender['id']} lacks broadcast")
+    channels = broadcast_channels()
+    if channel not in channels:
+        raise SystemExit(f"unknown broadcast channel {channel!r}; known: {channels}")
+    team = channel.split(".", 1)[1] if channel.startswith("team.") else None
+    recipients = [
+        a["id"] for a in ledger["agents"].values()
+        if a["kind"] == "agent" and a["status"] == "active" and a["id"] != sender["id"]
+        and (channel == "mesh.all" or a.get("team") == f"team.{team}")
+    ]
+    entry = {"ts": iso(ts), "kind": "broadcast", "from": sender["id"], "channel": channel,
+             "recipients": recipients, "message": message.strip()}
+    ledger["commute"].append(entry)
+    return entry
+
+
+def terminate(ledger: dict, caller_id: str, target_id: str, reason: str, ts: datetime) -> list[str]:
+    """synapse.terminate_lineage — ancestor or Aaron cancels a descendant tree."""
+    caller = get_agent(ledger, caller_id)
+    target = get_agent(ledger, target_id)
+    if target["id"] in (AARON_ID, CHIEF_ID) and caller["id"] != AARON_ID:
+        raise SystemExit(f"only Aaron may terminate {target['id']}")
+    if caller["id"] != AARON_ID:
+        if "terminate_lineage" not in caller["privileges"]:
+            raise SystemExit(f"{caller['id']} lacks terminate_lineage")
+        if not is_ancestor(ledger, caller["id"], target["id"]):
+            raise SystemExit(f"{caller['id']} is not an ancestor of {target['id']}")
+    victims = [target] + descendants(ledger, target["id"])
+    ids = []
+    for v in victims:
+        if v["id"] == AARON_ID:
+            continue
+        v["status"] = "terminated"
+        v["terminated"] = {"ts": iso(ts), "by": caller["id"], "reason": reason}
+        ids.append(v["id"])
+        for a in ledger["actions"]:
+            if a["assignee"] == v["id"] and a["status"] == "open":
+                a["status"] = "cancelled"
+                a["updated"] = iso(ts)
+                a["distillate"] = f"lineage terminated: {reason}"
+    log_event(ledger, ts, "terminate_lineage", target=target["id"], by=caller["id"],
+              reason=reason, cancelled=ids)
+    return ids
+
+
+# --- introspection ----------------------------------------------------------
+
+def doctor(ledger: dict) -> list[str]:
+    problems: list[str] = []
+    forbidden = aaron_only()
+    agents = ledger["agents"]
+    if agents.get(AARON_ID, {}).get("level") != 0:
+        problems.append("human.aaron must be level 0")
+    chief = agents.get(CHIEF_ID)
+    if not chief or chief.get("level") != 1 or chief.get("parent") != AARON_ID:
+        problems.append("chief must be level 1 under human.aaron")
+    for a in agents.values():
+        if a["kind"] != "agent":
+            continue
+        if set(a["privileges"]) & forbidden:
+            problems.append(f"{a['id']} holds Aaron-only privileges {sorted(set(a['privileges']) & forbidden)}")
+        parent = agents.get(a.get("parent") or "")
+        if not parent:
+            problems.append(f"{a['id']} has no parent")
+            continue
+        if a["level"] != parent["level"] + 1:
+            problems.append(f"{a['id']} level {a['level']} != parent level {parent['level']} + 1")
+        if not set(a["privileges"]) <= (set(parent["privileges"]) - forbidden):
+            problems.append(f"{a['id']} escalates beyond parent {parent['id']}")
+        if parent["status"] == "terminated" and a["status"] == "active":
+            problems.append(f"{a['id']} active under terminated parent {parent['id']}")
+    for act in ledger["actions"]:
+        if act["status"] not in ACTION_STATUSES:
+            problems.append(f"action {act['id']} has bad status {act['status']}")
+        if act["assignee"] not in agents:
+            problems.append(f"action {act['id']} assignee {act['assignee']} unknown")
+    server = server_lineage_summary()
+    if server and server.get("aaron_only_leaks"):
+        problems.append(f"server lineage grants Aaron-only privileges: {server['aaron_only_leaks']}")
+    if server and server.get("error"):
+        problems.append(f"server lineage unreadable: {server['path']}")
+    return problems
+
+
+def tree_lines(ledger: dict) -> list[str]:
+    lines: list[str] = []
+    agents = ledger["agents"]
+    open_by_agent: dict[str, int] = {}
+    for act in ledger["actions"]:
+        if act["status"] == "open":
+            open_by_agent[act["assignee"]] = open_by_agent.get(act["assignee"], 0) + 1
+
+    def walk(agent_id: str, depth: int) -> None:
+        a = agents[agent_id]
+        mark = "" if a["status"] == "active" else f" [{a['status']}]"
+        opens = open_by_agent.get(agent_id, 0)
+        extra = f" · {opens} open" if opens else ""
+        job = f" · {a['job_ref']}" if a.get("job_ref") else ""
+        lines.append(f"{'  ' * depth}{a['id']} ({a['role']}, L{a['level']}){mark}{extra}{job}")
+        for child in sorted((c for c in agents.values() if c.get("parent") == agent_id),
+                            key=lambda c: c["created"]):
+            walk(child["id"], depth + 1)
+
+    if AARON_ID in agents:
+        walk(AARON_ID, 0)
+    return lines
+
+
+def server_lineage_path() -> Path:
+    """The neural-mesh server (server/core/swarm-runtime.ts) keeps its own
+    lineage with a different schema; we read it, never write it."""
+    override = os.environ.get("CAM_SWARM_SERVER_LINEAGE")
+    return Path(override) if override else ROOT / "data/swarm-lineage.json"
+
+
+def server_lineage_summary() -> dict | None:
+    path = server_lineage_path()
+    if not path.exists():
+        return None
+    try:
+        state = load_json(path)
+    except json.JSONDecodeError:
+        return {"path": str(path), "error": "corrupt"}
+    agents = state.get("agents") or []
+    forbidden = aaron_only()
+    escalations = [a["id"] for a in agents if set(a.get("privileges") or []) & forbidden]
+    active = [a for a in agents if a.get("status") == "active"]
+    return {
+        "path": str(path),
+        "updated": state.get("updatedAt"),
+        "agents_active": len(active),
+        "agents_terminated": len([a for a in agents if a.get("status") == "terminated"]),
+        "max_level": max((int(a.get("level") or 0) for a in agents), default=0),
+        "events": len(state.get("events") or []),
+        "aaron_only_leaks": escalations,
+    }
+
+
+def stats(ledger: dict) -> dict:
+    agents = [a for a in ledger["agents"].values() if a["kind"] == "agent"]
+    active = [a for a in agents if a["status"] == "active"]
+    by_role: dict[str, int] = {}
+    by_team: dict[str, int] = {}
+    for a in active:
+        by_role[a["role"]] = by_role.get(a["role"], 0) + 1
+        if a.get("team"):
+            by_team[a["team"]] = by_team.get(a["team"], 0) + 1
+    actions = ledger["actions"]
+    return {
+        "agents_total": len(agents),
+        "agents_active": len(active),
+        "agents_terminated": len([a for a in agents if a["status"] == "terminated"]),
+        "max_level": max((a["level"] for a in agents), default=0),
+        "by_role": dict(sorted(by_role.items())),
+        "by_team": dict(sorted(by_team.items())),
+        "actions": {s: len([a for a in actions if a["status"] == s]) for s in ACTION_STATUSES},
+        "commute_messages": len(ledger["commute"]),
+        "kill_active": kill_active(),
+        "unlimited_spawn": True,
+        "server_runtime": server_lineage_summary(),
+    }
+
+
+def distill(ledger: dict, ts: datetime) -> dict:
+    """Counts-only mesh distillate — no task text, no mandates, no messages."""
+    doc = {
+        "kind": "agent-lineage",
+        "generated": iso(ts),
+        "source": "scripts/cam_swarm.py",
+        "sole_operator": "Aaron",
+        "stats": stats(ledger),
+        "doctor": doctor(ledger),
+        "recent_events": [
+            {k: v for k, v in e.items() if k in ("ts", "kind", "role", "level", "status")}
+            for e in ledger["events"][-20:]
+        ],
+    }
+    out = mesh_out_path()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    return doc
+
+
+# --- CLI --------------------------------------------------------------------
+
+def _dump(obj) -> int:
+    print(json.dumps(obj, indent=2))
+    return 0
+
+
+def cmd_spawn(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    child = spawn(ledger, args.parent, args.role, ts, privileges=args.privilege or None,
+                  mandate=args.mandate, job_ref=args.job, team=args.team)
+    save_ledger(ledger)
+    return _dump({"ok": True, "agent": child})
+
+
+def cmd_assign(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    action = assign(ledger, args.caller, args.assignee, args.task, ts,
+                    parent_action_id=args.parent_action, job_ref=args.job)
+    save_ledger(ledger)
+    return _dump({"ok": True, "action": action})
+
+
+def cmd_resolve(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    action = resolve(ledger, args.caller, args.action, args.status, ts, distillate=args.distillate)
+    save_ledger(ledger)
+    return _dump({"ok": True, "action": action})
+
+
+def cmd_send(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    entry = send_message(ledger, args.sender, args.to, args.message, ts, action_id=args.action)
+    save_ledger(ledger)
+    return _dump({"ok": True, "message": entry})
+
+
+def cmd_broadcast(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    entry = broadcast(ledger, args.sender, args.channel, args.message, ts)
+    save_ledger(ledger)
+    return _dump({"ok": True, "broadcast": entry})
+
+
+def cmd_terminate(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    ids = terminate(ledger, args.caller, args.target, args.reason, ts)
+    save_ledger(ledger)
+    return _dump({"ok": True, "terminated": ids})
+
+
+def cmd_kill(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    kill_flag_path().parent.mkdir(parents=True, exist_ok=True)
+    kill_flag_path().write_text(f"{iso(ts)} {args.reason}\n", encoding="utf-8")
+    log_event(ledger, ts, "kill_master", by=AARON_ID, reason=args.reason)
+    save_ledger(ledger)
+    return _dump({"ok": True, "switch.kill": "act", "note": "spawn/assign/broadcast silenced; records retained"})
+
+
+def cmd_resume(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    if kill_flag_path().exists():
+        kill_flag_path().unlink()
+    log_event(ledger, ts, "kill_resume", by=AARON_ID)
+    save_ledger(ledger)
+    return _dump({"ok": True, "switch.kill": "armed_allow_motor"})
+
+
+def cmd_tree(args: argparse.Namespace) -> int:
+    ledger = load_ledger(now_utc(args.now))
+    print("\n".join(tree_lines(ledger)) or "(empty)")
+    return 0
+
+
+def cmd_stats(args: argparse.Namespace) -> int:
+    return _dump(stats(load_ledger(now_utc(args.now))))
+
+
+def cmd_agents(args: argparse.Namespace) -> int:
+    ledger = load_ledger(now_utc(args.now))
+    rows = [a for a in ledger["agents"].values() if args.all or a["status"] == "active"]
+    return _dump(rows)
+
+
+def cmd_actions(args: argparse.Namespace) -> int:
+    ledger = load_ledger(now_utc(args.now))
+    rows = [a for a in ledger["actions"] if args.all or a["status"] == "open"]
+    return _dump(rows)
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    ledger = load_ledger(now_utc(args.now))
+    problems = doctor(ledger)
+    _dump({"ok": not problems, "problems": problems, "stats": stats(ledger)})
+    return 0 if not problems else 1
+
+
+def cmd_distill(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    doc = distill(load_ledger(ts), ts)
+    return _dump({"ok": True, "out": str(mesh_out_path()), "stats": doc["stats"]})
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Cam swarm runtime — spawn / assign / resolve / terminate")
+    parser.add_argument("--now", help="override clock (ISO8601)")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("spawn", help="synapse.spawn — child at parent.level + 1")
+    p.add_argument("role")
+    p.add_argument("--parent", default=CHIEF_ID)
+    p.add_argument("--privilege", action="append", help="explicit privilege (repeatable, ⊆ parent)")
+    p.add_argument("--mandate")
+    p.add_argument("--job", help="Instinct job ref (job:<id>)")
+    p.add_argument("--team", help="team id for broadcast membership")
+    p.set_defaults(fn=cmd_spawn)
+
+    p = sub.add_parser("assign", help="synapse.assign_task")
+    p.add_argument("assignee")
+    p.add_argument("task")
+    p.add_argument("--caller", default=CHIEF_ID)
+    p.add_argument("--parent-action")
+    p.add_argument("--job")
+    p.set_defaults(fn=cmd_assign)
+
+    p = sub.add_parser("resolve", help="synapse.resolve_task")
+    p.add_argument("action")
+    p.add_argument("status", choices=ACTION_STATUSES[1:])
+    p.add_argument("--caller", default=CHIEF_ID)
+    p.add_argument("--distillate")
+    p.set_defaults(fn=cmd_resolve)
+
+    p = sub.add_parser("send", help="synapse.send_message (internal bus)")
+    p.add_argument("to")
+    p.add_argument("message")
+    p.add_argument("--sender", default=CHIEF_ID)
+    p.add_argument("--action")
+    p.set_defaults(fn=cmd_send)
+
+    p = sub.add_parser("broadcast", help="synapse.broadcast to a team channel")
+    p.add_argument("channel")
+    p.add_argument("message")
+    p.add_argument("--sender", default=CHIEF_ID)
+    p.set_defaults(fn=cmd_broadcast)
+
+    p = sub.add_parser("terminate", help="synapse.terminate_lineage")
+    p.add_argument("target")
+    p.add_argument("--caller", default=CHIEF_ID)
+    p.add_argument("--reason", default="done")
+    p.set_defaults(fn=cmd_terminate)
+
+    p = sub.add_parser("kill", help="Aaron master kill — silence spawn/assign/broadcast")
+    p.add_argument("--reason", default="aaron kill")
+    p.set_defaults(fn=cmd_kill)
+    p = sub.add_parser("resume", help="Aaron re-arms the swarm")
+    p.set_defaults(fn=cmd_resume)
+
+    p = sub.add_parser("tree", help="lineage tree")
+    p.set_defaults(fn=cmd_tree)
+    p = sub.add_parser("stats", help="counts")
+    p.set_defaults(fn=cmd_stats)
+    p = sub.add_parser("agents", help="list agents")
+    p.add_argument("--all", action="store_true")
+    p.set_defaults(fn=cmd_agents)
+    p = sub.add_parser("actions", help="list actions")
+    p.add_argument("--all", action="store_true")
+    p.set_defaults(fn=cmd_actions)
+    p = sub.add_parser("doctor", help="lineage invariants")
+    p.set_defaults(fn=cmd_doctor)
+    p = sub.add_parser("distill", help="counts-only mesh distillate")
+    p.set_defaults(fn=cmd_distill)
+
+    args = parser.parse_args(argv)
+    return args.fn(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

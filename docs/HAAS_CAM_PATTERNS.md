@@ -29,6 +29,13 @@ HAAS Executive        →  Cam chief + capability-broker
 HAAS Sub-agent        →  specialists / unlimited subagents with privilege inheritance
 ```
 
+## Local runtime (CLI / MCP / loops)
+
+- `scripts/cam_swarm.py` — file-backed lineage for the same six primitives when the Node server is not running: `spawn` (level = parent + 1, privileges ⊆ parent, Aaron-only never granted, unlimited), `assign`, `resolve`, `send`, `broadcast` (team channels from `primitives.json`), `terminate` (ancestor or Aaron; cascades; cancels open actions), plus `kill` / `resume` for Aaron
+- Ledger `data/swarm/lineage.json`; counts-only distillate `vault/10-Mesh-Distillates/agent-lineage/latest.json`; the server's `data/swarm-lineage.json` is read for stats/doctor, never written
+- Instinct binds jobs to lineages: `scripts/instinct.py delegate <job>`; MCP `swarm_*` + `instinct_delegate`; nightly `swarm_distill` in `instinct-followups`
+- Tests: `python3 scripts/test_cam_swarm.py`
+
 ## Neural mesh + memory (all workspaces / agents)
 
 | Piece | Path |

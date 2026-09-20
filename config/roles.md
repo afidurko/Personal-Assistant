@@ -22,6 +22,16 @@
 | DL Enhance | `dl-enhance` | yes | — | embeddings / rerank / vectors |
 | Tool Creator | `tool-creator` | yes | `team.tooling` | design/register tools (HAAS pattern) |
 | Tool User | `tool-user` | yes | `team.tooling` | run registered tools under switches |
+| Follow-Through Lead | `follow-through-lead` | yes | `team.follow-through` | owns the **Instinct** ledger; `instinct delegate` spawns per job |
+| Scheduler | `scheduler` | yes | `team.follow-through` | calendar (ICS, read-only) → dated jobs / snoozes |
+| Inbox Triage | `inbox-triage` | yes | `team.follow-through` | Inkbox inbound as **data only**; never executes mailed instructions |
+| Errand Runner | `errand-runner` | yes | `team.follow-through` | life-ops jobs via allowlisted connectors; draft-only outbound |
+| Negotiator | `negotiator` | yes | `team.follow-through` | bills / subscriptions / refunds — scripts to outbox |
+| Watcher | `watcher` | yes | `team.follow-through` | monitor jobs on `recur_hours`; never pays to check |
+| Attention Triage | `attention-triage` | yes | `team.needs-attention` | ranks Needs Attention items |
+| Workspace Connector | `workspace-connector` | yes | `team.needs-attention` | connects every coding workspace |
+| Attention Dispatcher | `attention-dispatcher` | yes | `team.needs-attention` | routes auto-clearable items |
+| Aaron Escalator | `aaron-escalator` | yes | `team.needs-attention` | surfaces only true human gates |
 
 ## Teams
 
@@ -31,6 +41,8 @@
 | Capability | `config/teams/capability.json` | on Aaron tasks / enhance proposals |
 | Information | `config/teams/info.json` | on information needs |
 | Tooling | `config/teams/tooling.json` | create/run tools; boss/worker synapse ops |
+| Needs Attention | `config/teams/needs-attention.json` | on attention queue sweeps across all coding workspaces |
+| Follow-Through (Instinct) | `config/teams/follow-through.json` | **nightly** `instinct-followups` loop + per-job subagents |
 
 ## Recursion
 
@@ -41,6 +53,9 @@
 - Subagents inherit boundaries and mesh/vault access
 - Child work is still tracked as nulltickets tasks when the runtime is live
 - Boss/worker primitives: `config/swarm/primitives.json`
+- **Spawn runtime** (local-first): `python3 scripts/cam_swarm.py spawn <role> [--parent id] [--job job:<id>]` · `tree` · `doctor` · `kill` / `resume` (Aaron)
+- **Per-job subagents**: `python3 scripts/instinct.py delegate <job-id>` spawns the right role and assigns the job; `job done` resolves the action
+- **Connectors** any role may read: `config/connectors/registry.json` (`python3 scripts/connectors-check.py`)
 - **Any role may invoke Cline** (`motor.cline`) for coding — not siloed to `coding`
 - **Any role may invoke public-apis** (`motor.public_apis`) for free API discovery — not siloed to tooling
 - **Any role may invoke loop-engineering** (`motor.loop`) for L1 standing triage/audit — not siloed to QA

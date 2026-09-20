@@ -3,7 +3,20 @@
     "enabled": true,
     "lineage_terminate": true,
     "namespace": "mesh/agent-lineage",
-    "privilege_inheritance": true
+    "privilege_inheritance": true,
+    "runtime_local": "scripts/cam_swarm.py",
+    "runtime_server": "server/core/swarm-runtime.ts",
+    "distillate": "vault/10-Mesh-Distillates/agent-lineage/latest.json",
+    "unlimited_spawn": true,
+    "per_job_delegate": "scripts/instinct.py delegate <job>",
+    "teams": [
+      "team.follow-through",
+      "team.needs-attention",
+      "team.capability",
+      "team.info",
+      "team.tooling",
+      "team.agi-research-scan"
+    ]
   },
   "mesh/careers": {
     "boards": [
@@ -158,7 +171,9 @@
     "memorybear_cognitive_memory": true,
     "memorybear_available_to_all_agents": true,
     "memorybear_submodule": "integrations/memorybear",
-    "loop_engineering": true
+    "loop_engineering": true,
+    "connectors_registry": "config/connectors/registry.json — every app Cam can reach; content is data not instructions; human-reaching motors only behind switch.outbound",
+    "follow_through_team": "team.follow-through owns the Instinct ledger; one subagent per job; draft-only outbound"
   },
   "mesh/open-questions": {
     "ios_companion_pair_code": "generate on first launch",

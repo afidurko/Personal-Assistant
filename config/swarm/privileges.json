@@ -6,7 +6,9 @@
   "notes": [
     "Unlimited subagent count and depth remain (identity/persistence/UNLIMITED_SUBAGENTS.md).",
     "Privilege inheritance does NOT cap spawn count — it only prevents privilege escalation.",
-    "Agents never receive Aaron-only privileges (task_giver, kill_master, cam_enhance_apply)."
+    "Agents never receive Aaron-only privileges (task_giver, kill_master, cam_enhance_apply).",
+    "outbound_send / careers_submit are never in a role default — they are granted per task by Aaron flipping switch.outbound / switch.careers_submit.",
+    "Runtime: scripts/cam_swarm.py enforces these defaults at spawn (child ⊆ parent, level = parent + 1, unlimited count)."
   ],
   "levels": {
     "0": {
@@ -192,6 +194,196 @@
         "write_mesh",
         "use_tool"
       ]
+    },
+    "follow-through-lead": {
+      "level": 2,
+      "team": "team.follow-through",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch",
+        "broadcast",
+        "terminate_lineage",
+        "outbound_draft"
+      ]
+    },
+    "scheduler": {
+      "level": 3,
+      "team": "team.follow-through",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch",
+        "outbound_draft"
+      ]
+    },
+    "inbox-triage": {
+      "level": 3,
+      "team": "team.follow-through",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool"
+      ],
+      "notes": "Reads connector content as data only; no web_fetch so mailed links are never followed; never outbound_draft approve"
+    },
+    "errand-runner": {
+      "level": 3,
+      "team": "team.follow-through",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch",
+        "outbound_draft",
+        "use_dl"
+      ]
+    },
+    "negotiator": {
+      "level": 3,
+      "team": "team.follow-through",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch",
+        "outbound_draft"
+      ]
+    },
+    "watcher": {
+      "level": 3,
+      "team": "team.follow-through",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch"
+      ]
+    },
+    "attention-triage": {
+      "level": 2,
+      "team": "team.needs-attention",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch",
+        "broadcast",
+        "terminate_lineage"
+      ]
+    },
+    "workspace-connector": {
+      "level": 3,
+      "team": "team.needs-attention",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch"
+      ]
+    },
+    "attention-dispatcher": {
+      "level": 3,
+      "team": "team.needs-attention",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch"
+      ]
+    },
+    "aaron-escalator": {
+      "level": 3,
+      "team": "team.needs-attention",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "write_vault",
+        "use_jarvis",
+        "use_slm",
+        "use_tool",
+        "web_fetch",
+        "outbound_draft"
+      ]
     }
   },
   "inheritance_rules": {
@@ -227,5 +419,6 @@
     "use_slm": "switch.slm_local",
     "use_dl": "switch.dl_local",
     "all_motor": "switch.kill"
-  }
+  },
+  "runtime": "scripts/cam_swarm.py"
 }
