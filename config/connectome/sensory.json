@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "analogy": "Drosophila sensory periphery \u2014 shared receptors, little policy",
+  "analogy": "Drosophila sensory periphery — shared receptors, little policy",
   "neurons": [
     {
       "id": "sense.chat.aaron",
@@ -21,7 +21,7 @@
         "spike.fact",
         "spike.note_ref"
       ],
-      "notes": "Vault retrieval \u2014 isomorphic knowledge periphery"
+      "notes": "Vault retrieval — isomorphic knowledge periphery"
     },
     {
       "id": "sense.mesh.hit",
@@ -36,7 +36,10 @@
     {
       "id": "sense.memorybear.hit",
       "modality": "memory",
-      "source": ["memorybear", "memorybear_v1"],
+      "source": [
+        "memorybear",
+        "memorybear_v1"
+      ],
       "emits": [
         "spike.fact",
         "spike.pref",
@@ -133,7 +136,7 @@
         "spike.visual",
         "spike.frame"
       ],
-      "notes": "iPhone camera \u2014 tasked capture; not always-on unless Aaron enables monitor"
+      "notes": "iPhone camera — tasked capture; not always-on unless Aaron enables monitor"
     },
     {
       "id": "sense.ios.mic",
@@ -143,7 +146,7 @@
         "spike.speech",
         "spike.audio"
       ],
-      "notes": "iPhone microphone \u2014 tasked listen; must pass Aaron voice gate before converse"
+      "notes": "iPhone microphone — tasked listen; must pass Aaron voice gate before converse"
     },
     {
       "id": "sense.aaron.face",
@@ -153,7 +156,7 @@
         "spike.aaron_present",
         "spike.identity"
       ],
-      "notes": "Aaron face match score \u2014 strengthens switch.tasking / switch.identity"
+      "notes": "Aaron face match score — strengthens switch.tasking / switch.identity"
     },
     {
       "id": "sense.aaron.voice",
@@ -195,7 +198,7 @@
         "spike.audio",
         "spike.aaron_enroll"
       ],
-      "notes": "Aaron-granted file access \u2014 photos/videos/audio for look+sound enrollment"
+      "notes": "Aaron-granted file access — photos/videos/audio for look+sound enrollment"
     },
     {
       "id": "sense.swiftguide.map",
@@ -206,7 +209,7 @@
         "spike.fact",
         "spike.stack"
       ],
-      "notes": "SwiftGuide hierarchical mind-map hit \u2014 classification / architecture / 2026 stack"
+      "notes": "SwiftGuide hierarchical mind-map hit — classification / architecture / 2026 stack"
     },
     {
       "id": "sense.cline.result",
@@ -268,7 +271,7 @@
         "spike.fact",
         "spike.cite"
       ],
-      "notes": "Google Scholar via SerpAPI \u2014 citations + literature for info/research (+ AGI when relevant)"
+      "notes": "Google Scholar via SerpAPI — citations + literature for info/research (+ AGI when relevant)"
     },
     {
       "id": "sense.catalog.public_apis",
@@ -356,7 +359,7 @@
         "spike.task",
         "spike.tool_result"
       ],
-      "notes": "Internal boss/worker messages (assign/broadcast/resolve) \u2014 not human outbound"
+      "notes": "Internal boss/worker messages (assign/broadcast/resolve) — not human outbound"
     },
     {
       "id": "sense.tool.result",
@@ -374,7 +377,7 @@
       "emits": [
         "spike.tool_result"
       ],
-      "notes": "VoiceStudio GET /health \u2014 local speech engine readiness"
+      "notes": "VoiceStudio GET /health — local speech engine readiness"
     },
     {
       "id": "sense.voicestudio.result",
@@ -385,7 +388,22 @@
         "spike.audio",
         "spike.tool_result"
       ],
-      "notes": "TTS/ASR/clone job result from VoiceStudio REST or MCP \u2014 not Aaron speaker-ID"
+      "notes": "TTS/ASR/clone job result from VoiceStudio REST or MCP — not Aaron speaker-ID"
+    },
+    {
+      "id": "sense.loop.tick",
+      "modality": "ops",
+      "source": [
+        "loop_engineering",
+        "cam_schedules",
+        "afidurko_loop_engineering"
+      ],
+      "emits": [
+        "spike.route_hint",
+        "spike.tool_result",
+        "spike.fact"
+      ],
+      "notes": "Loop Engineering cadence tick — daily triage / QA bridge / PR babysitter (integrations/loop-engineering)"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "analogy": "Motor periphery \u2014 effectors fire only after switch resolves to act",
+  "analogy": "Motor periphery — effectors fire only after switch resolves to act",
   "effectors": [
     {
       "id": "motor.text",
@@ -88,13 +88,20 @@
         "switch.autonomy",
         "switch.kill"
       ],
-      "notes": "Shared coding effector \u2014 every role/subagent may invoke; not the brain"
+      "notes": "Shared coding effector — every role/subagent may invoke; not the brain"
     },
     {
       "id": "motor.pupil",
-      "channel": ["pupil_capture", "pupil_service", "pupil_remote_api"],
+      "channel": [
+        "pupil_capture",
+        "pupil_service",
+        "pupil_remote_api"
+      ],
       "path": "integrations/pupil",
-      "requires_switch": ["switch.pupil_vision", "switch.kill"],
+      "requires_switch": [
+        "switch.pupil_vision",
+        "switch.kill"
+      ],
       "notes": "Cam eyes — Pupil world camera + gaze ingest via scripts/pupil-see.py; not the brain"
     },
     {
@@ -132,9 +139,15 @@
     },
     {
       "id": "motor.memorybear",
-      "channel": ["memorybear_api", "memorybear_mcp"],
+      "channel": [
+        "memorybear_api",
+        "memorybear_mcp"
+      ],
       "path": "integrations/memorybear",
-      "requires_switch": ["switch.autonomy", "switch.kill"],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
       "notes": "Cognitive memory effector (read/write/forget/reflect) — all roles/subagents may invoke; complements vault + mesh"
     },
     {
@@ -170,7 +183,7 @@
         "switch.research_scan",
         "switch.kill"
       ],
-      "notes": "Fetch papers/findings for Scholar, AGI scan, and info team \u2014 no outbound messaging"
+      "notes": "Fetch papers/findings for Scholar, AGI scan, and info team — no outbound messaging"
     },
     {
       "id": "motor.enhance",
@@ -247,7 +260,7 @@
         "switch.autonomy",
         "switch.kill"
       ],
-      "notes": "Search afidurko/public-apis catalog (scripts/public-apis-search.py) \u2014 shared by all agents; no spend"
+      "notes": "Search afidurko/public-apis catalog (scripts/public-apis-search.py) — shared by all agents; no spend"
     },
     {
       "id": "motor.google_trends",
@@ -260,13 +273,24 @@
         "switch.autonomy",
         "switch.kill"
       ],
-      "notes": "Search/fetch GoogleTrends/data open datasets (scripts/google-trends-search.py) \u2014 no spend; no full-repo clone"
+      "notes": "Search/fetch GoogleTrends/data open datasets (scripts/google-trends-search.py) — no spend; no full-repo clone"
     },
     {
       "id": "motor.inkbox",
-      "channel": ["inkbox_sdk", "inkbox_cli", "email", "sms", "phone", "vault", "tunnel"],
+      "channel": [
+        "inkbox_sdk",
+        "inkbox_cli",
+        "email",
+        "sms",
+        "phone",
+        "vault",
+        "tunnel"
+      ],
       "path": "integrations/inkbox",
-      "requires_switch": ["switch.outbound", "switch.kill"],
+      "requires_switch": [
+        "switch.outbound",
+        "switch.kill"
+      ],
       "notes": "Inkbox agent identity — email/phone/SMS/vault/tunnels; gated outbound; not free-send from Cline"
     },
     {
@@ -280,7 +304,21 @@
         "switch.kill"
       ],
       "notes": "Emit synapse.assign_task / broadcast / resolve / send_message / spawn / terminate_lineage"
+    },
+    {
+      "id": "motor.loop",
+      "channel": [
+        "loop_engineering",
+        "local_script",
+        "cline_schedule"
+      ],
+      "path": "integrations/loop-engineering",
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "notes": "Loop Engineering patterns — audit/run/state spine (scripts/loop-run.py); week-one L1 report-only; not the brain"
     }
   ],
-  "response_rule": "Motor output must correspond to an active sensory\u2192center\u2192switch act pathway (no orphan actions)"
+  "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"
 }

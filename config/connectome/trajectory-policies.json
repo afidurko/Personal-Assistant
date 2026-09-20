@@ -162,6 +162,24 @@
         "motor.higgsfield"
       ],
       "revise_to": "comms_ok_higgsfield_held"
+    },
+    {
+      "id": "loop_report_not_enhance",
+      "description": "Loop motor may mesh/vault/cline-report but never silently enhance Cam",
+      "if_any_motors": [
+        "motor.loop"
+      ],
+      "if_any_motors_extra": [
+        "motor.enhance"
+      ],
+      "require_switch_act": [
+        "switch.cam_enhance"
+      ],
+      "on_violate": "strip",
+      "strip_motors": [
+        "motor.enhance"
+      ],
+      "revise_to": "loop_report_only"
     }
   ]
 }

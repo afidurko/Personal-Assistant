@@ -14,7 +14,8 @@
     "integration empty: integrations/voicestudio (submodule init or create config)",
     "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)",
     "integration empty: integrations/sgr-agent-core (submodule init or create config)",
-    "integration empty: integrations/litserve (submodule init or create config)"
+    "integration empty: integrations/litserve (submodule init or create config)",
+    "integration empty: integrations/loop-engineering (submodule init or create config)"
   ],
   "mesh_flags": {
     "daily_agi_research_scan": true,
@@ -24,6 +25,7 @@
     "memorybear": true,
     "public_apis": true,
     "inkbox": true,
+    "loop_engineering": true,
     "unlimited_subagents": true,
     "slm_cortex_enabled": true,
     "dl_cortex_enabled": true,
@@ -131,12 +133,18 @@
       "path": "integrations/higgsfield",
       "populated": true,
       "policy_exists": true
+    },
+    {
+      "id": "loop-engineering",
+      "path": "integrations/loop-engineering",
+      "populated": false,
+      "policy_exists": true
     }
   ],
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=34 edges=331"
+    "detail": "senses=35 edges=340"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

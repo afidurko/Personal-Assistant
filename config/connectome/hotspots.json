@@ -717,7 +717,7 @@
       "integration": "config/integrations/google-scholar.json"
     },
     {
-"id": "hotspot.voicestudio_result",
+      "id": "hotspot.voicestudio_result",
       "center": "center.comms",
       "pathway": [
         "sense.voicestudio.result",
@@ -962,6 +962,60 @@
       ],
       "behavior": "absorb_tool_result_into_mesh",
       "team": "team.tooling"
+    },
+    {
+      "id": "hotspot.loop_engineering",
+      "center": "center.qa",
+      "area": "area.cingulate",
+      "columns": [
+        "neuron.loop_triage",
+        "neuron.qa_cycle",
+        "neuron.qa"
+      ],
+      "tracts": [
+        "tract.cingulum",
+        "tract.mesh_callosal"
+      ],
+      "pathway": [
+        "sense.loop.tick",
+        "area.cingulate",
+        "switch.autonomy",
+        "motor.loop"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault",
+        "motor.cline"
+      ],
+      "behavior": "design_and_run_agent_loops_l1_report",
+      "available_to": "all_roles_and_subagents",
+      "integration": "config/integrations/loop-engineering.json"
+    },
+    {
+      "id": "hotspot.needs_attention",
+      "area": "area.dlpfc",
+      "columns": [
+        "neuron.plan_loop",
+        "neuron.qa",
+        "neuron.priority_boot"
+      ],
+      "tracts": [
+        "tract.cingulum"
+      ],
+      "pathway": [
+        "sense.clock.daily",
+        "area.dlpfc",
+        "switch.autonomy",
+        "motor.cline"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "triage_needs_attention_across_all_coding_workspaces",
+      "team": "team.needs-attention",
+      "script": "scripts/needs-attention.py",
+      "notes": "Cursor Needs Attention tab automation — connect all workspaces; Aaron gates enhance/outbound/kill"
     }
   ]
 }

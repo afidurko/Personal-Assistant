@@ -1,0 +1,219 @@
+{
+  "namespace": "mesh/loops",
+  "kind": "loop_run",
+  "at": "2026-09-20T01:31:56Z",
+  "source": "scripts/loop-run.py",
+  "pattern": "daily-triage",
+  "level": "L1",
+  "status": "ok",
+  "score": 100,
+  "notes": "actions=3",
+  "results": {
+    "connectome_check": {
+      "script": "scripts/connectome-check.py",
+      "exit_code": 0,
+      "stdout": "{\n  \"senses\": 34,\n  \"hotspot_options\": 47,\n  \"known_nodes\": 151,\n  \"motors\": 24,\n  \"edges\": 332,\n  \"hard_errors\": [],\n  \"missing_edges\": [],\n  \"soft_warnings\": [],\n  \"ok\": true\n}\n",
+      "stderr": "",
+      "json": {
+        "senses": 34,
+        "hotspot_options": 47,
+        "known_nodes": 151,
+        "motors": 24,
+        "edges": 332,
+        "hard_errors": [],
+        "missing_edges": [],
+        "soft_warnings": [],
+        "ok": true
+      }
+    },
+    "system_health": {
+      "script": "scripts/system-health-scan.py",
+      "exit_code": 0,
+      "stdout": "ntegrations/inkbox (heads/main)\",\n        \" 0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis (heads/master)\",\n        \" 16248473bc3127bef5d2cfe11de9d9677d9ee2c3 integrations/litserve (v0.2.19-1-g1624847)\",\n        \" 93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk (heads/main)\",\n        \" 015ad4a57f210bafac1497fd5305d67bf728a21f integrations/loop-engineering (loop-audit-v1.5.0-33-g015ad4a)\",\n        \" c32b937f1ed0d7b461383659261e01daa40bd93d integrations/memorybear (v0.4.5-198-gc32b937f1)\",\n        \" b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection (heads/release/2.9)\"\n      ]\n    },\n    {\n      \"neuron\": \"neuron.integration_pulse\",\n      \"present\": [\n        \"integrations/jarvis\",\n        \"integrations/paddledetection\",\n        \"integrations/pupil\",\n        \"integrations/llmavatartalk\",\n        \"integrations/voicestudio\",\n        \"integrations/smart-second-brain\",\n        \"integrations/swiftguide\",\n        \"integrations/public-apis\",\n        \"integrations/cline\",\n        \"integrations/joshinator-analyzer\",\n        \"integrations/inkbox\",\n        \"integrations/loop-engineering\"\n      ],\n      \"missing\": [],\n      \"status\": \"healthy\"\n    },\n    {\n      \"neuron\": \"neuron.persist_sync\",\n      \"manifest\": true,\n      \"mesh_seed\": true,\n      \"status\": \"healthy\"\n    },\n    {\n      \"neuron\": \"neuron.secret_hygiene\",\n      \"suspects\": [],\n      \"status\": \"healthy\"\n    },\n    {\n      \"neuron\": \"neuron.drift_scan\",\n      \"readme_mentions_3d\": true,\n      \"plasticity_config\": true,\n      \"areas_config\": true,\n      \"status\": \"healthy\"\n    },\n    {\n      \"neuron\": \"neuron.converse_health\",\n      \"reachable\": false,\n      \"body\": \"\",\n      \"status\": \"idle\",\n      \"notes\": \"idle if converse server not running \\u2014 not critical\"\n    },\n    {\n      \"neuron\": \"neuron.aaron_voice_gate\",\n      \"status\": \"healthy\",\n      \"aaron_only\": true,\n      \"addons_present\": [\n        \"adaptive_noise\",\n        \"health_pulse\",\n        \"ios_speaker_id\",\n        \"profile_export\",\n        \"reject_stats\"\n      ],\n      \"addons_missing\": [],\n      \"check_exit\": 0,\n      \"check_preview\": \"{\\n  \\\"ok\\\": true,\\n  \\\"hard_errors\\\": [],\\n  \\\"soft_warnings\\\": [],\\n  \\\"config\\\": \\\"aaron-voice-gate\\\",\\n  \\\"addons\\\": [\\n    \\\"adaptive_noise\\\",\\n    \\\"health_pulse\\\",\\n    \\\"ios_speaker_id\\\",\\n    \\\"profile_export\\\",\\n    \\\"rej\",\n      \"stats\": null,\n      \"ios_contract\": \"companions/ios/CamVoiceGate.swift\"\n    },\n    {\n      \"neuron\": \"neuron.arch_scan\",\n      \"issues\": [],\n      \"status\": \"healthy\"\n    },\n    {\n      \"neuron\": \"neuron.vuln_scan\",\n      \"findings\": [],\n      \"status\": \"healthy\"\n    },\n    {\n      \"neuron\": \"neuron.priority_boot\",\n      \"present\": true,\n      \"step_count\": 23,\n      \"status\": \"healthy\"\n    },\n    {\n      \"neuron\": \"neuron.tailscale_reach\",\n      \"status\": \"idle\",\n      \"cli\": false,\n      \"notes\": \"tailscale CLI not available in this environment\",\n      \"wanted\": [\n        \"aaron-iphone\",\n        \"aaron-ipad\"\n      ]\n    }\n  ],\n  \"neurons_fired\": [\n    \"neuron.vitals_loop\",\n    \"neuron.connectome_check\",\n    \"neuron.submodule_health\",\n    \"neuron.integration_pulse\",\n    \"neuron.persist_sync\",\n    \"neuron.secret_hygiene\",\n    \"neuron.drift_scan\",\n    \"neuron.converse_health\",\n    \"neuron.aaron_voice_gate\",\n    \"neuron.arch_scan\",\n    \"neuron.vuln_scan\",\n    \"neuron.priority_boot\",\n    \"neuron.tailscale_reach\"\n  ],\n  \"workspace\": \"/workspace\",\n  \"hooks\": {\n    \"improve_engine\": {\n      \"exit\": 0,\n      \"preview\": \"{\\n  \\\"at\\\": \\\"2026-09-20T01:31:56Z\\\",\\n  \\\"health_overall\\\": \\\"healthy\\\",\\n  \\\"task_count\\\": 0,\\n  \\\"tasks\\\": [],\\n  \\\"neuron\\\": \\\"neuron.improve_engine\\\"\\n}\\n\"\n    },\n    \"persist_weekly\": {\n      \"neuron\": \"neuron.persist_sync\",\n      \"ran\": true,\n      \"exit\": 0,\n      \"out\": \"refreshed identity/persistence/mesh-seed.json\\n\",\n      \"status\": \"healthy\",\n      \"marker_written\": true\n    },\n    \"fornix\": {\n      \"exit\": 0,\n      \"preview\": \"fornix: skipped (recent)\\n\"\n    }\n  }\n}\n",
+      "stderr": "",
+      "json": {
+        "at": "2026-09-20T01:31:56Z",
+        "overall": "healthy",
+        "checks": [
+          {
+            "neuron": "neuron.vitals_loop",
+            "loadavg": [
+              1.5986328125,
+              0.61181640625,
+              0.22119140625
+            ],
+            "cwd": "/workspace",
+            "status": "healthy"
+          },
+          {
+            "senses": 34,
+            "hotspot_options": 47,
+            "known_nodes": 151,
+            "motors": 24,
+            "edges": 332,
+            "hard_errors": [],
+            "missing_edges": [],
+            "soft_warnings": [],
+            "ok": true,
+            "neuron": "neuron.connectome_check",
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.submodule_health",
+            "count": 14,
+            "uninitialized": 0,
+            "status": "healthy",
+            "sample": [
+              " 173837314b7e02f4179c95b60fb6ca08c6d6f3bf integrations/cline (heads/main)",
+              " 8bafc65df0bec5719b722cdb04be028b6bed54d8 integrations/inkbox (heads/main)",
+              " 0c62c730de3af69d0105d0bbc7c65feee25c6f67 integrations/jarvis (heads/master)",
+              " 16248473bc3127bef5d2cfe11de9d9677d9ee2c3 integrations/litserve (v0.2.19-1-g1624847)",
+              " 93f67a9a2197390d86e0bb2acf515b28b54428db integrations/llmavatartalk (heads/main)",
+              " 015ad4a57f210bafac1497fd5305d67bf728a21f integrations/loop-engineering (loop-audit-v1.5.0-33-g015ad4a)",
+              " c32b937f1ed0d7b461383659261e01daa40bd93d integrations/memorybear (v0.4.5-198-gc32b937f1)",
+              " b25522a0f4bde8c80603f3ba5e3472059972e3b5 integrations/paddledetection (heads/release/2.9)"
+            ]
+          },
+          {
+            "neuron": "neuron.integration_pulse",
+            "present": [
+              "integrations/jarvis",
+              "integrations/paddledetection",
+              "integrations/pupil",
+              "integrations/llmavatartalk",
+              "integrations/voicestudio",
+              "integrations/smart-second-brain",
+              "integrations/swiftguide",
+              "integrations/public-apis",
+              "integrations/cline",
+              "integrations/joshinator-analyzer",
+              "integrations/inkbox",
+              "integrations/loop-engineering"
+            ],
+            "missing": [],
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.persist_sync",
+            "manifest": true,
+            "mesh_seed": true,
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.secret_hygiene",
+            "suspects": [],
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.drift_scan",
+            "readme_mentions_3d": true,
+            "plasticity_config": true,
+            "areas_config": true,
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.converse_health",
+            "reachable": false,
+            "body": "",
+            "status": "idle",
+            "notes": "idle if converse server not running \u2014 not critical"
+          },
+          {
+            "neuron": "neuron.aaron_voice_gate",
+            "status": "healthy",
+            "aaron_only": true,
+            "addons_present": [
+              "adaptive_noise",
+              "health_pulse",
+              "ios_speaker_id",
+              "profile_export",
+              "reject_stats"
+            ],
+            "addons_missing": [],
+            "check_exit": 0,
+            "check_preview": "{\n  \"ok\": true,\n  \"hard_errors\": [],\n  \"soft_warnings\": [],\n  \"config\": \"aaron-voice-gate\",\n  \"addons\": [\n    \"adaptive_noise\",\n    \"health_pulse\",\n    \"ios_speaker_id\",\n    \"profile_export\",\n    \"rej",
+            "stats": null,
+            "ios_contract": "companions/ios/CamVoiceGate.swift"
+          },
+          {
+            "neuron": "neuron.arch_scan",
+            "issues": [],
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.vuln_scan",
+            "findings": [],
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.priority_boot",
+            "present": true,
+            "step_count": 23,
+            "status": "healthy"
+          },
+          {
+            "neuron": "neuron.tailscale_reach",
+            "status": "idle",
+            "cli": false,
+            "notes": "tailscale CLI not available in this environment",
+            "wanted": [
+              "aaron-iphone",
+              "aaron-ipad"
+            ]
+          }
+        ],
+        "neurons_fired": [
+          "neuron.vitals_loop",
+          "neuron.connectome_check",
+          "neuron.submodule_health",
+          "neuron.integration_pulse",
+          "neuron.persist_sync",
+          "neuron.secret_hygiene",
+          "neuron.drift_scan",
+          "neuron.converse_health",
+          "neuron.aaron_voice_gate",
+          "neuron.arch_scan",
+          "neuron.vuln_scan",
+          "neuron.priority_boot",
+          "neuron.tailscale_reach"
+        ],
+        "workspace": "/workspace",
+        "hooks": {
+          "improve_engine": {
+            "exit": 0,
+            "preview": "{\n  \"at\": \"2026-09-20T01:31:56Z\",\n  \"health_overall\": \"healthy\",\n  \"task_count\": 0,\n  \"tasks\": [],\n  \"neuron\": \"neuron.improve_engine\"\n}\n"
+          },
+          "persist_weekly": {
+            "neuron": "neuron.persist_sync",
+            "ran": true,
+            "exit": 0,
+            "out": "refreshed identity/persistence/mesh-seed.json\n",
+            "status": "healthy",
+            "marker_written": true
+          },
+          "fornix": {
+            "exit": 0,
+            "preview": "fornix: skipped (recent)\n"
+          }
+        }
+      }
+    },
+    "loop_audit": {
+      "ok": true,
+      "exit_code": 0,
+      "cmd": [
+        "node",
+        "/workspace/integrations/loop-engineering/tools/loop-audit/dist/cli.js",
+        "/workspace"
+      ],
+      "output": "Loop Readiness Audit \u2014 /workspace\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nScore: 100/100  Level: L3\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  100/100\nStrong loop readiness \u2014 good candidate for L3 with explicit gates.\n\nFindings:\n  \u2713 State file(s): STATE.md\n  \u2713 Triage skill present.\n  \u2713 Verifier skill present.\n  \u2713 Safety documentation present.\n  \u2713 loop-constraints.md present.\n  ! No .github/ directory (templates, workflows for dogfooding).\n  \u2713 loop-budget.md present.\n  \u2713 loop-run-log.md present.\n  \u2713 loop-budget skill present.\n  \u2713 Loop activity detected \u2014 real usage signals present (4 sources).\n\nRecommendations:\n  \u2192 Add .github/ISSUE_TEMPLATE, PULL_REQUEST_TEMPLATE, and workflows (see this repo for examples)\n\nShare: npx @cobusgreyling/loop-audit /workspace --badge\nDocs: docs/loop-design-checklist.md\nTip: rerun with --suggest for ready-to-paste copy commands from templates/starters.",
+      "parsed_score": 100
+    }
+  },
+  "human_gates": [
+    "design-decisions",
+    "multi-file-refactors"
+  ],
+  "auto_fix": false,
+  "auto_merge": false
+}
