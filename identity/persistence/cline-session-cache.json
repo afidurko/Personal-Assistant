@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T16:30:49.431941+00:00",
+    "at": "2026-09-20T19:40:13.778527+00:00",
     "mode": "act",
-    "summary": "3T dual campaign green (ready=True); infinitemind submodule init fixed 7 test failures (135/135 green); landed avatar-check + avatar-fetch-models add-ons; shipped Cam Home Live zero-dep mission control app (panels + suggestion queue + presence) live on :8790; npm registry fully egress-blocked - React home needs allowlist",
+    "summary": "Phases 3+4 progressed: ethics inheritance manifest (config/swarm/ethics.json) inherited verbatim by every subagent + swarm-check drill; AvatarFrame tier-0 procedural engine (cam_avatar.py, 15 visemes, ARKit-52, blink/gaze micro-life) with cam-avatar-server.py and a speaking SVG rig in Cam Home Live; Aaron's home suggestions now lead needs-attention dispatch. 143/143 tests green.",
     "workspace": "."
   },
   "mesh_notes": [
@@ -104,6 +104,11 @@
     {
       "at": "2026-09-20T16:30:49.431941+00:00",
       "text": "companions/home + scripts/cam-home-live.py; demo video recorded",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-20T19:40:13.778527+00:00",
+      "text": "HF weights still egress-blocked; tier-0 rig upgrades in place when they land",
       "workspace": "."
     }
   ],
@@ -242,7 +247,7 @@
       "workspace_id": "personal-assistant"
     }
   ],
-  "schedules_synced_at": "2026-09-20T18:59:53.550107+00:00",
+  "schedules_synced_at": "2026-09-20T19:40:01.234863+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
