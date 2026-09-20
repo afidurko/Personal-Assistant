@@ -1,0 +1,45 @@
+{
+  "id": "illa-builder",
+  "name": "ILLA Builder",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-20",
+  "role": "Open-source low-code internal-tools builder; Cam desktop shell loads self-hosted or cloud ILLA",
+  "policy": "config/integrations/illa-builder.md",
+  "remote": "github.com/afidurko/illa-builder",
+  "upstream": "github.com/illacloud/illa-builder",
+  "default_branch": "beta",
+  "path": null,
+  "desktop_shell": "integrations/illa-desktop",
+  "packager": {
+    "id": "electron-builder",
+    "version": "26.16.1",
+    "config": "config/integrations/electron-builder.json"
+  },
+  "coding_workspace_id": "illa-builder",
+  "scripts": {
+    "check": "scripts/illa-electron-check.py"
+  },
+  "defaults": {
+    "illa_url_env": "ILLA_DESKTOP_URL",
+    "illa_url_default": "http://127.0.0.1:48080",
+    "cloud_url": "https://cloud.illacloud.com",
+    "save_to_mesh": true,
+    "save_to_vault": true
+  },
+  "mesh_namespace": "mesh/tools",
+  "vault": "vault/03-Projects/ILLA-Electron-Desktop.md",
+  "teams": [
+    "team.capability",
+    "team.tooling",
+    "team.info"
+  ],
+  "roles": [
+    "coding",
+    "ops",
+    "tool-user",
+    "chief",
+    "qa"
+  ],
+  "notes": "Fork is identical to illacloud/illa-builder@beta (web). Desktop packaging lives in Personal-Assistant integrations/illa-desktop until the fork gains push rights for an in-repo electron/ tree."
+}

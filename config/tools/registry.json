@@ -427,6 +427,27 @@
       ],
       "risk": "medium",
       "status": "active"
+    },
+    {
+      "id": "tool.illa_electron.check",
+      "purpose": "Validate ILLA desktop + electron-builder@26.16.1 Cam wiring",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/illa-electron-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "report": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active"
     }
   ]
 }

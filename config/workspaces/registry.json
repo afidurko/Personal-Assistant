@@ -3,7 +3,7 @@
   "title": "Cam unified workspace registry",
   "purpose": "Single map of vault areas, scan workspaces, agent teams, and integration checkouts \u2014 so cloud agents and future checkouts share one workflow. Also maps Cline coding workspaces (motor.cline) for every agent.",
   "authorized_by": "Aaron",
-  "updated_at": "2026-09-17",
+  "updated_at": "2026-09-20",
   "docs": "docs/WORKSPACES_WORKFLOW.md",
   "layers": {
     "vault_areas": [
@@ -212,7 +212,7 @@
         "motor": "motor.google_trends",
         "remote": "github.com/GoogleTrends/data",
         "available_to": "all_roles_and_subagents",
-        "notes": "Open Trends datasets via GitHub trees API — do not submodule (~382MB)"
+        "notes": "Open Trends datasets via GitHub trees API \u2014 do not submodule (~382MB)"
       },
       {
         "id": "public-apis",
@@ -319,6 +319,36 @@
         ],
         "plan": "docs/CAM_REASONING.md",
         "status": "proposed"
+      },
+      {
+        "id": "electron-builder",
+        "path": "https://github.com/afidurko/electron-builder",
+        "policy": "config/integrations/electron-builder.md",
+        "config": "config/integrations/electron-builder.json",
+        "script": "scripts/illa-electron-check.py",
+        "remote": "github.com/afidurko/electron-builder",
+        "pin": "26.16.1",
+        "notes": "Packaging pin electron-builder@26.16.1; fork master is v27 alpha \u2014 not for ILLA dist"
+      },
+      {
+        "id": "illa-builder",
+        "path": "https://github.com/afidurko/illa-builder",
+        "policy": "config/integrations/illa-builder.md",
+        "config": "config/integrations/illa-builder.json",
+        "script": "scripts/illa-electron-check.py",
+        "remote": "github.com/afidurko/illa-builder",
+        "default_branch": "beta",
+        "notes": "Low-code builder fork @ beta; desktop shell in integrations/illa-desktop"
+      },
+      {
+        "id": "illa-desktop",
+        "path": "integrations/illa-desktop",
+        "policy": "config/integrations/illa-builder.md",
+        "config": "config/integrations/illa-builder.json",
+        "script": "scripts/illa-electron-check.py",
+        "remote": "github.com/afidurko/Personal-Assistant",
+        "packager": "electron-builder@26.16.1",
+        "notes": "Electron shell for ILLA; lives in PA until illa-builder fork is writable"
       }
     ],
     "parallel_prs": [
@@ -594,6 +624,69 @@
         "install_rules": true,
         "cursor_bootstrap": true,
         "notes": "Local TTS/ASR/clone/dub; MCP at localhost:3900/mcp; not the brain"
+      },
+      {
+        "id": "electron-builder",
+        "label": "electron-builder (v26.16.1 pin)",
+        "path": "https://github.com/afidurko/electron-builder",
+        "remote": "github.com/afidurko/electron-builder",
+        "default_branch": "master",
+        "roles_allowed": [
+          "coding",
+          "ops",
+          "tool-user",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/electron-builder",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": false,
+        "cursor_bootstrap": false,
+        "notes": "Use tag/npm 26.16.1 for packaging; master is v27 alpha"
+      },
+      {
+        "id": "illa-builder",
+        "label": "ILLA Builder",
+        "path": "https://github.com/afidurko/illa-builder",
+        "remote": "github.com/afidurko/illa-builder",
+        "default_branch": "beta",
+        "roles_allowed": [
+          "coding",
+          "ops",
+          "tool-user",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/illa-builder",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": false,
+        "cursor_bootstrap": false,
+        "notes": "Web monorepo fork; pair with illa-desktop for Electron packaging"
+      },
+      {
+        "id": "illa-desktop",
+        "label": "ILLA Desktop (Electron)",
+        "path": "integrations/illa-desktop",
+        "remote": "github.com/afidurko/Personal-Assistant",
+        "default_branch": "main",
+        "roles_allowed": [
+          "coding",
+          "ops",
+          "tool-user",
+          "chief",
+          "qa"
+        ],
+        "cline_data_dir": "~/.cline/data/workspaces/illa-desktop",
+        "rules": [
+          ".clinerules"
+        ],
+        "install_rules": true,
+        "cursor_bootstrap": true,
+        "notes": "Pinned to electron-builder@26.16.1"
       }
     ]
   },
@@ -621,7 +714,8 @@
     "inkbox_check": "scripts/inkbox-check.py",
     "memorybear_client": "scripts/memorybear.py",
     "memorybear_check": "scripts/memorybear-check.py",
-    "memorybear_pack": "scripts/pack-memorybear-result.py"
+    "memorybear_pack": "scripts/pack-memorybear-result.py",
+    "illa_electron_check": "scripts/illa-electron-check.py"
   },
   "cline": {
     "default_workspace_id": "personal-assistant",
@@ -785,6 +879,35 @@
             "lit serve",
             "integrations/litserve",
             "lightning litserve"
+          ]
+        },
+        {
+          "id": "electron-builder",
+          "match_any": [
+            "electron-builder",
+            "electron builder",
+            "26.16.1",
+            "electron-builder@26.16.1",
+            "app-builder"
+          ]
+        },
+        {
+          "id": "illa-builder",
+          "match_any": [
+            "illa",
+            "illa-builder",
+            "illa builder",
+            "illacloud",
+            "open source retool"
+          ]
+        },
+        {
+          "id": "illa-desktop",
+          "match_any": [
+            "illa-desktop",
+            "illa desktop",
+            "integrations/illa-desktop",
+            "illa electron"
           ]
         }
       ]
@@ -1070,6 +1193,69 @@
       "install_rules": true,
       "cursor_bootstrap": true,
       "notes": "Hosts motor.slm / motor.dl + optional OpenAI-compatible backend for SGR"
+    },
+    {
+      "id": "electron-builder",
+      "label": "electron-builder (v26.16.1 pin)",
+      "path": "https://github.com/afidurko/electron-builder",
+      "remote": "github.com/afidurko/electron-builder",
+      "default_branch": "master",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "tool-user",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/electron-builder",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": false,
+      "cursor_bootstrap": false,
+      "notes": "Use tag/npm 26.16.1 for packaging; master is v27 alpha"
+    },
+    {
+      "id": "illa-builder",
+      "label": "ILLA Builder",
+      "path": "https://github.com/afidurko/illa-builder",
+      "remote": "github.com/afidurko/illa-builder",
+      "default_branch": "beta",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "tool-user",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/illa-builder",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": false,
+      "cursor_bootstrap": false,
+      "notes": "Web monorepo fork; pair with illa-desktop for Electron packaging"
+    },
+    {
+      "id": "illa-desktop",
+      "label": "ILLA Desktop (Electron)",
+      "path": "integrations/illa-desktop",
+      "remote": "github.com/afidurko/Personal-Assistant",
+      "default_branch": "main",
+      "roles_allowed": [
+        "coding",
+        "ops",
+        "tool-user",
+        "chief",
+        "qa"
+      ],
+      "cline_data_dir": "~/.cline/data/workspaces/illa-desktop",
+      "rules": [
+        ".clinerules"
+      ],
+      "install_rules": true,
+      "cursor_bootstrap": true,
+      "notes": "Pinned to electron-builder@26.16.1"
     }
   ],
   "chooser": {
@@ -1230,6 +1416,35 @@
           "lit serve",
           "integrations/litserve",
           "lightning litserve"
+        ]
+      },
+      {
+        "id": "electron-builder",
+        "match_any": [
+          "electron-builder",
+          "electron builder",
+          "26.16.1",
+          "electron-builder@26.16.1",
+          "app-builder"
+        ]
+      },
+      {
+        "id": "illa-builder",
+        "match_any": [
+          "illa",
+          "illa-builder",
+          "illa builder",
+          "illacloud",
+          "open source retool"
+        ]
+      },
+      {
+        "id": "illa-desktop",
+        "match_any": [
+          "illa-desktop",
+          "illa desktop",
+          "integrations/illa-desktop",
+          "illa electron"
         ]
       }
     ]

@@ -1,0 +1,49 @@
+{
+  "id": "electron-builder",
+  "name": "electron-builder packaging",
+  "status": "enabled",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-20",
+  "role": "Desktop packaging toolchain for Cam Electron shells (ILLA desktop + VoiceStudio-class apps)",
+  "policy": "config/integrations/electron-builder.md",
+  "remote": "github.com/afidurko/electron-builder",
+  "upstream": "github.com/electron-userland/electron-builder",
+  "default_branch": "master",
+  "pin": {
+    "package": "electron-builder",
+    "version": "26.16.1",
+    "npm": "electron-builder@26.16.1",
+    "release_tag": "electron-builder@26.16.1",
+    "release_url": "https://github.com/electron-userland/electron-builder/releases/tag/electron-builder%4026.16.1",
+    "commit": "7d3b30f3b15950d19f7c5ff882cf2d161cd3ba2c",
+    "channel": "v26",
+    "notes": "Pin packaging to stable v26.16.1. Fork master tracks upstream master (v27 alpha) — do not use for ILLA desktop dist yet."
+  },
+  "path": null,
+  "coding_workspace_id": "electron-builder",
+  "consumers": [
+    "illa-desktop",
+    "voicestudio"
+  ],
+  "scripts": {
+    "check": "scripts/illa-electron-check.py"
+  },
+  "mesh_namespace": "mesh/tools",
+  "vault_dir": "vault/03-Projects",
+  "defaults": {
+    "save_to_mesh": true,
+    "save_to_vault": true,
+    "prefer_npm_pin_over_fork_master": true
+  },
+  "teams": [
+    "team.capability",
+    "team.tooling"
+  ],
+  "roles": [
+    "coding",
+    "ops",
+    "tool-user",
+    "chief",
+    "qa"
+  ]
+}

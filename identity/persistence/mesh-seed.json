@@ -291,7 +291,11 @@
     "inkbox": true,
     "inkbox_outbound_gated": true,
     "memorybear_enabled": true,
-    "memorybear_offline_ok": true
+    "memorybear_offline_ok": true,
+    "electron_builder": true,
+    "electron_builder_pin": "26.16.1",
+    "illa_builder": true,
+    "illa_desktop": true
   },
   "mesh/projects": {
     "default_workspace_id": "personal-assistant",
@@ -301,6 +305,14 @@
       "remote": "github.com/afidurko/VoiceStudio",
       "vault": "vault/03-Projects/VoiceStudio-Local-Speech.md",
       "workspace_id": "voicestudio"
+    },
+    "illa_desktop": {
+      "remote_illa": "github.com/afidurko/illa-builder",
+      "remote_builder": "github.com/afidurko/electron-builder",
+      "pin": "26.16.1",
+      "vault": "vault/03-Projects/ILLA-Electron-Desktop.md",
+      "workspace_id": "illa-desktop",
+      "shell": "integrations/illa-desktop"
     }
   },
   "mesh/research": {
@@ -344,7 +356,15 @@
     "inkbox": true,
     "inkbox_config": "config/integrations/inkbox.json",
     "inkbox_script": "scripts/inkbox-check.py",
-    "inkbox_motor": "motor.inkbox"
+    "inkbox_motor": "motor.inkbox",
+    "electron_builder": true,
+    "electron_builder_pin": "26.16.1",
+    "electron_builder_config": "config/integrations/electron-builder.json",
+    "electron_builder_script": "scripts/illa-electron-check.py",
+    "illa_builder": true,
+    "illa_builder_config": "config/integrations/illa-builder.json",
+    "illa_desktop": true,
+    "illa_desktop_path": "integrations/illa-desktop"
   },
   "mesh/vault": {
     "plugin": "integrations/smart-second-brain",
