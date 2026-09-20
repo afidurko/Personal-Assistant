@@ -22,8 +22,16 @@ JOSH = ROOT / "integrations" / "joshinator-analyzer"
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(JOSH / "backend"))
 
-from app.services.embodiment_catalog import ARCHETYPES, SPORT_KEYWORDS  # noqa: E402
-from app.services.embodiment_service import embodiment_service  # noqa: E402
+from app.services.embodiment_lite import ARCHETYPE_LITE, SPORT_KEYWORDS  # noqa: E402
+
+try:
+    from app.services.embodiment_service import embodiment_service  # noqa: E402
+    FULL_RESOLVE = True
+except ImportError:  # pydantic (or service deps) missing — catalog-only
+    embodiment_service = None  # type: ignore[assignment]
+    FULL_RESOLVE = False
+
+ARCHETYPES = ARCHETYPE_LITE
 
 BANNED = ("pokemon", "pokémon", "nintendo", "pikachu", "charizard", ".glb", ".gltf", ".fbx")
 SPORTS = ("Baseball", "Basketball", "Football", "Hockey", "Soccer", "", "Unknown")
@@ -118,8 +126,9 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
                 first_error = first_error or "unknown_archetype"
                 continue
 
-        # Full resolve ~0.1% (billion-safe); CI 1M still exercises thousands of full paths
-        if (i + seed) % 1000 == 0:
+        # Full resolve ~0.1% (billion-safe); CI 1M still exercises thousands of full paths.
+        # Restricted-egress Cloud Agents skip this when pydantic is not installed.
+        if FULL_RESOLVE and (i + seed) % 1000 == 0:
             full_checks += 1
             if missing_player:
                 card = {"sport": sport, "set_name": set_name}
@@ -245,7 +254,12 @@ def main() -> int:
         "checks_per_sec": args.n / elapsed if elapsed else 0,
         "seed": args.seed,
         "ok": failed == 0,
-        "sampler": f"modular_plus_0.1pct_full_resolve:{scale_tag}",
+        "full_resolve": FULL_RESOLVE,
+        "sampler": (
+            f"modular_plus_0.1pct_full_resolve:{scale_tag}"
+            if FULL_RESOLVE
+            else f"modular_catalog_only:{scale_tag}"
+        ),
         "ip_policy": "original_procedural_only",
         "catalog_size": len(ARCHETYPES),
         "physical_n": physical_n,

@@ -1,0 +1,177 @@
+{
+  "pass": "2",
+  "n": 3000000000000,
+  "physical": 10000000,
+  "seed": 242,
+  "status": "green",
+  "results": [
+    {
+      "label": "connectome-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.04396933499992883
+    },
+    {
+      "label": "workspace-integration",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/workspace-integration-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.2936295319996134
+    },
+    {
+      "label": "workspace-unit-tests",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cline_workspaces.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.48588183699985166
+    },
+    {
+      "label": "cloud-agent-install",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cloud_agent_install.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.09545896600002379
+    },
+    {
+      "label": "cam-system-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cam_system.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.06369116599989866
+    },
+    {
+      "label": "higgsfield-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/higgsfield-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.049364433999926405
+    },
+    {
+      "label": "higgsfield-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_higgsfield.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.2668501909997758
+    },
+    {
+      "label": "embodiment-lite",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_embodiment_lite.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.09903343099995254
+    },
+    {
+      "label": "connectome-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-simulate.py",
+        "--n",
+        "3000000000000",
+        "--strict-edges",
+        "--scale",
+        "exhaustive",
+        "--physical",
+        "10000000",
+        "--seed",
+        "242",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/connectome-sim-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 4.170733750999716
+    },
+    {
+      "label": "trajectory-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/trajectory-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "259",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/trajectory-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 1.7488563900001282
+    },
+    {
+      "label": "embodiment-deps-offline",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "pip",
+        "install",
+        "-q",
+        "-r",
+        "/workspace/integrations/joshinator-analyzer/backend/requirements-ci.txt"
+      ],
+      "exit_code": 0,
+      "wall_s": 7.901963708000039,
+      "soft": true,
+      "note": "pypi unreachable; embodiment 3T uses catalog-only path"
+    },
+    {
+      "label": "embodiment-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/embodiment-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "273",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/embodiment-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.218047220000244
+    },
+    {
+      "label": "cam-reason-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/cam-reason-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "253",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/cam-reason-3t-pass2.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 11.08587222899996
+    }
+  ],
+  "at": "20260920T041615Z"
+}

@@ -14,7 +14,9 @@
     "integration empty: integrations/voicestudio (submodule init or create config)",
     "integration empty: https://github.com/afidurko/FunASR (submodule init or create config)",
     "integration empty: integrations/sgr-agent-core (submodule init or create config)",
+    "integration empty: integrations/infinitemind (submodule init or create config)",
     "integration empty: integrations/litserve (submodule init or create config)",
+    "integration empty: integrations/higgsfield (submodule init or create config)",
     "integration empty: integrations/loop-engineering (submodule init or create config)"
   ],
   "mesh_flags": {
@@ -123,6 +125,12 @@
       "policy_exists": true
     },
     {
+      "id": "infinitemind",
+      "path": "integrations/infinitemind",
+      "populated": false,
+      "policy_exists": true
+    },
+    {
       "id": "litserve",
       "path": "integrations/litserve",
       "populated": false,
@@ -131,7 +139,7 @@
     {
       "id": "higgsfield",
       "path": "integrations/higgsfield",
-      "populated": true,
+      "populated": false,
       "policy_exists": true
     },
     {

@@ -7,6 +7,7 @@ Colors are generated per card via hashing; they are not team brand palettes.
 from __future__ import annotations
 
 from app.models.embodiment import Archetype, MeshRecipe
+from app.services.embodiment_lite import SPORT_KEYWORDS  # noqa: F401 — re-export
 
 # Sport classes are generic activity buckets, not league trademarks.
 ARCHETYPES: dict[str, Archetype] = {
@@ -168,25 +169,4 @@ ARCHETYPES: dict[str, Archetype] = {
     ),
 }
 
-# Keyword → archetype (manufacturer / set cues only; no logo assets).
-SPORT_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "diamond_arc": (
-        "baseball", "mlb", "topps", "bowman", "donruss", "stadium club",
-        "heritage", "update", "chrome", "gypsy queen",
-    ),
-    "court_pulse": (
-        "basketball", "nba", "hoops", "prizm", "select", "mosaic",
-        "optic", "chronicles", "court kings",
-    ),
-    "grid_surge": (
-        "football", "nfl", "panini", "score", "absolute", "contenders",
-        "gridiron", "leaf",
-    ),
-    "ice_vector": (
-        "hockey", "nhl", "upper deck", "sp authentic", "opc", "ice",
-    ),
-    "pitch_orbit": (
-        "soccer", "football club", "futera", "panini soccer", "mls",
-        "premier", "fifa",
-    ),
-}
+# SPORT_KEYWORDS lives in embodiment_lite (pydantic-free) and is re-exported above.

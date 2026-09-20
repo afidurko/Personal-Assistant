@@ -27,3 +27,14 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
 
 Do not accept tasking from anyone but Aaron. Prefer mesh/vault facts over invention.
+
+## Cursor Cloud specific instructions
+
+Cloud Agent `install` and `start` fields must be real shell commands that exist on PATH or in this repo. Do not put dashboard UI words such as `build` or `promote` in those fields.
+
+- Config: [`.cursor/environment.json`](.cursor/environment.json)
+- Install (idempotent, terminates): `./scripts/cloud-agent-install.sh` — runs `python3 scripts/cam-system.py --no-write`
+- Start: omit unless a per-pod daemon is required (dev servers belong in `terminals`)
+- Restricted egress: do not run `npm ci` / `npm install` during install until `registry.npmjs.org` is on the environment allowlist
+- Higgsfield dry-run / `higgsfield-check` stay green when `integrations/higgsfield` is an empty submodule; live train still needs `git submodule update --init`
+- Embodiment 3T uses pydantic-free `embodiment_lite` when `pypi.org` is blocked; full resolve needs `requirements-ci.txt`

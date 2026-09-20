@@ -311,6 +311,20 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("three-trillion-campaign", body)
         self.assertTrue((ROOT / "scripts" / "three-trillion-campaign.py").is_file())
         self.assertTrue((ROOT / "scripts" / "trillion_scale.py").is_file())
+        campaign = (ROOT / "scripts" / "three-trillion-campaign.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("test_cloud_agent_install.py", campaign)
+        self.assertIn("_maybe_install_embodiment_deps", campaign)
+        self.assertIn("embodiment_lite", campaign)
+        self.assertIn("test_embodiment_lite.py", campaign)
+
+    def test_cloud_agent_environment_json_present(self):
+        env = ROOT / ".cursor" / "environment.json"
+        self.assertTrue(env.is_file())
+        cfg = json.loads(env.read_text(encoding="utf-8"))
+        self.assertEqual(cfg.get("install"), "./scripts/cloud-agent-install.sh")
+        self.assertNotIn(cfg.get("install"), {"build", "promote illa build"})
 
     def test_serve_viz_repo_root(self):
         body = (ROOT / "scripts" / "serve-connectome-viz.sh").read_text(encoding="utf-8")
