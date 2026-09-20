@@ -328,6 +328,9 @@
         "remote": "github.com/afidurko/higgsfield",
         "role": "multi_node_gpu_training",
         "motor": "motor.higgsfield",
+        "sense": "sense.train.higgsfield",
+        "hotspot": "hotspot.higgsfield",
+        "script": "scripts/higgsfield-check.py",
         "serves": [
           "motor.dl"
         ],

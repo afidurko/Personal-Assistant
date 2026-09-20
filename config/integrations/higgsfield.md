@@ -35,7 +35,9 @@ an outbound channel.
 | Policy | `config/integrations/higgsfield.md` |
 | Config | `config/integrations/higgsfield.json` |
 | Motor | `motor.higgsfield` (gated) |
-| Check | `python3 scripts/higgsfield-check.py` (when added) |
+| Sense | `sense.train.higgsfield` |
+| Hotspot | `hotspot.higgsfield` |
+| Check | `python3 scripts/higgsfield-check.py` |
 
 ## Install
 

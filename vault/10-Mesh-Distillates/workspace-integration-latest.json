@@ -125,12 +125,18 @@
       "path": "integrations/litserve",
       "populated": false,
       "policy_exists": true
+    },
+    {
+      "id": "higgsfield",
+      "path": "integrations/higgsfield",
+      "populated": true,
+      "policy_exists": true
     }
   ],
   "pr2_scan_workspaces_present": true,
   "connectome": {
     "ok": true,
-    "detail": "senses=33 edges=323"
+    "detail": "senses=34 edges=331"
   },
   "routes_ok": true,
   "registry": "config/workspaces/registry.json",

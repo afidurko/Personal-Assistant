@@ -64,6 +64,7 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Companion fuzzers: modular_period_scaled via trillion_scale.py",
         "- Codified Aaron test protocol (this entrypoint + CONTINUOUS_QA)",
         "- Google Trends: `scripts/google-trends-check.py` + curated add-ons (`trends.search_*`)",
+        "- Higgsfield: `scripts/higgsfield-check.py` + `motor.higgsfield` / `hotspot.higgsfield`",
         "",
         "## Standing suggestions",
         "- Keep `bash scripts/ci-connectome.sh` as the push gate",
@@ -73,6 +74,7 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Slim CI deps: `integrations/joshinator-analyzer/backend/requirements-ci.txt`",
         "- After registry edits: `python3 scripts/test_cline_workspaces.py`",
         "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
+        "- Higgsfield train jobs stay enhance-gated; never free-spend GPU from Cline",
         "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
         "",
     ]
@@ -100,6 +102,9 @@ def one_pass(
     )
     results.append(
         run([sys.executable, "scripts/test_cline_workspaces.py"], "workspace-unit-tests")
+    )
+    results.append(
+        run([sys.executable, "scripts/higgsfield-check.py"], "higgsfield-check")
     )
 
     conn_out = OUT / f"connectome-sim-3t-{out_tag}.json"

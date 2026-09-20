@@ -891,6 +891,26 @@
       "team": "team.capability"
     },
     {
+      "id": "hotspot.higgsfield",
+      "center": "center.dl",
+      "pathway": [
+        "sense.train.higgsfield",
+        "center.dl",
+        "center.enhance",
+        "center.qa",
+        "switch.cam_enhance",
+        "motor.higgsfield"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault",
+        "motor.cline"
+      ],
+      "behavior": "aaron_gated_multi_node_gpu_train_finetune",
+      "team": "team.capability",
+      "integration": "config/integrations/higgsfield.json"
+    },
+    {
       "id": "hotspot.tooling",
       "center": "center.tooling",
       "pathway": [
