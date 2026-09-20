@@ -24,7 +24,7 @@ T0 = "2026-09-14T09:00:00Z"
 
 def run(*argv: str) -> dict | list:
     buf = io.StringIO()
-    with contextlib.redirect_stdout(buf):
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.StringIO()):
         code = instinct.main(list(argv))
     out = buf.getvalue()
     parsed = json.loads(out) if out.lstrip().startswith(("{", "[")) else out
@@ -338,6 +338,138 @@ class AddOnTests(InstinctBase):
             self.assertTrue((vault / "2026-09-15.md").exists())
         finally:
             os.environ.pop("INSTINCT_VAULT_DIR", None)
+
+
+class CrossWorkspaceTests(InstinctBase):
+    def setUp(self):
+        super().setUp()
+        os.environ["INSTINCT_NO_CACHE_MIRROR"] = "1"
+
+    def tearDown(self):
+        os.environ.pop("INSTINCT_NO_CACHE_MIRROR", None)
+        os.environ.pop("INSTINCT_MESH_OUT", None)
+        super().tearDown()
+
+    def test_chooser_routes_coding_job_by_goal(self):
+        out = run("--now", T0, "job", "add", "Fix inkbox sdk identity email auth", "--coding")
+        self.assertEqual(out["workspace"], "inkbox")
+        self.assertEqual(out["kind"], "coding")
+
+    def test_life_job_defaults_to_personal_assistant(self):
+        out = run("--now", T0, "job", "add", "Book dentist appointment")
+        self.assertEqual(out["workspace"], "personal-assistant")
+
+    def test_explicit_workspace_validated(self):
+        out = run("--now", T0, "job", "add", "anything", "--workspace", "voicestudio")
+        self.assertEqual((out["workspace"], out["workspace_reason"]), ("voicestudio", "explicit"))
+        with self.assertRaises(SystemExit):
+            run("--now", T0, "job", "add", "anything", "--workspace", "not-a-workspace")
+
+    def test_job_list_filters_by_workspace(self):
+        run("--now", T0, "job", "add", "A", "--workspace", "pupil")
+        run("--now", T0, "job", "add", "B", "--workspace", "jarvis")
+        rows = run("job", "list", "--workspace", "pupil")
+        self.assertEqual([r["title"] for r in rows], ["A"])
+
+    def test_workspaces_rollup_and_brief_section(self):
+        run("--now", T0, "job", "add", "A", "--workspace", "pupil", "--coding")
+        run("--now", T0, "job", "add", "B", "--workspace", "pupil")
+        run("--now", T0, "job", "add", "C", "--workspace", "jarvis")
+        out = run("--now", T0, "workspaces")
+        by = {r["workspace"]: r for r in out["workspaces"]}
+        self.assertEqual((by["pupil"]["live"], by["pupil"]["coding"]), (2, 1))
+        self.assertEqual(by["jarvis"]["live"], 1)
+        self.assertGreaterEqual(out["registered"], 10)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            instinct.main(["--now", T0, "brief"])
+        self.assertIn("## By workspace", buf.getvalue())
+        self.assertIn("`pupil`", buf.getvalue())
+
+    def test_dispatch_plan_is_print_only_and_prioritized(self):
+        run("--now", T0, "job", "add", "low thing", "--coding", "--workspace", "cline", "--priority", "low")
+        run("--now", T0, "job", "add", "urgent thing", "--coding", "--workspace", "inkbox", "--priority", "high")
+        run("--now", T0, "job", "add", "life thing")  # not dispatchable
+        out = run("--now", T0, "dispatch")
+        self.assertFalse(out["executes"])
+        self.assertEqual([r["title"] for r in out["plan"]], ["urgent thing", "low thing"])
+        self.assertIn("--workspace-id inkbox", out["plan"][0]["command"])
+        self.assertFalse((self.data() / "dispatch-plan.json").exists())
+        run("--now", T0, "dispatch", "--write")
+        self.assertTrue((self.data() / "dispatch-plan.json").exists())
+
+    def test_track_cline_run_failure_opens_coding_job_via_sync(self):
+        ts = instinct.parse_ts(T0)
+        path = instinct.track_cline_run("voicestudio", "refactor tts pipeline", "failed", 1, "t-1", ts)
+        self.assertIsNotNone(path)
+        instinct.track_cline_run("inkbox", "add sdk docs", "completed", 0, "t-2", ts)
+        out = run("--now", T0, "sync")
+        self.assertEqual(len(out["folded"]), 2)
+        jobs = run("job", "list")
+        self.assertEqual(len(jobs), 1)  # only the failure opened a job
+        self.assertEqual((jobs[0]["workspace"], jobs[0]["kind"], jobs[0]["priority"]),
+                         ("voicestudio", "coding", "high"))
+        thread = run("thread")
+        self.assertTrue(all(m["from"] == "motor.cline" for m in thread))
+
+    def test_track_cline_run_unregistered_workspace_still_folds(self):
+        ts = instinct.parse_ts(T0)
+        instinct.track_cline_run("ad-hoc", "something odd", "failed", 2, None, ts)
+        out = run("--now", T0, "sync")
+        self.assertEqual(len(out["folded"]), 1)
+        self.assertEqual(out["skipped"], [])
+
+    def test_attention_sync_imports_dedupes_and_closes_upstream(self):
+        distillate = self.data() / "na.json"
+        items = [
+            {"id": "ws-inkbox", "kind": "connectivity", "severity": "high",
+             "title": "Connect coding workspace: inkbox", "detail": "submodule empty",
+             "workspace_id": "inkbox", "suggestion": "git submodule update --init"},
+            {"id": "gate-outbound", "kind": "policy", "severity": "info", "title": "gated"},
+            {"id": "instinct-abc", "kind": "followup", "severity": "medium",
+             "title": "Instinct escalation: x", "workspace_id": "personal-assistant"},
+        ]
+        distillate.write_text(json.dumps({"attention_items": items}))
+        out = run("--now", T0, "attention-sync", "--file", str(distillate))
+        self.assertEqual(len(out["added"]), 1)
+        self.assertEqual(out["added"][0]["workspace"], "inkbox")
+        # idempotent
+        again = run("--now", "2026-09-14T10:00:00Z", "attention-sync", "--file", str(distillate))
+        self.assertEqual(again["added"], [])
+        jobs = run("job", "list")
+        self.assertEqual((jobs[0]["kind"], jobs[0]["priority"]), ("attention", "high"))
+        # item cleared upstream -> job auto-closes
+        distillate.write_text(json.dumps({"attention_items": []}))
+        cleared = run("--now", "2026-09-15T09:00:00Z", "attention-sync", "--file", str(distillate))
+        self.assertEqual(len(cleared["closed_upstream"]), 1)
+        self.assertEqual(run("job", "list"), [])
+
+    def test_attention_sync_missing_file_reports_cleanly(self):
+        out = run("attention-sync", "--file", str(self.data() / "nope.json"))
+        self.assertFalse(out["ok"])
+        self.assertEqual(out["_exit"], 1)
+
+    def test_distill_is_sanitized_counts_only(self):
+        mesh_out = self.data() / "mesh" / "latest.json"
+        os.environ["INSTINCT_MESH_OUT"] = str(mesh_out)
+        run("--now", T0, "ingest", "--text", "Can you call Dr. Secret about the private thing?",
+            "--job", "Private job title", "--workspace", "pupil")
+        out = run("--now", T0, "distill")
+        self.assertTrue(out["ok"])
+        text = mesh_out.read_text()
+        self.assertNotIn("Secret", text)
+        self.assertNotIn("Private job title", text)
+        doc = json.loads(text)
+        self.assertEqual(doc["by_workspace"][0]["workspace"], "pupil")
+        self.assertTrue(doc["draft_only"])
+
+    def test_escalation_carries_workspace(self):
+        run("--now", T0, "job", "add", "Stuck thing", "--workspace", "jarvis")
+        for day in ("16", "18", "20"):
+            run("--now", f"2026-09-{day}T09:00:00Z", "scan", "--write")
+        run("--now", "2026-09-22T09:00:00Z", "scan")
+        handoff = json.loads((self.data() / "needs-attention.json").read_text())
+        self.assertEqual(handoff["items"][0]["workspace"], "jarvis")
 
 
 class ReportBriefDoctorTests(InstinctBase):

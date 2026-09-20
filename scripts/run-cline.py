@@ -122,6 +122,19 @@ def record_session(workspace_path: str, mode: str, summary: str, note: str = "")
     subprocess.run(cmd, check=False)
 
 
+def track_instinct_run(workspace_id: str, prompt: str, status: str, exit_code: int,
+                       ticket_id: str | None) -> None:
+    """Drop the run into Cam Instinct's follow-through ledger (motor.instinct).
+    Failures open a coding job; bookkeeping must never break the run itself."""
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import instinct  # noqa: WPS433
+
+        instinct.track_cline_run(workspace_id, prompt, status, exit_code, ticket_id)
+    except Exception:
+        pass
+
+
 def build_env(data_dir: Path, kill: bool) -> dict[str, str]:
     env = os.environ.copy()
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -355,6 +368,7 @@ def main() -> int:
 
     summary = f"{status} exit={proc.returncode} ws={ws.get('id')}"
     record_session(str(workspace_path), mode, summary, note=f"ticket={ticket_id}")
+    track_instinct_run(ws.get("id", "ad-hoc"), prompt, status, proc.returncode, ticket_id)
 
     out = {
         **meta,

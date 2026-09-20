@@ -388,7 +388,12 @@
         "motor": "motor.instinct",
         "remote": null,
         "available_to": "all_roles_and_subagents",
-        "notes": "First-party Cam module (behavior model inspired by instinct.com) — no submodule, no credential, draft-only outbound"
+        "notes": "First-party Cam module (behavior model inspired by instinct.com) — no submodule, no credential, draft-only outbound",
+        "spans_workspaces": "all_coding_workspaces",
+        "hooks": [
+          "scripts/run-cline.py (track_instinct_run)",
+          "scripts/needs-attention.py (escalations + attention-sync)"
+        ]
       }
     ],
     "parallel_prs": [
@@ -1341,7 +1346,11 @@
           "nullclaw",
           "nulltickets",
           "personal-assistant",
-          "persist"
+          "persist",
+          "instinct",
+          "follow-through",
+          "follow-up ledger",
+          "needs attention"
         ]
       },
       {

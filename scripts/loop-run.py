@@ -175,9 +175,23 @@ def action_scan_recent_merges() -> dict:
     }
 
 
+def action_instinct_sync() -> dict:
+    """Fold inbox event drops (run-cline, senses) + the Needs Attention queue
+    from all coding workspaces into the follow-through ledger."""
+    return {
+        "inbox": run_py("scripts/instinct.py", ["sync"]),
+        "attention": run_py("scripts/instinct.py", ["attention-sync"]),
+    }
+
+
 def action_instinct_scan() -> dict:
     """Draft-only follow-through scan (motor.instinct); never sends."""
     return run_py("scripts/instinct.py", ["scan", "--write"])
+
+
+def action_instinct_distill() -> dict:
+    """Sanitized per-workspace mesh distillate (counts only)."""
+    return run_py("scripts/instinct.py", ["distill"])
 
 
 def action_list_open_prs_report() -> dict:
@@ -232,8 +246,12 @@ def run_pattern(pattern: dict, level: str, dry_run: bool) -> dict:
             results[act] = action_scan_recent_merges()
         elif act == "list_open_prs_report":
             results[act] = action_list_open_prs_report()
+        elif act == "instinct_sync":
+            results[act] = action_instinct_sync()
         elif act == "instinct_scan":
             results[act] = action_instinct_scan()
+        elif act == "instinct_distill":
+            results[act] = action_instinct_distill()
         elif act in {"update_state", "append_run_log", "pack_mesh"}:
             continue
         else:

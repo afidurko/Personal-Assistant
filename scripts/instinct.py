@@ -92,6 +92,72 @@ def vault_briefs_dir() -> Path:
     return Path(override) if override else ROOT / "vault/06-Life-Ops/instinct/briefs"
 
 
+def mesh_out_path() -> Path:
+    override = os.environ.get("INSTINCT_MESH_OUT")
+    return Path(override) if override else ROOT / "vault/10-Mesh-Distillates/instinct/latest.json"
+
+
+def attention_default_path() -> Path:
+    return ROOT / "vault/10-Mesh-Distillates/needs-attention/latest.json"
+
+
+# --- cross-workspace: registry + chooser (shared with run-cline / needs-attention)
+
+
+DEFAULT_WORKSPACE = "personal-assistant"
+JOB_KINDS = ("life", "coding", "attention")
+
+
+def _cw():
+    """cam_workspaces (registry + chooser); None if unavailable — never fatal."""
+    try:
+        if str(ROOT / "scripts") not in sys.path:
+            sys.path.insert(0, str(ROOT / "scripts"))
+        import cam_workspaces as cw  # noqa: WPS433
+        return cw
+    except Exception:  # pragma: no cover — registry missing in a foreign checkout
+        return None
+
+
+def known_workspaces() -> list[dict]:
+    cw = _cw()
+    if cw is None:
+        return [{"id": DEFAULT_WORKSPACE, "label": "Personal-Assistant", "primary": True}]
+    try:
+        reg = cw.load_registry()
+        return list((reg.get("layers") or {}).get("coding_workspaces") or cw.list_workspaces(reg))
+    except Exception:
+        return [{"id": DEFAULT_WORKSPACE, "label": "Personal-Assistant", "primary": True}]
+
+
+def workspace_connected(ws_id: str) -> bool | None:
+    cw = _cw()
+    if cw is None:
+        return None
+    try:
+        return bool(cw.workspace_exists(cw.get_workspace(ws_id)))
+    except Exception:
+        return None
+
+
+def resolve_workspace(goal: str, workspace_id: str | None = None) -> tuple[str, str]:
+    """Explicit id wins (validated against the registry); otherwise the shared
+    chooser routes by goal text — the same brain run-cline uses."""
+    ids = {w["id"] for w in known_workspaces()}
+    if workspace_id:
+        if ids and workspace_id not in ids:
+            raise SystemExit(f"unknown workspace '{workspace_id}' — known: {', '.join(sorted(ids))}")
+        return workspace_id, "explicit"
+    cw = _cw()
+    if cw is None:
+        return DEFAULT_WORKSPACE, "chooser_unavailable"
+    try:
+        choice = cw.choose_workspace(goal=goal)
+        return choice["workspace"]["id"], choice.get("reason", "chooser")
+    except Exception:
+        return DEFAULT_WORKSPACE, "chooser_error"
+
+
 # --- time / io helpers ----------------------------------------------------
 
 
@@ -195,13 +261,22 @@ def find_job(ledger: dict, job_id: str) -> dict:
 
 
 def new_job(title: str, ts: datetime, due: str | None = None, priority: str = "normal",
-            recur_hours: float | None = None, origin_msg: str | None = None) -> dict:
+            recur_hours: float | None = None, origin_msg: str | None = None,
+            workspace_id: str | None = None, kind: str = "life",
+            source_ref: str | None = None) -> dict:
     if priority not in PRIORITY_WINDOW:
         raise SystemExit(f"priority must be one of {sorted(PRIORITY_WINDOW)}")
+    if kind not in JOB_KINDS:
+        raise SystemExit(f"kind must be one of {JOB_KINDS}")
+    ws_id, ws_reason = resolve_workspace(title, workspace_id)
     return {
         "id": short_id(),
         "title": title,
         "status": "open",
+        "kind": kind,
+        "workspace": ws_id,
+        "workspace_reason": ws_reason,
+        "source_ref": source_ref,
         "created": iso(ts),
         "updated": iso(ts),
         # Validate + normalize at creation so a bad due date can never poison scans.
@@ -261,7 +336,8 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     ts = now_utc(args.now)
     job_id = None
     if args.job:
-        job = new_job(args.job, ts, due=args.due, priority=args.priority or "normal")
+        job = new_job(args.job, ts, due=args.due, priority=args.priority or "normal",
+                      workspace_id=args.workspace, kind="coding" if args.coding else "life")
         ledger["jobs"].append(job)
         job_id = job["id"]
     msg = append_message(ledger, args.sender, args.text, ts, job_id=job_id, reply_to=args.reply_to)
@@ -293,8 +369,14 @@ def cmd_sync(args: argparse.Namespace) -> int:
             ev_ts = parse_ts(event["ts"]) if event.get("ts") else ts
             job_id = None
             if event.get("job"):
+                ws = event.get("workspace")
+                if ws and ws not in {w["id"] for w in known_workspaces()}:
+                    ws = None  # unregistered (e.g. ad-hoc path): let the chooser route it
                 job = new_job(str(event["job"]), ev_ts, due=event.get("due"),
-                              priority=event.get("priority") or "normal")
+                              priority=event.get("priority") or "normal",
+                              workspace_id=ws,
+                              kind=event.get("kind") or "life",
+                              source_ref=event.get("source_ref"))
                 ledger["jobs"].append(job)
                 job_id = job["id"]
             msg = append_message(ledger, sender, text, ev_ts, job_id=job_id,
@@ -317,18 +399,22 @@ def cmd_job(args: argparse.Namespace) -> int:
     ts = now_utc(args.now)
     if args.action == "add":
         job = new_job(args.title, ts, due=args.due, priority=args.priority or "normal",
-                      recur_hours=args.monitor)
+                      recur_hours=args.monitor, workspace_id=args.workspace,
+                      kind="coding" if args.coding else "life")
         ledger["jobs"].append(job)
         save_ledger(ledger)
         print(json.dumps({"ok": True, "job": job["id"], "title": job["title"],
-                          "monitor": bool(args.monitor)}, indent=2))
+                          "monitor": bool(args.monitor), "kind": job["kind"],
+                          "workspace": job["workspace"],
+                          "workspace_reason": job["workspace_reason"]}, indent=2))
         return 0
     if args.action == "list":
         rows = [
-            {k: j.get(k) for k in ("id", "title", "status", "priority", "due", "waiting_on",
-                                    "snooze_until", "recur_hours", "updated", "followups")}
+            {k: j.get(k) for k in ("id", "title", "status", "kind", "workspace", "priority", "due",
+                                    "waiting_on", "snooze_until", "recur_hours", "updated", "followups")}
             for j in ledger["jobs"]
-            if args.all or j["status"] != "done"
+            if (args.all or j["status"] != "done")
+            and (not args.workspace or j.get("workspace") == args.workspace)
         ]
         print(json.dumps(rows, indent=2))
         return 0
@@ -386,6 +472,8 @@ def draft_followup(ledger: dict, job: dict, reason: str, ts: datetime) -> Path:
         f"---\n"
         f"kind: instinct-followup-draft\n"
         f"job: {job['id']}\n"
+        f"workspace: {job.get('workspace', DEFAULT_WORKSPACE)}\n"
+        f"job_kind: {job.get('kind', 'life')}\n"
         f"priority: {job.get('priority', 'normal')}\n"
         f"reason: {reason}\n"
         f"drafted: {iso(ts)}\n"
@@ -443,6 +531,8 @@ def scan_findings(ledger: dict, ts: datetime, write: bool) -> tuple[list[dict], 
             findings.append({"job": job["id"], "title": job["title"],
                              "kind": "needs_aaron", "detail": detail})
             escalations.append({"job": job["id"], "title": job["title"],
+                                "workspace": job.get("workspace", DEFAULT_WORKSPACE),
+                                "kind": job.get("kind", "life"),
                                 "followups": job["followups"], "detail": detail})
             emit_spike("needs_aaron", {"job": job["id"], "title": job["title"]}, ts)
             continue
@@ -574,6 +664,15 @@ def cmd_brief(args: argparse.Namespace) -> int:
     for j in doc["snoozed"]:
         lines.append(f"- snoozed: {j['title']} (until {j.get('until')})")
     lines.append("")
+    rollup = [r for r in workspace_rollup(ledger, ts) if r["live"]]
+    if rollup:
+        lines.append("## By workspace")
+        for r in rollup:
+            conn = "" if r["connected"] in (None, True) else " · NOT CONNECTED"
+            lines.append(f"- `{r['workspace']}` — open {r['open']} · waiting {r['waiting']} · "
+                         f"monitors {r['monitors']} · escalations {r['escalations']} · "
+                         f"drafts {r['pending_drafts']}{conn}")
+        lines.append("")
     if doc["pending_drafts"]:
         lines.append("## Pending follow-up drafts (review before any send)")
         for d in doc["pending_drafts"]:
@@ -747,6 +846,244 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0 if not problems else 1
 
 
+# --- cross-workspace commands ----------------------------------------------
+
+
+def workspace_rollup(ledger: dict, ts: datetime) -> list[dict]:
+    """Per-workspace follow-through counts across every registered coding workspace."""
+    def is_snoozed(j: dict) -> bool:
+        return bool(j.get("snooze_until")) and parse_ts(j["snooze_until"]) > ts
+
+    escalated = set()
+    if escalations_path().exists():
+        try:
+            doc = json.loads(escalations_path().read_text(encoding="utf-8"))
+            escalated = {e.get("job") for e in doc.get("items") or []}
+        except json.JSONDecodeError:
+            escalated = set()
+    drafts_by_job: dict[str, int] = {}
+    if outbox_dir().exists():
+        for p in outbox_dir().glob("*.md"):
+            job_id = p.stem.split("-", 1)[-1]
+            drafts_by_job[job_id] = drafts_by_job.get(job_id, 0) + 1
+
+    ids = [w["id"] for w in known_workspaces()]
+    for j in ledger["jobs"]:
+        if j.get("workspace", DEFAULT_WORKSPACE) not in ids:
+            ids.append(j.get("workspace", DEFAULT_WORKSPACE))
+    rows = []
+    for ws_id in ids:
+        jobs = [j for j in ledger["jobs"] if j.get("workspace", DEFAULT_WORKSPACE) == ws_id]
+        live = [j for j in jobs if j["status"] != "done"]
+        rows.append({
+            "workspace": ws_id,
+            "connected": workspace_connected(ws_id),
+            "live": len(live),
+            "open": sum(1 for j in live if j["status"] == "open"
+                        and not j.get("recur_hours") and not is_snoozed(j)),
+            "waiting": sum(1 for j in live if j["status"] == "waiting" and not is_snoozed(j)),
+            "monitors": sum(1 for j in live if j.get("recur_hours")),
+            "snoozed": sum(1 for j in live if is_snoozed(j)),
+            "done": sum(1 for j in jobs if j["status"] == "done"),
+            "coding": sum(1 for j in live if j.get("kind") == "coding"),
+            "attention": sum(1 for j in live if j.get("kind") == "attention"),
+            "escalations": sum(1 for j in live if j["id"] in escalated),
+            "pending_drafts": sum(drafts_by_job.get(j["id"], 0) for j in live),
+        })
+    rows.sort(key=lambda r: (-r["live"], r["workspace"]))
+    return rows
+
+
+def cmd_workspaces(args: argparse.Namespace) -> int:
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    rows = workspace_rollup(ledger, ts)
+    if not args.all:
+        rows = [r for r in rows if r["live"] or r["done"]]
+    print(json.dumps({"ok": True, "as_of": iso(ts), "workspaces": rows,
+                      "registered": len(known_workspaces())}, indent=2))
+    return 0
+
+
+def dispatch_plan(ledger: dict, ts: datetime, limit: int) -> list[dict]:
+    """Print-only plan mapping coding/attention jobs to run-cline commands.
+    Nothing here executes; motor.cline still fires only under switch.autonomy
+    with the pattern's human gates."""
+    order = {"high": 0, "normal": 1, "low": 2}
+    rows = []
+    for j in ledger["jobs"]:
+        if j["status"] == "done" or j.get("kind") not in ("coding", "attention"):
+            continue
+        if j.get("snooze_until") and parse_ts(j["snooze_until"]) > ts:
+            continue
+        ws = j.get("workspace", DEFAULT_WORKSPACE)
+        goal = j["title"].replace('"', "'")
+        rows.append({
+            "job": j["id"],
+            "workspace": ws,
+            "connected": workspace_connected(ws),
+            "kind": j.get("kind"),
+            "priority": j.get("priority", "normal"),
+            "title": j["title"],
+            "command": (f'python3 scripts/run-cline.py --workspace-id {ws} '
+                        f'--goal "{goal}" "{goal}"'),
+            "gate": "switch.autonomy act + pattern human gates; never auto-run from this plan",
+        })
+    rows.sort(key=lambda r: (order.get(r["priority"], 1), r["title"]))
+    return rows[:limit]
+
+
+def cmd_dispatch(args: argparse.Namespace) -> int:
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    plan = dispatch_plan(ledger, ts, args.limit)
+    doc = {"ok": True, "as_of": iso(ts), "plan": plan, "executes": False,
+           "note": "print-only — run-cline is Aaron/loop dispatched, not fired from Instinct"}
+    if args.write:
+        data_dir().mkdir(parents=True, exist_ok=True)
+        (data_dir() / "dispatch-plan.json").write_text(json.dumps(doc, indent=2) + "\n",
+                                                       encoding="utf-8")
+        doc["wrote"] = str((data_dir() / "dispatch-plan.json"))
+    print(json.dumps(doc, indent=2))
+    return 0
+
+
+SEVERITY_PRIORITY = {"critical": "high", "high": "high", "medium": "normal", "low": "low"}
+
+
+def cmd_attention_sync(args: argparse.Namespace) -> int:
+    """Pull the Needs Attention queue (all coding workspaces) into the ledger as
+    attention jobs, idempotently by item id; auto-close jobs whose item cleared."""
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    path = Path(args.file) if args.file else attention_default_path()
+    if not path.exists():
+        print(json.dumps({"ok": False, "error": f"no needs-attention distillate at {path} — "
+                          "run scripts/needs-attention.py --write first"}, indent=2))
+        return 1
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"needs-attention distillate unreadable: {exc}")
+    items = [i for i in doc.get("attention_items") or []
+             if i.get("severity") in ("critical", "high", "medium")
+             and i.get("kind") != "policy"
+             and not str(i.get("id", "")).startswith("instinct-")]  # never re-import our own escalations
+    current_refs = {f"na:{i['id']}" for i in items}
+    existing = {j.get("source_ref"): j for j in ledger["jobs"] if j.get("source_ref")}
+
+    added, closed = [], []
+    for item in items:
+        ref = f"na:{item['id']}"
+        if ref in existing:
+            continue
+        ws = item.get("workspace_id") or DEFAULT_WORKSPACE
+        known = {w["id"] for w in known_workspaces()}
+        job = new_job(str(item.get("title") or item["id"]), ts,
+                      priority=SEVERITY_PRIORITY.get(item.get("severity"), "normal"),
+                      workspace_id=ws if ws in known else None, kind="attention", source_ref=ref)
+        detail = item.get("detail")
+        if detail:
+            job["notes"].append({"ts": iso(ts), "text": str(detail)})
+        if item.get("suggestion"):
+            job["notes"].append({"ts": iso(ts), "text": f"suggestion: {item['suggestion']}"})
+        ledger["jobs"].append(job)
+        added.append({"job": job["id"], "title": job["title"], "workspace": job["workspace"]})
+    for ref, job in existing.items():
+        if ref.startswith("na:") and job["status"] != "done" and ref not in current_refs:
+            job["status"] = "done"
+            job["updated"] = iso(ts)
+            job["notes"].append({"ts": iso(ts), "text": "cleared upstream in Needs Attention sweep"})
+            closed.append({"job": job["id"], "title": job["title"]})
+    save_ledger(ledger)
+    print(json.dumps({"ok": True, "source": str(path), "items_seen": len(items),
+                      "added": added, "closed_upstream": closed}, indent=2))
+    return 0
+
+
+def cmd_distill(args: argparse.Namespace) -> int:
+    """Sanitized mesh distillate (counts only — no message text, no PII) for
+    cross-workspace visibility, mirrored as a mesh note like needs-attention."""
+    ledger = load_ledger()
+    ts = now_utc(args.now)
+    report = report_doc(ledger, ts)
+    rollup = workspace_rollup(ledger, ts)
+    doc = {
+        "at": iso(ts),
+        "source": MOTOR,
+        "namespace": (load_config().get("mesh_namespace") or "mesh/projects"),
+        "jobs": report["jobs"],
+        "unanswered_asks": len(report["unanswered_asks"]),
+        "escalations": len(report["escalations"]),
+        "pending_drafts": len(report["pending_drafts"]),
+        "by_workspace": [r for r in rollup if r["live"] or r["done"]],
+        "last_scan": report["last_scan"],
+        "draft_only": True,
+    }
+    out = mesh_out_path()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    mirrored = False
+    cw = _cw()
+    if cw is not None and not os.environ.get("INSTINCT_NO_CACHE_MIRROR") and cw.CLINE_CACHE.exists():
+        try:
+            cache = cw.load_json(cw.CLINE_CACHE)
+            notes = cache.setdefault("mesh_notes", [])
+            if not isinstance(notes, list):
+                notes = []
+                cache["mesh_notes"] = notes
+            live = sum(r["live"] for r in rollup)
+            notes.append({"at": iso(ts), "namespace": doc["namespace"],
+                          "note": (f"instinct: live={live} escalations={doc['escalations']} "
+                                   f"drafts={doc['pending_drafts']} asks={doc['unanswered_asks']}")})
+            cache["mesh_notes"] = notes[-40:]
+            cw.write_json(cw.CLINE_CACHE, cache)
+            mirrored = True
+        except Exception:
+            mirrored = False
+    print(json.dumps({"ok": True, "wrote": str(out), "mesh_note_mirrored": mirrored,
+                      "by_workspace": doc["by_workspace"]}, indent=2))
+    return 0
+
+
+# --- event-drop helpers for other workspace tooling (run-cline, senses) -------
+
+
+def drop_event(payload: dict, ts: datetime | None = None) -> Path | None:
+    """Write one inbox event for `sync` to fold in. Never raises — a follow-
+    through bookkeeping failure must never break a Cline run or a sense."""
+    try:
+        ts = ts or now_utc()
+        inbox_dir().mkdir(parents=True, exist_ok=True)
+        payload = {"ts": iso(ts), **payload}
+        path = inbox_dir() / f"{ts.strftime('%Y%m%dT%H%M%S%fZ')}-{short_id()}.json"
+        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        return path
+    except Exception:
+        return None
+
+
+def track_cline_run(workspace_id: str, prompt: str, status: str, exit_code: int | None = None,
+                    ticket_id: str | None = None, ts: datetime | None = None) -> Path | None:
+    """Hook for run-cline.py: every Cline run in any workspace lands in the
+    thread; failures/timeouts open a high-priority coding job to follow through."""
+    summary = (prompt or "doctor").strip().replace("\n", " ")
+    short = summary[:100] + ("…" if len(summary) > 100 else "")
+    event: dict = {
+        "from": "motor.cline",
+        "text": f"Cline run {status} in {workspace_id} (exit={exit_code}): {short}",
+        "workspace": workspace_id,
+        "source_ref": f"ticket:{ticket_id}" if ticket_id else None,
+    }
+    if status in ("failed", "timeout"):
+        event.update({
+            "job": f"Cline run {status} in {workspace_id}: {short[:70]}",
+            "kind": "coding",
+            "priority": "high",
+        })
+    return drop_event(event, ts)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Cam Instinct — proactive follow-through engine")
     parser.add_argument("--now", help="override clock (ISO8601) for deterministic runs")
@@ -759,6 +1096,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--due", help="job due date ISO8601")
     p.add_argument("--priority", choices=sorted(PRIORITY_WINDOW))
     p.add_argument("--reply-to", help="mark an earlier message answered by this one")
+    p.add_argument("--workspace", help="registry workspace id for the opened job (default: chooser)")
+    p.add_argument("--coding", action="store_true", help="opened job is coding work (dispatchable)")
     p.set_defaults(fn=cmd_ingest)
 
     p = sub.add_parser("sync", help="fold event drops from the inbox into the thread")
@@ -772,8 +1111,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--priority", choices=sorted(PRIORITY_WINDOW))
     p.add_argument("--monitor", type=float, metavar="HOURS",
                    help="recurring watch: nudge every HOURS, never escalates")
-    p.add_argument("--until", help="snooze until ISO8601")
+    p.add_argument("--until", help="snooze until ISO8601 or +12h/+3d/+2w")
     p.add_argument("--all", action="store_true")
+    p.add_argument("--workspace", help="registry workspace id (add: assign; list: filter)")
+    p.add_argument("--coding", action="store_true", help="job is coding work (dispatchable)")
     p.set_defaults(fn=cmd_job)
 
     p = sub.add_parser("scan", help="find dropped asks and stale/overdue/monitor jobs")
@@ -800,6 +1141,23 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("find", help="search thread, job titles, and notes")
     p.add_argument("query")
     p.set_defaults(fn=cmd_find)
+
+    p = sub.add_parser("workspaces", help="per-workspace follow-through rollup")
+    p.add_argument("--all", action="store_true", help="include workspaces with no jobs")
+    p.set_defaults(fn=cmd_workspaces)
+
+    p = sub.add_parser("dispatch", help="print-only run-cline plan for coding/attention jobs")
+    p.add_argument("--limit", type=int, default=12)
+    p.add_argument("--write", action="store_true", help="also write data/instinct/dispatch-plan.json")
+    p.set_defaults(fn=cmd_dispatch)
+
+    p = sub.add_parser("attention-sync",
+                       help="import Needs Attention queue (all coding workspaces) as attention jobs")
+    p.add_argument("--file", help="needs-attention distillate (default vault/.../needs-attention/latest.json)")
+    p.set_defaults(fn=cmd_attention_sync)
+
+    p = sub.add_parser("distill", help="write sanitized mesh distillate + mesh note")
+    p.set_defaults(fn=cmd_distill)
 
     p = sub.add_parser("thread", help="show thread tail")
     p.add_argument("--tail", type=int, default=10)

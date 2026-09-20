@@ -71,6 +71,33 @@ These Instinct behaviors are excluded **by design** per `.clinerules`:
 - State: `data/instinct/` (ledger, spikes, outbox, inbox, briefs) — gitignored; never commit PII
 - Tests isolate state via `INSTINCT_DATA_DIR`
 
+## Cross-workspace (all coding workspaces)
+
+Instinct is the follow-through ledger for every workspace in
+`config/workspaces/registry.json`, not just Personal-Assistant:
+
+- **Every job has a workspace.** `--workspace <id>` is validated against the registry;
+  when omitted, the shared chooser (`cam_workspaces.choose_workspace`) routes by title —
+  the same brain `run-cline.py` uses. `--coding` marks work as dispatchable.
+- **run-cline hook.** `scripts/run-cline.py` drops every Cline run (any workspace) into the
+  thread via `instinct.track_cline_run`; failed/timeout runs open a high-priority coding
+  job in that workspace. Bookkeeping never breaks the run.
+- **Needs Attention both ways.** `attention-sync` imports the queue distillate
+  (`vault/10-Mesh-Distillates/needs-attention/latest.json`) as attention jobs — idempotent by
+  item id, severity → priority, auto-closed when the item clears upstream. Instinct's own
+  `needs_aaron` escalations flow back into the sweep carrying their workspace.
+- **`workspaces`** — per-workspace rollup (connectivity, open/waiting/monitors, escalations,
+  drafts); the brief gets a "By workspace" section.
+- **`dispatch`** — print-only `run-cline.py --workspace-id …` plan for coding/attention jobs,
+  priority-ordered. It never executes; `motor.cline` still fires only under `switch.autonomy`
+  with the pattern's human gates (`instinct-check` fails if the engine ever imports subprocess).
+- **`distill`** — sanitized mesh distillate (counts per workspace, no message text) to
+  `vault/10-Mesh-Distillates/instinct/latest.json` plus a mesh note in the cline session cache.
+- **Nightly loop** runs `instinct_sync` → `instinct_scan` → `instinct_distill`.
+- **Policy propagation.** `.clinerules`, the `install-cline-rules.py` bundle (AGENTS snippet +
+  Cursor rule), and `.cursor/rules/cam-cline.mdc` tell every workspace where open work lives;
+  chooser signals route "instinct" / "follow-through" goals to Personal-Assistant.
+
 ## Ops
 
 - Nightly loop drafts follow-ups; Aaron reviews with `outbox list` → `outbox show <draft>`

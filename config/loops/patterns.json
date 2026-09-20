@@ -123,7 +123,9 @@
       "schedule_id": "cam-nightly-instinct-scan",
       "neuron": "neuron.watch_loop",
       "actions": [
+        "instinct_sync",
         "instinct_scan",
+        "instinct_distill",
         "update_state",
         "append_run_log",
         "pack_mesh"
@@ -132,7 +134,7 @@
         "outbound-send"
       ],
       "cline_dispatch": false,
-      "notes": "Draft-only follow-ups (motor.instinct); sends stay gated behind switch.outbound via motor.inkbox."
+      "notes": "Cross-workspace follow-through: fold run-cline drops + Needs Attention queue, draft-only scan, sanitized per-workspace mesh distillate. Sends stay gated behind switch.outbound via motor.inkbox."
     }
   ]
 }

@@ -61,11 +61,42 @@ def main() -> int:
         if banned in mcp_text:
             errors.append("outbox approval must not be exposed over MCP (Aaron-only CLI)")
 
-    # Engine must ship the add-on commands
+    # Engine must ship the add-on + cross-workspace commands
     engine_text = (ROOT / "scripts/instinct.py").read_text(encoding="utf-8")
-    for needle in ("cmd_outbox", "cmd_stats", "cmd_find", "parse_when"):
+    for needle in ("cmd_outbox", "cmd_stats", "cmd_find", "parse_when",
+                   "cmd_workspaces", "cmd_dispatch", "cmd_attention_sync", "cmd_distill",
+                   "track_cline_run", "resolve_workspace"):
         if needle not in engine_text:
             errors.append(f"engine missing {needle}")
+
+    # Cross-workspace wiring: every coding workspace feeds and reads the ledger
+    for rel, needle in (
+        ("scripts/run-cline.py", "track_instinct_run"),
+        ("scripts/loop-run.py", "instinct_sync"),
+        ("scripts/loop-run.py", "instinct_distill"),
+        (".clinerules", "motor.instinct"),
+        ("scripts/install-cline-rules.py", "Instinct"),
+        (".cursor/rules/cam-cline.mdc", "Instinct"),
+    ):
+        if needle not in (ROOT / rel).read_text(encoding="utf-8"):
+            errors.append(f"cross-workspace wiring missing {needle} in {rel}")
+    for tool in ("instinct_workspaces", "instinct_dispatch"):
+        if f'"{tool}"' not in mcp_text:
+            errors.append(f"cam-mcp-server missing tool {tool}")
+    reg_full = load(ROOT / "config/workspaces/registry.json")
+    pa_signal = next((s for s in (reg_full.get("chooser") or {}).get("signals") or []
+                      if s.get("id") == "personal-assistant"), {})
+    if "instinct" not in (pa_signal.get("match_any") or []):
+        errors.append("chooser signals missing 'instinct' → personal-assistant")
+    pats_full = load(ROOT / "config/loops/patterns.json")
+    pat_actions = next((p.get("actions") or [] for p in pats_full.get("patterns") or []
+                        if p.get("id") == "instinct-followups"), [])
+    for act in ("instinct_sync", "instinct_scan", "instinct_distill"):
+        if act not in pat_actions:
+            errors.append(f"instinct-followups loop missing action {act}")
+    # dispatch must be print-only: the engine must never invoke run-cline itself
+    if "subprocess" in engine_text:
+        errors.append("engine must not shell out (dispatch is print-only)")
 
     # Guardrails: motor.instinct must NOT be an outbound-capable effector, and
     # the config must keep drafts-only + no credential + no spend.

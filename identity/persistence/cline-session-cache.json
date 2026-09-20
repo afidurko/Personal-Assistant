@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T14:46:35.820197+00:00",
+    "at": "2026-09-20T14:59:01.086698+00:00",
     "mode": "act",
-    "summary": "Instinct round 3: due validation, atomic ledger writes, corrupt-ledger guard, ambiguous reply-to; add-ons: outbox review lane, relative times, stats scorecard, find search, vault briefs, instinct_stats MCP; 36 tests green",
+    "summary": "Instinct across all workspaces: chooser-routed workspace on every job, run-cline hook, attention-sync both ways, workspaces rollup, print-only dispatch, sanitized distill, loop sync->scan->distill, policy propagation; 48 tests green",
     "workspace": "."
   },
   "mesh_notes": [
@@ -28,6 +28,21 @@
       "at": "2026-09-20T01:31:55Z",
       "namespace": "mesh/needs-attention",
       "note": "needs-attention: connected=15/15 queue=5"
+    },
+    {
+      "at": "2026-09-20T14:58:24Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=2/17 queue=20"
+    },
+    {
+      "at": "2026-09-20T03:18:00Z",
+      "namespace": "mesh/projects",
+      "note": "instinct: live=21 escalations=0 drafts=0 asks=0"
+    },
+    {
+      "at": "2026-09-20T14:58:30Z",
+      "namespace": "mesh/projects",
+      "note": "instinct: live=21 escalations=0 drafts=0 asks=0"
     }
   ],
   "notes": [
@@ -155,7 +170,7 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": true,
+      "workspace_exists": false,
       "workspace_id": "cline"
     },
     {
@@ -225,9 +240,26 @@
       "timeout": 1800,
       "workspace_exists": true,
       "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "0 3 * * *",
+      "enabled": true,
+      "id": "cam-nightly-instinct-scan",
+      "name": "Cam nightly Instinct follow-through scan (L1)",
+      "prompt": "Run python3 scripts/loop-run.py --pattern instinct-followups --level L1. Summarize new follow-up drafts, dropped asks, and needs_aaron escalations from data/instinct/. Draft-only \u2014 never send; outbound stays behind switch.outbound via motor.inkbox.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "instinct",
+        "followup",
+        "l1"
+      ],
+      "timeout": 900,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
     }
   ],
-  "schedules_synced_at": "2026-09-20T01:31:19.619261+00:00",
+  "schedules_synced_at": "2026-09-20T14:58:33.426677+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [

@@ -348,6 +348,34 @@ def tool_defs() -> list[dict]:
             },
         },
         {
+            "name": "instinct_workspaces",
+            "description": (
+                "Cam Instinct per-workspace rollup across all registered coding workspaces: "
+                "connectivity, open/waiting/monitor jobs, escalations, pending drafts."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "all": {"type": "boolean", "description": "include workspaces with no jobs"},
+                    "now": {"type": "string", "description": "ISO8601 clock override"},
+                },
+            },
+        },
+        {
+            "name": "instinct_dispatch",
+            "description": (
+                "Print-only run-cline dispatch plan for Instinct coding/attention jobs. "
+                "Never executes — motor.cline still fires only under switch.autonomy."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "limit": {"type": "integer"},
+                    "now": {"type": "string", "description": "ISO8601 clock override"},
+                },
+            },
+        },
+        {
             "name": "instinct_stats",
             "description": (
                 "Cam Instinct follow-through scorecard: jobs done, avg time-to-done, "
@@ -663,7 +691,8 @@ def loop_run(arguments: dict | None = None) -> Any:
 
 
 def instinct_cli(arguments: dict | None, command: str,
-                 write_flag: bool = False, text_output: bool = False) -> Any:
+                 write_flag: bool = False, text_output: bool = False,
+                 extra: list[str] | None = None) -> Any:
     arguments = arguments or {}
     cmd = [sys.executable, str(ROOT / "scripts/instinct.py")]
     if arguments.get("now"):
@@ -671,6 +700,8 @@ def instinct_cli(arguments: dict | None, command: str,
     cmd.append(command)
     if write_flag and arguments.get("write"):
         cmd.append("--write")
+    if extra:
+        cmd.extend(extra)
     proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
     if text_output:
         return {"ok": proc.returncode == 0, "brief": proc.stdout, "stderr": proc.stderr or None}
@@ -798,6 +829,11 @@ def call_tool(name: str, arguments: dict) -> Any:
         return instinct_cli(arguments, "brief", write_flag=True, text_output=True)
     if name == "instinct_stats":
         return instinct_cli(arguments, "stats")
+    if name == "instinct_workspaces":
+        return instinct_cli(arguments, "workspaces", extra=["--all"] if arguments.get("all") else None)
+    if name == "instinct_dispatch":
+        limit = arguments.get("limit")
+        return instinct_cli(arguments, "dispatch", extra=["--limit", str(int(limit))] if limit else None)
     raise ValueError(f"unknown tool: {name}")
 
 

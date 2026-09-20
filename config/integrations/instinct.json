@@ -55,8 +55,22 @@
     "instinct_scan",
     "instinct_report",
     "instinct_brief",
-    "instinct_stats"
+    "instinct_stats",
+    "instinct_workspaces",
+    "instinct_dispatch"
   ],
   "needs_attention_handoff": "data/instinct/needs-attention.json",
-  "outbox_review": "Aaron-only CLI (outbox list/show/approve/discard); approve stages, never sends"
+  "outbox_review": "Aaron-only CLI (outbox list/show/approve/discard); approve stages, never sends",
+  "cross_workspace": {
+    "workspace_resolution": "explicit --workspace validated against registry; else cam_workspaces.choose_workspace(goal=title)",
+    "run_cline_hook": "scripts/run-cline.py -> instinct.track_cline_run (failures open high-priority coding jobs)",
+    "attention_sync": "vault/10-Mesh-Distillates/needs-attention/latest.json -> attention jobs (idempotent by item id; auto-close when cleared upstream)",
+    "dispatch_plan": "print-only run-cline commands for coding/attention jobs; never executes",
+    "mesh_distillate": "vault/10-Mesh-Distillates/instinct/latest.json (counts only) + mesh note in cline-session-cache",
+    "policy_propagation": [
+      ".clinerules",
+      "scripts/install-cline-rules.py bundle",
+      ".cursor/rules/cam-cline.mdc"
+    ]
+  }
 }

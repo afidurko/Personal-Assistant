@@ -178,7 +178,7 @@ def scan_instinct_escalations() -> list[dict[str, Any]]:
                 "detail": f"{row.get('detail')} (job {row.get('job')}, generated {doc.get('generated')})",
                 "auto_clearable": False,
                 "aaron_gate": True,
-                "workspace_id": "personal-assistant",
+                "workspace_id": row.get("workspace") or "personal-assistant",
                 "suggestion": "python3 scripts/instinct.py report",
             }
         )

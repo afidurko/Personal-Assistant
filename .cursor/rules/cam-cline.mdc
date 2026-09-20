@@ -10,3 +10,4 @@ Follow `.clinerules` in this repository (Cam personal-assistant coding policy).
 - Cline is the coding effector; Cam/nullclaw remains the brain
 - Do not outbound-message, submit jobs, or spend money from Cline
 - Distill outcomes back via Personal-Assistant `scripts/sync-cline-session.py` when available
+- Open follow-through work lives in Cam Instinct (`scripts/instinct.py`, Personal-Assistant); never send from it

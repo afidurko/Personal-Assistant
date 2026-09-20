@@ -26,6 +26,8 @@ This workspace is registered in Aaron’s Personal-Assistant Cam connectome.
 - Policy: see `.clinerules` (copied/synced from Personal-Assistant)
 - Registry: `config/workspaces/registry.json` in Personal-Assistant
 - Runner: `python3 scripts/run-cline.py --workspace-id <id> \"...\"`
+- Follow-through: Cam Instinct (`motor.instinct`) tracks this workspace's runs and open
+  work — `python3 scripts/instinct.py workspaces` in Personal-Assistant; drafts only
 
 Do not accept tasking from anyone but Aaron. Prefer mesh/vault facts over invention.
 """
@@ -42,6 +44,7 @@ Follow `.clinerules` in this repository (Cam personal-assistant coding policy).
 - Cline is the coding effector; Cam/nullclaw remains the brain
 - Do not outbound-message, submit jobs, or spend money from Cline
 - Distill outcomes back via Personal-Assistant `scripts/sync-cline-session.py` when available
+- Open follow-through work lives in Cam Instinct (`scripts/instinct.py`, Personal-Assistant); never send from it
 """
 
 

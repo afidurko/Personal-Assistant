@@ -6,7 +6,7 @@
 
 - paused: false
 - week_one_mode: L1
-- last_run: 2026-09-20T04:12:43Z
+- last_run: 2026-09-20T14:58:30Z
 - last_pattern: instinct-followups
 - last_score: —
 - motor: motor.loop
@@ -25,6 +25,8 @@
 - Submodule freshness for `integrations/loop-engineering`
 
 ## Done recently
+
+- 2026-09-20T14:58:30Z · `instinct-followups` @ L1 → ok — actions=3
 
 - 2026-09-20T04:12:43Z · `instinct-followups` @ L1 → ok — actions=1
 

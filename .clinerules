@@ -61,6 +61,10 @@ and `scripts/inkbox-check.py` wiring; never free-send from Cline.
   and dispatches auto-clearable queue items (Aaron gates enhance/outbound/kill).
 - After meaningful runs, distill into `mesh/cline` / `mesh/runs` (see
   `scripts/sync-cline-session.py` and `scripts/export-cline-tickets.py`).
+- Follow-through ledger (Cam Instinct, `motor.instinct`) spans every workspace:
+  `run-cline.py` auto-drops each run (failures open a coding job); open work
+  Aaron mentions goes in via `scripts/instinct.py ingest --job ... --workspace <id>`;
+  Needs Attention items are pulled in by `attention-sync`. Drafts only — never send.
 - Never commit secrets, OAuth tokens, phone numbers, or raw PII.
 
 ## Style
