@@ -154,6 +154,15 @@
       "feeds": ["piece.health"]
     },
     {
+      "id": "piece.avatar",
+      "title": "Cam avatar contract (tiers + muscle spec + model cache)",
+      "layer": "presence",
+      "paths": ["scripts/avatar-check.py", "scripts/avatar-fetch-models.py", "identity/persona/cam-face.jpg"],
+      "check": "python3 scripts/avatar-check.py",
+      "depends_on": ["piece.build_plan", "piece.converse"],
+      "feeds": ["piece.home_ui"]
+    },
+    {
       "id": "piece.auto_sync",
       "title": "Auto-sync from all projects and repos",
       "layer": "ops",

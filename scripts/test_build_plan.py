@@ -82,6 +82,23 @@ class BuildPlanTests(unittest.TestCase):
         self.assertGreaterEqual(len(report["submodules"]), 10)
         self.assertEqual(report["registry"]["missing_paths"], [])
 
+    def test_avatar_scripts_run_offline(self) -> None:
+        for script, expect_key in (
+            ("scripts/avatar-check.py", "tier_ids"),
+            ("scripts/avatar-fetch-models.py", "models"),
+        ):
+            p = subprocess.run(
+                [sys.executable, str(ROOT / script), "--json"],
+                cwd=str(ROOT),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            self.assertEqual(p.returncode, 0, f"{script}: {p.stdout + p.stderr}")
+            report = json.loads(p.stdout)
+            self.assertTrue(report["ok"], report)
+            self.assertIn(expect_key, report)
+
     def test_phases_have_exit_checks(self) -> None:
         phases = self.plan["phases"]
         self.assertGreaterEqual(len(phases), 5)

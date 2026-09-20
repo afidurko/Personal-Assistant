@@ -129,6 +129,7 @@ def check(plan: dict) -> dict:
             require_paths(
                 [tier.get("tts_primary", ""), tier.get("identity_gate", "")], where
             )
+            require_paths(tier.get("landed_paths") or [], where)
             note_planned(tier.get("planned_paths") or [], where)
         if tier.get("integration"):
             require_paths([tier["integration"]], where)

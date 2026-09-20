@@ -5,28 +5,29 @@
   "failed": 0,
   "spawned": 9804688,
   "skipped": 195312,
-  "full_checks": 10000,
+  "full_checks": 0,
   "first_error": null,
-  "elapsed_s": 2.4314741440002763,
-  "checks_per_sec": 1233819412557.8408,
+  "elapsed_s": 2.07270764399982,
+  "checks_per_sec": 1447382127761.507,
   "seed": 173,
   "ok": true,
-  "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
+  "full_resolve": false,
+  "sampler": "modular_catalog_only:modular_period_scaled",
   "ip_policy": "original_procedural_only",
   "catalog_size": 6,
   "physical_n": 10000000,
   "scaled_n": 2999990000000,
   "workers_detail": [
     {
-      "worker_id": 2,
+      "worker_id": 0,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.4164887830002044
+      "elapsed_s": 2.0555172189999666
     },
     {
       "worker_id": 1,
@@ -35,9 +36,20 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.419341334000819
+      "elapsed_s": 2.0598238289999244
+    },
+    {
+      "worker_id": 2,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451172,
+      "skipped": 48828,
+      "full_checks": 0,
+      "first_error": null,
+      "elapsed_s": 2.062150653000117
     },
     {
       "worker_id": 3,
@@ -46,20 +58,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.4210221840003214
-    },
-    {
-      "worker_id": 0,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
-      "full_checks": 2500,
-      "first_error": null,
-      "elapsed_s": 2.423385897999651
+      "elapsed_s": 2.065967908999937
     }
   ]
 }

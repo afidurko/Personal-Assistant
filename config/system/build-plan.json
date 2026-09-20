@@ -95,11 +95,11 @@
         "tts_primary": "integrations/voicestudio",
         "identity_gate": "config/identity/aaron-voice.json",
         "requires_switch": ["switch.presence"],
-        "planned_paths": [
+        "landed_paths": [
           "scripts/avatar-fetch-models.py",
-          "scripts/cam-avatar-server.py",
           "scripts/avatar-check.py"
-        ]
+        ],
+        "planned_paths": ["scripts/cam-avatar-server.py"]
       },
       {
         "id": "studio_full_presence",
@@ -146,7 +146,7 @@
       {
         "id": "model_weights",
         "mechanism": "pinned HF revisions re-resolved from this manifest",
-        "planned_paths": ["scripts/avatar-fetch-models.py"]
+        "paths": ["scripts/avatar-fetch-models.py"]
       }
     ]
   },
