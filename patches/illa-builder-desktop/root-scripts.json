@@ -1,0 +1,6 @@
+{
+  "desktop": "npm --prefix electron run dev",
+  "desktop:dist": "npm --prefix electron run dist",
+  "desktop:dist:dir": "npm --prefix electron run dist:dir",
+  "desktop:check:pin": "npm --prefix electron run check:pin"
+}

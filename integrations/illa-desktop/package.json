@@ -1,0 +1,62 @@
+{
+  "name": "illa-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron shell for ILLA Builder \u2014 packaged with electron-builder@26.16.1",
+  "author": {
+    "name": "Aaron Fidurko",
+    "email": "aaronjfidurko@yahoo.com"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/afidurko/illa-builder",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:dir": "electron-builder --dir",
+    "dist:linux": "electron-builder --linux",
+    "check:pin": "node scripts/assert-builder-pin.mjs"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "26.16.1"
+  },
+  "build": {
+    "appId": "com.afidurko.illa-builder",
+    "productName": "ILLA Builder",
+    "copyright": "Copyright \u00a9 ILLA Cloud / Aaron Fidurko",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development",
+      "maintainer": "Aaron Fidurko <aaronjfidurko@yahoo.com>"
+    },
+    "mac": {
+      "icon": "build/icon.png",
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}

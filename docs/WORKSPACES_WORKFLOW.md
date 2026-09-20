@@ -10,6 +10,7 @@ Aaron runs Cam across **repo checkouts**, **scan workspaces**, **integration sub
 | **Persistence bundle** | Cross-checkout Cam memory (`persist-export` / `persist-import`) | Present; must include teams + AGI grants |
 | **Vault areas** | Obsidian second brain (`vault/01`…`10`) | Wired via smart-second-brain config |
 | **Integration submodules** | Jarvis · PaddleDetection · Pupil · LLMAvatarTalk · VoiceStudio · smart-second-brain · MemoryBear · public-apis · Cline · **Inkbox** · SwiftGuide | **Declared; init with `git submodule update --init --recursive`** |
+| **ILLA desktop (no submodule)** | `integrations/illa-desktop` + forks `afidurko/illa-builder` / `afidurko/electron-builder` | Packaged with **electron-builder@26.16.1**; check `scripts/illa-electron-check.py` |
 | **Scan workspaces (PR #2)** | health · architecture · vulnerability · updates · improvements · **agi_research** · **swarm** | **Merged to main** + AGI + swarm scanners on this branch |
 | **Brodmann / 3D cortex (PR #3)** | Plasticity + human brain viz + health conductor | Lives on `cursor/swiftguide-brain-map-0f2c` — overlaps connectome viz |
 | **Agent teams (PR #4 / this)** | AGI Research Scan · Capability · Information + sLM/DL · **Needs Attention** | This branch |

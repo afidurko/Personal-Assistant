@@ -1,0 +1,6 @@
+# Cam workspace rules for ILLA desktop packaging
+
+- Sole operator: Aaron
+- Packaging pin: electron-builder@26.16.1 (not fork master / v27 alpha)
+- ILLA web source: github.com/afidurko/illa-builder @ beta
+- Do not outbound-message or spend from this workspace

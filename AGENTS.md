@@ -21,6 +21,8 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Public APIs: `python3 scripts/public-apis-search.py --query "weather"`
 - Google Trends: `python3 scripts/google-trends-search.py --query "election" --offline`
 - Inkbox: `python3 scripts/inkbox-check.py`
+- ILLA desktop / electron-builder@26.16.1: `python3 scripts/illa-electron-check.py` (`integrations/illa-desktop`)
+- Promote ILLA desktop → fork: `python3 scripts/promote-illa-desktop.py --push` (needs `ILLA_BUILDER_GITHUB_TOKEN`)
 - Needs Attention (all coding workspaces): `python3 scripts/needs-attention.py --connect --dispatch-plan --write`
 - Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
 
