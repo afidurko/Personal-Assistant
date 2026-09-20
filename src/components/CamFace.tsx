@@ -310,14 +310,14 @@ export function CamFace({
       }`}
       style={
         {
-          ['--mouth-open' as string]: String(pose.mouthOpen),
-          ['--mouth-spread' as string]: String(pose.mouthSpread),
-          ['--jaw' as string]: String(pose.jaw),
-          ['--brow' as string]: String(pose.brow),
-          ['--lid' as string]: String(pose.lid),
-          ['--gaze-x' as string]: String(pose.gazeX),
-          ['--smile' as string]: String(pose.smile),
-          ['--level' as string]: String(level),
+          ['--mouth-open' as string]: String(Math.min(1, Math.max(0, pose.mouthOpen))),
+          ['--mouth-spread' as string]: String(Math.min(1.5, Math.max(0.5, pose.mouthSpread))),
+          ['--jaw' as string]: String(Math.min(1, Math.max(0, pose.jaw))),
+          ['--brow' as string]: String(Math.min(1, Math.max(-1, pose.brow))),
+          ['--lid' as string]: String(Math.min(1, Math.max(0, pose.lid))),
+          ['--gaze-x' as string]: String(Math.min(1, Math.max(-1, pose.gazeX))),
+          ['--smile' as string]: String(Math.min(1, Math.max(-0.5, pose.smile))),
+          ['--level' as string]: String(Math.min(1, Math.max(0, level))),
           ['--head-tilt' as string]: `${pose.headTilt}deg`,
           ['--head-nod' as string]: `${pose.headNod}px`,
           ['--mouth-w' as string]: `${geom.w}%`,
