@@ -26,6 +26,7 @@ DEFAULT_INCLUDE = [
     "identity/persistence/PUBLIC_APIS.md",
     "identity/persistence/INKBOX.md",
     "identity/persistence/LOOP_ENGINEERING.md",
+    "docs/NEEDS_ATTENTION.md",
     "identity/persistence/CAM_PUPIL_VISION_ENABLED.md",
     "identity/persistence/cline-session-cache.json",
     "identity/persistence/cline-schedules.export.json",

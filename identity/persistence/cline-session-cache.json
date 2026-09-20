@@ -18,6 +18,16 @@
       "at": "2026-09-20T01:30:09Z",
       "namespace": "mesh/needs-attention",
       "note": "needs-attention: connected=15/15 queue=0"
+    },
+    {
+      "at": "2026-09-20T01:30:37Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=15/15 queue=5"
+    },
+    {
+      "at": "2026-09-20T01:31:55Z",
+      "namespace": "mesh/needs-attention",
+      "note": "needs-attention: connected=15/15 queue=5"
     }
   ],
   "notes": [
@@ -130,7 +140,7 @@
         "doctor"
       ],
       "timeout": 1200,
-      "workspace_exists": false,
+      "workspace_exists": true,
       "workspace_id": "cline"
     },
     {
@@ -183,9 +193,26 @@
       "timeout": 1200,
       "workspace_exists": true,
       "workspace_id": "personal-assistant"
+    },
+    {
+      "cron": "15 7 * * *",
+      "enabled": true,
+      "id": "cam-daily-needs-attention",
+      "name": "Cam daily Needs Attention sweep",
+      "prompt": "Run python3 scripts/needs-attention-check.py then python3 scripts/needs-attention.py --connect --dispatch-plan --write. Summarize connected/disconnected coding workspaces and the attention queue. Auto-clear only non-Aaron-gated items via choose-workspace routing notes; do not outbound-message, spend money, or apply Cam enhance. Do not push commits unless Aaron asked.",
+      "resolved_workspace_path": "/workspace",
+      "tags": [
+        "cam",
+        "needs-attention",
+        "workspaces",
+        "triage"
+      ],
+      "timeout": 1800,
+      "workspace_exists": true,
+      "workspace_id": "personal-assistant"
     }
   ],
-  "schedules_synced_at": "2026-09-19T21:56:44.980039+00:00",
+  "schedules_synced_at": "2026-09-20T01:31:19.619261+00:00",
   "source": "https://github.com/afidurko/cline",
   "submodule": "integrations/cline",
   "workspaces": [
