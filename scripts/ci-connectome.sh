@@ -7,6 +7,7 @@ cd "$ROOT"
 echo "== cam system integration =="
 python3 scripts/cam-system.py --smoke
 python3 scripts/test_cam_system.py
+python3 scripts/test_cloud_agent_install.py
 python3 scripts/flight-envelope.py --offline-only
 
 echo "== connectome-check =="
@@ -47,9 +48,20 @@ python3 scripts/google-trends-check.py
 python3 scripts/google-trends-addon.py doctor
 
 echo "== joshinator IP-safe embodiment =="
-python3 -m pip install -q -r integrations/joshinator-analyzer/backend/requirements-ci.txt
-PYTHONPATH=integrations/joshinator-analyzer/backend \
-  python3 -m unittest discover -s integrations/joshinator-analyzer/backend -p 'test_embodiment.py' -v
+if python3 -c "import pydantic" 2>/dev/null; then
+  echo "pydantic already present"
+elif python3 -m pip install -q -r integrations/joshinator-analyzer/backend/requirements-ci.txt; then
+  echo "installed requirements-ci.txt"
+else
+  echo "pydantic unavailable (offline); catalog-only embodiment fuzz"
+fi
+python3 scripts/test_embodiment_lite.py
+if python3 -c "import pydantic" 2>/dev/null; then
+  PYTHONPATH=integrations/joshinator-analyzer/backend \
+    python3 -m unittest discover -s integrations/joshinator-analyzer/backend -p 'test_embodiment.py' -v
+else
+  echo "skip embodiment unit tests (no pydantic)"
+fi
 python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-embodiment-1m.json
 

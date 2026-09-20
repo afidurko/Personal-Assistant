@@ -46,6 +46,25 @@ class HiggsfieldTests(unittest.TestCase):
         payload = json.loads(out)
         self.assertTrue(payload.get("ok"))
         self.assertEqual(payload.get("mode"), "dry_run")
+        inv = payload.get("inventory") or {}
+        if not inv.get("ok"):
+            self.assertTrue(inv.get("soft"))
+            self.assertTrue(payload.get("warnings"))
+
+    def test_dry_run_empty_submodule_is_soft(self) -> None:
+        out = subprocess.check_output(
+            [sys.executable, str(RUN), "--experiment", str(SAMPLE.relative_to(ROOT))],
+            text=True,
+            cwd=str(ROOT),
+        )
+        payload = json.loads(out)
+        self.assertTrue(payload.get("ok"), payload.get("errors"))
+        self.assertEqual(payload.get("mode"), "dry_run")
+        inv = payload.get("inventory") or {}
+        if not inv.get("populated"):
+            blob = " ".join(payload.get("warnings") or [])
+            self.assertIn("inventory incomplete", blob)
+            self.assertTrue(inv.get("soft"))
 
     def test_live_refused_without_env(self) -> None:
         env = {**os.environ}
@@ -71,7 +90,7 @@ class HiggsfieldTests(unittest.TestCase):
 
     def test_live_intent_when_armed(self) -> None:
         env = {**os.environ, "CAM_HIGGSFIELD_LIVE": "1"}
-        out = subprocess.check_output(
+        proc = subprocess.run(
             [
                 sys.executable,
                 str(RUN),
@@ -83,11 +102,21 @@ class HiggsfieldTests(unittest.TestCase):
             text=True,
             cwd=str(ROOT),
             env=env,
+            capture_output=True,
         )
-        payload = json.loads(out)
-        self.assertTrue(payload.get("ok"))
-        self.assertEqual(payload.get("mode"), "live_intent")
+        payload = json.loads(proc.stdout)
         self.assertFalse(payload.get("spend", {}).get("remote_exec"))
+        inv = payload.get("inventory") or {}
+        if inv.get("ok"):
+            self.assertEqual(proc.returncode, 0)
+            self.assertTrue(payload.get("ok"))
+            self.assertEqual(payload.get("mode"), "live_intent")
+        else:
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertFalse(payload.get("ok"))
+            self.assertTrue(
+                any("inventory incomplete" in e for e in payload.get("errors") or [])
+            )
 
     def test_pack(self) -> None:
         plan = subprocess.check_output(

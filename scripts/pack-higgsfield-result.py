@@ -55,6 +55,7 @@ def main() -> int:
         "packed_at": datetime.now(timezone.utc).isoformat(),
         "source_at": payload.get("at"),
         "errors": payload.get("errors") or [],
+        "warnings": payload.get("warnings") or [],
     }
 
     text = json.dumps(doc, indent=2) + "\n"

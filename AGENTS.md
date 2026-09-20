@@ -34,3 +34,5 @@ Cloud Agent `install` and `start` fields must be real shell commands that exist 
 - Install (idempotent, terminates): `./scripts/cloud-agent-install.sh` — runs `python3 scripts/cam-system.py --no-write`
 - Start: omit unless a per-pod daemon is required (dev servers belong in `terminals`)
 - Restricted egress: do not run `npm ci` / `npm install` during install until `registry.npmjs.org` is on the environment allowlist
+- Higgsfield dry-run / `higgsfield-check` stay green when `integrations/higgsfield` is an empty submodule; live train still needs `git submodule update --init`
+- Embodiment 3T uses pydantic-free `embodiment_lite` when `pypi.org` is blocked; full resolve needs `requirements-ci.txt`

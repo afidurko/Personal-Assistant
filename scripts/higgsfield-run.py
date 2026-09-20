@@ -138,6 +138,7 @@ def build_plan(args: argparse.Namespace) -> dict:
         exp_path = (ROOT / exp_path).resolve()
 
     errors: list[str] = []
+    warnings: list[str] = []
     experiments = []
     if not exp_path.is_file():
         errors.append(f"missing experiment file: {exp_path}")
@@ -147,8 +148,6 @@ def build_plan(args: argparse.Namespace) -> dict:
             errors.append("no @experiment decorator found")
 
     inv = inventory_ok(sub)
-    if not inv["ok"]:
-        errors.append(f"submodule inventory incomplete: {inv['missing_files']}")
 
     nodes_path = Path(args.nodes) if args.nodes else None
     if nodes_path and not nodes_path.is_absolute():
@@ -174,6 +173,19 @@ def build_plan(args: argparse.Namespace) -> dict:
         errors.append(f"live mode refused: {live_blocked_reason}")
 
     mode = "live_intent" if live_allowed else "dry_run"
+    if not inv["ok"]:
+        inv_msg = f"submodule inventory incomplete: {inv['missing_files']}"
+        # Empty checkout is expected until `git submodule update --init`.
+        # Dry-run / doctor must stay green; live intent still requires sources.
+        if mode == "live_intent":
+            errors.append(inv_msg)
+        else:
+            warnings.append(inv_msg)
+            inv = {
+                **inv,
+                "soft": True,
+                "note": "empty checkout is dry-run ok; init submodule before live train",
+            }
     primary = experiments[0]["experiment"] if experiments else "unknown"
 
     plan = {
@@ -200,6 +212,7 @@ def build_plan(args: argparse.Namespace) -> dict:
         },
         "litserve_handoff": litserve_handoff(primary, dry_run=(mode == "dry_run")),
         "errors": errors,
+        "warnings": warnings,
         "next": (
             "pack with scripts/pack-higgsfield-result.py"
             if not errors

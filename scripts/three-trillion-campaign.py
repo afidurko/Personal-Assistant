@@ -35,6 +35,46 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
+def _pydantic_ready() -> bool:
+    try:
+        import pydantic  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def _maybe_install_embodiment_deps() -> dict:
+    """Install CI pydantic if missing; offline / restricted egress is soft."""
+    if _pydantic_ready():
+        return {
+            "label": "embodiment-deps",
+            "cmd": [sys.executable, "-c", "import pydantic"],
+            "exit_code": 0,
+            "wall_s": 0.0,
+            "note": "pydantic already importable",
+        }
+    req = ROOT / "integrations/joshinator-analyzer/backend/requirements-ci.txt"
+    if not req.exists():
+        return {
+            "label": "embodiment-deps-offline",
+            "cmd": [],
+            "exit_code": 0,
+            "wall_s": 0.0,
+            "soft": True,
+            "note": "no requirements-ci.txt; catalog-only fuzz",
+        }
+    result = run(
+        [sys.executable, "-m", "pip", "install", "-q", "-r", str(req)],
+        "embodiment-deps",
+    )
+    if result["exit_code"] != 0:
+        result["label"] = "embodiment-deps-offline"
+        result["exit_code"] = 0
+        result["soft"] = True
+        result["note"] = "pypi unreachable; embodiment 3T uses catalog-only path"
+    return result
+
+
 def run(cmd: list[str], label: str) -> dict:
     print(f"[3T] {label}: {' '.join(cmd)}", flush=True)
     t0 = time.perf_counter()
@@ -66,6 +106,10 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Google Trends: `scripts/google-trends-check.py` + curated add-ons (`trends.search_*`)",
         "- Higgsfield: `scripts/higgsfield-check.py` + dry-run `higgsfield-run.py` + mesh pack",
         "- Higgsfield OCL: `no_higgsfield_without_aaron` / jobs / outbound burst policies",
+        "- Cloud Agent install: `scripts/test_cloud_agent_install.py` + `.cursor/environment.json`",
+        "- 3T campaign + CI run cloud-agent-install and cam-system unit gates",
+        "- Higgsfield dry-run / doctor: empty submodule is a warning, not a campaign-fail",
+        "- Embodiment 3T: pydantic-free `embodiment_lite` catalog path when pypi is blocked",
         "",
         "## Standing suggestions",
         "- Keep `bash scripts/ci-connectome.sh` as the push gate",
@@ -77,7 +121,13 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
         "- Higgsfield: `python3 scripts/higgsfield-run.py --doctor` then pack to `mesh/runs`",
         "- Higgsfield train jobs stay enhance-gated; never free-spend GPU from Cline",
+        "- `git submodule update --init integrations/higgsfield` before any live train intent",
+        "- Allowlist `pypi.org` / `files.pythonhosted.org` if you want full embodiment resolve in Cloud Agent",
         "- Mirror cycles into `identity/persistence/qa-mesh-latest.json`",
+        "- Cloud Agent: install must be a real command (`./scripts/cloud-agent-install.sh`); never `build` / `promote`",
+        "- Do not add `npm ci` to Cloud Agent install until `registry.npmjs.org` is allowlisted",
+        "- After merge, start a new Cloud Agent so `.cursor/environment.json` overrides the dashboard",
+        "- Dashboard Save is on the agent Environment panel; if Save is missing, merge this PR so repo JSON wins",
         "",
     ]
     (cycle_dir / "suggestions.md").write_text("\n".join(lines), encoding="utf-8")
@@ -106,7 +156,22 @@ def one_pass(
         run([sys.executable, "scripts/test_cline_workspaces.py"], "workspace-unit-tests")
     )
     results.append(
+        run(
+            [sys.executable, "scripts/test_cloud_agent_install.py"],
+            "cloud-agent-install",
+        )
+    )
+    results.append(
+        run([sys.executable, "scripts/test_cam_system.py"], "cam-system-unit")
+    )
+    results.append(
         run([sys.executable, "scripts/higgsfield-check.py"], "higgsfield-check")
+    )
+    results.append(
+        run([sys.executable, "scripts/test_higgsfield.py"], "higgsfield-unit")
+    )
+    results.append(
+        run([sys.executable, "scripts/test_embodiment_lite.py"], "embodiment-lite")
     )
 
     conn_out = OUT / f"connectome-sim-3t-{out_tag}.json"
@@ -139,22 +204,7 @@ def one_pass(
         ("scripts/cam-reason-billion-fuzz.py", "cam-reason-3t", 11),
     ):
         if name == "embodiment-3t":
-            req = ROOT / "integrations/joshinator-analyzer/backend/requirements-ci.txt"
-            if req.exists():
-                results.append(
-                    run(
-                        [
-                            sys.executable,
-                            "-m",
-                            "pip",
-                            "install",
-                            "-q",
-                            "-r",
-                            str(req),
-                        ],
-                        "embodiment-deps",
-                    )
-                )
+            results.append(_maybe_install_embodiment_deps())
         out = CYCLES / f"{name}-{out_tag}.json"
         results.append(
             run(
