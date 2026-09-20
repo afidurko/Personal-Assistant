@@ -100,7 +100,7 @@ export function sampleViseme(frames: VisemeFrame[], progress: number): VisemeFra
 /** Estimate utterance duration in ms from text + speech rate. */
 export function estimateSpeechMs(text: string, rate = 0.95): number {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
-  const base = Math.max(900, words * 380 + text.length * 18);
+  const base = Math.max(1600, words * 420 + text.length * 22);
   return base / Math.max(0.6, rate);
 }
 

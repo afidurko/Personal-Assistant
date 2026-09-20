@@ -127,10 +127,10 @@ export function CamStage({ onListeningChange }: CamStageProps) {
           <div className="cam-avatar-ring" aria-hidden />
           <div className="cam-avatar-face-wrap">
             <CamFace
-              status={status}
+              status={speechFace.active ? 'speaking' : status}
               listening={listening}
               level={level}
-              typing={typingActive}
+              typing={typingActive && !speechFace.active}
               speakingText={speechFace.active ? speechFace.text : ''}
               speechProgress={speechFace.active ? speechFace.progress : -1}
             />

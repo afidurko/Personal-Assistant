@@ -2198,7 +2198,7 @@ h2,
   border-radius: 50%;
   background: radial-gradient(circle, rgba(220, 110, 110, 0.35), transparent 70%);
   z-index: 2;
-  opacity: calc(0.15 + max(var(--smile, 0), var(--mouth-open, 0)) * 0.55);
+  opacity: calc(0.2 + var(--smile, 0) * 0.5 + var(--mouth-open, 0) * 0.25);
   pointer-events: none;
 }
 
@@ -2214,27 +2214,39 @@ h2,
 .cam-face-mouth {
   position: absolute;
   left: 50%;
-  top: var(--mouth-y, 67%);
-  width: var(--mouth-w, 14%);
+  top: var(--mouth-y, 68%);
+  width: var(--mouth-w, 16%);
   height: var(--mouth-h, 3%);
-  translate: -50% -30%;
+  translate: -50% -40%;
   border-radius: var(--mouth-round, 50%);
-  background: #2a1218;
+  background: #1a0a0e;
   box-shadow:
-    inset 0 2px 3px rgba(0, 0, 0, 0.45),
-    0 1px 2px rgba(255, 200, 180, 0.15);
-  z-index: 4;
+    inset 0 3px 4px rgba(0, 0, 0, 0.55),
+    0 1px 3px rgba(255, 200, 180, 0.2);
+  z-index: 5;
   overflow: hidden;
+  opacity: 0.92;
   transition:
-    width 0.05s linear,
-    height 0.05s linear,
-    border-radius 0.05s linear,
-    top 0.05s linear;
+    width 0.04s linear,
+    height 0.04s linear,
+    border-radius 0.04s linear,
+    top 0.04s linear,
+    opacity 0.15s ease;
+}
+
+.cam-face-live.expr-idle .cam-face-mouth,
+.cam-face-live.expr-listen .cam-face-mouth {
+  opacity: 0.35;
+  height: max(1.6%, var(--mouth-h, 2%));
 }
 
 .cam-face-live.expr-speak .cam-face-mouth,
 .cam-face-live.mouth-open .cam-face-mouth {
-  background: #3a1520;
+  opacity: 1;
+  background: #2c0f16;
+  box-shadow:
+    inset 0 3px 5px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(180, 60, 80, 0.25);
 }
 
 .cam-face-mouth-inner {

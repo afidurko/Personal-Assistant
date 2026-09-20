@@ -153,25 +153,25 @@ function mixPose(a: FacePose, b: FacePose, t: number): FacePose {
 
 /** Viseme → mouth ellipse geometry (percent of face). */
 function mouthGeom(v: VisemeId, open: number, spread: number, smile: number) {
-  const baseW = 14 * spread;
-  const baseH = 2.2 + open * 14;
+  const baseW = 18 * spread;
+  const baseH = 2.8 + open * 20;
   switch (v) {
     case 'closed':
-      return { w: baseW * 0.85, h: 1.2, round: 50, y: 68 };
+      return { w: baseW * 0.85, h: 1.4, round: 50, y: 69 };
     case 'smile':
-      return { w: baseW * 1.15, h: 2.4 + smile * 2, round: 60, y: 67.5 };
+      return { w: baseW * 1.2, h: 3.2 + smile * 2.5, round: 60, y: 68.5 };
     case 'wide':
-      return { w: baseW * 1.25, h: Math.max(4, baseH * 0.75), round: 45, y: 67 };
+      return { w: baseW * 1.3, h: Math.max(6, baseH * 0.8), round: 42, y: 68 };
     case 'round':
-      return { w: baseW * 0.7, h: Math.max(6, baseH), round: 50, y: 67 };
+      return { w: baseW * 0.72, h: Math.max(9, baseH), round: 50, y: 68 };
     case 'narrow':
-      return { w: baseW * 0.65, h: Math.max(3, baseH * 0.55), round: 50, y: 67.5 };
+      return { w: baseW * 0.68, h: Math.max(5, baseH * 0.55), round: 50, y: 68.5 };
     case 'teeth':
-      return { w: baseW * 1.05, h: Math.max(3.5, baseH * 0.55), round: 30, y: 67 };
+      return { w: baseW * 1.1, h: Math.max(5, baseH * 0.6), round: 28, y: 68 };
     case 'open':
-      return { w: baseW, h: Math.max(7, baseH), round: 48, y: 66.5 };
+      return { w: baseW * 1.05, h: Math.max(10, baseH), round: 46, y: 67.5 };
     default:
-      return { w: baseW * 0.95, h: Math.max(2, baseH * 0.4), round: 50, y: 68 };
+      return { w: baseW * 0.95, h: Math.max(2.2, baseH * 0.35), round: 50, y: 69 };
   }
 }
 
@@ -216,11 +216,12 @@ export function CamFace({
     prevExprRef.current = expr;
   }, [expr]);
 
+  // Reset local speech clock whenever a new utterance text arrives
   useEffect(() => {
-    if (status !== 'speaking' || !speakingText) return;
+    if (!speakingText) return;
     speakStartedRef.current = performance.now();
     speakDurRef.current = estimateSpeechMs(speakingText);
-  }, [status, speakingText]);
+  }, [speakingText]);
 
   useEffect(() => {
     const loop = (now: number) => {
@@ -239,7 +240,8 @@ export function CamFace({
         };
       }
 
-      if (expr === 'speak' && speakingText) {
+      const speaking = Boolean(speakingText) || expr === 'speak';
+      if (speaking && speakingText) {
         const timed = Math.min(
           1,
           (now - speakStartedRef.current) / Math.max(1, speakDurRef.current),
@@ -247,8 +249,8 @@ export function CamFace({
         const localP =
           speechProgress > 0.02 ? Math.max(speechProgress, timed * 0.85) : timed;
         const sample = sampleViseme(schedule, localP);
-        const flutter = 0.1 * Math.sin(now / 42) + 0.06 * Math.sin(now / 23);
-        const open = Math.min(1, Math.max(0.12, sample.open + Math.max(0, flutter)));
+        const flutter = 0.12 * Math.sin(now / 40) + 0.08 * Math.sin(now / 21);
+        const open = Math.min(1, Math.max(0.22, sample.open + Math.max(0, flutter)));
         next = {
           ...next,
           viseme: sample.id,
@@ -257,13 +259,13 @@ export function CamFace({
             sample.id === 'round' || sample.id === 'narrow'
               ? 0.78
               : sample.id === 'wide' || sample.id === 'smile'
-                ? 1.2
-                : 1.05,
+                ? 1.25
+                : 1.1,
           smile: sample.id === 'smile' || sample.id === 'wide' ? 0.55 : 0.15,
-          jaw: open * 0.85,
-          brow: 0.2 + open * 0.4 + 0.1 * Math.sin(now / 160),
-          headNod: Math.sin(now / 130) * 2.4,
-          headTilt: Math.sin(now / 280) * 2.8,
+          jaw: open * 0.9,
+          brow: 0.25 + open * 0.45 + 0.1 * Math.sin(now / 150),
+          headNod: Math.sin(now / 120) * 2.8,
+          headTilt: Math.sin(now / 260) * 3.2,
           lid: 0.05,
         };
       } else if (expr === 'think') {
