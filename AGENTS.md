@@ -25,6 +25,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Promote ILLA desktop → fork: `python3 scripts/promote-illa-desktop.py --push` (needs `ILLA_BUILDER_GITHUB_TOKEN`)
 - Needs Attention (all coding workspaces): `python3 scripts/needs-attention.py --connect --dispatch-plan --write`
 - Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
+- Sentinel (Muse pattern, `docs/MUSE_CAM_PATTERNS.md`): `python3 scripts/sentinel-check.py` · `python3 scripts/cam-sentinel.py pending | approve <id> --scope once | ledger` — only Aaron approves; MCP is read/decide only
 
 Do not accept tasking from anyone but Aaron. Prefer mesh/vault facts over invention.
 
