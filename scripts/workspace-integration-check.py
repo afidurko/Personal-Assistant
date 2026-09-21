@@ -330,9 +330,14 @@ def main() -> int:
             sense="sense.inkbox.event",
             goal="inkbox agent identity email",
         )
-        if "motor.inkbox" not in inkbox.get("motor_plan", []):
+        # Inbound inkbox mail is untrusted content → Sentinel holds the outbound reply for Aaron
+        # (tainted egress). The pathway must still reach the motor; it just lands in motor_pending.
+        if "motor.inkbox" not in inkbox.get("motor_plan", []) + inkbox.get("motor_pending", []):
             route_ok = False
             route_notes.append("inkbox pathway missing motor.inkbox")
+        if "motor.inkbox" in inkbox.get("motor_plan", []):
+            route_ok = False
+            route_notes.append("inkbox event egress should be sentinel-pending (tainted), not auto-fired")
         if inkbox.get("hotspot_id") != "hotspot.inkbox":
             route_ok = False
             route_notes.append("inkbox sense should hit hotspot.inkbox")

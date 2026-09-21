@@ -78,6 +78,7 @@ def smoke_checks() -> list[dict]:
     for name, filename, argv in [
         ("connectome-check", "connectome-check.py", []),
         ("swarm-check", "swarm-check.py", []),
+        ("sentinel-check", "sentinel-check.py", []),
         ("workspace-integration-check", "workspace-integration-check.py", []),
     ]:
         try:
