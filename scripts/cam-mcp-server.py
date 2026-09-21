@@ -10,7 +10,8 @@ Tools:
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   loop_check, loop_audit, loop_run, higgsfield_check, presence_check,
-  voicestudio_health, needs_attention
+  voicestudio_health, needs_attention,
+  sentinel_decide, sentinel_pending, sentinel_ledger (read-only; Aaron approves via CLI)
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -29,7 +30,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import cam_workspaces as cw  # noqa: E402
 
 SERVER_NAME = "cam-personal-assistant"
-SERVER_VERSION = "1.1.0"
+SERVER_VERSION = "1.2.0"
 
 
 def _ok(result: Any, req_id: Any) -> dict:
@@ -320,6 +321,39 @@ def tool_defs() -> list[dict]:
                     "write": {"type": "boolean"},
                     "limit": {"type": "integer"},
                 },
+            },
+        },
+        {
+            "name": "sentinel_decide",
+            "description": (
+                "Sentinel verdict for a sense/goal: which motors are allowed, which await Aaron, "
+                "and taint sources. Read-only — cannot approve or grant (Aaron only, via CLI)."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "sense": {"type": "string"},
+                    "goal": {"type": "string"},
+                    "hotspot": {"type": "string"},
+                    "paths": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["sense"],
+            },
+        },
+        {
+            "name": "sentinel_pending",
+            "description": "Open Sentinel approval requests awaiting Aaron (from the intent journal).",
+            "inputSchema": {
+                "type": "object",
+                "properties": {"day": {"type": "string"}},
+            },
+        },
+        {
+            "name": "sentinel_ledger",
+            "description": "Export the append-only intent ledger for a day: who allowed each motor, unconfirmed intents.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {"day": {"type": "string"}},
             },
         },
     ]
@@ -685,7 +719,58 @@ def needs_attention(arguments: dict | None = None) -> Any:
         }
 
 
+def sentinel_decide(arguments: dict) -> Any:
+    """Read-only Sentinel verdict — Cline sees what needs Aaron, never grants it."""
+    import cam_inproc
+    import cam_sentinel as cs
+
+    try:
+        doc = cam_inproc.route(
+            sense=arguments["sense"],
+            goal=arguments.get("goal") or "",
+            hotspot=arguments.get("hotspot") or None,
+        )
+    except ValueError as exc:
+        return {"error": "route_failed", "detail": str(exc)}
+    verdict = doc.get("sentinel") or {}
+    if arguments.get("paths"):
+        verdict = cs.evaluate(
+            list(doc.get("motor_plan") or []) + list(doc.get("motor_pending") or []),
+            sense=arguments["sense"],
+            pathway=doc.get("pathway") or [],
+            switch_state=doc.get("switch_state") or {},
+            task=arguments.get("goal") or "",
+            paths=list(arguments["paths"]),
+        )
+    return {
+        "hotspot_id": doc.get("hotspot_id"),
+        "motor_plan": verdict.get("allowed", doc.get("motor_plan")),
+        "motor_pending": verdict.get("pending", []),
+        "taint": verdict.get("taint"),
+        "decisions": verdict.get("decisions"),
+        "approve_via": "python3 scripts/cam-sentinel.py approve <pending_id> --scope ... (Aaron only)",
+    }
+
+
+def sentinel_pending(arguments: dict | None = None) -> Any:
+    import cam_sentinel as cs
+
+    return {"pending": cs.pending((arguments or {}).get("day"))}
+
+
+def sentinel_ledger(arguments: dict | None = None) -> Any:
+    import cam_journal as cj
+
+    return cj.export((arguments or {}).get("day"))
+
+
 def call_tool(name: str, arguments: dict) -> Any:
+    if name == "sentinel_decide":
+        return sentinel_decide(arguments)
+    if name == "sentinel_pending":
+        return sentinel_pending(arguments)
+    if name == "sentinel_ledger":
+        return sentinel_ledger(arguments)
     if name == "list_workspaces":
         return cw.mesh_projects_doc()
     if name == "choose_workspace":
