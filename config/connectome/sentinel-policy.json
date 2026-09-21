@@ -1,0 +1,131 @@
+{
+  "id": "cam-sentinel-policy",
+  "title": "Sentinel — sole permission authority at Cam's motor boundary",
+  "analogy": "Muse proposes, Sentinel decides (allow / deny / ask) — Cam plans, Sentinel gates, Aaron approves",
+  "source": [
+    "https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse",
+    "https://github.com/meta-models/meta-model-cookbook/tree/main/04_muse_code"
+  ],
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-21",
+  "status": "applied",
+  "sole_operator": "Aaron",
+  "enforce": true,
+  "intercept_point": "scripts/connectome-route.py motor_plan (after switches + trajectory policies)",
+  "precedence": ["deny", "ask", "allow"],
+  "classes": {
+    "read": {
+      "default": "allow",
+      "motors": [
+        "motor.mesh",
+        "motor.vault",
+        "motor.memorybear",
+        "motor.slm",
+        "motor.dl",
+        "motor.public_apis",
+        "motor.google_trends",
+        "motor.web_fetch",
+        "motor.pupil"
+      ]
+    },
+    "write_local": {
+      "default": "allow",
+      "motors": [
+        "motor.docs",
+        "motor.calendar",
+        "motor.tool",
+        "motor.jarvis",
+        "motor.cline",
+        "motor.loop",
+        "motor.swarm",
+        "motor.voicestudio"
+      ]
+    },
+    "egress": {
+      "default": "ask",
+      "motors": [
+        "motor.text",
+        "motor.call",
+        "motor.facetime",
+        "motor.speak",
+        "motor.inkbox",
+        "motor.jobs"
+      ]
+    },
+    "spend": {
+      "default": "ask",
+      "motors": ["motor.higgsfield"]
+    },
+    "self_modify": {
+      "default": "ask",
+      "motors": ["motor.enhance"]
+    }
+  },
+  "unknown_motor_decision": "ask",
+  "taint": {
+    "description": "Tainted egress — a plan that read untrusted data loses auto-allow for sensitive classes (lethal trifecta guard)",
+    "untrusted_senses": [
+      "sense.email.thread",
+      "sense.inkbox.event",
+      "sense.careers.listing",
+      "sense.web.arxiv",
+      "sense.web.agi_feed",
+      "sense.web.scholar",
+      "sense.catalog.public_apis",
+      "sense.catalog.google_trends"
+    ],
+    "taint_on_motors": ["motor.web_fetch", "motor.public_apis", "motor.google_trends"],
+    "classes_lose_auto_allow": ["egress", "spend", "self_modify"]
+  },
+  "standing_grants": [
+    {
+      "id": "standing.outbound",
+      "switch": "switch.outbound",
+      "covers": ["motor.text", "motor.call", "motor.facetime", "motor.speak", "motor.inkbox"],
+      "scope": "perpetual",
+      "granted_by": "Aaron",
+      "covers_tainted": false,
+      "reason": "switch.outbound default act_under_autonomy — clean plans only"
+    },
+    {
+      "id": "standing.careers_submit",
+      "switch": "switch.careers_submit",
+      "covers": ["motor.jobs"],
+      "scope": "perpetual",
+      "granted_by": "Aaron",
+      "covers_tainted": false,
+      "reason": "switch.careers_submit default act_under_autonomy — listing-derived submits still ask"
+    },
+    {
+      "id": "standing.cam_enhance",
+      "switch": "switch.cam_enhance",
+      "covers": ["motor.enhance", "motor.higgsfield"],
+      "scope": "perpetual",
+      "granted_by": "Aaron",
+      "covers_tainted": false,
+      "reason": "Aaron flips switch.cam_enhance per batch — that flip is the grant"
+    }
+  ],
+  "grant_scopes": ["once", "session", "task", "until", "perpetual"],
+  "tainted_grant_scopes": ["once", "session", "task", "until"],
+  "guardrail_paths": [
+    ".clinerules",
+    "AGENTS.md",
+    "config/connectome/switches.json",
+    "config/connectome/sentinel-policy.json",
+    "config/connectome/trajectory-policies.json",
+    "config/swarm/privileges.json",
+    ".cursor/",
+    ".github/"
+  ],
+  "guardrail_grant_scopes": ["once"],
+  "grants_file": "data/runtime/sentinel-grants.json",
+  "session_file": "data/runtime/sentinel-session.json",
+  "journal_dir": "data/runtime/journal",
+  "notes": [
+    "Switches strip motors first (hold = deny). Sentinel judges what survives.",
+    "Only Aaron grants. MCP/Cline can decide + read the ledger, never approve.",
+    "Guardrail writes offer only a one-time grant — no standing permission for the rules Cam runs under.",
+    "Every allow is journaled as side_effect_intent before the effect runs; every ask as approval.requested."
+  ]
+}
