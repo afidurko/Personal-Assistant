@@ -108,6 +108,9 @@ class ContentRules(unittest.TestCase):
             "contact newslabtrends@google.com upstream",  # allowlisted upstream address
             "/home/ubuntu/work and /Users/<you>/repo",  # generic hosts / placeholders
             "timezone: operator_local",
+            'fetch("/api/home/status") and /opt/home/cache',  # route segments, not a home directory
+            "ping someone@example.com or billing@comcast.example",  # RFC 2606 reserved domains
+            "call +1 (555) 010-9999 or 555 0123 or +15550100",  # fictional 555-01xx range
         ]
         for line in clean:
             with self.subTest(line=line):

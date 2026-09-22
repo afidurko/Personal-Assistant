@@ -93,11 +93,10 @@
       "severity": "block",
       "label": "email address",
       "pattern": "(?<![\\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}(?![\\w-])",
+      "validator": "email_real",
       "allow": [
         "noreply@",
         "no-reply@",
-        "@example.com",
-        "@example.org",
         "@users.noreply.github.com",
         "newslabtrends@google.com",
         "security@",
@@ -117,9 +116,7 @@
       "severity": "block",
       "label": "phone number",
       "pattern": "(?<![\\w./:-])(?:\\+?1[\\s.-]?)?\\(?[2-9]\\d{2}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}(?![\\w-])|(?<![\\w./:-])\\+(?!1\\b)\\d{1,3}[\\s.-]?\\(?\\d{1,4}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{3,4}(?![\\w-])",
-      "allow": [
-        "555-01"
-      ]
+      "validator": "phone_real"
     },
     {
       "id": "ssn",
@@ -220,7 +217,7 @@
       "id": "home_path",
       "severity": "block",
       "label": "personal home-directory path (reveals a username)",
-      "pattern": "(?:/Users/(?!Shared\\b|<)[A-Za-z0-9._-]{2,}|/home/(?!ubuntu\\b|runner\\b|user\\b|node\\b|<|\\$)[A-Za-z0-9._-]{2,}|[A-Za-z]:\\\\Users\\\\(?!Public\\b|<)[A-Za-z0-9._-]{2,})",
+      "pattern": "(?<![\\w.~-])(?:/Users/(?!Shared\\b|<)[A-Za-z0-9._-]{2,}|/home/(?!ubuntu\\b|runner\\b|user\\b|node\\b|<|\\$)[A-Za-z0-9._-]{2,}|[A-Za-z]:\\\\Users\\\\(?!Public\\b|<)[A-Za-z0-9._-]{2,})",
       "allow": [
         "/Users/<you>",
         "/home/<you>",

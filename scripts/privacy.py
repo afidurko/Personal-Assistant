@@ -95,9 +95,33 @@ def _ipv4_public(candidate: str) -> bool:
     return True
 
 
+def _phone_real(candidate: str) -> bool:
+    """False for fictional North-American numbers: 555 area code or the 555-01xx exchange range."""
+    digits = "".join(c for c in candidate if c.isdigit())
+    if digits.startswith("1") and len(digits) in (8, 11):
+        digits = digits[1:]
+    if digits.startswith("555"):
+        return False
+    return not (len(digits) == 10 and digits[3:8] == "55501")
+
+
+_RESERVED_MAIL_DOMAINS = re.compile(
+    r"(?:^|\.)(?:example\.(?:com|net|org)|example|test|invalid|localhost|local|lan|internal)$",
+    re.IGNORECASE,
+)
+
+
+def _email_real(candidate: str) -> bool:
+    """False for RFC 2606 / RFC 6761 reserved domains (example.com, .example, .test, .invalid...)."""
+    domain = candidate.rsplit("@", 1)[-1]
+    return _RESERVED_MAIL_DOMAINS.search(domain) is None
+
+
 _VALIDATORS: dict[str, Callable[[str], bool]] = {
     "luhn": _luhn,
     "ipv4_public": _ipv4_public,
+    "phone_real": _phone_real,
+    "email_real": _email_real,
 }
 
 
