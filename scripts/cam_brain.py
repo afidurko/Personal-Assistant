@@ -48,7 +48,9 @@ MEMORY_PATH = RUNTIME / "cam-memory.json"
 HISTORY_PATH = RUNTIME / "cam-history.jsonl"
 VAULT = ROOT / "vault"
 
-AARON_TZ = "America/New_York"
+# Aaron's timezone is personal information: it lives in private memory / the host
+# environment (CAM_OPERATOR_TZ), never as a literal in a tracked file.
+AARON_TZ = os.environ.get("CAM_OPERATOR_TZ") or os.environ.get("TZ") or "UTC"
 
 PERSONA_PROMPT = (
     "You are Cam, Aaron's personal assistant: 32, from Argentina, blue eyes, "
