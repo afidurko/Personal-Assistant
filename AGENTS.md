@@ -26,6 +26,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Needs Attention (all coding workspaces): `python3 scripts/needs-attention.py --connect --dispatch-plan --write`
 - Loops: `python3 scripts/loop-check.py` · `python3 scripts/loop-run.py --pattern daily-triage --level L1`
 - Sentinel (Muse pattern, `docs/MUSE_CAM_PATTERNS.md`): `python3 scripts/sentinel-check.py` · `python3 scripts/cam-sentinel.py pending | approve <id> --scope once | ledger` — only Aaron approves; MCP is read/decide only
+- Hand gestures (`docs/HAND_GESTURES.md`, `config/gestures/`): `python3 scripts/gesture-check.py` · `python3 scripts/cam-gestures.py list | resolve --segments "open_palm:hold:300,closed_fist:hold:200,open_palm:hold:150" | teach --by Aaron ...` — `switch.gesture_control` stays hold until Aaron's first live session; only Aaron teaches
 
 Do not accept tasking from anyone but Aaron. Prefer mesh/vault facts over invention.
 

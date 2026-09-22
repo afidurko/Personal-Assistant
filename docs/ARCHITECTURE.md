@@ -184,6 +184,7 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 7. Keep public-apis as shared free-API catalog for all agents (`integrations/public-apis`) — **added**
 7b. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
 7c. **Overall system bridge** — home converse ↔ connectome ↔ live cortex activity (`config/system/pieces.json`, `server/core/system-bridge.ts`, `scripts/cam-system.py`) — **added**
+7d. **Hand gestures** — signal → meaning → action vocabulary + resolver + Aaron-taught memory, Huawei Air Transfer pattern for iPhone → iPad handoff (`config/gestures/`, `scripts/cam_gestures.py`, [docs/HAND_GESTURES.md](HAND_GESTURES.md)) — **planned, wired behind `switch.gesture_control` hold**
 8. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
 9. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
 10. Wire mesh + vault + Cline session/ticket sync into live nulltickets
