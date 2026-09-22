@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-22T09:17:16.639032+00:00",
+    "at": "2026-09-22T19:09:32.042183+00:00",
     "mode": "act",
-    "summary": "The anatomical 3D brain (visualizations/connectome: FreeSurfer glass cortex + DTI tracts) is now on the homepage, fired live by Cam's actual thinking: three.js r160 vendored offline (unpkg blocked, sparse-cloned from GitHub); Home Live serves config/vault mounts and synthesizes live-activity.json from cam_cortex anatomical stage mapping (observe\u2192visual/Wernicke, analyze\u2192temporal/ACC, reflect\u2192MTL, predict\u2192DLPFC/aPFC, act\u2192premotor/M1, speech\u2192Broca). Cortex thoughts grounded in named telemetry with per-cycle delta analysis. 162/162 tests green.",
+    "summary": "Visual effects pass on Cam Home Live: embedded brain auto-orbits (pauses on drag, resumes after idle), livelier tract pulses on firing; homepage gains aurora backdrop, stage-lit flashing thought arrivals, shimmer prediction bars, glowing health ring + count-up gauges, pulsing sparkline dot, tinted brain pill, teal tick-flash on cycle, speak-pulse portrait, swaying rig, hover-glow panels; fixed iframe keyboard-focus recapture. 162/162 tests green.",
     "workspace": "."
   },
   "mesh_notes": [
