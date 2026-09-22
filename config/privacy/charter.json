@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "title": "Cam privacy charter",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-22",
+  "docs": "docs/PRIVACY_CHARTER.md",
+  "kernel": "scripts/cam_privacy.py",
+  "check": "scripts/privacy-check.py",
+  "principle": "Aaron's personal information and preferences exist inside Cam for exactly one purpose: to help Aaron. They are never released to any other person, agent, service, distillate or channel. Other people may have their own individual prompts and memory; memory is never shared, transmitted, revealed or used across people. Secrecy of personal information is a moral obligation here, not a configuration default.",
+  "owner": {
+    "id": "aaron",
+    "kind": "owner",
+    "label": "Aaron",
+    "data_roots": ["data/instinct", "data/swarm", "data/inkbox", "identity/aaron/local", "vault"],
+    "notes": "The owner's roots are the pre-existing Cam directories; nothing moved. Owner-only files are chmod 700/600 by the kernel."
+  },
+  "principals": {
+    "env": "CAM_PRINCIPAL",
+    "default": "aaron",
+    "id_pattern": "^[a-z][a-z0-9_-]{1,31}$",
+    "reserved": ["aaron", "owner", "cam", "chief", "human", "system", "all", "shared", "mesh", "vault"],
+    "guest_root": "data/principals/<id>",
+    "guest_layout": {
+      "profile.json": "id, label, created, consent (what this person allowed Cam to keep for them)",
+      "prompt.md": "this person's own prompt — individual, never merged with anyone else's",
+      "instinct/": "own thread, jobs, outbox, briefs",
+      "swarm/": "own lineage (chief spawns under this person's root)",
+      "inkbox/inbound/": "own inbound drops",
+      "distill/": "own counts-only distillate — never written to the owner's vault or mesh"
+    },
+    "seal_file": ".principal",
+    "guest_tools": [
+      "privacy_status", "privacy_redact",
+      "instinct_scan", "instinct_report", "instinct_brief", "instinct_stats", "instinct_delegate",
+      "swarm_spawn", "swarm_assign", "swarm_resolve", "swarm_tree", "swarm_stats",
+      "inkbox_inbound",
+      "public_apis_search", "public_apis_addon", "google_trends_search", "google_trends_addon",
+      "kill_switch_status"
+    ],
+    "guest_tools_notes": "Everything else (vault, mesh, MemoryBear, workspaces, tickets, Needs Attention, loops, calendar sources, connectors inventory, privacy audit) reaches the owner's data or configuration and is not listed for a guest process — tools/list omits them and tools/call refuses them.",
+    "isolation": [
+      "A data directory is sealed to one principal at first touch (.principal). Any script that opens a directory sealed to a different principal refuses.",
+      "Guests cannot redirect their roots outside data/principals/<id> via environment overrides; the kernel rejects the override.",
+      "Guest processes never read the owner's vault, mesh seed, cline cache, workspaces registry paths, calendar sources, or MemoryBear account.",
+      "Guest distillates stay inside the guest root; the nightly loop, the mesh, and the vault only ever see the owner's counts-only distillates.",
+      "Nothing in Cam merges, compares, or trains across principals. There is no shared memory tier.",
+      "Recommended host hardening: give each additional person their own OS user; Cam's owner data is chmod 700 so that user cannot read it even by accident."
+    ]
+  },
+  "classes": {
+    "personal_info": {
+      "label": "personal information",
+      "detectors": ["email", "phone", "street_address", "national_id", "payment_card", "iban", "date_of_birth", "personal_term"],
+      "notes": "personal_term = tokens from the owner's local vocabulary file (identity/aaron/local/personal-vocabulary.txt, git-ignored). The list itself is personal and never leaves the machine."
+    },
+    "personal_preference": {
+      "label": "personal preference / sensitive context",
+      "detectors": ["preference_statement", "sensitive_context"],
+      "notes": "Preferences ('I prefer', 'my favourite', 'I hate') and health / finance / relationship / location context."
+    },
+    "secret": {
+      "label": "credential or secret",
+      "detectors": ["api_key", "bearer_token", "env_assignment", "private_key"]
+    },
+    "operational": {
+      "label": "counts, statuses, ids, timestamps",
+      "detectors": [],
+      "notes": "The only class allowed into mesh distillates."
+    }
+  },
+  "sinks": {
+    "local_ledger": {"personal_info": "allow", "personal_preference": "allow", "secret": "deny", "scope": "same_principal_only"},
+    "vault": {"personal_info": "allow", "personal_preference": "allow", "secret": "deny", "scope": "owner_only"},
+    "brief": {"personal_info": "allow", "personal_preference": "allow", "secret": "deny", "scope": "same_principal_only"},
+    "outbox_draft": {"personal_info": "allow", "personal_preference": "allow", "secret": "deny", "scope": "same_principal_only", "notes": "Drafts are read by the principal who approves them. A draft addressed to a third party is redacted by the redactor role before Aaron sees it, unless Aaron's consent record names that recipient."},
+    "mesh_distillate": {"personal_info": "deny", "personal_preference": "deny", "secret": "deny", "scope": "owner_only", "notes": "Counts only. The kernel refuses to write a distillate containing personal classes."},
+    "mesh_note": {"personal_info": "redact", "personal_preference": "redact", "secret": "deny", "scope": "owner_only"},
+    "mcp_response": {"personal_info": "allow", "personal_preference": "allow", "secret": "deny", "scope": "same_principal_only", "notes": "The MCP server serves one principal per process; guests see a reduced tool set that cannot reach owner roots."},
+    "other_principal": {"personal_info": "deny", "personal_preference": "deny", "secret": "deny", "scope": "never"},
+    "network": {"personal_info": "deny", "personal_preference": "deny", "secret": "deny", "scope": "never", "notes": "No script in this repo posts personal classes anywhere. MemoryBear is the one sanctioned external memory and is owner-scoped by end_user_id."}
+  },
+  "consent": {
+    "default": "nobody",
+    "record": "identity/aaron/local/consent.json",
+    "notes": "Sharing any personal class with a named third party requires an explicit consent entry (recipient, classes, expires) written by Aaron at the CLI (`cam_privacy.py consent grant --aaron`). Agents can read consent, never write it."
+  },
+  "privileges": {
+    "aaron_only": ["disclose_personal"],
+    "notes": "disclose_personal is in privilege_catalog.aaron_only, so no agent can ever hold it; cam_swarm doctor and privacy-check both assert it."
+  },
+  "invariants": [
+    {"id": "P1", "rule": "No personal class in any mesh distillate", "enforced_by": ["cam_privacy.assert_shareable(sink=mesh_distillate)", "instinct distill", "cam_swarm distill", "needs-attention distill audit"], "test": "test_cam_privacy.DistillateGuardTests"},
+    {"id": "P2", "rule": "One process, one principal; owner roots unreachable from a guest principal", "enforced_by": ["cam_privacy.scoped_dir", "cam_privacy.enter (seal check)"], "test": "test_cam_privacy.PrincipalIsolationTests"},
+    {"id": "P3", "rule": "Guest MCP exposes only the guest tool allowlist", "enforced_by": ["cam-mcp-server tool_defs / call_tool principal gate"], "test": "test_mcp_guards.PrincipalGuards"},
+    {"id": "P4", "rule": "Memory is per-person: MemoryBear and the vault are owner-only; guests keep memory in their own root", "enforced_by": ["memorybear.py principal gate", "instinct vault paths scoped"], "test": "test_cam_privacy.PrincipalIsolationTests"},
+    {"id": "P5", "rule": "Owner data directories are chmod 700 and files 600", "enforced_by": ["cam_privacy.enter / harden"], "test": "test_cam_privacy.HardeningTests"},
+    {"id": "P6", "rule": "Ledgers are HMAC-sealed when CAM_LEDGER_HMAC_KEY (or identity/aaron/local/ledger.key) exists; tampering is reported by doctor", "enforced_by": ["cam_privacy.seal_doc / verify_doc", "cam_swarm doctor", "instinct doctor"], "test": "test_cam_privacy.SealTests"},
+    {"id": "P7", "rule": "No agent holds disclose_personal", "enforced_by": ["privileges.json aaron_only", "cam_swarm spawn / doctor"], "test": "test_cam_swarm"},
+    {"id": "P8", "rule": "Mesh notes are redacted; secrets are refused everywhere", "enforced_by": ["cam-mcp-server mesh_put", "cam_privacy.assert_shareable"], "test": "test_mcp_guards.PrincipalGuards"},
+    {"id": "P9", "rule": "Personal vocabulary, consent records, guest roots and keys are git-ignored; privacy-check fails if any are tracked", "enforced_by": [".gitignore", "privacy-check.py"], "test": "privacy-check"},
+    {"id": "P10", "rule": "Third-party recipients need a consent record; drafts to unknown recipients are redacted", "enforced_by": ["cam_privacy.consent_allows", "instinct outbox redaction hook"], "test": "test_cam_privacy.ConsentTests"}
+  ],
+  "team": "config/teams/privacy.json",
+  "loop_action": "privacy_audit",
+  "tracked_file_allowlist": {
+    "email_domains": ["example.com", "example.net", "example.org", "*.example", "google.com"],
+    "phone_contains": ["555"],
+    "notes": "privacy-check scans tracked config/docs/scripts for identifiers. Documentation fixtures (RFC 2606 example domains, 555 numbers) and vendor/org contact addresses already public in upstream docs are not personal identifiers."
+  },
+  "notes": [
+    "Aaron's first name is the repository's operator label and appears in code and docs; his surname, contact details, addresses, and anything else identifying never appear in tracked files.",
+    "Nothing here weakens the draft-only outbound rule; it adds a second gate (privacy) before the first one (approval)."
+  ]
+}
