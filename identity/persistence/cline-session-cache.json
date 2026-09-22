@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-22T02:34:52.754414+00:00",
+    "at": "2026-09-22T09:17:16.639032+00:00",
     "mode": "act",
-    "summary": "Homepage reworked around a live cortex: scripts/cam_cortex.py runs observe/reflect/predict/act cycles from real check data with probability-scored, self-calibrating predictions (12/12 held), streamed to the page via SSE; sticky quick-access dock + keyboard shortcuts (c/x/s/g/r/b/?) and /cam,/cortex redirects; 152/152 tests green.",
+    "summary": "The anatomical 3D brain (visualizations/connectome: FreeSurfer glass cortex + DTI tracts) is now on the homepage, fired live by Cam's actual thinking: three.js r160 vendored offline (unpkg blocked, sparse-cloned from GitHub); Home Live serves config/vault mounts and synthesizes live-activity.json from cam_cortex anatomical stage mapping (observe\u2192visual/Wernicke, analyze\u2192temporal/ACC, reflect\u2192MTL, predict\u2192DLPFC/aPFC, act\u2192premotor/M1, speech\u2192Broca). Cortex thoughts grounded in named telemetry with per-cycle delta analysis. 162/162 tests green.",
     "workspace": "."
   },
   "mesh_notes": [
@@ -109,6 +109,11 @@
     {
       "at": "2026-09-20T19:40:13.778527+00:00",
       "text": "HF weights still egress-blocked; tier-0 rig upgrades in place when they land",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-22T09:17:16.639032+00:00",
+      "text": "speak + suggestions now arrive as sensory notes and light the language pathways",
       "workspace": "."
     }
   ],
