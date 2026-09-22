@@ -108,12 +108,11 @@ export function intentOrder(cfg: ConverseOverlaysConfig): string[] {
 
 const regexCache = new Map<string, RegExp>();
 
-function intentRegex(name: string, pattern: string): RegExp {
-  const key = `${name}:${pattern}`;
-  let re = regexCache.get(key);
+function intentRegex(pattern: string): RegExp {
+  let re = regexCache.get(pattern);
   if (!re) {
     re = new RegExp(pattern, 'i');
-    regexCache.set(key, re);
+    regexCache.set(pattern, re);
   }
   return re;
 }
@@ -127,7 +126,7 @@ export function classifyIntents(text: string, cfg: ConverseOverlaysConfig): stri
     const spec = rules[name];
     const pattern = spec?.regex;
     if (!pattern) continue;
-    if (intentRegex(name, pattern).test(t)) hits.push(name);
+    if (intentRegex(pattern).test(t)) hits.push(name);
   }
   return hits;
 }
@@ -269,7 +268,7 @@ export function checkOverlays(cfg: ConverseOverlaysConfig): OverlayCheck {
       continue;
     }
     try {
-      intentRegex(key, pattern);
+      intentRegex(pattern);
     } catch {
       errors.push(`intent_rule_invalid:${key}`);
       continue;

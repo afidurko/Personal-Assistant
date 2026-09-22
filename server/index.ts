@@ -12,7 +12,7 @@ import { CamConverse, type ReplyContext } from './core/cam-converse.js';
 import type { ConnectomeRoute } from './core/connectome-kernel.js';
 import { CamAutonomy } from './core/cam-autonomy.js';
 import { RuntimeStore } from './core/runtime-store.js';
-import { SystemBridge } from './core/system-bridge.js';
+import { SystemBridge, type TurnBridgeResult } from './core/system-bridge.js';
 import { a2fStatus } from './avatar/a2f-bridge.js';
 import { higgsfieldStatus, runHiggsfield, underRoot } from './avatar/higgsfield.js';
 
@@ -304,7 +304,7 @@ app.post('/api/turn', async (req, res) => {
 
   // Gate → connectome route → reply composed from the route (slow plans name
   // their hotspot + motors; fast turns take overlays / intents from config).
-  const held: { bridged?: Awaited<ReturnType<typeof bridge.onTurn>> } = {};
+  let bridged: TurnBridgeResult | undefined;
   const reply = await converse.turn(
     {
       text,
@@ -317,13 +317,12 @@ app.post('/api/turn', async (req, res) => {
     source,
     {
       beforeReply: async () => {
-        held.bridged = await bridge.onTurn(text, source, { aaronVoiceScore });
-        return replyContextFromRoute(held.bridged.route);
+        bridged = await bridge.onTurn(text, source, { aaronVoiceScore });
+        return replyContextFromRoute(bridged.route);
       },
     },
   );
-  const turnBridge = held.bridged;
-  if (reply.rejected || !turnBridge) {
+  if (reply.rejected || !bridged) {
     res.status(403).json(reply);
     return;
   }
@@ -336,10 +335,10 @@ app.post('/api/turn', async (req, res) => {
   res.json({
     ...reply,
     bridge: {
-      route: turnBridge.route,
-      activities: turnBridge.activities.length,
-      execution: turnBridge.execution,
-      memory: turnBridge.memory,
+      route: bridged.route,
+      activities: bridged.activities.length,
+      execution: bridged.execution,
+      memory: bridged.memory,
     },
   });
 });

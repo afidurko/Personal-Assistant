@@ -422,9 +422,7 @@ export function useCamVoice() {
           ? {
               kind: String(turn.overlay.kind || 'echo'),
               id: turn.overlay.id ?? null,
-              intents: Array.isArray(turn.overlay.intents)
-                ? turn.overlay.intents.map(String)
-                : undefined,
+              intents: turn.overlay.intents?.map(String),
             }
           : undefined;
         if (overlay) setLastOverlay(overlay);

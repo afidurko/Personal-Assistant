@@ -116,6 +116,14 @@ export function CamStage({ onListeningChange }: CamStageProps) {
   const areas = useMemo(() => {
     return [...(lastRoute?.pathway || [])].filter((p) => p.startsWith('area.'));
   }, [lastRoute]);
+  // While answering/speaking the persona branch is the better label; otherwise the route behavior.
+  const behaviorLabel = lastRoute?.behavior ? String(lastRoute.behavior).replace(/_/g, ' ') : undefined;
+  const brainLabel =
+    phase === 'idle'
+      ? undefined
+      : phase === 'answering' || phase === 'speaking'
+        ? (overlayLabel(lastOverlay) ?? behaviorLabel)
+        : behaviorLabel;
 
   const statusLine =
     status === 'enrolling'
@@ -164,19 +172,7 @@ export function CamStage({ onListeningChange }: CamStageProps) {
           ) : null}
         </div>
 
-        <MiniBrain
-          phase={phase}
-          tracts={tracts}
-          areas={areas}
-          label={
-            phase === 'answering' || phase === 'speaking'
-              ? overlayLabel(lastOverlay) ??
-                (lastRoute?.behavior ? String(lastRoute.behavior).replace(/_/g, ' ') : undefined)
-              : lastRoute?.behavior && phase !== 'idle'
-                ? String(lastRoute.behavior).replace(/_/g, ' ')
-                : undefined
-          }
-        />
+        <MiniBrain phase={phase} tracts={tracts} areas={areas} label={brainLabel} />
       </div>
 
       <div className="cam-stage-converse">

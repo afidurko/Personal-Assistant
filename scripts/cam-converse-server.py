@@ -32,6 +32,8 @@ VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
 TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
 
 sys.path.insert(0, str(ROOT / "scripts"))
+import converse_overlays as co  # noqa: E402
+
 try:
     import activity_emit
 except Exception:  # pragma: no cover
@@ -510,8 +512,6 @@ def route_sense(sense: str, goal: str = "") -> dict:
 
 def _overlay_reply(low: str) -> str | None:
     """Spoken lines from config/persona/converse-overlays.json."""
-    import converse_overlays as co
-
     rule = co.match_overlay(low)
     if rule:
         return str(rule.get("reply") or "") or None
@@ -520,8 +520,6 @@ def _overlay_reply(low: str) -> str | None:
 
 def speak_from_trace(aaron_text: str, trace: dict, history: list[dict] | None = None) -> str:
     """Warm spoken reply from one reason() trace. Overlays live in persona config."""
-    import converse_overlays as co
-
     return co.speak_from_trace(aaron_text, trace, history)
 
 
@@ -533,8 +531,6 @@ def converse_turn(
 ) -> dict:
     """One cam_reason.reason() per turn. Spoken text from the trace + overlays."""
     import cam_reason as cr
-
-    import converse_overlays as co
 
     text = (aaron_text or "").strip()
     trace = cr.reason(goal=text, sense=sense, write_trace=False, dry_run=True)
@@ -556,8 +552,6 @@ def converse_turn(
 
 def converse_overlays_status() -> dict:
     """Loaded overlay config summary + static check (same shape as the TS host)."""
-    import converse_overlays as co
-
     cfg = co.load_overlays()
     check = co.check_overlays(cfg)
     try:
@@ -733,16 +727,12 @@ class Handler(BaseHTTPRequestHandler):
         payload = self._read_json()
 
         if path == "/api/converse/overlays/reload":
-            import converse_overlays as co
-
             co.invalidate_cache()
             self._json(200, {"reloaded": True, **converse_overlays_status()})
             return
 
         if path == "/api/converse/preview":
             # Dry reply for phrase editing: no gate, no history, no log, no mesh.
-            import converse_overlays as co
-
             text = str(payload.get("text") or "").strip()
             intents = payload.get("intents")
             if not isinstance(intents, list):

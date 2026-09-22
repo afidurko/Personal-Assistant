@@ -24,6 +24,7 @@ import {
   intentOrder,
   speakParams,
   type ConverseOverlaysConfig,
+  type HistoryRow,
   type OverlayCheck,
   type ReplyExplanation,
   type ReplyKind,
@@ -173,16 +174,8 @@ export class CamConverse {
   }
 
   /** Dry reply — no gate, no history mutation, no log. For phrase editing. */
-  preview(text: string, ctx: ReplyContext = {}): ReplyExplanation & { intents: string[] } {
-    const cfg = this.overlays.load();
-    const intents = ctx.intents?.length ? ctx.intents : classifyIntents(text, cfg);
-    const trace: ReplyTrace = {
-      intents,
-      path: ctx.path ?? 'fast',
-      hotspot_id: ctx.hotspot_id ?? null,
-      motor_plan: ctx.motor_plan ?? null,
-    };
-    return { ...explainReply(text, trace, null, cfg), intents };
+  preview(text: string, ctx: ReplyContext = {}): ComposedReply {
+    return composeReply(text, ctx, null, this.overlays.load());
   }
 
   async turn(
@@ -234,29 +227,15 @@ export class CamConverse {
 
     const ctx = (opts.beforeReply ? await opts.beforeReply(aaronText) : undefined) ?? {};
     const cfg = this.overlays.load();
-    const intents = ctx.intents?.length ? ctx.intents : classifyIntents(aaronText, cfg);
-    const trace: ReplyTrace = {
-      intents,
-      path: ctx.path ?? 'fast',
-      hotspot_id: ctx.hotspot_id ?? null,
-      motor_plan: ctx.motor_plan ?? null,
-    };
     // History still ends at the previous turn here — repeat detection needs that.
-    const explained = explainReply(aaronText, trace, this.history, cfg);
-    const meta: ReplyMeta = { kind: explained.kind, id: explained.id, intents };
+    const { text: cam, kind, id, intents } = composeReply(aaronText, ctx, this.history, cfg);
+    const meta: ReplyMeta = { kind, id, intents };
 
     const at = new Date().toISOString();
     if (aaronText) {
       this.history.push({ role: 'aaron', text: aaronText, source: src, at, gate });
     }
-    const cam = explained.text;
-    this.history.push({
-      role: 'cam',
-      text: cam,
-      source: 'reply',
-      at: new Date().toISOString(),
-      overlay: meta,
-    });
+    this.history.push({ role: 'cam', text: cam, source: 'reply', at, overlay: meta });
     // Keep a rolling window so spawn/memory stays light
     if (this.history.length > 80) this.history = this.history.slice(-80);
     await this.logTurn(aaronText, cam, src, gate, meta);
@@ -299,6 +278,25 @@ export class CamConverse {
   }
 }
 
+export type ComposedReply = ReplyExplanation & { intents: string[] };
+
+/** One place that turns (text, route context, history, config) into a line. */
+export function composeReply(
+  aaronText: string,
+  ctx: ReplyContext,
+  history: HistoryRow[] | null,
+  cfg: ConverseOverlaysConfig,
+): ComposedReply {
+  const intents = ctx.intents?.length ? ctx.intents : classifyIntents(aaronText, cfg);
+  const trace: ReplyTrace = {
+    intents,
+    path: ctx.path ?? 'fast',
+    hotspot_id: ctx.hotspot_id ?? null,
+    motor_plan: ctx.motor_plan ?? null,
+  };
+  return { ...explainReply(aaronText, trace, history, cfg), intents };
+}
+
 let standaloneStore: OverlaysStore | null = null;
 
 /**
@@ -311,16 +309,5 @@ export function camReply(
   ctx: ReplyContext = {},
 ): string {
   const config = cfg ?? (standaloneStore ??= new OverlaysStore(process.cwd())).load();
-  const intents = ctx.intents?.length ? ctx.intents : classifyIntents(aaronText, config);
-  return explainReply(
-    aaronText,
-    {
-      intents,
-      path: ctx.path ?? 'fast',
-      hotspot_id: ctx.hotspot_id ?? null,
-      motor_plan: ctx.motor_plan ?? null,
-    },
-    null,
-    config,
-  ).text;
+  return composeReply(aaronText, ctx, null, config).text;
 }

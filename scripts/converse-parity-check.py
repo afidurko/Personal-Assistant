@@ -127,33 +127,27 @@ def run_parity() -> dict:
             report["mismatches"].append({"mirror": "node", "error": skip})
         return report
 
+    mismatches: list[dict] = report["mismatches"]
+
+    def diff(mirror: str, expected: dict, got: dict, keys: tuple[str, ...], **where: object) -> None:
+        for key in keys:
+            if expected.get(key) != got.get(key):
+                mismatches.append(
+                    {"mirror": mirror, "key": key, "python": expected.get(key), "got": got.get(key), **where}
+                )
+
     report["mirrors"] = ["python", "ts", "js"]
-    keys = ("text", "kind", "id", "intents_from_config")
+    reply_keys = ("text", "kind", "id", "intents_from_config")
     for mirror in ("ts", "js"):
         rows = node.get(mirror) or []
         if len(rows) != len(py):
-            report["mismatches"].append({"mirror": mirror, "error": "case_count"})
+            mismatches.append({"mirror": mirror, "error": "case_count"})
             continue
         for idx, (case, expect, got) in enumerate(zip(cases, py, rows)):
-            for key in keys:
-                if expect.get(key) != got.get(key):
-                    report["mismatches"].append(
-                        {
-                            "mirror": mirror,
-                            "case": idx,
-                            "text": (case.get("text") or "")[:60],
-                            "key": key,
-                            "python": expect.get(key),
-                            mirror: got.get(key),
-                        }
-                    )
-    py_check = co.check_overlays(cfg)
-    ts_check = node.get("ts_check") or {}
-    if not ts_check.get("ok"):
-        report["mismatches"].append({"mirror": "ts", "error": f"ts_check:{ts_check.get('errors')}"})
-    if not py_check.get("ok"):
-        report["mismatches"].append({"mirror": "python", "error": f"py_check:{py_check.get('errors')}"})
-    js_load = node.get("js_load") or {}
+            diff(mirror, expect, got, reply_keys, case=idx, text=(case.get("text") or "")[:60])
+    for mirror, check in (("python", co.check_overlays(cfg)), ("ts", node.get("ts_check") or {})):
+        if not check.get("ok"):
+            mismatches.append({"mirror": mirror, "error": f"{mirror}_check:{check.get('errors')}"})
     expected_load = {
         "network_source": "network",
         "network_version": cfg.get("version"),
@@ -162,19 +156,12 @@ def run_parity() -> dict:
         "cold_source": "fallback",
         "cold_answers": "echo",
     }
-    for key, want in expected_load.items():
-        if js_load.get(key) != want:
-            report["mismatches"].append(
-                {"mirror": "js_load", "key": key, "expected": want, "got": js_load.get(key)}
-            )
-    report["js_load"] = js_load
+    report["js_load"] = node.get("js_load") or {}
+    diff("js_load", expected_load, report["js_load"], tuple(expected_load))
     py_speak = co.speak_params(cfg)
     for mirror in ("ts_speak", "js_speak"):
-        got = node.get(mirror) or {}
-        for key in ("rate", "pitch", "lang"):
-            if got.get(key) != py_speak.get(key):
-                report["mismatches"].append({"mirror": mirror, "key": key, "python": py_speak.get(key), "got": got.get(key)})
-    report["ok"] = not report["mismatches"]
+        diff(mirror, py_speak, node.get(mirror) or {}, ("rate", "pitch", "lang"))
+    report["ok"] = not mismatches
     return report
 
 

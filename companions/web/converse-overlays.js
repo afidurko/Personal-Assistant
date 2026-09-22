@@ -83,10 +83,9 @@
     return order.map(String);
   }
 
-  function intentRegex(name, pattern) {
-    var key = name + ":" + pattern;
-    if (!regexCache[key]) regexCache[key] = new RegExp(pattern, "i");
-    return regexCache[key];
+  function intentRegex(pattern) {
+    if (!regexCache[pattern]) regexCache[pattern] = new RegExp(pattern, "i");
+    return regexCache[pattern];
   }
 
   function classifyIntents(text, cfg) {
@@ -97,7 +96,7 @@
     for (var i = 0; i < order.length; i++) {
       var spec = rules[order[i]];
       if (!spec || !spec.regex) continue;
-      if (intentRegex(order[i], spec.regex).test(t)) hits.push(order[i]);
+      if (intentRegex(spec.regex).test(t)) hits.push(order[i]);
     }
     return hits;
   }

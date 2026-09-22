@@ -68,15 +68,14 @@ def match_overlay(low: str, cfg: dict | None = None) -> dict | None:
     return None
 
 
-def _intent_regex(name: str, spec: dict) -> re.Pattern[str] | None:
+def _intent_regex(spec: dict) -> re.Pattern[str] | None:
     pattern = str(spec.get("regex") or "")
     if not pattern:
         return None
-    key = f"{name}:{pattern}"
-    compiled = _REGEX_CACHE.get(key)
+    compiled = _REGEX_CACHE.get(pattern)
     if compiled is None:
         compiled = re.compile(pattern, re.I)
-        _REGEX_CACHE[key] = compiled
+        _REGEX_CACHE[pattern] = compiled
     return compiled
 
 
@@ -100,7 +99,7 @@ def classify_intents(text: str, cfg: dict | None = None) -> list[str]:
         spec = rules.get(name)
         if not isinstance(spec, dict):
             continue
-        pat = _intent_regex(name, spec)
+        pat = _intent_regex(spec)
         if pat and pat.search(text):
             hits.append(name)
     return hits
@@ -300,8 +299,8 @@ def check_overlays(cfg: dict | None = None) -> dict:
                 errors.append(f"probe_mismatch:{rid}:{probe}")
     if not (cfg.get("empty") or "").strip():
         errors.append("empty_line_missing")
-    for key in ("echo", "echo_repeat", "slow_plan"):
-        if "{short}" not in str(cfg.get(key) or "") and key != "slow_plan":
+    for key in ("echo", "echo_repeat"):
+        if "{short}" not in str(cfg.get(key) or ""):
             errors.append(f"template_missing_short:{key}")
     if "{hotspot}" not in str(cfg.get("slow_plan") or ""):
         errors.append("template_missing_hotspot:slow_plan")
@@ -315,7 +314,7 @@ def check_overlays(cfg: dict | None = None) -> dict:
             errors.append(f"intent_rule_missing:{key}")
             continue
         try:
-            _intent_regex(key, rules[key])
+            _intent_regex(rules[key])
         except re.error:
             errors.append(f"intent_rule_invalid:{key}")
             continue
