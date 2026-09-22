@@ -7,8 +7,8 @@ entries in config/integrations/public-apis-addons.json may be called.
 
 Usage:
   python3 scripts/public-apis-addon.py --list
-  python3 scripts/public-apis-addon.py call weather.open_meteo --latitude 40.7 --longitude -74.0 --offline
-  python3 scripts/public-apis-addon.py call geo.open_meteo --name "New York" --offline
+  python3 scripts/public-apis-addon.py call weather.open_meteo --latitude 52.52 --longitude 13.41 --offline
+  python3 scripts/public-apis-addon.py call geo.open_meteo --name "Berlin" --offline
   python3 scripts/public-apis-addon.py doctor
 """
 

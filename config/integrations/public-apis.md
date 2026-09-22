@@ -69,8 +69,8 @@ python3 scripts/pack-public-apis-result.py --results path/to/results.json
 
 # Thin-wrapper add-ons (allowlisted only — no free-form URLs)
 python3 scripts/public-apis-addon.py --list
-python3 scripts/public-apis-addon.py call weather.open_meteo --latitude 40.7 --longitude -74.0 --offline
-python3 scripts/public-apis-addon.py call geo.open_meteo --name "New York"
+python3 scripts/public-apis-addon.py call weather.open_meteo --latitude 52.52 --longitude 13.41 --offline
+python3 scripts/public-apis-addon.py call geo.open_meteo --name "Berlin"
 ```
 
 ## Thin-wrapper add-ons

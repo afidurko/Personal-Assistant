@@ -1,13 +1,13 @@
 {
   "results": [
     {
-      "id": 5128581,
-      "name": "New York",
-      "latitude": 40.71427,
-      "longitude": -74.00597,
-      "country": "United States",
-      "admin1": "New York",
-      "timezone": "America/New_York"
+      "id": 2950159,
+      "name": "Berlin",
+      "latitude": 52.52437,
+      "longitude": 13.41053,
+      "country": "Germany",
+      "admin1": "Land Berlin",
+      "timezone": "Europe/Berlin"
     }
   ],
   "_fixture": true

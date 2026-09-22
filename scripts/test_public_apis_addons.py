@@ -41,9 +41,9 @@ class PublicApisAddonTests(unittest.TestCase):
             "call",
             "weather.open_meteo",
             "--latitude",
-            "40.7",
+            "52.52",
             "--longitude",
-            "-74.0",
+            "13.41",
             "--offline",
         )
         self.assertTrue(payload.get("ok"))
@@ -51,7 +51,7 @@ class PublicApisAddonTests(unittest.TestCase):
         self.assertIn("current", payload.get("result") or {})
 
     def test_call_geo_offline(self) -> None:
-        payload = self._run("call", "geo.open_meteo", "--name", "New York", "--offline")
+        payload = self._run("call", "geo.open_meteo", "--name", "Berlin", "--offline")
         self.assertTrue(payload.get("ok"))
         results = (payload.get("result") or {}).get("results") or []
         self.assertGreaterEqual(len(results), 1)
@@ -78,9 +78,9 @@ class PublicApisAddonTests(unittest.TestCase):
             "call",
             "air.open_meteo",
             "--latitude",
-            "40.7",
+            "52.52",
             "--longitude",
-            "-74.0",
+            "13.41",
             "--offline",
         )
         self.assertTrue(payload.get("ok"))
