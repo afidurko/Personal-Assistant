@@ -16,6 +16,12 @@ sealed private memory on Aaron's host and is out of scope for this repository.
 - Cam's Sentinel denies any motor plan that would move private-memory content
   off-host (email, post, apply, commit) — no approval scope is offered.
 - Runtime journals and distillates are redacted before they are written.
+- The operator's own facts (name, street, employer, …) are sealed as *protected terms*
+  in private memory; the guard and every redaction path block them wherever they
+  appear, without ever printing them.
+- The stack is operator-agnostic and portable: `scripts/privacy-init.py` for a new
+  operator, `scripts/privacy-kit.py export <repo>` for another repository
+  ([`docs/PRIVACY_QUICKSTART.md`](docs/PRIVACY_QUICKSTART.md)).
 
 Full policy, layers, runbooks, and threat model: [`docs/PRIVACY_SAFEGUARDS.md`](docs/PRIVACY_SAFEGUARDS.md).
 

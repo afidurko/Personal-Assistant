@@ -137,6 +137,9 @@
     "scripts/pii-guard.py",
     "scripts/privacy.py",
     "scripts/private_memory.py",
+    "scripts/private-memory.py",
+    "scripts/privacy-init.py",
+    "scripts/privacy-kit.py",
     ".gitignore",
     ".cursor/",
     ".github/"

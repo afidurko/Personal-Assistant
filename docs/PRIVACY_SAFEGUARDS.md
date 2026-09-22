@@ -11,6 +11,14 @@ publish personal data.
 > The human needs to be safe. Protecting Aaron from information leaks, hackers, and
 > accidental disclosure is a standing goal that outranks convenience.
 
+**For any operator.** Nothing in the stack is specific to Aaron: the policy expands an
+`operator.handle` / `operator.display_name` pair into its paths and patterns, and the
+operator's own facts (full name, street, employer, …) are sealed as **protected terms**
+in private memory that the guard blocks everywhere. `scripts/privacy-init.py` sets it
+up for a new person in one command; `scripts/privacy-kit.py export <repo>` carries the
+whole stack into another repository. Start with
+[`PRIVACY_QUICKSTART.md`](PRIVACY_QUICKSTART.md).
+
 ---
 
 ## 1. Data classification
@@ -32,8 +40,12 @@ Nothing else about Aaron is.
 | `identity.aaron.visual_profile` | face-recognition notes (traits, source photos, third-party notes) | `identity/aaron/VISUAL_PROFILE.md` |
 | `identity.aaron.enroll_index` | enrollment index with source refs, labels, confidence | `identity/aaron/enroll-index.json` |
 | `identity.aaron.timezone` | operator timezone | `operator_local` placeholder in configs; runtime reads `CAM_OPERATOR_TZ` |
+| `privacy.personal_terms` | the operator's **protected terms** — facts the guard must block wherever they appear | none; `private-memory.py protected` prints a count only |
 
-Add new facts the same way: `put` the value, reference the key, never paste the value.
+Add new facts the same way: `put` the value (add `--protect` so the guard also blocks
+it), reference the key, never paste the value. Facts that have no runtime use — a
+surname, a street, an employer, a school — go straight to
+`private-memory.py protect --value "…"`.
 
 ---
 
@@ -83,7 +95,10 @@ python3 scripts/pii-guard.py --text -  < draft-pr-body.md
 Rules live in `config/privacy/pii-guard.json` (block: email, phone, SSN, payment card
 with Luhn, street / postal address, public IP, private key, API tokens, JWT, secret
 assignment, home-directory path, operator timezone, physical description vocabulary,
-enrollment-media filenames, government IDs, date of birth; warn: tailnet IPs).
+enrollment-media filenames, government IDs, date of birth; warn: tailnet IPs). One
+more rule, `personal_term`, is built at run time from the operator's protected terms
+in private memory — it exists only on hosts that hold the store, and its pattern is
+never written to disk or printed.
 Path rules block private directories, media, key material, and images outside the
 persona/asset folders — even when force-added. Output is **location + rule only**;
 `--show-snippets` is local-only.
@@ -98,9 +113,11 @@ python3 scripts/private-memory.py doctor
 python3 scripts/private-memory.py put identity.aaron.timezone --value "Region/City"
 python3 scripts/private-memory.py get identity.aaron.timezone
 python3 scripts/private-memory.py list          # keys and sizes only
+python3 scripts/private-memory.py protect --value "…" --value "…"   # your own facts → blocked everywhere
+python3 scripts/private-memory.py protected     # count only
 ```
 
-- Store: `CAM_PRIVATE_HOME` (default `identity/aaron/local/private-memory/`; `~/.cam/private` recommended on Aaron's Mac)
+- Store: `PRIVATE_MEMORY_HOME` / `CAM_PRIVATE_HOME` (default `identity/<handle>/local/private-memory/`; `~/.cam/private` recommended on Aaron's Mac)
 - Key: `CAM_PRIVATE_KEY_FILE` (default `<store>/.key`, generated 0600). Back the key up in Aaron's password manager — records are unrecoverable without it.
 - Cipher: Fernet when `cryptography` is installed, else `openssl enc -aes-256-cbc -pbkdf2`. Plaintext requires `CAM_PRIVATE_ALLOW_PLAINTEXT=1` and is reported by `doctor`.
 - The metadata index never holds values. Working copies the runtime needs (`identity/aaron/local/VISUAL_PROFILE.md`, `enroll-index.json`) are 0600 inside the gitignored tree.
@@ -138,14 +155,18 @@ paths — a Cline/agent edit gets at most a one-time grant from Aaron.
 ## 3. Operating procedures
 
 ### Adding a new personal fact
-1. `python3 scripts/private-memory.py put <domain>.<name> --value "…"` (or `--file`, `--json`)
+1. `python3 scripts/private-memory.py put <domain>.<name> --value "…" --protect` (or `--file`, `--json`); facts with no runtime use: `private-memory.py protect --value "…"`
 2. Reference it by key in tracked files; use a neutral placeholder such as `operator_local`
 3. Runtime resolves via `private_memory.PrivateMemory().get(key)` or an env var Aaron exports on the host
 
-### New machine / new workspace
-1. `bash scripts/install-git-hooks.sh`
+### New machine / new workspace / new operator
+1. `python3 scripts/privacy-init.py --operator <handle> --name <Name>` (hooks, gitignore, store, protected terms — idempotent)
 2. Copy the private-memory store **out of band** (AirDrop / encrypted disk) — never through git, a PR, chat, or a cloud VM. Copy the key separately.
 3. `python3 scripts/private-memory.py doctor`
+
+### Another repository
+`python3 scripts/privacy-kit.py export <repo> --operator <handle> --name <Name>`, then
+`privacy-init.py` inside it — see [`PRIVACY_QUICKSTART.md`](PRIVACY_QUICKSTART.md).
 
 ### Cloud Agents and Cline sessions
 - They run in VMs that must **not** hold private memory. The default store path is gitignored and empty there; `doctor` shows `record_count: 0`.
