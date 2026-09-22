@@ -5,6 +5,14 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { applyTrajectoryPolicies, loadTrajectoryPolicies, type TrajectoryViolation } from './trajectory-policies.js';
+import {
+  currentSessionId,
+  evaluateSentinel,
+  loadGrants,
+  loadSentinelPolicy,
+  type SentinelPolicy,
+  type SentinelVerdict,
+} from './sentinel.js';
 
 export interface RouteOptions {
   sense: string;
@@ -53,6 +61,9 @@ export interface ConnectomeRoute {
   pathway: string[];
   switch_state: Record<string, string>;
   motor_plan: string[];
+  /** Motors Sentinel held for Aaron's approval (tainted egress, guardrails, unknown) */
+  motor_pending: string[];
+  sentinel: Pick<SentinelVerdict, 'taint' | 'decisions' | 'pending' | 'enforced'>;
   trajectory_violations: TrajectoryViolation[];
   missing_explicit_edges: string[][];
   dual_stream: DualStreamResult;
@@ -89,6 +100,7 @@ interface ConnectomeData {
   identityThreshold: number;
   quietHours: { start: string; end: string; timezone: string } | null;
   policies: import('./trajectory-policies.js').TrajectoryPolicy[];
+  sentinelPolicy: SentinelPolicy;
 }
 
 function edgeKey(a: string, b: string): string {
@@ -103,7 +115,7 @@ export class ConnectomeKernel {
   async ensureLoaded(): Promise<ConnectomeData> {
     if (this.data) return this.data;
     const cfg = path.join(this.rootDir, 'config/connectome');
-    const [sensory, switches, motor, hotspots, synapses, meshParams, voice, policies] =
+    const [sensory, switches, motor, hotspots, synapses, meshParams, voice, policies, sentinelPolicy] =
       await Promise.all([
         readJson(path.join(cfg, 'sensory.json')),
         readJson(path.join(cfg, 'switches.json')),
@@ -113,6 +125,7 @@ export class ConnectomeKernel {
         readJson(path.join(cfg, 'mesh-params.json')),
         readJson(path.join(this.rootDir, 'config/persona/voice.json')).catch(() => ({})),
         loadTrajectoryPolicies(this.rootDir),
+        loadSentinelPolicy(this.rootDir),
       ]);
 
     const dual = (meshParams.language_dual_stream || {}) as Record<string, unknown>;
@@ -149,6 +162,7 @@ export class ConnectomeKernel {
         ? { start: qh.start, end: qh.end, timezone: avail?.timezone || 'America/New_York' }
         : null,
       policies,
+      sentinelPolicy,
     };
     return this.data;
   }
@@ -233,6 +247,17 @@ export class ConnectomeKernel {
 
     const { plan, violations } = applyTrajectoryPolicies(planned, switchState, data.policies);
 
+    // Sentinel — sole permission authority (Muse pattern). Runtime grants are Aaron's, on disk.
+    const [grants, sessionId] = await Promise.all([
+      loadGrants(this.rootDir, data.sentinelPolicy),
+      currentSessionId(this.rootDir, data.sentinelPolicy),
+    ]);
+    const verdict = evaluateSentinel(
+      plan,
+      { sense, pathway, switchState, task: goal, grants, sessionId },
+      data.sentinelPolicy,
+    );
+
     const missing: string[][] = [];
     for (let i = 0; i < pathway.length - 1; i++) {
       const a = pathway[i]!;
@@ -250,11 +275,13 @@ export class ConnectomeKernel {
 
     let accepted = true;
     let reason: string | undefined;
-    let motorPlan = plan;
+    let motorPlan = verdict.enforced ? verdict.allowed : plan;
+    let motorPending = verdict.enforced ? verdict.pending : [];
     if (opts.kill || switchState['switch.kill'] === 'act') {
       accepted = false;
       reason = 'switch.kill act — all motor silenced';
       motorPlan = [];
+      motorPending = [];
     }
 
     return {
@@ -272,6 +299,13 @@ export class ConnectomeKernel {
       pathway,
       switch_state: switchState,
       motor_plan: motorPlan,
+      motor_pending: motorPending,
+      sentinel: {
+        taint: verdict.taint,
+        decisions: verdict.decisions,
+        pending: motorPending,
+        enforced: verdict.enforced,
+      },
       trajectory_violations: violations,
       missing_explicit_edges: missing.slice(0, 10),
       dual_stream: dual,
@@ -308,6 +342,13 @@ function rejected(sense: string, goal: string, reason: string): ConnectomeRoute 
     pathway: [],
     switch_state: {},
     motor_plan: [],
+    motor_pending: [],
+    sentinel: {
+      taint: { tainted: false, sources: [] },
+      decisions: {},
+      pending: [],
+      enforced: true,
+    },
     trajectory_violations: [],
     missing_explicit_edges: [],
     dual_stream: {

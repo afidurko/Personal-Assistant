@@ -9,4 +9,5 @@ Active projects live as notes in this folder. Link people and research.
 - [[Improve-Engine-Tasks]] — auto tasks from health warnings
 - [[VoiceStudio-Local-Speech]] — Aaron’s VoiceStudio fork as Cam local speech engine
 - [[ILLA-Electron-Desktop]] — ILLA Builder desktop shell pinned to electron-builder@26.16.1
+- [[Muse-Sentinel-Research]] — Meta Muse research → Sentinel allow/ask/deny + intent journal at Cam's motor boundary
 - Fasciculus × AGI mesh research — `vault/10-Mesh-Distillates/2026-09-17-fasciculus-AGI-mesh.md`

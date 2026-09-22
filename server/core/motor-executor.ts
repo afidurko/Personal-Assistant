@@ -1,16 +1,19 @@
 /**
  * Causal motor executor — accepted plans leave world deltas (mesh/vault/activity).
  * Dangerous motors (outbound, jobs, enhance, cline) stay dry-run unless explicitly armed.
+ * Every effect is journaled append-only BEFORE it runs (Sentinel intent ledger);
+ * motors Sentinel held for Aaron surface as pending_approval, never fire.
  */
 import { appendFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import type { RuntimeStore } from './runtime-store.js';
 import type { ConnectomeRoute } from './connectome-kernel.js';
+import { IntentJournal, idempotencyKey } from './sentinel.js';
 
 export interface MotorResult {
   motor: string;
-  status: 'executed' | 'dry_run' | 'skipped' | 'denied' | 'error';
+  status: 'executed' | 'dry_run' | 'skipped' | 'denied' | 'error' | 'pending_approval';
   detail: string;
   delta?: Record<string, unknown>;
 }
@@ -46,10 +49,14 @@ const ALWAYS_DRY = new Set([
 ]);
 
 export class MotorExecutor {
+  private readonly journal: IntentJournal;
+
   constructor(
     private readonly rootDir: string,
     private readonly runtime: RuntimeStore,
-  ) {}
+  ) {
+    this.journal = new IntentJournal(rootDir);
+  }
 
   async execute(route: ConnectomeRoute, opts: { goal?: string } = {}): Promise<ExecutionReport> {
     const results: MotorResult[] = [];
@@ -73,6 +80,35 @@ export class MotorExecutor {
       };
     }
 
+    const goal = opts.goal || route.goal;
+    const pendingMotors = route.motor_pending ?? [];
+    if (route.motor_plan.length || pendingMotors.length) {
+      await this.journalSafe('proposed', {
+        sense: route.sense,
+        goal: goal.slice(0, 240),
+        motor_plan: [...route.motor_plan, ...pendingMotors],
+        taint: route.sentinel?.taint,
+      });
+    }
+    for (const motor of pendingMotors) {
+      const row = route.sentinel?.decisions?.[motor];
+      await this.journalSafe('approval.requested', {
+        pending_id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
+        motor,
+        class: row?.class ?? null,
+        purpose: goal.slice(0, 240) || route.sense,
+        reason: row?.reason,
+        tainted: !!row?.tainted,
+        grant_options: row?.grant_options ?? [],
+        sense: route.sense,
+      });
+      results.push({
+        motor,
+        status: 'pending_approval',
+        detail: row?.reason || 'sentinel: awaiting Aaron',
+      });
+    }
+
     for (const motor of route.motor_plan) {
       if (ALWAYS_DRY.has(motor) || !LIVE_SAFE.has(motor)) {
         results.push({
@@ -82,9 +118,22 @@ export class MotorExecutor {
         });
         continue;
       }
+      const key = idempotencyKey(motor, route.sense, goal, new Date().toISOString());
+      const authorizer = route.sentinel?.decisions?.[motor]?.authorizer ?? 'policy';
+      await this.journalSafe('side_effect_intent', {
+        motor,
+        policy_decision: `allow:${authorizer}`,
+        idempotency_key: key,
+        tainted: !!route.sentinel?.decisions?.[motor]?.tainted,
+      });
       try {
-        const r = await this.runSafe(motor, route, opts.goal || route.goal);
+        const r = await this.runSafe(motor, route, goal);
         results.push(r);
+        await this.journalSafe('effect.terminal', {
+          motor,
+          idempotency_key: key,
+          outcome: r.status,
+        });
         if (r.status === 'executed') {
           for (const t of route.tracts.slice(0, 4)) ltp.push(t);
         } else if (r.status === 'error') {
@@ -95,6 +144,11 @@ export class MotorExecutor {
           motor,
           status: 'error',
           detail: String(e),
+        });
+        await this.journalSafe('effect.terminal', {
+          motor,
+          idempotency_key: key,
+          outcome: 'error',
         });
         for (const t of route.tracts.slice(0, 2)) ltd.push(t);
       }
@@ -114,6 +168,17 @@ export class MotorExecutor {
       plasticity: { ltp: [...new Set(ltp)], ltd: [...new Set(ltd)] },
       workspace_packet: packet,
     };
+  }
+
+  private async journalSafe(
+    kind: Parameters<IntentJournal['append']>[0],
+    payload: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      await this.journal.append(kind, payload);
+    } catch {
+      /* the ledger is best-effort in the home bridge; Python CLI is authoritative */
+    }
   }
 
   private async runSafe(

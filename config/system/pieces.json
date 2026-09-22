@@ -186,11 +186,21 @@
       "check": "python3 scripts/higgsfield-check.py",
       "depends_on": ["piece.tools"],
       "feeds": []
+    },
+    {
+      "id": "piece.sentinel",
+      "title": "Sentinel permission authority + intent journal (Muse pattern)",
+      "layer": "brain",
+      "paths": ["config/connectome/sentinel-policy.json", "scripts/cam_sentinel.py", "scripts/cam_journal.py", "scripts/cam-sentinel.py", "scripts/sentinel-check.py", "server/core/sentinel.ts"],
+      "check": "python3 scripts/sentinel-check.py",
+      "depends_on": ["piece.connectome"],
+      "feeds": ["piece.system_bridge", "piece.cline"]
     }
   ],
   "boot_order": [
     "piece.persistence",
     "piece.connectome",
+    "piece.sentinel",
     "piece.swarm",
     "piece.teams",
     "piece.tools",
