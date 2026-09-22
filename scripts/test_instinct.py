@@ -187,7 +187,7 @@ class RegressionTests(InstinctBase):
     def test_naive_timestamps_are_utc_regardless_of_host_tz(self):
         import time
         old_tz = os.environ.get("TZ")
-        os.environ["TZ"] = "America/New_York"
+        os.environ["TZ"] = "America/Puerto_Rico"
         time.tzset()
         try:
             dt = instinct.parse_ts("2026-09-18T00:00:00")
