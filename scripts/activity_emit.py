@@ -15,7 +15,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EVENTS = ROOT / "vault" / "10-Mesh-Distillates" / "activity-events.jsonl"
 FEED = ROOT / "scripts" / "live-activity-feed.py"
+PARAMS = ROOT / "config" / "connectome" / "mesh-params.json"
 _DUAL_CACHE: dict | None = None
+_DUAL_MTIME: float | None = None
 
 
 def utc() -> str:
@@ -64,17 +66,33 @@ def refresh_live_activity() -> None:
         pass
 
 
-def dual_stream(act: str) -> dict:
-    """Resolve dorsal/ventral winner from mesh-params (cached)."""
-    global _DUAL_CACHE
-    if _DUAL_CACHE is None:
-        params_path = ROOT / "config" / "connectome" / "mesh-params.json"
+def invalidate_dual_stream_cache() -> None:
+    """Drop cached mesh-params language_dual_stream (Aaron edited tracts live)."""
+    global _DUAL_CACHE, _DUAL_MTIME
+    _DUAL_CACHE = None
+    _DUAL_MTIME = None
+
+
+def load_language_dual_stream() -> dict:
+    """Cached dual-stream policy; reloads when mesh-params.json mtime changes."""
+    global _DUAL_CACHE, _DUAL_MTIME
+    try:
+        mtime = PARAMS.stat().st_mtime
+    except OSError:
+        mtime = None
+    if _DUAL_CACHE is None or mtime != _DUAL_MTIME:
         try:
-            params = json.loads(params_path.read_text(encoding="utf-8"))
+            params = json.loads(PARAMS.read_text(encoding="utf-8"))
         except Exception:
             params = {}
         _DUAL_CACHE = params.get("language_dual_stream") or {}
-    dual = _DUAL_CACHE
+        _DUAL_MTIME = mtime
+    return _DUAL_CACHE
+
+
+def dual_stream(act: str) -> dict:
+    """Resolve dorsal/ventral winner from mesh-params (mtime-invalidated cache)."""
+    dual = load_language_dual_stream()
     policy = dual.get("conflict_policy") or {}
     winner = policy.get(act) or policy.get("default") or "dorsal"
     chosen = dual.get(winner) or {}

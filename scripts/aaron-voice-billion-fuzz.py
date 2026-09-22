@@ -52,6 +52,36 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
     silence = synthesize_tone(0.3, freq=1.0, seed=0) * 0.0
     mixed = np.concatenate([other, silence, aaron])
     gate.enroll_samples(aaron, 16000, source="fuzz-aaron.wav", template_id="aaron-voice-01")
+    if not gate.store.verify_enroll_checksum():
+        return {
+            "worker_id": worker_id,
+            "attempted": 0,
+            "passed": 0,
+            "failed": 1,
+            "first_error": "enroll_checksum_mismatch",
+            "elapsed_s": 0.0,
+        }
+    checksum = gate.store.enroll_checksum
+    if len(checksum) != 32 or any(c not in "0123456789abcdef" for c in checksum):
+        return {
+            "worker_id": worker_id,
+            "attempted": 0,
+            "passed": 0,
+            "failed": 1,
+            "first_error": "enroll_checksum_format",
+            "elapsed_s": 0.0,
+        }
+    # FunASR contract: same digest after reload (hash_dev covers live FunASR store shape)
+    reloaded = type(gate.store).load(gate.store.path)
+    if reloaded.enroll_checksum != checksum or not reloaded.verify_enroll_checksum():
+        return {
+            "worker_id": worker_id,
+            "attempted": 0,
+            "passed": 0,
+            "failed": 1,
+            "first_error": "enroll_checksum_reload",
+            "elapsed_s": 0.0,
+        }
 
     # Warm full-path references once
     ref_aaron = gate.gate_samples(aaron, 16000)
@@ -105,6 +135,9 @@ def run_worker(payload: tuple[int, int, int]) -> dict:
             if mic_ok:
                 failed += 1
                 first_error = first_error or "missing_audio_inline"
+            if not gate.store.verify_enroll_checksum():
+                failed += 1
+                first_error = first_error or "enroll_checksum_loop"
         else:
             # text bypass
             source, required = "text", True

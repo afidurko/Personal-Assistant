@@ -218,6 +218,47 @@ def write_markdown(payload: dict, json_path: Path) -> Path:
     return md_path
 
 
+def search(
+    *,
+    query: str | None = None,
+    category: str | None = None,
+    auth: str | None = None,
+    https_only: bool = False,
+    cors: str | None = None,
+    num: int = 0,
+    offline: bool = True,
+    refresh: bool = False,
+) -> dict:
+    """In-process catalog search (fixture by default — no subprocess)."""
+    cfg = load_config()
+    md, source = read_catalog_text(cfg, offline=offline, refresh=refresh)
+    entries = parse_catalog(md)
+    defaults = cfg.get("defaults") or {}
+    limit = num or int(defaults.get("num_results") or 12)
+    results = filter_entries(
+        entries,
+        query=query,
+        category=category,
+        auth=auth,
+        https_only=https_only,
+        cors=cors,
+    )[:limit]
+    return {
+        "provider": source,
+        "offline": bool(offline or source == "fixture"),
+        "query": query,
+        "category": category,
+        "filters": {"auth": auth, "https": https_only, "cors": cors},
+        "total_catalog": len(entries),
+        "returned": len(results),
+        "results": results,
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "integration": "public-apis",
+        "source_repo": "github.com/afidurko/public-apis",
+        "sense": cfg.get("sense") or "sense.catalog.public_apis",
+    }
+
+
 def doctor(cfg: dict) -> dict:
     local = ROOT / (cfg.get("catalog_file") or "integrations/public-apis/README.md")
     report = {
@@ -265,51 +306,24 @@ def main() -> int:
         print(json.dumps(report, indent=2))
         return 0 if report.get("ok") else 1
 
-    md, source = read_catalog_text(cfg, offline=args.offline, refresh=args.refresh)
-    entries = parse_catalog(md)
-
     if args.list_categories:
-        cats = categories(entries)
+        md, source = read_catalog_text(cfg, offline=args.offline, refresh=args.refresh)
+        cats = categories(parse_catalog(md))
         print(json.dumps({"provider": source, "count": len(cats), "categories": cats}, indent=2))
         return 0
 
-    defaults = cfg.get("defaults") or {}
-    limit = args.num or int(defaults.get("num_results") or 12)
-    https_only = args.https or bool(defaults.get("https_preferred") and not args.query and args.category)
-    # Only force https when --https passed; don't surprise keyword search
     https_only = bool(args.https)
-
-    results = filter_entries(
-        entries,
+    payload = search(
         query=args.query,
         category=args.category,
         auth=args.auth,
         https_only=https_only,
         cors=args.cors,
-    )[:limit]
-
-    payload = {
-        "provider": source,
-        "offline": bool(args.offline or source == "fixture"),
-        "query": args.query,
-        "category": args.category,
-        "filters": {
-            "auth": args.auth,
-            "https": https_only,
-            "cors": args.cors,
-        },
-        "total_catalog": len(entries),
-        "returned": len(results),
-        "results": results,
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
-        "integration": "public-apis",
-        "source_repo": "github.com/afidurko/public-apis",
-    }
-
-    save = args.save_vault or (
-        defaults.get("save_to_vault") and (args.query or args.category) and not args.no_save_vault
+        num=args.num,
+        offline=args.offline,
+        refresh=args.refresh,
     )
-    # Default CLI: don't write vault unless asked or config+query — keep smoke tests clean
+
     if args.save_vault:
         jp = save_vault(payload, args.query or args.category)
         write_markdown(payload, jp)

@@ -367,6 +367,7 @@ class VoiceStore:
     updated_at: str = ""
     templates: list[dict] = field(default_factory=list)
     centroid: list[float] = field(default_factory=list)
+    enroll_checksum: str = ""
 
     @classmethod
     def load(cls, path: Path) -> "VoiceStore":
@@ -383,15 +384,37 @@ class VoiceStore:
             updated_at=data.get("updated_at", ""),
             templates=list(data.get("templates") or []),
             centroid=list(data.get("centroid") or []),
+            enroll_checksum=str(data.get("enroll_checksum") or ""),
         )
 
     @property
     def enrolled(self) -> bool:
         return len(self.templates) > 0 and bool(self.centroid)
 
+    def compute_enroll_checksum(self) -> str:
+        """Stable FunASR/hash_dev enroll digest (ids + source_hash + embeddings)."""
+        h = hashlib.sha256()
+        h.update((self.backend or "").encode("utf-8"))
+        h.update(b"|")
+        h.update((self.model_id or "").encode("utf-8"))
+        for t in self.templates:
+            h.update((t.get("id") or "").encode("utf-8"))
+            h.update((t.get("source_hash") or "").encode("utf-8"))
+            emb = t.get("embedding") or []
+            if emb:
+                h.update(struct.pack(f"{len(emb)}d", *[float(x) for x in emb]))
+        return h.hexdigest()[:32]
+
+    def verify_enroll_checksum(self) -> bool:
+        if not self.templates:
+            return True
+        expected = self.compute_enroll_checksum()
+        return bool(self.enroll_checksum) and self.enroll_checksum == expected
+
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.updated_at = utc_now()
+        self.enroll_checksum = self.compute_enroll_checksum()
         payload = {
             "subject": self.subject,
             "version": self.version,
@@ -401,6 +424,7 @@ class VoiceStore:
             "updated_at": self.updated_at,
             "templates": self.templates,
             "centroid": self.centroid,
+            "enroll_checksum": self.enroll_checksum,
             "counts": {"templates": len(self.templates)},
         }
         self.path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -470,6 +494,8 @@ class AaronVoiceGate:
                 self.cfg.get("converse_require_voice_match_for_mic", True)
             ),
             "ready_for_production": enrolled and self.store.backend.startswith("funasr"),
+            "enroll_checksum": self.store.enroll_checksum or self.store.compute_enroll_checksum(),
+            "enroll_checksum_ok": self.store.verify_enroll_checksum() if enrolled else True,
         }
 
     def reload_store(self) -> None:

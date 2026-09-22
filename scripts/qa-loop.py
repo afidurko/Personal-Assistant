@@ -365,6 +365,8 @@ def write_suggestions(
         "- Suggest: enroll Aaron voice (`aaron-voice-enroll.py`) before live mic; keep fail-closed",
         "- Suggest: `speak_requires_aaron_identity` — motor.speak stripped when switch.identity holds",
         "- Suggest: Cam presence is portrait + A2F only — `python3 scripts/presence-check.py`",
+        "- Suggest: converse overlays — `python3 scripts/converse-overlays-check.py` + `converse-billion-fuzz.py`",
+        "- Suggest: in-process catalogs — `cam_inproc.catalog_sense_smoke()` (no subprocess search)",
         "- Suggest: Higgsfield Speak clips stay off the face; `motor.higgsfield` is GPU train under `switch.cam_enhance`",
         "- Suggest: `higgsfield_rejected_for_cam_face` keeps train jobs off speak plans",
         "",

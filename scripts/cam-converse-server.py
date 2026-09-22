@@ -509,79 +509,20 @@ def route_sense(sense: str, goal: str = "") -> dict:
 
 
 def _overlay_reply(low: str) -> str | None:
-    """Spoken lines reason() would miss (camera/pupil/voice classify as general/fast)."""
-    if "only my voice" in low or "my voice only" in low or (
-        "ignore" in low
-        and any(w in low for w in ("other", "people", "room", "noise", "surround"))
-    ):
-        return (
-            "Aaron-only mode is on. Enroll once if you haven't, "
-            "then I'll ignore other speakers in noisy places."
-        )
-    if "camera" in low or "face" in low or "see me" in low:
-        return (
-            "Camera is wired through the companion too. "
-            "I already have your face enrollment from the photos you shared. "
-            "Keep the lens on you and I'll treat that as Aaron present."
-        )
-    if "can you see" in low or "pupil" in low or "eye tracking" in low or "what do you see" in low:
-        return (
-            "Yes — Pupil is wired so I can see. "
-            "World camera plus gaze feed sense.vision.world when you open my eyes. "
-            "I'm not watching continuously unless you ask me to."
-        )
-    if "voice" in low or "recognize me" in low or "only me" in low or "surrounding" in low:
-        return (
-            "I'm set up to listen for your voice only. "
-            "Enroll a few clean clips with aaron-voice-enroll.py on your host, "
-            "and I'll ignore surrounding conversation before I take a turn."
-        )
-    if "who are you" in low or "your name" in low:
-        return (
-            "I'm Cam — thirty-two, from Argentina, soft airy English. "
-            "You're Aaron, my only task-giver. What should we do?"
-        )
-    if "thank" in low:
-        return "Of course. I'm right here."
+    """Spoken lines from config/persona/converse-overlays.json."""
+    import converse_overlays as co
+
+    rule = co.match_overlay(low)
+    if rule:
+        return str(rule.get("reply") or "") or None
     return None
 
 
 def speak_from_trace(aaron_text: str, trace: dict, history: list[dict] | None = None) -> str:
-    """Warm spoken reply from one reason() trace. Overlays keep camera/pupil/voice lines."""
-    t = (aaron_text or "").strip()
-    if not t:
-        return "I'm here, Aaron. Whenever you're ready — I'm listening."
-    low = t.lower()
-    overlay = _overlay_reply(low)
-    if overlay:
-        return overlay
-    intents = set((trace.get("classification") or {}).get("intents") or [])
-    if "greeting" in intents:
-        return (
-            "Hi Aaron. Soft and clear on my side. "
-            "I can hear you through the companion when the mic is on."
-        )
-    if "mic_check" in intents:
-        return (
-            "Yes — I'm listening for your voice only. "
-            "Surrounding conversation is filtered out once you're enrolled."
-        )
-    if "ack" in intents:
-        return "Of course. I'm right here."
-    if "presence_chatter" in intents:
-        return "I'm right here, Aaron."
-    if (trace.get("path") or "") == "slow":
-        hotspot = trace.get("hotspot_id") or "capability"
-        motors = ", ".join(trace.get("motor_plan") or ["motor.mesh"])
-        return (
-            f"I have a plan — {hotspot}, motors {motors}. "
-            "Tell me the next step and I'll take it from there."
-        )
-    short = t if len(t) < 120 else t[:117] + "…"
-    return (
-        f"I heard you: “{short}”. "
-        "Tell me the next step and I'll take it from there."
-    )
+    """Warm spoken reply from one reason() trace. Overlays live in persona config."""
+    import converse_overlays as co
+
+    return co.speak_from_trace(aaron_text, trace, history)
 
 
 def converse_turn(

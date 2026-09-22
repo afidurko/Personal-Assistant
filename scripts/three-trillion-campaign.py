@@ -122,14 +122,16 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Presence: Higgsfield Speak clips rejected — portrait + A2F only (`scripts/presence-check.py`)",
         "- Trajectory: `higgsfield_rejected_for_cam_face` strips Speak clips from speak plans",
         "- Higgsfield IDs are GPU train (`switch.cam_enhance`); Speak never owns `motor.higgsfield`",
+        "- Converse overlays live in `config/persona/converse-overlays.json` (`speak_from_trace` reads config)",
+        "- `converse-billion-fuzz.py` overlay × intent matrix + in-process catalog smoke",
+        "- `cam_inproc.public_apis_search` / `google_trends_search` / `catalog_sense_smoke` (no subprocess)",
+        "- FunASR/hash_dev enroll checksum on VoiceStore; aaron-voice 3T verifies reload",
+        "- `activity_emit.invalidate_dual_stream_cache` + mesh-params mtime reload",
         "",
         "## Suggested add-ons",
-        "- `config/persona/converse-overlays.json` — move camera/pupil/voice lines out of the server so new presence phrases do not fork `speak_from_trace`",
-        "- `scripts/converse-billion-fuzz.py` — modular overlay/intent matrix at 3T (companion to cam-reason fuzz)",
-        "- `public-apis` add-on: offline fixture for `sense.catalog.public_apis` smoke without subprocess search",
-        "- `google-trends` add-on: same in-process search helper as `cam_inproc.route`",
-        "- Voice add-on: FunASR enroll checksum in aaron-voice 3T (hash_dev already covers contract)",
-        "- Activity add-on: quiet `write_live_activity()` already exists; emit converse refresh only on last row (done) — add a mesh-params dual_stream cache invalidation hook",
+        "- `quotes.quotable` / `exchange.open_er_api` allowlisted public-apis add-ons when ops asks",
+        "- Voice add-on: live FunASR CAM++ enroll on Aaron’s host (checksum already in store)",
+        "- Converse add-on: turn-history phrasing in `converse_overlays.speak_from_trace` (history arg reserved)",
         "",
         "## Standing suggestions",
         "- Keep `python3 scripts/ci-static-gate.py` as the fast static gate; `bash scripts/ci-connectome.sh` still owns 1M fuzz",
@@ -140,6 +142,9 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Converse units: `AARON_VOICE_TEST=1 AARON_VOICE_ALLOW_DEV_BACKEND=1 python3 scripts/test_cam_converse_voice_gate.py`",
         "- Slim CI deps: `integrations/joshinator-analyzer/backend/requirements-ci.txt`",
         "- After registry edits: `python3 scripts/test_cline_workspaces.py`",
+        "- Converse overlays: `python3 scripts/converse-overlays-check.py`",
+        "- Converse 3T: `python3 scripts/converse-billion-fuzz.py --n 3000000000000`",
+        "- In-process catalogs: `cam_inproc.public_apis_search` / `google_trends_search`",
         "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
         "- Higgsfield: `python3 scripts/higgsfield-run.py --doctor` then pack to `mesh/runs`",
         "- Higgsfield train jobs stay enhance-gated; never free-spend GPU from Cline",
@@ -232,6 +237,12 @@ def one_pass(
     )
     results.append(run([sys.executable, "scripts/presence-check.py"], "presence-check"))
     results.append(
+        run([sys.executable, "scripts/converse-overlays-check.py"], "converse-overlays-check")
+    )
+    results.append(
+        run([sys.executable, "scripts/test_converse_overlays.py"], "converse-overlays-unit")
+    )
+    results.append(
         run([sys.executable, "scripts/trajectory-policy-check.py"], "trajectory-policy-check")
     )
 
@@ -285,6 +296,7 @@ def one_pass(
         ("scripts/illa-desktop-billion-fuzz.py", "illa-desktop-3t", 26),
         ("scripts/aaron-voice-billion-fuzz.py", "aaron-voice-3t", 19),
         ("scripts/public-apis-billion-fuzz.py", "public-apis-3t", 23),
+        ("scripts/converse-billion-fuzz.py", "converse-3t", 29),
     ):
         if name == "embodiment-3t":
             results.append(_maybe_install_embodiment_deps())

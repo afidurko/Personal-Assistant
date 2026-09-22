@@ -326,6 +326,9 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("public-apis-billion-fuzz.py", campaign)
         self.assertIn("test_cam_converse_voice_gate", campaign)
         self.assertIn("presence-check.py", campaign)
+        self.assertIn("converse-billion-fuzz.py", campaign)
+        self.assertTrue((ROOT / "scripts" / "converse-billion-fuzz.py").is_file())
+        self.assertTrue((ROOT / "config" / "persona" / "converse-overlays.json").is_file())
 
     def test_cloud_agent_environment_json_present(self):
         env = ROOT / ".cursor" / "environment.json"

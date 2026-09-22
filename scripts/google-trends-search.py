@@ -326,6 +326,45 @@ def fetch_file(entry: dict, cfg: dict) -> Path:
     return out
 
 
+def search(
+    *,
+    query: str | None = None,
+    year: str | None = None,
+    ext: str | None = None,
+    folder: str | None = None,
+    num: int = 0,
+    offline: bool = True,
+    refresh: bool = False,
+) -> dict:
+    """In-process Trends catalog search (fixture by default — no subprocess)."""
+    cfg = load_config()
+    entries, source = load_catalog(cfg, offline=offline, refresh=refresh)
+    defaults = cfg.get("defaults") or {}
+    limit = num or int(defaults.get("num_results") or 12)
+    results = filter_entries(
+        entries,
+        query=query,
+        year=year,
+        ext=ext,
+        folder=folder,
+    )[:limit]
+    return {
+        "provider": source,
+        "offline": bool(offline or source == "fixture"),
+        "query": query,
+        "year": year,
+        "filters": {"ext": ext, "folder": folder},
+        "total_catalog": len(entries),
+        "returned": len(results),
+        "results": results,
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "integration": "google-trends",
+        "source_repo": "github.com/GoogleTrends/data",
+        "homepage": "https://github.com/GoogleTrends/data",
+        "sense": cfg.get("sense") or "sense.catalog.google_trends",
+    }
+
+
 def doctor(cfg: dict) -> dict:
     report = {
         "ok": True,
@@ -370,7 +409,10 @@ def main() -> int:
         print(json.dumps(report, indent=2))
         return 0 if report.get("ok") else 1
 
-    entries, source = load_catalog(cfg, offline=args.offline, refresh=args.refresh)
+    if args.list_years or args.list_ext or args.fetch:
+        entries, source = load_catalog(cfg, offline=args.offline, refresh=args.refresh)
+    else:
+        entries, source = [], ""
 
     if args.list_years:
         years = sorted({e.get("year") for e in entries if e.get("year")})
@@ -426,30 +468,15 @@ def main() -> int:
         print(json.dumps(payload, indent=2))
         return 0
 
-    defaults = cfg.get("defaults") or {}
-    limit = args.num or int(defaults.get("num_results") or 12)
-    results = filter_entries(
-        entries,
+    payload = search(
         query=args.query,
         year=args.year,
         ext=args.ext,
         folder=args.folder,
-    )[:limit]
-
-    payload = {
-        "provider": source,
-        "offline": bool(args.offline or source == "fixture"),
-        "query": args.query,
-        "year": args.year,
-        "filters": {"ext": args.ext, "folder": args.folder},
-        "total_catalog": len(entries),
-        "returned": len(results),
-        "results": results,
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
-        "integration": "google-trends",
-        "source_repo": "github.com/GoogleTrends/data",
-        "homepage": "https://github.com/GoogleTrends/data",
-    }
+        num=args.num,
+        offline=args.offline,
+        refresh=args.refresh,
+    )
 
     if args.save_vault:
         jp = save_vault(payload, args.query or args.year)

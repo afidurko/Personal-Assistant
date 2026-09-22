@@ -16,6 +16,17 @@ PACK = ROOT / "scripts" / "pack-public-apis-result.py"
 
 
 class PublicApisSearchTests(unittest.TestCase):
+    def test_inprocess_offline_search(self) -> None:
+        from importlib.util import module_from_spec, spec_from_file_location
+
+        spec = spec_from_file_location("public_apis_search", SEARCH)
+        assert spec and spec.loader
+        mod = module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        payload = mod.search(query="weather", offline=True, num=5)
+        self.assertTrue(payload.get("offline"))
+        self.assertGreaterEqual(payload.get("returned", 0), 1)
+
     def test_offline_weather_search(self) -> None:
         out = subprocess.check_output(
             [sys.executable, str(SEARCH), "--query", "weather", "--offline", "--num", "5"],

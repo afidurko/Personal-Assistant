@@ -11,15 +11,23 @@ Issues found were coverage gaps, not connectome/reason property failures.
 4. Campaign units: reason/fast/InfiniteMind + Aaron voice/converse.
 5. `workspace-integration-check` is now inside the static gate.
 
+## Landed add-ons
+
+| Add-on | Status |
+|---|---|
+| `config/persona/converse-overlays.json` | Landed — `speak_from_trace` reads persona config. |
+| `scripts/converse-billion-fuzz.py` | Landed — overlay × intent matrix + catalog smoke. |
+| In-process public-apis / google-trends search | Landed — `cam_inproc.public_apis_search` / `google_trends_search`. |
+| FunASR enroll checksum in voice 3T | Landed — `VoiceStore.enroll_checksum` + reload verify. |
+| dual_stream cache invalidation | Landed — mtime reload + `invalidate_dual_stream_cache()`. |
+
 ## Suggested add-ons (next cycle)
 
 | Add-on | Why |
 |---|---|
-| `config/persona/converse-overlays.json` | Camera/pupil/voice lines live in the server; new presence phrases should not fork `speak_from_trace`. |
-| `scripts/converse-billion-fuzz.py` | Modular overlay × intent matrix at 3T, companion to cam-reason fuzz. |
-| In-process public-apis / google-trends search | Route smokes are in-process; catalog search still shells out. |
-| FunASR enroll checksum in voice 3T | hash_dev covers the contract; live enroll still host-only. |
-| dual_stream cache invalidation | mesh-params is cached in `activity_emit`; hook a reload if Aaron edits tracts live. |
+| Turn-history phrasing | `speak_from_trace(..., history=)` is reserved; use last Aaron line for echo variety. |
+| Live FunASR CAM++ enroll | Checksum covers the store; host enroll still replaces hash_dev. |
+| `quotes.quotable` / `exchange.open_er_api` | Allowlisted add-ons when ops asks. |
 
 ## Do not
 

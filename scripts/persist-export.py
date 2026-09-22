@@ -78,6 +78,8 @@ DEFAULT_INCLUDE = [
     "config/roles/memory-curator.md",
     "config/persona/voice.json",
     "config/persona/vault.json",
+    "config/persona/avatar.json",
+    "config/persona/converse-overlays.json",
     "docs/PERSISTENCE.md",
     "docs/PERSONA.md",
     "docs/SYSTEM_INTEGRATION.md",

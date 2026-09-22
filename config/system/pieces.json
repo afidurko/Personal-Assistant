@@ -49,7 +49,7 @@
       "id": "piece.converse",
       "title": "Cam converse (mic/speak turns)",
       "layer": "presence",
-      "paths": ["server/core/cam-converse.ts", "companions/web/"],
+      "paths": ["server/core/cam-converse.ts", "companions/web/", "config/persona/converse-overlays.json", "scripts/converse_overlays.py"],
       "depends_on": ["piece.system_bridge"],
       "feeds": ["piece.autonomy", "piece.home_cortex"]
     },

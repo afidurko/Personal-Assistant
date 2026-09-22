@@ -15,16 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import activity_emit  # noqa: E402
 
-PARAMS = ROOT / "config" / "connectome" / "mesh-params.json"
-_DUAL: dict | None = None
-
-
 def _dual() -> dict:
-    global _DUAL
-    if _DUAL is None:
-        params = json.loads(PARAMS.read_text(encoding="utf-8")) if PARAMS.exists() else {}
-        _DUAL = params.get("language_dual_stream") or {}
-    return _DUAL
+    return activity_emit.load_language_dual_stream()
 
 
 def route_act(act: str) -> dict:
