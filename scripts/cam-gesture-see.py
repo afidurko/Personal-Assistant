@@ -99,6 +99,10 @@ class Sink:
         segs, intents = self.session.flush()
         self.emit(segs, intents)
         if self.args.post:
+            # One empty frame closes any open run on the server too.
+            self.batch.append(
+                ge.Observation(self.session.engine.last_t_ms + 700, [], self.args.width, self.args.height, self.args.device).to_dict()
+            )
             self.flush_post()
         if self.record:
             self.record.close()

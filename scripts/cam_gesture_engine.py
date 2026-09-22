@@ -705,7 +705,8 @@ def two_hand_motion(a: Track, b: Track) -> tuple[str, float]:
 class PoseFusion:
     """Vote between rules, Kazuhito00 k-NN, Aaron's prototypes, and external labels."""
 
-    W_RULE, W_KNN, W_PROTO, W_EXT = 1.0, 0.6, 1.2, 0.9
+    # Aaron's taught prototypes outweigh rules + k-NN together when the match is close.
+    W_RULE, W_KNN, W_PROTO, W_EXT = 1.0, 0.6, 2.0, 0.9
 
     def __init__(self, vocab: dict, keypoint_knn: KNN | None, prototypes: PrototypeStore | None) -> None:
         self.rules = RulePoseHead()
@@ -1181,7 +1182,22 @@ class GestureSession:
         self.segments: list[cg.Segment] = []
         self.intents: list[cg.Intent] = []
 
+    def reset(self) -> None:
+        """New clock (page reload, new runner process): fresh engine state, same models, same resolver settings."""
+        self.engine = GestureEngine(
+            self.engine.vocab,
+            keypoint_knn=self.engine.keypoint_knn,
+            history_knn=self.engine.history_knn,
+            prototypes=self.engine.prototypes,
+            load_repo_models=False,
+        )
+        self.resolver.buffer.clear()
+        self.resolver.engaged_until = -1
+        self.resolver.last_fired.clear()
+
     def feed(self, obs: Observation) -> tuple[list[cg.Segment], list[cg.Intent]]:
+        if self.engine.frames and obs.t_ms < self.engine.last_t_ms - 1000:
+            self.reset()
         segs = self.engine.feed(obs)
         intents: list[cg.Intent] = []
         for s in segs:

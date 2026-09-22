@@ -6,6 +6,9 @@ data/*.json
 data/runtime/
 data/voicestudio/
 data/higgsfield/
+# Aaron's hand prototypes + landmark recordings stay on his machines
+data/gestures/prototypes.json
+data/gestures/*.jsonl
 !data/.gitkeep
 .DS_Store
 *.log

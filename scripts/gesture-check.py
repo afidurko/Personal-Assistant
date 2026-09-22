@@ -93,6 +93,45 @@ def resolver_demos() -> tuple[list[dict], list[str]]:
     return demos, errors
 
 
+ENGINE_EXPECT = {
+    "engage_grab_collapse": ["gesture.engage", "gesture.grab_collapse"],
+    "swipe_left": ["gesture.engage", "gesture.swipe_left"],
+    "spread_expand": ["gesture.spread_expand"],
+    "handoff_grab": ["gesture.engage", "gesture.handoff_grab"],
+    "two_palms_hold": ["gesture.two_palms_hold"],
+    "circle_repeat": ["gesture.engage", "gesture.circle_repeat"],
+}
+
+
+def engine_demos() -> tuple[list[dict], list[str], list[str]]:
+    """Synthetic 21-landmark streams through cam_gesture_engine → resolver (switch simulated act)."""
+    errors: list[str] = []
+    soft: list[str] = []
+    out: list[dict] = []
+    try:
+        import cam_gesture_engine as ge
+    except Exception as exc:  # pragma: no cover
+        return out, [f"cam_gesture_engine import failed: {exc}"], soft
+    shared = ge.GestureEngine()
+    if not (shared.keypoint_knn and shared.keypoint_knn.ready):
+        soft.append("hand-gesture-mediapipe CSV heads not loaded — rules only (git submodule update --init)")
+    for name, expect in ENGINE_EXPECT.items():
+        ctx = "gallery" if name.startswith("swipe") else "home"
+        sess = ge.GestureSession(
+            engine=ge.GestureEngine(keypoint_knn=shared.keypoint_knn, history_knn=shared.history_knn, load_repo_models=False),
+            context=ctx, identity_ok=True, switch_act=True,
+        )
+        for obs in ge.synth_sequence(ge.DEMO_SCRIPTS[name], fps=30):
+            sess.feed(obs)
+        sess.flush()
+        fired = [i.gesture for i in sess.intents if i.fired]
+        ok = fired == expect
+        if not ok:
+            errors.append(f"engine_demo:{name}: expected {expect} got {fired}")
+        out.append({"demo": name, "segments": [f"{s.pose}:{s.motion}" for s in sess.segments], "fired": fired, "ok": ok})
+    return out, errors, soft
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--json", action="store_true")
@@ -208,6 +247,22 @@ def main() -> int:
     demos, demo_errors = resolver_demos()
     errors.extend(demo_errors)
 
+    # Eyes: the merged engine sees synthetic hands end-to-end, and the companion carries the on-device recognizer.
+    eyes, eye_errors, eye_soft = engine_demos()
+    errors.extend(eye_errors)
+    soft.extend(eye_soft)
+    for rel, needle in (
+        ("companions/web/gestures.js", "/api/spike/hand"),
+        ("companions/web/index.html", "gestures.js"),
+        ("scripts/cam-converse-server.py", "/api/spike/hand"),
+        ("scripts/cam-gesture-see.py", "--camera"),
+    ):
+        path = ROOT / rel
+        if not path.exists():
+            errors.append(f"missing {rel}")
+        elif needle not in path.read_text(encoding="utf-8"):
+            errors.append(f"{rel} does not wire {needle}")
+
     recal = cg.recalibration_flags(learned)
     if recal:
         soft.append(f"needs_recalibration:{','.join(recal)}")
@@ -221,6 +276,7 @@ def main() -> int:
         "repos": repo_status,
         "switch_default": (gsw or {}).get("default"),
         "demos": demos,
+        "eyes": eyes,
         "errors": errors,
         "soft": soft,
     }
@@ -235,6 +291,8 @@ def main() -> int:
         print(f"  repos={report['repos']}")
         for d in demos:
             print(f"  {'OK ' if d['ok'] else 'BAD'} {d['case']} → {[a for a, _ in d['got']]}")
+        for d in eyes:
+            print(f"  {'OK ' if d['ok'] else 'BAD'} eyes:{d['demo']} → {d['segments']} → {d['fired']}")
         for e in errors:
             print(f"  ERR {e}")
         for s in soft:
