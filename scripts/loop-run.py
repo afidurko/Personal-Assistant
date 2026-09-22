@@ -254,7 +254,27 @@ def run_pattern(pattern: dict, level: str, dry_run: bool) -> dict:
     if "pack_mesh" in actions:
         pack_mesh(record)
         record["mesh"] = str(MESH_OUT.relative_to(ROOT))
+    notify_inbox(record)
     return record
+
+
+def notify_inbox(record: dict) -> None:
+    """Best-effort: surface the loop report in Aaron's Cam Live inbox."""
+    try:
+        from cam_messages import MessageCenter
+
+        summary = ", ".join(
+            f"{k}: {'ok' if (v or {}).get('ok', True) else 'FAIL'}"
+            for k, v in (record.get("results") or {}).items()
+        ) or "no actions"
+        MessageCenter().send(
+            f"Loop · {record.get('pattern')} ({record.get('level')})",
+            f"Status {record.get('status')}, score {record.get('score')}. {summary}",
+            kind="report",
+            allow_outbound=False,
+        )
+    except Exception:
+        pass
 
 
 def main() -> int:

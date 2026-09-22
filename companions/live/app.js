@@ -165,6 +165,11 @@ $("cambtn").addEventListener("click", async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
     state.camera = stream;
+    // restore the live view if a still image was analyzed earlier
+    const bg = $("stage").querySelector("img.bg");
+    if (bg) bg.remove();
+    $("video").style.display = "";
+    $("overlay").getContext("2d").clearRect(0, 0, $("overlay").width, $("overlay").height);
     $("video").srcObject = stream;
     await $("video").play();
     $("cambtn").textContent = "Stop camera";
@@ -200,8 +205,21 @@ function drawBoxes(objects, w, h, normalized) {
 }
 
 function showDetections(objects, source) {
-  const out = objects.length
-    ? objects.map((o) => `<div class="det"><b>${o.label || o.class}</b> — ${(o.score * 100) | 0}%${o.position ? ` · ${o.position}` : ""}</div>`).join("")
+  // aggregate identical labels ("2× cup") instead of listing duplicates
+  const grouped = new Map();
+  for (const o of objects) {
+    const key = `${o.label || o.class}|${o.position || ""}`;
+    const g = grouped.get(key);
+    if (g) {
+      g.count += 1;
+      g.score = Math.max(g.score, o.score);
+    } else {
+      grouped.set(key, { label: o.label || o.class, position: o.position, score: o.score, count: 1 });
+    }
+  }
+  const out = grouped.size
+    ? [...grouped.values()].map((g) =>
+        `<div class="det"><b>${g.count > 1 ? `${g.count}× ` : ""}${g.label}</b> — ${(g.score * 100) | 0}%${g.position ? ` · ${g.position}` : ""}</div>`).join("")
     : "<div class='det'>nothing salient detected</div>";
   $("visionout").innerHTML = `<div class="det sub">source: ${source} · ${new Date().toLocaleTimeString()}</div>` + out;
 }
@@ -212,7 +230,10 @@ async function identifyFrom(el, w, h) {
   if (det) {
     const preds = await det.detect(el);
     const objects = preds.map((p) => ({ label: p.class, score: p.score, bbox: p.bbox }));
-    drawBoxes(objects, w, h, false);
+    // coco-ssd boxes are in the element's natural pixels — size the canvas to match
+    const nw = el.videoWidth || el.naturalWidth || w;
+    const nh = el.videoHeight || el.naturalHeight || h;
+    drawBoxes(objects, nw, nh, false);
     showDetections(objects, "coco-ssd (live)");
     await api("/api/vision/detections", { method: "POST", body: { objects, source: "cocossd" } });
     return;
@@ -275,11 +296,12 @@ $("filepick").addEventListener("change", async (ev) => {
       bg.style.width = "100%";
       $("stage").insertBefore(bg, cv);
     }
+    bg.onload = () => URL.revokeObjectURL(img.src);
     bg.src = img.src;
     await identifyFrom(img, w, h);
-    URL.revokeObjectURL(img.src);
   };
   img.src = URL.createObjectURL(file);
+  ev.target.value = ""; // allow re-picking the same file
 });
 
 /* ---------------- tasks ---------------- */
@@ -386,6 +408,18 @@ function refreshAll() {
   refreshTasks();
 }
 
+/* restore the conversation so a page reload doesn't look like amnesia */
+async function restoreHistory() {
+  try {
+    const doc = await api("/api/history");
+    for (const t of (doc.history || []).slice(-20)) {
+      if (t.aaron) addChat("aaron", t.aaron, t.source === "mic" ? "Aaron · voice" : "Aaron");
+      if (t.cam) addChat("cam", t.cam, `Cam${t.engine ? ` · ${t.engine}` : ""}`);
+    }
+  } catch (_) {}
+}
+
+restoreHistory();
 refreshAll();
 setInterval(refreshAll, 3000);
 if ("Notification" in window && Notification.permission === "default") {

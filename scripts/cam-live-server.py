@@ -32,10 +32,17 @@ from urllib.parse import parse_qs, urlparse
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from cam_brain import CamBrain, LLMBackend, Memory  # noqa: E402
+from cam_brain import CamBrain, LLMBackend, Memory, aaron_now  # noqa: E402
 from cam_messages import MessageCenter, outbound_config  # noqa: E402
 from cam_teams import TeamOrchestrator  # noqa: E402
 from cam_vision import VisionState, analyze_rgba_b64  # noqa: E402
+
+try:
+    import activity_emit  # lights up the 3D cortex / neural-mesh viz
+except Exception:  # pragma: no cover
+    activity_emit = None  # type: ignore
+
+BRIEF_STAMP = ROOT / "data" / "runtime" / "cam-brief-last.txt"
 
 WEB = ROOT / "companions" / "live"
 VOICE_GATE_CFG = ROOT / "config" / "identity" / "aaron-voice-gate.json"
@@ -120,6 +127,7 @@ class App:
                 "tasks_running": self.teams.running_count(),
                 "unread_messages": self.messages.unread_count(),
             },
+            brief_provider=self.build_brief,
         )
         self._stop = threading.Event()
         self._heartbeat = threading.Thread(target=self._beat, daemon=True, name="cam-heartbeat")
@@ -140,9 +148,57 @@ class App:
         while not self._stop.is_set():
             try:
                 self.messages.fire_due()
+                self._maybe_daily_brief()
             except Exception:
                 pass
             self._stop.wait(3.0)
+
+    # -- daily brief -----------------------------------------------------------
+
+    def build_brief(self) -> str:
+        now = aaron_now()
+        lines = [f"Good {'morning' if now.hour < 12 else 'afternoon' if now.hour < 18 else 'evening'}, "
+                 f"Aaron — {now.strftime('%A, %B %d')}."]
+        pending = self.messages.pending_reminders()
+        if pending:
+            items = "; ".join(
+                f"{r['what']} (due {r['due'][11:16]} UTC)" for r in sorted(pending, key=lambda r: r["due"])[:5])
+            lines.append(f"Reminders on deck: {items}.")
+        else:
+            lines.append("No reminders pending.")
+        running = self.teams.running_count()
+        done_today = [t for t in self.teams.list_tasks(50)
+                      if t.get("status") == "done" and (t.get("finished") or "")[:10] == now.strftime("%Y-%m-%d")]
+        lines.append(f"Teams: {running} task{'s' if running != 1 else ''} running, "
+                     f"{len(done_today)} finished today.")
+        unread = self.messages.unread_count()
+        if unread:
+            lines.append(f"You have {unread} unread message{'s' if unread != 1 else ''} from me.")
+        st = self.brain.status()
+        lines.append(f"Brain: {'live LLM (' + str(st.get('backend')) + ')' if st.get('live_llm') else 'local cortex'} · "
+                     f"{st['memory_facts']} memories kept.")
+        return " ".join(lines)
+
+    def _maybe_daily_brief(self) -> None:
+        """Send one proactive brief each day at CAM_BRIEF_HOUR (NY time, default 8)."""
+        import os
+
+        hour = int(os.environ.get("CAM_BRIEF_HOUR", "8"))
+        if hour < 0:  # CAM_BRIEF_HOUR=-1 disables
+            return
+        now = aaron_now()
+        if now.hour < hour:
+            return
+        today = now.strftime("%Y-%m-%d")
+        try:
+            last = BRIEF_STAMP.read_text(encoding="utf-8").strip() if BRIEF_STAMP.exists() else ""
+        except OSError:
+            last = ""
+        if last == today:
+            return
+        BRIEF_STAMP.parent.mkdir(parents=True, exist_ok=True)
+        BRIEF_STAMP.write_text(today + "\n", encoding="utf-8")
+        self.messages.send("Daily brief", self.build_brief(), kind="brief")
 
     def state(self) -> dict:
         return {
@@ -161,6 +217,25 @@ class App:
                       "teams": [{"id": t["id"], "name": t["name"]} for t in self.teams.teams]},
             "vision": {"latest": self.vision.latest()},
         }
+
+
+def _emit_mesh_activity(source: str) -> None:
+    """Best-effort spike into the neural-mesh viz so the 3D cortex shows life."""
+    if activity_emit is None:
+        return
+    try:
+        activity_emit.emit(
+            neuron="neuron.language_in", kind="agent", area="area.wernicke",
+            intensity=0.9, tracts=["tract.arcuate", "tract.fat"],
+            reason=f"cam_live_turn:{source}", source="cam_live")
+        if source in {"mic", "speech"}:
+            activity_emit.emit(
+                neuron="neuron.asr", kind="agent", area="area.auditory",
+                intensity=0.85, tracts=["tract.mdlf", "tract.arcuate"],
+                reason="cam_live_mic", source="cam_live")
+        activity_emit.refresh_live_activity()
+    except Exception:
+        pass
 
 
 APP = App()
@@ -283,6 +358,7 @@ class Handler(BaseHTTPRequestHandler):
             turn["accepted"] = True
             turn["gate"] = gate
             turn["speak"] = SPEAK
+            _emit_mesh_activity(payload.get("source", "text"))
             self._json(200, turn)
             return
 

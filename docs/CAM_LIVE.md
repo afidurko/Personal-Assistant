@@ -27,6 +27,14 @@ speech recognition; replies are spoken via speech synthesis):
 - `do you remember my dentist?` — recall
 - `remind me to take out the trash in 20 minutes` / `…at 5pm` — fires a
   message + notification when due
+- `note: pick up dry cleaning Friday` — appends to today's note in
+  `vault/00-Inbox/` (opens in Obsidian, searchable immediately)
+- `weather in Buffalo` — live conditions + today's range via open-meteo
+  (keyless). Say `remember that I live in <city>` once and plain
+  `weather?` uses your city
+- `brief` / `daily brief` — on-demand day summary; Cam also sends one
+  proactive Daily Brief message each morning (default 8am NY; set
+  `CAM_BRIEF_HOUR`, or `-1` to disable)
 - `task: research small language models for the home lab` — dispatches a
   team; subagents work in parallel; results land in Messages
 - `what do you see?` — answers from the latest camera detections
@@ -88,6 +96,37 @@ Each task shows its team, lead, and every subagent's live status and
 elapsed time; `parallel speedup ×N` shows the win from running
 subagents concurrently. Results are synthesized (LLM when available)
 and delivered to Messages.
+
+The Research Team now runs **7 parallel scouts**, including three
+previously-dormant integrations wired in as subagents:
+
+- `scholar-scout` — Google Scholar via `scripts/scholar-search.py`
+  (live with `SERPAPI` key, offline fixtures otherwise)
+- `apis-scout` — the public-apis catalog (`scripts/public-apis-search.py`)
+- `trends-scout` — Google Trends open datasets (`scripts/google-trends-search.py`)
+- plus vault, memory, arXiv, and GitHub scouts
+
+## Sending Cam messages from other scripts and loops
+
+Any cron job, loop, or script can drop a message into your inbox:
+
+```bash
+python3 scripts/cam-notify.py --subject "Nightly triage" --body "3 findings…"
+```
+
+`scripts/loop-run.py` already does this — every loop run now lands a
+report in Messages instead of only a JSONL nobody reads.
+
+## InfiniteMind slow-path reasoning
+
+`cam_reason.py`'s slow path enriches with the InfiniteMind
+logic/abduction adapter when the submodule is present. Run once:
+
+```bash
+git submodule update --init integrations/infinitemind
+```
+
+This also turns the 7 `test_cam_infinitemind` tests green.
 
 ## Voice identity (Aaron-only mode)
 

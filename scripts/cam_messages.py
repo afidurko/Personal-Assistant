@@ -51,10 +51,10 @@ def outbound_config() -> dict:
 
 
 class MessageCenter:
-    def __init__(self, inbox_path: Path = INBOX_PATH,
-                 reminders_path: Path = REMINDERS_PATH) -> None:
-        self.inbox_path = inbox_path
-        self.reminders_path = reminders_path
+    def __init__(self, inbox_path: Path | None = None,
+                 reminders_path: Path | None = None) -> None:
+        self.inbox_path = inbox_path or INBOX_PATH
+        self.reminders_path = reminders_path or REMINDERS_PATH
         self._lock = threading.Lock()
         self.messages: list[dict] = []
         self.reminders: list[dict] = []

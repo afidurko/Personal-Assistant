@@ -1,194 +1,41 @@
 {
-  "at": "2026-09-19T20:07:09Z",
-  "epoch": 1789848429,
+  "at": "2026-09-22T08:37:22Z",
+  "epoch": 1790066242,
   "firing": [
-    {
-      "neuron": "neuron.health_conductor",
-      "kind": "loop",
-      "area": "area.cingulate",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.slf",
-        "tract.cingulum",
-        "tract.forceps_minor"
-      ],
-      "reason": "cam_autonomy:done:Health conductor standing scan",
-      "ts": "2026-09-19T20:06:14.664Z"
-    },
-    {
-      "neuron": "neuron.memory",
-      "kind": "loop",
-      "area": "area.mtl",
-      "intensity": 0.7,
-      "tracts": [
-        "tract.fornix",
-        "tract.cingulum",
-        "tract.cingulum2"
-      ],
-      "reason": "cam_autonomy:done:Consolidate episodic converse into semantic me",
-      "ts": "2026-09-19T20:05:51.829Z"
-    },
-    {
-      "neuron": "neuron.mesh_sync_loop",
-      "kind": "loop",
-      "area": "area.mtl",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.fornix",
-        "tract.cingulum",
-        "tract.cingulum2"
-      ],
-      "reason": "cam_autonomy:done:Refresh live activity feed for cortex fibers",
-      "ts": "2026-09-19T20:06:14.665Z"
-    },
-    {
-      "neuron": "neuron.speak_loop",
-      "kind": "loop",
-      "area": "area.broca",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.arcuate",
-        "tract.af_anterior",
-        "tract.af_posterior",
-        "tract.slf3",
-        "tract.fat"
-      ],
-      "reason": "dual_stream:dorsal:speak",
-      "ts": "2026-09-19T20:06:14.683Z"
-    },
-    {
-      "neuron": "neuron.delegate_burst",
-      "kind": "agent",
-      "area": "area.dlpfc",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.slf",
-        "tract.cingulum",
-        "tract.forceps_minor"
-      ],
-      "reason": "cam_autonomy:running:Sweep spawn bay capacity for subagents",
-      "ts": "2026-09-19T20:06:14.663Z"
-    },
-    {
-      "neuron": "neuron.improve_engine",
-      "kind": "agent",
-      "area": "area.apfc",
-      "intensity": 0.95,
-      "tracts": [
-        "tract.slf",
-        "tract.cingulum",
-        "tract.forceps_minor"
-      ],
-      "reason": "cam_autonomy:running:Propose Cam system enhancement from scan fi",
-      "ts": "2026-09-19T20:06:14.661Z"
-    },
     {
       "neuron": "neuron.language_in",
       "kind": "agent",
       "area": "area.wernicke",
       "intensity": 0.9,
-      "tracts": [
-        "tract.arcuate",
-        "tract.af_anterior",
-        "tract.af_posterior",
-        "tract.slf3",
-        "tract.fat"
-      ],
-      "reason": "converse_turn:text",
-      "ts": "2026-09-19T20:06:14.683Z"
-    },
-    {
-      "neuron": "neuron.comms",
-      "kind": "agent",
-      "area": "area.broca",
-      "intensity": 0.7,
+      "reason": "cam_live_turn:text",
       "tracts": [
         "tract.arcuate",
         "tract.fat"
       ],
-      "reason": "outbound_reply",
-      "ts": "2026-09-19T20:06:14.683Z"
+      "source": "cam_live"
     },
     {
-      "neuron": "neuron.motor_plan",
+      "neuron": "neuron.asr",
       "kind": "agent",
-      "area": "area.premotor",
-      "intensity": 0.65,
+      "area": "area.auditory",
+      "intensity": 0.85,
+      "reason": "cam_live_mic",
       "tracts": [
-        "tract.corticospinal"
+        "tract.mdlf",
+        "tract.arcuate"
       ],
-      "reason": "map:action_proposal",
-      "ts": "2026-09-19T20:06:14.683Z"
-    },
-    {
-      "neuron": "neuron.qa_cycle",
-      "kind": "agent",
-      "area": "area.cingulate",
-      "intensity": 0.65,
-      "tracts": [
-        "tract.cingulum"
-      ],
-      "reason": "map:error_monitoring",
-      "ts": "2026-09-19T20:06:14.683Z"
-    },
-    {
-      "neuron": "neuron.plan_loop",
-      "kind": "agent",
-      "area": "area.apfc",
-      "intensity": 0.65,
-      "tracts": [
-        "tract.ifof"
-      ],
-      "reason": "map:state_prediction",
-      "ts": "2026-09-19T20:06:14.683Z"
-    },
-    {
-      "neuron": "neuron.boundary",
-      "kind": "agent",
-      "area": "area.ofc",
-      "intensity": 0.65,
-      "tracts": [
-        "tract.uncinate"
-      ],
-      "reason": "map:state_evaluation",
-      "ts": "2026-09-19T20:06:14.683Z"
-    },
-    {
-      "neuron": "neuron.workspace_orchestrator",
-      "kind": "agent",
-      "area": "area.dlpfc",
-      "intensity": 0.65,
-      "tracts": [
-        "tract.forceps_minor"
-      ],
-      "reason": "map:task_coordination",
-      "ts": "2026-09-19T20:06:14.683Z"
+      "source": "cam_live"
     },
     {
       "neuron": "neuron.improve_engine",
       "kind": "loop",
       "area": "area.apfc",
-      "intensity": 0.9,
-      "reason": "tasks:1",
+      "intensity": 0.8,
+      "reason": "open_tasks:1",
       "tracts": [
         "tract.ifof",
-        "tract.slf",
-        "tract.cingulum"
-      ],
-      "source": "improve_engine"
-    },
-    {
-      "neuron": "neuron.qa_cycle",
-      "kind": "loop",
-      "area": "area.cingulate",
-      "intensity": 0.85,
-      "reason": "cycle_start:1",
-      "tracts": [
-        "tract.cingulum",
-        "tract.slf",
-        "tract.fornix"
-      ],
-      "source": "qa_loop"
+        "tract.slf"
+      ]
     },
     {
       "neuron": "neuron.submodule_health",
@@ -205,18 +52,16 @@
       ]
     },
     {
-      "neuron": "neuron.tailscale_reach",
+      "neuron": "neuron.priority_boot",
       "kind": "loop",
-      "area": "area.parietal",
+      "area": "area.dlpfc",
       "intensity": 0.55,
-      "reason": "standing:standing_scan",
+      "reason": "standing:boot",
       "tracts": [
-        "tract.af_anterior",
-        "tract.af_posterior",
-        "tract.slf1",
         "tract.slf",
-        "tract.slf3",
-        "tract.mdlf"
+        "tract.ifof",
+        "tract.cingulum",
+        "tract.forceps_minor"
       ]
     },
     {
@@ -277,62 +122,43 @@
       ]
     },
     {
-      "neuron": "neuron.chief",
+      "neuron": "neuron.ops",
       "kind": "agent",
-      "area": "area.dlpfc",
-      "intensity": 0.4,
-      "reason": "standing:always_on",
+      "area": "area.parietal",
+      "intensity": 0.35,
+      "reason": "idle_ready",
       "tracts": [
+        "tract.af_anterior",
+        "tract.af_posterior",
+        "tract.slf1",
         "tract.slf",
-        "tract.ifof",
-        "tract.cingulum",
-        "tract.forceps_minor"
-      ]
-    },
-    {
-      "neuron": "neuron.memory",
-      "kind": "agent",
-      "area": "area.mtl",
-      "intensity": 0.4,
-      "reason": "standing:standing",
-      "tracts": [
-        "tract.cingulum",
-        "tract.fornix"
+        "tract.slf3",
+        "tract.mdlf"
       ]
     }
   ],
   "active_areas": [
-    "area.cingulate",
-    "area.mtl",
-    "area.broca",
-    "area.dlpfc",
     "area.apfc",
-    "area.wernicke",
-    "area.premotor",
-    "area.ofc",
-    "area.parietal"
+    "area.auditory",
+    "area.cingulate",
+    "area.dlpfc",
+    "area.parietal",
+    "area.wernicke"
   ],
   "active_tracts": [
-    "tract.slf",
-    "tract.cingulum",
-    "tract.forceps_minor",
-    "tract.fornix",
-    "tract.cingulum2",
-    "tract.arcuate",
     "tract.af_anterior",
     "tract.af_posterior",
-    "tract.slf3",
+    "tract.arcuate",
+    "tract.cingulum",
     "tract.fat",
-    "tract.corticospinal",
+    "tract.forceps_minor",
+    "tract.fornix",
     "tract.ifof",
-    "tract.uncinate",
     "tract.mdlf",
-    "tract.slf1"
+    "tract.slf",
+    "tract.slf1",
+    "tract.slf3"
   ],
-  "firing_count": 23,
-  "neuron_count": 42,
-  "standing": true,
-  "note": "system bridge organism bus",
   "recent_tasks": [
     {
       "type": "synapse",
@@ -411,5 +237,7 @@
     }
   ],
   "health_overall": "warning",
-  "improve_tasks": 1
+  "improve_tasks": 1,
+  "neuron_count": 47,
+  "firing_count": 10
 }

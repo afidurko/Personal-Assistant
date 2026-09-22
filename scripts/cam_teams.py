@@ -23,6 +23,7 @@ Stdlib only.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
 import threading
@@ -57,7 +58,8 @@ BUILTIN_TEAMS: list[dict] = [
         "keywords": ["research", "paper", "arxiv", "find out", "learn", "investigate",
                      "look up", "study", "explore", "compare"],
         "lead_role": "research-lead",
-        "workers": ["vault-scout", "memory-scout", "arxiv-scout", "github-scout"],
+        "workers": ["vault-scout", "memory-scout", "arxiv-scout", "github-scout",
+                    "scholar-scout", "apis-scout", "trends-scout"],
     },
     {
         "id": "team.memory",
@@ -179,6 +181,97 @@ def work_github_scout(goal: str, ctx: dict) -> dict:
                 "degraded": str(exc)[:120]}
 
 
+_HYPHEN_MODS: dict[str, object] = {}
+
+
+def _load_tool(filename: str):
+    """Import one of the hyphen-named tool scripts (scholar-search.py etc.)."""
+    if filename in _HYPHEN_MODS:
+        return _HYPHEN_MODS[filename]
+    path = ROOT / "scripts" / filename
+    spec = importlib.util.spec_from_file_location(filename.replace("-", "_").rstrip(".py"), path)
+    if spec is None or spec.loader is None:
+        raise ImportError(filename)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    _HYPHEN_MODS[filename] = mod
+    return mod
+
+
+def _goal_terms(goal: str, n: int = 4) -> str:
+    stop = {"research", "find", "look", "task", "about", "into", "with", "what", "the"}
+    words = [w for w in re.findall(r"[a-z0-9]{3,}", goal.lower()) if w not in stop]
+    return " ".join(words[:n])
+
+
+def work_scholar_scout(goal: str, ctx: dict) -> dict:
+    """Google Scholar via scripts/scholar-search.py (SerpAPI live, fixture offline)."""
+    try:
+        sch = _load_tool("scholar-search.py")
+        query = _goal_terms(goal) or "ai assistants"
+        cfg = sch.load_config()
+        payload = None
+        if (cfg.get("serpapi_key") or "").strip():
+            try:
+                payload = sch.fetch_serpapi({"engine": "google_scholar", "q": query})
+            except Exception:
+                payload = None
+        if payload is None:
+            payload = sch.offline_payload(query, None)
+        results = (payload.get("organic_results") or payload.get("results") or [])[:5]
+        findings = []
+        for r in results:
+            title = r.get("title") or r.get("name") or "untitled"
+            snippet = (r.get("snippet") or "")[:100]
+            findings.append(f"{title} — {snippet}".strip(" —"))
+        mode = "live SerpAPI" if not payload.get("offline") else "offline fixture"
+        return {"summary": f"{len(findings)} scholar results ({mode})", "findings": findings}
+    except Exception as exc:
+        return {"summary": "scholar tool unavailable", "findings": [], "degraded": str(exc)[:120]}
+
+
+def work_apis_scout(goal: str, ctx: dict) -> dict:
+    """Free/public API catalog via scripts/public-apis-search.py."""
+    try:
+        pas = _load_tool("public-apis-search.py")
+        cfg = pas.load_config()
+        try:
+            text, provider = pas.read_catalog_text(cfg, offline=False, refresh=False)
+        except Exception:
+            text, provider = pas.read_catalog_text(cfg, offline=True, refresh=False)
+        entries = pas.parse_catalog(text)
+        hits = pas.filter_entries(
+            entries, query=_goal_terms(goal), category=None, auth=None,
+            https_only=False, cors=None)[:5]
+        findings = [
+            f"{e.get('name')} ({e.get('category')}, auth: {e.get('auth') or 'none'}): "
+            f"{(e.get('description') or '')[:90]}" for e in hits]
+        if provider.startswith("fixture"):
+            provider = "offline fixture"
+        return {"summary": f"{len(findings)} public APIs matched ({provider})",
+                "findings": findings}
+    except Exception as exc:
+        return {"summary": "public-apis tool unavailable", "findings": [], "degraded": str(exc)[:120]}
+
+
+def work_trends_scout(goal: str, ctx: dict) -> dict:
+    """Google Trends open datasets via scripts/google-trends-search.py."""
+    try:
+        gts = _load_tool("google-trends-search.py")
+        cfg = gts.load_config()
+        try:
+            entries, provider = gts.load_catalog(cfg, offline=False, refresh=False)
+        except Exception:
+            entries, provider = gts.load_catalog(cfg, offline=True, refresh=False)
+        hits = gts.filter_entries(entries, query=_goal_terms(goal),
+                                  year=None, ext=None, folder=None)[:5]
+        findings = [f"{e.get('name')} ({e.get('year') or 'n/a'}): {e.get('path')}" for e in hits]
+        return {"summary": f"{len(findings)} trends datasets matched ({provider})",
+                "findings": findings}
+    except Exception as exc:
+        return {"summary": "google-trends tool unavailable", "findings": [], "degraded": str(exc)[:120]}
+
+
 def work_repo_scanner(goal: str, ctx: dict) -> dict:
     counts: dict[str, int] = {}
     total = 0
@@ -230,6 +323,9 @@ WORKERS: dict[str, Callable[[str, dict], dict]] = {
     "memory-scout": work_memory_scout,
     "arxiv-scout": work_arxiv_scout,
     "github-scout": work_github_scout,
+    "scholar-scout": work_scholar_scout,
+    "apis-scout": work_apis_scout,
+    "trends-scout": work_trends_scout,
     "repo-scanner": work_repo_scanner,
     "runtime-auditor": work_runtime_auditor,
     "drafter": work_drafter,
@@ -238,7 +334,7 @@ WORKERS: dict[str, Callable[[str, dict], dict]] = {
 # roles from config/teams/*.json map onto the nearest real worker
 ROLE_ALIASES = {
     "agi-scout": "arxiv-scout",
-    "agi-analyst": "vault-scout",
+    "agi-analyst": "scholar-scout",
     "agi-synthesist": "drafter",
     "capability-broker": "runtime-auditor",
     "qa": "runtime-auditor",

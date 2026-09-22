@@ -245,12 +245,20 @@ def vault_search(query: str, limit: int = 4, vault: Path = VAULT) -> list[dict]:
 # --------------------------------------------------------------------------
 
 class LLMBackend:
-    """Picks the first reachable chat-completion backend, if any."""
+    """Picks the first reachable chat-completion backend, if any.
+
+    Re-probes periodically while unresolved, so starting Ollama (or
+    exporting a key and restarting a local server) is picked up without
+    restarting Cam.
+    """
+
+    RECHECK_SECONDS = 60.0
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._resolved: dict | None = None
         self._checked = False
+        self._checked_at = 0.0
 
     def _candidates(self) -> list[dict]:
         cands: list[dict] = []
@@ -288,10 +296,16 @@ class LLMBackend:
         return cands
 
     def resolve(self, force: bool = False) -> dict | None:
+        import time as _time
+
         with self._lock:
             if self._checked and not force:
-                return self._resolved
+                if self._resolved is not None:
+                    return self._resolved
+                if _time.monotonic() - self._checked_at < self.RECHECK_SECONDS:
+                    return None
             self._checked = True
+            self._checked_at = _time.monotonic()
             self._resolved = None
             for cand in self._candidates():
                 probe = cand.get("probe")
@@ -400,6 +414,86 @@ def parse_due(text: str, now: datetime | None = None) -> datetime | None:
 
 
 # --------------------------------------------------------------------------
+# Vault notes (Obsidian inbox)
+# --------------------------------------------------------------------------
+
+NOTES_DIR = VAULT / "00-Inbox"
+
+
+def save_note(text: str, notes_dir: Path | None = None) -> Path:
+    """Append a timestamped note to today's Cam-Notes file in the vault inbox.
+
+    Notes are immediately findable by vault_search, so Cam can quote them
+    back later, and they open in Obsidian like any other vault page.
+    """
+    notes_dir = notes_dir or NOTES_DIR
+    day = aaron_now().strftime("%Y-%m-%d")
+    path = notes_dir / f"Cam-Notes-{day}.md"
+    notes_dir.mkdir(parents=True, exist_ok=True)
+    stamp = aaron_now().strftime("%H:%M")
+    if not path.exists():
+        path.write_text(f"# Cam notes — {day}\n\n", encoding="utf-8")
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(f"- **{stamp}** {text.strip()}\n")
+    return path
+
+
+# --------------------------------------------------------------------------
+# Weather (open-meteo, no API key; graceful when offline)
+# --------------------------------------------------------------------------
+
+_WMO_CODES = {
+    0: "clear sky", 1: "mostly clear", 2: "partly cloudy", 3: "overcast",
+    45: "fog", 48: "icy fog", 51: "light drizzle", 53: "drizzle", 55: "heavy drizzle",
+    61: "light rain", 63: "rain", 65: "heavy rain", 66: "freezing rain",
+    71: "light snow", 73: "snow", 75: "heavy snow", 77: "snow grains",
+    80: "rain showers", 81: "rain showers", 82: "violent rain showers",
+    85: "snow showers", 86: "snow showers", 95: "thunderstorm",
+    96: "thunderstorm with hail", 99: "thunderstorm with heavy hail",
+}
+
+
+def _fetch_json(url: str, timeout: float = 6.0) -> dict:
+    req = urllib.request.Request(url, headers={"User-Agent": "cam-live/1.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def get_weather(city: str) -> dict:
+    """Current conditions + today's range for a city via open-meteo (free, keyless)."""
+    import urllib.parse as _p
+
+    try:
+        geo = _fetch_json(
+            "https://geocoding-api.open-meteo.com/v1/search?count=1&name=" + _p.quote(city))
+        results = geo.get("results") or []
+        if not results:
+            return {"ok": False, "error": f"city_not_found:{city}"}
+        place = results[0]
+        wx = _fetch_json(
+            "https://api.open-meteo.com/v1/forecast"
+            f"?latitude={place['latitude']}&longitude={place['longitude']}"
+            "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m"
+            "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max"
+            "&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=1")
+        cur = wx.get("current") or {}
+        daily = wx.get("daily") or {}
+        return {
+            "ok": True,
+            "place": f"{place.get('name')}, {place.get('admin1') or place.get('country', '')}".strip(", "),
+            "temp_f": cur.get("temperature_2m"),
+            "feels_f": cur.get("apparent_temperature"),
+            "conditions": _WMO_CODES.get(int(cur.get("weather_code") or 0), "unknown"),
+            "wind_mph": cur.get("wind_speed_10m"),
+            "high_f": (daily.get("temperature_2m_max") or [None])[0],
+            "low_f": (daily.get("temperature_2m_min") or [None])[0],
+            "precip_pct": (daily.get("precipitation_probability_max") or [None])[0],
+        }
+    except (urllib.error.URLError, OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        return {"ok": False, "error": "network_unreachable", "detail": str(exc)[:120]}
+
+
+# --------------------------------------------------------------------------
 # The brain
 # --------------------------------------------------------------------------
 
@@ -414,6 +508,12 @@ _TASK_RE = re.compile(
 _SEE_RE = re.compile(r"\b(what (?:do|can) you see|describe (?:the|what's on) camera|"
                      r"what am i (?:holding|looking at)|any objects)\b", re.I)
 _TIME_RE = re.compile(r"\b(what time|what's the time|what day|what date|today'?s date)\b", re.I)
+_NOTE_RE = re.compile(r"^(?:cam[,\s]+)?(?:note|jot down|write down)\s*[:\-]\s*(.+)$|"
+                      r"^(?:cam[,\s]+)?(?:jot down|write down)\s+(.+)$", re.I)
+_WEATHER_RE = re.compile(r"\bweather\b(?:.*?\b(?:in|for|at)\s+([a-z .'\-]+?))?\s*[?.!]*$", re.I)
+_LIVE_IN_RE = re.compile(r"\blive(?:s)? in\s+([a-z .'\-]+)", re.I)
+_BRIEF_RE = re.compile(r"^(?:cam[,\s]+)?(?:daily )?brief(?:ing)?(?: me)?\s*[?.!]*$|"
+                       r"\bmorning brief\b|\bdaily summary\b", re.I)
 _STATUS_RE = re.compile(r"\b(status|system (?:check|pulse)|are you (?:ok|online|working)|health)\b", re.I)
 _GREET_RE = re.compile(r"^(hi|hello|hey|good (morning|afternoon|evening))\b", re.I)
 _MATH_HINT_RE = re.compile(r"^[\s\d(.\-]|what is\s+[\d(]|calculate|compute", re.I)
@@ -432,6 +532,7 @@ class CamBrain:
         reminder_create: Callable[[str, datetime], dict] | None = None,
         vision_latest: Callable[[], dict | None] | None = None,
         status_provider: Callable[[], dict] | None = None,
+        brief_provider: Callable[[], str] | None = None,
     ) -> None:
         self.memory = memory or Memory()
         self.llm = llm or LLMBackend()
@@ -439,6 +540,7 @@ class CamBrain:
         self.reminder_create = reminder_create
         self.vision_latest = vision_latest
         self.status_provider = status_provider
+        self.brief_provider = brief_provider
         self.history: list[dict] = []
         self._lock = threading.Lock()
 
@@ -510,6 +612,23 @@ class CamBrain:
                 return f"Done — I dropped {removed} matching {'memory' if removed == 1 else 'memories'}."
             return "I didn't have anything matching that to forget."
 
+        m = _NOTE_RE.match(text)
+        if m:
+            note = (m.group(1) or m.group(2) or "").strip()
+            if note:
+                path = save_note(note)
+                try:
+                    shown = str(path.relative_to(ROOT))
+                except ValueError:
+                    shown = str(path)
+                turn["actions"].append({"kind": "note", "path": shown})
+                return (f"Noted — I wrote it into your vault inbox "
+                        f"({path.name}). It's searchable right away.")
+
+        if _BRIEF_RE.search(text) and self.brief_provider:
+            turn["actions"].append({"kind": "brief"})
+            return self.brief_provider()
+
         if _RECALL_RE.search(text):
             hits = self.memory.recall(text)
             turn["actions"].append({"kind": "recall", "hits": len(hits)})
@@ -543,6 +662,36 @@ class CamBrain:
             return (f"On it. I put “{m.group(1)[:80]}” with the {job.get('team_name', job.get('team'))} — "
                     f"{agents} subagents are working it in parallel now. "
                     "I'll drop the results in your messages when they finish.")
+
+        m = _WEATHER_RE.search(text)
+        if m:
+            city = (m.group(1) or "").strip(" .?!")
+            if not city:
+                for f in self.memory.facts:
+                    hit = _LIVE_IN_RE.search(f.get("text", ""))
+                    if hit:
+                        city = hit.group(1).strip(" .?!")
+                        break
+            if not city:
+                return ("Which city? Say “weather in <city>” — or tell me once, "
+                        "“remember that I live in <city>”, and I'll default to it.")
+            wx = get_weather(city)
+            turn["actions"].append({"kind": "weather", "city": city, "ok": wx.get("ok")})
+            if wx.get("ok"):
+                parts = [f"{wx['place']}: {round(wx['temp_f'])}°F and {wx['conditions']}"]
+                if wx.get("feels_f") is not None:
+                    parts.append(f"feels like {round(wx['feels_f'])}°F")
+                if wx.get("high_f") is not None and wx.get("low_f") is not None:
+                    parts.append(f"today {round(wx['low_f'])}–{round(wx['high_f'])}°F")
+                if wx.get("precip_pct") is not None:
+                    parts.append(f"{round(wx['precip_pct'])}% chance of precipitation")
+                if wx.get("wind_mph") is not None:
+                    parts.append(f"wind {round(wx['wind_mph'])} mph")
+                return "Right now in " + ", ".join(parts) + "."
+            if wx.get("error", "").startswith("city_not_found"):
+                return f"I couldn't find a city called “{city}” — try the nearest bigger town?"
+            return ("I can't reach the weather service from this network right now "
+                    "(open-meteo.com). On your machine with internet this works keyless.")
 
         if _SEE_RE.search(text) and self.vision_latest:
             latest = self.vision_latest()

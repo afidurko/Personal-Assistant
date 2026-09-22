@@ -130,6 +130,134 @@ class TestBrain(unittest.TestCase):
             self.assertTrue(t["cam"] and len(t["cam"]) > 4, text)
 
 
+class TestNewSkills(unittest.TestCase):
+    """Notes → vault, weather (mocked), daily brief, LLM re-probe."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.base = Path(self.tmp.name)
+        self._orig_notes = cam_brain.NOTES_DIR
+        cam_brain.NOTES_DIR = self.base / "00-Inbox"
+        self.brain = cam_brain.CamBrain(
+            memory=cam_brain.Memory(self.base / "mem.json"),
+            brief_provider=lambda: "Good morning, Aaron — 2 reminders, 1 task running.",
+        )
+
+    def tearDown(self) -> None:
+        cam_brain.NOTES_DIR = self._orig_notes
+        self.tmp.cleanup()
+
+    def test_note_written_to_vault_inbox(self) -> None:
+        t = self.brain.respond("note: pick up dry cleaning on Friday")
+        self.assertIn("vault inbox", t["cam"])
+        files = list((self.base / "00-Inbox").glob("Cam-Notes-*.md"))
+        self.assertEqual(len(files), 1)
+        self.assertIn("pick up dry cleaning on Friday", files[0].read_text(encoding="utf-8"))
+
+    def test_brief_command(self) -> None:
+        t = self.brain.respond("brief")
+        self.assertIn("Good morning, Aaron", t["cam"])
+        t2 = self.brain.respond("daily brief")
+        self.assertIn("Good morning, Aaron", t2["cam"])
+
+    def test_weather_with_mock(self) -> None:
+        from unittest.mock import patch
+
+        def fake_fetch(url, timeout=6.0):
+            if "geocoding" in url:
+                return {"results": [{"name": "Buffalo", "admin1": "New York",
+                                     "latitude": 42.9, "longitude": -78.9}]}
+            return {"current": {"temperature_2m": 61.0, "apparent_temperature": 59.0,
+                                "weather_code": 2, "wind_speed_10m": 8.0},
+                    "daily": {"temperature_2m_max": [68.0], "temperature_2m_min": [51.0],
+                              "precipitation_probability_max": [20]}}
+
+        with patch.object(cam_brain, "_fetch_json", side_effect=fake_fetch):
+            t = self.brain.respond("what's the weather in Buffalo?")
+        self.assertIn("Buffalo", t["cam"])
+        self.assertIn("61", t["cam"])
+        self.assertIn("partly cloudy", t["cam"])
+
+    def test_weather_city_from_memory(self) -> None:
+        from unittest.mock import patch
+
+        self.brain.memory.remember("I live in Buffalo")
+        with patch.object(cam_brain, "_fetch_json",
+                          side_effect=lambda url, timeout=6.0: {"results": []}):
+            t = self.brain.respond("weather?")
+        self.assertIn("Buffalo", t["cam"])  # asked open-meteo for the remembered city
+
+    def test_weather_offline_graceful(self) -> None:
+        import urllib.error
+        from unittest.mock import patch
+
+        with patch.object(cam_brain, "_fetch_json",
+                          side_effect=urllib.error.URLError("blocked")):
+            t = self.brain.respond("weather in Buffalo")
+        self.assertIn("can't reach the weather service", t["cam"])
+
+    def test_llm_reprobe_after_cooldown(self) -> None:
+        llm = cam_brain.LLMBackend()
+        llm._candidates = lambda: []  # nothing configured
+        self.assertIsNone(llm.resolve())
+        llm._candidates = lambda: [{"name": "fake", "kind": "openai",
+                                    "url": "http://x/v1/chat/completions",
+                                    "key": "", "model": "m"}]
+        self.assertIsNone(llm.resolve())          # cached negative inside cooldown
+        llm._checked_at = 0.0                      # cooldown elapsed
+        self.assertIsNotNone(llm.resolve())        # re-probe finds the new backend
+
+
+class TestNewWorkers(unittest.TestCase):
+    """Scholar / public-apis / google-trends scouts run (offline fixtures OK)."""
+
+    def test_scholar_scout(self) -> None:
+        out = cam_teams.work_scholar_scout("research agent memory papers", {})
+        self.assertIn("scholar", out["summary"])
+        self.assertIsInstance(out["findings"], list)
+
+    def test_apis_scout(self) -> None:
+        out = cam_teams.work_apis_scout("find a weather api", {})
+        self.assertIn("APIs", out["summary"])
+        self.assertTrue(out["findings"])  # fixture catalog has weather entries
+
+    def test_trends_scout(self) -> None:
+        out = cam_teams.work_trends_scout("election trends data", {})
+        self.assertIn("trends", out["summary"])
+        self.assertIsInstance(out["findings"], list)
+
+    def test_research_team_includes_new_scouts(self) -> None:
+        team = cam_teams.pick_team("research new topics")
+        self.assertIn("scholar-scout", team["workers"])
+        self.assertIn("apis-scout", team["workers"])
+        self.assertIn("trends-scout", team["workers"])
+
+
+class TestNotifyCLI(unittest.TestCase):
+    def test_notify_writes_inbox(self) -> None:
+        import importlib.util
+
+        tmp = tempfile.TemporaryDirectory()
+        base = Path(tmp.name)
+        orig_inbox, orig_rem = cam_messages.INBOX_PATH, cam_messages.REMINDERS_PATH
+        cam_messages.INBOX_PATH = base / "inbox.jsonl"
+        cam_messages.REMINDERS_PATH = base / "rem.json"
+        try:
+            spec = importlib.util.spec_from_file_location(
+                "cam_notify", ROOT / "scripts" / "cam-notify.py")
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            rc = mod.main(["--subject", "Loop report", "--body", "all green",
+                           "--no-outbound"])
+            self.assertEqual(rc, 0)
+            text = (base / "inbox.jsonl").read_text(encoding="utf-8")
+            self.assertIn("Loop report", text)
+            self.assertIn("all green", text)
+        finally:
+            cam_messages.INBOX_PATH, cam_messages.REMINDERS_PATH = orig_inbox, orig_rem
+            tmp.cleanup()
+
+
 class TestMessages(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
