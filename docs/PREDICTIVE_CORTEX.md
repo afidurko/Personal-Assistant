@@ -42,7 +42,37 @@ Schema (`make_experience`): `ts`, `source`, `context{sense, hotspot, center, pat
 | `confidence` | 1 − credible-interval width |
 | `advice` | `expect_success` · `expect_friction` · `thin_evidence` · `no_experience_yet`; `suggest_qa_hold`, `suggest_gather_more` (advisory) |
 
-Calibration (`--report`) is **prequential** — each experience is predicted before it is revealed: Brier, log loss, ECE (10 bins) with a reliability table, AUROC, Brier skill against a Laplace running base rate, score MAE and 90% interval coverage, mean surprise, and a verdict (`not_yet_skillful` / `skillful_but_miscalibrated` / `skillful_and_calibrated`).
+Calibration (`--report`) is **prequential** — each experience is predicted before it is revealed: Brier, log loss, ECE (10 bins) with a reliability table, AUROC, Brier skill against a Laplace running base rate, score MAE and 90% interval coverage, mean surprise, abstention rate, per-hotspot calibration parity, and a verdict (`insufficient_sample` / `not_yet_skillful` / `skillful_but_miscalibrated` / `skillful_and_calibrated`).
+
+## Failure modes and survival measures
+
+Each of these would have made the first draft wrong or dead; each has a countermeasure in `cam_experience.py` and a unit test in `SurvivalTests`.
+
+| Failure | Measure |
+|---|---|
+| Same run in `loop-run-log.md` **and** `loop-runs/latest.json` counted twice | cross-source `dedupe` on `(ts, hotspot, pattern)`; same-source same-second records stay distinct (two QA cycles really did share a second) |
+| Unparseable timestamp weighted as fresh (decay 1.0) | `unknown_ts_weight` 0.25; `coverage.unknown_timestamps` |
+| Regime shift hidden by a 14-day half-life | EWMA of reward-prediction error per context → `drift_suspected`; posterior counts scaled by `drift_inflation` (interval widens) until surprise settles |
+| Parent rate dominated by one child leaks to siblings (`center.qa` ≈ QA cycles) | parent with ≤1 distinct child passes `backoff_single_child_factor` of its prior strength |
+| Crashed runs write no distillate → survivorship bias | `coverage.stale_contexts` (no record for `stale_after_days`), limitation stated on every card |
+| One corrupt source file kills the load | per-source isolation → `coverage.source_errors` |
+| Runtime log grows forever | rotation at `max_runtime_rows`, keep `keep_runtime_rows` |
+| Writes continue during a kill | `CAM_KILL=1` refuses `--record`, `--forget-*`, distillates (exit 3); reads stay allowed |
+| arXiv scan hammers six categories back-to-back → throttled | `min_interval_s` 3.0 in `agi-research-scan.py`, asserted by the ethics gate |
+| Verdict trusted on 59 records with 2 failures | `insufficient_sample` until `min_n_for_verdict` and `min_outcomes_each_class` |
+
+## Ethics
+
+Config: `config/ethics/research-ethics.json` · gate: `scripts/research-ethics-check.py` (in `ci-static-gate`) · brief: `vault/04-Research/2026-09-22-Research-Ethics-Measures.md`.
+
+- **Honesty / abstention** — below `abstention.min_effective_n` or above `max_interval_width`, `advice.stance = abstain`; `narration` is a hedged sentence that always carries the range, never a bare number.
+- **Human primacy / protected contexts** — careers, outbound, Inkbox, money, identity, voice → `human_judgment_required`; no `suggest_qa_hold`; narration ends "the call is yours".
+- **No persons as targets** — contexts are Cam's own hotspots/patterns; protected list blocks people-facing motors.
+- **Data minimisation** — `redact()` strips emails, phones, tokens, bearer strings, SSNs on write; `redacted` marks the record; the gate scans tracked artefacts.
+- **Right to forget** — `--forget-ref` / `--forget-key` rewrite the runtime log.
+- **Fairness of confidence** — `calibration.parity` reports ECE per hotspot and flags gaps > 0.15.
+- **Anti-Goodhart** — scores are reported, never optimised; P3 needs a held-out unbiased slice and `switch.cam_enhance`.
+- **Source respect / reproducibility** — arXiv etiquette, identifying User-Agent, `## Sources` with accessed dates on every brief since 2026-09-22, versioned schema, prequential protocol.
 
 ## Run
 
@@ -51,8 +81,12 @@ python3 scripts/cam-predict.py --report                                   # live
 python3 scripts/cam-predict.py --report --offline                         # fixture only
 python3 scripts/cam-predict.py --hotspot hotspot.loop_engineering --pattern daily-triage --sense sense.loop.tick
 python3 scripts/cam-predict.py --sense sense.experience.outcome --goal "predict outcome from experience"
+python3 scripts/cam-predict.py --narrate --hotspot hotspot.coding         # only the hedged sentence
 python3 scripts/cam-predict.py --record --ok --hotspot hotspot.coding --score 88 --notes "PR green"
+python3 scripts/cam-predict.py --forget-ref "run-42"                      # right to forget
+CAM_KILL=1 python3 scripts/cam-predict.py --record --ok --hotspot x       # exit 3, nothing written
 python3 scripts/predictive-cortex-check.py                                # wiring + offline smoke (in ci-static-gate)
+python3 scripts/research-ethics-check.py                                  # ethics gate (in ci-static-gate)
 ```
 
 MCP: `predict_experience {goal|hotspot|pattern, sense, report, offline}` in `scripts/cam-mcp-server.py`. Tool registry: `tool.predict.experience` (all roles and subagents, `switch.dl_local`).

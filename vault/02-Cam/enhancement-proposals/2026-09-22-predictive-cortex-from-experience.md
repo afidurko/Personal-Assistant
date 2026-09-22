@@ -41,7 +41,10 @@ Cam already records what she does (loop runs, QA cycles, reasoning traces) but n
 1. Bias `pick_hotspot` by `p_success` when candidates tie.  
 2. Let `center.qa` insert a hold when `advice.suggest_qa_hold` is true for motor plans touching `motor.cline`, `motor.jobs`, `motor.outbound`.  
 3. Auto-emit experiences from `loop-run.py`, `qa-loop.py`, `cam_reason.py`.  
-4. Criteria before asking: ≥ 200 real experiences, `brier_skill > 0`, `ece < 0.1` on the live report.
+4. Criteria before asking: ≥ 200 real experiences, `brier_skill > 0`, `ece < 0.1` on the live report, `calibration.parity.flagged` empty, `abstention_rate < 0.5`.  
+5. Anti-Goodhart conditions for the closed loop: an exploration floor (never route away from a context with `n_effective < 3`), a held-out unbiased slice (≥ 10% of runs ignore predictions) so calibration stays measurable, and protected contexts (`config/ethics/research-ethics.json`) excluded from any automatic hold or bias.
+
+**Ethics + survival (this batch, no gate needed — constrains, never widens)** — `config/ethics/research-ethics.json`, `scripts/research-ethics-check.py` in `ci-static-gate`; dedup, unknown-timestamp discounting, drift inflation, diversity-aware backoff, staleness coverage, source isolation, log rotation, `CAM_KILL`; redaction, protected contexts, abstention + hedged narration, calibration parity, right to forget, prediction card. Details: `vault/04-Research/2026-09-22-Research-Ethics-Measures.md`.
 
 ```bash
 python3 scripts/cam-enhance-propose.py --proposal vault/02-Cam/enhancement-proposals/2026-09-22-predictive-cortex-from-experience.md
@@ -52,4 +55,5 @@ python3 scripts/cam-enhance-propose.py --proposal ... --aaron-approve
 ## Apply record
 
 - **P0 implemented (advisory)** 2026-09-22 — this checkout; verify with `python3 scripts/predictive-cortex-check.py` and `python3 scripts/cam-predict.py --report`.
+- **Survival + ethics hardened** 2026-09-22 — verify with `python3 scripts/research-ethics-check.py` and `python3 -m unittest scripts.test_cam_experience` (`SurvivalTests`, `EthicsTests`).
 - P3: pending Aaron.

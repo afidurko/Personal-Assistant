@@ -73,7 +73,9 @@ python3 scripts/memorybear-check.py
 # Predictive cortex — outcome prediction from Cam's own experience (advisory)
 python3 scripts/cam-predict.py --report
 python3 scripts/cam-predict.py --hotspot hotspot.loop_engineering --pattern daily-triage --sense sense.loop.tick
+python3 scripts/cam-predict.py --narrate --hotspot hotspot.coding      # the hedged sentence Cam would say
 python3 scripts/predictive-cortex-check.py
+python3 scripts/research-ethics-check.py                               # ethics gate: redaction, protected contexts, abstention, parity
 # Overall system pulse (all pieces on one bus)
 python3 scripts/cam-system.py --smoke
 # HAAS→Cam privilege + boss/worker contracts
