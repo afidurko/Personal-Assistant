@@ -165,27 +165,27 @@ class TestNewSkills(unittest.TestCase):
 
         def fake_fetch(url, timeout=6.0):
             if "geocoding" in url:
-                return {"results": [{"name": "Buffalo", "admin1": "New York",
-                                     "latitude": 42.9, "longitude": -78.9}]}
+                return {"results": [{"name": "Berlin", "admin1": "Land Berlin",
+                                     "latitude": 52.52, "longitude": 13.41}]}
             return {"current": {"temperature_2m": 61.0, "apparent_temperature": 59.0,
                                 "weather_code": 2, "wind_speed_10m": 8.0},
                     "daily": {"temperature_2m_max": [68.0], "temperature_2m_min": [51.0],
                               "precipitation_probability_max": [20]}}
 
         with patch.object(cam_brain, "_fetch_json", side_effect=fake_fetch):
-            t = self.brain.respond("what's the weather in Buffalo?")
-        self.assertIn("Buffalo", t["cam"])
+            t = self.brain.respond("what's the weather in Berlin?")
+        self.assertIn("Berlin", t["cam"])
         self.assertIn("61", t["cam"])
         self.assertIn("partly cloudy", t["cam"])
 
     def test_weather_city_from_memory(self) -> None:
         from unittest.mock import patch
 
-        self.brain.memory.remember("I live in Buffalo")
+        self.brain.memory.remember("I live in Berlin")
         with patch.object(cam_brain, "_fetch_json",
                           side_effect=lambda url, timeout=6.0: {"results": []}):
             t = self.brain.respond("weather?")
-        self.assertIn("Buffalo", t["cam"])  # asked open-meteo for the remembered city
+        self.assertIn("Berlin", t["cam"])  # asked open-meteo for the remembered city
 
     def test_weather_offline_graceful(self) -> None:
         import urllib.error
@@ -193,7 +193,7 @@ class TestNewSkills(unittest.TestCase):
 
         with patch.object(cam_brain, "_fetch_json",
                           side_effect=urllib.error.URLError("blocked")):
-            t = self.brain.respond("weather in Buffalo")
+            t = self.brain.respond("weather in Berlin")
         self.assertIn("can't reach the weather service", t["cam"])
 
     def test_llm_reprobe_after_cooldown(self) -> None:

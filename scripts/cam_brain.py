@@ -712,7 +712,7 @@ class CamBrain:
         if _TIME_RE.search(text):
             now = aaron_now()
             return ("It's " + now.strftime("%I:%M %p").lstrip("0") +
-                    " on " + now.strftime("%A, %B %d, %Y") + " (New York time).")
+                    " on " + now.strftime("%A, %B %d, %Y") + " (your local time).")
 
         if _STATUS_RE.search(text):
             st = self.status()

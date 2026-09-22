@@ -29,7 +29,7 @@ speech recognition; replies are spoken via speech synthesis):
   message + notification when due
 - `note: pick up dry cleaning Friday` — appends to today's note in
   `vault/00-Inbox/` (opens in Obsidian, searchable immediately)
-- `weather in Buffalo` — live conditions + today's range via open-meteo
+- `weather in Berlin` — live conditions + today's range via open-meteo
   (keyless). Say `remember that I live in <city>` once and plain
   `weather?` uses your city
 - `brief` / `daily brief` — on-demand day summary; Cam also sends one
