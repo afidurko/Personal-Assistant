@@ -180,6 +180,7 @@ class ScriptSmokeTests(unittest.TestCase):
         self.assertIn("connectome_route", tools)
         self.assertIn("inkbox_check", tools)
         self.assertIn("loop_check", tools)
+        self.assertIn("coding_effector_smoke", tools)
         self.assertIn("loop_run", tools)
         self.assertIn("voicestudio_health", tools)
         self.assertIn("higgsfield_check", tools)
