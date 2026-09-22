@@ -158,6 +158,39 @@ def main() -> int:
     if "hand-gestures" not in integ_ids:
         errors.append("registry missing hand-gestures integration")
 
+    # Aaron's repos: submodule declared, registered, and mapped onto the vocabulary.
+    gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
+    coding_ids = [w.get("id") for w in (reg.get("layers") or {}).get("coding_workspaces") or []]
+    repos = {k: v for k, v in (vocab.get("repos") or {}).items() if isinstance(v, dict)}
+    repo_status: dict[str, str] = {}
+    for rid, spec in repos.items():
+        rel = spec.get("path") or f"integrations/{rid}"
+        if rel not in gitmodules:
+            errors.append(f".gitmodules missing {rel}")
+        if rid not in integ_ids:
+            errors.append(f"registry integrations missing {rid}")
+        if rid not in coding_ids:
+            errors.append(f"registry coding_workspaces missing {rid}")
+        sub = ROOT / rel
+        entries = [p for p in sub.iterdir() if p.name not in {".git", ".gitignore"}] if sub.exists() else []
+        repo_status[rid] = "populated" if entries else "empty"
+        if not entries:
+            soft.append(f"{rel} empty — run git submodule update --init")
+    if repo_status.get("hagrid") == "populated":
+        consts = (ROOT / "integrations/hagrid/constants.py").read_text(encoding="utf-8")
+        for label in repos["hagrid"].get("labels") or []:
+            if f'"{label}"' not in consts:
+                errors.append(f"hagrid_label_not_in_constants:{label}")
+    if repo_status.get("hand-gesture-mediapipe") == "populated":
+        model = ROOT / "integrations/hand-gesture-mediapipe/model"
+        kp = (model / "keypoint_classifier/keypoint_classifier_label.csv").read_text(encoding="utf-8-sig").split()
+        ph = [l.strip() for l in (model / "point_history_classifier/point_history_classifier_label.csv").read_text(encoding="utf-8-sig").splitlines() if l.strip()]
+        spec = repos["hand-gesture-mediapipe"]
+        if sorted(kp) != sorted(spec.get("keypoint_labels") or []):
+            errors.append(f"hand-gesture-mediapipe keypoint labels drifted: {kp}")
+        if sorted(ph) != sorted(spec.get("point_history_labels") or []):
+            errors.append(f"hand-gesture-mediapipe point-history labels drifted: {ph}")
+
     tools = load("config/tools/registry.json")
     tool_ids = [t.get("id") for t in tools.get("tools") or []]
     for tid in ("tool.gesture.resolve", "tool.gesture.check"):
@@ -185,6 +218,7 @@ def main() -> int:
         "actions": len(actions["actions"]),
         "learned": len(learned["bindings"]),
         "huawei_parity": sorted({g["id"] for g in vocab["gestures"] if g.get("source") == "huawei"}),
+        "repos": repo_status,
         "switch_default": (gsw or {}).get("default"),
         "demos": demos,
         "errors": errors,
@@ -198,6 +232,7 @@ def main() -> int:
             f"  gestures={report['gestures']} actions={report['actions']} learned={report['learned']} "
             f"huawei_parity={len(report['huawei_parity'])} switch={report['switch_default']}"
         )
+        print(f"  repos={report['repos']}")
         for d in demos:
             print(f"  {'OK ' if d['ok'] else 'BAD'} {d['case']} → {[a for a, _ in d['got']]}")
         for e in errors:

@@ -52,12 +52,21 @@ python3 scripts/connectome-route.py --sense sense.vision.gesture --goal "collaps
 
 ## Aaron's repos
 
-The starter repo link did not arrive with the request. When it lands:
+Three submodules, mapped in `config/gestures/gestures.json → repos` (details in `docs/HAND_GESTURES.md`):
+
+| Path | Upstream | License | Job |
+| --- | --- | --- | --- |
+| `integrations/hagrid` | hukenovs/hagrid (HaGRIDv2) | see `license/en_us.pdf` | dataset + labels for every `support: custom` pose; pretrained detectors for the Mac |
+| `integrations/hand-gesture-mediapipe` | Kazuhito00/hand-gesture-recognition-using-mediapipe | Apache-2.0 | segmenter reference (keypoint MLP + fingertip point-history MLP); teach-mode pipeline |
+| `integrations/hand-gesture-recognition` | Ha0Tang/HandGestureRecognition | CC BY-NC-SA 4.0 | dynamic-gesture patterns (key-frame extraction); class lists only, no code shipped |
+
+Rules: every repo label is either in a `*_map` or in `ignore`; `gesture-check` fails otherwise and also
+diffs the live label files inside the submodules against the vocabulary. The vocabulary stays the
+source of truth; repos supply recognizers, models, or datasets. Next repo:
 
 ```bash
-git submodule add <url> integrations/<gesture-repo>
-# map its labels onto primitives.poses / primitives.motions in config/gestures/gestures.json
+git submodule add -b <branch> <url> integrations/<gesture-repo>
+# add repos.<id> with labels + pose_map / motion_map / ignore in config/gestures/gestures.json
+# register in config/workspaces/registry.json (integrations + coding_workspaces + chooser signal)
 python3 scripts/gesture-check.py
 ```
-
-The vocabulary stays the source of truth; repos supply recognizers, models, or datasets.

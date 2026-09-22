@@ -39,7 +39,10 @@ CSDN HarmonyOS dev community notes on `gesturesShare`.
   fits the on-device companion PWA and the "frames never leave the device" rule.
 - Motion (flick / swipe / push / wave / circle / carry) is **not** in the canned model — Cam
   adds a landmark motion segmenter and expresses every gesture as pose + motion + duration.
-- Aaron's starter repo: link pending; slot reserved in `config/integrations/hand-gestures.json`.
+- Aaron's repos (mounted 2026-09-22, mapped in `gestures.json → repos`):
+  - **HaGRIDv2** (`integrations/hagrid`, hukenovs) — 1.09M images, 33 static classes + `no_gesture`; the folder-per-label layout Model Maker wants, and the dataset Google's customization guide itself uses. 25 labels → 13 Cam poses; `mute`, `take_picture`, `timeout`, `hand_heart` became new poses + gestures.
+  - **hand-gesture-recognition-using-mediapipe** (`integrations/hand-gesture-mediapipe`, Kazuhito00, Apache-2) — 21-landmark keypoint MLP (`Open/Close/Pointer`) + 16-frame fingertip point-history MLP (`Stop/Clockwise/Counter Clockwise/Move`). This is how Cam's motion primitives get trained, and its log-samples→retrain loop is teach mode.
+  - **HandGestureRecognition** (`integrations/hand-gesture-recognition`, Ha0Tang, CC BY-NC-SA) — key-frame extraction + feature fusion for *dynamic* gestures (Neurocomputing 2019). Pattern for the segmenter (keep the frames that carry the motion); Cambridge / Action3D / HandGesture classes seed `swipe_*`, `pull_out`, `wave`, `beckon`, `circle_cw`, `raise` and counting poses. Academic license → no code shipped.
 
 ## What carried into Cam
 

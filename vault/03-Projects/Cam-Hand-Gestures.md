@@ -33,9 +33,11 @@ Research: [[2026-09-22-Huawei-Air-Transfer-hand-gestures]] · Plan: `docs/HAND_G
 - [ ] P2 — Aaron's first live session → flip switch; collapse / expand / scroll live
 - [ ] P3 — handoff iPhone → iPad via converse-server carry state
 - [ ] P4 — teach mode + custom pose model (`three`, `four`, `ok_sign`)
-- [ ] P5 — Pupil world camera as second source; Aaron's repos mapped onto primitives
+- [x] Aaron's repos mounted + mapped — `integrations/hagrid` (HaGRIDv2 → custom poses), `integrations/hand-gesture-mediapipe` (segmenter + teach pipeline), `integrations/hand-gesture-recognition` (key-frame patterns); `gesture-check` verifies labels ↔ vocabulary
+- [ ] P5 — Pupil world camera + Mac (HaGRID detector / Kazuhito00 app) as further sources
 
 ## Waiting on Aaron
 
-- Starter repo link (slot: `integrations/<gesture-repo>`)
+- Next repo (slot: `aaron_repos.next_slot`)
+- Read HaGRID license PDF before shipping a `.task` trained on it beyond personal use
 - Confirm iPhone → iPad as the first pair

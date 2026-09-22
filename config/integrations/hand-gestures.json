@@ -46,20 +46,47 @@
   },
   "recognizer": {
     "runs_on": "companion_pwa",
-    "engine": "mediapipe tasks-vision GestureRecognizer (LIVE_STREAM) + landmark motion segmenter",
-    "custom_model": "data/gestures/cam-gestures.task",
+    "engine": "mediapipe tasks-vision GestureRecognizer (LIVE_STREAM) + landmark motion segmenter (point-history pattern from integrations/hand-gesture-mediapipe)",
+    "custom_model": "data/gestures/cam-gestures.task — Model Maker on HaGRIDv2 folders (integrations/hagrid) + Aaron's samples",
+    "desktop_path": "integrations/hagrid pretrained detectors or integrations/hand-gesture-mediapipe app.py on the Mac when its slot opens",
     "frames_leave_device": false,
     "emits": "segments pose:motion:duration_ms:confidence:hands → POST /api/spike/gesture"
   },
   "aaron_repos": {
-    "note": "Aaron's starter repo link did not arrive with the request; slot reserved. Each repo Aaron adds mounts as a submodule and is mapped onto primitives.poses / primitives.motions in gestures.json — the vocabulary stays the source of truth.",
-    "slots": [
+    "note": "Each repo Aaron adds mounts as a submodule and is mapped onto primitives.poses / primitives.motions in gestures.json (repos.*) — the vocabulary stays the source of truth. gesture-check fails if a repo label is neither mapped nor explicitly ignored.",
+    "added_at": "2026-09-22",
+    "repos": [
       {
-        "slot": "integrations/<gesture-repo>",
-        "status": "awaiting_link",
-        "use": "recognizer / landmark model / dataset"
+        "id": "hagrid",
+        "path": "integrations/hagrid",
+        "remote": "github.com/afidurko/hagrid",
+        "upstream": "github.com/hukenovs/hagrid",
+        "branch": "master",
+        "use": "HaGRIDv2 dataset (33 static classes + no_gesture, 1.09M images) → Model Maker folders for every custom pose; pretrained YOLOv10 / ResNet gesture + hand detectors for the Mac / desktop path",
+        "maps": "repos.hagrid.pose_map (25 labels → 13 poses), 9 labels ignored / reserved"
+      },
+      {
+        "id": "hand-gesture-mediapipe",
+        "path": "integrations/hand-gesture-mediapipe",
+        "remote": "github.com/afidurko/hand-gesture-recognition-using-mediapipe",
+        "upstream": "github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe",
+        "branch": "main",
+        "license": "Apache-2.0",
+        "use": "segmenter reference — keypoint MLP (Open / Close / Pointer) and 16-frame fingertip point-history MLP (Stop / Clockwise / Counter Clockwise / Move); teach-mode pipeline (k / h to log samples → notebook → TFLite)",
+        "maps": "repos.hand-gesture-mediapipe.keypoint_map + motion_map"
+      },
+      {
+        "id": "hand-gesture-recognition",
+        "path": "integrations/hand-gesture-recognition",
+        "remote": "github.com/afidurko/HandGestureRecognition",
+        "upstream": "github.com/Ha0Tang/HandGestureRecognition",
+        "branch": "master",
+        "license": "CC BY-NC-SA 4.0 — patterns and datasets only, no code shipped",
+        "use": "dynamic-gesture research (key-frame extraction + feature fusion, Neurocomputing 2019); Cambridge / Action3D / HandGesture classes seed motion primitives and counting poses",
+        "maps": "repos.hand-gesture-recognition.motion_map + pose_map"
       }
-    ]
+    ],
+    "next_slot": "integrations/<gesture-repo> — open for the next repo Aaron adds"
   },
   "defaults": {
     "switch_default": "hold — every recognized gesture is system.log_only until Aaron flips switch.gesture_control after the first live session",

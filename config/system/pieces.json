@@ -212,6 +212,6 @@
     "Live nulltickets/nullclaw runtime (synaptic body across boots)",
     "Local sLM/DL model weights (heuristic stubs active on motor.slm / motor.dl)",
     "Embodiment theater — open PRs #19/#20/#21 (cards / Joshinator / Inkbox)",
-    "Live hand-gesture recognizer in the companion PWA — Aaron's starter repo link + MediaPipe tasks-vision (switch.gesture_control stays hold until first live session)"
+    "Live hand-gesture recognizer in the companion PWA — MediaPipe tasks-vision from registry.npmjs.org + custom .task trained from integrations/hagrid folders (switch.gesture_control stays hold until first live session)"
   ]
 }

@@ -505,6 +505,11 @@
     "switch": "switch.gesture_control",
     "inspiration": "Huawei HarmonyOS 5 AI Air Transfer (grab → carry → release across devices) + Air scroll / Grabshot / Air press; MediaPipe Gesture Recognizer canned labels",
     "who_may_teach": ["Aaron"],
+    "aaron_repos": {
+      "hagrid": "integrations/hagrid — HaGRIDv2 dataset + detectors → custom poses",
+      "hand-gesture-mediapipe": "integrations/hand-gesture-mediapipe — keypoint + point-history MLPs → segmenter / teach pipeline",
+      "hand-gesture-recognition": "integrations/hand-gesture-recognition — key-frame extraction patterns (CC BY-NC-SA, no code shipped)"
+    },
     "first_use_cases": ["ui.collapse", "ui.expand", "device.handoff_grab → device.handoff_release (iPhone → iPad)"]
   }
 }
