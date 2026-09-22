@@ -18,6 +18,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - MCP: `python3 scripts/cam-mcp-server.py` (stdio) — install with `cline mcp install cam -- ...`
 - Schedules: `python3 scripts/sync-cline-schedules.py --apply-cache --print-commands`
 - Cognitive memory: `python3 scripts/memorybear.py --doctor --offline` · `python3 scripts/memorybear-check.py`
+- Predictive cortex (advisory, `motor.dl`): `python3 scripts/cam-predict.py --report` · `python3 scripts/predictive-cortex-check.py` — [`docs/PREDICTIVE_CORTEX.md`](docs/PREDICTIVE_CORTEX.md)
 - Public APIs: `python3 scripts/public-apis-search.py --query "weather"`
 - Google Trends: `python3 scripts/google-trends-search.py --query "election" --offline`
 - Inkbox: `python3 scripts/inkbox-check.py`
