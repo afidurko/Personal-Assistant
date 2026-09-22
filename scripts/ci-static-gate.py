@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import cam_inproc  # noqa: E402
 
 CHECKS: list[tuple[str, str, list[str]]] = [
+    ("pii-guard", "pii-guard.py", ["--all"]),
     ("connectome-check", "connectome-check.py", []),
     ("workspace-integration-check", "workspace-integration-check.py", []),
     ("connectome-anatomy-check", "connectome-anatomy-check.py", []),
