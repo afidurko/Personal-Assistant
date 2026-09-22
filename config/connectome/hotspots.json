@@ -857,7 +857,7 @@
       "side_effects": [
         "motor.mesh"
       ],
-      "behavior": "local_dl_embed_rerank_cluster_assist"
+      "behavior": "local_dl_embed_rerank_cluster_predict_assist"
     },
     {
       "id": "hotspot.dl_feedback",
@@ -1016,6 +1016,34 @@
       "team": "team.needs-attention",
       "script": "scripts/needs-attention.py",
       "notes": "Cursor Needs Attention tab automation — connect all workspaces; Aaron gates enhance/outbound/kill"
+    },
+    {
+      "id": "hotspot.predict_from_experience",
+      "area": "area.apfc",
+      "center": "center.dl",
+      "columns": [
+        "neuron.plan_loop",
+        "neuron.predict_experience"
+      ],
+      "tracts": [
+        "tract.ifof",
+        "tract.fornix"
+      ],
+      "pathway": [
+        "sense.experience.outcome",
+        "center.dl",
+        "switch.dl_local",
+        "motor.dl"
+      ],
+      "side_effects": [
+        "motor.mesh",
+        "motor.vault"
+      ],
+      "behavior": "predict_outcome_from_experience_calibrated_advisory",
+      "map_stage": "state_prediction",
+      "enhancement": "config/enhancement/predictive-cortex.json",
+      "script": "scripts/cam-predict.py",
+      "notes": "Beta-Bernoulli + TD(0) predictive measures over Cam's own run history; prequential Brier/ECE; advisory only — acting on predictions needs switch.cam_enhance"
     }
   ]
 }

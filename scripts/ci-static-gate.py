@@ -28,6 +28,8 @@ CHECKS: list[tuple[str, str, list[str]]] = [
     ("inkbox-check", "inkbox-check.py", []),
     ("higgsfield-check", "higgsfield-check.py", []),
     ("presence-check", "presence-check.py", []),
+    ("predictive-cortex-check", "predictive-cortex-check.py", []),
+    ("research-ethics-check", "research-ethics-check.py", []),
     ("loop-check", "loop-check.py", []),
     ("loop-run-dry", "loop-run.py", ["--pattern", "daily-triage", "--level", "L1", "--dry-run"]),
     ("flight-envelope", "flight-envelope.py", ["--offline-only"]),

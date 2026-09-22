@@ -1884,6 +1884,30 @@
       "to": "switch.autonomy",
       "weight": 0.9,
       "notes": "needs-attention plan → autonomy"
+    },
+    {
+      "from": "sense.experience.outcome",
+      "to": "center.dl",
+      "weight": 1.0,
+      "notes": "outcome feedback → predictive cortex"
+    },
+    {
+      "from": "sense.experience.outcome",
+      "to": "center.memory",
+      "weight": 0.8,
+      "notes": "episodic store of experiences (HMO secondary)"
+    },
+    {
+      "from": "sense.experience.outcome",
+      "to": "center.qa",
+      "weight": 0.6,
+      "notes": "high surprise → conflict monitor may insert hold"
+    },
+    {
+      "from": "center.dl",
+      "to": "center.qa",
+      "weight": 0.6,
+      "notes": "prediction error / low p_success advisory to QA"
     }
   ]
 }

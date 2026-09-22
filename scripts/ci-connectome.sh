@@ -24,7 +24,8 @@ echo "== unit tests (one process) =="
     test_google_trends \
     test_google_trends_addons \
     test_higgsfield \
-    test_embodiment_lite
+    test_embodiment_lite \
+    test_cam_experience
 )
 
 echo "== aaron voice gate unit tests =="
@@ -67,5 +68,11 @@ python3 scripts/cam-reason-billion-fuzz.py \
   --n 1000000 \
   --seed 11 \
   --out vault/10-Mesh-Distillates/qa-cycles/ci-cam-reason-1m.json
+
+echo "== predictive cortex fuzz (1M modular + sparse full predict) =="
+python3 scripts/predictive-cortex-billion-fuzz.py \
+  --n 1000000 \
+  --seed 29 \
+  --out vault/10-Mesh-Distillates/qa-cycles/ci-predictive-cortex-1m.json
 
 echo "CI OK"

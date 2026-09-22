@@ -19,7 +19,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 
 ## Design
 
-- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [MemoryBear](https://github.com/afidurko/MemoryBear) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
+- **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [MemoryBear](https://github.com/afidurko/MemoryBear) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md) · **predictive cortex** (outcomes from experience, calibrated) — [docs/PREDICTIVE_CORTEX.md](docs/PREDICTIVE_CORTEX.md)
 - **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
 - **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
 - **Sentinel (Muse pattern):** Cam plans, Sentinel decides allow / ask / deny at the motor boundary, Aaron approves; tainted egress + append-only intent journal — [docs/MUSE_CAM_PATTERNS.md](docs/MUSE_CAM_PATTERNS.md)
@@ -71,6 +71,12 @@ python3 scripts/loop-run.py --pattern daily-triage --level L1
 # MemoryBear cognitive memory (offline doctor)
 python3 scripts/memorybear.py --doctor --offline
 python3 scripts/memorybear-check.py
+# Predictive cortex — outcome prediction from Cam's own experience (advisory)
+python3 scripts/cam-predict.py --report
+python3 scripts/cam-predict.py --hotspot hotspot.loop_engineering --pattern daily-triage --sense sense.loop.tick
+python3 scripts/cam-predict.py --narrate --hotspot hotspot.coding      # the hedged sentence Cam would say
+python3 scripts/predictive-cortex-check.py
+python3 scripts/research-ethics-check.py                               # ethics gate: redaction, protected contexts, abstention, parity
 # Overall system pulse (all pieces on one bus)
 python3 scripts/cam-system.py --smoke
 # HAAS→Cam privilege + boss/worker contracts

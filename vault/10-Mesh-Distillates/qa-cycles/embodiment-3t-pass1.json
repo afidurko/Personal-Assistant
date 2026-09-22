@@ -3,16 +3,16 @@
   "workers": 4,
   "passed": 3000000000000,
   "failed": 0,
-  "spawned": 9804688,
-  "skipped": 195312,
-  "full_checks": 10000,
+  "spawned": 9804687,
+  "skipped": 195313,
+  "full_checks": 0,
   "first_error": null,
-  "elapsed_s": 2.4737808639983996,
-  "checks_per_sec": 1212718573281.8171,
-  "seed": 173,
+  "elapsed_s": 2.435987643999397,
+  "checks_per_sec": 1231533340240.8435,
+  "seed": 174,
   "ok": true,
-  "full_resolve": true,
-  "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
+  "full_resolve": false,
+  "sampler": "modular_catalog_only:modular_period_scaled",
   "ip_policy": "original_procedural_only",
   "catalog_size": 6,
   "physical_n": 10000000,
@@ -25,31 +25,20 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.432785954002611
-    },
-    {
-      "worker_id": 3,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
-      "full_checks": 2500,
-      "first_error": null,
-      "elapsed_s": 2.4412993579971953
+      "elapsed_s": 2.1173347190015193
     },
     {
       "worker_id": 0,
       "attempted": 2500000,
       "passed": 2500000,
       "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
-      "full_checks": 2500,
+      "spawned": 2451171,
+      "skipped": 48829,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.4526204120011244
+      "elapsed_s": 2.1217246180003713
     },
     {
       "worker_id": 2,
@@ -58,9 +47,20 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.466608118000295
+      "elapsed_s": 2.127154634999897
+    },
+    {
+      "worker_id": 3,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451172,
+      "skipped": 48828,
+      "full_checks": 0,
+      "first_error": null,
+      "elapsed_s": 2.148539460999018
     }
   ]
 }

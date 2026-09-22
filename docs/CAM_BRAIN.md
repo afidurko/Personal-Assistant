@@ -43,8 +43,9 @@ Local helpers, not a second brain:
 
 - **sLM runtime** (`center.slm` → `motor.slm`) — classify, route hints, compress, draft assists
 - **DL enhance** (`center.dl` → `motor.dl`) — embeddings, rerank, identity/paper vectors
+- **Predictive cortex** (`sense.experience.outcome` → `center.dl` → `motor.dl`, area.apfc `state_prediction`) — p_success / score / surprise from Cam's own run history with prequential Brier/ECE; advisory until Aaron closes the loop — [PREDICTIVE_CORTEX.md](PREDICTIVE_CORTEX.md)
 
-Recipe book: `config/enhancement/slm-dl.json`
+Recipe book: `config/enhancement/slm-dl.json` · `config/enhancement/predictive-cortex.json`
 
 ## Human ultimate say
 

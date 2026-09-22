@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "hard_errors": [],
+  "soft_warnings": [],
+  "integration": "predictive-cortex",
+  "status": "implemented_advisory",
+  "act_gate": "switch.cam_enhance",
+  "smoke": {
+    "experiences": 120,
+    "sources": {
+      "fixture": 120,
+      "_duplicates_removed": 0,
+      "_source_errors": 0,
+      "_unknown_ts": 0
+    },
+    "brier": 0.1805,
+    "brier_skill": 0.2272,
+    "ece": 0.1047,
+    "auroc": 0.7555,
+    "p_success_daily_triage": 0.8496,
+    "credible_interval": [
+      0.6459,
+      0.9779
+    ],
+    "evidence_level": "hotspot"
+  }
+}

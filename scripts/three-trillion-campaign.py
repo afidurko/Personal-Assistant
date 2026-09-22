@@ -122,6 +122,9 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Presence: Higgsfield Speak clips rejected — portrait + A2F only (`scripts/presence-check.py`)",
         "- Trajectory: `higgsfield_rejected_for_cam_face` strips Speak clips from speak plans",
         "- Higgsfield IDs are GPU train (`switch.cam_enhance`); Speak never owns `motor.higgsfield`",
+        "- Predictive cortex: `predictive-cortex-billion-fuzz.py` (beta math, decay, redaction, dedupe, protected contexts, metrics + sparse full predict) joins the campaign",
+        "- Predictive cortex: redaction patterns ordered specific→generic (phone no longer swallows/mislabels SSN); `beta_quantile` bracketed Newton (1e-10 in q, tails safe above `prior_floor`)",
+        "- `trillion_scale.resolve_scale` honours an explicit `--physical` below 1e11 (`physical_capped_scaled`) for heavy harnesses",
         "",
         "## Suggested add-ons",
         "- `config/persona/converse-overlays.json` — move camera/pupil/voice lines out of the server so new presence phrases do not fork `speak_from_trace`",
@@ -234,6 +237,16 @@ def one_pass(
     results.append(
         run([sys.executable, "scripts/trajectory-policy-check.py"], "trajectory-policy-check")
     )
+    results.append(
+        run(
+            [sys.executable, "-m", "unittest", "test_cam_experience"],
+            "predictive-cortex-unit",
+            cwd=str(ROOT / "scripts"),
+        )
+    )
+    results.append(
+        run([sys.executable, "scripts/research-ethics-check.py"], "research-ethics-check")
+    )
 
     conn_out = OUT / f"connectome-sim-3t-{out_tag}.json"
     results.append(
@@ -285,6 +298,7 @@ def one_pass(
         ("scripts/illa-desktop-billion-fuzz.py", "illa-desktop-3t", 26),
         ("scripts/aaron-voice-billion-fuzz.py", "aaron-voice-3t", 19),
         ("scripts/public-apis-billion-fuzz.py", "public-apis-3t", 23),
+        ("scripts/predictive-cortex-billion-fuzz.py", "predictive-cortex-3t", 29),
     ):
         if name == "embodiment-3t":
             results.append(_maybe_install_embodiment_deps())

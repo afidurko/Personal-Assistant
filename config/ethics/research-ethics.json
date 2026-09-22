@@ -1,0 +1,78 @@
+{
+  "id": "cam-research-ethics",
+  "title": "Ethical and moral measures for Cam research + prediction from experience",
+  "version": 1,
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-22",
+  "applies_to": [
+    "scripts/cam_experience.py",
+    "scripts/cam-predict.py",
+    "scripts/agi-research-scan.py",
+    "scripts/scholar-search.py",
+    "vault/04-Research/"
+  ],
+  "principles": [
+    { "id": "honesty", "rule": "Never present a probability without its evidence count and interval; abstain when evidence is thin instead of guessing." },
+    { "id": "human_primacy", "rule": "Predictions never assign tasks, fire motors, or move gates. Aaron decides; switch.cam_enhance stays the boundary." },
+    { "id": "no_persons_as_targets", "rule": "Cam predicts outcomes of her own work, never the behaviour, worth, or prospects of a person." },
+    { "id": "data_minimisation", "rule": "Experience records hold context and outcome only; PII and secrets are redacted before they are written." },
+    { "id": "right_to_forget", "rule": "Any experience can be dropped by ref or key; forgetting is a supported operation, not a hack." },
+    { "id": "fairness_of_confidence", "rule": "Calibration is checked per context, not only in aggregate, so one domain cannot hide systematic over-confidence in another." },
+    { "id": "anti_goodhart", "rule": "Scores are reported, never optimised; when predictions start influencing choices, hold out unbiased evidence." },
+    { "id": "source_respect", "rule": "Respect API terms and rate etiquette, identify Cam in User-Agent, prefer legal open access, cite every external claim with an accessed date." },
+    { "id": "reproducibility", "rule": "Prequential protocol, fixed seeds, and versioned schemas so any number Cam reports can be recomputed." }
+  ],
+  "protected_contexts": {
+    "description": "Contexts whose outcomes involve other people, money, identity, or irreversible external action. Predictions here are reported as advisory-for-human-judgment only and never suggest automation.",
+    "hotspot_patterns": ["careers", "jobs", "outbound", "inkbox", "comms", "money", "identity", "voice_gate", "aaron_voice"],
+    "motor_patterns": ["motor.jobs", "motor.outbound", "motor.inkbox", "motor.speak", "motor.enhance"],
+    "stance": "human_judgment_required"
+  },
+  "redaction": {
+    "fields": ["notes", "ref"],
+    "order_note": "applied in this order — specific shapes first so a generic pattern (phone) cannot swallow and mislabel a specific one (ssn)",
+    "patterns": {
+      "bearer": "(?i)bearer\\s+[A-Za-z0-9._\\-]{12,}",
+      "token": "(?i)\\b(?:sk|ghp|gho|xox[bap]|AKIA|serp|hf)[_-]?[A-Za-z0-9_\\-]{16,}\\b",
+      "ssn": "\\b\\d{3}-\\d{2}-\\d{4}\\b",
+      "email": "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}",
+      "phone": "(?<![\\w/])\\+?\\d[\\d\\s().-]{8,}\\d(?![\\w/])"
+    },
+    "replacement": "[redacted:{kind}]"
+  },
+  "abstention": {
+    "min_effective_n": 3.0,
+    "max_interval_width": 0.6,
+    "verdict": "abstain — not enough experience to give a number; say so plainly"
+  },
+  "calibration_parity": {
+    "group_by": "hotspot",
+    "min_group_n": 8,
+    "max_group_ece_gap": 0.15,
+    "description": "Flag any hotspot whose ECE exceeds the aggregate ECE by more than max_group_ece_gap"
+  },
+  "source_etiquette": {
+    "arxiv_min_interval_s": 3.0,
+    "user_agent_must_identify": "CamAGIScout",
+    "bulk_crawl_forbidden": ["dl.acm.org", "scholar.google.com"],
+    "open_access_only": true
+  },
+  "citation_discipline": {
+    "research_dirs": ["vault/04-Research"],
+    "since": "2026-09-22",
+    "require_sections": ["## Sources"],
+    "require_accessed_date": true
+  },
+  "prediction_card": {
+    "required_fields": ["p_success", "credible_interval", "n_effective", "evidence_level", "evidence", "advice", "gate", "limitations"],
+    "limitations": [
+      "Learned from Cam's own logs; silent failures that wrote no distillate are invisible (coverage is reported).",
+      "Outcome labels differ by source (loop ok / QA green / no trajectory violation) and are pooled.",
+      "Beta-Bernoulli with forgetting assumes exchangeable outcomes within a context; drift is detected, not modelled.",
+      "Small n_effective means the interval, not the point estimate, is the answer."
+    ]
+  },
+  "check": "scripts/research-ethics-check.py",
+  "docs": "docs/PREDICTIVE_CORTEX.md#ethics",
+  "brief": "vault/04-Research/2026-09-22-Research-Ethics-Measures.md"
+}

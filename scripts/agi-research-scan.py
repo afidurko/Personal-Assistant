@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -109,7 +110,12 @@ def fetch_arxiv(max_results: int, timeout: int = 45) -> list[dict]:
     }
     by_id: dict[str, dict] = {}
     errors: list[str] = []
-    for cat in categories:
+    # arXiv API etiquette asks for ≥3 s between requests; hammering six categories
+    # back-to-back is how a polite scout gets rate-limited into silence
+    min_interval = float(TEAM["sources"][0].get("min_interval_s", 3.0))
+    for i, cat in enumerate(categories):
+        if i and min_interval > 0:
+            time.sleep(min_interval)
         url = arxiv_query(cat, per_cat)
         try:
             req = urllib.request.Request(url, headers=headers)
@@ -135,9 +141,26 @@ def score_paper(paper: dict) -> dict:
         "enhance_vision": 0,
         "enhance_slm_local": 0,
         "enhance_dl_embeddings": 0,
+        "enhance_predictive_cortex": 0,
         "general_agi_theory": 0,
     }
     checks = [
+        (
+            "enhance_predictive_cortex",
+            [
+                "world model",
+                "experience replay",
+                "learn from experience",
+                "experiential",
+                "calibrat",
+                "conformal",
+                "uncertainty quantification",
+                "brier",
+                "successor representation",
+                "temporal difference",
+                "predictive coding",
+            ],
+        ),
         ("enhance_cam_routing", ["agent", "multi-agent", "tool use", "planning", "orchestr"]),
         ("enhance_memory_mesh", ["retriev", "rag", "memory", "continual", "knowledge graph"]),
         ("enhance_presence_voice", ["speech", "tts", "avatar", "dialogue", "convers"]),
@@ -159,6 +182,8 @@ def score_paper(paper: dict) -> dict:
         touchpoints += ["center.slm", "config/enhancement/slm-dl.json"]
     if scores["enhance_dl_embeddings"]:
         touchpoints += ["center.dl", "config/enhancement/slm-dl.json"]
+    if scores["enhance_predictive_cortex"]:
+        touchpoints += ["center.dl", "config/enhancement/predictive-cortex.json", "scripts/cam_experience.py"]
     if scores["enhance_presence_voice"]:
         touchpoints += ["center.comms", "motor.speak"]
     if scores["enhance_vision"]:

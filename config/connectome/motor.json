@@ -215,13 +215,14 @@
       "channel": [
         "local_dl",
         "embeddings",
-        "rerank"
+        "rerank",
+        "experience_predict"
       ],
       "requires_switch": [
         "switch.dl_local",
         "switch.kill"
       ],
-      "notes": "Invoke Cam DL cortex (embed/rerank/cluster/identity vectors)"
+      "notes": "Invoke Cam DL cortex (embed/rerank/cluster/identity vectors; experience-outcome prediction via scripts/cam-predict.py — advisory)"
     },
     {
       "id": "motor.higgsfield",

@@ -63,7 +63,8 @@
       "rerank_retrieval",
       "vision_distillate_encode",
       "aaron_identity_embedding",
-      "paper_similarity_cluster"
+      "paper_similarity_cluster",
+      "experience_outcome_predict"
     ],
     "preferred_classes": [
       "sentence / document embedding models",
@@ -86,6 +87,13 @@
         "id": "cam-identity-embed",
         "use": "Aaron face/voice enrollment vectors",
         "status": "planned"
+      },
+      {
+        "id": "cam-experience-predictor",
+        "use": "outcome prediction from Cam's own run history (Beta-Bernoulli + TD(0), prequential calibration)",
+        "status": "implemented_stdlib_advisory",
+        "config": "config/enhancement/predictive-cortex.json",
+        "cli": "scripts/cam-predict.py"
       }
     ],
     "mesh_namespace": "mesh/enhance/dl"

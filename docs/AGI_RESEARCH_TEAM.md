@@ -25,6 +25,9 @@ All members may spawn unlimited subagents.
 
 arXiv (cs.AI/LG/CL/MA/NE, stat.ML), OpenReview, ACL Anthology, Hugging Face Papers, major lab blogs,
 and **Google Scholar** (`sense.web.scholar` · `config/integrations/google-scholar.md`) for citation-aware literature.
+Rubric lens `enhance_predictive_cortex` (world models, experience replay, calibration, conformal, successor
+representations) feeds the predictive cortex — see `docs/PREDICTIVE_CORTEX.md` and the tools brief
+`vault/04-Research/2026-09-22-Research-Tools-For-Cam.md` (Semantic Scholar / OpenAlex / Crossref proposed).
 When a finding implies new free HTTP tooling for Cam, consult **public-apis**
 (`sense.catalog.public_apis` · `config/integrations/public-apis.md`) before inventing endpoints.
 
