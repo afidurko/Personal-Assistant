@@ -114,8 +114,17 @@
       "layer": "brain",
       "paths": ["config/enhancement/predictive-cortex.json", "scripts/cam_experience.py", "scripts/cam-predict.py", "scripts/testdata/sample-experiences.jsonl"],
       "check": "python3 scripts/predictive-cortex-check.py",
-      "depends_on": ["piece.connectome"],
+      "depends_on": ["piece.connectome", "piece.research_ethics"],
       "feeds": ["piece.teams", "piece.health"]
+    },
+    {
+      "id": "piece.research_ethics",
+      "title": "Research ethics (redaction, protected contexts, abstention, parity, source etiquette)",
+      "layer": "policy",
+      "paths": ["config/ethics/research-ethics.json", "scripts/research-ethics-check.py", "vault/04-Research/2026-09-22-Research-Ethics-Measures.md"],
+      "check": "python3 scripts/research-ethics-check.py",
+      "depends_on": ["piece.connectome"],
+      "feeds": ["piece.predictive_cortex", "piece.teams", "piece.health"]
     },
     {
       "id": "piece.scholar",
