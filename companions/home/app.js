@@ -190,6 +190,7 @@ const RING_C = 226.2;
 
 function thoughtRow(th) {
   const el = document.createElement("li");
+  el.className = `st-${th.stage}`;
   const chip = document.createElement("span");
   chip.className = `stagechip ${th.stage}`;
   chip.textContent = th.stage;
@@ -220,7 +221,30 @@ function pushThought(th) {
   while (feed.children.length > 60) feed.removeChild(feed.firstChild);
   feed.scrollTop = feed.scrollHeight;
   const region = STAGE_REGION[th.stage];
-  if (region) $("vizCaption").textContent = `firing now → ${region}`;
+  if (region) {
+    const cap = $("vizCaption");
+    cap.textContent = `firing now → ${region}`;
+    cap.className = `meta st-${th.stage}`;
+  }
+}
+
+const counters = {};
+function countUp(el, target, suffix = "") {
+  const from = counters[el.id] ?? target;
+  counters[el.id] = target;
+  if (from === target) {
+    el.textContent = `${target}${suffix}`;
+    return;
+  }
+  const t0 = performance.now();
+  const dur = 700;
+  function step(now) {
+    const k = Math.min(1, (now - t0) / dur);
+    const eased = 1 - Math.pow(1 - k, 3);
+    el.textContent = `${Math.round(from + (target - from) * eased)}${suffix}`;
+    if (k < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 function renderSparkline(history) {
@@ -229,11 +253,11 @@ function renderSparkline(history) {
   if (!history || history.length < 2) return;
   const min = Math.min(...history) - 3;
   const max = Math.max(...history) + 3;
-  const pts = history.map((h, i) => {
-    const x = (i / (history.length - 1)) * 118 + 1;
-    const y = 38 - ((h - min) / Math.max(1, max - min)) * 34;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
+  const coords = history.map((h, i) => [
+    (i / (history.length - 1)) * 118 + 1,
+    38 - ((h - min) / Math.max(1, max - min)) * 34,
+  ]);
+  const pts = coords.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`);
   const area = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
   area.setAttribute("class", "area");
   area.setAttribute("points", `1,39 ${pts.join(" ")} 119,39`);
@@ -241,6 +265,13 @@ function renderSparkline(history) {
   const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
   line.setAttribute("points", pts.join(" "));
   svg.appendChild(line);
+  const [lx, ly] = coords[coords.length - 1];
+  const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  dot.setAttribute("class", "spark-dot");
+  dot.setAttribute("cx", lx.toFixed(1));
+  dot.setAttribute("cy", ly.toFixed(1));
+  dot.setAttribute("r", "2.4");
+  svg.appendChild(dot);
 }
 
 function renderBrain(state) {
@@ -248,15 +279,24 @@ function renderBrain(state) {
   $("brainMeta").textContent =
     `cycle ${state.tick} · ${state.at} · derived from live checks — nothing invented`;
   if (m.health != null) {
-    $("healthNum").textContent = m.health;
+    countUp($("healthNum"), m.health);
     const ring = $("healthRing");
+    const color = m.health >= 75 ? "#7dbe98" : m.health >= 50 ? "#d4a017" : "#d47a6a";
     ring.style.strokeDashoffset = (RING_C * (1 - m.health / 100)).toFixed(1);
-    ring.style.stroke = m.health >= 75 ? "var(--ok)" : m.health >= 50 ? "var(--warn)" : "var(--bad)";
+    ring.style.stroke = color;
+    ring.style.filter = `drop-shadow(0 0 5px ${color})`;
     $("pillHealth").innerHTML = `brain <strong>${m.health}</strong> · ${m.trend}`;
+    $("brainPill").className =
+      `brainpill ${m.health >= 75 ? "ok" : m.health >= 50 ? "warn" : "bad"}`;
+    const panel = $("panelBrain");
+    panel.classList.remove("ticked");
+    void panel.offsetWidth; // restart the tick glow
+    panel.classList.add("ticked");
   }
   $("trendWord").textContent = m.trend || "—";
   renderSparkline(m.history);
-  $("calibNum").textContent = m.prediction_accuracy != null ? `${m.prediction_accuracy}%` : "—";
+  if (m.prediction_accuracy != null) countUp($("calibNum"), m.prediction_accuracy, "%");
+  else $("calibNum").textContent = "—";
   $("calibSub").textContent = m.predictions_scored
     ? `${m.predictions_scored} scored so far`
     : "no samples yet";

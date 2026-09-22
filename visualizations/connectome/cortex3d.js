@@ -155,6 +155,20 @@ controls.dampingFactor = 0.05;
 controls.target.set(0, 0.1, 0.15);
 controls.minDistance = 2.2;
 controls.maxDistance = 14;
+/* Embed presence: slow cinematic orbit; pause while Aaron drives, resume after idle */
+controls.autoRotate = EMBED;
+controls.autoRotateSpeed = 0.55;
+let autoRotateTimer = null;
+controls.addEventListener("start", () => {
+  controls.autoRotate = false;
+  if (autoRotateTimer) clearTimeout(autoRotateTimer);
+});
+controls.addEventListener("end", () => {
+  if (autoRotateTimer) clearTimeout(autoRotateTimer);
+  autoRotateTimer = setTimeout(() => {
+    controls.autoRotate = EMBED;
+  }, 12000);
+});
 applyFsCameraUp(camera, controls);
 
 scene.add(new THREE.AmbientLight(0xb8d4cc, 0.7));
@@ -843,7 +857,7 @@ function applyLiveFeed(feed) {
     }
     (f.tracts || []).forEach((tid) => {
       setTractGlow(tid, (f.intensity || 0.4) * 0.85);
-      if ((f.intensity || 0) > 0.6 && Math.random() < 0.35) pulseAlongTract(tid);
+      if ((f.intensity || 0) > 0.5 && Math.random() < 0.6) pulseAlongTract(tid);
     });
   });
   renderAgents();
