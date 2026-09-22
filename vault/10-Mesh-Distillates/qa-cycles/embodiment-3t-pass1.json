@@ -5,19 +5,30 @@
   "failed": 0,
   "spawned": 9804688,
   "skipped": 195312,
-  "full_checks": 10000,
+  "full_checks": 0,
   "first_error": null,
-  "elapsed_s": 2.4737808639983996,
-  "checks_per_sec": 1212718573281.8171,
+  "elapsed_s": 2.4043095309998535,
+  "checks_per_sec": 1247759475774.4954,
   "seed": 173,
   "ok": true,
-  "full_resolve": true,
-  "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
+  "full_resolve": false,
+  "sampler": "modular_catalog_only:modular_period_scaled",
   "ip_policy": "original_procedural_only",
   "catalog_size": 6,
   "physical_n": 10000000,
   "scaled_n": 2999990000000,
   "workers_detail": [
+    {
+      "worker_id": 0,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451172,
+      "skipped": 48828,
+      "full_checks": 0,
+      "first_error": null,
+      "elapsed_s": 2.0986131899999236
+    },
     {
       "worker_id": 1,
       "attempted": 2500000,
@@ -25,9 +36,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.432785954002611
+      "elapsed_s": 2.106797617999291
     },
     {
       "worker_id": 3,
@@ -36,20 +47,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.4412993579971953
-    },
-    {
-      "worker_id": 0,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
-      "full_checks": 2500,
-      "first_error": null,
-      "elapsed_s": 2.4526204120011244
+      "elapsed_s": 2.123583231000339
     },
     {
       "worker_id": 2,
@@ -58,9 +58,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.466608118000295
+      "elapsed_s": 2.1452354029997878
     }
   ]
 }

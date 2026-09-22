@@ -5,41 +5,19 @@
   "failed": 0,
   "spawned": 9804687,
   "skipped": 195313,
-  "full_checks": 10000,
+  "full_checks": 0,
   "first_error": null,
-  "elapsed_s": 2.46635428800073,
-  "checks_per_sec": 1216370257345.2466,
+  "elapsed_s": 2.669859242999337,
+  "checks_per_sec": 1123654742423.717,
   "seed": 273,
   "ok": true,
-  "full_resolve": true,
-  "sampler": "modular_plus_0.1pct_full_resolve:modular_period_scaled",
+  "full_resolve": false,
+  "sampler": "modular_catalog_only:modular_period_scaled",
   "ip_policy": "original_procedural_only",
   "catalog_size": 6,
   "physical_n": 10000000,
   "scaled_n": 2999990000000,
   "workers_detail": [
-    {
-      "worker_id": 2,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451171,
-      "skipped": 48829,
-      "full_checks": 2500,
-      "first_error": null,
-      "elapsed_s": 2.4276570030015137
-    },
-    {
-      "worker_id": 3,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "spawned": 2451172,
-      "skipped": 48828,
-      "full_checks": 2500,
-      "first_error": null,
-      "elapsed_s": 2.428036710000015
-    },
     {
       "worker_id": 1,
       "attempted": 2500000,
@@ -47,9 +25,9 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.430976613999519
+      "elapsed_s": 2.0730226650002805
     },
     {
       "worker_id": 0,
@@ -58,9 +36,31 @@
       "failed": 0,
       "spawned": 2451172,
       "skipped": 48828,
-      "full_checks": 2500,
+      "full_checks": 0,
       "first_error": null,
-      "elapsed_s": 2.4587084999984654
+      "elapsed_s": 2.0843331080004646
+    },
+    {
+      "worker_id": 3,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451172,
+      "skipped": 48828,
+      "full_checks": 0,
+      "first_error": null,
+      "elapsed_s": 2.1152599520000877
+    },
+    {
+      "worker_id": 2,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "spawned": 2451171,
+      "skipped": 48829,
+      "full_checks": 0,
+      "first_error": null,
+      "elapsed_s": 2.2226415389995964
     }
   ]
 }

@@ -17,10 +17,10 @@
     "brier_skill": 0.2272,
     "ece": 0.1047,
     "auroc": 0.7555,
-    "p_success_daily_triage": 0.8503,
+    "p_success_daily_triage": 0.8496,
     "credible_interval": [
-      0.649,
-      0.9774
+      0.6459,
+      0.9779
     ],
     "evidence_level": "hotspot"
   }
