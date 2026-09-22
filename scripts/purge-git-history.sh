@@ -63,7 +63,9 @@ for p in "${PURGE_PATHS[@]}"; do
 done
 echo
 echo "text replaced in every historical blob:"
-sed 's/^/  - /' "$REPLACE_FILE"
+grep -v '==>operator_local$' "$REPLACE_FILE" | grep -v '^regex:' | sed 's/^/  - /' || true
+grep '^regex:' "$REPLACE_FILE" | sed 's/^/  - /' || true
+echo "  - <identity.aaron.timezone>==>operator_local  $TZ_NOTE"
 echo
 
 if ! command -v git-filter-repo >/dev/null 2>&1 && ! git filter-repo --version >/dev/null 2>&1; then
