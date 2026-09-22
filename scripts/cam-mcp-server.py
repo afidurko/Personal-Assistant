@@ -10,7 +10,7 @@ Tools:
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   loop_check, loop_audit, loop_run, higgsfield_check, presence_check,
-  voicestudio_health, needs_attention,
+  converse_overlays_check, voicestudio_health, needs_attention,
   sentinel_decide, sentinel_pending, sentinel_ledger (read-only; Aaron approves via CLI)
 
 Install into Cline (example):
@@ -294,6 +294,21 @@ def tool_defs() -> list[dict]:
                 "Does not launch GPU jobs or spend."
             ),
             "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "converse_overlays_check",
+            "description": (
+                "Validate config/persona/converse-overlays.json and prove the Python, TS home-server "
+                "and web-companion reply mirrors answer identically (converse-parity-check). "
+                "Optional `text` returns a dry preview reply from the config."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string"},
+                    "parity": {"type": "boolean", "description": "run node parity (default true)"},
+                },
+            },
         },
         {
             "name": "voicestudio_health",
@@ -613,6 +628,37 @@ def higgsfield_check(_arguments: dict | None = None) -> Any:
     return json.loads(out)
 
 
+def converse_overlays_check(arguments: dict | None = None) -> Any:
+    import converse_overlays as co
+
+    arguments = arguments or {}
+    cfg = co.load_overlays(force=True)
+    out: dict[str, Any] = {
+        "config": "config/persona/converse-overlays.json",
+        "version": cfg.get("version"),
+        "check": co.check_overlays(cfg),
+        "overlay_ids": [str(r.get("id")) for r in cfg.get("overlays") or []],
+        "intent_order": co.intent_order(cfg),
+    }
+    if arguments.get("parity", True):
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/converse-parity-check.py")],
+            text=True,
+            capture_output=True,
+            cwd=str(ROOT),
+        )
+        try:
+            out["parity"] = json.loads(proc.stdout)
+        except json.JSONDecodeError:
+            out["parity"] = {"ok": False, "error": (proc.stderr or proc.stdout)[-400:]}
+    text = arguments.get("text")
+    if isinstance(text, str):
+        trace = {"classification": {"intents": co.classify_intents(text, cfg)}, "path": "fast"}
+        out["preview"] = co.explain_reply(text, trace, None, cfg)
+    out["ok"] = bool(out["check"].get("ok")) and bool((out.get("parity") or {"ok": True}).get("ok"))
+    return out
+
+
 def inkbox_check(_arguments: dict | None = None) -> Any:
     out = subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/inkbox-check.py")],
@@ -819,6 +865,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return presence_check(arguments)
     if name == "higgsfield_check":
         return higgsfield_check(arguments)
+    if name == "converse_overlays_check":
+        return converse_overlays_check(arguments)
     if name == "inkbox_check":
         return inkbox_check(arguments)
     if name == "loop_check":

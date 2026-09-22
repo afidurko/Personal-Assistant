@@ -7,7 +7,7 @@ import { NeuralMesh } from '../core/neural-mesh.js';
 import { PersistentMemory } from '../core/persistent-memory.js';
 import { ScanOrchestrator } from '../core/scan-orchestrator.js';
 import { statusFromScore } from '../workspaces/utils.js';
-import { runAllScans } from '../workspaces/index.js';
+import { allScanners, runAllScans } from '../workspaces/index.js';
 import type { WorkspaceSnapshot } from '../../shared/types.js';
 import { STATUS_COLORS } from '../../shared/types.js';
 import { SWIFT_GUIDE_CONCEPTS } from '../../shared/swiftGuide.js';
@@ -217,7 +217,8 @@ describe('integration after suggestive implementations', () => {
       await orch.init();
       await orch.runOnce();
       const state = orch.getFullState();
-      expect(state.workspaces.length).toBe(7);
+      // One snapshot per registered scanner (core + improvements + needs_attention)
+      expect(state.workspaces.length).toBe(allScanners.length);
       expect(state.workspaces.some((w) => w.kind === 'agi_research')).toBe(true);
       expect(state.workspaces.some((w) => w.kind === 'swarm')).toBe(true);
       expect(state.workspaces.some((w) => w.kind === 'needs_attention')).toBe(true);

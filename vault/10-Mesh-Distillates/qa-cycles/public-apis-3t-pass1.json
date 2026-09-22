@@ -7,8 +7,8 @@
   "passed": 3000000000000,
   "failed": 0,
   "first_error": null,
-  "elapsed_s": 3.979443946998799,
-  "checks_per_sec": 2512913.897817749,
+  "elapsed_s": 4.0656725659973745,
+  "checks_per_sec": 2459617.649397902,
   "workers": 4,
   "seed": 165,
   "integration": "public-apis"

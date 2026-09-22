@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "cases": 36,
+  "mirrors": [
+    "python",
+    "ts",
+    "js"
+  ],
+  "mismatches": [],
+  "config": "config/persona/converse-overlays.json",
+  "version": 2,
+  "js_load": {
+    "network_source": "network",
+    "network_version": 2,
+    "cache_source": "cache",
+    "cache_version": 2,
+    "cold_source": "fallback",
+    "cold_answers": "echo"
+  }
+}

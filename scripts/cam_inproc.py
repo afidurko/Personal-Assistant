@@ -54,3 +54,25 @@ def run_main_captured(filename: str, argv: list[str] | None = None) -> tuple[int
 def route(**kwargs) -> dict:
     """Full connectome-route plan (trajectory + workspace). In-process."""
     return load_script("connectome-route.py").route(**kwargs)
+
+
+def public_apis_search(**kwargs) -> dict:
+    """Offline-first public-apis catalog search — no python3 spawn."""
+    kwargs.setdefault("offline", True)
+    return load_script("public-apis-search.py").search(**kwargs)
+
+
+def google_trends_search(**kwargs) -> dict:
+    """Offline-first Google Trends catalog search — no python3 spawn."""
+    kwargs.setdefault("offline", True)
+    return load_script("google-trends-search.py").search(**kwargs)
+
+
+def catalog_sense_smoke() -> dict:
+    """sense.catalog.public_apis route + fixture searches, no subprocess."""
+    routed = route(sense="sense.catalog.public_apis", goal="list weather apis")
+    return {
+        "route": routed,
+        "public_apis": public_apis_search(query="weather", offline=True, num=3),
+        "google_trends": google_trends_search(query="election", offline=True, num=3),
+    }

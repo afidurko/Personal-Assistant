@@ -399,6 +399,29 @@
       "motor": "motor.speak"
     },
     {
+      "id": "tool.converse.overlays_check",
+      "purpose": "Validate persona converse overlays and prove Python/TS/companion reply mirrors answer identically",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/converse-parity-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "cases": "number",
+        "mirrors": "string[]",
+        "mismatches": "object[]"
+      },
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "motor": "motor.speak"
+    },
+    {
       "id": "tool.memorybear.read",
       "purpose": "Recall cognitive memory via MemoryBear (offline fixture or live API)",
       "created_by_role": "memory-curator",

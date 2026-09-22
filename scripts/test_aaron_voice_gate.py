@@ -111,6 +111,9 @@ class AaronVoiceGateTests(unittest.TestCase):
         stored = json.loads(self.store.read_text(encoding="utf-8"))
         self.assertIn("centroid", stored)
         self.assertTrue(stored["templates"])
+        self.assertTrue(self.gate.store.verify_enroll_checksum())
+        self.assertEqual(len(stored.get("enroll_checksum") or ""), 32)
+        self.assertTrue(status.get("enroll_checksum_ok"))
 
 
 def np_concat(parts):

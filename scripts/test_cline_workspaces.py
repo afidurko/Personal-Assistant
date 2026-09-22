@@ -326,6 +326,42 @@ class AnatomyCortexTests(unittest.TestCase):
         self.assertIn("public-apis-billion-fuzz.py", campaign)
         self.assertIn("test_cam_converse_voice_gate", campaign)
         self.assertIn("presence-check.py", campaign)
+        self.assertIn("converse-billion-fuzz.py", campaign)
+        self.assertIn("converse-parity-check.py", campaign)
+        self.assertTrue((ROOT / "scripts" / "converse-billion-fuzz.py").is_file())
+        self.assertTrue((ROOT / "config" / "persona" / "converse-overlays.json").is_file())
+
+    def test_converse_one_voice_wiring(self):
+        """Python / TS / companion mirrors + parity guard are wired everywhere."""
+        self.assertTrue((ROOT / "scripts" / "converse-parity-check.py").is_file())
+        self.assertTrue((ROOT / "shared" / "converseOverlays.ts").is_file())
+        self.assertTrue((ROOT / "companions" / "web" / "converse-overlays.js").is_file())
+        html = (ROOT / "companions" / "web" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('src="converse-overlays.js"', html)
+        self.assertLess(html.index("converse-overlays.js"), html.index('src="app.js"'))
+        gate = (ROOT / "scripts" / "ci-static-gate.py").read_text(encoding="utf-8")
+        self.assertIn("converse-parity-check.py", gate)
+        ci = (ROOT / "scripts" / "ci-connectome.sh").read_text(encoding="utf-8")
+        self.assertIn("converse-parity-check.py", ci)
+        mcp = (ROOT / "scripts" / "cam-mcp-server.py").read_text(encoding="utf-8")
+        self.assertIn('"converse_overlays_check"', mcp)
+        registry = json.loads(
+            (ROOT / "config" / "tools" / "registry.json").read_text(encoding="utf-8")
+        )
+        ids = {t["id"] for t in registry["tools"]}
+        self.assertIn("tool.converse.overlays_check", ids)
+        pieces = json.loads(
+            (ROOT / "config" / "system" / "pieces.json").read_text(encoding="utf-8")
+        )
+        converse = next(p for p in pieces["pieces"] if p["id"] == "piece.converse")
+        self.assertIn("shared/converseOverlays.ts", converse["paths"])
+        self.assertIn("companions/web/converse-overlays.js", converse["paths"])
+        server = (ROOT / "server" / "index.ts").read_text(encoding="utf-8")
+        for route in ("/api/converse/overlays", "/api/converse/overlays/reload", "/api/converse/preview"):
+            self.assertIn(route, server)
+        py_server = (ROOT / "scripts" / "cam-converse-server.py").read_text(encoding="utf-8")
+        for route in ("/api/converse/overlays", "/api/converse/overlays/reload", "/api/converse/preview"):
+            self.assertIn(route, py_server)
 
     def test_cloud_agent_environment_json_present(self):
         env = ROOT / ".cursor" / "environment.json"

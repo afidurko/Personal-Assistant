@@ -32,6 +32,8 @@ VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
 TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
 
 sys.path.insert(0, str(ROOT / "scripts"))
+import converse_overlays as co  # noqa: E402
+
 try:
     import activity_emit
 except Exception:  # pragma: no cover
@@ -509,79 +511,16 @@ def route_sense(sense: str, goal: str = "") -> dict:
 
 
 def _overlay_reply(low: str) -> str | None:
-    """Spoken lines reason() would miss (camera/pupil/voice classify as general/fast)."""
-    if "only my voice" in low or "my voice only" in low or (
-        "ignore" in low
-        and any(w in low for w in ("other", "people", "room", "noise", "surround"))
-    ):
-        return (
-            "Aaron-only mode is on. Enroll once if you haven't, "
-            "then I'll ignore other speakers in noisy places."
-        )
-    if "camera" in low or "face" in low or "see me" in low:
-        return (
-            "Camera is wired through the companion too. "
-            "I already have your face enrollment from the photos you shared. "
-            "Keep the lens on you and I'll treat that as Aaron present."
-        )
-    if "can you see" in low or "pupil" in low or "eye tracking" in low or "what do you see" in low:
-        return (
-            "Yes — Pupil is wired so I can see. "
-            "World camera plus gaze feed sense.vision.world when you open my eyes. "
-            "I'm not watching continuously unless you ask me to."
-        )
-    if "voice" in low or "recognize me" in low or "only me" in low or "surrounding" in low:
-        return (
-            "I'm set up to listen for your voice only. "
-            "Enroll a few clean clips with aaron-voice-enroll.py on your host, "
-            "and I'll ignore surrounding conversation before I take a turn."
-        )
-    if "who are you" in low or "your name" in low:
-        return (
-            "I'm Cam — thirty-two, from Argentina, soft airy English. "
-            "You're Aaron, my only task-giver. What should we do?"
-        )
-    if "thank" in low:
-        return "Of course. I'm right here."
+    """Spoken lines from config/persona/converse-overlays.json."""
+    rule = co.match_overlay(low)
+    if rule:
+        return str(rule.get("reply") or "") or None
     return None
 
 
 def speak_from_trace(aaron_text: str, trace: dict, history: list[dict] | None = None) -> str:
-    """Warm spoken reply from one reason() trace. Overlays keep camera/pupil/voice lines."""
-    t = (aaron_text or "").strip()
-    if not t:
-        return "I'm here, Aaron. Whenever you're ready — I'm listening."
-    low = t.lower()
-    overlay = _overlay_reply(low)
-    if overlay:
-        return overlay
-    intents = set((trace.get("classification") or {}).get("intents") or [])
-    if "greeting" in intents:
-        return (
-            "Hi Aaron. Soft and clear on my side. "
-            "I can hear you through the companion when the mic is on."
-        )
-    if "mic_check" in intents:
-        return (
-            "Yes — I'm listening for your voice only. "
-            "Surrounding conversation is filtered out once you're enrolled."
-        )
-    if "ack" in intents:
-        return "Of course. I'm right here."
-    if "presence_chatter" in intents:
-        return "I'm right here, Aaron."
-    if (trace.get("path") or "") == "slow":
-        hotspot = trace.get("hotspot_id") or "capability"
-        motors = ", ".join(trace.get("motor_plan") or ["motor.mesh"])
-        return (
-            f"I have a plan — {hotspot}, motors {motors}. "
-            "Tell me the next step and I'll take it from there."
-        )
-    short = t if len(t) < 120 else t[:117] + "…"
-    return (
-        f"I heard you: “{short}”. "
-        "Tell me the next step and I'll take it from there."
-    )
+    """Warm spoken reply from one reason() trace. Overlays live in persona config."""
+    return co.speak_from_trace(aaron_text, trace, history)
 
 
 def converse_turn(
@@ -595,10 +534,12 @@ def converse_turn(
 
     text = (aaron_text or "").strip()
     trace = cr.reason(goal=text, sense=sense, write_trace=False, dry_run=True)
-    reply = speak_from_trace(text, trace, history)
+    explained = co.explain_reply(text, trace, history)
     return {
         "trace": trace,
-        "reply": reply,
+        "reply": str(explained["text"]),
+        "overlay": {"kind": explained["kind"], "id": explained["id"]},
+        "speak": co.speak_params(),
         "route": {
             "sense": sense,
             "hotspot_id": trace.get("hotspot_id"),
@@ -606,6 +547,27 @@ def converse_turn(
             "accepted": trace.get("accepted", True),
             "path": trace.get("path"),
         },
+    }
+
+
+def converse_overlays_status() -> dict:
+    """Loaded overlay config summary + static check (same shape as the TS host)."""
+    cfg = co.load_overlays()
+    check = co.check_overlays(cfg)
+    try:
+        mtime = co.CONFIG.stat().st_mtime
+    except OSError:
+        mtime = None
+    return {
+        "ok": bool(check.get("ok")),
+        "config": "config/persona/converse-overlays.json",
+        "version": cfg.get("version"),
+        "mtime": mtime,
+        "overlay_ids": [str(r.get("id")) for r in cfg.get("overlays") or []],
+        "intent_order": co.intent_order(cfg),
+        "speak": co.speak_params(cfg),
+        "check": check,
+        "host": "python",
     }
 
 
@@ -714,6 +676,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/voice/profile":
             self._json(200, {"ok": True, "profile": load_voice_profile()})
             return
+        if path == "/api/converse/overlays":
+            self._json(200, converse_overlays_status())
+            return
 
         # static companion (relative paths for iOS PWA / on-device)
         if path.startswith("/config/"):
@@ -760,6 +725,38 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         path = urlparse(self.path).path
         payload = self._read_json()
+
+        if path == "/api/converse/overlays/reload":
+            co.invalidate_cache()
+            self._json(200, {"reloaded": True, **converse_overlays_status()})
+            return
+
+        if path == "/api/converse/preview":
+            # Dry reply for phrase editing: no gate, no history, no log, no mesh.
+            text = str(payload.get("text") or "").strip()
+            intents = payload.get("intents")
+            if not isinstance(intents, list):
+                intents = co.classify_intents(text)
+            trace = {
+                "classification": {"intents": intents},
+                "path": payload.get("path") or "fast",
+                "hotspot_id": payload.get("hotspot_id"),
+                "motor_plan": payload.get("motor_plan"),
+            }
+            explained = co.explain_reply(text, trace, payload.get("history"))
+            self._json(
+                200,
+                {
+                    "ok": True,
+                    "text": text,
+                    "cam": explained["text"],
+                    "overlay": {"kind": explained["kind"], "id": explained["id"]},
+                    "intents": intents,
+                    "speak": co.speak_params(),
+                    "preview": True,
+                },
+            )
+            return
 
         if path == "/api/spike/mic":
             route = route_sense("sense.ios.mic", goal=payload.get("purpose", "listen"))
@@ -971,6 +968,7 @@ class Handler(BaseHTTPRequestHandler):
                 "source": source,
                 "aaron": text,
                 "cam": reply,
+                "overlay": decided.get("overlay"),
                 "gate": spectral,
                 "voice_stats": VOICE_ADDONS.as_dict(),
                 "accepted": True,
@@ -980,6 +978,7 @@ class Handler(BaseHTTPRequestHandler):
                     "hotspot_id": route.get("hotspot_id"),
                     "motor_plan": route.get("motor_plan"),
                     "accepted": route.get("accepted", True),
+                    "path": route.get("path"),
                 },
                 "mesh_activity": [
                     {"neuron": r.get("neuron"), "intensity": r.get("intensity"), "reason": r.get("reason")}
@@ -987,10 +986,8 @@ class Handler(BaseHTTPRequestHandler):
                 ],
                 "speak": {
                     "enabled": True,
-                    "rate": 0.95,
-                    "pitch": 1.05,
-                    "lang": "en-US",
                     "style": "soft airy fluent English",
+                    **(decided.get("speak") or {}),
                 },
             }
             STATE.history.append(turn)
