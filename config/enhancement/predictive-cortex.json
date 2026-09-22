@@ -49,7 +49,27 @@
     "low_confidence_below": 0.5,
     "high_surprise_above": 0.6,
     "min_n_for_verdict": 30,
-    "min_outcomes_each_class": 5
+    "min_outcomes_each_class": 5,
+    "unknown_ts_weight": 0.25,
+    "drift_ewma_beta": 0.3,
+    "drift_surprise_above": 0.6,
+    "drift_inflation": 0.5,
+    "backoff_single_child_factor": 0.5,
+    "stale_after_days": 7.0,
+    "max_runtime_rows": 5000,
+    "keep_runtime_rows": 1000
+  },
+  "ethics": "config/ethics/research-ethics.json",
+  "ethics_check": "scripts/research-ethics-check.py",
+  "survival_measures": {
+    "cross_source_dedup": "same (ts, hotspot, pattern) from loop-run-log.md and loop-runs/latest.json collapses to one experience",
+    "unknown_timestamp": "records without a parseable ts are weighted unknown_ts_weight, never treated as fresh",
+    "source_isolation": "each ingestor is wrapped; a corrupt file is reported in coverage.source_errors and the rest still loads",
+    "drift_detection": "EWMA of |reward-prediction error| per context; above drift_surprise_above the posterior counts are scaled by drift_inflation (interval widens) and advice suggests gathering more",
+    "diversity_aware_backoff": "a parent context whose evidence comes from a single child passes only backoff_single_child_factor of its prior strength to siblings",
+    "staleness": "contexts with ≥2 experiences and no record for stale_after_days are listed as coverage.stale_contexts (hint of silent failure)",
+    "log_rotation": "runtime log above max_runtime_rows is archived, keeping keep_runtime_rows live",
+    "kill_switch": "CAM_KILL=1 refuses --record, --forget-*, and distillate writes; predictions stay read-only"
   },
   "predictive_measures": {
     "p_success": "Beta-Bernoulli posterior mean with exponential forgetting (half_life_days) and hierarchical backoff hotspot→pattern→center→sense→global",

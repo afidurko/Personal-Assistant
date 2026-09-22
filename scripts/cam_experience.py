@@ -10,7 +10,22 @@ normalized *experience* stream and turns it into predictive measures:
 * expected score / duration — recency-weighted means with dispersion
 * TD(0) value + reward-prediction error ("surprise") per context
 * prequential calibration — Brier, log loss, ECE, AUROC, Brier skill vs the
-  base rate, computed by predicting each experience *before* seeing it
+  running base rate, computed by predicting each experience *before* seeing it
+
+Survival measures (why an earlier draft would have failed, and the fix):
+* the same run reported by two sources was counted twice → cross-source dedup
+* records with unknown timestamps were treated as *fresh* → discounted weight
+* one corrupt source file killed the whole load → per-source error isolation
+* a stable rate that silently shifted stayed confident → EWMA-surprise drift
+  detection inflates uncertainty until the new regime is learned
+* a parent rate dominated by one child bled into siblings → diversity-aware backoff
+* runs that never wrote a distillate were invisible → staleness / coverage report
+* unbounded runtime log → rotation; kill switch (``CAM_KILL``) refuses writes
+
+Ethical measures (``config/ethics/research-ethics.json``): PII/secret redaction
+on write, protected contexts → human judgment only, abstention when evidence is
+thin, per-context calibration parity, right-to-forget, and a prediction card
+with stated limitations plus a hedged narration Cam can actually say.
 
 Advisory only: predictions are a report for Cam's centers and Aaron. Using
 them to alter routing or fire motors stays behind ``switch.cam_enhance``.
@@ -28,6 +43,7 @@ from typing import Any, Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 CFG_PATH = ROOT / "config" / "enhancement" / "predictive-cortex.json"
+ETHICS_PATH = ROOT / "config" / "ethics" / "research-ethics.json"
 FIXTURE = ROOT / "scripts" / "testdata" / "sample-experiences.jsonl"
 RUNTIME_LOG = ROOT / "data" / "runtime" / "experiences.jsonl"
 DISTILL_DIR = ROOT / "vault" / "10-Mesh-Distillates" / "predictive-cortex"
@@ -38,8 +54,14 @@ QA_CYCLES = ROOT / "vault" / "10-Mesh-Distillates" / "qa-cycles"
 REASONING = ROOT / "vault" / "10-Mesh-Distillates" / "reasoning"
 
 BACKOFF_ORDER = ("hotspot", "pattern", "center", "sense", "global")
+SCHEMA_VERSION = 1
 
 _CACHE: dict[str, Any] = {}
+LAST_SOURCE_ERRORS: list[dict[str, str]] = []
+
+
+class KillSwitchActive(RuntimeError):
+    """Raised when a write is attempted while CAM_KILL is set."""
 
 
 # --- time helpers -------------------------------------------------------------
@@ -64,6 +86,10 @@ def parse_ts(value: Any) -> datetime | None:
         return None
 
 
+def kill_active() -> bool:
+    return os.environ.get("CAM_KILL", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 # --- config -------------------------------------------------------------------
 
 DEFAULTS: dict[str, Any] = {
@@ -81,6 +107,15 @@ DEFAULTS: dict[str, Any] = {
     "high_surprise_above": 0.6,
     "min_n_for_verdict": 30,
     "min_outcomes_each_class": 5,
+    # survival
+    "unknown_ts_weight": 0.25,
+    "drift_ewma_beta": 0.3,
+    "drift_surprise_above": 0.6,
+    "drift_inflation": 0.5,
+    "backoff_single_child_factor": 0.5,
+    "stale_after_days": 7.0,
+    "max_runtime_rows": 5000,
+    "keep_runtime_rows": 1000,
 }
 
 
@@ -93,6 +128,46 @@ def load_config() -> dict[str, Any]:
             cfg["_raw"] = raw
         _CACHE["cfg"] = cfg
     return _CACHE["cfg"]
+
+
+def load_ethics() -> dict[str, Any]:
+    if "ethics" not in _CACHE:
+        _CACHE["ethics"] = json.loads(ETHICS_PATH.read_text(encoding="utf-8")) if ETHICS_PATH.exists() else {}
+    return _CACHE["ethics"]
+
+
+# --- ethics: redaction + protected contexts ----------------------------------
+
+def redact(text: str) -> tuple[str, list[str]]:
+    """Strip PII / secrets from free text before it is persisted."""
+    if not text:
+        return text, []
+    eth = load_ethics().get("redaction") or {}
+    patterns = eth.get("patterns") or {}
+    template = eth.get("replacement") or "[redacted:{kind}]"
+    kinds: list[str] = []
+    out = text
+    for kind, pattern in patterns.items():
+        try:
+            new = re.sub(pattern, template.format(kind=kind), out)
+        except re.error:
+            continue
+        if new != out:
+            kinds.append(kind)
+            out = new
+    return out, kinds
+
+
+def is_protected(ctx: dict[str, Any]) -> bool:
+    """True when the context touches people, money, identity or outbound action."""
+    prot = load_ethics().get("protected_contexts") or {}
+    blob = " ".join(
+        str(ctx.get(k) or "") for k in ("hotspot", "pattern", "center", "sense")
+    ).lower()
+    if any(tok in blob for tok in prot.get("hotspot_patterns") or []):
+        return True
+    motors = {str(m) for m in (ctx.get("motors") or [])}
+    return any(m in motors for m in prot.get("motor_patterns") or [])
 
 
 # --- experience schema --------------------------------------------------------
@@ -113,8 +188,11 @@ def make_experience(
     ref: str | None = None,
 ) -> dict[str, Any]:
     """Normalized experience record. ``ok`` is the Bernoulli outcome."""
-    return {
+    clean_notes, kinds = redact((notes or "")[:240])
+    clean_ref, ref_kinds = redact(ref or "") if ref else (ref, [])
+    exp = {
         "kind": "experience",
+        "schema": SCHEMA_VERSION,
         "ts": ts or utc(),
         "source": source,
         "context": {
@@ -129,9 +207,12 @@ def make_experience(
             "score": None if score is None else float(score),
             "duration_s": None if duration_s is None else float(duration_s),
         },
-        "notes": notes[:240],
-        "ref": ref,
+        "notes": clean_notes,
+        "ref": clean_ref or None,
     }
+    if kinds or ref_kinds:
+        exp["redacted"] = sorted(set(kinds + ref_kinds))
+    return exp
 
 
 def context_keys(ctx: dict[str, Any]) -> dict[str, str | None]:
@@ -142,6 +223,12 @@ def context_keys(ctx: dict[str, Any]) -> dict[str, str | None]:
         "sense": f"sense:{ctx['sense']}" if ctx.get("sense") else None,
         "global": "global",
     }
+
+
+def identity_key(exp: dict[str, Any]) -> tuple:
+    """Same run seen through two sources must collapse to one experience."""
+    ctx = exp.get("context") or {}
+    return (exp.get("ts"), ctx.get("hotspot") or ctx.get("center"), ctx.get("pattern"))
 
 
 # --- ingestion ----------------------------------------------------------------
@@ -210,10 +297,7 @@ def ingest_loop_log(path: Path = LOOP_LOG) -> list[dict[str, Any]]:
 def ingest_loop_latest(path: Path = LOOP_LATEST) -> list[dict[str, Any]]:
     if not path.exists():
         return []
-    try:
-        doc = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return []
+    doc = json.loads(path.read_text(encoding="utf-8"))
     payload = doc.get("payload") if isinstance(doc.get("payload"), dict) else doc
     status = str(payload.get("status") or doc.get("status") or "").lower()
     if not status:
@@ -307,38 +391,121 @@ def runtime_log_path() -> Path:
     return Path(override) if override else RUNTIME_LOG
 
 
-def record_experience(exp: dict[str, Any], path: Path | None = None) -> Path:
+def _rotate_if_needed(path: Path, cfg: dict[str, Any]) -> Path | None:
+    """Archive an oversized runtime log, keeping the most recent rows live."""
+    max_rows = int(cfg.get("max_runtime_rows") or 0)
+    if max_rows <= 0 or not path.exists():
+        return None
+    lines = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    if len(lines) <= max_rows:
+        return None
+    keep = int(cfg.get("keep_runtime_rows") or max_rows // 5)
+    archive = path.with_name(f"{path.stem}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}{path.suffix}")
+    archive.write_text("\n".join(lines[:-keep]) + "\n", encoding="utf-8")
+    path.write_text("\n".join(lines[-keep:]) + "\n", encoding="utf-8")
+    return archive
+
+
+def record_experience(exp: dict[str, Any], path: Path | None = None, cfg: dict[str, Any] | None = None) -> Path:
+    if kill_active():
+        raise KillSwitchActive("CAM_KILL is set — refusing to write experience")
     path = path or runtime_log_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(exp, ensure_ascii=False) + "\n")
+    _rotate_if_needed(path, cfg or load_config())
     return path
 
 
+def forget_experiences(*, ref_contains: str | None = None, key: str | None = None, path: Path | None = None) -> int:
+    """Right-to-forget: drop runtime experiences by ref substring or context key."""
+    if kill_active():
+        raise KillSwitchActive("CAM_KILL is set — refusing to rewrite experience log")
+    path = path or runtime_log_path()
+    if not path.exists():
+        return 0
+    kept, dropped = [], 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            doc = json.loads(line)
+        except json.JSONDecodeError:
+            kept.append(line)
+            continue
+        keys = set(v for v in context_keys(doc.get("context") or {}).values() if v)
+        hit = (ref_contains and ref_contains in str(doc.get("ref") or "")) or (key and key in keys)
+        if hit:
+            dropped += 1
+        else:
+            kept.append(line)
+    path.write_text(("\n".join(kept) + "\n") if kept else "", encoding="utf-8")
+    return dropped
+
+
+def dedupe(docs: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int]:
+    """Collapse the same run reported by several sources; keep the richest record."""
+    groups: dict[tuple, list[dict[str, Any]]] = {}
+    out: list[dict[str, Any]] = []
+    removed = 0
+    for d in docs:
+        src = str(d.get("source", ""))
+        # only *different* sources describing the same moment collapse; two records
+        # from one source in the same second (e.g. two QA cycles) are distinct runs
+        merge_into = next(
+            (k for k in groups.get(identity_key(d), []) if src not in str(k.get("source", "")).split("+")),
+            None,
+        )
+        if merge_into is None:
+            groups.setdefault(identity_key(d), []).append(d)
+            out.append(d)
+            continue
+        removed += 1
+        for field in ("score", "duration_s"):
+            if merge_into["outcome"].get(field) is None and d.get("outcome", {}).get(field) is not None:
+                merge_into["outcome"][field] = d["outcome"][field]
+        srcs = set(str(merge_into.get("source", "")).split("+")) | {src}
+        merge_into["source"] = "+".join(sorted(s for s in srcs if s))
+    return out, removed
+
+
 def load_experiences(*, offline: bool = False, extra: Iterable[Path] = ()) -> tuple[list[dict[str, Any]], dict[str, int]]:
-    """Merge every experience source, chronologically sorted, with per-source counts."""
+    """Merge every experience source, chronologically sorted, with per-source counts.
+
+    A broken source is reported (``LAST_SOURCE_ERRORS``, ``counts['_source_errors']``)
+    instead of taking the whole stream down.
+    """
+    global LAST_SOURCE_ERRORS
+    LAST_SOURCE_ERRORS = []
     sources: dict[str, list[dict[str, Any]]] = {}
-    if offline:
-        sources["fixture"] = read_jsonl(FIXTURE)
-    else:
-        sources["loop_run_log"] = ingest_loop_log()
-        sources["loop_run_latest"] = ingest_loop_latest()
-        sources["qa_cycle"] = ingest_qa_cycles()
-        sources["reasoning_trace"] = ingest_reasoning()
-        sources["runtime_log"] = read_jsonl(runtime_log_path())
+    loaders: list[tuple[str, Any]] = (
+        [("fixture", lambda: read_jsonl(FIXTURE))]
+        if offline
+        else [
+            ("loop_run_log", ingest_loop_log),
+            ("loop_run_latest", ingest_loop_latest),
+            ("qa_cycle", ingest_qa_cycles),
+            ("reasoning_trace", ingest_reasoning),
+            ("runtime_log", lambda: read_jsonl(runtime_log_path())),
+        ]
+    )
     for p in extra:
-        sources[f"extra:{p.name}"] = read_jsonl(Path(p))
-    merged: list[dict[str, Any]] = []
-    seen: set[tuple] = set()
-    for docs in sources.values():
-        for d in docs:
-            key = (d.get("ts"), d.get("source"), json.dumps(d.get("context"), sort_keys=True), d.get("ref"))
-            if key in seen:
-                continue
-            seen.add(key)
-            merged.append(d)
-    merged.sort(key=lambda d: parse_ts(d.get("ts")) or datetime.min.replace(tzinfo=timezone.utc))
-    return merged, {k: len(v) for k, v in sources.items()}
+        loaders.append((f"extra:{Path(p).name}", lambda p=p: read_jsonl(Path(p))))
+    for name, fn in loaders:
+        try:
+            sources[name] = fn()
+        except Exception as exc:  # noqa: BLE001 — isolate, report, continue
+            sources[name] = []
+            LAST_SOURCE_ERRORS.append({"source": name, "error": f"{type(exc).__name__}: {exc}"[:200]})
+    merged_raw = [d for docs in sources.values() for d in docs]
+    merged, removed = dedupe(merged_raw)
+    far_past = datetime.min.replace(tzinfo=timezone.utc)
+    merged.sort(key=lambda d: parse_ts(d.get("ts")) or far_past)
+    counts = {k: len(v) for k, v in sources.items()}
+    counts["_duplicates_removed"] = removed
+    counts["_source_errors"] = len(LAST_SOURCE_ERRORS)
+    counts["_unknown_ts"] = sum(1 for d in merged if parse_ts(d.get("ts")) is None)
+    return merged, counts
 
 
 # --- math: beta distribution without scipy -----------------------------------
@@ -413,7 +580,8 @@ class ExperiencePredictor:
     # -- weights -----------------------------------------------------------
     def _decay(self, ts: datetime | None, ref: datetime) -> float:
         if ts is None:
-            return 1.0
+            # unknown age must not masquerade as fresh evidence
+            return float(self.cfg["unknown_ts_weight"])
         age_days = max(0.0, (ref - ts).total_seconds() / 86400.0)
         return 0.5 ** (age_days / float(self.cfg["half_life_days"]))
 
@@ -426,27 +594,38 @@ class ExperiencePredictor:
                 "td_updates": 0,
                 "last_surprise": None,
                 "surprises": [],
+                "ewma_surprise": None,
+                "children": set(),
             },
         )
 
+    def drift_suspected(self, key: str) -> bool:
+        b = self.stats.get(key)
+        if not b or b.get("ewma_surprise") is None or len(b["events"]) < 3:
+            return False
+        return b["ewma_surprise"] > float(self.cfg["drift_surprise_above"])
+
     # -- learning ------------------------------------------------------------
-    def update(self, exp: dict[str, Any]) -> dict[str, Any]:
+    def update(self, exp: dict[str, Any]) -> dict[str, float]:
         ctx = exp.get("context") or {}
         out = exp.get("outcome") or {}
         y = 1.0 if out.get("ok") else 0.0
         reward = (float(out["score"]) / 100.0) if isinstance(out.get("score"), (int, float)) else y
         ts = parse_ts(exp.get("ts"))
         alpha = float(self.cfg["td_alpha"])
+        beta = float(self.cfg["drift_ewma_beta"])
+        keys = context_keys(ctx)
+        finest = keys.get("hotspot") or keys.get("pattern") or keys.get("center") or "global"
         surprise_by_key: dict[str, float] = {}
-        for level, key in context_keys(ctx).items():
+        for level, key in keys.items():
             if not key:
                 continue
             b = self._bucket(key)
             b["events"].append((ts, y, out.get("score"), out.get("duration_s")))
+            b["children"].add(finest)
             v = b["td_value"]
             if v is None:
-                # first visit: seed at reward, surprise measured against neutral 0.5
-                rpe = reward - 0.5
+                rpe = reward - 0.5  # first visit: measured against neutral
                 b["td_value"] = reward
             else:
                 rpe = reward - v
@@ -454,6 +633,7 @@ class ExperiencePredictor:
             b["td_updates"] += 1
             b["last_surprise"] = abs(rpe)
             b["surprises"].append(abs(rpe))
+            b["ewma_surprise"] = abs(rpe) if b["ewma_surprise"] is None else (1 - beta) * b["ewma_surprise"] + beta * abs(rpe)
             surprise_by_key[level] = round(abs(rpe), 4)
         self.history.append(exp)
         return surprise_by_key
@@ -463,8 +643,9 @@ class ExperiencePredictor:
         b = self.stats.get(key)
         a, bb, n_eff = prior_a, prior_b, 0.0
         if b:
+            inflate = float(self.cfg["drift_inflation"]) if self.drift_suspected(key) else 1.0
             for ts, y, _s, _d in b["events"]:
-                w = self._decay(ts, ref)
+                w = self._decay(ts, ref) * inflate
                 a += w * y
                 bb += w * (1.0 - y)
                 n_eff += w
@@ -475,25 +656,30 @@ class ExperiencePredictor:
         keys = context_keys(ctx)
         cfg = self.cfg
         strength = float(cfg["backoff_prior_strength"])
+        floor = float(cfg["prior_floor"])
 
         # hierarchical backoff: coarse → fine, each level's posterior mean becomes
         # the next finer level's prior (shrinkage toward the parent)
         prior_a, prior_b = float(cfg["prior_alpha"]), float(cfg["prior_beta"])
         chain = []
         final = (prior_a, prior_b, 0.0, "prior", "global")
+        drift_flags: list[str] = []
         for level in reversed(BACKOFF_ORDER):
             key = keys.get(level)
             if not key:
                 continue
             a, b, n_eff = self._posterior(key, ref, prior_a, prior_b)
             mean = a / (a + b)
-            chain.append({"level": level, "key": key, "n_effective": round(n_eff, 3), "mean": round(mean, 4)})
-            # floor keeps a near-certain parent from collapsing the child's interval on 2-3 events
-            floor = float(cfg["prior_floor"])
-            prior_a, prior_b = max(floor, strength * mean), max(floor, strength * (1.0 - mean))
+            drifting = self.drift_suspected(key)
+            if drifting:
+                drift_flags.append(key)
+            children = len((self.stats.get(key) or {}).get("children") or ())
+            chain.append({"level": level, "key": key, "n_effective": round(n_eff, 3), "mean": round(mean, 4), "children": children, "drift": drifting})
+            # a parent whose evidence comes from a single child is a weak prior for its siblings
+            eff_strength = strength * (float(cfg["backoff_single_child_factor"]) if children <= 1 else 1.0)
+            prior_a, prior_b = max(floor, eff_strength * mean), max(floor, eff_strength * (1.0 - mean))
             final = (a, b, n_eff, level, key)
         a, b, n_eff, _level_used, key_used = final
-        # the finest level with real evidence is what the number "means"
         min_n = float(cfg["min_effective_n"])
         evidence_level = next((c["level"] for c in reversed(chain) if c["n_effective"] >= min_n), "prior")
         evidence_key = next((c["key"] for c in reversed(chain) if c["n_effective"] >= min_n), "global")
@@ -507,6 +693,7 @@ class ExperiencePredictor:
         bucket = self.stats.get(evidence_key) or {}
         td_value = bucket.get("td_value")
         evidence = self._evidence(keys, ref)
+        ethics = load_ethics()
         result = {
             "p_success": round(p, 4),
             "credible_interval": [round(lo, 4), round(hi, 4)],
@@ -524,9 +711,13 @@ class ExperiencePredictor:
             "surprise_if_fail": round(-math.log(max(1e-9, 1.0 - p)), 4),
             "surprise_if_ok": round(-math.log(max(1e-9, p)), 4),
             "confidence": round(1.0 - (hi - lo), 4),
+            "drift_suspected": drift_flags,
+            "protected_context": is_protected(ctx),
             "evidence": evidence,
+            "limitations": (ethics.get("prediction_card") or {}).get("limitations") or [],
         }
         result["advice"] = self._advice(result)
+        result["narration"] = narrate(result)
         return result
 
     def _weighted_stats(self, key: str, ref: datetime, index: int) -> dict[str, Any] | None:
@@ -573,11 +764,24 @@ class ExperiencePredictor:
         return picks
 
     def _advice(self, r: dict[str, Any]) -> dict[str, Any]:
+        eth = load_ethics()
+        abst = eth.get("abstention") or {}
+        width = r["credible_interval"][1] - r["credible_interval"][0]
+        abstain = (
+            r["evidence_level"] == "prior"
+            or r["n_effective"] < float(abst.get("min_effective_n", 0.0))
+            or width > float(abst.get("max_interval_width", 1.0))
+        )
         low_conf = r["confidence"] < float(self.cfg["low_confidence_below"])
         risky = r["p_success"] < 0.5
         high_surprise = (r["last_surprise"] or 0.0) > float(self.cfg["high_surprise_above"])
-        if r["evidence_level"] == "prior":
+        drifting = bool(r.get("drift_suspected"))
+        if r["protected_context"]:
+            stance = (eth.get("protected_contexts") or {}).get("stance", "human_judgment_required")
+        elif r["evidence_level"] == "prior":
             stance = "no_experience_yet"
+        elif abstain:
+            stance = "abstain"
         elif low_conf:
             stance = "thin_evidence"
         elif risky:
@@ -586,10 +790,37 @@ class ExperiencePredictor:
             stance = "expect_success"
         return {
             "stance": stance,
-            "suggest_qa_hold": bool(risky or high_surprise),
-            "suggest_gather_more": bool(low_conf),
+            "abstain": bool(abstain),
+            # never propose automation for protected contexts — people decide there
+            "suggest_qa_hold": bool((risky or high_surprise or drifting) and not r["protected_context"]),
+            "suggest_gather_more": bool(low_conf or abstain or drifting),
             "note": "advisory only — acting on predictions requires switch.cam_enhance",
         }
+
+
+def narrate(r: dict[str, Any]) -> str:
+    """A hedged sentence Cam can say out loud — numbers always come with their doubt."""
+    lo, hi = r["credible_interval"]
+    n = r["n_effective"]
+    stance = (r.get("advice") or {}).get("stance") if r.get("advice") else None
+    if r.get("protected_context"):
+        if r["evidence_level"] == "prior" or n < 1.0:
+            return "This touches people or something I shouldn't decide alone, and I have no real experience with it — no number from me. The call is yours."
+        return (
+            "This touches people or something I shouldn't decide alone, so take this only as background: "
+            f"in about {n:.1f} weighted past runs it went well roughly {r['p_success']:.0%} of the time "
+            f"({lo:.0%} to {hi:.0%}). The call is yours."
+        )
+    if r["evidence_level"] == "prior":
+        return "I haven't done anything like this before, so I won't give you a number — let's try it and I'll learn."
+    if stance == "abstain" or n < 1.0 or (hi - lo) > 0.6:
+        have = "almost no experience with this exact situation" if n < 1.0 else f"only about {n:.1f} runs' worth of experience here"
+        return f"I have {have}, and the honest range is {lo:.0%} to {hi:.0%} — too wide to call. I'd rather say I don't know yet."
+    drift = " Recent runs surprised me, so I'm holding this looser than usual." if r.get("drift_suspected") else ""
+    return (
+        f"From about {n:.1f} weighted past runs, I'd expect this to go well roughly {r['p_success']:.0%} of the time "
+        f"(somewhere between {lo:.0%} and {hi:.0%}).{drift}"
+    )
 
 
 # --- prequential evaluation ---------------------------------------------------
@@ -599,7 +830,6 @@ def _auroc(pairs: list[tuple[float, float]]) -> float | None:
     neg = [p for p, y in pairs if y < 0.5]
     if not pos or not neg:
         return None
-    # rank-sum with tie handling
     ranked = sorted(pairs, key=lambda t: t[0])
     ranks: dict[float, float] = {}
     i = 0
@@ -607,8 +837,7 @@ def _auroc(pairs: list[tuple[float, float]]) -> float | None:
         j = i
         while j + 1 < len(ranked) and ranked[j + 1][0] == ranked[i][0]:
             j += 1
-        avg = (i + j) / 2.0 + 1.0
-        ranks[ranked[i][0]] = avg
+        ranks[ranked[i][0]] = (i + j) / 2.0 + 1.0
         i = j + 1
     rank_sum = sum(ranks[p] for p in pos)
     return (rank_sum - len(pos) * (len(pos) + 1) / 2.0) / (len(pos) * len(neg))
@@ -634,8 +863,7 @@ def calibration_metrics(pairs: list[tuple[float, float]], bins: int = 10) -> dic
     skill = None if brier_base == 0 else 1.0 - brier / brier_base
     buckets: list[list[tuple[float, float]]] = [[] for _ in range(bins)]
     for p, y in pairs:
-        idx = min(bins - 1, int(p * bins))
-        buckets[idx].append((p, y))
+        buckets[min(bins - 1, int(p * bins))].append((p, y))
     ece = 0.0
     reliability = []
     for i, bucket in enumerate(buckets):
@@ -646,6 +874,7 @@ def calibration_metrics(pairs: list[tuple[float, float]], bins: int = 10) -> dic
         ece += (len(bucket) / n) * abs(acc - conf)
         reliability.append({"bin": f"{i / bins:.1f}-{(i + 1) / bins:.1f}", "n": len(bucket), "confidence": round(conf, 3), "accuracy": round(acc, 3)})
     sharpness = sum(abs(p - 0.5) for p, _ in pairs) / n
+    auroc = _auroc(pairs)
     return {
         "n": n,
         "brier": round(brier, 4),
@@ -653,7 +882,7 @@ def calibration_metrics(pairs: list[tuple[float, float]], bins: int = 10) -> dic
         "brier_skill": None if skill is None else round(skill, 4),
         "log_loss": round(logloss, 4),
         "ece": round(ece, 4),
-        "auroc": None if (a := _auroc(pairs)) is None else round(a, 4),
+        "auroc": None if auroc is None else round(auroc, 4),
         "base_rate": round(base_rate, 4),
         "sharpness": round(sharpness, 4),
         "reliability": reliability,
@@ -664,21 +893,28 @@ def prequential(experiences: list[dict[str, Any]], cfg: dict[str, Any] | None = 
     """Predict-then-update over the chronological stream; returns metrics + model."""
     model = ExperiencePredictor(cfg)
     pairs: list[tuple[float, float]] = []
+    by_group: dict[str, list[tuple[float, float]]] = {}
     surprises: list[float] = []
-    score_pairs: list[tuple[float, float, float]] = []  # (pred_mean, pred_std, actual)
+    abstained = 0
+    protected = 0
+    score_pairs: list[tuple[float, float, float]] = []
     for exp in experiences:
         ctx = exp.get("context") or {}
         ts = parse_ts(exp.get("ts")) or datetime.now(timezone.utc)
         pred = model.predict(ctx, now=ts)
         y = 1.0 if (exp.get("outcome") or {}).get("ok") else 0.0
         pairs.append((pred["p_success"], y))
+        by_group.setdefault(str(ctx.get("hotspot") or ctx.get("center") or "unknown"), []).append((pred["p_success"], y))
+        abstained += 1 if pred["advice"]["abstain"] else 0
+        protected += 1 if pred["protected_context"] else 0
         actual_score = (exp.get("outcome") or {}).get("score")
         if pred["expected_score"] and isinstance(actual_score, (int, float)):
             score_pairs.append((pred["expected_score"]["mean"], pred["expected_score"]["std"], float(actual_score)))
         rpe = model.update(exp)
         if rpe:
             surprises.append(max(rpe.values()))
-    metrics = calibration_metrics(pairs, int((cfg or DEFAULTS).get("ece_bins", 10)))
+    bins = int((cfg or DEFAULTS).get("ece_bins", 10))
+    metrics = calibration_metrics(pairs, bins)
     if score_pairs:
         mae = sum(abs(m - a) for m, _s, a in score_pairs) / len(score_pairs)
         covered = sum(1 for m, s, a in score_pairs if abs(a - m) <= 1.645 * max(s, 1e-9)) / len(score_pairs)
@@ -686,7 +922,29 @@ def prequential(experiences: list[dict[str, Any]], cfg: dict[str, Any] | None = 
         metrics["score_interval_coverage_90"] = round(covered, 3)
         metrics["score_pairs"] = len(score_pairs)
     metrics["mean_surprise"] = round(sum(surprises) / len(surprises), 4) if surprises else None
+    metrics["abstention_rate"] = round(abstained / len(pairs), 4) if pairs else None
+    metrics["protected_predictions"] = protected
+    metrics["parity"] = calibration_parity(by_group, metrics.get("ece"), bins)
     return {"metrics": metrics, "model": model}
+
+
+def calibration_parity(by_group: dict[str, list[tuple[float, float]]], aggregate_ece: float | None, bins: int) -> dict[str, Any]:
+    """Per-context ECE so one domain cannot hide another's over-confidence."""
+    par = load_ethics().get("calibration_parity") or {}
+    min_n = int(par.get("min_group_n", 8))
+    max_gap = float(par.get("max_group_ece_gap", 0.15))
+    rows, flagged = [], []
+    for group, pairs in sorted(by_group.items()):
+        if len(pairs) < min_n:
+            continue
+        m = calibration_metrics(pairs, bins)
+        gap = None if aggregate_ece is None else round(m["ece"] - aggregate_ece, 4)
+        row = {"group": group, "n": len(pairs), "ece": m["ece"], "brier": m["brier"], "base_rate": m["base_rate"], "ece_gap": gap}
+        row["flag"] = bool(gap is not None and gap > max_gap)
+        rows.append(row)
+        if row["flag"]:
+            flagged.append(group)
+    return {"groups": rows, "flagged": flagged, "max_group_ece_gap": max_gap, "min_group_n": min_n}
 
 
 # --- reports ------------------------------------------------------------------
@@ -696,31 +954,46 @@ def summarize_keys(model: ExperiencePredictor, now: datetime | None = None) -> l
     rows = []
     for key, b in model.stats.items():
         a, bb, n_eff = model._posterior(key, ref, float(model.cfg["prior_alpha"]), float(model.cfg["prior_beta"]))
-        p = a / (a + bb)
+        last_ts = next((e[0] for e in reversed(b["events"]) if e[0]), None)
         rows.append(
             {
                 "key": key,
                 "n": len(b["events"]),
                 "n_effective": round(n_eff, 3),
-                "p_success": round(p, 4),
+                "p_success": round(a / (a + bb), 4),
                 "td_value": None if b["td_value"] is None else round(b["td_value"], 4),
                 "mean_surprise": round(sum(b["surprises"]) / len(b["surprises"]), 4) if b["surprises"] else None,
-                "last_ts": next((e[0].strftime("%Y-%m-%dT%H:%M:%SZ") for e in reversed(b["events"]) if e[0]), None),
+                "ewma_surprise": None if b.get("ewma_surprise") is None else round(b["ewma_surprise"], 4),
+                "drift_suspected": model.drift_suspected(key),
+                "children": len(b.get("children") or ()),
+                "last_ts": last_ts.strftime("%Y-%m-%dT%H:%M:%SZ") if last_ts else None,
+                "staleness_days": None if last_ts is None else round((ref - last_ts).total_seconds() / 86400.0, 2),
             }
         )
     rows.sort(key=lambda r: (-r["n"], r["key"]))
     return rows
 
 
-def build_report(*, offline: bool = False, extra: Iterable[Path] = (), cfg: dict[str, Any] | None = None) -> dict[str, Any]:
+def build_report(*, offline: bool = False, extra: Iterable[Path] = (), cfg: dict[str, Any] | None = None, now: datetime | None = None) -> dict[str, Any]:
     cfg = cfg or load_config()
     experiences, counts = load_experiences(offline=offline, extra=extra)
     ev = prequential(experiences, cfg)
     model: ExperiencePredictor = ev["model"]
-    rows = summarize_keys(model)
+    if now is None and offline:
+        # a frozen fixture is judged on its own clock, not the wall clock
+        stamps = [parse_ts(e.get("ts")) for e in experiences]
+        now = max((s for s in stamps if s), default=None)
+    ref = now or datetime.now(timezone.utc)
+    rows = summarize_keys(model, now=ref)
     watch = [
         r for r in rows
-        if r["key"] != "global" and (r["p_success"] < 0.5 or (r["mean_surprise"] or 0) > float(cfg["high_surprise_above"]))
+        if r["key"] != "global" and (r["p_success"] < 0.5 or (r["mean_surprise"] or 0) > float(cfg["high_surprise_above"]) or r["drift_suspected"])
+    ]
+    stale_after = float(cfg["stale_after_days"])
+    stale = [
+        {"key": r["key"], "staleness_days": r["staleness_days"], "n": r["n"]}
+        for r in rows
+        if r["key"] != "global" and r["n"] >= 2 and r["staleness_days"] is not None and r["staleness_days"] > stale_after
     ]
     met = ev["metrics"]
     skill = met.get("brier_skill")
@@ -740,23 +1013,43 @@ def build_report(*, offline: bool = False, extra: Iterable[Path] = (), cfg: dict
         verdict = "skillful_but_miscalibrated — beats base rate; ECE above 0.1"
     else:
         verdict = "skillful_and_calibrated"
+    ethics = load_ethics()
+    redacted = sum(1 for e in experiences if e.get("redacted"))
     return {
-        "verdict": verdict,
         "kind": "predictive_cortex_report",
+        "verdict": verdict,
         "namespace": (cfg.get("_raw") or {}).get("mesh_namespace", "mesh/enhance/dl/predict"),
         "at": utc(),
         "offline": offline,
         "experience_count": len(experiences),
         "sources": counts,
+        "coverage": {
+            "duplicates_removed": counts.get("_duplicates_removed", 0),
+            "unknown_timestamps": counts.get("_unknown_ts", 0),
+            "source_errors": list(LAST_SOURCE_ERRORS),
+            "stale_contexts": stale,
+            "note": "silent failures that wrote no distillate are invisible; stale contexts hint at them",
+        },
         "config": {k: v for k, v in cfg.items() if not k.startswith("_")},
-        "calibration": ev["metrics"],
+        "calibration": met,
         "contexts": rows,
         "watch": watch,
+        "ethics": {
+            "config": _rel(ETHICS_PATH),
+            "principles": [p.get("id") for p in ethics.get("principles") or []],
+            "protected_predictions": met.get("protected_predictions"),
+            "abstention_rate": met.get("abstention_rate"),
+            "redacted_records": redacted,
+            "parity_flagged": (met.get("parity") or {}).get("flagged"),
+            "kill_switch": "act" if kill_active() else "armed_allow",
+        },
         "gate": "advisory_only — switch.cam_enhance required to act on predictions",
     }
 
 
 def write_distillate(doc: dict[str, Any], name: str = "latest.json") -> Path:
+    if kill_active():
+        raise KillSwitchActive("CAM_KILL is set — refusing to write distillate")
     DISTILL_DIR.mkdir(parents=True, exist_ok=True)
     path = DISTILL_DIR / name
     path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")

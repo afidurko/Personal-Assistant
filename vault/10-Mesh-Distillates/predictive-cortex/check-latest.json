@@ -8,16 +8,19 @@
   "smoke": {
     "experiences": 120,
     "sources": {
-      "fixture": 120
+      "fixture": 120,
+      "_duplicates_removed": 0,
+      "_source_errors": 0,
+      "_unknown_ts": 0
     },
-    "brier": 0.1827,
-    "brier_skill": 0.2179,
-    "ece": 0.0957,
-    "auroc": 0.7515,
-    "p_success_daily_triage": 0.8616,
+    "brier": 0.1805,
+    "brier_skill": 0.2272,
+    "ece": 0.1047,
+    "auroc": 0.7555,
+    "p_success_daily_triage": 0.8503,
     "credible_interval": [
-      0.6743,
-      0.9791
+      0.649,
+      0.9774
     ],
     "evidence_level": "hotspot"
   }
