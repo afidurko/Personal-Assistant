@@ -1,0 +1,338 @@
+{
+  "id": "cam-pii-guard",
+  "title": "Personal-information guard — what may never reach a tracked file, a PR, a log, or an outbound motor",
+  "authorized_by": "{display_name}",
+  "authorized_at": "2026-09-22",
+  "status": "enforced",
+  "operator": {
+    "handle": "aaron",
+    "display_name": "Aaron",
+    "note": "Set with `python3 scripts/privacy-init.py --operator <handle> --name <Display>`. {handle} and {display_name} expand in every path and pattern below; the operator's own personal facts are sealed with `private-memory.py protect`, never written here."
+  },
+  "policy_doc": "docs/PRIVACY_SAFEGUARDS.md",
+  "allow_pragma": "pii-guard: allow",
+  "max_file_bytes": 2000000,
+  "skip_paths": [
+    ".git/",
+    "node_modules/",
+    "integrations/",
+    "dist/",
+    "dist-server/",
+    "package-lock.json",
+    "*.glb",
+    "*.lock"
+  ],
+  "private_paths": [
+    "identity/{handle}/local/",
+    "identity/*/local/",
+    "**/private-memory/",
+    ".cam/",
+    ".cam-private/",
+    "secrets/",
+    "credentials/",
+    "data/runtime/",
+    "data/runtime/journal/",
+    "vault/10-Mesh-Distillates/converse/",
+    "vault/00-Inbox/attachments/"
+  ],
+  "private_path_exceptions": [
+    "vault/00-Inbox/attachments/.gitkeep",
+    "data/.gitkeep",
+    "vault/10-Mesh-Distillates/converse/README.md",
+    "data/runtime/README.md"
+  ],
+  "blocked_basenames": [
+    ".env",
+    ".envrc",
+    "embeddings.json",
+    "voice-profile.json",
+    "enroll.json",
+    "id_rsa",
+    "id_ed25519",
+    "id_ecdsa",
+    "credentials.json",
+    "token.json",
+    "service-account.json"
+  ],
+  "blocked_extensions": [
+    ".wav",
+    ".m4a",
+    ".mp3",
+    ".aac",
+    ".caf",
+    ".heic",
+    ".mov",
+    ".mp4",
+    ".m4v",
+    ".pem",
+    ".p12",
+    ".pfx",
+    ".key",
+    ".keystore",
+    ".jks",
+    ".voiceprint",
+    ".faceprint",
+    ".private.json",
+    ".private.md"
+  ],
+  "image_extensions": [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+    ".bmp",
+    ".tiff"
+  ],
+  "image_allowed_prefixes": [
+    "identity/persona/",
+    "public/",
+    "companions/web/",
+    "visualizations/",
+    "docs/guides/",
+    "src/assets/",
+    "integrations/"
+  ],
+  "rules": [
+    {
+      "id": "email",
+      "severity": "block",
+      "label": "email address",
+      "pattern": "(?<![\\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}(?![\\w-])",
+      "validator": "email_real",
+      "allow": [
+        "noreply@",
+        "no-reply@",
+        "@users.noreply.github.com",
+        "newslabtrends@google.com",
+        "security@",
+        "@types/",
+        "@vitejs/",
+        "@met4citizen/"
+      ],
+      "exclude": [
+        "package.json",
+        "**/package.json",
+        "**/*.test.ts",
+        "scripts/test_*.py"
+      ]
+    },
+    {
+      "id": "phone",
+      "severity": "block",
+      "label": "phone number",
+      "pattern": "(?<![\\w./:-])(?:\\+?1[\\s.-]?)?\\(?[2-9]\\d{2}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}(?![\\w-])|(?<![\\w./:-])\\+(?!1\\b)\\d{1,3}[\\s.-]?\\(?\\d{1,4}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{3,4}(?![\\w-])",
+      "validator": "phone_real"
+    },
+    {
+      "id": "ssn",
+      "severity": "block",
+      "label": "US social security number",
+      "pattern": "(?<!\\d)(?!000|666|9\\d\\d)\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}(?!\\d)"
+    },
+    {
+      "id": "credit_card",
+      "severity": "block",
+      "label": "payment card number",
+      "pattern": "(?<![\\d.-])(?:\\d[ -]?){13,19}(?![\\d.-])",
+      "validator": "luhn"
+    },
+    {
+      "id": "street_address",
+      "severity": "block",
+      "label": "street address",
+      "pattern": "\\b\\d{1,6}\\s+(?:[A-Z][a-z]+\\s+){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Place|Pl|Terrace|Ter|Parkway|Pkwy|Highway|Hwy)\\.?(?=[\\s,.;]|$)"
+    },
+    {
+      "id": "postal_address_line",
+      "severity": "block",
+      "label": "city/state/ZIP line",
+      "pattern": "\\b[A-Z][a-z]+(?:\\s[A-Z][a-z]+)?,\\s?[A-Z]{2}\\s\\d{5}(?:-\\d{4})?\\b"
+    },
+    {
+      "id": "ipv4",
+      "severity": "block",
+      "label": "IP address",
+      "pattern": "(?<![\\d.])(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}(?![\\d.])",
+      "validator": "ipv4_public",
+      "exclude": [
+        "**/*.test.ts",
+        "scripts/test_*.py",
+        "scripts/testdata/**"
+      ]
+    },
+    {
+      "id": "private_key",
+      "severity": "block",
+      "label": "private key material",
+      "pattern": "-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?-----"
+    },
+    {
+      "id": "api_token",
+      "severity": "block",
+      "label": "API token / credential",
+      "pattern": "\\b(?:sk-(?:proj-|ant-)?[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|tskey-[a-z]+-[A-Za-z0-9-]{10,}|sk_live_[A-Za-z0-9]{16,}|rk_live_[A-Za-z0-9]{16,}|SG\\.[A-Za-z0-9_-]{16,}\\.[A-Za-z0-9_-]{16,}|glpat-[A-Za-z0-9_-]{20})",
+      "exclude": [
+        "**/*.test.ts",
+        "scripts/test_*.py"
+      ]
+    },
+    {
+      "id": "jwt",
+      "severity": "block",
+      "label": "JSON web token",
+      "pattern": "\\beyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\b",
+      "exclude": [
+        "**/*.test.ts",
+        "scripts/test_*.py",
+        "scripts/cam_journal.py",
+        "server/core/sentinel.ts"
+      ]
+    },
+    {
+      "id": "secret_assignment",
+      "severity": "block",
+      "label": "secret assigned in plain text",
+      "pattern": "(?i)\\b[a-z0-9_.-]*(?:api[_-]?key|secret|token|password|passwd|client_secret|private_key|auth_key)[a-z0-9_.-]*\\s*[:=]\\s*[\"']?(?![\"'\\s$<{\\[]|your_|changeme|example|placeholder|redacted|process\\.env|os\\.environ|env\\.|\\$\\{|\\{\\{|<)[A-Za-z0-9_\\-/+=.]{16,}[\"']?",
+      "allow": [
+        "[REDACTED]",
+        "your_key_here",
+        "your_api_key",
+        "your_token",
+        "sk-your",
+        "_FILE=",
+        "_PATH=",
+        "KEY_FILE",
+        "tokens_used",
+        "token_budget",
+        "token_count",
+        "max_tokens"
+      ],
+      "exclude": [
+        "**/*.test.ts",
+        "scripts/test_*.py",
+        "scripts/cam_journal.py",
+        "server/core/sentinel.ts",
+        "scripts/privacy.py",
+        "config/privacy/pii-guard.json",
+        "**/*.lock",
+        "**/package-lock.json"
+      ]
+    },
+    {
+      "id": "home_path",
+      "severity": "block",
+      "label": "personal home-directory path (reveals a username)",
+      "pattern": "(?<![\\w.~-])(?:/Users/(?!Shared\\b|<)[A-Za-z0-9._-]{2,}|/home/(?!ubuntu\\b|runner\\b|user\\b|node\\b|<|\\$)[A-Za-z0-9._-]{2,}|[A-Za-z]:\\\\Users\\\\(?!Public\\b|<)[A-Za-z0-9._-]{2,})",
+      "allow": [
+        "/Users/<you>",
+        "/home/<you>",
+        "/Users/{user}",
+        "/home/{user}",
+        "/Users/USER",
+        "/home/USER"
+      ],
+      "exclude": [
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts",
+        "scripts/test_privacy.py",
+        "scripts/privacy.py",
+        "config/privacy/pii-guard.json"
+      ]
+    },
+    {
+      "id": "operator_timezone",
+      "severity": "block",
+      "label": "operator timezone / region (belongs in private memory)",
+      "pattern": "\\b(?:Africa|America|Antarctica|Asia|Atlantic|Australia|Europe|Indian|Pacific)/[A-Z][A-Za-z_]+(?:/[A-Z][A-Za-z_]+)?\\b|\\b(?:EST|EDT|CST|CDT|MST|MDT|PST|PDT)\\s*/\\s*(?:Africa|America|Asia|Europe)/",
+      "paths": [
+        "identity/**",
+        "config/**",
+        "docs/**",
+        "vault/**",
+        "*.md",
+        "companions/**",
+        "server/**",
+        "src/**",
+        "scripts/**"
+      ],
+      "exclude": [
+        "scripts/testdata/**",
+        "**/*.test.ts",
+        "scripts/test_*.py",
+        "docs/PRIVACY_SAFEGUARDS.md",
+        "scripts/privacy.py",
+        "config/privacy/pii-guard.json",
+        "vault/10-Mesh-Distillates/**",
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts",
+        "scripts/test_privacy.py"
+      ]
+    },
+    {
+      "id": "physical_description",
+      "severity": "block",
+      "label": "physical / biometric description of a person",
+      "pattern": "(?i)\\b(?:goatee|mo?ustache|buzz[ -]?cut|tattoos?|olive[ -]skin|skin tone|facial hair|clean[ -]shaven|selfie|glasses glare|birthmark|eye colou?r|hair colou?r|bbox_hint)\\b",
+      "paths": [
+        "identity/**",
+        "vault/**",
+        "docs/**",
+        "config/**",
+        "*.md",
+        "companions/**",
+        "scripts/**",
+        "server/**",
+        "src/**"
+      ],
+      "exclude": [
+        "docs/PRIVACY_SAFEGUARDS.md",
+        "scripts/privacy.py",
+        "scripts/test_privacy.py",
+        "config/privacy/pii-guard.json",
+        "vault/10-Mesh-Distillates/**",
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts"
+      ]
+    },
+    {
+      "id": "enrollment_media_ref",
+      "severity": "block",
+      "label": "reference to an enrollment photo / clip of {display_name}",
+      "pattern": "\\b{handle}-\\d{2}[a-z0-9-]*\\.(?:jpe?g|png|heic|mov|mp4|m4a|wav)\\b",
+      "exclude": [
+        "config/integrations/funasr.md",
+        "scripts/privacy.py",
+        "scripts/test_privacy.py",
+        "config/privacy/pii-guard.json",
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts"
+      ]
+    },
+    {
+      "id": "government_id",
+      "severity": "block",
+      "label": "passport / driver licence / national ID",
+      "pattern": "(?i)\\b(?:passport|driver'?s? licen[cs]e|national id|tax id|itin|ein)\\s*(?:no\\.?|number|#|:)\\s*[A-Z0-9-]{6,}"
+    },
+    {
+      "id": "date_of_birth",
+      "severity": "block",
+      "label": "date of birth",
+      "pattern": "(?i)\\b(?:date of birth|birth ?date|\\bdob)\\b\\s*[:=-]?\\s*\\d{1,4}[/-]\\d{1,2}[/-]\\d{1,4}"
+    },
+    {
+      "id": "tailnet_ip",
+      "severity": "warn",
+      "label": "Tailscale CGNAT address (tailnet-internal, still identifying)",
+      "pattern": "(?<![\\d.])100\\.(?:6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.\\d{1,3}\\.\\d{1,3}(?![\\d.])"
+    }
+  ],
+  "notes": [
+    "Every `block` rule fails pre-commit, pre-push, ci-static-gate and the GitHub Action.",
+    "`warn` rules print but pass — promote to block once the repo is clean of them.",
+    "Snippets in findings are redacted before printing so the guard never re-leaks what it found.",
+    "A line may carry `pii-guard: allow` to opt out (audited in review). Never use it for real personal data.",
+    "This file is a Sentinel guardrail path: edits get a one-time grant only."
+  ]
+}

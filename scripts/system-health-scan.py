@@ -138,6 +138,37 @@ def check_secrets_hygiene() -> dict:
     }
 
 
+def check_privacy_guard() -> dict:
+    """neuron.privacy_guard — no personal information in tracked files; hooks installed.
+
+    Reports counts and rule ids only — never content or line text.
+    """
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import privacy
+
+        code, out = run(["git", "ls-files", "-z"])
+        names = [n for n in out.split("\0") if n] if code == 0 else []
+        findings = privacy.scan_paths(names, ROOT)
+        summ = privacy.summary(findings)
+        hooks = run(["git", "config", "--get", "core.hooksPath"])[1].strip() == ".githooks"
+        tracked_private = [n for n in names if privacy.contains_private_path([n]) and not n.endswith(".gitkeep") and privacy.path_violation(n)]
+        status = "critical" if summ["blocking"] or tracked_private else ("warning" if not hooks or summ["warnings"] else "healthy")
+        return {
+            "neuron": "neuron.privacy_guard",
+            "status": status,
+            "blocking": summ["blocking"],
+            "warnings": summ["warnings"],
+            "by_rule": summ["by_rule"],
+            "files_flagged": sorted({f.path for f in findings})[:20],
+            "tracked_private_paths": tracked_private[:20],
+            "hooks_installed": hooks,
+            "policy": "config/privacy/pii-guard.json",
+        }
+    except Exception as exc:  # noqa: BLE001
+        return {"neuron": "neuron.privacy_guard", "status": "warning", "error": str(exc)[:200]}
+
+
 def check_drift() -> dict:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     arch = (ROOT / "docs" / "CONNECTOME_ARCHITECTURE.md").read_text(encoding="utf-8")
@@ -410,6 +441,7 @@ def main() -> int:
         check_integrations(),
         check_persist(),
         check_secrets_hygiene(),
+        check_privacy_guard(),
         check_drift(),
         check_converse_health(),
         check_aaron_voice_gate(),

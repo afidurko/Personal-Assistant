@@ -1,6 +1,6 @@
 # Aaron
 
-- Timezone: America/New_York (EST)
+- Timezone: operator-local (private memory `identity.aaron.timezone`)
 - Sole operator for Cam
 - Assistant: [[Cam]]
 

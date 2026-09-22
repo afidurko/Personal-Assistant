@@ -711,9 +711,16 @@ class AaronVoiceGate:
 
 
 def update_enroll_index(templates: list[dict]) -> None:
-    """Refresh voice refs in identity/aaron/enroll-index.json (no embeddings)."""
-    index_path = ROOT / "identity" / "aaron" / "enroll-index.json"
-    data = json.loads(index_path.read_text(encoding="utf-8"))
+    """Refresh voice refs in the *private* enroll index (identity/aaron/local/, gitignored).
+
+    The tracked identity/aaron/enroll-index.json is a public stub and is never written.
+    """
+    index_path = ROOT / "identity" / "aaron" / "local" / "enroll-index.json"
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    if index_path.exists():
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    else:
+        data = {"subject": "Aaron", "purpose": "understand_aaron_look_and_sound", "visibility": "private"}
     voices = []
     for t in templates:
         voices.append(
@@ -729,11 +736,15 @@ def update_enroll_index(templates: list[dict]) -> None:
     data["voices"] = voices
     data["updated_at"] = utc_now()
     data["status"] = (
-        "face_enrollment_complete_4_photos_voice_enrolled"
+        "face_enrollment_complete_voice_enrolled"
         if voices
-        else data.get("status", "face_enrollment_complete_4_photos")
+        else data.get("status", "face_enrollment_complete")
     )
     index_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    try:
+        index_path.chmod(0o600)
+    except OSError:
+        pass
 
 
 def synthesize_tone(

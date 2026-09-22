@@ -25,10 +25,12 @@ WEB = ROOT / "companions" / "web"
 LOG_DIR = ROOT / "vault" / "10-Mesh-Distillates" / "converse"
 VOICE = json.loads((ROOT / "config" / "persona" / "voice.json").read_text(encoding="utf-8"))
 VOICE_GATE_PATH = ROOT / "config" / "identity" / "aaron-voice-gate.json"
-VOICE_PROFILE_PATH = ROOT / "identity" / "aaron" / "voice-profile.json"
+VOICE_PROFILE_PATH = ROOT / "identity" / "aaron" / "local" / "voice-profile.json"
 VOICE_REJECTS_PATH = ROOT / "data" / "runtime" / "aaron-voice-rejects.jsonl"
 VOICE_STATS_PATH = ROOT / "data" / "runtime" / "aaron-voice-stats.json"
-VISUAL = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
+# Private (gitignored) copy — the tracked identity/aaron/VISUAL_PROFILE.md is a public stub.
+VISUAL = ROOT / "identity" / "aaron" / "local" / "VISUAL_PROFILE.md"
+VISUAL_STUB = ROOT / "identity" / "aaron" / "VISUAL_PROFILE.md"
 TAILSCALE = ROOT / "config" / "network" / "tailscale.json"
 
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -677,7 +679,7 @@ class Handler(BaseHTTPRequestHandler):
                         "enabled": True,
                         "enabled_by": "Aaron",
                         "ios_capture_mode": "standing_on",
-                        "aaron_face_enrolled": VISUAL.exists(),
+                        "aaron_face_enrolled": VISUAL.exists() or VISUAL_STUB.exists(),
                         "aaron_voice_only": True,
                         "aaron_voice_gate": voice_gate_status(),
                         "host_has_local_mic": False,  # browser supplies mic

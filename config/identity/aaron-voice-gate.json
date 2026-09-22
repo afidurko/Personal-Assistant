@@ -34,7 +34,7 @@
     },
     "profile_export": {
       "enabled": true,
-      "vault_path": "identity/aaron/voice-profile.json",
+      "vault_path": "identity/aaron/local/voice-profile.json",
       "pack_script": "scripts/pack-aaron-voice-profile.py"
     },
     "reject_stats": {

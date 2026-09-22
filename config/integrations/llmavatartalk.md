@@ -47,7 +47,7 @@ Tutorials in submodule: `docs/RIVA`, `docs/Audio2Face`, `docs/UE`.
 
 Mirror Cam prefs into AvatarTalk before launch:
 
-- Language: `en-US` (Aaron / EST)
+- Language: `en-US`
 - RIVA voice: start with `English-US.Female-1` unless Aaron picks another — stored in `config/persona/voice.json`
 - Approver: only Aaron may start a live avatar session or approve outbound spoken content
 

@@ -138,7 +138,10 @@ def refresh_seed() -> None:
     prefs = seed.setdefault("mesh/prefs", {})
     prefs["human_name"] = answers.get("human", {}).get("preferred_name", prefs.get("human_name"))
     prefs["assistant_name"] = answers.get("assistant", {}).get("name", prefs.get("assistant_name"))
-    prefs["timezone"] = answers.get("human", {}).get("timezone", prefs.get("timezone"))
+    # Operator timezone is personal information: tracked files only ever carry the
+    # `operator_local` placeholder. The real value lives in private memory.
+    tz = answers.get("human", {}).get("timezone", prefs.get("timezone"))
+    prefs["timezone"] = "operator_local" if tz else tz
     seed_path.write_text(json.dumps(seed, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 

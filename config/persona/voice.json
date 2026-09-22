@@ -23,7 +23,7 @@
       "end": "07:00",
       "note": "Throttle standing loops + speak intensity; kill still instant"
     },
-    "timezone": "America/New_York"
+    "timezone": "operator_local"
   },
   "autonomy": {
     "complete_without_interference": true,

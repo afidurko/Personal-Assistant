@@ -22,6 +22,19 @@ def utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _scrub(text: str) -> str:
+    """Free-text reasons land in vault/ (tracked) — never with personal information."""
+    if not text:
+        return text
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import privacy
+
+        return privacy.redact(text)
+    except Exception:  # noqa: BLE001
+        return text
+
+
 def emit(
     *,
     neuron: str,
@@ -40,7 +53,7 @@ def emit(
         "area": area,
         "intensity": float(intensity),
         "tracts": tracts or [],
-        "reason": reason,
+        "reason": _scrub(reason),
         "source": source,
     }
     EVENTS.parent.mkdir(parents=True, exist_ok=True)

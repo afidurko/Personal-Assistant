@@ -177,9 +177,19 @@
       "check": "python3 scripts/sentinel-check.py",
       "depends_on": ["piece.connectome"],
       "feeds": ["piece.system_bridge", "piece.cline"]
+    },
+    {
+      "id": "piece.privacy",
+      "title": "Privacy safeguards — pii-guard, private memory, redaction",
+      "layer": "brain",
+      "paths": ["config/privacy/pii-guard.json", "scripts/privacy.py", "scripts/pii-guard.py", "scripts/private_memory.py", "scripts/private-memory.py", "scripts/privacy-init.py", "scripts/privacy-kit.py", ".githooks/pre-commit", ".githooks/pre-push", ".github/workflows/privacy-guard.yml", "docs/PRIVACY_SAFEGUARDS.md", "docs/PRIVACY_QUICKSTART.md", "SECURITY.md"],
+      "check": "python3 scripts/pii-guard.py --all",
+      "depends_on": ["piece.sentinel"],
+      "feeds": ["piece.persistence", "piece.cline", "piece.system_bridge"]
     }
   ],
   "boot_order": [
+    "piece.privacy",
     "piece.persistence",
     "piece.connectome",
     "piece.sentinel",

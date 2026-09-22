@@ -262,6 +262,35 @@ def _guardrail_hit(paths: list[str] | tuple[str, ...], policy: dict) -> str | No
     return None
 
 
+def _private_hit(paths: list[str] | tuple[str, ...], policy: dict) -> str | None:
+    """First plan path inside private memory, or None (docs/PRIVACY_SAFEGUARDS.md)."""
+    cfg = policy.get("private_memory") or {}
+    globs = cfg.get("paths") or []
+    if not globs or not paths:
+        return None
+    root = str(ROOT).replace("\\", "/").rstrip("/") + "/"
+    for raw in paths:
+        rel = str(raw).replace("\\", "/")
+        if rel.startswith(root):
+            rel = rel[len(root):]
+        while rel.startswith("./"):
+            rel = rel[2:]
+        rel = rel.lstrip("/")
+        for g in globs:
+            body = g.rstrip("/")
+            if body.startswith("**/"):
+                if ("/" + body[3:] + "/") in ("/" + rel + "/"):
+                    return rel
+            elif rel == body or rel.startswith(body + "/"):
+                return rel
+    return None
+
+
+def _private_denies(motor: str, cls: str | None, policy: dict) -> bool:
+    cfg = policy.get("private_memory") or {}
+    return motor in (cfg.get("deny_motors") or []) or (cls in (cfg.get("deny_classes") or []))
+
+
 def evaluate(
     motor_plan: list[str],
     *,
@@ -281,6 +310,7 @@ def evaluate(
     taint = taint_for(sense, pathway, motor_plan, pol)
     lose = set((pol.get("taint") or {}).get("classes_lose_auto_allow") or [])
     rail = _guardrail_hit(paths, pol)
+    private_path = _private_hit(paths, pol)
     decisions: dict[str, dict] = {}
     allowed: list[str] = []
     pending: list[str] = []
@@ -292,6 +322,12 @@ def evaluate(
         row: dict = {"class": cls}
         if kill:
             row.update(decision="deny", reason="switch.kill act")
+        elif private_path and _private_denies(motor, cls, pol):
+            row.update(
+                decision="deny",
+                reason=f"private memory path {private_path} — personal information never leaves the host",
+                private_path=private_path,
+            )
         elif cls is None:
             row.update(
                 decision=pol.get("unknown_motor_decision", "ask"),
@@ -346,6 +382,7 @@ def evaluate(
         "authority": "sentinel",
         "enforced": enforced(pol),
         "taint": taint,
+        "private_path": private_path,
         "decisions": decisions,
         "allowed": allowed,
         "pending": pending,

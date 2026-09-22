@@ -1,6 +1,6 @@
 # Session 1 — answered by Aaron (2026-09-16)
 
-**Human:** Aaron · **Assistant:** Cam · **Timezone:** America/New_York (EST)  
+**Human:** Aaron · **Assistant:** Cam · **Timezone:** operator-local (held in private memory)  
 **Result:** Sections A–J all **YES**, with conflict resolutions in `PROFILE.md`.  
 **Extras:** persistence across future workspaces; LinkedIn + Indeed; most-priority-first boot order.
 

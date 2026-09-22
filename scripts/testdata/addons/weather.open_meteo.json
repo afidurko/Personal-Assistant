@@ -1,11 +1,11 @@
 {
-  "latitude": 40.71,
-  "longitude": -74.01,
+  "latitude": 52.52,
+  "longitude": 13.41,
   "generationtime_ms": 0.1,
-  "utc_offset_seconds": -14400,
-  "timezone": "America/New_York",
-  "timezone_abbreviation": "EDT",
-  "elevation": 10.0,
+  "utc_offset_seconds": 7200,
+  "timezone": "Europe/Berlin",
+  "timezone_abbreviation": "CEST",
+  "elevation": 38.0,
   "current": {
     "time": "2026-09-19T14:00",
     "temperature_2m": 22.5,

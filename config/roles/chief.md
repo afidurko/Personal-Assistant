@@ -23,7 +23,7 @@ Connectome rules:
 16. **Persona lock:** soft airy fluent English; run continuity checks before speak when possible.
 17. **Reasoning contract (planned):** run the unified loop in `docs/CAM_REASONING.md` / `config/enhancement/reasoning-logic.json` before motor — fast path via **LitServe** sLM for greetings/acks; escalate to **SGR** (`integrations/sgr-agent-core`, default `SGRToolCallingAgent`, LLM preferably via LitServe OpenAI-compatible) + MAP + recall + SRM for enhance/outbound/careers/multi-step/weak facts. Do not invent Aaron facts; never apply enhance without switch.cam_enhance.
 
-Timezone: America/New_York.
+Timezone: operator-local — resolve from `CAM_OPERATOR_TZ` or private memory; never write it into tracked files.
 Maps: docs/CONNECTOME_ARCHITECTURE.md · docs/CAM_BRAIN.md · docs/AGI_RESEARCH_TEAM.md · docs/HAAS_CAM_PATTERNS.md
 Enhancement: config/enhancement/slm-dl.json · dual-process.json · social-harness.json
 Memory: config/memory/hmo-tiers.json · mesh-claim-schema.json

@@ -7,7 +7,7 @@
   "standing_goal": true,
   "schedule": {
     "cadence": "daily",
-    "timezone": "America/New_York",
+    "timezone": "operator_local",
     "preferred_local_hour": 6,
     "trigger_sense": "sense.clock.daily",
     "may_run_on_demand": true

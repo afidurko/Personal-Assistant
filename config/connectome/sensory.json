@@ -229,7 +229,7 @@
         "spike.schedule",
         "spike.scan"
       ],
-      "notes": "Daily standing trigger for AGI research scan team (America/New_York)"
+      "notes": "Daily standing trigger for AGI research scan team (operator-local timezone)"
     },
     {
       "id": "sense.web.arxiv",

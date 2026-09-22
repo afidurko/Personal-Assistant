@@ -6,7 +6,10 @@
     "secrets",
     "oauth_tokens",
     "raw_media",
-    "phone_numbers"
+    "phone_numbers",
+    "personal_information",
+    "biometrics",
+    "private_memory"
   ],
   "human": "Aaron",
   "includes": [
@@ -74,6 +77,6 @@
     "scripts/pupil-see.py"
   ],
   "scope": "this_workspace_and_future_workspaces",
-  "timezone": "America/New_York",
+  "timezone": "operator_local",
   "updated_at": "2026-09-19T19:08:50.600959+00:00"
 }

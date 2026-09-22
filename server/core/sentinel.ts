@@ -19,12 +19,14 @@ export interface SentinelRow {
   grant_options?: string[];
   grant_id?: string;
   grant_scope?: string;
+  private_path?: string;
 }
 
 export interface SentinelVerdict {
   authority: 'sentinel';
   enforced: boolean;
   taint: { tainted: boolean; sources: string[] };
+  private_path?: string | null;
   decisions: Record<string, SentinelRow>;
   allowed: string[];
   pending: string[];
@@ -51,6 +53,11 @@ export interface SentinelPolicy {
   }>;
   grant_scopes?: string[];
   tainted_grant_scopes?: string[];
+  private_memory?: {
+    paths?: string[];
+    deny_classes?: string[];
+    deny_motors?: string[];
+  };
   grants_file?: string;
   session_file?: string;
   journal_dir?: string;
@@ -150,6 +157,33 @@ function grantMatches(
   }
 }
 
+/** First plan path inside private memory (mirrors cam_sentinel._private_hit). */
+export function privatePathHit(paths: string[] | undefined, policy: SentinelPolicy, rootDir = ''): string | null {
+  const globs = policy.private_memory?.paths || [];
+  if (!globs.length || !paths?.length) return null;
+  const root = rootDir ? rootDir.replace(/\\/g, '/').replace(/\/+$/, '') + '/' : '';
+  for (const raw of paths) {
+    let rel = String(raw).replace(/\\/g, '/');
+    if (root && rel.startsWith(root)) rel = rel.slice(root.length);
+    while (rel.startsWith('./')) rel = rel.slice(2);
+    rel = rel.replace(/^\/+/, '');
+    for (const g of globs) {
+      const body = g.replace(/\/+$/, '');
+      if (body.startsWith('**/')) {
+        if (('/' + rel + '/').includes('/' + body.slice(3) + '/')) return rel;
+      } else if (rel === body || rel.startsWith(body + '/')) {
+        return rel;
+      }
+    }
+  }
+  return null;
+}
+
+function privateDenies(motor: string, cls: string | null, policy: SentinelPolicy): boolean {
+  const cfg = policy.private_memory || {};
+  return (cfg.deny_motors || []).includes(motor) || (cls !== null && (cfg.deny_classes || []).includes(cls));
+}
+
 export function evaluateSentinel(
   motorPlan: string[],
   opts: {
@@ -157,6 +191,7 @@ export function evaluateSentinel(
     pathway?: string[];
     switchState?: Record<string, string>;
     task?: string;
+    paths?: string[];
     grants?: Grant[];
     sessionId?: string | null;
     now?: number;
@@ -166,6 +201,7 @@ export function evaluateSentinel(
   const state = opts.switchState || {};
   const taint = taintFor(opts.sense || '', opts.pathway || [], motorPlan, policy);
   const lose = new Set(policy.taint?.classes_lose_auto_allow || []);
+  const privatePath = privatePathHit(opts.paths, policy);
   const ctx = {
     task: opts.task || '',
     now: opts.now ?? Date.now(),
@@ -183,6 +219,13 @@ export function evaluateSentinel(
     let row: SentinelRow;
     if (kill) {
       row = { class: cls, decision: 'deny', reason: 'switch.kill act' };
+    } else if (privatePath && privateDenies(motor, cls, policy)) {
+      row = {
+        class: cls,
+        decision: 'deny',
+        reason: `private memory path ${privatePath} — personal information never leaves the host`,
+        private_path: privatePath,
+      };
     } else if (cls === null) {
       row = {
         class: null,
@@ -238,6 +281,7 @@ export function evaluateSentinel(
     authority: 'sentinel',
     enforced: policy.enforce !== false,
     taint,
+    private_path: privatePath,
     decisions,
     allowed,
     pending,
@@ -264,9 +308,22 @@ const REDACT: Array<[RegExp, string]> = [
   [/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g, '[REDACTED]'],
   [/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g, '[REDACTED]'],
   [/\b([a-z0-9_]*(?:secret|token|password|api_key|apikey)[a-z0-9_]*\s*[:=]\s*)(['"]?)[^\s'",]{6,}\2/gi, '$1[REDACTED]'],
+  // Personal information — mirrors the block rules in config/privacy/pii-guard.json.
+  [/(?<![\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}(?![\w-])/g, '[REDACTED:email]'],
+  [/(?<![\w./:-])(?:\+?1[\s.-]?)?\(?[2-9]\d{2}\)?[\s.-]\d{3}[\s.-]\d{4}(?![\w-])/g, '[REDACTED:phone]'],
+  [/(?<![\w./:-])\+(?!1\b)\d{1,3}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}(?![\w-])/g, '[REDACTED:phone]'],
+  [/(?<!\d)(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}(?!\d)/g, '[REDACTED:ssn]'],
+  [/\b\d{1,6}\s+(?:[A-Z][a-z]+\s+){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Place|Pl|Terrace|Ter|Parkway|Pkwy|Highway|Hwy)\.?(?=[\s,.;]|$)/g, '[REDACTED:street_address]'],
+  [/\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)?,\s?[A-Z]{2}\s\d{5}(?:-\d{4})?\b/g, '[REDACTED:postal_address_line]'],
+  [/(?:\/Users\/(?!Shared\b|<)[A-Za-z0-9._-]{2,}|\/home\/(?!ubuntu\b|runner\b|user\b|node\b|<|\$)[A-Za-z0-9._-]{2,})/g, '[REDACTED:home_path]'],
+  [/\b(?:Africa|America|Antarctica|Asia|Atlantic|Australia|Europe|Indian|Pacific)\/[A-Z][A-Za-z_]+(?:\/[A-Z][A-Za-z_]+)?\b/g, '[REDACTED:operator_timezone]'],
+  [/\b(?:goatee|mo?ustache|buzz[ -]?cut|tattoos?|olive[ -]skin|skin tone|facial hair|clean[ -]shaven|selfie|glasses glare|birthmark|eye colou?r|hair colou?r)\b/gi, '[REDACTED:physical_description]'],
+  [/\baaron-\d{2}[a-z0-9-]*\.(?:jpe?g|png|heic|mov|mp4|m4a|wav)\b/g, '[REDACTED:enrollment_media_ref]'],
 ];
 
 const SECRET_KEY = /(secret|token|password|passwd|api_key|apikey|private_key|credential)/i;
+/** Keys whose values are personal by nature — blanked regardless of content (mirrors privacy.scrub_obj). */
+const PRIVATE_KEY = /^(?:timezone|tz|phone|phone_number|mobile|email|e-mail|address|street|home_address|dob|date_of_birth|birthday|ssn|passport|licen[cs]e|latitude|longitude|lat|lng|lon|voiceprint|faceprint|embedding|embeddings|face_vector|voice_vector)$/i;
 
 export function redact(text: string): string {
   let out = text;
@@ -282,7 +339,9 @@ export function redactObject<T>(obj: T): T {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
       const empty = v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length);
-      out[k] = SECRET_KEY.test(k) && !empty ? '[REDACTED]' : redactObject(v);
+      if (SECRET_KEY.test(k) && !empty) out[k] = '[REDACTED]';
+      else if (PRIVATE_KEY.test(k) && !empty && v !== 'operator_local') out[k] = '[REDACTED:private_field]';
+      else out[k] = redactObject(v);
     }
     return out as T;
   }

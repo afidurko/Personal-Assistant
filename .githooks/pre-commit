@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Cam privacy guard — layer 2 (local). Blocks commits that carry personal
+# information, secrets, or private-memory paths. Installed by
+# scripts/install-git-hooks.sh (core.hooksPath=.githooks).
+#
+# Never bypass with --no-verify for real personal data. If the guard is wrong,
+# fix the rule in config/privacy/pii-guard.json (a Sentinel guardrail path).
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "pre-commit: python3 missing — cannot run pii-guard; refusing to commit blind." >&2
+  exit 1
+fi
+
+python3 scripts/pii-guard.py --staged

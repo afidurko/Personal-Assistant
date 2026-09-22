@@ -1,45 +1,36 @@
-# Aaron — visual identity (enrollment notes)
+# Aaron — visual identity (held in private memory)
 
-**Enrolled:** 2026-09-16 · **Subject:** Aaron · **Purpose:** face recognition / photo↔video match
+**Subject:** Aaron · **Purpose:** face recognition / photo↔video match · **Visibility:** private
 
-Private originals live under `identity/aaron/local/photos/` (gitignored). This note is the durable description Cam uses.
+The durable description Cam uses to recognize Aaron — source photo names, physical
+traits, appearance variations, and any notes about other people who appear in
+enrollment media — is **personal information**. It is not published in this
+repository and must never be committed here.
 
-## Primary face cluster (Aaron)
+## Where it lives
 
-Sources:
-- `aaron-01-mirror-selfie.jpg` — mirror selfie, iPhone Pro, business-casual
-- `aaron-02-gym-pair.jpg` — **Aaron = left** (Yankees Baseball tee, yellow belt); right person is not Aaron
-- `aaron-03-closeup-glasses.jpg` — close frontal selfie, glasses glare
-- `aaron-04-cafe-cap.jpg` — cafe / laptop, hat on
-
-### Stable traits
-| Trait | Observation |
+| Item | Location |
 |---|---|
-| Hair | Dark; curly/wavy with volume **or** short-cropped (gym) |
-| Eyes | Dark; often behind glasses (sometimes without) |
-| Glasses | Thin rectangular / semi-rimless metal frames; frequent blue screen reflection — **not always worn** |
-| Facial hair | Mustache + groomed goatee / short beard, or clean-shaven (gym) |
-| Skin | Light–medium / olive |
-| Build / style | Young adult male; casual → athletic → business-casual |
+| Sealed record | private memory key `identity.aaron.visual_profile` |
+| Working copy on Aaron's host | `identity/aaron/local/VISUAL_PROFILE.md` (gitignored) |
+| Photos / embeddings | `identity/aaron/local/photos/`, `identity/aaron/local/embeddings/` (gitignored) |
 
-### Appearance variation Cam must handle
-- With / without glasses
-- Curly longer hair vs short athletic cut
-- Facial hair present vs reduced
-- Smiling wide (gym) vs neutral (selfie / cafe)
+```bash
+python3 scripts/private-memory.py get identity.aaron.visual_profile
+python3 scripts/private-memory.py doctor
+```
 
-### Recognition challenges
-- Glasses + screen glare on lenses
-- Cap / hat covering hair (`aaron-04`)
-- Mirror selfie angle + phone occlusion (`aaron-01`)
-- Multi-person frames — only match **Aaron’s** face (`aaron-02` left)
+See [`docs/PRIVACY_SAFEGUARDS.md`](../../docs/PRIVACY_SAFEGUARDS.md) for the full
+data-classification policy and the layers that keep this file redacted.
 
-## Non-Aaron in enrolled media
-- `aaron-02-gym-pair.jpg` **right**: light buzz cut, arm tattoos, Punch Gear tee — **not Aaron**; ignore for identity match
+## What is safe to say publicly
 
-## Voice / video
-None yet. When Aaron adds talking video of the same face, link via photo↔video match.
+- Face enrollment is complete; matching runs on-device or on Aaron's host
+- No photos, embeddings, biometric vectors, or physical descriptions are tracked in git
+- `pii-guard` blocks any commit that re-introduces them
 
 ## Match policy
-- Primary cluster = Aaron for `sense.aaron.face`
-- Reject faces outside enrolled cluster (including gym-pair right) for `switch.identity`
+
+- Primary enrolled cluster = Aaron for `sense.aaron.face`
+- Reject faces outside the enrolled cluster for `switch.identity`
+- Other people who appear in enrollment media are never enrolled or described
