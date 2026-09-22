@@ -284,8 +284,6 @@
         "scripts/privacy.py",
         "scripts/test_privacy.py",
         "config/privacy/pii-guard.json",
-        "identity/aaron/README.md",
-        "identity/aaron/VISUAL_PROFILE.md",
         "vault/10-Mesh-Distillates/**",
         "server/core/sentinel.ts",
         "server/core/sentinel.test.ts"

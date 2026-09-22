@@ -373,6 +373,14 @@ class Wiring(unittest.TestCase):
         self.assertEqual(idx["primary_face_cluster"], "private")
         self.assertEqual(idx["visibility"], "public_stub")
 
+    def test_identity_stubs_are_not_exempt_from_description_rules(self):
+        # The files that leaked in the first PR must stay under full scrutiny: a description
+        # or enrollment-media reference re-added to the stub has to be caught.
+        for rel in ("identity/aaron/VISUAL_PROFILE.md", "identity/aaron/README.md", "identity/aaron/enroll-index.json"):
+            hits = {f.rule for f in privacy.scan_text("trim goatee, source aaron-03-park.jpg", rel)}
+            self.assertIn("physical_description", hits, rel)
+            self.assertIn("enrollment_media_ref", hits, rel)
+
     def test_no_operator_timezone_in_tracked_identity_or_config(self):
         out = subprocess.run(["git", "grep", "-l", "-E", r"(America|Europe|Asia|Africa|Australia)/[A-Z][A-Za-z_]+", "--", "identity", "config", "docs", "vault/01-Aaron", "*.md"], cwd=ROOT, capture_output=True, text=True).stdout
         offenders = [l for l in out.splitlines() if l and not l.startswith("docs/PRIVACY_SAFEGUARDS.md") and "pii-guard.json" not in l]
