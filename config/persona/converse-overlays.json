@@ -1,7 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "converse-overlays",
-  "role": "Presence phrases for speak_from_trace — edit here, not the server",
+  "role": "Presence phrases for every Cam reply path (Python converse server, TS home server, web companion on-device) — edit here, not the servers",
+  "consumers": [
+    "scripts/converse_overlays.py",
+    "shared/converseOverlays.ts",
+    "companions/web/converse-overlays.js"
+  ],
+  "speak": {
+    "rate": 0.95,
+    "pitch": 1.05,
+    "lang": "en-US",
+    "style": "soft airy fluent English"
+  },
   "empty": "I'm here, Aaron. Whenever you're ready — I'm listening.",
   "overlays": [
     {
@@ -46,8 +57,36 @@
       "must_contain": ["Of course"],
       "probes": ["thank you", "thanks cam"],
       "reply": "Of course. I'm right here."
+    },
+    {
+      "id": "cortex",
+      "words": ["brain", "cortex", "3d", "mesh"],
+      "must_contain": ["cortex"],
+      "probes": ["show me the 3d brain", "spin the cortex", "light the mesh"],
+      "reply": "The 3D cortex is live behind me — fibers light as my agents and tasks fire. Spin it; tap tracts to explore."
+    },
+    {
+      "id": "agents",
+      "words": ["agent", "agents", "spawn", "task", "tasks", "improve"],
+      "must_contain": ["spawn bay"],
+      "probes": ["spawn an agent", "what tasks are running", "improve yourself"],
+      "reply": "I'm already spawning background improve tasks for myself and the mesh. Check the spawn bay — there's room for all of us."
+    },
+    {
+      "id": "companion_devices",
+      "words": ["ipad", "iphone", "tailscale", "companion"],
+      "must_contain": ["Tailscale"],
+      "probes": ["does the ipad work", "connect over tailscale", "open the iphone companion"],
+      "reply": "We're set for iPhone and iPad over Tailscale. On-device mode keeps working when the host is away; the same phrases live on every companion."
     }
   ],
+  "intent_rules": {
+    "greeting": { "regex": "\\b(hi|hello|hey)\\b|hi cam|hey cam" },
+    "ack": { "regex": "^(ok|okay|thanks|thank you|got it|cool)\\.?$" },
+    "mic_check": { "regex": "\\b(mic|microphone|hear me|listening)\\b" },
+    "presence_chatter": { "regex": "\\b(how are you|you there|still there)\\b" }
+  },
+  "intent_order": ["greeting", "mic_check", "ack", "presence_chatter"],
   "intents": {
     "greeting": "Hi Aaron. Soft and clear on my side. I can hear you through the companion when the mic is on.",
     "mic_check": "Yes — I'm listening for your voice only. Surrounding conversation is filtered out once you're enrolled.",
@@ -61,5 +100,7 @@
     "presence_chatter": "you there"
   },
   "slow_plan": "I have a plan — {hotspot}, motors {motors}. Tell me the next step and I'll take it from there.",
-  "echo": "I heard you: “{short}”. Tell me the next step and I'll take it from there."
+  "echo": "I heard you: “{short}”. Tell me the next step and I'll take it from there.",
+  "echo_repeat": "Same as before — “{short}”. I'm still on it; give me the next step or tell me to change course.",
+  "short_max": 120
 }
