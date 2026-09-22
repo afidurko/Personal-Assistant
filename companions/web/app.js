@@ -79,7 +79,11 @@
       const t = (aaronText || "").trim();
       return t ? `I heard you: “${t}”.` : "I'm here, Aaron.";
     }
-    const explained = Overlays.explainReply(aaronText, { path: "fast" }, history, overlaysCfg);
+    // history already holds this turn's Aaron line; repeat detection needs the one before it
+    const last = history[history.length - 1];
+    const prior =
+      last && last.role === "aaron" && last.text === aaronText ? history.slice(0, -1) : history;
+    const explained = Overlays.explainReply(aaronText, { path: "fast" }, prior, overlaysCfg);
     lastOverlay = { kind: explained.kind, id: explained.id, host: "on_device", config: overlaysSource };
     return explained.text;
   }

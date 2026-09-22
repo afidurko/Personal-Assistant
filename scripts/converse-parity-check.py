@@ -46,12 +46,29 @@ function run(mod, c) {
   const out = mod.explainReply(c.text || '', trace, c.history || null, cfg);
   return { text: out.text, kind: out.kind, id: out.id, intents_from_config: mod.classifyIntents(c.text || '', cfg) };
 }
+// Companion load(): absolute path first, relative fallback, cache when offline.
+const store = new Map();
+const storage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, v) };
+const okJson = { ok: true, json: async () => cfg };
+const fetchAbsolute404 = async (url) => (url.startsWith('/') ? { ok: false, status: 404 } : okJson);
+const first = await js.load({ storage, fetch: fetchAbsolute404 });
+const offline = await js.load({ storage, fetch: async () => { throw new Error('offline'); } });
+const cold = await js.load({ storage: { getItem: () => null, setItem: () => {} }, fetch: async () => { throw new Error('offline'); } });
+const jsLoad = {
+  network_source: first.source,
+  network_version: first.cfg.version,
+  cache_source: offline.source,
+  cache_version: offline.cfg.version,
+  cold_source: cold.source,
+  cold_answers: js.explainReply('anything', {}, null, cold.cfg).kind,
+};
 const result = {
   ts: input.cases.map((c) => run(ts, c)),
   js: input.cases.map((c) => run(js, c)),
   ts_check: ts.checkOverlays(cfg),
   ts_speak: ts.speakParams(cfg),
   js_speak: js.speakParams(cfg),
+  js_load: jsLoad,
 };
 process.stdout.write(JSON.stringify(result));
 """
@@ -136,6 +153,21 @@ def run_parity() -> dict:
         report["mismatches"].append({"mirror": "ts", "error": f"ts_check:{ts_check.get('errors')}"})
     if not py_check.get("ok"):
         report["mismatches"].append({"mirror": "python", "error": f"py_check:{py_check.get('errors')}"})
+    js_load = node.get("js_load") or {}
+    expected_load = {
+        "network_source": "network",
+        "network_version": cfg.get("version"),
+        "cache_source": "cache",
+        "cache_version": cfg.get("version"),
+        "cold_source": "fallback",
+        "cold_answers": "echo",
+    }
+    for key, want in expected_load.items():
+        if js_load.get(key) != want:
+            report["mismatches"].append(
+                {"mirror": "js_load", "key": key, "expected": want, "got": js_load.get(key)}
+            )
+    report["js_load"] = js_load
     py_speak = co.speak_params(cfg)
     for mirror in ("ts_speak", "js_speak"):
         got = node.get(mirror) or {}

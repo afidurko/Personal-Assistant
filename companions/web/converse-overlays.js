@@ -27,9 +27,12 @@
     echo: "I heard you: “{short}”. Tell me the next step and I'll take it from there.",
     short_max: 120,
   };
-  var CONFIG_PATH = "config/persona/converse-overlays.json";
+  var CONFIG_PATH = "/config/persona/converse-overlays.json";
+  var CONFIG_PATHS = [CONFIG_PATH, "config/persona/converse-overlays.json"];
   var STORAGE_KEY = "cam.converse.overlays.v1";
   var regexCache = {};
+  var globalRef =
+    typeof self !== "undefined" ? self : typeof globalThis !== "undefined" ? globalThis : null;
 
   function escapeRegex(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -188,23 +191,31 @@
   function load(opts) {
     opts = opts || {};
     var storage = opts.storage !== undefined ? opts.storage : typeof localStorage !== "undefined" ? localStorage : null;
-    var url = opts.url || CONFIG_PATH;
-    var fetchFn = opts.fetch || (typeof fetch === "function" ? fetch.bind(root) : null);
+    var urls = opts.url ? [opts.url] : CONFIG_PATHS.slice();
+    var fetchFn =
+      opts.fetch ||
+      (globalRef && typeof globalRef.fetch === "function" ? globalRef.fetch.bind(globalRef) : null);
     var cached = readCached(storage);
-    if (!fetchFn) return Promise.resolve({ cfg: cached || FALLBACK, source: cached ? "cache" : "fallback" });
-    return fetchFn(url, { cache: "no-store" })
-      .then(function (res) {
-        if (!res.ok) throw new Error("overlays " + res.status);
-        return res.json();
-      })
-      .then(function (cfg) {
-        if (!cfg || typeof cfg !== "object" || !Array.isArray(cfg.overlays)) throw new Error("overlays shape");
-        writeCached(storage, cfg);
-        return { cfg: cfg, source: "network" };
-      })
-      .catch(function () {
-        return { cfg: cached || FALLBACK, source: cached ? "cache" : "fallback" };
-      });
+    var offline = { cfg: cached || FALLBACK, source: cached ? "cache" : "fallback" };
+    if (!fetchFn) return Promise.resolve(offline);
+
+    function attempt(index) {
+      if (index >= urls.length) return Promise.resolve(offline);
+      return fetchFn(urls[index], { cache: "no-store" })
+        .then(function (res) {
+          if (!res.ok) throw new Error("overlays " + res.status);
+          return res.json();
+        })
+        .then(function (cfg) {
+          if (!cfg || typeof cfg !== "object" || !Array.isArray(cfg.overlays)) throw new Error("overlays shape");
+          writeCached(storage, cfg);
+          return { cfg: cfg, source: "network" };
+        })
+        .catch(function () {
+          return attempt(index + 1);
+        });
+    }
+    return attempt(0);
   }
 
   return {
