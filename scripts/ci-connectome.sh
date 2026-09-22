@@ -55,6 +55,9 @@ python3 scripts/embodiment-billion-fuzz.py --n 1000000 --seed 11 \
 echo "== presence portrait (no Speak clips) =="
 python3 scripts/presence-check.py
 
+echo "== converse overlays parity (python / ts / companion js) =="
+python3 scripts/converse-parity-check.py
+
 echo "== connectome fuzz (1M strict) =="
 python3 scripts/connectome-simulate.py \
   --n 1000000 \

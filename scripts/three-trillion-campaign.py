@@ -127,11 +127,18 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- `cam_inproc.public_apis_search` / `google_trends_search` / `catalog_sense_smoke` (no subprocess)",
         "- FunASR/hash_dev enroll checksum on VoiceStore; aaron-voice 3T verifies reload",
         "- `activity_emit.invalidate_dual_stream_cache` + mesh-params mtime reload",
+        "- One converse voice: TS home server (`shared/converseOverlays.ts`) + web companion "
+        "(`companions/web/converse-overlays.js`) read the same persona config as Python",
+        "- `converse-parity-check.py` asserts Python/TS/JS mirrors byte-identical (static gate + 3T)",
+        "- Turn-history phrasing (`echo_repeat`) + config `intent_rules` mirrored from cam_reason",
+        "- Reply metadata (`overlay.kind/id`) flows /api/turn → home bubble tag + MiniBrain label",
+        "- `/api/converse/overlays` (+ `/reload`, `/preview`) on both hosts; MCP `converse_overlays_check`",
         "",
         "## Suggested add-ons",
         "- `quotes.quotable` / `exchange.open_er_api` allowlisted public-apis add-ons when ops asks",
         "- Voice add-on: live FunASR CAM++ enroll on Aaron’s host (checksum already in store)",
-        "- Converse add-on: turn-history phrasing in `converse_overlays.speak_from_trace` (history arg reserved)",
+        "- Converse add-on: per-overlay `area`/`tracts` hints so the cortex lights the phrase's pathway",
+        "- Converse add-on: iOS companion reads `converse-overlays.json` (Swift mirror + parity case)",
         "",
         "## Standing suggestions",
         "- Keep `python3 scripts/ci-static-gate.py` as the fast static gate; `bash scripts/ci-connectome.sh` still owns 1M fuzz",
@@ -143,6 +150,8 @@ def write_suggestions(cycle_dir: Path, pass_id: str, results: list[dict], green:
         "- Slim CI deps: `integrations/joshinator-analyzer/backend/requirements-ci.txt`",
         "- After registry edits: `python3 scripts/test_cline_workspaces.py`",
         "- Converse overlays: `python3 scripts/converse-overlays-check.py`",
+        "- Converse parity (py/ts/js): `python3 scripts/converse-parity-check.py`",
+        "- Converse TS units: `npx vitest run shared/converseOverlays.test.ts server/core/cam-converse.test.ts`",
         "- Converse 3T: `python3 scripts/converse-billion-fuzz.py --n 3000000000000`",
         "- In-process catalogs: `cam_inproc.public_apis_search` / `google_trends_search`",
         "- Trends add-ons: `python3 scripts/google-trends-addon.py list`",
@@ -241,6 +250,17 @@ def one_pass(
     )
     results.append(
         run([sys.executable, "scripts/test_converse_overlays.py"], "converse-overlays-unit")
+    )
+    results.append(
+        run(
+            [
+                sys.executable,
+                "scripts/converse-parity-check.py",
+                "--out",
+                str(OUT / f"converse-parity-{out_tag}.json"),
+            ],
+            "converse-parity",
+        )
     )
     results.append(
         run([sys.executable, "scripts/trajectory-policy-check.py"], "trajectory-policy-check")

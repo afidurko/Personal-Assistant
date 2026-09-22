@@ -47,6 +47,78 @@ class ConverseOverlayTests(unittest.TestCase):
         reply = co.speak_from_trace("", {})
         self.assertIn("Aaron", reply)
 
+    def test_words_matcher_is_whole_word(self) -> None:
+        self.assertEqual(co.match_overlay("spin the cortex")["id"], "cortex")
+        self.assertEqual(co.match_overlay("what tasks are running")["id"], "agents")
+        # "mesh" only as a whole word — "meshuggah" must not light the cortex
+        self.assertIsNone(co.match_overlay("play some meshuggah"))
+
+    def test_classify_intents_matches_cam_reason(self) -> None:
+        import cam_reason as cr
+
+        cfg = co.load_overlays()
+        for intent, probe in (cfg.get("intent_probes") or {}).items():
+            self.assertIn(intent, co.classify_intents(probe, cfg), probe)
+            self.assertIn(intent, cr.classify_intent(probe)["intents"], probe)
+        self.assertEqual(co.classify_intents("implement a refactor", cfg), [])
+
+    def test_explain_reply_kinds(self) -> None:
+        fast = {"classification": {"intents": ["general"]}, "path": "fast"}
+        self.assertEqual(co.explain_reply("", {})["kind"], "empty")
+        cam = co.explain_reply("can you see me", fast)
+        self.assertEqual((cam["kind"], cam["id"]), ("overlay", "camera"))
+        hi = co.explain_reply("hi cam", {"classification": {"intents": ["greeting"]}})
+        self.assertEqual((hi["kind"], hi["id"]), ("intent", "greeting"))
+        # No classification in the trace → config intent rules take over
+        hi2 = co.explain_reply("hi cam", {})
+        self.assertEqual(hi2["id"], "greeting")
+        slow = co.explain_reply(
+            "implement a refactor",
+            {"path": "slow", "hotspot_id": "hotspot.coding", "motor_plan": ["motor.cline"]},
+        )
+        self.assertEqual((slow["kind"], slow["id"]), ("slow_plan", "hotspot.coding"))
+        self.assertEqual(co.explain_reply("ping", fast)["kind"], "echo")
+
+    def test_echo_repeat_from_both_history_shapes(self) -> None:
+        fast = {"classification": {"intents": ["general"]}, "path": "fast"}
+        py_hist = [{"aaron": "Ping", "cam": "x"}]
+        ts_hist = [{"role": "aaron", "text": "ping"}, {"role": "cam", "text": "y"}]
+        a = co.explain_reply("ping", fast, py_hist)
+        b = co.explain_reply("ping", fast, ts_hist)
+        self.assertEqual(a["kind"], "echo_repeat")
+        self.assertEqual(a["text"], b["text"])
+        self.assertIn("ping", a["text"])
+        # A different previous line is a plain echo again
+        self.assertEqual(co.explain_reply("ping", fast, [{"aaron": "pong"}])["kind"], "echo")
+
+    def test_speak_params(self) -> None:
+        speak = co.speak_params()
+        self.assertEqual(speak["lang"], "en-US")
+        self.assertAlmostEqual(speak["rate"], 0.95)
+        self.assertAlmostEqual(speak["pitch"], 1.05)
+
+    def test_parity_corpus_covers_every_branch(self) -> None:
+        kinds = {co.run_parity_case(c)["kind"] for c in co.parity_corpus()}
+        self.assertEqual(
+            kinds, {"empty", "overlay", "intent", "slow_plan", "echo", "echo_repeat"}
+        )
+
+    def test_parity_across_mirrors(self) -> None:
+        import importlib.util
+        import shutil
+
+        spec = importlib.util.spec_from_file_location(
+            "converse_parity_check", ROOT / "scripts" / "converse-parity-check.py"
+        )
+        assert spec and spec.loader
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        report = mod.run_parity()
+        self.assertTrue(report["ok"], report.get("mismatches") or report.get("skipped"))
+        if shutil.which("node"):
+            self.assertEqual(report["mirrors"], ["python", "ts", "js"])
+            self.assertEqual(report["mismatches"], [])
+
     def test_server_delegates(self) -> None:
         import importlib.util
 
@@ -60,6 +132,13 @@ class ConverseOverlayTests(unittest.TestCase):
             mod.speak_from_trace("thanks", {"classification": {"intents": ["ack"]}}),
             "Of course. I'm right here.",
         )
+        status = mod.converse_overlays_status()
+        self.assertTrue(status["ok"], status["check"])
+        self.assertEqual(status["host"], "python")
+        self.assertIn("camera", status["overlay_ids"])
+        decided = mod.converse_turn("can you see me")
+        self.assertEqual(decided["overlay"], {"kind": "overlay", "id": "camera"})
+        self.assertEqual(decided["speak"]["lang"], "en-US")
 
 
 class CatalogInprocTests(unittest.TestCase):

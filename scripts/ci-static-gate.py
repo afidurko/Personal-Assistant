@@ -28,6 +28,7 @@ CHECKS: list[tuple[str, str, list[str]]] = [
     ("higgsfield-check", "higgsfield-check.py", []),
     ("presence-check", "presence-check.py", []),
     ("converse-overlays-check", "converse-overlays-check.py", []),
+    ("converse-parity-check", "converse-parity-check.py", []),
     ("loop-check", "loop-check.py", []),
     ("loop-run-dry", "loop-run.py", ["--pattern", "daily-triage", "--level", "L1", "--dry-run"]),
     ("flight-envelope", "flight-envelope.py", ["--offline-only"]),
