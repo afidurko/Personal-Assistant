@@ -11,10 +11,17 @@ Tools:
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   loop_check, loop_audit, loop_run,
   voicestudio_health, needs_attention,
-  instinct_scan, instinct_report, instinct_brief
+  instinct_scan, instinct_report, instinct_brief,
+  privacy_status, privacy_redact, privacy_audit
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
+
+One process serves one person (config/privacy/charter.json). For another
+person Aaron enrolls them once (`cam_privacy.py --aaron principals add <id>`)
+and runs a separate server: `CAM_PRINCIPAL=<id> python3 scripts/cam-mcp-server.py`
+(or `--principal <id>`). That process sees only the guest tool allowlist and
+only that person's own root — never Aaron's data.
 """
 
 from __future__ import annotations
@@ -28,10 +35,25 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+import cam_privacy as privacy  # noqa: E402
 import cam_workspaces as cw  # noqa: E402
 
 SERVER_NAME = "cam-personal-assistant"
-SERVER_VERSION = "1.1.0"
+SERVER_VERSION = "1.2.0"
+
+
+def principal() -> str:
+    """One server process serves one person (config/privacy/charter.json).
+    Set via CAM_PRINCIPAL or `--principal`; the owner is the default."""
+    return privacy.current_principal()
+
+
+def guest_tool_allowlist() -> set[str]:
+    return set(privacy.charter()["principals"].get("guest_tools") or [])
+
+
+def tool_visible(name: str) -> bool:
+    return privacy.is_owner(principal()) or name in guest_tool_allowlist()
 
 
 def _ok(result: Any, req_id: Any) -> dict:
@@ -43,7 +65,41 @@ def _err(req_id: Any, code: int, message: str) -> dict:
 
 
 def tool_defs() -> list[dict]:
+    return [t for t in all_tool_defs() if tool_visible(t["name"])]
+
+
+def all_tool_defs() -> list[dict]:
     return [
+        {
+            "name": "privacy_status",
+            "description": (
+                "Which principal this server serves, the privacy charter summary, seal/HMAC state "
+                "and known principals (ids only). Read-only; consent grants and adding people are "
+                "Aaron-only CLI actions (scripts/cam_privacy.py --aaron)."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "privacy_redact",
+            "description": (
+                "Redact personal information / preferences / secrets from a text with class tags "
+                "([email], [phone], [address], [preference], [secret] …). Use before any text crosses "
+                "a boundary (mesh note, third-party draft). Returns counts, never the removed values."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {"text": {"type": "string"}},
+                "required": ["text"],
+            },
+        },
+        {
+            "name": "privacy_audit",
+            "description": (
+                "Owner-only: scan mesh distillates, the cline cache, git tracking and ledger seals for "
+                "personal classes (charter P1/P6/P9). Findings are counts and locations, never values."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
         {
             "name": "list_workspaces",
             "description": "List Aaron's registered Cam coding workspaces (paths, remotes, existence).",
@@ -527,11 +583,15 @@ def script_cli(rel: str, argv: list[str], text_output: bool = False) -> Any:
     proc = subprocess.run([sys.executable, str(ROOT / rel), *argv], cwd=str(ROOT),
                           capture_output=True, text=True)
     if text_output:
-        return {"ok": proc.returncode == 0, "text": proc.stdout, "stderr": proc.stderr or None}
+        out = {"ok": proc.returncode == 0, "text": proc.stdout, "stderr": proc.stderr or None}
+        if proc.returncode != 0 and proc.stderr:
+            out["error"] = proc.stderr.strip()
+        return out
     try:
         out = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
-        return {"ok": False, "stdout": proc.stdout, "stderr": proc.stderr, "exit_code": proc.returncode}
+        return {"ok": False, "error": (proc.stderr or proc.stdout).strip() or "tool failed",
+                "stdout": proc.stdout, "stderr": proc.stderr, "exit_code": proc.returncode}
     if proc.returncode != 0 and isinstance(out, dict) and "ok" not in out:
         out["ok"] = False
     if proc.returncode != 0 and proc.stderr:
@@ -581,17 +641,34 @@ def mesh_search(query: str, limit: int = 20) -> dict:
 def mesh_put(note: str, workspace: str = ".", namespace: str = "mesh/cline") -> dict:
     from datetime import datetime, timezone
 
+    # Charter P8: mesh notes are read by every agent, so personal classes are
+    # redacted before the write; a secret makes the whole note refuse.
+    clean = privacy.assert_shareable(note, "mesh_note")
     cache = cw.load_json(cw.CLINE_CACHE)
     cache.setdefault("notes", []).append(
         {
             "at": datetime.now(timezone.utc).isoformat(),
-            "text": note,
+            "text": clean,
             "workspace": workspace,
             "namespace": namespace,
         }
     )
     cw.write_json(cw.CLINE_CACHE, cache)
-    return {"ok": True, "notes": len(cache["notes"]), "path": str(cw.CLINE_CACHE)}
+    return {"ok": True, "notes": len(cache["notes"]), "path": str(cw.CLINE_CACHE),
+            "redacted": clean != note}
+
+
+def privacy_status() -> dict:
+    rep = privacy.doctor()
+    ch = privacy.charter()
+    return {
+        "ok": rep["ok"], "principal": rep["principal"], "owner": rep["owner"],
+        "principals": [{"id": p["id"], "kind": p["kind"]} for p in rep["principals"]],
+        "hmac_key": rep["hmac_key"], "problems": rep["problems"], "notes": rep["notes"],
+        "charter": {"principle": ch["principle"], "invariants": [i["id"] + ": " + i["rule"] for i in ch["invariants"]]},
+        "guest_tools": sorted(guest_tool_allowlist()),
+        "aaron_only": ["principals add", "consent grant/revoke", "keygen", "outbox approve", "swarm resume"],
+    }
 
 
 def vault_search(query: str, limit: int = 20) -> dict:
@@ -874,7 +951,7 @@ def instinct_cli(arguments: dict | None, command: str,
     if text_output:
         return {"ok": proc.returncode == 0, "brief": proc.stdout, "stderr": proc.stderr or None}
     try:
-        return json.loads(proc.stdout or "{}")
+        out = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
         return {
             "ok": False,
@@ -882,6 +959,10 @@ def instinct_cli(arguments: dict | None, command: str,
             "stderr": proc.stderr,
             "exit_code": proc.returncode,
         }
+    if proc.returncode != 0 and not proc.stdout.strip():
+        # a refusal (privacy seal, guest scope, kill) exits before printing JSON
+        return {"ok": False, "error": (proc.stderr or "").strip(), "exit_code": proc.returncode}
+    return out
 
 
 def voicestudio_health(base_url: str | None = None, timeout: float = 5.0) -> dict:
@@ -930,6 +1011,21 @@ def needs_attention(arguments: dict | None = None) -> Any:
 
 
 def call_tool(name: str, arguments: dict) -> Any:
+    if not tool_visible(name):
+        # Charter P3: a guest process cannot reach tools that touch the owner's
+        # data or configuration — not even by name.
+        return {"ok": False, "error": f"tool {name!r} is not available to principal {principal()!r} "
+                                      "(owner-only; see privacy_status.guest_tools)"}
+    if name in ("instinct_scan", "instinct_brief") and arguments.get("write") and arguments.get("now"):
+        # drafts / briefs are records; agents do not backdate them
+        arguments = {k: v for k, v in arguments.items() if k != "now"}
+    if name == "privacy_status":
+        return privacy_status()
+    if name == "privacy_redact":
+        text, counts = privacy.redact(str(arguments.get("text") or ""))
+        return {"ok": True, "text": text, "redacted": counts}
+    if name == "privacy_audit":
+        return privacy.audit()
     if name == "list_workspaces":
         return cw.mesh_projects_doc()
     if name == "choose_workspace":
@@ -1087,11 +1183,13 @@ def handle(msg: dict) -> dict | None:
         return None
 
     if method == "initialize":
+        pid = principal()
+        name = SERVER_NAME if privacy.is_owner(pid) else f"{SERVER_NAME}-{pid}"
         return _ok(
             {
                 "protocolVersion": params.get("protocolVersion") or "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                "serverInfo": {"name": name, "version": SERVER_VERSION, "principal": pid},
             },
             req_id,
         )
@@ -1114,6 +1212,27 @@ def handle(msg: dict) -> dict | None:
                 },
                 req_id,
             )
+        except privacy.PrivacyViolation as exc:
+            # Charter refusals are answers, not crashes: the write did not
+            # happen and the session stays up for the next request. Killing
+            # the server here would hand any agent a one-line denial of service.
+            return _ok(
+                {
+                    "isError": True,
+                    "content": [{"type": "text", "text": json.dumps(
+                        {"ok": False, "refused": "privacy", "error": str(exc)}, indent=2, sort_keys=True)}],
+                },
+                req_id,
+            )
+        except SystemExit as exc:  # a tool's own argparse/usage exit
+            return _ok(
+                {
+                    "isError": True,
+                    "content": [{"type": "text", "text": json.dumps(
+                        {"ok": False, "error": str(exc) or "tool exited"}, indent=2, sort_keys=True)}],
+                },
+                req_id,
+            )
         except Exception as exc:  # noqa: BLE001
             return _ok(
                 {
@@ -1126,6 +1245,24 @@ def handle(msg: dict) -> dict | None:
 
 
 def main() -> int:
+    argv = sys.argv[1:]
+    if "--principal" in argv:
+        idx = argv.index("--principal")
+        if idx + 1 >= len(argv):
+            sys.stderr.write("--principal needs an id\n")
+            return 2
+        os.environ[privacy.PRINCIPAL_ENV] = argv[idx + 1]
+    try:
+        pid = principal()  # fail fast on an invalid id
+    except SystemExit as exc:
+        sys.stderr.write(f"{exc}\n")
+        return 2
+    if not privacy.is_owner(pid):
+        root = privacy.guest_root(pid)
+        if not (root / "profile.json").exists():
+            sys.stderr.write(f"principal {pid!r} is not enrolled — Aaron runs: "
+                             f"python3 scripts/cam_privacy.py --aaron principals add {pid}\n")
+            return 2
     for line in sys.stdin:
         line = line.strip()
         if not line:
