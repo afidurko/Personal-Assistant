@@ -61,31 +61,31 @@
     transcriptEl.scrollTop = transcriptEl.scrollHeight;
   }
 
+  // On-device replies come from the same persona config both servers read
+  // (config/persona/converse-overlays.json); last good copy is cached offline.
+  const Overlays = window.CamOverlays;
+  let overlaysCfg = Overlays ? Overlays.FALLBACK : null;
+  let overlaysSource = "fallback";
+  let lastOverlay = null;
+  if (Overlays) {
+    Overlays.load().then((loaded) => {
+      overlaysCfg = loaded.cfg;
+      overlaysSource = loaded.source;
+    });
+  }
+
   function camReplyLocal(aaronText) {
-    const t = (aaronText || "").trim();
-    const low = t.toLowerCase();
-    if (!t) return "I'm here, Aaron. Whenever you're ready — I'm listening.";
-    if (/hello|hi cam|hey cam|^hi\b|^hey\b/.test(low)) {
-      return "Hi Aaron. Soft and clear on this device. Aaron-only voice filter is on.";
+    if (!Overlays) {
+      const t = (aaronText || "").trim();
+      return t ? `I heard you: “${t}”.` : "I'm here, Aaron.";
     }
-    if (/mic|microphone|hear me|working/.test(low)) {
-      return "Yes — I listen for your voice only. Surrounding conversation is ignored once you're enrolled.";
-    }
-    if (/only my voice|my voice only|ignore.*(other|people|room|noise|surround)/.test(low)) {
-      return "Aaron-only mode is active. Enroll once if needed, then I'll filter other speakers.";
-    }
-    if (/camera|face|see me/.test(low)) {
-      return "Camera is available here too. I already know your face from the photos you shared.";
-    }
-    if (/who are you|your name/.test(low)) {
-      return "I'm Cam — thirty-two, from Argentina, soft airy English. You're Aaron, my only task-giver.";
-    }
-    if (/thank/.test(low)) return "Of course. I'm right here.";
-    if (/ipad|iphone|tailscale/.test(low)) {
-      return "We're set for iPhone and iPad over Tailscale. On-device mode works without a Mac.";
-    }
-    const short = t.length < 120 ? t : t.slice(0, 117) + "…";
-    return `I heard you: “${short}”. Tell me the next step and I'll take it from there.`;
+    const explained = Overlays.explainReply(aaronText, { path: "fast" }, history, overlaysCfg);
+    lastOverlay = { kind: explained.kind, id: explained.id, host: "on_device", config: overlaysSource };
+    return explained.text;
+  }
+
+  function speakDefaults() {
+    return Overlays ? Overlays.speakParams(overlaysCfg) : { rate: 0.95, pitch: 1.05, lang: "en-US" };
   }
 
   function speakCam(text, opts) {
@@ -283,7 +283,7 @@
     setStatus("Cam is listening…");
     try {
       let reply;
-      let speak = { rate: 0.95, pitch: 1.05, lang: "en-US" };
+      let speak = speakDefaults();
       if (mode === "server") {
         try {
           const audio_wav_b64 =
@@ -321,6 +321,7 @@
           }
           reply = turn.cam;
           speak = turn.speak || speak;
+          if (turn.overlay) lastOverlay = { ...turn.overlay, host: "server" };
           if (turn.voice_stats) {
             adaptiveRaised = !!turn.voice_stats.adaptive_raised;
             multiSpeakerStreak = turn.voice_stats.multi_speaker_streak || multiSpeakerStreak;
@@ -357,7 +358,7 @@
       } else {
         reply = camReplyLocal(text);
       }
-      history.push({ role: "cam", text: reply });
+      history.push({ role: "cam", text: reply, overlay: lastOverlay });
       addBubble("cam", reply);
       speakCam(reply, speak);
       setStatus(

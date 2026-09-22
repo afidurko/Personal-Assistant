@@ -534,12 +534,16 @@ def converse_turn(
     """One cam_reason.reason() per turn. Spoken text from the trace + overlays."""
     import cam_reason as cr
 
+    import converse_overlays as co
+
     text = (aaron_text or "").strip()
     trace = cr.reason(goal=text, sense=sense, write_trace=False, dry_run=True)
-    reply = speak_from_trace(text, trace, history)
+    explained = co.explain_reply(text, trace, history)
     return {
         "trace": trace,
-        "reply": reply,
+        "reply": str(explained["text"]),
+        "overlay": {"kind": explained["kind"], "id": explained["id"]},
+        "speak": co.speak_params(),
         "route": {
             "sense": sense,
             "hotspot_id": trace.get("hotspot_id"),
@@ -547,6 +551,29 @@ def converse_turn(
             "accepted": trace.get("accepted", True),
             "path": trace.get("path"),
         },
+    }
+
+
+def converse_overlays_status() -> dict:
+    """Loaded overlay config summary + static check (same shape as the TS host)."""
+    import converse_overlays as co
+
+    cfg = co.load_overlays()
+    check = co.check_overlays(cfg)
+    try:
+        mtime = co.CONFIG.stat().st_mtime
+    except OSError:
+        mtime = None
+    return {
+        "ok": bool(check.get("ok")),
+        "config": "config/persona/converse-overlays.json",
+        "version": cfg.get("version"),
+        "mtime": mtime,
+        "overlay_ids": [str(r.get("id")) for r in cfg.get("overlays") or []],
+        "intent_order": co.intent_order(cfg),
+        "speak": co.speak_params(cfg),
+        "check": check,
+        "host": "python",
     }
 
 
@@ -655,6 +682,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/voice/profile":
             self._json(200, {"ok": True, "profile": load_voice_profile()})
             return
+        if path == "/api/converse/overlays":
+            self._json(200, converse_overlays_status())
+            return
 
         # static companion (relative paths for iOS PWA / on-device)
         if path.startswith("/config/"):
@@ -701,6 +731,42 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         path = urlparse(self.path).path
         payload = self._read_json()
+
+        if path == "/api/converse/overlays/reload":
+            import converse_overlays as co
+
+            co.invalidate_cache()
+            self._json(200, {"reloaded": True, **converse_overlays_status()})
+            return
+
+        if path == "/api/converse/preview":
+            # Dry reply for phrase editing: no gate, no history, no log, no mesh.
+            import converse_overlays as co
+
+            text = str(payload.get("text") or "").strip()
+            intents = payload.get("intents")
+            if not isinstance(intents, list):
+                intents = co.classify_intents(text)
+            trace = {
+                "classification": {"intents": intents},
+                "path": payload.get("path") or "fast",
+                "hotspot_id": payload.get("hotspot_id"),
+                "motor_plan": payload.get("motor_plan"),
+            }
+            explained = co.explain_reply(text, trace, payload.get("history"))
+            self._json(
+                200,
+                {
+                    "ok": True,
+                    "text": text,
+                    "cam": explained["text"],
+                    "overlay": {"kind": explained["kind"], "id": explained["id"]},
+                    "intents": intents,
+                    "speak": co.speak_params(),
+                    "preview": True,
+                },
+            )
+            return
 
         if path == "/api/spike/mic":
             route = route_sense("sense.ios.mic", goal=payload.get("purpose", "listen"))
@@ -912,6 +978,7 @@ class Handler(BaseHTTPRequestHandler):
                 "source": source,
                 "aaron": text,
                 "cam": reply,
+                "overlay": decided.get("overlay"),
                 "gate": spectral,
                 "voice_stats": VOICE_ADDONS.as_dict(),
                 "accepted": True,
@@ -921,6 +988,7 @@ class Handler(BaseHTTPRequestHandler):
                     "hotspot_id": route.get("hotspot_id"),
                     "motor_plan": route.get("motor_plan"),
                     "accepted": route.get("accepted", True),
+                    "path": route.get("path"),
                 },
                 "mesh_activity": [
                     {"neuron": r.get("neuron"), "intensity": r.get("intensity"), "reason": r.get("reason")}
@@ -928,10 +996,8 @@ class Handler(BaseHTTPRequestHandler):
                 ],
                 "speak": {
                     "enabled": True,
-                    "rate": 0.95,
-                    "pitch": 1.05,
-                    "lang": "en-US",
                     "style": "soft airy fluent English",
+                    **(decided.get("speak") or {}),
                 },
             }
             STATE.history.append(turn)

@@ -2,8 +2,13 @@
  * Cam converse — soft airy replies + session log for the home presence.
  * Browser supplies mic/ASR; this module handles turn logic and distill logs.
  * Mic turns are Aaron-only gated (noisy-room filter) via aaron-voice-gate add-ons.
+ *
+ * Reply phrases come from config/persona/converse-overlays.json — the same file
+ * the Python converse server and the web companion read — so every Cam host
+ * answers with one voice. Edit the config, not this module.
  */
 import { appendFile, mkdir } from 'node:fs/promises';
+import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { VoiceGateResult } from './aaron-voice-gate.js';
@@ -11,6 +16,22 @@ import {
   AaronVoiceGateAddons,
   type VoiceGateStats,
 } from './aaron-voice-gate-addons.js';
+import {
+  FALLBACK_OVERLAYS,
+  checkOverlays,
+  classifyIntents,
+  explainReply,
+  intentOrder,
+  speakParams,
+  type ConverseOverlaysConfig,
+  type OverlayCheck,
+  type ReplyExplanation,
+  type ReplyKind,
+  type ReplyTrace,
+  type SpeakParams,
+} from '../../shared/converseOverlays.js';
+
+export const OVERLAYS_CONFIG_REL = 'config/persona/converse-overlays.json';
 
 export interface ConverseTurn {
   role: 'aaron' | 'cam' | 'system';
@@ -18,16 +39,24 @@ export interface ConverseTurn {
   source?: string;
   at: string;
   gate?: VoiceGateResult & { adaptive?: boolean };
+  overlay?: ReplyMeta;
+}
+
+export interface ReplyMeta {
+  kind: ReplyKind;
+  id: string | null;
+  intents?: string[];
 }
 
 export interface ConverseReply {
   cam: string;
-  speak: { rate: number; pitch: number; lang: string };
+  speak: SpeakParams;
   sessionId: string;
   history: ConverseTurn[];
   rejected?: boolean;
   gate?: VoiceGateResult & { adaptive?: boolean };
   voice_stats?: VoiceGateStats;
+  overlay?: ReplyMeta;
 }
 
 export interface ConverseTurnInput {
@@ -39,16 +68,96 @@ export interface ConverseTurnInput {
   device_id?: string;
 }
 
-const SPEAK = { rate: 0.95, pitch: 1.05, lang: 'en-US' } as const;
+/** Route facts the bridge can hand to the reply composer (slow-path plans). */
+export interface ReplyContext {
+  path?: 'fast' | 'slow';
+  hotspot_id?: string | null;
+  motor_plan?: string[] | null;
+  intents?: string[];
+}
+
+export interface TurnOptions {
+  /** Runs after the gate accepts and before the reply is composed. */
+  beforeReply?: (aaronText: string) => Promise<ReplyContext | undefined | void>;
+}
+
+export interface OverlaysStatus {
+  ok: boolean;
+  config: string;
+  version?: number;
+  mtime: number | null;
+  overlay_ids: string[];
+  intent_order: string[];
+  speak: SpeakParams;
+  check: OverlayCheck;
+  host: 'ts';
+  fallback: boolean;
+}
+
+/** mtime-cached loader; safe to call per turn. */
+export class OverlaysStore {
+  private cache: ConverseOverlaysConfig | null = null;
+  private mtime: number | null = null;
+  private usingFallback = false;
+
+  constructor(private readonly rootDir: string) {}
+
+  get file(): string {
+    return path.join(this.rootDir, OVERLAYS_CONFIG_REL);
+  }
+
+  invalidate(): void {
+    this.cache = null;
+    this.mtime = null;
+  }
+
+  load(): ConverseOverlaysConfig {
+    let mtime: number | null = null;
+    try {
+      mtime = statSync(this.file).mtimeMs;
+    } catch {
+      mtime = null;
+    }
+    if (this.cache && mtime === this.mtime) return this.cache;
+    try {
+      this.cache = JSON.parse(readFileSync(this.file, 'utf8')) as ConverseOverlaysConfig;
+      this.usingFallback = false;
+    } catch {
+      this.cache = FALLBACK_OVERLAYS;
+      this.usingFallback = true;
+    }
+    this.mtime = mtime;
+    return this.cache;
+  }
+
+  status(): OverlaysStatus {
+    const cfg = this.load();
+    const check = checkOverlays(cfg);
+    return {
+      ok: check.ok && !this.usingFallback,
+      config: OVERLAYS_CONFIG_REL,
+      version: cfg.version,
+      mtime: this.mtime,
+      overlay_ids: (cfg.overlays ?? []).map((r) => String(r.id)),
+      intent_order: intentOrder(cfg),
+      speak: speakParams(cfg),
+      check,
+      host: 'ts',
+      fallback: this.usingFallback,
+    };
+  }
+}
 
 export class CamConverse {
   readonly sessionId = randomUUID();
   readonly started = new Date().toISOString();
   private history: ConverseTurn[] = [];
   readonly voiceAddons: AaronVoiceGateAddons;
+  readonly overlays: OverlaysStore;
 
   constructor(private readonly rootDir: string) {
     this.voiceAddons = new AaronVoiceGateAddons(rootDir);
+    this.overlays = new OverlaysStore(rootDir);
   }
 
   getHistory(): ConverseTurn[] {
@@ -59,7 +168,28 @@ export class CamConverse {
     return this.voiceAddons.getStats();
   }
 
-  async turn(input: string | ConverseTurnInput, source = 'text'): Promise<ConverseReply> {
+  speak(): SpeakParams {
+    return speakParams(this.overlays.load());
+  }
+
+  /** Dry reply — no gate, no history mutation, no log. For phrase editing. */
+  preview(text: string, ctx: ReplyContext = {}): ReplyExplanation & { intents: string[] } {
+    const cfg = this.overlays.load();
+    const intents = ctx.intents?.length ? ctx.intents : classifyIntents(text, cfg);
+    const trace: ReplyTrace = {
+      intents,
+      path: ctx.path ?? 'fast',
+      hotspot_id: ctx.hotspot_id ?? null,
+      motor_plan: ctx.motor_plan ?? null,
+    };
+    return { ...explainReply(text, trace, null, cfg), intents };
+  }
+
+  async turn(
+    input: string | ConverseTurnInput,
+    source = 'text',
+    opts: TurnOptions = {},
+  ): Promise<ConverseReply> {
     const req: ConverseTurnInput =
       typeof input === 'string' ? { text: input, source } : { source: 'text', ...input };
     const aaronText = (req.text || '').trim();
@@ -93,7 +223,7 @@ export class CamConverse {
       await this.logTurn(aaronText, cam, src, gate);
       return {
         cam,
-        speak: { ...SPEAK },
+        speak: this.speak(),
         sessionId: this.sessionId,
         history: this.getHistory(),
         rejected: true,
@@ -102,22 +232,42 @@ export class CamConverse {
       };
     }
 
+    const ctx = (opts.beforeReply ? await opts.beforeReply(aaronText) : undefined) ?? {};
+    const cfg = this.overlays.load();
+    const intents = ctx.intents?.length ? ctx.intents : classifyIntents(aaronText, cfg);
+    const trace: ReplyTrace = {
+      intents,
+      path: ctx.path ?? 'fast',
+      hotspot_id: ctx.hotspot_id ?? null,
+      motor_plan: ctx.motor_plan ?? null,
+    };
+    // History still ends at the previous turn here — repeat detection needs that.
+    const explained = explainReply(aaronText, trace, this.history, cfg);
+    const meta: ReplyMeta = { kind: explained.kind, id: explained.id, intents };
+
     const at = new Date().toISOString();
     if (aaronText) {
       this.history.push({ role: 'aaron', text: aaronText, source: src, at, gate });
     }
-    const cam = camReply(aaronText);
-    this.history.push({ role: 'cam', text: cam, source: 'reply', at: new Date().toISOString() });
+    const cam = explained.text;
+    this.history.push({
+      role: 'cam',
+      text: cam,
+      source: 'reply',
+      at: new Date().toISOString(),
+      overlay: meta,
+    });
     // Keep a rolling window so spawn/memory stays light
     if (this.history.length > 80) this.history = this.history.slice(-80);
-    await this.logTurn(aaronText, cam, src, gate);
+    await this.logTurn(aaronText, cam, src, gate, meta);
     return {
       cam,
-      speak: { ...SPEAK },
+      speak: speakParams(cfg),
       sessionId: this.sessionId,
       history: this.getHistory(),
       gate,
       voice_stats: this.getVoiceStats(),
+      overlay: meta,
     };
   }
 
@@ -126,6 +276,7 @@ export class CamConverse {
     cam: string,
     source: string,
     gate?: VoiceGateResult,
+    overlay?: ReplyMeta,
   ): Promise<void> {
     try {
       const dir = path.join(this.rootDir, 'vault/10-Mesh-Distillates/converse');
@@ -139,6 +290,7 @@ export class CamConverse {
           aaron,
           cam,
           gate,
+          overlay,
         }) + '\n';
       await appendFile(path.join(dir, `${day}.jsonl`), line, 'utf8');
     } catch {
@@ -147,32 +299,28 @@ export class CamConverse {
   }
 }
 
-export function camReply(aaronText: string): string {
-  const t = (aaronText || '').trim();
-  const low = t.toLowerCase();
-  if (!t) return "I'm here, Aaron. Whenever you're ready — I'm listening.";
-  if (/hello|hi cam|hey cam|^hi\b|^hey\b/.test(low)) {
-    return "Hi Aaron. Soft and clear — mic path is live. Say what you need and I'll take it.";
-  }
-  if (/mic|microphone|hear me|listening|working/.test(low)) {
-    return "Yes — I'm listening for your voice only. Surrounding conversation gets filtered out once you're enrolled.";
-  }
-  if (/only my voice|my voice only|ignore.*(other|people|room|noise|surround)/.test(low)) {
-    return "Got it — Aaron-only mode is on. Enroll once if you haven't, then I'll ignore other speakers in noisy places.";
-  }
-  if (/brain|cortex|3d|mesh/.test(low)) {
-    return "The 3D cortex is live behind me — fibers light as my agents and tasks fire. Spin it; tap tracts to explore.";
-  }
-  if (/agent|spawn|task|improve/.test(low)) {
-    return "I'm already spawning background improve tasks for myself and the mesh. Check the spawn bay — there's room for all of us.";
-  }
-  if (/camera|face|see me/.test(low)) {
-    return "Camera can join from the companion too. I already know your face from enrollment.";
-  }
-  if (/who are you|your name/.test(low)) {
-    return "I'm Cam — thirty-two, from Argentina, soft airy English. You're Aaron, my only task-giver.";
-  }
-  if (/thank/.test(low)) return "Of course. I'm right here.";
-  const short = t.length < 120 ? t : `${t.slice(0, 117)}…`;
-  return `I heard you: “${short}”. Tell me the next step and I'll take it from there.`;
+let standaloneStore: OverlaysStore | null = null;
+
+/**
+ * Stateless reply from the shared config (no gate, no history). Reads the
+ * config relative to cwd; pass `cfg` to pin one explicitly.
+ */
+export function camReply(
+  aaronText: string,
+  cfg?: ConverseOverlaysConfig,
+  ctx: ReplyContext = {},
+): string {
+  const config = cfg ?? (standaloneStore ??= new OverlaysStore(process.cwd())).load();
+  const intents = ctx.intents?.length ? ctx.intents : classifyIntents(aaronText, config);
+  return explainReply(
+    aaronText,
+    {
+      intents,
+      path: ctx.path ?? 'fast',
+      hotspot_id: ctx.hotspot_id ?? null,
+      motor_plan: ctx.motor_plan ?? null,
+    },
+    null,
+    config,
+  ).text;
 }

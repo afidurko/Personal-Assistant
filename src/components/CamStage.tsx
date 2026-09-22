@@ -2,7 +2,7 @@
  * CamStage — large interactive avatar: listens, thinks (mini-brain), types + speaks.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useCamVoice, type CamVoiceStatus } from '@/hooks/useCamVoice';
+import { useCamVoice, type CamReplyMeta, type CamVoiceStatus } from '@/hooks/useCamVoice';
 import { useTypewriter } from '@/hooks/useTypewriter';
 import { MiniBrain, type BrainPhase } from '@/components/MiniBrain';
 import { CamFace } from '@/components/CamFace';
@@ -27,6 +27,27 @@ function toBrainPhase(status: CamVoiceStatus, typing: boolean): BrainPhase {
   }
 }
 
+/** Short human label for which persona-config branch spoke. */
+function overlayLabel(meta: CamReplyMeta | null | undefined): string | undefined {
+  if (!meta) return undefined;
+  switch (meta.kind) {
+    case 'overlay':
+      return `overlay · ${String(meta.id || '').replace(/_/g, ' ')}`;
+    case 'intent':
+      return `intent · ${String(meta.id || '').replace(/_/g, ' ')}`;
+    case 'slow_plan':
+      return `plan · ${String(meta.id || 'capability').replace(/^hotspot\./, '')}`;
+    case 'echo_repeat':
+      return 'repeat';
+    case 'echo':
+      return 'echo';
+    case 'empty':
+      return 'listening';
+    default:
+      return undefined;
+  }
+}
+
 export function CamStage({ onListeningChange }: CamStageProps) {
   const {
     status,
@@ -40,6 +61,7 @@ export function CamStage({ onListeningChange }: CamStageProps) {
     enrollProgress,
     adaptiveRaised,
     lastRoute,
+    lastOverlay,
     bridgeBusy,
     speechFace,
     startListening,
@@ -147,9 +169,12 @@ export function CamStage({ onListeningChange }: CamStageProps) {
           tracts={tracts}
           areas={areas}
           label={
-            lastRoute?.behavior && phase !== 'idle'
-              ? String(lastRoute.behavior).replace(/_/g, ' ')
-              : undefined
+            phase === 'answering' || phase === 'speaking'
+              ? overlayLabel(lastOverlay) ??
+                (lastRoute?.behavior ? String(lastRoute.behavior).replace(/_/g, ' ') : undefined)
+              : lastRoute?.behavior && phase !== 'idle'
+                ? String(lastRoute.behavior).replace(/_/g, ' ')
+                : undefined
           }
         />
       </div>
@@ -176,6 +201,14 @@ export function CamStage({ onListeningChange }: CamStageProps) {
                     {text}
                     {isLastCam && typingActive ? <span className="cam-caret" aria-hidden /> : null}
                   </span>
+                  {b.who === 'cam' && b.overlay && !(isLastCam && typingActive) ? (
+                    <span
+                      className={`cam-bubble-tag kind-${b.overlay.kind}`}
+                      title="Persona phrase branch (config/persona/converse-overlays.json)"
+                    >
+                      {overlayLabel(b.overlay)}
+                    </span>
+                  ) : null}
                 </div>
               );
             })

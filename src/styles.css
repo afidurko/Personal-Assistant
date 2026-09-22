@@ -2399,6 +2399,29 @@ h2,
   font-style: italic;
 }
 
+/* Which persona-config branch spoke (overlay / intent / plan / echo) */
+.cam-bubble-tag {
+  align-self: flex-start;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 1px solid rgba(61, 184, 168, 0.22);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  opacity: 0.85;
+}
+
+.cam-bubble-tag.kind-overlay,
+.cam-bubble-tag.kind-intent {
+  color: var(--teal-soft);
+}
+
+.cam-bubble-tag.kind-slow_plan {
+  color: #c4a35a;
+  border-color: rgba(196, 163, 90, 0.35);
+}
+
 .cam-caret {
   display: inline-block;
   width: 0.45em;

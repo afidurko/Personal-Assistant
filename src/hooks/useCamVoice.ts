@@ -27,10 +27,18 @@ export type CamVoiceStatus =
   | 'ignored'
   | 'error';
 
+/** Which persona-config branch produced a Cam line (shared with Python host). */
+export interface CamReplyMeta {
+  kind: 'empty' | 'overlay' | 'intent' | 'slow_plan' | 'echo_repeat' | 'echo' | string;
+  id: string | null;
+  intents?: string[];
+}
+
 export interface CamBubble {
   who: 'aaron' | 'cam' | 'system';
   text: string;
   at: string;
+  overlay?: CamReplyMeta;
 }
 
 export interface VoiceGateClientStats {
@@ -52,6 +60,7 @@ interface TurnResponse {
   cam: string;
   speak?: { rate?: number; pitch?: number; lang?: string };
   rejected?: boolean;
+  overlay?: { kind?: string; id?: string | null; intents?: string[] };
   gate?: { reason?: string; score?: number; threshold?: number; adaptive?: boolean };
   voice_stats?: {
     rejects?: number;
@@ -184,6 +193,7 @@ export function useCamVoice() {
     multiSpeakerStreak: 0,
   });
   const [lastRoute, setLastRoute] = useState<CamRouteSummary | null>(null);
+  const [lastOverlay, setLastOverlay] = useState<CamReplyMeta | null>(null);
   const [bridgeBusy, setBridgeBusy] = useState(false);
   const [speechFace, setSpeechFace] = useState<SpeechFaceState>({
     text: '',
@@ -408,9 +418,22 @@ export function useCamVoice() {
           ]);
           return;
         }
+        const overlay: CamReplyMeta | undefined = turn.overlay
+          ? {
+              kind: String(turn.overlay.kind || 'echo'),
+              id: turn.overlay.id ?? null,
+              intents: Array.isArray(turn.overlay.intents)
+                ? turn.overlay.intents.map(String)
+                : undefined,
+            }
+          : undefined;
+        if (overlay) setLastOverlay(overlay);
         // Queue speech — CamStage types first, then flushSpeak()
         pendingSpeakRef.current = { text: turn.cam, opts: turn.speak || {} };
-        setBubbles((b) => [...b, { who: 'cam', text: turn.cam, at: new Date().toISOString() }]);
+        setBubbles((b) => [
+          ...b,
+          { who: 'cam', text: turn.cam, at: new Date().toISOString(), overlay },
+        ]);
         setStatus('speaking');
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Turn failed');
@@ -718,6 +741,7 @@ export function useCamVoice() {
     adaptiveRaised,
     gateStats,
     lastRoute,
+    lastOverlay,
     bridgeBusy,
     speechFace,
     aaronOnly: gateCfg.aaron_only,

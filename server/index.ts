@@ -8,7 +8,8 @@ import type { WsClientMessage, WsServerMessage } from '../shared/types.js';
 import { SWIFT_GUIDE_CONCEPTS, isSwiftConceptNodeId } from '../shared/swiftGuide.js';
 import { AGENT_LAYERS, MESH_AGENTS } from '../shared/agentLayers.js';
 import { ScanOrchestrator } from './core/scan-orchestrator.js';
-import { CamConverse } from './core/cam-converse.js';
+import { CamConverse, type ReplyContext } from './core/cam-converse.js';
+import type { ConnectomeRoute } from './core/connectome-kernel.js';
 import { CamAutonomy } from './core/cam-autonomy.js';
 import { RuntimeStore } from './core/runtime-store.js';
 import { SystemBridge } from './core/system-bridge.js';
@@ -61,6 +62,20 @@ function stateFingerprint(state: ReturnType<typeof fullState>): string {
 
 let lastStateFingerprint = '';
 
+/**
+ * Slow path when the MAP plan actually engaged (stages planned rather than a
+ * single active proposal); the reply then names the hotspot + motors.
+ */
+function replyContextFromRoute(route: ConnectomeRoute): ReplyContext {
+  if (!route.accepted) return { path: 'fast' };
+  const planned = route.map_plan.some((s) => s.status === 'planned');
+  return {
+    path: planned && route.hotspot_id ? 'slow' : 'fast',
+    hotspot_id: route.hotspot_id,
+    motor_plan: route.motor_plan,
+  };
+}
+
 app.get('/api/health', async (_req, res) => {
   const system = await bridge.status({
     sessionId: converse.sessionId,
@@ -68,6 +83,7 @@ app.get('/api/health', async (_req, res) => {
     listening: micListeningHint,
   });
   const voicePolicy = await converse.voiceAddons.loadPolicy();
+  const overlays = converse.overlays.status();
   res.json({
     ok: system.ok,
     service: 'personal-assistant',
@@ -87,6 +103,13 @@ app.get('/api/health', async (_req, res) => {
       enabled: true,
       aaron_voice_only: true,
       voice_addons: true,
+      converse_overlays: true,
+    },
+    converse_overlays: {
+      ok: overlays.ok,
+      version: overlays.version,
+      overlay_count: overlays.overlay_ids.length,
+      fallback: overlays.fallback,
     },
     session_id: converse.sessionId,
     circadian: system.circadian,
@@ -279,19 +302,31 @@ app.post('/api/turn', async (req, res) => {
     return;
   }
 
-  const reply = await converse.turn({
-    text,
+  // Gate → connectome route → reply composed from the route (slow plans name
+  // their hotspot + motors; fast turns take overlays / intents from config).
+  const held: { bridged?: Awaited<ReturnType<typeof bridge.onTurn>> } = {};
+  const reply = await converse.turn(
+    {
+      text,
+      source,
+      aaron_voice_score: aaronVoiceScore ?? body.aaron_voice_score,
+      enrolled: body.enrolled,
+      multi_speaker_hint: body.multi_speaker_hint,
+      device_id: body.device_id,
+    },
     source,
-    aaron_voice_score: aaronVoiceScore ?? body.aaron_voice_score,
-    enrolled: body.enrolled,
-    multi_speaker_hint: body.multi_speaker_hint,
-    device_id: body.device_id,
-  });
-  if (reply.rejected) {
+    {
+      beforeReply: async () => {
+        held.bridged = await bridge.onTurn(text, source, { aaronVoiceScore });
+        return replyContextFromRoute(held.bridged.route);
+      },
+    },
+  );
+  const turnBridge = held.bridged;
+  if (reply.rejected || !turnBridge) {
     res.status(403).json(reply);
     return;
   }
-  const bridged = await bridge.onTurn(text, source, { aaronVoiceScore });
   // Pulse autonomy when Aaron talks so Cam keeps self-tasks warm
   void autonomy.tick({
     workspaces: orchestrator.getWorkspaces(),
@@ -301,11 +336,48 @@ app.post('/api/turn', async (req, res) => {
   res.json({
     ...reply,
     bridge: {
-      route: bridged.route,
-      activities: bridged.activities.length,
-      execution: bridged.execution,
-      memory: bridged.memory,
+      route: turnBridge.route,
+      activities: turnBridge.activities.length,
+      execution: turnBridge.execution,
+      memory: turnBridge.memory,
     },
+  });
+});
+
+/** Same config the Python converse server reads — one voice on every host. */
+app.get('/api/converse/overlays', (_req, res) => {
+  res.json(converse.overlays.status());
+});
+
+app.post('/api/converse/overlays/reload', (_req, res) => {
+  converse.overlays.invalidate();
+  res.json({ reloaded: true, ...converse.overlays.status() });
+});
+
+/** Dry reply for phrase editing: no gate, no history, no distill log. */
+app.post('/api/converse/preview', (req, res) => {
+  const body = req.body as {
+    text?: string;
+    intents?: string[];
+    path?: 'fast' | 'slow';
+    hotspot_id?: string | null;
+    motor_plan?: string[] | null;
+  };
+  const text = String(body.text ?? '').trim();
+  const out = converse.preview(text, {
+    intents: Array.isArray(body.intents) ? body.intents.map(String) : undefined,
+    path: body.path === 'slow' ? 'slow' : 'fast',
+    hotspot_id: body.hotspot_id ?? null,
+    motor_plan: Array.isArray(body.motor_plan) ? body.motor_plan.map(String) : null,
+  });
+  res.json({
+    ok: true,
+    text,
+    cam: out.text,
+    overlay: { kind: out.kind, id: out.id },
+    intents: out.intents,
+    speak: converse.speak(),
+    preview: true,
   });
 });
 
