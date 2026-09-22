@@ -6,7 +6,7 @@ cd "$ROOT"
 
 echo "== static gate (one process) =="
 # ci-static-gate covers connectome-check, workspace-integration, anatomy,
-# trajectory, voice, public-apis, trends, inkbox, higgsfield, loop, envelope.
+# trajectory, sentinel, voice, public-apis, trends, inkbox, higgsfield, loop, envelope.
 python3 scripts/ci-static-gate.py
 
 echo "== unit tests (one process) =="
@@ -15,6 +15,7 @@ echo "== unit tests (one process) =="
     test_cam_system \
     test_cloud_agent_install \
     test_cam_reason \
+    test_cam_sentinel \
     test_cam_fast \
     test_cam_infinitemind \
     test_cline_workspaces \

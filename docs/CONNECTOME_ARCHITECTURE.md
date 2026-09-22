@@ -221,9 +221,19 @@ Paper: isomorphic sensory paths diverge via switches into antagonistic circuits.
 Aaron flips switches; Cam does not accept other operators. Aaron has ultimate say on functionality apply.
 See `config/connectome/switches.json`.
 
+### Sentinel (permission authority, Muse pattern)
+
+Switches strip; trajectory policies veto compositions; then **Sentinel** judges every motor that
+survives — allow / ask / deny — and journals the intent before the effect runs.
+`read` / `write_local` motors allow by policy; `egress` / `spend` / `self_modify` ask unless an
+Aaron grant or an act switch covers them; a plan that read untrusted input (email, inbound Inkbox
+mail, listings, web feeds) is **tainted** and standing grants stop covering it. Held motors surface
+as `motor_pending`; Aaron answers with `scripts/cam-sentinel.py approve|deny`.
+See `config/connectome/sentinel-policy.json` and [MUSE_CAM_PATTERNS.md](MUSE_CAM_PATTERNS.md).
+
 ## Motor periphery (`config/connectome/motor.json`)
 
-Effectors fire only after a switch resolves to **act**.
+Effectors fire only after a switch resolves to **act** and Sentinel returns **allow**.
 
 | Effector | Output |
 |---|---|

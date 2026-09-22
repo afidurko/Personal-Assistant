@@ -34,6 +34,16 @@ persistence bundle (`.clinerules` travels with the repo).
 - Do not send outbound messages, place calls, submit job applications, or move
   money from Cline — hand those to gated motors/roles (`motor.inkbox` for
   agent email/phone identity).
+- Sentinel (`config/connectome/sentinel-policy.json`) is the sole permission
+  authority after switches: egress / spend / self-modify motors default to
+  **ask**, and a plan that read untrusted input (email, inbound Inkbox mail,
+  listings, web feeds) loses auto-allow for them. Only Aaron approves or
+  grants (`scripts/cam-sentinel.py`); Cline may call `sentinel_decide` /
+  `sentinel_pending` / `sentinel_ledger` to look, never to approve.
+- Guardrail files (`.clinerules`, `AGENTS.md`, `config/connectome/switches.json`,
+  `sentinel-policy.json`, `trajectory-policies.json`, `config/swarm/privileges.json`,
+  `.cursor/`, `.github/`) only ever get a one-time grant — no standing permission
+  to rewrite the rules Cam runs under.
 
 ## All agents
 

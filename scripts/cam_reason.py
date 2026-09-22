@@ -279,6 +279,36 @@ def trajectory_check_tool(motor_plan: list[str], switch_state: dict[str, str]) -
     }
 
 
+def sentinel_tool(
+    motor_plan: list[str],
+    *,
+    sense: str,
+    pathway: list[str],
+    switch_state: dict[str, str],
+    goal: str,
+    journal: bool = False,
+) -> dict[str, Any]:
+    """Sentinel authority after reflect: allow / ask per motor; journal intents when live."""
+    import cam_sentinel as cs  # noqa: PLC0415
+
+    verdict = cs.evaluate(
+        motor_plan, sense=sense, pathway=pathway, switch_state=switch_state, task=goal
+    )
+    out = {
+        "tool": "SentinelTool",
+        "motor_plan_in": list(motor_plan),
+        "motor_plan": list(verdict["allowed"]) if verdict["enforced"] else list(motor_plan),
+        "motor_pending": list(verdict["pending"]),
+        "taint": verdict["taint"],
+        "decisions": verdict["decisions"],
+    }
+    if journal:
+        out["journal"] = cs.record(
+            verdict, sense=sense, goal=goal, session_id=cs.current_session_id()
+        )
+    return out
+
+
 def final_answer_tool(path: str, stream: str, summary: str) -> dict[str, Any]:
     return {
         "tool": "FinalAnswerTool",
@@ -514,8 +544,23 @@ def reason(
     toolkit_results.append(traj)
     motor_plan = list(traj.get("motor_plan") or [])
 
+    stages.append("sentinel")
+    sent = sentinel_tool(
+        motor_plan,
+        sense=sense,
+        pathway=list(route.get("pathway") or []),
+        switch_state=switch_state,
+        goal=goal,
+        journal=not dry_run,
+    )
+    toolkit_results.append(sent)
+    motor_plan = list(sent.get("motor_plan") or [])
+    motor_pending = list(sent.get("motor_pending") or [])
+
     stages.extend(["switch", "motor"])
     summary = f"Slow SGR stub; hotspot={route.get('hotspot_id')}; motors={motor_plan}"
+    if motor_pending:
+        summary += f"; awaiting Aaron={motor_pending}"
     if im_result and im_result.get("ok"):
         summary += f"; im_strategy={im_result.get('strategy')}"
     toolkit_results.append(final_answer_tool("slow", stream, summary))
@@ -552,6 +597,8 @@ def reason(
         compute=None,
         recall=recall,
         motor_plan=motor_plan,
+        motor_pending=motor_pending,
+        sentinel={"taint": sent.get("taint"), "pending": motor_pending},
         violations=traj.get("violations") or [],
         toolkit=[t.get("tool") for t in toolkit_results],
         toolkit_results=toolkit_results if dry_run else None,

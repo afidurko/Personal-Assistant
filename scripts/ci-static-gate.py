@@ -18,6 +18,7 @@ CHECKS: list[tuple[str, str, list[str]]] = [
     ("workspace-integration-check", "workspace-integration-check.py", []),
     ("connectome-anatomy-check", "connectome-anatomy-check.py", []),
     ("trajectory-policy-check", "trajectory-policy-check.py", []),
+    ("sentinel-check", "sentinel-check.py", []),
     ("memory-tier-check", "memory-tier-check.py", []),
     ("aaron-voice-gate-check", "aaron-voice-gate-check.py", []),
     ("public-apis-check", "public-apis-check.py", []),

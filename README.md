@@ -22,6 +22,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 - **Brain:** nullclaw + [smart-second-brain](https://github.com/afidurko/smart-second-brain) + [MemoryBear](https://github.com/afidurko/MemoryBear) + [SwiftGuide](https://github.com/afidurko/SwiftGuide) cartography + sLM/DL cortex — [docs/CAM_BRAIN.md](docs/CAM_BRAIN.md)
 - **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
 - **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
+- **Sentinel (Muse pattern):** Cam plans, Sentinel decides allow / ask / deny at the motor boundary, Aaron approves; tainted egress + append-only intent journal — [docs/MUSE_CAM_PATTERNS.md](docs/MUSE_CAM_PATTERNS.md)
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
@@ -74,6 +75,11 @@ python3 scripts/memorybear-check.py
 python3 scripts/cam-system.py --smoke
 # HAAS→Cam privilege + boss/worker contracts
 python3 scripts/swarm-check.py
+# Muse→Cam Sentinel: what would fire, what waits for Aaron, and the intent ledger
+python3 scripts/sentinel-check.py
+python3 scripts/cam-sentinel.py decide --sense sense.email.thread --goal "reply to landlord"
+python3 scripts/cam-sentinel.py pending
+python3 scripts/cam-sentinel.py ledger
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
 # Live 3D cortex

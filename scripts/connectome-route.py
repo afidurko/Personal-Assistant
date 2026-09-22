@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "config" / "connectome"
 import sys
 sys.path.insert(0, str(ROOT / "scripts"))
+import cam_sentinel as sentinel  # noqa: E402
 import cam_workspaces as cw  # noqa: E402
 import trajectory_policies as tp  # noqa: E402
 
@@ -339,6 +340,20 @@ def route(
     # OCL / CPV trajectory policies (Aaron-approved 2026-09-17)
     planned_motors, policy_violations = tp.apply_policies(planned_motors, switch_state)
 
+    # Sentinel — sole permission authority (Muse pattern, Aaron-approved 2026-09-21).
+    # Switches stripped first; Sentinel decides allow / ask on what survived.
+    verdict = sentinel.evaluate(
+        planned_motors,
+        sense=sense,
+        pathway=pathway,
+        switch_state=switch_state,
+        task=goal,
+    )
+    motor_pending: list[str] = []
+    if verdict["enforced"]:
+        planned_motors = list(verdict["allowed"])
+        motor_pending = list(verdict["pending"])
+
     edge_pairs = {(e["from"], e["to"]) for e in synapses["edges"]}
     missing = []
     for a, b in zip(pathway, pathway[1:]):
@@ -361,6 +376,13 @@ def route(
         "pathway": pathway,
         "switch_state": switch_state,
         "motor_plan": planned_motors,
+        "motor_pending": motor_pending,
+        "sentinel": {
+            "taint": verdict["taint"],
+            "decisions": verdict["decisions"],
+            "pending": motor_pending,
+            "enforced": verdict["enforced"],
+        },
         "trajectory_violations": policy_violations,
         "response_rule": motor["response_rule"],
         "missing_explicit_edges": missing[:10],
@@ -403,6 +425,7 @@ def route(
         result["accepted"] = False
         result["reason"] = "switch.kill act — all motor silenced"
         result["motor_plan"] = []
+        result["motor_pending"] = []
     return result
 
 
