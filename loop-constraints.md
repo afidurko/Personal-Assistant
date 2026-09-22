@@ -37,3 +37,4 @@
 - Never spend money, submit job applications, or free-send from Cline
 - Prefer mesh/vault facts over invention
 - Kill switch / STATE.md paused:true stops motor.loop
+- Never write Aaron's personal information (timezone, location, devices, contact, physical descriptions, photos, voice/face data) into reports, PRs, or tracked files — private memory only (`docs/PRIVACY_SAFEGUARDS.md`); run `scripts/pii-guard.py` before any write

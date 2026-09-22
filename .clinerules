@@ -73,6 +73,25 @@ and `scripts/inkbox-check.py` wiring; never free-send from Cline.
   `scripts/sync-cline-session.py` and `scripts/export-cline-tickets.py`).
 - Never commit secrets, OAuth tokens, phone numbers, or raw PII.
 
+## Personal information (docs/PRIVACY_SAFEGUARDS.md · SECURITY.md)
+
+- This repository is public. It describes how Cam works, never who Aaron is.
+  Aaron's first name and "sole operator" are the only personal facts allowed in git.
+- Personal information — contact details, timezone/location, device names, physical
+  or biometric descriptions, photos, voice/face data, health, finances, employment
+  specifics, relationships, message contents, home paths, IPs — goes **only** into
+  private memory: `python3 scripts/private-memory.py put <key> …`, then reference the
+  key. Use the `operator_local` placeholder for timezone in tracked configs.
+- Never write personal information into tracked files, commit messages, PR titles or
+  bodies, tickets, distillates, or logs. Run `python3 scripts/pii-guard.py --staged`
+  (or the MCP `privacy_scan` tool) before committing; the hooks and CI will refuse
+  otherwise. Never use `--no-verify` or the `pii-guard: allow` pragma for real data.
+- Private memory never leaves Aaron's host: not into a repo, a PR, a chat, a cloud VM,
+  or an outbound motor. Sentinel denies such plans; do not try to route around it.
+- `config/privacy/`, `.githooks/`, `.gitignore`, `scripts/pii-guard.py`,
+  `scripts/privacy.py`, `scripts/private_memory.py`, `SECURITY.md` are guardrail
+  files — one-time grant only.
+
 ## Style
 
 - Prefer smallest correct change; match existing repo patterns.

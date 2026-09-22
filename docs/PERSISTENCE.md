@@ -35,7 +35,17 @@ Aaron required: store Session/memory for **this workspace and all future workspa
 ## What does *not* go in git
 
 - API keys, OAuth tokens, phone numbers, raw resume PDFs with PII dumps
-- Those live in a local secrets store / nullclaw encrypted secrets and are referenced, not committed
+- **Any personal information about Aaron**: timezone/location, device names, contact
+  details, physical or biometric descriptions, photos, voice/face samples or vectors,
+  health, finances, employment specifics, home paths, IPs
+- Those live in **private memory** (`scripts/private-memory.py`, sealed on Aaron's host)
+  and are referenced by key — tracked files carry placeholders such as `operator_local`
+- Enforced by `scripts/pii-guard.py` (hooks + CI) — see `docs/PRIVACY_SAFEGUARDS.md`
+- Private memory store: `identity/aaron/local/private-memory/` (or `CAM_PRIVATE_HOME`) — sealed personal facts, never in the bundle
+
+The portable bundle from `persist-export.py` therefore carries **no** personal
+information; import it anywhere, then copy private memory out-of-band if that
+machine is Aaron's.
 
 ## Commands
 

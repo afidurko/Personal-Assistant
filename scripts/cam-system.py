@@ -79,6 +79,7 @@ def smoke_checks() -> list[dict]:
         ("connectome-check", "connectome-check.py", []),
         ("swarm-check", "swarm-check.py", []),
         ("sentinel-check", "sentinel-check.py", []),
+        ("pii-guard", "pii-guard.py", ["--all", "--quiet"]),
         ("workspace-integration-check", "workspace-integration-check.py", []),
     ]:
         try:

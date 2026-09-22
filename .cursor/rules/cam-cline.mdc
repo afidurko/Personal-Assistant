@@ -10,3 +10,8 @@ Follow `.clinerules` in this repository (Cam personal-assistant coding policy).
 - Cline is the coding effector; Cam/nullclaw remains the brain
 - Do not outbound-message, submit jobs, or spend money from Cline
 - Distill outcomes back via Personal-Assistant `scripts/sync-cline-session.py` when available
+- This repo is public: never write Aaron's personal information (contact, timezone/location,
+  devices, physical/biometric descriptions, photos, voice/face data, health, finances, home paths)
+  into tracked files, commit messages, or PR text. Store it with `scripts/private-memory.py put`
+  and reference the key. Run `python3 scripts/pii-guard.py --staged` before committing
+  (`docs/PRIVACY_SAFEGUARDS.md`).

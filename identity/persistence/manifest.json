@@ -6,7 +6,10 @@
     "secrets",
     "oauth_tokens",
     "raw_media",
-    "phone_numbers"
+    "phone_numbers",
+    "personal_information",
+    "biometrics",
+    "private_memory"
   ],
   "human": "Aaron",
   "includes": [

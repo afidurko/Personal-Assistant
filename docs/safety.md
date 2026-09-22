@@ -36,6 +36,18 @@ per motor and journals the intent before any effect runs (`data/runtime/journal/
 
 See [MUSE_CAM_PATTERNS.md](MUSE_CAM_PATTERNS.md).
 
+## Personal information (privacy safeguards)
+
+The repository is public; Aaron is not. Seven layers keep personal information in
+private memory and out of git, PRs, logs, and outbound motors — see
+[PRIVACY_SAFEGUARDS.md](PRIVACY_SAFEGUARDS.md) and [`SECURITY.md`](../SECURITY.md).
+
+- `python3 scripts/pii-guard.py --staged | --diff origin/main | --all` (hooks + CI run these)
+- `python3 scripts/private-memory.py doctor | put | get | list`
+- Sentinel `private_memory` policy: plans touching private paths are **denied** for
+  egress / spend / self_modify and `motor.cline`
+- `neuron.privacy_guard` in `system-health-scan.py` goes critical on any tracked leak
+
 ## References
 
 - `LOOP.md` · `loop-budget.md` · `loop-constraints.md`

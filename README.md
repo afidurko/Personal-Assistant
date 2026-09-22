@@ -23,6 +23,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 - **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
 - **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
 - **Sentinel (Muse pattern):** Cam plans, Sentinel decides allow / ask / deny at the motor boundary, Aaron approves; tainted egress + append-only intent journal — [docs/MUSE_CAM_PATTERNS.md](docs/MUSE_CAM_PATTERNS.md)
+- **Privacy:** this repo describes how Cam works, never who Aaron is. Personal information lives in sealed private memory; `pii-guard` hooks + CI + Sentinel keep it out of git, PRs, logs, and outbound motors — [docs/PRIVACY_SAFEGUARDS.md](docs/PRIVACY_SAFEGUARDS.md) · [SECURITY.md](SECURITY.md)
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
@@ -80,6 +81,9 @@ python3 scripts/sentinel-check.py
 python3 scripts/cam-sentinel.py decide --sense sense.email.thread --goal "reply to landlord"
 python3 scripts/cam-sentinel.py pending
 python3 scripts/cam-sentinel.py ledger
+# Privacy guard (what the git hooks + CI run) and private memory health
+python3 scripts/pii-guard.py --all
+python3 scripts/private-memory.py doctor
 # Kill switch silences motors
 python3 scripts/connectome-route.py --sense sense.chat.aaron --kill
 # Live 3D cortex
