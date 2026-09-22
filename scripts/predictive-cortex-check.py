@@ -28,7 +28,7 @@ def main() -> int:
         errors.append("missing config/enhancement/predictive-cortex.json")
     cfg = load(cfg_path) if cfg_path.exists() else {}
 
-    for key in ("library", "cli", "check", "tests", "fixture", "plan_doc", "proposal", "research_plan"):
+    for key in ("library", "cli", "check", "tests", "fuzz", "fixture", "plan_doc", "proposal", "research_plan"):
         rel = cfg.get(key)
         if not rel:
             errors.append(f"config missing key:{key}")

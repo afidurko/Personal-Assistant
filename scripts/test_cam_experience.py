@@ -431,6 +431,40 @@ class EthicsTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, doc.get("errors"))
         self.assertTrue(doc["ok"])
 
+    def test_redaction_labels_specific_kind_first(self) -> None:
+        # phone is the generic shape; ssn must win the label (found by the 3B fuzz)
+        _clean, kinds = ce.redact("ssn 519-83-2477 on file")
+        self.assertEqual(kinds, ["ssn"])
+
+
+class FuzzHarnessTests(unittest.TestCase):
+    def test_beta_quantile_tail_accuracy(self) -> None:
+        # bracketed Newton must invert the cdf to 1e-10 in q across the predictor's domain
+        for q, a, b in ((0.05, 0.5, 300.0), (0.95, 300.0, 0.5), (0.5, 0.5, 0.5), (0.9, 35.0, 0.5), (0.02, 1.0, 1.0)):
+            x = ce.beta_quantile(q, a, b)
+            self.assertLess(abs(ce.beta_cdf(x, a, b) - q), 1e-9, (q, a, b, x))
+
+    def test_resolve_scale_honours_explicit_physical_below_threshold(self) -> None:
+        import trillion_scale as ts
+
+        self.assertEqual(ts.resolve_scale(10**6), (10**6, 0, "literal_loop"))
+        self.assertEqual(ts.resolve_scale(3 * 10**9, 2 * 10**8), (2 * 10**8, 28 * 10**8, "physical_capped_scaled"))
+        self.assertEqual(ts.resolve_scale(3 * 10**9, 5 * 10**9), (3 * 10**9, 0, "literal_loop"))
+        self.assertEqual(ts.resolve_scale(3 * 10**12, 10**7)[2], "modular_period_scaled")
+
+    def test_predictive_fuzz_shakedown(self) -> None:
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "predictive-cortex-billion-fuzz.py"), "--n", "6000", "--workers", "1", "--seed", "3"],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout[-800:])
+        txt = proc.stdout
+        doc = json.loads(txt[txt.index("{"): txt.rindex("}") + 1])
+        self.assertTrue(doc["ok"])
+        self.assertEqual(doc["failed"], 0)
+        self.assertGreaterEqual(doc["full_samples"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

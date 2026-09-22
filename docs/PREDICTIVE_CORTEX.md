@@ -87,7 +87,13 @@ python3 scripts/cam-predict.py --forget-ref "run-42"                      # righ
 CAM_KILL=1 python3 scripts/cam-predict.py --record --ok --hotspot x       # exit 3, nothing written
 python3 scripts/predictive-cortex-check.py                                # wiring + offline smoke (in ci-static-gate)
 python3 scripts/research-ethics-check.py                                  # ethics gate (in ci-static-gate)
+python3 scripts/predictive-cortex-billion-fuzz.py --n 1000000             # property fuzz (1M in ci-connectome; 3T in three-trillion-campaign)
+python3 scripts/predictive-cortex-billion-fuzz.py --n 3000000000 --physical 200000000   # heavy box: 3B with a 200M physical subset
 ```
+
+## Property fuzz (billion / trillion scale)
+
+`scripts/predictive-cortex-billion-fuzz.py` is a companion to the other Cam fuzzers and follows the `trillion_scale` contract (`--n`, `--physical`, `--seed`, `--workers`, `--out`). Every iteration checks one modular invariant — beta CDF monotone/symmetric and quantile inverting to 1e-6, decay ordering and unknown-timestamp weight, redaction leaving no pattern behind and labelling the right kind, `dedupe` collapsing cross-source only, protected-context detection, calibration metric ranges — and every 4,000th iteration builds a random experience stream, runs the prequential loop, and predicts random contexts asserting the card contract (interval brackets the mean, stance in the allowed set, protected ⇒ no automation, prior ⇒ abstain, deterministic). The first campaign found two issues: SSN-shaped strings were redacted but mislabelled `phone` (pattern order), and `beta_quantile` inverted poorly in steep tails (now bracketed Newton).
 
 MCP: `predict_experience {goal|hotspot|pattern, sense, report, offline}` in `scripts/cam-mcp-server.py`. Tool registry: `tool.predict.experience` (all roles and subagents, `switch.dl_local`).
 

@@ -24,6 +24,7 @@
   "cli": "scripts/cam-predict.py",
   "check": "scripts/predictive-cortex-check.py",
   "tests": "scripts/test_cam_experience.py",
+  "fuzz": "scripts/predictive-cortex-billion-fuzz.py",
   "fixture": "scripts/testdata/sample-experiences.jsonl",
   "runtime_log": "data/runtime/experiences.jsonl",
   "distill_dir": "vault/10-Mesh-Distillates/predictive-cortex",
