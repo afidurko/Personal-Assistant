@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Unit tests for Cam's privacy safeguards: privacy core, pii-guard, private memory,
-Sentinel private-path deny, journal redaction, and the wiring files."""
+"""Unit tests for the privacy safeguards: privacy core, pii-guard, private memory,
+protected terms, and (when present) Cam's Sentinel deny, journal redaction, and wiring.
+Portable: ships with scripts/privacy-kit.py; Cam-only classes skip elsewhere."""
 
 from __future__ import annotations
 
@@ -15,10 +16,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import cam_journal as cj  # noqa: E402
-import cam_sentinel as cs  # noqa: E402
 import privacy  # noqa: E402
 import private_memory as pm  # noqa: E402
+
+try:  # Cam runtime pieces — absent when this file ships via privacy-kit into another repo
+    import cam_journal as cj  # noqa: E402
+    import cam_sentinel as cs  # noqa: E402
+
+    CAM_RUNTIME = True
+except ImportError:  # pragma: no cover - portable kit
+    cj = cs = None  # type: ignore
+    CAM_RUNTIME = False
+
+# The guard must not read the operator's real protected terms while tests run.
+os.environ.setdefault("PII_GUARD_SKIP_PRIVATE_TERMS", "1")
 
 GUARD = ROOT / "scripts" / "pii-guard.py"
 PM_CLI = ROOT / "scripts" / "private-memory.py"
@@ -39,7 +50,7 @@ SAMPLES = {
     "home_path": "see /Users/somebody/Documents/notes.txt",
     "operator_timezone": "timezone: Europe/Lisbon",
     "physical_description": "curly hair, goatee, glasses",
-    "enrollment_media_ref": "source aaron-07-park-walk.jpg",
+    "enrollment_media_ref": f"source {privacy.operator()['handle']}-07-park-walk.jpg",
     "date_of_birth": "DOB: 01/02/1990",  # pii-guard: allow (synthetic)
 }
 
@@ -154,6 +165,7 @@ class Redaction(unittest.TestCase):
         self.assertEqual(out["n"], 3)
         self.assertIn("[REDACTED:street_address]", out["list"][0])
 
+    @unittest.skipUnless(CAM_RUNTIME, "Cam runtime not present (portable kit)")
     def test_journal_redacts_pii_and_secrets(self):
         out = cj.redact("token=abcdefghij123456 phone (212) 867-5309 tz Europe/Lisbon goatee")  # pii-guard: allow (synthetic)
         self.assertNotIn("867-5309", out)
@@ -192,7 +204,7 @@ class GuardCli(unittest.TestCase):
         self.assertEqual(doc["findings"][0]["snippet"], "")
 
     def test_paths_mode_blocks_private_path_even_if_file_missing_content(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "identity" / "aaron") as tmp:
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
             # any `private-memory/` directory at any depth is a private path by policy
             local = Path(tmp) / "private-memory"
             local.mkdir()
@@ -300,6 +312,7 @@ class PrivateMemoryStore(unittest.TestCase):
         self.assertFalse(list(self.home.glob("records/*")))  # dry run seals nothing
 
 
+@unittest.skipUnless(CAM_RUNTIME, "Cam runtime not present (portable kit)")
 class SentinelPrivatePaths(unittest.TestCase):
     def test_private_path_denies_egress_and_cline_but_not_local(self):
         v = cs.evaluate(
@@ -333,6 +346,7 @@ class SentinelPrivatePaths(unittest.TestCase):
             self.assertIn(p, rails)
 
 
+@unittest.skipUnless(CAM_RUNTIME, "Cam repository wiring not present (portable kit)")
 class Wiring(unittest.TestCase):
     def test_hooks_installed_and_executable(self):
         for name in ("pre-commit", "pre-push"):
@@ -385,6 +399,177 @@ class Wiring(unittest.TestCase):
         out = subprocess.run(["git", "grep", "-l", "-E", r"(America|Europe|Asia|Africa|Australia)/[A-Z][A-Za-z_]+", "--", "identity", "config", "docs", "vault/01-Aaron", "*.md"], cwd=ROOT, capture_output=True, text=True).stdout
         offenders = [l for l in out.splitlines() if l and not l.startswith("docs/PRIVACY_SAFEGUARDS.md") and "pii-guard.json" not in l]
         self.assertEqual(offenders, [])
+
+
+class OperatorAgnostic(unittest.TestCase):
+    """The policy must work for any operator: placeholders, wildcard private trees, no hardcoded person."""
+
+    def _cfg_for(self, handle: str, name: str) -> dict:
+        raw = json.loads((ROOT / "config" / "privacy" / "pii-guard.json").read_text(encoding="utf-8"))
+        raw["operator"] = {"handle": handle, "display_name": name}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            json.dump(raw, fh)
+        try:
+            return privacy.load_config(Path(fh.name))
+        finally:
+            os.unlink(fh.name)
+
+    def test_placeholders_expand_into_paths_and_patterns(self):
+        cfg = self._cfg_for("sam", "Sam")
+        self.assertIn("identity/sam/local/", cfg["private_paths"])
+        self.assertEqual(cfg["authorized_by"], "Sam")
+        rule = next(r for r in cfg["rules"] if r["id"] == "enrollment_media_ref")
+        self.assertIn("sam-", rule["pattern"])
+        self.assertNotIn("{handle}", json.dumps(cfg))
+        self.assertNotIn("{display_name}", json.dumps({k: v for k, v in cfg.items() if k != "operator"}))
+        rules = privacy.compile_rules(cfg)
+        self.assertEqual({f.rule for f in privacy.scan_text("see sam-03-park.jpg", "identity/notes.md", cfg, rules)}, {"enrollment_media_ref"})
+        self.assertEqual(privacy.scan_text("see aaron-03-park.jpg", "identity/notes.md", cfg, rules), [])
+
+    def test_any_operator_local_tree_is_private(self):
+        cfg = privacy.load_config()
+        for rel in ("identity/sam/local/notes.txt", "identity/aaron/local/x", "identity/x-y_z/local/private-memory/k"):
+            self.assertIsNotNone(privacy.path_violation(rel, cfg), rel)
+        self.assertIsNone(privacy.path_violation("identity/sam/README.md", cfg))
+        self.assertTrue(privacy.glob_match("identity/sam/local", "identity/*/local/"))
+        self.assertFalse(privacy.glob_match("identity/sam/localhost/x", "identity/*/local/"))
+
+    def test_no_hardcoded_operator_outside_the_operator_block(self):
+        raw = json.loads((ROOT / "config" / "privacy" / "pii-guard.json").read_text(encoding="utf-8"))
+        raw.pop("operator")
+        self.assertNotIn("aaron", json.dumps(raw).lower())
+        for rel in ("scripts/privacy.py", "scripts/private_memory.py", "scripts/privacy-init.py", "scripts/privacy-kit.py", ".githooks/pre-commit", ".githooks/pre-push", ".github/workflows/privacy-guard.yml"):
+            self.assertNotIn("aaron", (ROOT / rel).read_text(encoding="utf-8").lower(), rel)
+
+    def test_private_memory_default_home_follows_handle(self):
+        self.assertEqual(pm.default_home(), ROOT / "identity" / pm.operator_handle() / "local" / "private-memory")
+
+
+class ProtectedTerms(unittest.TestCase):
+    """The operator's own facts, sealed in private memory, are blocked and redacted everywhere."""
+
+    TERMS = ["Quentin Exampleworth", "Acme Widgets Inc", "ab"]  # 'ab' is too short and must be ignored
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self.tmp.name) / "store"
+        self.store = pm.PrivateMemory(home=self.home)
+        self.store.protect(self.TERMS)
+        self._env = dict(os.environ)
+        os.environ["PRIVATE_MEMORY_HOME"] = str(self.home)
+        os.environ["PII_GUARD_SKIP_PRIVATE_TERMS"] = "0"
+        privacy.load_config(force=True)
+        privacy.personal_terms(force=True)
+
+    def tearDown(self):
+        os.environ.clear()
+        os.environ.update(self._env)
+        privacy.load_config(force=True)
+        privacy.personal_terms(force=True)
+        self.tmp.cleanup()
+
+    def test_store_api(self):
+        self.assertEqual(self.store.protected_terms(), ["Quentin Exampleworth", "Acme Widgets Inc"])
+        self.assertEqual(self.store.protect(["quentin exampleworth", "New Fact"]), 3)  # case-insensitive dedupe
+        self.assertEqual(self.store.unprotect(["NEW FACT"]), 2)
+        self.assertEqual(self.store.doctor()["protected_terms"], 2)
+        # never in the metadata index
+        self.assertNotIn("Exampleworth", (self.home / "index.json").read_text(encoding="utf-8"))
+
+    def test_guard_blocks_terms_case_and_whitespace_insensitively(self):
+        self.assertEqual(privacy.personal_terms(), ["Quentin Exampleworth", "Acme Widgets Inc"])
+        f = privacy.scan_text("memo from QUENTIN   exampleworth at acme widgets inc", "<text>")
+        self.assertEqual({x.rule for x in f}, {"personal_term"})
+        self.assertNotIn("xampleworth", f[0].snippet)
+        self.assertEqual(privacy.scan_text("Quentin Exampleworthy", "<text>"), [])  # whole word
+        self.assertEqual(privacy.scan_text("unrelated text", "<text>"), [])
+
+    def test_redaction_paths_strip_terms(self):
+        self.assertEqual(privacy.redact("hi Quentin Exampleworth"), "hi [REDACTED:personal_term]")
+        self.assertEqual(privacy.scrub_obj({"who": "acme widgets inc", "n": 2}), {"who": "[REDACTED:personal_term]", "n": 2})
+
+    def test_skip_env_disables_terms(self):
+        os.environ["PII_GUARD_SKIP_PRIVATE_TERMS"] = "1"
+        self.assertEqual(privacy.personal_terms(force=True), [])
+        privacy.load_config(force=True)
+        self.assertEqual(privacy.scan_text("Quentin Exampleworth", "<text>"), [])
+
+    def test_cli_protect_protected_unprotect_and_put_protect(self):
+        env = {**os.environ, "PRIVATE_MEMORY_HOME": str(self.home), "PII_GUARD_SKIP_PRIVATE_TERMS": "0"}
+        run = lambda *a, **k: subprocess.run([sys.executable, str(PM_CLI), *a], capture_output=True, text=True, env=env, **k)
+        self.assertEqual(json.loads(run("protected").stdout)["protected_terms"], 2)
+        out = json.loads(run("protect", "--value", "Third Fact Here").stdout)
+        self.assertEqual(out["protected_terms"], 3)
+        out = json.loads(run("put", "identity.test.tz", "--value", "Europe/Lisbon", "--protect").stdout)
+        self.assertEqual(out["protected_terms"], 4)
+        self.assertEqual(json.loads(run("unprotect", "--value", "third fact here").stdout)["protected_terms"], 3)
+        self.assertNotIn("Exampleworth", run("protected").stdout)
+        self.assertIn("Quentin Exampleworth", run("protected", "--reveal").stdout)
+        # the guard CLI in a fresh process picks the terms up from the store
+        p = subprocess.run([sys.executable, str(GUARD), "--text", "-"], input="by Quentin Exampleworth\n", capture_output=True, text=True, env=env, cwd=ROOT)
+        self.assertEqual(p.returncode, 1, p.stdout)
+        self.assertIn("personal_term", p.stdout)
+        self.assertNotIn("Exampleworth", p.stdout)
+
+
+@unittest.skipIf(os.environ.get("PRIVACY_KIT_NESTED") == "1", "already running inside an exported kit")
+class PortableKit(unittest.TestCase):
+    """privacy-kit export + privacy-init inside a brand-new repository must yield working hooks."""
+
+    def test_export_init_and_hook_in_fresh_repo(self):
+        # assembled at run time so this source file never contains the protected term itself
+        term = " ".join(["Samantha", "Q", "Example" + "ton"])
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "other"
+            repo.mkdir()
+            git = lambda *a, **k: subprocess.run(["git", *a], cwd=repo, capture_output=True, text=True, **k)
+            git("init", "-q", "-b", "main")
+            git("config", "user.email", "kit@example.com")
+            git("config", "user.name", "Kit Test")
+
+            ex = subprocess.run([sys.executable, str(ROOT / "scripts" / "privacy-kit.py"), "export", str(repo), "--operator", "sam", "--name", "Sam"], capture_output=True, text=True)
+            self.assertEqual(ex.returncode, 0, ex.stdout + ex.stderr)
+            for rel in ("scripts/pii-guard.py", "config/privacy/pii-guard.json", ".githooks/pre-commit", ".github/workflows/privacy-guard.yml", "docs/PRIVACY_QUICKSTART.md"):
+                self.assertTrue((repo / rel).exists(), rel)
+            self.assertEqual(json.loads((repo / "config/privacy/pii-guard.json").read_text())["operator"]["handle"], "sam")
+
+            env = {**os.environ, "PRIVATE_MEMORY_HOME": str(Path(tmp) / "pm"), "PII_GUARD_SKIP_PRIVATE_TERMS": "0", "PRIVACY_KIT_NESTED": "1"}
+            env.pop("CAM_PRIVATE_HOME", None)
+            init = subprocess.run([sys.executable, "scripts/privacy-init.py", "--operator", "sam", "--name", "Sam", "--protect", term, "--json"], cwd=repo, capture_output=True, text=True, env=env)
+            self.assertEqual(init.returncode, 0, init.stdout + init.stderr)
+            rep = json.loads(init.stdout)
+            self.assertTrue(rep["ok"])
+            self.assertTrue(rep["hooks"]["installed"])
+            self.assertEqual(rep["protected_terms"], 1)
+            self.assertIn("identity/*/local/", (repo / ".gitignore").read_text())
+            self.assertNotIn("Exampleton", init.stdout)
+
+            # the kit's own tests pass in the target (Cam-only classes skip)
+            t = subprocess.run([sys.executable, "-m", "unittest", "test_privacy", "-q"], cwd=repo / "scripts", capture_output=True, text=True, env={**env, "PII_GUARD_SKIP_PRIVATE_TERMS": "1"})
+            self.assertEqual(t.returncode, 0, t.stderr[-2000:])
+            self.assertIn("skipped", t.stderr)
+
+            # commit everything clean → allowed
+            git("add", "-A")
+            ok = git("commit", "-q", "-m", "add safeguards", env=env)
+            self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)
+
+            # a protected term or an email in a new file → pre-commit refuses
+            (repo / "notes.md").write_text(f"owner: {term.lower()}\n", encoding="utf-8")
+            git("add", "notes.md")
+            bad = git("commit", "-q", "-m", "leak", env=env)
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertIn("personal_term", bad.stdout + bad.stderr)
+            self.assertNotIn("Exampleton", bad.stdout + bad.stderr)
+            (repo / "notes.md").write_text("mail someone.real@example-mail.net\n", encoding="utf-8")
+            git("add", "notes.md")
+            bad = git("commit", "-q", "-m", "leak", env=env)
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertIn("BLOCK email", bad.stdout + bad.stderr)
+            # a private tree is ignored, and force-adding it is refused by the hook
+            (repo / "identity/sam/local").mkdir(parents=True, exist_ok=True)
+            (repo / "identity/sam/local/profile.md").write_text("harmless\n", encoding="utf-8")
+            self.assertEqual(git("check-ignore", "-q", "identity/sam/local/profile.md").returncode, 0)
 
 
 if __name__ == "__main__":
