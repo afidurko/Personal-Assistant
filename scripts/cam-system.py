@@ -80,6 +80,7 @@ def smoke_checks() -> list[dict]:
         ("swarm-check", "swarm-check.py", []),
         ("sentinel-check", "sentinel-check.py", []),
         ("workspace-integration-check", "workspace-integration-check.py", []),
+        ("coding-effector-smoke", "coding-effector-smoke.py", []),
     ]:
         try:
             code, preview = cam_inproc.run_main_captured(filename, argv)

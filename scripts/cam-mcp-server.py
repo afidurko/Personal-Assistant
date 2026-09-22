@@ -9,7 +9,7 @@ Tools:
   vault_search, memorybear_read, memorybear_write, connectome_route,
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
-  loop_check, loop_audit, loop_run, higgsfield_check, presence_check,
+  loop_check, loop_audit, loop_run, coding_effector_smoke, higgsfield_check, presence_check,
   voicestudio_health, needs_attention,
   sentinel_decide, sentinel_pending, sentinel_ledger (read-only; Aaron approves via CLI)
 
@@ -246,6 +246,14 @@ def tool_defs() -> list[dict]:
             "description": (
                 "Confirm Loop Engineering wiring (connectome, spine files, submodule). "
                 "No network required."
+            ),
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "coding_effector_smoke",
+            "description": (
+                "Prove motor.cline wiring and a tiny local build still work "
+                "(useful when Cursor plan usage is exhausted). No network required."
             ),
             "inputSchema": {"type": "object", "properties": {}},
         },
@@ -631,6 +639,15 @@ def loop_check(_arguments: dict | None = None) -> Any:
     return json.loads(out)
 
 
+def coding_effector_smoke(_arguments: dict | None = None) -> Any:
+    out = subprocess.check_output(
+        [sys.executable, str(ROOT / "scripts/coding-effector-smoke.py")],
+        text=True,
+        cwd=str(ROOT),
+    )
+    return json.loads(out)
+
+
 def loop_audit(arguments: dict | None = None) -> Any:
     arguments = arguments or {}
     cmd = [sys.executable, str(ROOT / "scripts/loop-audit.py"), "--json"]
@@ -823,6 +840,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         return inkbox_check(arguments)
     if name == "loop_check":
         return loop_check(arguments)
+    if name == "coding_effector_smoke":
+        return coding_effector_smoke(arguments)
     if name == "loop_audit":
         return loop_audit(arguments)
     if name == "loop_run":

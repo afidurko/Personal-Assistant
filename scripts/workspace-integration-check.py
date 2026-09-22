@@ -111,6 +111,7 @@ HARD_PATHS = [
     "scripts/pack-higgsfield-result.py",
     "scripts/test_higgsfield.py",
     "scripts/loop-check.py",
+    "scripts/coding-effector-smoke.py",
     "scripts/loop-audit.py",
     "scripts/loop-run.py",
     "scripts/pack-loop-result.py",
