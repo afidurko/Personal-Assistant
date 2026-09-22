@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-20T19:40:13.778527+00:00",
+    "at": "2026-09-22T02:34:52.754414+00:00",
     "mode": "act",
-    "summary": "Phases 3+4 progressed: ethics inheritance manifest (config/swarm/ethics.json) inherited verbatim by every subagent + swarm-check drill; AvatarFrame tier-0 procedural engine (cam_avatar.py, 15 visemes, ARKit-52, blink/gaze micro-life) with cam-avatar-server.py and a speaking SVG rig in Cam Home Live; Aaron's home suggestions now lead needs-attention dispatch. 143/143 tests green.",
+    "summary": "Homepage reworked around a live cortex: scripts/cam_cortex.py runs observe/reflect/predict/act cycles from real check data with probability-scored, self-calibrating predictions (12/12 held), streamed to the page via SSE; sticky quick-access dock + keyboard shortcuts (c/x/s/g/r/b/?) and /cam,/cortex redirects; 152/152 tests green.",
     "workspace": "."
   },
   "mesh_notes": [
