@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-22T02:13:56.360221+00:00",
+    "at": "2026-09-22T19:47:32.511834+00:00",
     "mode": "act",
-    "summary": "Muse\u2192Cam: Sentinel allow/ask/deny at motor boundary + append-only intent journal; tainted egress asks Aaron; guardrail paths once-only (PR #43)",
-    "workspace": "/workspace"
+    "summary": "Hand gestures P1: meshed Aaron's 3 repos into one engine (scripts/cam_gesture_engine.py \u2014 HaGRID labels + Kazuhito00 keypoint/point-history k-NN from the submodule CSVs + Ha0Tang key frames + Cam finger rules \u2192 segments); Cam's eyes: companions/web/gestures.js (MediaPipe on-device landmarks \u2192 POST /api/spike/hand), cam-gesture-see.py (Mac camera / replay / demo), converse-server GestureHub + /api/gesture/*; 30 engine tests + 6 eyes demos in gesture-check; switch.gesture_control still hold (dry run via --gesture-act + ?gesture-demo=)",
+    "workspace": "."
   },
   "mesh_notes": [
     {
@@ -105,6 +105,21 @@
       "at": "2026-09-22T02:13:56.360221+00:00",
       "text": "docs/MUSE_CAM_PATTERNS.md \u00b7 vault/03-Projects/Muse-Sentinel-Research.md \u00b7 scripts/cam-sentinel.py pending|approve|deny|ledger",
       "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-22T18:11:13.354153+00:00",
+      "text": "docs/HAND_GESTURES.md \u00b7 config/gestures/gestures.json \u00b7 scripts/cam-gestures.py list|resolve|teach \u00b7 scripts/gesture-check.py in ci-static-gate; Aaron's starter repo link pending",
+      "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-22T18:29:48.185152+00:00",
+      "text": "44 gestures / 34 actions; switch.gesture_control still hold",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-22T19:47:32.511834+00:00",
+      "text": "gestures: engine + eyes built; first live camera session flips switch.gesture_control",
+      "workspace": "."
     }
   ],
   "rules": ".clinerules",

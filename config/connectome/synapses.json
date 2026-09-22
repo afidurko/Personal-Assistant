@@ -1884,6 +1884,65 @@
       "to": "switch.autonomy",
       "weight": 0.9,
       "notes": "needs-attention plan → autonomy"
+    },
+    {
+      "from": "sense.vision.gesture",
+      "to": "switch.gesture_control",
+      "weight": 1.0
+    },
+    {
+      "from": "sense.vision.gesture",
+      "to": "area.visual",
+      "weight": 1.0,
+      "tract": "tract.thalamo"
+    },
+    {
+      "from": "sense.vision.gesture",
+      "to": "center.vision",
+      "weight": 0.9
+    },
+    {
+      "from": "switch.gesture_control",
+      "to": "area.visual",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "switch.gesture_control",
+      "to": "motor.gesture",
+      "when": "act",
+      "weight": 1.0
+    },
+    {
+      "from": "area.visual",
+      "to": "area.premotor",
+      "weight": 0.9,
+      "tract": "tract.slf",
+      "notes": "dorsal visuomotor stream — seen hand shape to motor plan"
+    },
+    {
+      "from": "area.premotor",
+      "to": "switch.identity",
+      "weight": 1.0,
+      "notes": "gesture plan must come from Aaron's hand (face/voice match)"
+    },
+    {
+      "from": "switch.autonomy",
+      "to": "motor.gesture",
+      "when": "act",
+      "weight": 0.9
+    },
+    {
+      "from": "motor.gesture",
+      "to": "area.mtl",
+      "weight": 0.85,
+      "notes": "feedback — gesture intents + learned bindings into memory"
+    },
+    {
+      "from": "motor.gesture",
+      "to": "center.vision",
+      "weight": 0.7,
+      "notes": "feedback"
     }
   ]
 }

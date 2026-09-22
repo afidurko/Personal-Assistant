@@ -18,7 +18,7 @@ import uuid
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "companions" / "web"
@@ -42,6 +42,110 @@ try:
 except Exception:  # pragma: no cover
     AaronVoiceGate = None  # type: ignore
     load_voice_config = None  # type: ignore
+
+try:
+    import cam_gesture_engine as gesture_engine
+    import cam_gestures as gestures_vocab
+except Exception as exc:  # pragma: no cover
+    gesture_engine = None  # type: ignore
+    gestures_vocab = None  # type: ignore
+    GESTURE_IMPORT_ERROR = str(exc)
+else:
+    GESTURE_IMPORT_ERROR = ""
+
+
+class GestureHub:
+    """One GestureSession per device stream; engine models are loaded once and shared.
+
+    Landmarks (21 points, no pixels) arrive from the companion PWA or
+    cam-gesture-see.py, run through the merged engine (HaGRID labels +
+    Kazuhito00 k-NN heads + Ha0Tang key frames + Cam rules) and the resolver.
+    switch.gesture_control comes from the connectome config: while it is hold
+    every intent is system.log_only.
+    """
+
+    def __init__(self) -> None:
+        self.shared = None
+        self.sessions: dict = {}
+        self.switch_act = False
+        self.error = GESTURE_IMPORT_ERROR
+        self.log: list[dict] = []
+        if gesture_engine is not None:
+            try:
+                self.shared = gesture_engine.GestureEngine()
+                self.switch_act = gesture_engine.switch_is_act()
+            except Exception as exc:  # pragma: no cover
+                self.error = str(exc)
+
+    @property
+    def ready(self) -> bool:
+        return self.shared is not None
+
+    def session(self, device: str, context: str, identity_ok: bool):
+        key = device or "default"
+        sess = self.sessions.get(key)
+        if sess is None:
+            engine = gesture_engine.GestureEngine(
+                keypoint_knn=self.shared.keypoint_knn,
+                history_knn=self.shared.history_knn,
+                prototypes=self.shared.prototypes,
+                load_repo_models=False,
+            )
+            sess = gesture_engine.GestureSession(
+                engine=engine, context=context or "home", identity_ok=identity_ok, switch_act=self.switch_act
+            )
+            self.sessions[key] = sess
+        else:
+            if context:
+                sess.resolver.context = context
+            sess.resolver.identity_ok = bool(identity_ok)
+            sess.resolver.switch_act = self.switch_act
+        return sess
+
+    def feed_frames(self, device: str, context: str, identity_ok: bool, frames: list[dict]) -> dict:
+        sess = self.session(device, context, identity_ok)
+        segs, intents = sess.feed_dicts(frames)
+        return self._result(sess, segs, intents)
+
+    def feed_segments(self, device: str, context: str, identity_ok: bool, segments: list) -> dict:
+        sess = self.session(device, context, identity_ok)
+        out_segs, intents = [], []
+        for item in segments:
+            if isinstance(item, str):
+                seg = gestures_vocab.Segment.parse(item, device=device)
+            else:
+                seg = gestures_vocab.Segment(
+                    str(item.get("pose")), str(item.get("motion") or "hold"), int(item.get("duration_ms") or 300),
+                    float(item.get("confidence") or 0.9), int(item.get("hands") or 1), int(item.get("t_ms") or 0), device,
+                )
+            out_segs.append(seg)
+            intents += sess.resolver.feed(seg)
+        sess.segments += out_segs
+        sess.intents += intents
+        return self._result(sess, out_segs, intents)
+
+    def _result(self, sess, segs, intents) -> dict:
+        return {
+            "segments": [
+                {"pose": s.pose, "motion": s.motion, "duration_ms": s.duration_ms, "confidence": s.confidence,
+                 "hands": s.hands, "t_ms": s.t_ms}
+                for s in segs
+            ],
+            "intents": [i.to_dict() for i in intents],
+            "status": sess.status(),
+        }
+
+    def status(self) -> dict:
+        return {
+            "ready": self.ready,
+            "error": self.error or None,
+            "switch_act": self.switch_act,
+            "sessions": {k: v.status() for k, v in self.sessions.items()},
+            "models": self.shared.models if self.shared else {},
+        }
+
+
+GESTURES = GestureHub()
 
 
 VOICE_GATE = None
@@ -451,6 +555,30 @@ def emit_converse_activity(
                 source="pupil",
             )
         )
+    elif kind == "gesture_spike":
+        # Hand seen → visual cortex → premotor (the hotspot.gesture pathway).
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.vision",
+                kind="agent",
+                area="area.visual",
+                intensity=0.85,
+                tracts=["tract.ilf", "tract.vof", "tract.slf"],
+                reason="gesture_seen",
+                source="cam_converse",
+            )
+        )
+        rows.append(
+            activity_emit.emit(
+                neuron="neuron.gesture",
+                kind="agent",
+                area="area.premotor",
+                intensity=0.8,
+                tracts=["tract.slf", "tract.fat"],
+                reason="gesture_intent",
+                source="cam_converse",
+            )
+        )
     if refresh and rows:
         activity_emit.refresh_live_activity()
     return rows
@@ -680,6 +808,8 @@ class Handler(BaseHTTPRequestHandler):
                         "aaron_face_enrolled": VISUAL.exists(),
                         "aaron_voice_only": True,
                         "aaron_voice_gate": voice_gate_status(),
+                        "gestures": GESTURES.ready,
+                        "gesture_switch": "act" if GESTURES.switch_act else "hold",
                         "host_has_local_mic": False,  # browser supplies mic
                         "tailscale": bool(ts.get("enabled")),
                     },
@@ -713,6 +843,24 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/voice/profile":
             self._json(200, {"ok": True, "profile": load_voice_profile()})
+            return
+        if path == "/api/gesture/status":
+            self._json(200, GESTURES.status())
+            return
+        if path == "/api/gesture/demo":
+            # Synthetic landmark frames for a dry run of the companion's gesture loop (no camera).
+            if not GESTURES.ready:
+                self._json(503, {"error": GESTURES.error or "gesture engine unavailable"})
+                return
+            q = parse_qs(urlparse(self.path).query)
+            name = (q.get("name") or ["engage_grab_collapse"])[0]
+            fps = int((q.get("fps") or ["30"])[0])
+            script = gesture_engine.DEMO_SCRIPTS.get(name)
+            if script is None:
+                self._json(404, {"error": f"unknown demo {name}", "demos": sorted(gesture_engine.DEMO_SCRIPTS)})
+                return
+            frames = [o.to_dict() for o in gesture_engine.synth_sequence(script, fps=fps, device="demo")]
+            self._json(200, {"name": name, "fps": fps, "frames": frames, "demos": sorted(gesture_engine.DEMO_SCRIPTS)})
             return
 
         # static companion (relative paths for iOS PWA / on-device)
@@ -847,6 +995,42 @@ class Handler(BaseHTTPRequestHandler):
             self._append_log("spikes", event)
             mesh = emit_converse_activity(kind="camera_spike", source="camera")
             self._json(200, {"accepted": True, "event": event, "mesh_activity": mesh})
+            return
+
+        if path in ("/api/spike/hand", "/api/spike/gesture"):
+            # Hand landmarks (or pre-segmented gestures) from the companion / cam-gesture-see.
+            if not GESTURES.ready:
+                self._json(503, {"accepted": False, "error": GESTURES.error or "gesture engine unavailable"})
+                return
+            device = str(payload.get("device") or self.client_address[0])
+            context = str(payload.get("context") or "")
+            identity_ok = bool(payload.get("aaron_identity"))
+            if path == "/api/spike/hand":
+                frames = payload.get("frames") or ([payload] if payload.get("hands") is not None else [])
+                result = GESTURES.feed_frames(device, context, identity_ok, frames)
+            else:
+                result = GESTURES.feed_segments(device, context, identity_ok, payload.get("segments") or [])
+            fired = [i for i in result["intents"] if i.get("fired")]
+            if result["segments"] or result["intents"]:
+                event = {
+                    "at": utc_now(),
+                    "type": "gesture_spike",
+                    "sense": "sense.vision.gesture",
+                    "device": device,
+                    "context": result["status"]["context"],
+                    "switch_act": GESTURES.switch_act,
+                    "segments": result["segments"],
+                    "intents": [
+                        {k: i.get(k) for k in ("gesture", "action", "requested_action", "fired", "hold_reason", "confidence", "t_ms")}
+                        for i in result["intents"]
+                    ],
+                }
+                self._append_log("gestures", event)
+            mesh = None
+            if fired:
+                mesh = emit_converse_activity(kind="gesture_spike", source="gesture")
+            result.update({"accepted": True, "mesh_activity": mesh})
+            self._json(200, result)
             return
 
         if path == "/api/spike/pupil":
@@ -1011,7 +1195,16 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--host", default="")
     p.add_argument("--port", type=int, default=0)
+    p.add_argument(
+        "--gesture-act",
+        action="store_true",
+        help="dry run: treat switch.gesture_control as act for this process only (config stays hold)",
+    )
     args = p.parse_args()
+    if args.gesture_act:
+        GESTURES.switch_act = True
+        for sess in GESTURES.sessions.values():
+            sess.resolver.switch_act = True
     ts = load_tailscale()
     urls = converse_urls(ts)
     host = args.host or (ts.get("converse") or {}).get("bind_host") or "0.0.0.0"

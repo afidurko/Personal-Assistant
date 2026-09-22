@@ -17,6 +17,9 @@ and outbound contact (text / FaceTime / call) when needed.
 | [Jarvis](https://github.com/afidurko/Jarvis) | **Local CLI utility layer** | Deterministic life tools; submodule — not the brain |
 | [PaddleDetection](https://github.com/afidurko/PaddleDetection) (`release/2.9`) | **Vision tool layer** | Detection on approved media; submodule — not always-on camera |
 | [pupil](https://github.com/afidurko/pupil) (`master`) | **Eye-tracking / gaze layer** | Pupil Capture/Player/Service; submodule — not always-on eye camera |
+| [hagrid](https://github.com/afidurko/hagrid) (`master`) | **Hand-gesture dataset layer** | HaGRIDv2 labels + detectors feed Cam's custom poses (`config/gestures/`); submodule — data, not a brain |
+| [hand-gesture-recognition-using-mediapipe](https://github.com/afidurko/hand-gesture-recognition-using-mediapipe) (`main`) | **Gesture segmenter reference** | Keypoint + point-history MLPs — pattern for Cam's pose/motion segmenter and teach mode; submodule |
+| [HandGestureRecognition](https://github.com/afidurko/HandGestureRecognition) (`master`) | **Dynamic-gesture research** | Key-frame extraction + fusion (CC BY-NC-SA) — patterns and class lists only; submodule |
 | [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) | **Cam presence (face/voice)** | RIVA ASR/TTS + Audio2Face (+ optional Metahuman); not a second brain |
 | [smart-second-brain](https://github.com/afidurko/smart-second-brain) | **Knowledge cortex** | Obsidian vault search/graph/agents — enhances Cam’s long-term memory |
 | [MemoryBear](https://github.com/afidurko/MemoryBear) | **Cognitive memory engine** | Perceive → extract → associate → forget — hybrid search + graph + reflection for all agents |
@@ -184,6 +187,7 @@ Prefer nullclaw built-ins (iMessage, email, Telegram, etc.). For gaps
 7. Keep public-apis as shared free-API catalog for all agents (`integrations/public-apis`) — **added**
 7b. Workspace registry + motor runner + MCP + schedules (`config/workspaces/`, `scripts/run-cline.py`) — **added**
 7c. **Overall system bridge** — home converse ↔ connectome ↔ live cortex activity (`config/system/pieces.json`, `server/core/system-bridge.ts`, `scripts/cam-system.py`) — **added**
+7d. **Hand gestures** — signal → meaning → action vocabulary + resolver + Aaron-taught memory, Huawei Air Transfer pattern for iPhone → iPad handoff (`config/gestures/`, `scripts/cam_gestures.py`, [docs/HAND_GESTURES.md](HAND_GESTURES.md)) — **planned, wired behind `switch.gesture_control` hold**
 8. Stand up nulltickets → nullclaw → nullboiler → nullhub locally
 9. Seed pipelines with standing autonomy (Aaron assigns; Cam finishes)
 10. Wire mesh + vault + Cline session/ticket sync into live nulltickets

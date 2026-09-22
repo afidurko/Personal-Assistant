@@ -102,7 +102,20 @@
         /female|samantha|karen|moira|tessa|fiona|victoria|zira/i.test(v.name)
       ) || voices.find((v) => v.lang && v.lang.startsWith("en"));
     if (prefer) u.voice = prefer;
+    if (document.body.dataset.camMuted === "1") return;
+    u.onstart = () => { document.body.dataset.camContext = "speaking"; };
+    u.onend = u.onerror = () => { document.body.dataset.camContext = "home"; };
     window.speechSynthesis.speak(u);
+  }
+
+  // Gestures: Aaron's identity is fresh for 60 s after an accepted voice turn.
+  let identityTimer = 0;
+  function markAaronIdentity() {
+    document.body.dataset.aaronIdentity = "1";
+    if (identityTimer) clearTimeout(identityTimer);
+    identityTimer = setTimeout(() => {
+      document.body.dataset.aaronIdentity = "0";
+    }, 60000);
   }
 
   async function postJSON(path, body) {
@@ -321,6 +334,7 @@
           }
           reply = turn.cam;
           speak = turn.speak || speak;
+          markAaronIdentity();
           if (turn.voice_stats) {
             adaptiveRaised = !!turn.voice_stats.adaptive_raised;
             multiSpeakerStreak = turn.voice_stats.multi_speaker_streak || multiSpeakerStreak;

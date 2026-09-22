@@ -1,0 +1,148 @@
+{
+  "id": "hand-gestures",
+  "name": "Hand gestures — signal → meaning → action",
+  "status": "dry_run",
+  "planned_by": "Aaron",
+  "planned_at": "2026-09-22",
+  "role": "Cam recognizes Aaron's hand signals on the companion camera, remembers what each one means, and fires the bound action: collapse / expand / scroll the page, move Cam from one device to another (iPhone → iPad), control the converse turn",
+  "policy": "config/integrations/hand-gestures.md",
+  "plan": "docs/HAND_GESTURES.md",
+  "path": "config/gestures",
+  "vocabulary": "config/gestures/gestures.json",
+  "actions": "config/gestures/actions.json",
+  "learned": "data/gestures/learned.json",
+  "sense": "sense.vision.gesture",
+  "hotspot": "hotspot.gesture",
+  "motor": "motor.gesture",
+  "switch": "switch.gesture_control",
+  "area": "area.premotor",
+  "center": "center.vision",
+  "mesh_namespace": "mesh/gestures",
+  "vault_dir": "vault/03-Projects/Cam-Hand-Gestures.md",
+  "inspiration": {
+    "huawei_air_transfer": {
+      "what": "HarmonyOS 5 / Mate 70 · Mate X6 · MatePad Pro — open palm at half an arm, pause, clench fist to grab the open image / video / playing track / screenshot; keep the fist, move to the receiving phone or tablet, pause, open palm to send",
+      "requirements": "both devices HarmonyOS 5, Bluetooth + WLAN on, screens unlocked, Air Transfer switch on, ≥ 40 cm between devices",
+      "developer_surface": "Share Kit harmonyShare.gesturesShare event — page registers a listener, gets a SharableTarget, must call share() within ~3 s; system owns discovery, connection, transfer",
+      "sources": [
+        "https://harmonyos.cool/docs/full-scene/air-transfer",
+        "https://www.gsmarena.com/huawei_demoes_gestureoperated__file_transfer_between_devices-news-65475.php",
+        "https://www.androidauthority.com/huawei-grab-drop-transfer-files-3503116/"
+      ]
+    },
+    "huawei_air_gestures": {
+      "what": "Air scroll (palm / back of hand 20–40 cm, wrist flick up/down/left/right), Grabshot (palm then clench fist), Air press (palm from 30–40 cm to ~5 cm answers a call or pauses / resumes playback); hand icon appears at the top of the screen when engaged",
+      "sources": [
+        "https://consumer.huawei.com/en/support/content/en-us15974017/"
+      ]
+    },
+    "mediapipe_gesture_recognizer": {
+      "what": "On-device (WASM in Safari) hand landmarker + canned classifier: None, Closed_Fist, Open_Palm, Pointing_Up, Thumb_Down, Thumb_Up, Victory, ILoveYou; custom .task via Model Maker (folders per label + none)",
+      "sources": [
+        "https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer/web_js",
+        "https://developers.google.com/edge/mediapipe/solutions/customization/gesture_recognizer"
+      ]
+    }
+  },
+  "recognizer": {
+    "runs_on": "companion_pwa (landmarks on-device) → converse server (engine + resolver)",
+    "engine": "scripts/cam_gesture_engine.py — HaGRID labels + hand-gesture-mediapipe keypoint / point-history k-NN (trained live from the submodule CSVs) + HandGestureRecognition key frames + Cam finger rules; pose fusion → per-hand segmenter → motion head → Segment → GestureResolver",
+    "eyes": {
+      "companion_pwa": "companions/web/gestures.js — MediaPipe tasks-vision GestureRecognizer (Safari WASM, CDN) on the camera preview; landmarks + canned label batched to POST /api/spike/hand every 200 ms; overlay, engaged glyph, intent line, reversible UI actions; ?gesture-demo=NAME dry run without a camera",
+      "mac": "scripts/cam-gesture-see.py --camera 0 (OpenCV + MediaPipe Hands) [--post http://cam:8766]",
+      "pupil": "world-camera frames through the same runner when Pupil is live",
+      "hagrid_detector": "optional — HaGRID YOLO / ResNet labels enter as labels.hagrid on each hand"
+    },
+    "custom_model": "data/gestures/cam-gestures.task — Model Maker on HaGRIDv2 folders (integrations/hagrid) + Aaron's samples — optional now; rules / HaGRID labels / Aaron prototypes already cover every custom pose",
+    "desktop_path": "integrations/hagrid pretrained detectors or integrations/hand-gesture-mediapipe app.py on the Mac when its slot opens",
+    "frames_leave_device": false,
+    "landmarks_leave_device": "21 points per hand, no pixels, tailnet only",
+    "emits": "segments pose:motion:duration_ms:confidence:hands → GestureResolver (server) → intents back to the companion + vault/10-Mesh-Distillates/converse/*-gestures.jsonl",
+    "endpoints": {
+      "landmarks": "POST /api/spike/hand",
+      "segments": "POST /api/spike/gesture",
+      "status": "GET /api/gesture/status",
+      "demo": "GET /api/gesture/demo?name=…"
+    },
+    "dry_run": "python3 scripts/cam-converse-server.py --gesture-act (process-only switch.gesture_control=act) + http://…/?gesture-demo=engage_grab_collapse",
+    "frame_rate_hz": 30
+  },
+  "aaron_repos": {
+    "note": "Each repo Aaron adds mounts as a submodule and is mapped onto primitives.poses / primitives.motions in gestures.json (repos.*) — the vocabulary stays the source of truth. gesture-check fails if a repo label is neither mapped nor explicitly ignored.",
+    "added_at": "2026-09-22",
+    "repos": [
+      {
+        "id": "hagrid",
+        "path": "integrations/hagrid",
+        "remote": "github.com/afidurko/hagrid",
+        "upstream": "github.com/hukenovs/hagrid",
+        "branch": "master",
+        "use": "HaGRIDv2 dataset (33 static classes + no_gesture, 1.09M images) → Model Maker folders for every custom pose; pretrained YOLOv10 / ResNet gesture + hand detectors for the Mac / desktop path",
+        "maps": "repos.hagrid.pose_map (25 labels → 13 poses), 9 labels ignored / reserved"
+      },
+      {
+        "id": "hand-gesture-mediapipe",
+        "path": "integrations/hand-gesture-mediapipe",
+        "remote": "github.com/afidurko/hand-gesture-recognition-using-mediapipe",
+        "upstream": "github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe",
+        "branch": "main",
+        "license": "Apache-2.0",
+        "use": "segmenter reference — keypoint MLP (Open / Close / Pointer) and 16-frame fingertip point-history MLP (Stop / Clockwise / Counter Clockwise / Move); teach-mode pipeline (k / h to log samples → notebook → TFLite)",
+        "maps": "repos.hand-gesture-mediapipe.keypoint_map + motion_map"
+      },
+      {
+        "id": "hand-gesture-recognition",
+        "path": "integrations/hand-gesture-recognition",
+        "remote": "github.com/afidurko/HandGestureRecognition",
+        "upstream": "github.com/Ha0Tang/HandGestureRecognition",
+        "branch": "master",
+        "license": "CC BY-NC-SA 4.0 — patterns and datasets only, no code shipped",
+        "use": "dynamic-gesture research (key-frame extraction + feature fusion, Neurocomputing 2019); Cambridge / Action3D / HandGesture classes seed motion primitives and counting poses",
+        "maps": "repos.hand-gesture-recognition.motion_map + pose_map"
+      }
+    ],
+    "next_slot": "integrations/<gesture-repo> — open for the next repo Aaron adds"
+  },
+  "defaults": {
+    "switch_default": "hold — every recognized gesture is system.log_only until Aaron flips switch.gesture_control after the first live session",
+    "aaron_identity_required_for": [
+      "ui.screenshot",
+      "device.*",
+      "converse.confirm",
+      "presence.hold_all",
+      "memory.*"
+    ],
+    "never_via_gesture": [
+      "egress (text / call / facetime / inkbox / jobs)",
+      "spend (higgsfield)",
+      "self_modify (enhance)",
+      "switch.kill flip",
+      "Sentinel approvals"
+    ],
+    "save_to_mesh": true,
+    "save_frames": false,
+    "save_landmark_samples_when_teaching": true
+  },
+  "scripts": {
+    "cli": "scripts/cam-gestures.py",
+    "module": "scripts/cam_gestures.py",
+    "check": "scripts/gesture-check.py",
+    "engine": "scripts/cam_gesture_engine.py",
+    "see": "scripts/cam-gesture-see.py",
+    "server": "scripts/cam-converse-server.py (/api/spike/hand)",
+    "companion": "companions/web/gestures.js",
+    "tests": "scripts/test_cam_gestures.py · scripts/test_cam_gesture_engine.py"
+  },
+  "teams": [
+    "team.capability",
+    "team.tooling"
+  ],
+  "roles": [
+    "chief",
+    "vision",
+    "ops",
+    "coding",
+    "qa"
+  ],
+  "available_to": "chief_vision_ops_coding"
+}

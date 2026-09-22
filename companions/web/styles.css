@@ -82,13 +82,43 @@ html, body {
 @media (min-width: 640px) {
   .media { grid-template-columns: 180px 1fr; align-items: stretch; }
 }
+.cam-wrap { position: relative; }
 #camPreview {
   width: 100%;
   aspect-ratio: 3/4;
   background: #0e1316;
   border: 1px solid var(--line);
-  object-fit: cover;
+  object-fit: contain;
+  transform: scaleX(-1);
 }
+.gesture-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* same letterboxing as the video so landmarks line up */
+  pointer-events: none;
+}
+.gesture-glyph {
+  position: absolute;
+  top: 0.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.4rem;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+.gesture-status { font-size: 0.85rem; opacity: 0.85; margin: 0.25rem 0 0; }
+.gesture-status.warn { color: var(--warn); }
+.gesture-status.ok { color: var(--ok, #8fd694); }
+.gesture-intent { font-size: 0.85rem; margin: 0.15rem 0 0; min-height: 1.2em; }
+.gesture-intent.fired { color: var(--ok, #8fd694); }
+.gesture-intent.held { opacity: 0.7; }
+body.collapsed .transcript,
+body.collapsed .text-fallback,
+body.collapsed .hint { display: none; }
+body.collapsed .face { width: 56px; height: 56px; }
 .meter {
   height: 0.35rem;
   background: rgba(255,255,255,0.08);

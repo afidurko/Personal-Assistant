@@ -177,6 +177,15 @@
       "check": "python3 scripts/sentinel-check.py",
       "depends_on": ["piece.connectome"],
       "feeds": ["piece.system_bridge", "piece.cline"]
+    },
+    {
+      "id": "piece.gestures",
+      "title": "Hand gestures — signal → meaning → action (Huawei Air Transfer pattern)",
+      "layer": "presence",
+      "paths": ["config/gestures/", "config/integrations/hand-gestures.json", "scripts/cam_gestures.py", "scripts/cam-gestures.py", "scripts/cam_gesture_engine.py", "scripts/cam-gesture-see.py", "companions/web/gestures.js", "scripts/gesture-check.py", "docs/HAND_GESTURES.md"],
+      "check": "python3 scripts/gesture-check.py",
+      "depends_on": ["piece.connectome", "piece.sentinel", "piece.converse", "piece.ios"],
+      "feeds": ["piece.converse", "piece.ios", "piece.system_bridge"]
     }
   ],
   "boot_order": [
@@ -202,6 +211,7 @@
     "Live Pupil eye tracking — open PR #18 (foveated world)",
     "Live nulltickets/nullclaw runtime (synaptic body across boots)",
     "Local sLM/DL model weights (heuristic stubs active on motor.slm / motor.dl)",
-    "Embodiment theater — open PRs #19/#20/#21 (cards / Joshinator / Inkbox)"
+    "Embodiment theater — open PRs #19/#20/#21 (cards / Joshinator / Inkbox)",
+    "Hand gestures live session — engine + companion eyes are built (dry run: cam-converse-server.py --gesture-act + ?gesture-demo=); Aaron's first camera session on the iPhone/Mac flips switch.gesture_control to standing_on"
   ]
 }

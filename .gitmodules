@@ -52,3 +52,15 @@
 	path = integrations/loop-engineering
 	url = https://github.com/afidurko/loop-engineering.git
 	branch = main
+[submodule "integrations/hand-gesture-recognition"]
+	path = integrations/hand-gesture-recognition
+	url = https://github.com/afidurko/HandGestureRecognition.git
+	branch = master
+[submodule "integrations/hagrid"]
+	path = integrations/hagrid
+	url = https://github.com/afidurko/hagrid.git
+	branch = master
+[submodule "integrations/hand-gesture-mediapipe"]
+	path = integrations/hand-gesture-mediapipe
+	url = https://github.com/afidurko/hand-gesture-recognition-using-mediapipe.git
+	branch = main

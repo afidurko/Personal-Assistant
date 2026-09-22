@@ -486,5 +486,30 @@
     ],
     "status": "wired",
     "available_to": "all_roles_and_subagents"
+  },
+  "mesh/gestures": {
+    "enabled": false,
+    "status": "planned",
+    "planned_by": "Aaron",
+    "planned_at": "2026-09-22",
+    "plan": "docs/HAND_GESTURES.md",
+    "vocabulary": "config/gestures/gestures.json",
+    "actions": "config/gestures/actions.json",
+    "learned": "data/gestures/learned.json",
+    "resolver": "scripts/cam_gestures.py",
+    "cli": "scripts/cam-gestures.py",
+    "check": "scripts/gesture-check.py",
+    "sense": "sense.vision.gesture",
+    "hotspot": "hotspot.gesture",
+    "motor": "motor.gesture",
+    "switch": "switch.gesture_control",
+    "inspiration": "Huawei HarmonyOS 5 AI Air Transfer (grab → carry → release across devices) + Air scroll / Grabshot / Air press; MediaPipe Gesture Recognizer canned labels",
+    "who_may_teach": ["Aaron"],
+    "aaron_repos": {
+      "hagrid": "integrations/hagrid — HaGRIDv2 dataset + detectors → custom poses",
+      "hand-gesture-mediapipe": "integrations/hand-gesture-mediapipe — keypoint + point-history MLPs → segmenter / teach pipeline",
+      "hand-gesture-recognition": "integrations/hand-gesture-recognition — key-frame extraction patterns (CC BY-NC-SA, no code shipped)"
+    },
+    "first_use_cases": ["ui.collapse", "ui.expand", "device.handoff_grab → device.handoff_release (iPhone → iPad)"]
   }
 }
