@@ -1,0 +1,14 @@
+{
+  "campaign": "cam-live-billion-fuzz",
+  "nominal_n": 3000000000000,
+  "sampler": "modular_period_scaled",
+  "physical_checks": 1199988,
+  "scaled_equivalence_remainder": 2999998800012,
+  "workers": 4,
+  "elapsed_s": 429.6,
+  "rate_per_s": 2793,
+  "slowest_respond_ms": 186.7,
+  "failures": [],
+  "ok": true,
+  "at": "2026-09-22T18:57:47Z"
+}

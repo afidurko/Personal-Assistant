@@ -31,6 +31,7 @@ import operator
 import os
 import re
 import threading
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -121,7 +122,11 @@ def safe_math(expr: str) -> float | None:
         if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
             return node.value
         if isinstance(node, ast.BinOp) and type(node.op) in _MATH_OPS:
-            return _MATH_OPS[type(node.op)](ev(node.left), ev(node.right))
+            left, right = ev(node.left), ev(node.right)
+            # Guard ** against DoS: 10**10**7 would compute a 10-million-digit int
+            if isinstance(node.op, ast.Pow) and (abs(right) > 128 or abs(left) > 1e15):
+                raise ValueError("power too large")
+            return _MATH_OPS[type(node.op)](left, right)
         if isinstance(node, ast.UnaryOp) and type(node.op) in _MATH_OPS:
             return _MATH_OPS[type(node.op)](ev(node.operand))
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
@@ -133,11 +138,12 @@ def safe_math(expr: str) -> float | None:
 
     try:
         result = ev(tree)
-    except (ValueError, ZeroDivisionError, TypeError, OverflowError):
-        return None
-    if isinstance(result, (int, float)) and math.isfinite(result):
+        if not isinstance(result, (int, float)) or not math.isfinite(float(result)):
+            return None
         return float(result)
-    return None
+    except (ValueError, ZeroDivisionError, TypeError, OverflowError):
+        # OverflowError also covers float(huge-int) after a large but allowed **
+        return None
 
 
 # --------------------------------------------------------------------------
@@ -298,16 +304,14 @@ class LLMBackend:
         return cands
 
     def resolve(self, force: bool = False) -> dict | None:
-        import time as _time
-
         with self._lock:
             if self._checked and not force:
                 if self._resolved is not None:
                     return self._resolved
-                if _time.monotonic() - self._checked_at < self.RECHECK_SECONDS:
+                if time.monotonic() - self._checked_at < self.RECHECK_SECONDS:
                     return None
             self._checked = True
-            self._checked_at = _time.monotonic()
+            self._checked_at = time.monotonic()
             self._resolved = None
             for cand in self._candidates():
                 probe = cand.get("probe")
@@ -388,15 +392,18 @@ def parse_due(text: str, now: datetime | None = None) -> datetime | None:
     if m:
         qty = float(m.group(1))
         unit = m.group(2).lower()
-        if unit.startswith("sec"):
-            delta = timedelta(seconds=qty)
-        elif unit.startswith(("min",)):
-            delta = timedelta(minutes=qty)
-        elif unit.startswith(("hour", "hr")):
-            delta = timedelta(hours=qty)
-        else:
-            delta = timedelta(days=qty)
-        return now + delta
+        try:
+            if unit.startswith("sec"):
+                delta = timedelta(seconds=qty)
+            elif unit.startswith(("min",)):
+                delta = timedelta(minutes=qty)
+            elif unit.startswith(("hour", "hr")):
+                delta = timedelta(hours=qty)
+            else:
+                delta = timedelta(days=qty)
+            return now + delta
+        except (OverflowError, OSError, ValueError):
+            return None  # "in 99999999999 days" — treat as unparseable
     m = _AT_RE.search(text)
     if m:
         hour = int(m.group(1))
@@ -406,7 +413,9 @@ def parse_due(text: str, now: datetime | None = None) -> datetime | None:
             hour += 12
         if ampm == "am" and hour == 12:
             hour = 0
-        due = now.replace(hour=hour % 24, minute=minute, second=0, microsecond=0)
+        if not (0 <= hour <= 23 and 0 <= minute <= 59):
+            return None  # "at 99:99" — nonsense time, treat as unparseable
+        due = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         if _TOMORROW_RE.search(text) or due <= now:
             due += timedelta(days=1)
         return due
@@ -554,9 +563,11 @@ class CamBrain:
         st["history_turns"] = len(self.history)
         return st
 
+    MAX_TURN_CHARS = 4000
+
     def respond(self, text: str, source: str = "text") -> dict:
-        """One conversational turn. Always returns a real answer."""
-        text = (text or "").strip()
+        """One conversational turn. Always returns a reply, never raises."""
+        text = str(text or "").strip()[: self.MAX_TURN_CHARS]
         turn: dict[str, Any] = {
             "at": utc_now(), "source": source, "aaron": text,
             "engine": "local_cortex", "actions": [],
@@ -565,20 +576,26 @@ class CamBrain:
             turn["cam"] = "I'm here, Aaron — listening. Say the word."
             return self._finish(turn)
 
-        handled = self._local_skills(text, turn)
-        if handled is not None:
-            turn["cam"] = handled
-            return self._finish(turn)
+        try:
+            handled = self._local_skills(text, turn)
+            if handled is not None:
+                turn["cam"] = handled
+                return self._finish(turn)
 
-        # General conversation → LLM with grounding, else grounded local reply
-        context = self._build_context(text)
-        llm_reply = self._llm_reply(text, context)
-        if llm_reply:
-            turn["engine"] = self.llm.status().get("engine", "llm")
-            turn["cam"] = llm_reply
-            return self._finish(turn)
+            # General conversation → LLM with grounding, else grounded local reply
+            context = self._build_context(text)
+            llm_reply = self._llm_reply(text, context)
+            if llm_reply:
+                turn["engine"] = self.llm.status().get("engine", "llm")
+                turn["cam"] = llm_reply
+                return self._finish(turn)
 
-        turn["cam"] = self._grounded_reply(text, context)
+            turn["cam"] = self._grounded_reply(text, context)
+        except Exception as exc:  # a skill bug must never kill the conversation
+            turn["engine"] = "local_cortex"
+            turn["error"] = f"{type(exc).__name__}: {exc}"[:200]
+            turn["cam"] = ("Something glitched inside me while thinking about that "
+                           "— I logged it. Try rephrasing, or ask me something else.")
         return self._finish(turn)
 
     # -- internals -----------------------------------------------------------
@@ -667,33 +684,7 @@ class CamBrain:
 
         m = _WEATHER_RE.search(text)
         if m:
-            city = (m.group(1) or "").strip(" .?!")
-            if not city:
-                for f in self.memory.facts:
-                    hit = _LIVE_IN_RE.search(f.get("text", ""))
-                    if hit:
-                        city = hit.group(1).strip(" .?!")
-                        break
-            if not city:
-                return ("Which city? Say “weather in <city>” — or tell me once, "
-                        "“remember that I live in <city>”, and I'll default to it.")
-            wx = get_weather(city)
-            turn["actions"].append({"kind": "weather", "city": city, "ok": wx.get("ok")})
-            if wx.get("ok"):
-                parts = [f"{wx['place']}: {round(wx['temp_f'])}°F and {wx['conditions']}"]
-                if wx.get("feels_f") is not None:
-                    parts.append(f"feels like {round(wx['feels_f'])}°F")
-                if wx.get("high_f") is not None and wx.get("low_f") is not None:
-                    parts.append(f"today {round(wx['low_f'])}–{round(wx['high_f'])}°F")
-                if wx.get("precip_pct") is not None:
-                    parts.append(f"{round(wx['precip_pct'])}% chance of precipitation")
-                if wx.get("wind_mph") is not None:
-                    parts.append(f"wind {round(wx['wind_mph'])} mph")
-                return "Right now in " + ", ".join(parts) + "."
-            if wx.get("error", "").startswith("city_not_found"):
-                return f"I couldn't find a city called “{city}” — try the nearest bigger town?"
-            return ("I can't reach the weather service from this network right now "
-                    "(open-meteo.com). On your machine with internet this works keyless.")
+            return self._weather_reply((m.group(1) or "").strip(" .?!"), turn)
 
         if _SEE_RE.search(text) and self.vision_latest:
             latest = self.vision_latest()
@@ -744,6 +735,34 @@ class CamBrain:
                     "Ask me anything, set a reminder, or give a team a task.")
 
         return None
+
+    def _weather_reply(self, city: str, turn: dict) -> str:
+        if not city:
+            for f in self.memory.facts:
+                hit = _LIVE_IN_RE.search(f.get("text", ""))
+                if hit:
+                    city = hit.group(1).strip(" .?!")
+                    break
+        if not city:
+            return ("Which city? Say “weather in <city>” — or tell me once, "
+                    "“remember that I live in <city>”, and I'll default to it.")
+        wx = get_weather(city)
+        turn["actions"].append({"kind": "weather", "city": city, "ok": wx.get("ok")})
+        if wx.get("ok"):
+            parts = [f"{wx['place']}: {round(wx['temp_f'])}°F and {wx['conditions']}"]
+            if wx.get("feels_f") is not None:
+                parts.append(f"feels like {round(wx['feels_f'])}°F")
+            if wx.get("high_f") is not None and wx.get("low_f") is not None:
+                parts.append(f"today {round(wx['low_f'])}–{round(wx['high_f'])}°F")
+            if wx.get("precip_pct") is not None:
+                parts.append(f"{round(wx['precip_pct'])}% chance of precipitation")
+            if wx.get("wind_mph") is not None:
+                parts.append(f"wind {round(wx['wind_mph'])} mph")
+            return "Right now in " + ", ".join(parts) + "."
+        if wx.get("error", "").startswith("city_not_found"):
+            return f"I couldn't find a city called “{city}” — try the nearest bigger town?"
+        return ("I can't reach the weather service from this network right now "
+                "(open-meteo.com). On your machine with internet this works keyless.")
 
     def _build_context(self, text: str) -> dict:
         mem = self.memory.recall(text, limit=4)

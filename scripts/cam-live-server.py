@@ -21,9 +21,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import threading
-import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -66,6 +66,22 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def as_text(value, limit: int = 8000) -> str:
+    """Coerce any JSON value to a trimmed string (never raises)."""
+    if isinstance(value, str):
+        return value.strip()[:limit]
+    if value is None:
+        return ""
+    return str(value)[:limit]
+
+
+def as_int(value, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 # ---------------------------------------------------------------------------
 # Voice gate with open-mic fallback (the "it's not listening" fix)
 # ---------------------------------------------------------------------------
@@ -83,7 +99,7 @@ def load_gate_policy() -> dict:
 
 def gate_turn(payload: dict) -> dict:
     source = payload.get("source", "text")
-    if source not in {"mic", "speech"}:
+    if not isinstance(source, str) or source not in {"mic", "speech"}:
         return {"accepted": True, "mode": "text"}
     policy = load_gate_policy()
     enrolled = bool(payload.get("enrolled"))
@@ -181,8 +197,6 @@ class App:
 
     def _maybe_daily_brief(self) -> None:
         """Send one proactive brief each day at CAM_BRIEF_HOUR (NY time, default 8)."""
-        import os
-
         hour = int(os.environ.get("CAM_BRIEF_HOUR", "8"))
         if hour < 0:  # CAM_BRIEF_HOUR=-1 disables
             return
@@ -341,12 +355,21 @@ class Handler(BaseHTTPRequestHandler):
     # -- POST -----------------------------------------------------------------
 
     def do_POST(self) -> None:
-        path = urlparse(self.path).path
-        payload = self._read_json()
+        try:
+            self._post(urlparse(self.path).path, self._read_json())
+        except Exception as exc:  # one bad request must never take a thread down noisily
+            try:
+                self._json(500, {"error": f"{type(exc).__name__}: {exc}"[:200]})
+            except OSError:
+                pass
+
+    def _post(self, path: str, payload: dict) -> None:
+        if not isinstance(payload, dict):
+            payload = {}
 
         if path == "/api/chat":
             gate = gate_turn(payload)
-            text = (payload.get("text") or payload.get("transcript") or "").strip()
+            text = as_text(payload.get("text") or payload.get("transcript"))
             if not gate["accepted"]:
                 self._json(403, {
                     "accepted": False, "gate": gate,
@@ -354,16 +377,17 @@ class Handler(BaseHTTPRequestHandler):
                     "speak": SPEAK,
                 })
                 return
-            turn = APP.brain.respond(text, source=payload.get("source", "text"))
+            source = as_text(payload.get("source")) or "text"
+            turn = APP.brain.respond(text, source=source)
             turn["accepted"] = True
             turn["gate"] = gate
             turn["speak"] = SPEAK
-            _emit_mesh_activity(payload.get("source", "text"))
+            _emit_mesh_activity(source)
             self._json(200, turn)
             return
 
         if path == "/api/tasks":
-            goal = (payload.get("goal") or "").strip()
+            goal = as_text(payload.get("goal"), limit=500)
             if not goal:
                 self._json(400, {"error": "goal_required"})
                 return
@@ -372,7 +396,7 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/reminders":
-            what = (payload.get("what") or "").strip()
+            what = as_text(payload.get("what"), limit=500)
             due_raw = payload.get("due")
             if not what or not due_raw:
                 self._json(400, {"error": "what_and_due_required"})
@@ -387,23 +411,26 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/messages/read":
-            n = APP.messages.mark_read(payload.get("ids"))
+            ids = payload.get("ids")
+            ids = [str(i) for i in ids] if isinstance(ids, list) else None
+            n = APP.messages.mark_read(ids)
             self._json(200, {"marked": n, "unread": APP.messages.unread_count()})
             return
 
         if path == "/api/messages/send":
             # Cam-to-Aaron note (e.g. from UI test button or other tools)
             msg = APP.messages.send(
-                payload.get("subject") or "Note",
-                payload.get("body") or "",
-                kind=payload.get("kind") or "note")
+                as_text(payload.get("subject"), limit=140) or "Note",
+                as_text(payload.get("body")),
+                kind=as_text(payload.get("kind"), limit=30) or "note")
             self._json(200, {"message": msg})
             return
 
         if path == "/api/vision/frame":
-            b64 = payload.get("rgba_b64") or ""
-            w = int(payload.get("width") or 0)
-            h = int(payload.get("height") or 0)
+            b64 = payload.get("rgba_b64")
+            b64 = b64 if isinstance(b64, str) else ""
+            w = as_int(payload.get("width"))
+            h = as_int(payload.get("height"))
             analysis = analyze_rgba_b64(b64, w, h)
             if analysis.get("ok"):
                 APP.vision.ingest_frame_analysis(analysis)
@@ -411,8 +438,10 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/vision/detections":
-            objs = payload.get("objects") or []
-            snap = APP.vision.ingest_detections(objs, source=payload.get("source") or "cocossd")
+            objs = payload.get("objects")
+            objs = objs if isinstance(objs, list) else []
+            snap = APP.vision.ingest_detections(
+                objs, source=as_text(payload.get("source"), limit=30) or "cocossd")
             self._json(200, {"ok": True, "latest": snap})
             return
 

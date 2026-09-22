@@ -191,12 +191,18 @@ class VisionState:
     def ingest_detections(self, objects: list[dict], source: str = "cocossd") -> dict:
         clean = []
         for o in objects[:20]:
+            if not isinstance(o, dict):
+                continue
             label = str(o.get("label") or o.get("class") or "object")[:60]
-            clean.append({
-                "label": label,
-                "score": round(float(o.get("score") or 0), 2),
-                "bbox": o.get("bbox"),
-            })
+            try:
+                score = round(float(o.get("score") or 0), 2)
+            except (TypeError, ValueError):
+                score = 0.0
+            bbox = o.get("bbox")
+            if not (isinstance(bbox, (list, tuple)) and len(bbox) == 4
+                    and all(isinstance(v, (int, float)) for v in bbox)):
+                bbox = None
+            clean.append({"label": label, "score": score, "bbox": bbox})
         snap = {"at": utc_now(), "source": source, "objects": clean}
         with self._lock:
             self._latest = snap
