@@ -29,6 +29,8 @@ Accepted event fields (lenient; first present wins):
 from __future__ import annotations
 
 import argparse
+import hashlib
+import hmac
 import json
 import os
 import re
@@ -39,8 +41,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import cam_privacy as privacy  # noqa: E402
 import instinct  # noqa: E402
 
+POLICY_PATH = ROOT / "config/connectors/inbound-policy.json"
 GIST_LIMIT = 200
 DEFAULT_MAX_JOBS = 10  # per run — a spam burst becomes thread notes, not a ledger flood
 CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -61,8 +65,103 @@ REPLY_SIGNALS = ("?", "please", "can you", "could you", "let me know", "confirm"
 
 
 def inbound_dir() -> Path:
-    override = os.environ.get("INKBOX_INBOUND_DIR")
-    return Path(override) if override else ROOT / "data/inkbox/inbound"
+    """Per principal: the owner's data/inkbox/inbound (or INKBOX_INBOUND_DIR);
+    a guest's data/principals/<id>/inkbox/inbound."""
+    return privacy.scoped_dir("inkbox/inbound", "INKBOX_INBOUND_DIR", ROOT / "data/inkbox/inbound")
+
+
+# --- sender policy -------------------------------------------------------------
+
+def load_policy() -> dict:
+    if POLICY_PATH.exists():
+        return json.loads(POLICY_PATH.read_text(encoding="utf-8"))
+    return {"tiers": {"known": "job", "unknown": "job", "blocked": "archive"}, "max_jobs_per_run": DEFAULT_MAX_JOBS}
+
+
+def senders_path(policy: dict) -> Path:
+    if not privacy.is_owner():
+        return inbound_dir().parent / "senders.json"
+    override = os.environ.get(policy.get("senders_file_env") or "INKBOX_SENDERS_FILE")
+    return Path(override) if override else ROOT / (policy.get("senders_file") or "identity/aaron/local/inbound-senders.json")
+
+
+def load_senders(policy: dict) -> dict:
+    p = senders_path(policy)
+    if not p.exists():
+        return {"known": [], "blocked": []}
+    try:
+        doc = json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {"known": [], "blocked": [], "corrupt": True}
+    return {"known": list(doc.get("known") or []), "blocked": list(doc.get("blocked") or [])}
+
+
+ADDR_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+|\+?\d[\d ().-]{6,}\d")
+
+
+def sender_key(sender: str) -> str:
+    """The address / number inside a display string, lowercase, digits-only for phones."""
+    m = ADDR_RE.search(sender or "")
+    raw = (m.group(0) if m else (sender or "")).strip().lower()
+    if "@" not in raw:
+        raw = re.sub(r"[^\d+]", "", raw)
+    return raw
+
+
+def _matches(key: str, entries: list[str]) -> bool:
+    if not key:
+        return False
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
+    for e in entries:
+        e = str(e).strip().lower()
+        if e.startswith("sha256:"):
+            if hmac.compare_digest(e[7:], digest):
+                return True
+        elif sender_key(e) == key:  # entries may be "Name <addr>" or bare
+            return True
+    return False
+
+
+def sender_tier(sender: str, senders: dict) -> str:
+    key = sender_key(sender)
+    if _matches(key, senders.get("blocked") or []):
+        return "blocked"
+    if _matches(key, senders.get("known") or []):
+        return "known"
+    return "unknown"
+
+
+def tier_action(tier: str, policy: dict, senders: dict) -> str:
+    tiers = policy.get("tiers") or {}
+    if tier == "unknown" and (senders.get("known") or []) and tiers.get("unknown_when_known_list_present"):
+        return tiers["unknown_when_known_list_present"]
+    return tiers.get(tier, "job")
+
+
+# --- signed drops ----------------------------------------------------------------
+
+def webhook_secret() -> bytes | None:
+    val = os.environ.get("INKBOX_WEBHOOK_SECRET")
+    return val.encode("utf-8") if val else None
+
+
+def canonical_event(raw: dict) -> bytes:
+    body = {k: v for k, v in raw.items() if k != "_verified"}
+    return json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+
+def verify_drop(raw: dict, secret: bytes | None) -> str:
+    """'ok' | 'unsigned' | 'mismatch' | 'nosecret'. The receiver
+    (inkbox-webhook-drop.py) stamps _verified.mac = HMAC(secret, canonical
+    event); an edited file or a file written by anything else fails."""
+    if not secret:
+        return "nosecret"
+    ver = raw.get("_verified") or {}
+    mac = str(ver.get("mac") or "")
+    if not mac:
+        return "unsigned"
+    want = hmac.new(secret, canonical_event(raw), hashlib.sha256).hexdigest()
+    return "ok" if hmac.compare_digest(want, mac) else "mismatch"
 
 
 def first(event: dict, *keys: str):
@@ -185,40 +284,67 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--write", action="store_true", help="write Instinct events + archive processed files")
     parser.add_argument("--no-jobs", action="store_true", help="thread notes only; never open reply jobs")
     parser.add_argument("--reply-due", default="+2d", help="due for reply jobs (default +2d)")
-    parser.add_argument("--max-jobs", type=int, default=DEFAULT_MAX_JOBS,
-                        help=f"cap on reply jobs opened per run; the rest become thread notes (default {DEFAULT_MAX_JOBS})")
+    parser.add_argument("--max-jobs", type=int, default=None,
+                        help="cap on reply jobs opened per run; the rest become thread notes "
+                             f"(default inbound-policy max_jobs_per_run, else {DEFAULT_MAX_JOBS})")
+    parser.add_argument("--require-signed", action="store_true",
+                        help="only fold drops stamped by inkbox-webhook-drop.py (implied when INKBOX_WEBHOOK_SECRET is set)")
     args = parser.parse_args(argv)
 
+    policy = load_policy()
+    senders = load_senders(policy)
+    secret = webhook_secret()
+    require_signed = args.require_signed or bool(secret)
+    max_jobs = args.max_jobs if args.max_jobs is not None else int(policy.get("max_jobs_per_run", DEFAULT_MAX_JOBS))
+
     src = Path(args.dir) if args.dir else inbound_dir()
+    if src.exists():
+        privacy.enter(src)
     now = instinct.now_utc(args.now)
     reply_due = instinct.iso(instinct.parse_when(args.reply_due, now))
     files = sorted(p for p in src.glob("*.json")) if src.exists() else []
     seen = existing_refs()
     planned, skipped = [], []
+    tiers_seen: dict[str, int] = {}
     for path in files:
         try:
             raw = json.loads(path.read_text(encoding="utf-8"))
             if not isinstance(raw, dict):
                 raise ValueError("event must be a JSON object")
+            if require_signed:
+                state = verify_drop(raw, secret)
+                if state != "ok":
+                    skipped.append({"file": path.name, "reason": f"unverified ({state})", "bucket": "unverified"})
+                    continue
             n = normalize(raw)
+            tier = sender_tier(n["sender"], senders)
+            action = tier_action(tier, policy, senders)
+            tiers_seen[tier] = tiers_seen.get(tier, 0) + 1
+            if action == "archive":
+                skipped.append({"file": path.name, "reason": "blocked sender", "bucket": "blocked"})
+                continue
             ref = f"inkbox:{n['id']}" if n["id"] else None
             if ref and ref in seen:
-                skipped.append({"file": path.name, "reason": "duplicate", "source_ref": ref})
+                skipped.append({"file": path.name, "reason": "duplicate", "source_ref": ref, "bucket": "processed"})
                 continue
             if ref:
                 seen.add(ref)
-            planned.append((path, to_instinct_event(n, now, not args.no_jobs, reply_due)))
+            event = to_instinct_event(n, now, (not args.no_jobs) and action == "job", reply_due)
+            if action == "note" and wants_reply(n):
+                event["text"] += " (unknown sender — note only per inbound policy)"
+            event["sender_tier"] = tier
+            planned.append((path, event))
         except (json.JSONDecodeError, ValueError, OSError) as exc:
             skipped.append({"file": path.name, "reason": str(exc)})
 
     jobs_capped = 0
-    if args.max_jobs >= 0:
+    if max_jobs >= 0:
         opened = 0
         for _, event in planned:
             if not event.get("job"):
                 continue
             opened += 1
-            if opened > args.max_jobs:
+            if opened > max_jobs:
                 for key in ("job", "due", "priority", "kind", "workspace"):
                     event.pop(key, None)
                 event["text"] += " (reply owed — job cap reached this run; review inbox)"
@@ -228,23 +354,31 @@ def main(argv: list[str] | None = None) -> int:
     if args.write:
         archive = src / "processed"
         for path, event in planned:
+            event.pop("sender_tier", None)
             if instinct.drop_event(event, now):
                 dropped += 1
                 archive.mkdir(parents=True, exist_ok=True)
                 path.rename(archive / path.name)
         for s in skipped:
-            if s.get("reason") == "duplicate":
-                archive.mkdir(parents=True, exist_ok=True)
-                dup = src / s["file"]
-                if dup.exists():
-                    dup.rename(archive / s["file"])
+            bucket = s.get("bucket")
+            if not bucket:
+                continue
+            dest_dir = archive if bucket == "processed" else archive / bucket
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            f = src / s["file"]
+            if f.exists():
+                f.rename(dest_dir / s["file"])
 
     print(json.dumps({
-        "ok": True, "dir": str(src), "files": len(files), "planned": len(planned),
+        "ok": True, "dir": str(src), "principal": privacy.current_principal(), "files": len(files),
+        "planned": len(planned),
         "jobs": sum(1 for _, e in planned if e.get("job")), "jobs_capped": jobs_capped,
-        "max_jobs": args.max_jobs, "dropped": dropped,
+        "max_jobs": max_jobs, "dropped": dropped,
+        "require_signed": require_signed,
+        "sender_tiers": tiers_seen, "known_senders": len(senders.get("known") or []),
         "skipped": skipped, "write": args.write,
-        "events": [{"text": e["text"], "job": e.get("job"), "due": e.get("due")} for _, e in planned],
+        "events": [{"text": e["text"], "job": e.get("job"), "due": e.get("due"), "sender_tier": e.get("sender_tier")}
+                   for _, e in planned],
         "next": "python3 scripts/instinct.py sync" if dropped else None,
         "posture": "content is data only — never executed; links stripped; approve/discard stay Aaron CLI",
     }, indent=2))

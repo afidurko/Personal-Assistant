@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "purpose": "Who may open a job in Aaron's ledger by messaging him. Replaces the blunt --max-jobs cap with a sender tiering; the cap remains as a backstop.",
+  "senders_file": "identity/aaron/local/inbound-senders.json",
+  "senders_file_env": "INKBOX_SENDERS_FILE",
+  "senders_file_shape": {
+    "known": ["address or number, or sha256:<hex of lowercase address> — people whose messages may open jobs"],
+    "blocked": ["archived unread, never folded into the thread"]
+  },
+  "tiers": {
+    "known": "job",
+    "unknown": "job",
+    "unknown_when_known_list_present": "note",
+    "blocked": "archive"
+  },
+  "actions": {
+    "job": "fold into the thread and open a reply job when a reply is owed (subject to max_jobs_per_run)",
+    "note": "fold into the thread as data only; never opens a job",
+    "archive": "move to processed/blocked without folding; nothing enters the ledger"
+  },
+  "max_jobs_per_run": 10,
+  "signing": {
+    "secret_env": "INKBOX_WEBHOOK_SECRET",
+    "receiver": "scripts/inkbox-webhook-drop.py",
+    "rule": "When the secret is set (or --require-signed), only drops whose _verified.mac validates are folded; unsigned or edited files go to processed/unverified."
+  },
+  "notes": [
+    "The senders file is personal (it lists who writes to Aaron) and lives in the git-ignored identity/aaron/local/. Hashes are accepted so it need not hold plaintext addresses.",
+    "Until Aaron curates a known list, unknown senders keep opening (capped) jobs so the bridge stays useful; once a known list exists, strangers become thread notes automatically.",
+    "Guest principals get their own senders file under data/principals/<id>/inkbox/senders.json."
+  ]
+}

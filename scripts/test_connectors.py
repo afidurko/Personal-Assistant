@@ -277,20 +277,40 @@ class ConnectorExploitRegressionTests(ConnectorBase):
     def test_x4_env_listed_url_is_trusted(self):
         url = "http://127.0.0.1:9/aaron.ics"
         os.environ["CAM_CALENDAR_ICS"] = url
+        os.environ["CAM_CALENDAR_ALLOW_PRIVATE"] = "1"  # loopback is otherwise refused (round 6)
         calls = []
-
-        class Resp:
-            def __enter__(self): return self
-            def __exit__(self, *a): return False
-            def read(self, n=-1): return ICS.encode()
-        real = calendar_sync.urllib.request.urlopen
-        calendar_sync.urllib.request.urlopen = lambda u, timeout=0: calls.append(u) or Resp()
+        real = calendar_sync.open_url
+        calendar_sync.open_url = lambda u, host, timeout=20: calls.append((u, host)) or ICS
         try:
             out = run(calendar_sync, "--now", T0)
         finally:
-            calendar_sync.urllib.request.urlopen = real
-        self.assertEqual(calls, [url])
+            calendar_sync.open_url = real
+            os.environ.pop("CAM_CALENDAR_ALLOW_PRIVATE", None)
+        self.assertEqual(calls, [(url, "127.0.0.1")])
         self.assertEqual(out["events"], 6)
+
+    def test_private_host_refused_without_optin(self):
+        url = "http://127.0.0.1:9/aaron.ics"
+        os.environ["CAM_CALENDAR_ICS"] = url
+        real = calendar_sync.open_url
+        calendar_sync.open_url = lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not fetch"))
+        try:
+            out = run(calendar_sync, "--now", T0)
+        finally:
+            calendar_sync.open_url = real
+        self.assertFalse(out["ok"])
+        self.assertIn("private / loopback", out["errors"][0])
+
+    def test_redirect_to_other_host_or_private_refused(self):
+        handler = calendar_sync.PinnedRedirects("calendar.example.com")
+        with self.assertRaises(PermissionError):
+            handler.redirect_request(None, None, 302, "Found", {}, "https://evil.example.net/x.ics")
+        with self.assertRaises(PermissionError):
+            handler.redirect_request(None, None, 302, "Found", {}, "ftp://calendar.example.com/x.ics")
+        self.assertTrue(calendar_sync.host_is_private("127.0.0.1"))
+        self.assertTrue(calendar_sync.host_is_private("10.0.0.5"))
+        self.assertTrue(calendar_sync.host_is_private("localhost"))
+        self.assertTrue(calendar_sync.host_is_private("169.254.169.254"))
 
     def test_x7_tzid_resolved_via_zoneinfo(self):
         events = {e["uid"]: e for e in calendar_sync.parse_ics(ICS)}

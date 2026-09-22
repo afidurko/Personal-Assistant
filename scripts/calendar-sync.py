@@ -115,6 +115,8 @@ def parse_ics(text: str) -> list[dict]:
                 cur["description"] = clean(unescape(value))
             elif name == "STATUS":
                 cur["status"] = value.strip().upper()
+            elif name == "SEQUENCE":
+                cur["sequence"] = int(value.strip() or 0)
             elif name == "RRULE":
                 cur["recurring"] = True
         except ValueError:
@@ -133,14 +135,65 @@ def clean(text: str) -> str:
 URL_RE = re.compile(r"^[a-z][a-z0-9+.-]*://", re.IGNORECASE)
 
 
-def read_source(src: str, trusted_urls: set[str]) -> str:
+def host_is_private(host: str) -> bool:
+    """Loopback / link-local / RFC1918 / ULA — a trusted public ICS URL must not
+    be able to redirect Cam onto its own LAN or metadata endpoints."""
+    import ipaddress
+    import socket
+    host = (host or "").strip("[]").lower()
+    if host in ("localhost",) or host.endswith(".localhost") or host.endswith(".local"):
+        return True
+    try:
+        addrs = {info[4][0] for info in socket.getaddrinfo(host, None)}
+    except (socket.gaierror, UnicodeError):
+        return True  # unresolvable → treat as unsafe
+    for a in addrs:
+        try:
+            ip = ipaddress.ip_address(a.split("%", 1)[0])
+        except ValueError:
+            return True
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified:
+            return True
+    return False
+
+
+class PinnedRedirects(urllib.request.HTTPRedirectHandler):
+    """Follow redirects only to the same host, over http(s), never to private ranges."""
+
+    def __init__(self, host: str):
+        super().__init__()
+        self.host = host
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: D401
+        from urllib.parse import urlsplit
+        parts = urlsplit(newurl)
+        if parts.scheme not in ("http", "https"):
+            raise PermissionError(f"redirect to non-http(s) URL refused")
+        if (parts.hostname or "").lower() != self.host:
+            raise PermissionError(f"redirect to a different host refused ({parts.hostname})")
+        if host_is_private(parts.hostname or ""):
+            raise PermissionError("redirect to a private / loopback address refused")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def open_url(src: str, host: str, timeout: int = 20) -> str:
+    opener = urllib.request.build_opener(PinnedRedirects(host))
+    with opener.open(src, timeout=timeout) as resp:  # noqa: S310 — Aaron-trusted ICS URL, host pinned
+        return resp.read(5_000_000).decode("utf-8", errors="replace")
+
+
+def read_source(src: str, trusted_urls: set[str], allow_private: bool = False) -> str:
     if URL_RE.match(src):
+        from urllib.parse import urlsplit
         if not re.match(r"^https?://", src, re.IGNORECASE):
             raise PermissionError(f"only http(s) ICS URLs are supported: {src}")
         if src not in trusted_urls:
             raise PermissionError("untrusted URL source — add it to CAM_CALENDAR_ICS or pass --trust-url at the CLI")
-        with urllib.request.urlopen(src, timeout=20) as resp:  # noqa: S310 — Aaron-trusted ICS URL
-            return resp.read(5_000_000).decode("utf-8", errors="replace")
+        host = (urlsplit(src).hostname or "").lower()
+        if not allow_private and host_is_private(host):
+            raise PermissionError(f"ICS host {host!r} resolves to a private / loopback address "
+                                  "(set CAM_CALENDAR_ALLOW_PRIVATE=1 for a LAN calendar)")
+        return open_url(src, host)
     path = Path(src).expanduser()
     if path.suffix.lower() not in (".ics", ".ical", ".icalendar", ".txt"):
         raise PermissionError(f"refusing non-calendar file {path.name} (expected .ics)")
@@ -160,7 +213,19 @@ def prep_lead(start: datetime, all_day: bool) -> timedelta:
     return timedelta(days=1) if all_day else timedelta(hours=2)
 
 
-def plan(events: list[dict], now: datetime, horizon_days: int, existing_refs: set[str]) -> list[dict]:
+def _calendar_blob(ev: dict) -> dict:
+    return {"uid": ev["uid"], "start": instinct.iso(ev["start"]), "sequence": int(ev.get("sequence") or 0),
+            "all_day": bool(ev.get("all_day")), "recurring": bool(ev.get("recurring"))}
+
+
+def plan(events: list[dict], now: datetime, horizon_days: int, existing_refs, existing: dict | None = None) -> list[dict]:
+    """New events become prep jobs. An event already in the ledger whose
+    DTSTART moved (or SEQUENCE grew) yields an *update* event instead, so the
+    prep job follows the reschedule rather than firing for the old time.
+    `existing_refs` may be a set (legacy) or the dict from existing_source_refs()."""
+    if existing is None and isinstance(existing_refs, dict):
+        existing, existing_refs = existing_refs, set(existing_refs)
+    existing = existing or {}
     horizon = now + timedelta(days=horizon_days)
     out: list[dict] = []
     for ev in sorted(events, key=lambda e: e["start"]):
@@ -170,14 +235,26 @@ def plan(events: list[dict], now: datetime, horizon_days: int, existing_refs: se
         if end < now or ev["start"] > horizon:
             continue
         ref = f"ics:{ev['uid']}"
-        if ref in existing_refs:
-            continue
         due = ev["start"] - prep_lead(ev["start"], bool(ev.get("all_day")))
         if due < now:
             due = now
         title = ev.get("summary") or "(untitled event)"
         where = f" @ {ev['location']}" if ev.get("location") else ""
         when = ev["start"].strftime("%Y-%m-%d" if ev.get("all_day") else "%Y-%m-%d %H:%M UTC")
+        if ref in existing_refs:
+            prev = existing.get(ref) or {}
+            moved = prev.get("start") and prev["start"] != instinct.iso(ev["start"])
+            bumped = int(ev.get("sequence") or 0) > int(prev.get("sequence") or 0)
+            if prev and (moved or bumped):
+                out.append({
+                    "from": "sense.calendar.event",
+                    "text": f"Calendar moved: {title}{where} — now {when}",
+                    "update_ref": ref,
+                    "update": {"title": f"Prep: {title}"[:140], "due": instinct.iso(due),
+                               "calendar": _calendar_blob(ev), "reopen_if_done": ev["start"] > now},
+                    "source_ref": ref,
+                })
+            continue
         text = f"Calendar: {title}{where} — {when}"
         if ev.get("description"):
             text += f" | note: {ev['description'][:120]}"
@@ -190,31 +267,36 @@ def plan(events: list[dict], now: datetime, horizon_days: int, existing_refs: se
             "kind": "life",
             "workspace": instinct.DEFAULT_WORKSPACE,
             "source_ref": ref,
-            "calendar": {"uid": ev["uid"], "start": instinct.iso(ev["start"]),
-                         "all_day": bool(ev.get("all_day")), "recurring": bool(ev.get("recurring"))},
+            "calendar": _calendar_blob(ev),
         })
     return out
 
 
-def existing_source_refs() -> set[str]:
-    refs: set[str] = set()
+def existing_source_refs() -> dict[str, dict]:
+    """ref → {start, sequence, status} for every calendar-sourced job and
+    every not-yet-folded drop (so a re-run never double-plans)."""
+    refs: dict[str, dict] = {}
     try:
         ledger = instinct.load_ledger()
     except SystemExit:
-        return refs
+        ledger = {"jobs": []}
     for j in ledger.get("jobs") or []:
         if j.get("source_ref"):
-            refs.add(j["source_ref"])
+            cal = j.get("calendar") or {}
+            refs[j["source_ref"]] = {"start": cal.get("start"), "sequence": cal.get("sequence", 0),
+                                     "status": j.get("status")}
     # drops not yet folded by `instinct sync`
     inbox = instinct.inbox_dir()
     if inbox.exists():
         for p in inbox.glob("*.json"):
             try:
-                ref = json.loads(p.read_text(encoding="utf-8")).get("source_ref")
-                if ref:
-                    refs.add(ref)
+                doc = json.loads(p.read_text(encoding="utf-8"))
             except (json.JSONDecodeError, OSError):
                 continue
+            ref = doc.get("source_ref")
+            if ref:
+                cal = (doc.get("update") or {}).get("calendar") or doc.get("calendar") or {}
+                refs[ref] = {"start": cal.get("start"), "sequence": cal.get("sequence", 0), "status": "pending"}
     return refs
 
 
@@ -243,14 +325,17 @@ def main(argv: list[str] | None = None) -> int:
 
     events: list[dict] = []
     errors: list[str] = []
+    allow_private = bool(os.environ.get("CAM_CALENDAR_ALLOW_PRIVATE"))
     for src in sources:
         try:
-            events.extend(parse_ics(read_source(src, trusted_urls)))
+            events.extend(parse_ics(read_source(src, trusted_urls, allow_private=allow_private)))
         except Exception as exc:  # noqa: BLE001 — report per source, keep going
             errors.append(f"{src}: {exc.__class__.__name__}: {exc}")
     broken = [f"{e['uid']}: {e['broken']}" for e in events if e.get("broken")]
 
     planned = plan(events, now, args.horizon_days, existing_source_refs())
+    new_items = [p for p in planned if p.get("job")]
+    updates = [p for p in planned if p.get("update_ref")]
     dropped = 0
     if args.write:
         for item in planned:
@@ -258,12 +343,13 @@ def main(argv: list[str] | None = None) -> int:
                 dropped += 1
     print(json.dumps({
         "ok": not errors, "sources": len(sources), "events": len(events),
-        "in_horizon_new": len(planned), "dropped": dropped, "write": args.write,
+        "in_horizon_new": len(new_items), "rescheduled": len(updates), "dropped": dropped, "write": args.write,
         "errors": errors,
         "broken_fields": broken,
         "ignored_ics_argument": bool(args.note_ignored_ics) or None,
         "planned": [{"job": p["job"], "due": p["due"], "priority": p["priority"],
-                     "source_ref": p["source_ref"]} for p in planned],
+                     "source_ref": p["source_ref"]} for p in new_items],
+        "updates": [{"source_ref": p["update_ref"], "due": p["update"]["due"]} for p in updates],
         "next": "python3 scripts/instinct.py sync" if dropped else None,
     }, indent=2))
     return 0 if not errors else 1
