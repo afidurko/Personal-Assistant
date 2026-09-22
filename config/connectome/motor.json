@@ -318,6 +318,22 @@
         "switch.kill"
       ],
       "notes": "Loop Engineering patterns — audit/run/state spine (scripts/loop-run.py); week-one L1 report-only; not the brain"
+    },
+    {
+      "id": "motor.gesture",
+      "channel": [
+        "companion_pwa_action_bus",
+        "cam_converse_server",
+        "device_bridge_tailscale"
+      ],
+      "path": "config/gestures",
+      "requires_switch": [
+        "switch.gesture_control",
+        "switch.identity",
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "notes": "Hand-gesture effector — collapse/expand/scroll/select the page, cross-device handoff (iPhone ↔ iPad ↔ Mac), converse turn control. Resolver scripts/cam_gestures.py; never egress/spend/self_modify"
     }
   ],
   "response_rule": "Motor output must correspond to an active sensory→center→switch act pathway (no orphan actions)"

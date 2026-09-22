@@ -1016,6 +1016,39 @@
       "team": "team.needs-attention",
       "script": "scripts/needs-attention.py",
       "notes": "Cursor Needs Attention tab automation — connect all workspaces; Aaron gates enhance/outbound/kill"
+    },
+    {
+      "id": "hotspot.gesture",
+      "area": "area.visual",
+      "columns": [
+        "neuron.vision",
+        "neuron.motor_plan",
+        "neuron.identity_gate",
+        "neuron.memory"
+      ],
+      "tracts": [
+        "tract.slf",
+        "tract.ilf",
+        "tract.corticospinal"
+      ],
+      "pathway": [
+        "sense.vision.gesture",
+        "switch.gesture_control",
+        "area.visual",
+        "area.premotor",
+        "switch.identity",
+        "area.mtl",
+        "switch.autonomy",
+        "motor.gesture"
+      ],
+      "side_effects": [
+        "motor.mesh"
+      ],
+      "behavior": "hand_signal_to_meaning_to_action",
+      "integration": "hand-gestures",
+      "mesh_ns": "mesh/gestures",
+      "script": "scripts/cam-gestures.py",
+      "notes": "Dorsal visuomotor stream: see hand → premotor plan (vocabulary + learned bindings) → Aaron identity → remember → act. Unbound or held gestures fall to motor.mesh log-only so Aaron can teach them"
     }
   ]
 }

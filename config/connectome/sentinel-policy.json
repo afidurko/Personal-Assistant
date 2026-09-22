@@ -38,7 +38,8 @@
         "motor.cline",
         "motor.loop",
         "motor.swarm",
-        "motor.voicestudio"
+        "motor.voicestudio",
+        "motor.gesture"
       ]
     },
     "egress": {

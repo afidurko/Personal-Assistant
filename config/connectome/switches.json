@@ -126,6 +126,16 @@
       "enabled_by": "Aaron",
       "enabled_at": "2026-09-17",
       "notes": "ENABLED — tool-creator/tool-user + boss/worker synapse ops; cam_enhance still gates core Cam changes"
+    },
+    {
+      "id": "switch.gesture_control",
+      "default": "hold_until_aaron_confirms_first_live_session",
+      "act": ["sense.vision.gesture", "motor.gesture"],
+      "hold": "log_gestures_to_mesh_only",
+      "flipped_by": ["Aaron", "switch.kill"],
+      "planned_by": "Aaron",
+      "planned_at": "2026-09-22",
+      "notes": "PLANNED — hand gestures resolve to UI / handoff / converse actions only after Aaron runs the first live session and flips this to standing_on; until then every recognized gesture is system.log_only (mesh/gestures). Kill still pauses."
     }
   ],
   "antagonistic_pairs": [
@@ -137,6 +147,7 @@
     ["aaron_match", "reject_identity"],
     ["scan", "pause_scan"],
     ["apply_enhance", "propose_only"],
-    ["tool_run", "no_new_tools"]
+    ["tool_run", "no_new_tools"],
+    ["gesture_act", "gesture_log_only"]
   ]
 }

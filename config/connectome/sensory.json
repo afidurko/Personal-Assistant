@@ -404,6 +404,19 @@
         "spike.fact"
       ],
       "notes": "Loop Engineering cadence tick — daily triage / QA bridge / PR babysitter (integrations/loop-engineering)"
+    },
+    {
+      "id": "sense.vision.gesture",
+      "modality": "vision",
+      "source": [
+        "companion_pwa_mediapipe",
+        "pupil_world_frame"
+      ],
+      "emits": [
+        "spike.visual",
+        "spike.gesture"
+      ],
+      "notes": "Hand-gesture segments (pose + motion + duration + confidence) from the on-device recognizer — labels only, never frames; vocabulary config/gestures/gestures.json"
     }
   ]
 }
