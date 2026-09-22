@@ -1,0 +1,101 @@
+{
+  "id": "hand-gestures",
+  "name": "Hand gestures — signal → meaning → action",
+  "status": "planned",
+  "planned_by": "Aaron",
+  "planned_at": "2026-09-22",
+  "role": "Cam recognizes Aaron's hand signals on the companion camera, remembers what each one means, and fires the bound action: collapse / expand / scroll the page, move Cam from one device to another (iPhone → iPad), control the converse turn",
+  "policy": "config/integrations/hand-gestures.md",
+  "plan": "docs/HAND_GESTURES.md",
+  "path": "config/gestures",
+  "vocabulary": "config/gestures/gestures.json",
+  "actions": "config/gestures/actions.json",
+  "learned": "data/gestures/learned.json",
+  "sense": "sense.vision.gesture",
+  "hotspot": "hotspot.gesture",
+  "motor": "motor.gesture",
+  "switch": "switch.gesture_control",
+  "area": "area.premotor",
+  "center": "center.vision",
+  "mesh_namespace": "mesh/gestures",
+  "vault_dir": "vault/03-Projects/Cam-Hand-Gestures.md",
+  "inspiration": {
+    "huawei_air_transfer": {
+      "what": "HarmonyOS 5 / Mate 70 · Mate X6 · MatePad Pro — open palm at half an arm, pause, clench fist to grab the open image / video / playing track / screenshot; keep the fist, move to the receiving phone or tablet, pause, open palm to send",
+      "requirements": "both devices HarmonyOS 5, Bluetooth + WLAN on, screens unlocked, Air Transfer switch on, ≥ 40 cm between devices",
+      "developer_surface": "Share Kit harmonyShare.gesturesShare event — page registers a listener, gets a SharableTarget, must call share() within ~3 s; system owns discovery, connection, transfer",
+      "sources": [
+        "https://harmonyos.cool/docs/full-scene/air-transfer",
+        "https://www.gsmarena.com/huawei_demoes_gestureoperated__file_transfer_between_devices-news-65475.php",
+        "https://www.androidauthority.com/huawei-grab-drop-transfer-files-3503116/"
+      ]
+    },
+    "huawei_air_gestures": {
+      "what": "Air scroll (palm / back of hand 20–40 cm, wrist flick up/down/left/right), Grabshot (palm then clench fist), Air press (palm from 30–40 cm to ~5 cm answers a call or pauses / resumes playback); hand icon appears at the top of the screen when engaged",
+      "sources": [
+        "https://consumer.huawei.com/en/support/content/en-us15974017/"
+      ]
+    },
+    "mediapipe_gesture_recognizer": {
+      "what": "On-device (WASM in Safari) hand landmarker + canned classifier: None, Closed_Fist, Open_Palm, Pointing_Up, Thumb_Down, Thumb_Up, Victory, ILoveYou; custom .task via Model Maker (folders per label + none)",
+      "sources": [
+        "https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer/web_js",
+        "https://developers.google.com/edge/mediapipe/solutions/customization/gesture_recognizer"
+      ]
+    }
+  },
+  "recognizer": {
+    "runs_on": "companion_pwa",
+    "engine": "mediapipe tasks-vision GestureRecognizer (LIVE_STREAM) + landmark motion segmenter",
+    "custom_model": "data/gestures/cam-gestures.task",
+    "frames_leave_device": false,
+    "emits": "segments pose:motion:duration_ms:confidence:hands → POST /api/spike/gesture"
+  },
+  "aaron_repos": {
+    "note": "Aaron's starter repo link did not arrive with the request; slot reserved. Each repo Aaron adds mounts as a submodule and is mapped onto primitives.poses / primitives.motions in gestures.json — the vocabulary stays the source of truth.",
+    "slots": [
+      {
+        "slot": "integrations/<gesture-repo>",
+        "status": "awaiting_link",
+        "use": "recognizer / landmark model / dataset"
+      }
+    ]
+  },
+  "defaults": {
+    "switch_default": "hold — every recognized gesture is system.log_only until Aaron flips switch.gesture_control after the first live session",
+    "aaron_identity_required_for": [
+      "ui.screenshot",
+      "device.*",
+      "converse.confirm",
+      "presence.hold_all",
+      "memory.*"
+    ],
+    "never_via_gesture": [
+      "egress (text / call / facetime / inkbox / jobs)",
+      "spend (higgsfield)",
+      "self_modify (enhance)",
+      "switch.kill flip",
+      "Sentinel approvals"
+    ],
+    "save_to_mesh": true,
+    "save_frames": false,
+    "save_landmark_samples_when_teaching": true
+  },
+  "scripts": {
+    "cli": "scripts/cam-gestures.py",
+    "module": "scripts/cam_gestures.py",
+    "check": "scripts/gesture-check.py"
+  },
+  "teams": [
+    "team.capability",
+    "team.tooling"
+  ],
+  "roles": [
+    "chief",
+    "vision",
+    "ops",
+    "coding",
+    "qa"
+  ],
+  "available_to": "chief_vision_ops_coding"
+}

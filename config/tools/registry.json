@@ -634,6 +634,64 @@
       ],
       "risk": "low",
       "status": "active"
+    },
+    {
+      "id": "tool.gesture.resolve",
+      "purpose": "Turn recognizer hand-gesture segments into a meaning + action under context / engagement / identity / switch gates",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/cam-gestures.py",
+      "kind": "local_script",
+      "inputs": {
+        "segments": "string",
+        "context": "string?",
+        "identity": "boolean?",
+        "device": "string?"
+      },
+      "outputs": {
+        "intents": "object[]",
+        "context_out": "string",
+        "mesh": "object[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh",
+        "write_mesh"
+      ],
+      "requires_switch": [
+        "switch.gesture_control",
+        "switch.identity",
+        "switch.kill"
+      ],
+      "risk": "medium",
+      "status": "planned",
+      "integration": "config/integrations/hand-gestures.json",
+      "motor": "motor.gesture",
+      "available_to": "chief_vision_ops_coding"
+    },
+    {
+      "id": "tool.gesture.check",
+      "purpose": "Validate the hand-gesture vocabulary, action catalog, connectome wiring, and canonical resolver demos",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/gesture-check.py",
+      "kind": "local_script",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]",
+        "demos": "object[]"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "integration": "config/integrations/hand-gestures.json",
+      "motor": "motor.gesture",
+      "available_to": "all_roles_and_subagents"
     }
   ]
 }

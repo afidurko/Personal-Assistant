@@ -378,6 +378,21 @@
         "available_to": "all_roles_and_subagents"
       },
       {
+        "id": "hand-gestures",
+        "path": "config/gestures",
+        "policy": "config/integrations/hand-gestures.md",
+        "config": "config/integrations/hand-gestures.json",
+        "script": "scripts/cam-gestures.py",
+        "sense": "sense.vision.gesture",
+        "hotspot": "hotspot.gesture",
+        "motor": "motor.gesture",
+        "switch": "switch.gesture_control",
+        "mesh_ns": "mesh/gestures",
+        "plan": "docs/HAND_GESTURES.md",
+        "available_to": "chief_vision_ops_coding",
+        "notes": "Hand-signal vocabulary + resolver (config-first). Aaron's recognizer repo mounts at integrations/<gesture-repo> when the link lands"
+      },
+      {
         "id": "electron-builder",
         "path": "https://github.com/afidurko/electron-builder",
         "policy": "config/integrations/electron-builder.md",
@@ -1074,6 +1089,20 @@
             "26.16.1",
             "electron-builder@26.16.1",
             "app-builder"
+          ]
+        },
+        {
+          "id": "personal-assistant",
+          "match_any": [
+            "hand gesture",
+            "hand-gesture",
+            "air gesture",
+            "air transfer",
+            "grabshot",
+            "mediapipe",
+            "handoff gesture",
+            "config/gestures",
+            "motor.gesture"
           ]
         },
         {

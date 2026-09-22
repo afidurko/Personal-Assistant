@@ -1,0 +1,1492 @@
+{
+  "version": 1,
+  "id": "cam-gesture-vocabulary",
+  "title": "Cam hand-gesture vocabulary — which hand signal means what, and the action it commands",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-22",
+  "status": "planned",
+  "sole_operator": "Aaron",
+  "plan": "docs/HAND_GESTURES.md",
+  "actions": "config/gestures/actions.json",
+  "learned_overrides": "data/gestures/learned.json",
+  "mesh_namespace": "mesh/gestures",
+  "sources": {
+    "huawei_air_transfer": "https://harmonyos.cool/docs/full-scene/air-transfer",
+    "huawei_air_gestures": "https://consumer.huawei.com/en/support/content/en-us15974017/",
+    "huawei_share_kit_gestures_share": "HarmonyOS Share Kit — harmonyShare.gesturesShare event; app must call sharableTarget.share() within ~3 s",
+    "mediapipe_gesture_recognizer": "https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer",
+    "mediapipe_model_maker": "https://developers.google.com/edge/mediapipe/solutions/customization/gesture_recognizer"
+  },
+  "recognizer": {
+    "primary": "mediapipe_gesture_recognizer",
+    "runs_on": "companion_pwa (on-device Safari, WASM) — frames never leave the device; only labels + landmarks-derived motion leave",
+    "landmarks_per_hand": 21,
+    "max_hands": 2,
+    "canned_labels": [
+      "None",
+      "Closed_Fist",
+      "Open_Palm",
+      "Pointing_Up",
+      "Thumb_Down",
+      "Thumb_Up",
+      "Victory",
+      "ILoveYou"
+    ],
+    "custom_model": "data/gestures/cam-gestures.task (Model Maker export; folders per label + a none class)",
+    "custom_prefers_over_canned": true,
+    "engagement_distance_cm": [
+      20,
+      60
+    ],
+    "frame_rate_hz": 15,
+    "smoothing_window_frames": 5,
+    "aaron_repo_slot": "integrations/<gesture-repo> — Aaron's starter repo (link pending); mounted as a submodule and mapped onto these primitives, not the other way round"
+  },
+  "primitives": {
+    "poses": [
+      {
+        "id": "open_palm",
+        "label": "Open_Palm",
+        "support": "canned",
+        "desc": "Palm facing the camera, fingers extended"
+      },
+      {
+        "id": "closed_fist",
+        "label": "Closed_Fist",
+        "support": "canned",
+        "desc": "Fist facing the camera"
+      },
+      {
+        "id": "pointing_up",
+        "label": "Pointing_Up",
+        "support": "canned",
+        "desc": "Index finger extended upward, others curled"
+      },
+      {
+        "id": "thumb_up",
+        "label": "Thumb_Up",
+        "support": "canned",
+        "desc": "Thumb extended up, fist closed"
+      },
+      {
+        "id": "thumb_down",
+        "label": "Thumb_Down",
+        "support": "canned",
+        "desc": "Thumb extended down, fist closed"
+      },
+      {
+        "id": "victory",
+        "label": "Victory",
+        "support": "canned",
+        "desc": "Index + middle extended (V / two)"
+      },
+      {
+        "id": "i_love_you",
+        "label": "ILoveYou",
+        "support": "canned",
+        "desc": "Thumb + index + pinky extended (ASL ILY)"
+      },
+      {
+        "id": "none",
+        "label": "None",
+        "support": "canned",
+        "desc": "Hand visible, no recognized pose"
+      },
+      {
+        "id": "back_of_hand",
+        "label": "Back_Of_Hand",
+        "support": "landmark_rule",
+        "desc": "Fingers extended, palm normal pointing away from the camera (handedness × knuckle order)"
+      },
+      {
+        "id": "pinch",
+        "label": "Pinch",
+        "support": "landmark_rule",
+        "desc": "Thumb tip to index tip distance < 0.25 × palm width, other fingers relaxed"
+      },
+      {
+        "id": "ok_sign",
+        "label": "OK",
+        "support": "custom",
+        "desc": "Thumb–index ring, three fingers extended"
+      },
+      {
+        "id": "three",
+        "label": "Three",
+        "support": "custom",
+        "desc": "Index + middle + ring extended"
+      },
+      {
+        "id": "four",
+        "label": "Four",
+        "support": "custom",
+        "desc": "Four fingers extended, thumb tucked"
+      },
+      {
+        "id": "palm_down",
+        "label": "Palm_Down",
+        "support": "landmark_rule",
+        "desc": "Flat hand, palm normal pointing at the floor"
+      },
+      {
+        "id": "palm_up",
+        "label": "Palm_Up",
+        "support": "landmark_rule",
+        "desc": "Flat hand, palm normal pointing at the ceiling"
+      },
+      {
+        "id": "pointing_away",
+        "label": "Pointing_Away",
+        "support": "landmark_rule",
+        "desc": "Index extended toward something not the camera (index vector not vertical, not toward lens)"
+      }
+    ],
+    "motions": [
+      {
+        "id": "hold",
+        "desc": "Pose held with wrist displacement < 4% of frame for the step duration"
+      },
+      {
+        "id": "flick_up",
+        "desc": "Fast wrist rotation / short upward displacement then return (< 400 ms)"
+      },
+      {
+        "id": "flick_down",
+        "desc": "Fast wrist rotation / short downward displacement then return (< 400 ms)"
+      },
+      {
+        "id": "flick_left",
+        "desc": "Short leftward displacement then return, screen-relative after handedness mirror"
+      },
+      {
+        "id": "flick_right",
+        "desc": "Short rightward displacement then return, screen-relative after handedness mirror"
+      },
+      {
+        "id": "swipe_left",
+        "desc": "Sustained leftward translate ≥ 25% of frame width"
+      },
+      {
+        "id": "swipe_right",
+        "desc": "Sustained rightward translate ≥ 25% of frame width"
+      },
+      {
+        "id": "push_in",
+        "desc": "Hand bounding box grows ≥ 1.6× within 600 ms (approaching the screen)"
+      },
+      {
+        "id": "pull_out",
+        "desc": "Hand bounding box shrinks ≤ 0.6× within 600 ms (retreating from the screen)"
+      },
+      {
+        "id": "wave",
+        "desc": "≥ 2 left-right oscillations within 1.2 s while pose held"
+      },
+      {
+        "id": "circle_cw",
+        "desc": "Fingertip traces ≥ 300° clockwise within 1.5 s"
+      },
+      {
+        "id": "circle_ccw",
+        "desc": "Fingertip traces ≥ 300° counter-clockwise within 1.5 s"
+      },
+      {
+        "id": "translate_out",
+        "desc": "Pose held while the hand leaves the frame or the engagement distance"
+      },
+      {
+        "id": "raise",
+        "desc": "Vertical translate up ≥ 20% of frame height"
+      },
+      {
+        "id": "lower",
+        "desc": "Vertical translate down ≥ 20% of frame height"
+      },
+      {
+        "id": "beckon",
+        "desc": "Palm toward self, fingers curl and re-extend ≥ 2× within 1.5 s"
+      },
+      {
+        "id": "spread_apart",
+        "desc": "Two hands: wrist distance grows ≥ 1.5× within 800 ms"
+      },
+      {
+        "id": "bring_together",
+        "desc": "Two hands: wrist distance shrinks ≤ 0.66× within 800 ms"
+      }
+    ]
+  },
+  "contexts": [
+    {
+      "id": "*",
+      "desc": "Any context — fallback binding"
+    },
+    {
+      "id": "home",
+      "desc": "Cam home view (portrait + converse)"
+    },
+    {
+      "id": "reading",
+      "desc": "Long transcript, vault note, or document view"
+    },
+    {
+      "id": "gallery",
+      "desc": "Paged media / cards / tabs"
+    },
+    {
+      "id": "choice",
+      "desc": "Cam has offered a numbered choice (1–5)"
+    },
+    {
+      "id": "prompt",
+      "desc": "Cam is waiting on a low-risk yes/no"
+    },
+    {
+      "id": "speaking",
+      "desc": "Cam is mid speak turn"
+    },
+    {
+      "id": "listening",
+      "desc": "Mic turn open"
+    },
+    {
+      "id": "carrying",
+      "desc": "A handoff payload is held (grab happened, release pending)"
+    },
+    {
+      "id": "teach",
+      "desc": "Aaron is teaching a new gesture or meaning"
+    }
+  ],
+  "grammar": {
+    "engagement": {
+      "poses": [
+        "open_palm",
+        "back_of_hand"
+      ],
+      "dwell_ms": 300,
+      "window_ms": 2500,
+      "glyph": "hand icon at the top of the screen (Huawei convention) — the next motion inside the window is read as a command",
+      "always_on_without_engagement": [
+        "converse.attention",
+        "converse.stop",
+        "presence.hold_all"
+      ]
+    },
+    "one_intent_per_window": true,
+    "sequence_timeout_ms": 1500,
+    "carry_ttl_ms": 10000,
+    "default_confidence_min": 0.7,
+    "default_cooldown_ms": 800,
+    "tie_break": [
+      "learned binding over default",
+      "longer match (more steps) over shorter — a fist→palm sequence beats a lone palm push",
+      "context-specific over '*'",
+      "sequence over dynamic over static",
+      "higher priority value",
+      "otherwise log_only and ask"
+    ],
+    "handedness": "Left-hand motions are mirrored so flick/swipe directions are screen-relative, not hand-relative",
+    "two_hands": "Both-hand gestures need both hands labeled within 300 ms of each other",
+    "unbound": "A recognized gesture with no binding in the active context resolves to system.log_only (mesh/gestures) so it can be taught later",
+    "grab_disambiguation": {
+      "primitive": "open_palm → closed_fist while engaged (Huawei 'grab')",
+      "resolves_by_what_follows": {
+        "reopen_in_place_within_800ms": "ui.collapse",
+        "hold_still_1200ms_or_more": "ui.screenshot",
+        "hold_and_translate_out_or_pull_out": "device.handoff_grab (enters 'carrying')"
+      },
+      "huawei_note": "On HarmonyOS 5 the same grab triggers Grabshot and Air Transfer together when both switches are on; Cam resolves by the follow-up motion instead of firing both"
+    }
+  },
+  "learning": {
+    "principle": "Cam recognizes with the vocabulary below and remembers what Aaron teaches on top of it. Defaults live in git; learned bindings live in data/gestures/learned.json and are distilled to mesh/gestures + MemoryBear.",
+    "who_may_teach": [
+      "Aaron"
+    ],
+    "teach_flow": [
+      "Aaron says 'Cam, learn this gesture' (or runs cam-gestures.py teach) → context 'teach'",
+      "Aaron performs the gesture 3–5 times; only landmark sequences are kept locally (data/gestures/samples/), never frames",
+      "Aaron states the meaning and picks an action from actions.json (or 'log only')",
+      "Cam replays: 'When you do <gesture> while <context>, I will <action>' → thumb_up confirms, thumb_down discards",
+      "Binding is written with provenance {taught_by: Aaron, taught_at, samples, context} and mirrored to mesh/gestures"
+    ],
+    "precedence": [
+      "learned + context",
+      "learned + '*'",
+      "default + context",
+      "default + '*'"
+    ],
+    "conflict_policy": "Re-binding a gesture that already has a default or learned meaning in the same context requires an explicit replace; otherwise Cam refuses and reports the existing meaning",
+    "feedback": "converse.confirm / converse.reject within 5 s after a gesture action is logged as reinforcement; confidence_min adapts per gesture within [0.6, 0.95]; reject rate > 30% over 20 uses flags the gesture for recalibration in gesture-check",
+    "forgetting": "Learned bindings unused for 90 days are flagged stale in doctor output; nothing is auto-deleted — only Aaron forgets",
+    "custom_model": "Once ≥ 30 samples exist for a custom pose, Model Maker retrains data/gestures/cam-gestures.task offline (switch.cam_enhance gate for shipping the new model)"
+  },
+  "gestures": [
+    {
+      "id": "gesture.engage",
+      "name": "Engage (palm to screen)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 300
+        }
+      ],
+      "meaning": "I am about to give you a hand command — watch my hand.",
+      "action": "system.engage",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 500,
+      "requires_engagement": false,
+      "priority": 1,
+      "support": "canned",
+      "source": "huawei",
+      "huawei_equivalent": "Hold palm 20–40 cm from the screen until the hand icon appears",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.grab_collapse",
+      "name": "Grab and let go (collapse)",
+      "aliases": [
+        "pinch page closed",
+        "close it up"
+      ],
+      "kind": "sequence",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 300
+        },
+        {
+          "pose": "closed_fist",
+          "motion": "hold",
+          "min_ms": 150,
+          "max_ms": 800
+        },
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 100
+        }
+      ],
+      "meaning": "Collapse the page — fold what I'm looking at down to its compact state.",
+      "action": "ui.collapse",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 1000,
+      "requires_engagement": true,
+      "priority": 6,
+      "support": "sequence",
+      "source": "cam",
+      "notes": "Same grab primitive as Huawei Grabshot / Air Transfer; the quick re-open in place is what makes it 'collapse'",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.spread_expand",
+      "name": "Fist bursts open (expand)",
+      "aliases": [
+        "open it up",
+        "blossom"
+      ],
+      "kind": "sequence",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "closed_fist",
+          "motion": "hold",
+          "min_ms": 300
+        },
+        {
+          "pose": "open_palm",
+          "motion": "push_in",
+          "min_ms": 100,
+          "max_ms": 800
+        }
+      ],
+      "meaning": "Expand the page — open what I'm looking at to its full state.",
+      "action": "ui.expand",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 1000,
+      "requires_engagement": false,
+      "priority": 6,
+      "support": "sequence",
+      "source": "cam",
+      "notes": "Starts from a fist so it never collides with the palm-first grab family",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.air_scroll_up",
+      "name": "Air scroll up",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "flick_down",
+          "min_ms": 80,
+          "max_ms": 400
+        }
+      ],
+      "meaning": "Scroll up (or raise volume in media).",
+      "action": "ui.scroll_up",
+      "contexts": [
+        "reading",
+        "home",
+        "*"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 600,
+      "requires_engagement": true,
+      "priority": 4,
+      "support": "landmark_rule",
+      "source": "huawei",
+      "huawei_equivalent": "Air scroll up — palm facing screen, fingers up, flick wrist down",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.air_scroll_down",
+      "name": "Air scroll down",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "back_of_hand",
+          "motion": "flick_up",
+          "min_ms": 80,
+          "max_ms": 400
+        }
+      ],
+      "meaning": "Scroll down (or lower volume in media).",
+      "action": "ui.scroll_down",
+      "contexts": [
+        "reading",
+        "home",
+        "*"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 600,
+      "requires_engagement": true,
+      "priority": 4,
+      "support": "landmark_rule",
+      "source": "huawei",
+      "huawei_equivalent": "Air scroll down — back of hand, fingers down, flick wrist up",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.air_scroll_left",
+      "name": "Air scroll left (previous)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "flick_left",
+          "min_ms": 80,
+          "max_ms": 400
+        }
+      ],
+      "meaning": "Go to the previous page / card.",
+      "action": "nav.page_prev",
+      "contexts": [
+        "gallery",
+        "reading",
+        "*"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 700,
+      "requires_engagement": true,
+      "priority": 4,
+      "support": "landmark_rule",
+      "source": "huawei",
+      "huawei_equivalent": "Air scroll left — palm, fingers pointing right, flick wrist left (Gallery / e-books)",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.air_scroll_right",
+      "name": "Air scroll right (next)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "back_of_hand",
+          "motion": "flick_right",
+          "min_ms": 80,
+          "max_ms": 400
+        }
+      ],
+      "meaning": "Go to the next page / card.",
+      "action": "nav.page_next",
+      "contexts": [
+        "gallery",
+        "reading",
+        "*"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 700,
+      "requires_engagement": true,
+      "priority": 4,
+      "support": "landmark_rule",
+      "source": "huawei",
+      "huawei_equivalent": "Air scroll right — back of hand, fingers pointing left, flick wrist right",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.swipe_left",
+      "name": "Swipe left",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "swipe_left",
+          "min_ms": 150,
+          "max_ms": 900
+        }
+      ],
+      "meaning": "Next (page moves left, like a touch swipe).",
+      "action": "nav.page_next",
+      "contexts": [
+        "gallery"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 700,
+      "requires_engagement": true,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "cam",
+      "notes": "Touch-convention alternative to the Huawei flick pair; only in gallery so it cannot fight air_scroll_left",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.swipe_right",
+      "name": "Swipe right",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "swipe_right",
+          "min_ms": 150,
+          "max_ms": 900
+        }
+      ],
+      "meaning": "Previous (page moves right, like a touch swipe).",
+      "action": "nav.page_prev",
+      "contexts": [
+        "gallery"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 700,
+      "requires_engagement": true,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.grabshot",
+      "name": "Grabshot (hold the grab)",
+      "kind": "sequence",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 300
+        },
+        {
+          "pose": "closed_fist",
+          "motion": "hold",
+          "min_ms": 1200
+        }
+      ],
+      "meaning": "Capture what's on screen right now.",
+      "action": "ui.screenshot",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 2000,
+      "requires_engagement": true,
+      "priority": 7,
+      "support": "sequence",
+      "source": "huawei",
+      "huawei_equivalent": "Grabshot — palm 20–40 cm, clench fist",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.handoff_grab",
+      "name": "Grab and carry (handoff start)",
+      "aliases": [
+        "take it with me",
+        "air transfer grab"
+      ],
+      "kind": "sequence",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 300
+        },
+        {
+          "pose": "closed_fist",
+          "motion": "hold",
+          "min_ms": 200
+        },
+        {
+          "pose": "closed_fist",
+          "motion": "translate_out",
+          "min_ms": 100,
+          "max_ms": 1500
+        }
+      ],
+      "meaning": "Pick this up — I'm taking Cam (this page / this session) to another device.",
+      "action": "device.handoff_grab",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": true,
+      "priority": 8,
+      "support": "sequence",
+      "source": "huawei",
+      "huawei_equivalent": "AI Air Transfer — open palm at half an arm from the screen, pause, clench fist to grab, keep the fist and move to the receiving device",
+      "notes": "Enters context 'carrying' on the converse server for carry_ttl_ms; the payload is a session snapshot, not a file copy",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.handoff_release",
+      "name": "Open hand at the other device (handoff finish)",
+      "aliases": [
+        "drop it here",
+        "air transfer release"
+      ],
+      "kind": "sequence",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "closed_fist",
+          "motion": "hold",
+          "min_ms": 300
+        },
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 200
+        }
+      ],
+      "meaning": "Put it down here — continue Cam on this device.",
+      "action": "device.handoff_release",
+      "contexts": [
+        "carrying"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 9,
+      "support": "sequence",
+      "source": "huawei",
+      "huawei_equivalent": "AI Air Transfer — hold the fist in front of the receiving screen, pause, open the palm to send (devices ≥ 40 cm apart recommended)",
+      "notes": "Only the device whose camera sees the release claims the payload; iPhone → iPad is the first target pair (config/network/ios-devices.json)",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.handoff_cancel",
+      "name": "Wave off while carrying",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "wave",
+          "min_ms": 600,
+          "max_ms": 1500
+        }
+      ],
+      "meaning": "Never mind — keep Cam where it was.",
+      "action": "device.handoff_cancel",
+      "contexts": [
+        "carrying"
+      ],
+      "confidence_min": 0.7,
+      "cooldown_ms": 1000,
+      "requires_engagement": false,
+      "priority": 9,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.beckon_follow",
+      "name": "Beckon (come here)",
+      "aliases": [
+        "follow me",
+        "come to this device"
+      ],
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "palm_up",
+          "motion": "beckon",
+          "min_ms": 600,
+          "max_ms": 1500
+        }
+      ],
+      "meaning": "Come here — move Cam's live session to the device I'm beckoning at.",
+      "action": "device.follow_me",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 3000,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "landmark_rule",
+      "source": "cam",
+      "notes": "Shortcut for the grab → release pair when Aaron is already at the target device",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.wave_hello",
+      "name": "Wave (attention)",
+      "aliases": [
+        "hey Cam",
+        "look at me"
+      ],
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "wave",
+          "min_ms": 600,
+          "max_ms": 1500
+        }
+      ],
+      "meaning": "Cam, I'm here — pay attention to me on this device.",
+      "action": "converse.attention",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 3000,
+      "requires_engagement": false,
+      "priority": 3,
+      "support": "landmark_rule",
+      "source": "cam",
+      "notes": "Always-on; in context 'carrying' the same wave means cancel (handoff_cancel wins by context)",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.stop_hand",
+      "name": "Stop hand (halt)",
+      "aliases": [
+        "hold on",
+        "shh"
+      ],
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 900
+        }
+      ],
+      "meaning": "Stop talking / stop what you're doing on screen.",
+      "action": "converse.stop",
+      "contexts": [
+        "speaking"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 8,
+      "support": "canned",
+      "source": "cam",
+      "notes": "Bound only while Cam is speaking so a plain engage palm elsewhere is not read as stop",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.air_press",
+      "name": "Air press (palm pushes in)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "push_in",
+          "min_ms": 150,
+          "max_ms": 700
+        }
+      ],
+      "meaning": "Pause / resume Cam's presence (face + voice).",
+      "action": "presence.pause_resume",
+      "contexts": [
+        "home",
+        "speaking",
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 1500,
+      "requires_engagement": true,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "huawei",
+      "huawei_equivalent": "Air press — move palm from 30–40 cm to about 5 cm to answer a call or pause/resume playback",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.thumb_up_yes",
+      "name": "Thumbs up (yes)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "thumb_up",
+          "motion": "hold",
+          "min_ms": 500
+        }
+      ],
+      "meaning": "Yes / go ahead with the low-risk thing you just asked.",
+      "action": "converse.confirm",
+      "contexts": [
+        "prompt",
+        "teach"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 6,
+      "support": "canned",
+      "source": "mediapipe",
+      "notes": "Never a Sentinel approval channel in v1 — egress / spend / self_modify stay with cam-sentinel.py approve",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.thumb_up_thanks",
+      "name": "Thumbs up (nice one)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "thumb_up",
+          "motion": "hold",
+          "min_ms": 500
+        }
+      ],
+      "meaning": "That was helpful — remember to do it like that.",
+      "action": "converse.thanks",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 2,
+      "support": "canned",
+      "source": "mediapipe",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.thumb_down_no",
+      "name": "Thumbs down (no)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "thumb_down",
+          "motion": "hold",
+          "min_ms": 500
+        }
+      ],
+      "meaning": "No / dismiss that.",
+      "action": "converse.reject",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 6,
+      "support": "canned",
+      "source": "mediapipe",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.ily_thanks",
+      "name": "I-love-you sign (thanks, Cam)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "i_love_you",
+          "motion": "hold",
+          "min_ms": 500
+        }
+      ],
+      "meaning": "Thanks — strong positive feedback on the last turn.",
+      "action": "converse.thanks",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 2000,
+      "requires_engagement": false,
+      "priority": 3,
+      "support": "canned",
+      "source": "mediapipe",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.point_tap",
+      "name": "Point and push (air tap)",
+      "kind": "sequence",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "pointing_up",
+          "motion": "hold",
+          "min_ms": 250
+        },
+        {
+          "pose": "pointing_up",
+          "motion": "push_in",
+          "min_ms": 100,
+          "max_ms": 600
+        }
+      ],
+      "meaning": "Select the thing I'm pointing at.",
+      "action": "ui.select",
+      "contexts": [
+        "home",
+        "gallery",
+        "reading"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 800,
+      "requires_engagement": true,
+      "priority": 6,
+      "support": "sequence",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.one",
+      "name": "One finger (option 1)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "pointing_up",
+          "motion": "hold",
+          "min_ms": 600
+        }
+      ],
+      "meaning": "Option one.",
+      "action": "nav.choose_option",
+      "action_params": {
+        "n": 1
+      },
+      "contexts": [
+        "choice"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "canned",
+      "source": "mediapipe",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.two",
+      "name": "Two fingers (option 2)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "victory",
+          "motion": "hold",
+          "min_ms": 600
+        }
+      ],
+      "meaning": "Option two.",
+      "action": "nav.choose_option",
+      "action_params": {
+        "n": 2
+      },
+      "contexts": [
+        "choice"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "canned",
+      "source": "mediapipe",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.three",
+      "name": "Three fingers (option 3)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "three",
+          "motion": "hold",
+          "min_ms": 600
+        }
+      ],
+      "meaning": "Option three.",
+      "action": "nav.choose_option",
+      "action_params": {
+        "n": 3
+      },
+      "contexts": [
+        "choice"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "custom",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.four",
+      "name": "Four fingers (option 4)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "four",
+          "motion": "hold",
+          "min_ms": 600
+        }
+      ],
+      "meaning": "Option four.",
+      "action": "nav.choose_option",
+      "action_params": {
+        "n": 4
+      },
+      "contexts": [
+        "choice"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "custom",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.five",
+      "name": "Five fingers (option 5)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 900
+        }
+      ],
+      "meaning": "Option five.",
+      "action": "nav.choose_option",
+      "action_params": {
+        "n": 5
+      },
+      "contexts": [
+        "choice"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "canned",
+      "source": "cam",
+      "notes": "Longer dwell than engage so the palm is unambiguous inside a choice",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.victory_camera",
+      "name": "V sign (camera preview)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "victory",
+          "motion": "hold",
+          "min_ms": 800
+        }
+      ],
+      "meaning": "Show / hide the camera preview.",
+      "action": "ui.toggle_camera_preview",
+      "contexts": [
+        "home"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 2000,
+      "requires_engagement": true,
+      "priority": 3,
+      "support": "canned",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.ok_done",
+      "name": "OK sign (done / accept)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "ok_sign",
+          "motion": "hold",
+          "min_ms": 500
+        }
+      ],
+      "meaning": "OK, that's done / I accept this.",
+      "action": "converse.confirm",
+      "contexts": [
+        "prompt",
+        "teach"
+      ],
+      "confidence_min": 0.85,
+      "cooldown_ms": 1500,
+      "requires_engagement": false,
+      "priority": 6,
+      "support": "custom",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.circle_repeat",
+      "name": "Circle clockwise (again)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "pointing_up",
+          "motion": "circle_cw",
+          "min_ms": 500,
+          "max_ms": 1500
+        }
+      ],
+      "meaning": "Say that again.",
+      "action": "converse.repeat",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 2000,
+      "requires_engagement": true,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.circle_undo",
+      "name": "Circle counter-clockwise (undo)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "pointing_up",
+          "motion": "circle_ccw",
+          "min_ms": 500,
+          "max_ms": 1500
+        }
+      ],
+      "meaning": "Undo that last screen change.",
+      "action": "ui.undo",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 2000,
+      "requires_engagement": true,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.palm_raise",
+      "name": "Palm up rising (louder)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "palm_up",
+          "motion": "raise",
+          "min_ms": 200,
+          "max_ms": 900
+        }
+      ],
+      "meaning": "Louder.",
+      "action": "converse.volume_up",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 700,
+      "requires_engagement": true,
+      "priority": 4,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.palm_lower",
+      "name": "Palm down lowering (quieter)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "palm_down",
+          "motion": "lower",
+          "min_ms": 200,
+          "max_ms": 900
+        }
+      ],
+      "meaning": "Quieter (mute at the floor).",
+      "action": "converse.volume_down",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 700,
+      "requires_engagement": true,
+      "priority": 4,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.zoom_in",
+      "name": "Two hands spread (zoom in)",
+      "kind": "dynamic",
+      "hands": "two",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "spread_apart",
+          "min_ms": 200,
+          "max_ms": 800
+        }
+      ],
+      "meaning": "Bigger — zoom in.",
+      "action": "ui.zoom_in",
+      "contexts": [
+        "reading",
+        "gallery"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 800,
+      "requires_engagement": true,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.zoom_out",
+      "name": "Two hands together (zoom out)",
+      "kind": "dynamic",
+      "hands": "two",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "bring_together",
+          "min_ms": 200,
+          "max_ms": 800
+        }
+      ],
+      "meaning": "Smaller — zoom out.",
+      "action": "ui.zoom_out",
+      "contexts": [
+        "reading",
+        "gallery"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 800,
+      "requires_engagement": true,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.double_open_home",
+      "name": "Fist opens twice (home)",
+      "kind": "sequence",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "closed_fist",
+          "motion": "hold",
+          "min_ms": 150
+        },
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 100,
+          "max_ms": 500
+        },
+        {
+          "pose": "closed_fist",
+          "motion": "hold",
+          "min_ms": 100,
+          "max_ms": 500
+        },
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 100,
+          "max_ms": 500
+        }
+      ],
+      "meaning": "Take me home.",
+      "action": "nav.home",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.75,
+      "cooldown_ms": 2000,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "sequence",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.pinch_remember",
+      "name": "Pinch and hold (remember this)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "pinch",
+          "motion": "hold",
+          "min_ms": 1000
+        }
+      ],
+      "meaning": "Remember this moment.",
+      "action": "memory.remember_this",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 3000,
+      "requires_engagement": false,
+      "priority": 6,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.flick_away_forget",
+      "name": "Back-of-hand flick away (forget that)",
+      "kind": "dynamic",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "back_of_hand",
+          "motion": "flick_right",
+          "min_ms": 80,
+          "max_ms": 400
+        },
+        {
+          "pose": "back_of_hand",
+          "motion": "flick_right",
+          "min_ms": 80,
+          "max_ms": 400
+        }
+      ],
+      "meaning": "Never mind — forget what I just had you remember.",
+      "action": "memory.forget_last",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 3000,
+      "requires_engagement": false,
+      "priority": 6,
+      "support": "sequence",
+      "source": "cam",
+      "notes": "Double flick so a single air_scroll_right is never mistaken for a forget",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.point_identify",
+      "name": "Point at something (what's that?)",
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "pointing_away",
+          "motion": "hold",
+          "min_ms": 800
+        }
+      ],
+      "meaning": "Look at what I'm pointing at and tell me what it is.",
+      "action": "vision.identify",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 4000,
+      "requires_engagement": false,
+      "priority": 5,
+      "support": "landmark_rule",
+      "source": "cam",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.two_palms_hold",
+      "name": "Both palms up and still (hold everything)",
+      "kind": "static",
+      "hands": "two",
+      "steps": [
+        {
+          "pose": "open_palm",
+          "motion": "hold",
+          "min_ms": 1000
+        }
+      ],
+      "meaning": "Everything on hold — pause all motors for this session.",
+      "action": "presence.hold_all",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.85,
+      "cooldown_ms": 3000,
+      "requires_engagement": false,
+      "priority": 10,
+      "support": "canned",
+      "source": "cam",
+      "notes": "Soft hold only; switch.kill remains Aaron voice/CLI",
+      "status": "planned"
+    }
+  ]
+}
