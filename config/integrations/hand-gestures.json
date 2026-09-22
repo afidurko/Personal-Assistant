@@ -1,7 +1,7 @@
 {
   "id": "hand-gestures",
   "name": "Hand gestures — signal → meaning → action",
-  "status": "planned",
+  "status": "dry_run",
   "planned_by": "Aaron",
   "planned_at": "2026-09-22",
   "role": "Cam recognizes Aaron's hand signals on the companion camera, remembers what each one means, and fires the bound action: collapse / expand / scroll the page, move Cam from one device to another (iPhone → iPad), control the converse turn",
@@ -45,12 +45,27 @@
     }
   },
   "recognizer": {
-    "runs_on": "companion_pwa",
-    "engine": "mediapipe tasks-vision GestureRecognizer (LIVE_STREAM) + landmark motion segmenter (point-history pattern from integrations/hand-gesture-mediapipe)",
-    "custom_model": "data/gestures/cam-gestures.task — Model Maker on HaGRIDv2 folders (integrations/hagrid) + Aaron's samples",
+    "runs_on": "companion_pwa (landmarks on-device) → converse server (engine + resolver)",
+    "engine": "scripts/cam_gesture_engine.py — HaGRID labels + hand-gesture-mediapipe keypoint / point-history k-NN (trained live from the submodule CSVs) + HandGestureRecognition key frames + Cam finger rules; pose fusion → per-hand segmenter → motion head → Segment → GestureResolver",
+    "eyes": {
+      "companion_pwa": "companions/web/gestures.js — MediaPipe tasks-vision GestureRecognizer (Safari WASM, CDN) on the camera preview; landmarks + canned label batched to POST /api/spike/hand every 200 ms; overlay, engaged glyph, intent line, reversible UI actions; ?gesture-demo=NAME dry run without a camera",
+      "mac": "scripts/cam-gesture-see.py --camera 0 (OpenCV + MediaPipe Hands) [--post http://cam:8766]",
+      "pupil": "world-camera frames through the same runner when Pupil is live",
+      "hagrid_detector": "optional — HaGRID YOLO / ResNet labels enter as labels.hagrid on each hand"
+    },
+    "custom_model": "data/gestures/cam-gestures.task — Model Maker on HaGRIDv2 folders (integrations/hagrid) + Aaron's samples — optional now; rules / HaGRID labels / Aaron prototypes already cover every custom pose",
     "desktop_path": "integrations/hagrid pretrained detectors or integrations/hand-gesture-mediapipe app.py on the Mac when its slot opens",
     "frames_leave_device": false,
-    "emits": "segments pose:motion:duration_ms:confidence:hands → POST /api/spike/gesture"
+    "landmarks_leave_device": "21 points per hand, no pixels, tailnet only",
+    "emits": "segments pose:motion:duration_ms:confidence:hands → GestureResolver (server) → intents back to the companion + vault/10-Mesh-Distillates/converse/*-gestures.jsonl",
+    "endpoints": {
+      "landmarks": "POST /api/spike/hand",
+      "segments": "POST /api/spike/gesture",
+      "status": "GET /api/gesture/status",
+      "demo": "GET /api/gesture/demo?name=…"
+    },
+    "dry_run": "python3 scripts/cam-converse-server.py --gesture-act (process-only switch.gesture_control=act) + http://…/?gesture-demo=engage_grab_collapse",
+    "frame_rate_hz": 30
   },
   "aaron_repos": {
     "note": "Each repo Aaron adds mounts as a submodule and is mapped onto primitives.poses / primitives.motions in gestures.json (repos.*) — the vocabulary stays the source of truth. gesture-check fails if a repo label is neither mapped nor explicitly ignored.",
@@ -111,7 +126,12 @@
   "scripts": {
     "cli": "scripts/cam-gestures.py",
     "module": "scripts/cam_gestures.py",
-    "check": "scripts/gesture-check.py"
+    "check": "scripts/gesture-check.py",
+    "engine": "scripts/cam_gesture_engine.py",
+    "see": "scripts/cam-gesture-see.py",
+    "server": "scripts/cam-converse-server.py (/api/spike/hand)",
+    "companion": "companions/web/gestures.js",
+    "tests": "scripts/test_cam_gestures.py · scripts/test_cam_gesture_engine.py"
   },
   "teams": [
     "team.capability",

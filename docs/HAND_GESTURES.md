@@ -68,9 +68,10 @@ Runs on-device in Safari via WASM (`@mediapipe/tasks-vision`), 21 landmarks per
 hand, up to 2 hands, canned classes `None, Closed_Fist, Open_Palm, Pointing_Up,
 Thumb_Down, Thumb_Up, Victory, ILoveYou`, plus a custom classifier trained with
 Model Maker from a folder-per-label dataset (must include a `none` class);
-custom wins over canned when both fire. Cam adds a **landmark motion segmenter**
-on top (flick / swipe / push / wave / circle / translate) because the canned
-model is pose-only. Sources: [web guide](https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer/web_js) ·
+custom wins over canned when both fire. In Cam the canned label is one voter
+in the merged engine below; the landmarks are what matter, because the canned
+model is pose-only and Cam needs motion (flick / swipe / push / wave / circle /
+translate) too. Sources: [web guide](https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer/web_js) ·
 [customization](https://developers.google.com/edge/mediapipe/solutions/customization/gesture_recognizer).
 
 ### Aaron's repos — mounted and mapped
@@ -95,10 +96,62 @@ and the gestures they make unambiguous — `mute` (finger over lips →
 (referee T → `presence.hold_all`), `hand_heart` (→ `converse.thanks`). Vocabulary
 now: 44 gestures, 34 actions. The next repo goes in `aaron_repos.next_slot`.
 
-Runtime split: on the iPhone / iPad the PWA keeps MediaPipe tasks-vision in
-WASM (custom `.task` trained from HaGRID folders + Aaron's samples); on the Mac
-the HaGRID YOLOv10 detector or Kazuhito00's `app.py` can be the recognizer, both
-posting the same `pose:motion:ms:conf:hands` segments to `/api/spike/gesture`.
+### The merged algorithm — `scripts/cam_gesture_engine.py`
+
+The three repos are meshed into **one engine** that takes a stream of 21-point
+hand landmarks (any camera) and emits the `pose:motion:duration:conf:hands`
+segments the resolver already understands. No TensorFlow: the two Kazuhito00
+classifiers are re-trained at load time as k-NN over the CSV samples that ship
+in the submodule (holdout accuracy 0.95 / 0.96 in the tests).
+
+```
+landmarks (21 × x,y,z per hand, screen space, 24–30 fps)
+   │
+   ├─ PoseFusion ── weighted vote per frame
+   │     rules            finger extension / thumb / palm facing / depth → every one-hand pose   (Cam)          w 1.0
+   │     keypoint k-NN    Open / Close / Pointer from keypoint.csv, abstains outside its families (Kazuhito00)   w 0.6
+   │     prototypes       Aaron-taught 42-vectors, data/gestures/prototypes.json                  (teach mode)   w 2.0
+   │     external labels  hagrid → repos.hagrid.pose_map · mediapipe canned → primitives.poses     (HaGRID/MP)    w 0.9
+   │     two-hand rules   take_picture · timeout · hand_heart                                     (HaGRID poses)
+   │
+   ├─ HandSegmenter (per hand) ── one run = one pose in one phase
+   │     still / moving from windowed palm speed or palm-length growth (hysteresis, time-confirmed)
+   │     engagement poses emit at dwell_ms → system.engage fires while the palm is still up
+   │     pending / raw-mismatch frames carry into the next run so a swipe keeps its first frames
+   │   PairSegmenter ── both hands one pose (or a two-hand rule pose) → hands=2, spread_apart / bring_together
+   │
+   ├─ MotionHead ── on the run's frames
+   │     key frames        endpoints + extrema of palm motion energy, ≤ 5                          (Ha0Tang)
+   │     geometry          displacement · excursion · palm-length ratio · x-reversals · angular sweep
+   │                       → hold flick_* swipe_* raise lower push_in pull_out wave circle_* translate_out
+   │     point-history k-NN Stop / Clockwise / CCW / Move on the resampled index-tip track            (Kazuhito00)
+   │                       agrees → confidence up · disagrees → down · circle rescue on strong sweep
+   │
+   └─ Segment → GestureResolver (context · engagement · confidence · cooldown · identity · switch)
+```
+
+Coordinates are **screen space as Aaron sees them** (selfie-mirrored, x right,
+y down); sources that run on the raw frame send `mirror=true`. Palm length
+(wrist → middle MCP) is the size unit everywhere, so closing a fist is never
+mistaken for pulling the hand back.
+
+### Cam's eyes — where the landmarks come from
+
+| Eye | Path | Notes |
+| --- | --- | --- |
+| iPhone / iPad | `companions/web/gestures.js` — MediaPipe tasks-vision `GestureRecognizer` on-device (Safari WASM from the jsDelivr CDN) → landmarks + canned label → `POST /api/spike/hand` every 200 ms | frames never leave the device; landmarks (no pixels) cross the tailnet to Cam's converse server, which runs the engine + resolver and answers with segments / intents. Overlay skeleton, ✋ engaged glyph, intent line, reversible UI actions (`ui.collapse / ui.expand / ui.scroll_* / converse.stop / mute`). `?gesture-demo=NAME` plays synthetic landmarks through the same path — a dry run with no camera |
+| Mac | `python3 scripts/cam-gesture-see.py --camera 0 [--post http://cam:8766]` — OpenCV + MediaPipe Hands | same engine in-process; `--record` keeps landmark JSONL for replay / teaching, `--teach-pose ID` adds Aaron's prototypes |
+| Pupil | world camera through the same runner | when `integrations/pupil` is live |
+| HaGRID detector | YOLOv10 / ResNet labels attached as `labels.hagrid` per hand | optional extra voter |
+
+Server side: `GET /api/gesture/status` (sessions, models, switch), `GET
+/api/gesture/demo?name=…` (synthetic frames), `POST /api/spike/gesture`
+(pre-segmented input). Every batch that produced segments or intents is
+appended to `vault/10-Mesh-Distillates/converse/*-gestures.jsonl`; fired
+intents light `neuron.vision → neuron.gesture` in the live cortex.
+`switch.gesture_control` is read from `switches.json` — still **hold**, so every
+intent is `system.log_only`; `cam-converse-server.py --gesture-act` simulates
+Aaron's flip for one process (dry run only, config untouched).
 
 ## 2. The idea in Cam terms
 
@@ -286,20 +339,24 @@ palm → fist → move out   ─►   POST /api/spike/gesture
 | Phase | Deliverable | Pieces touched | Gate |
 |---|---|---|---|
 | **P0 — this PR** | Gesture database, action catalog, resolver + Aaron-only teach memory, connectome wiring (`sense.vision.gesture`, `switch.gesture_control`, `hotspot.gesture`, `motor.gesture`), Sentinel class, 3 trajectory policies, `gesture-check` in CI, docs, vault notes | `config/gestures`, `config/connectome`, `scripts/cam_gestures.py`, `scripts/gesture-check.py` | `ci-static-gate` green; switch **hold** |
-| **P1 — see hands, log only** | `companions/web/gestures.js`: MediaPipe `GestureRecognizer` (LIVE_STREAM) + landmark segmenter (point-history window per `integrations/hand-gesture-mediapipe`, key-frame pruning per `integrations/hand-gesture-recognition`) → `POST /api/spike/gesture`; server appends to `spikes` log, runs the resolver, emits activity for the live cortex; on-screen engaged glyph | PWA, `cam-converse-server.py` | still hold — Aaron watches `mesh/gestures` fill with correctly named gestures |
+| **P1 — see hands, log only** ✅ built | `scripts/cam_gesture_engine.py` (merged algorithm, above), `companions/web/gestures.js` (on-device landmarks → `POST /api/spike/hand`), `scripts/cam-gesture-see.py` (Mac camera / replay / demo), server `GestureHub` + `/api/gesture/*`, gestures log, activity emit, engaged glyph; 30 engine tests + six end-to-end synthetic demos in `gesture-check` | PWA, `cam-converse-server.py`, engine | still hold — Aaron's first camera session watches `mesh/gestures` fill with correctly named gestures |
 | **P2 — first live session** | Aaron flips `switch.gesture_control` → `standing_on`; PWA action bus implements `ui.collapse / ui.expand / ui.scroll_* / nav.page_* / converse.stop / thumb yes-no` | PWA action bus | Aaron confirms; `enabled_at` recorded in `switches.json` |
 | **P3 — handoff** | Carry state on the converse server, device claim, origin banner; iPhone → iPad first, iPad → Mac when the Mac slot opens | `cam-converse-server.py`, PWA | `device.*` behind `switch.identity` |
 | **P4 — teach mode** | Voice-triggered `teach` context, landmark sample capture, replay confirm, Model Maker retrain job for custom poses seeded from HaGRID folders (`integrations/hagrid` → `ok_sign three four mute take_picture timeout hand_heart`) plus Aaron's samples | PWA, `scripts/cam-gestures.py`, `data/gestures/` | new `.task` ships via `switch.cam_enhance` |
 | **P5 — more eyes** | Pupil world camera and the Mac (HaGRID YOLOv10 detector or Kazuhito00 `app.py`) as further `sense.vision.gesture` sources posting the same segments | `integrations/pupil`, `integrations/hagrid`, `integrations/hand-gesture-mediapipe` | `switch.pupil_vision` |
 
-P1 needs `@mediapipe/tasks-vision` from `registry.npmjs.org` (or a vendored
-WASM bundle under `public/`) — not installable in the cloud environment until
-the domain is allowlisted, so P1 lands from Aaron's machine.
+The PWA pulls `@mediapipe/tasks-vision` from the jsDelivr CDN on Aaron's
+device at first tap (no npm build); the cloud environment cannot reach it, so
+the browser path was verified there with `?gesture-demo=` synthetic landmarks
+and the real camera path is Aaron's first session. Live camera on the Mac needs
+`pip install mediapipe opencv-python`.
 
 ## 7. Verification
 
-- `python3 scripts/gesture-check.py` — database integrity, connectome / Sentinel / registry wiring, eight canonical resolver demos (collapse, expand, iPhone → iPad handoff, identity hold, switch hold, stop-while-speaking, yes-in-prompt, two-palms hold), and Aaron's repos: submodule declared + registered, every repo label mapped or ignored, live label files (`hagrid/constants.py`, Kazuhito00 CSVs) match the vocabulary.
+- `python3 scripts/gesture-check.py` — database integrity, connectome / Sentinel / registry wiring, eight canonical resolver demos (collapse, expand, iPhone → iPad handoff, identity hold, switch hold, stop-while-speaking, yes-in-prompt, two-palms hold), six **eyes** demos (synthetic landmarks → engine → resolver: grab-collapse, swipe, spread-expand, handoff out of frame, two palms, circle), companion / server / runner wiring, and Aaron's repos: submodule declared + registered, every repo label mapped or ignored, live label files (`hagrid/constants.py`, Kazuhito00 CSVs) match the vocabulary.
 - `python3 scripts/test_cam_gestures.py` — unit tests for the grammar, context precedence, learned-over-default, Aaron-only teach / forget, carry timeout, mesh packing.
+- `python3 scripts/test_cam_gesture_engine.py` — 30 engine tests: every rule pose on both hands, two-hand L-shapes, external-label and prototype voting, Ha0Tang key frames, Kazuhito00 k-NN holdouts (> 0.9) and label drift, segmenter end-to-end at 30 fps (grab → collapse, swipe, flick scroll, push-in family, wave / circle / thumb, handoff out of frame, identity hold, two-palm pair, zoom, double-open vs beckon, flick-pause-flick, switch hold), observation round-trip + mirror, CLI demo / record / replay.
+- `python3 scripts/cam-gesture-see.py --demo all --act --identity` — synthetic hands through the engine; `--post http://127.0.0.1:8766` sends the same landmarks to a running converse server. Browser dry run: `python3 scripts/cam-converse-server.py --gesture-act` then open `/?gesture-demo=engage_grab_collapse` and tap **Enable gestures**.
 - `python3 scripts/connectome-route.py --sense sense.vision.gesture --goal "collapse page"` — with the switch on hold the plan is `motor.mesh` only (log-only).
 - `python3 scripts/ci-static-gate.py` — everything above plus the existing gates.
 

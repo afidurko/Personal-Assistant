@@ -29,7 +29,7 @@ Research: [[2026-09-22-Huawei-Air-Transfer-hand-gestures]] · Plan: `docs/HAND_G
 ## State
 
 - [x] P0 — database, resolver, wiring, gates (this PR) — `switch.gesture_control` **hold**
-- [ ] P1 — PWA recognizer (MediaPipe) + segmenter + `/api/spike/gesture`, log-only
+- [x] P1 — merged engine `scripts/cam_gesture_engine.py` (HaGRID labels + Kazuhito00 k-NN heads + Ha0Tang key frames + Cam rules) · companion `gestures.js` (on-device landmarks → `/api/spike/hand`) · `cam-gesture-see.py` (Mac camera / replay / demo) · server `GestureHub` — log-only until the switch flips; browser dry run `?gesture-demo=`
 - [ ] P2 — Aaron's first live session → flip switch; collapse / expand / scroll live
 - [ ] P3 — handoff iPhone → iPad via converse-server carry state
 - [ ] P4 — teach mode + custom pose model (`three`, `four`, `ok_sign`)
@@ -41,3 +41,5 @@ Research: [[2026-09-22-Huawei-Air-Transfer-hand-gestures]] · Plan: `docs/HAND_G
 - Next repo (slot: `aaron_repos.next_slot`)
 - Read HaGRID license PDF before shipping a `.task` trained on it beyond personal use
 - Confirm iPhone → iPad as the first pair
+- First camera session: open the companion on the iPhone, tap **Enable gestures**, hold an open palm, grab → release; check `vault/10-Mesh-Distillates/converse/*-gestures.jsonl` names the gesture; then flip `switch.gesture_control`
+- Mac eye: `pip install mediapipe opencv-python` then `python3 scripts/cam-gesture-see.py --camera 0 --post http://127.0.0.1:8766`

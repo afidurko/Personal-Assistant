@@ -21,10 +21,13 @@
     "aaron_hand_gesture_recognition": "https://github.com/afidurko/HandGestureRecognition (paper: https://arxiv.org/abs/1901.04622)"
   },
   "recognizer": {
-    "primary": "mediapipe_gesture_recognizer",
-    "runs_on": "companion_pwa (on-device Safari, WASM) — frames never leave the device; only labels + landmarks-derived motion leave",
+    "primary": "cam_gesture_engine",
+    "engine": "scripts/cam_gesture_engine.py — one algorithm meshed from Aaron's three repos: HaGRID labels (pose_map) + hand-gesture-mediapipe keypoint / point-history k-NN (trained live from the submodule CSVs) + HandGestureRecognition key-frame extraction + Cam finger rules; pose fusion → per-hand segmenter → motion head → Segment",
+    "landmark_source": "companion_pwa: MediaPipe tasks-vision GestureRecognizer on-device (Safari WASM) → 21 landmarks + canned label per hand; mac: scripts/cam-gesture-see.py --camera (OpenCV + MediaPipe Hands); pupil: world camera via the same runner",
+    "runs_on": "landmarks (21 points, no pixels) leave the device over the tailnet to Cam's converse server (/api/spike/hand); frames never leave the device",
     "landmarks_per_hand": 21,
     "max_hands": 2,
+    "coordinate_space": "screen space as Aaron sees it (selfie-mirrored, x right, y down, 0..1); sources on the raw frame send mirror=true",
     "canned_labels": [
       "None",
       "Closed_Fist",
@@ -35,16 +38,38 @@
       "Victory",
       "ILoveYou"
     ],
-    "custom_model": "data/gestures/cam-gestures.task (Model Maker export; folders per label + a none class)",
+    "pose_heads": {
+      "rules": "finger extension / thumb / palm facing / depth tilt → every one-hand pose; two-hand rules for take_picture / timeout / hand_heart",
+      "keypoint_knn": "integrations/hand-gesture-mediapipe/model/keypoint_classifier/keypoint.csv (Open / Close / Pointer) — abstains outside its families",
+      "prototypes": "data/gestures/prototypes.json — Aaron-taught 42-vectors (cam-gesture-see.py --teach-pose), weight 2.0",
+      "external_labels": "hagrid → repos.hagrid.pose_map; mediapipe canned → primitives.poses.label; weight 0.9"
+    },
+    "motion_head": {
+      "key_frames": "integrations/hand-gesture-recognition key_frames_extraction: endpoints + extrema of palm motion energy (≤ 5)",
+      "geometry": "displacement / excursion / palm-length ratio / reversals / angular sweep on the key frames → hold, flick_*, swipe_*, raise, lower, push_in, pull_out, wave, circle_*, translate_out, spread_apart, bring_together",
+      "point_history_knn": "integrations/hand-gesture-mediapipe/model/point_history_classifier/point_history.csv (Stop / Clockwise / Counter Clockwise / Move) on the resampled index-tip track → confidence fusion via repos.hand-gesture-mediapipe.motion_map"
+    },
+    "segmenter": "one run = one pose in one phase (still / moving; windowed speed ≥ 0.25 frame/s or palm growth); engagement poses emit at dwell_ms so system.engage fires while the palm is up; two hands with one pose (or a two-hand rule pose) pair into hands=2 segments",
+    "custom_model": "data/gestures/cam-gestures.task (Model Maker export; folders per label + a none class) — optional; the engine already covers every custom pose by rules / HaGRID labels / prototypes",
     "custom_prefers_over_canned": true,
     "engagement_distance_cm": [
       20,
       60
     ],
-    "frame_rate_hz": 15,
+    "frame_rate_hz": 30,
+    "frame_rate_min_hz": 24,
+    "frame_rate_note": "flicks (< 400 ms) need ≥ 24 fps; holds, swipes, circles, push/pull, two-hand motions resolve down to 15 fps",
     "smoothing_window_frames": 5,
     "segmenter_reference": "integrations/hand-gesture-mediapipe — fingertip point-history classifier (16 frames) is the template for Cam's motion primitives; key-frame extraction from integrations/hand-gesture-recognition picks which frames matter",
-    "custom_pose_dataset": "integrations/hagrid — HaGRIDv2 labels feed Model Maker for every pose marked support=custom"
+    "custom_pose_dataset": "integrations/hagrid — HaGRIDv2 labels feed Model Maker for every pose marked support=custom",
+    "runner": "scripts/cam-gesture-see.py --camera N | --replay FILE | --demo [NAME] [--post URL] [--record FILE] [--teach-pose ID] [--act]",
+    "server": {
+      "landmarks": "POST /api/spike/hand",
+      "segments": "POST /api/spike/gesture",
+      "status": "GET /api/gesture/status",
+      "demo": "GET /api/gesture/demo?name=…"
+    },
+    "tests": "scripts/test_cam_gesture_engine.py"
   },
   "repos": {
     "note": "Aaron's repos are mounted as submodules and mapped onto primitives.poses / primitives.motions below. The vocabulary stays the source of truth; repos supply datasets, models, and segmenter patterns. Every repo label is either mapped to a primitive or listed under ignore (log-only, never bound).",

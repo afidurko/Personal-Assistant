@@ -669,6 +669,46 @@
       "available_to": "chief_vision_ops_coding"
     },
     {
+      "id": "tool.gesture.see",
+      "purpose": "Cam's eyes for hands: camera / replay / synthetic landmarks \u2192 merged gesture engine (HaGRID + hand-gesture-mediapipe + HandGestureRecognition + Cam rules) \u2192 resolver intents; records landmark streams and teaches Aaron's pose prototypes",
+      "created_by_role": "tool-creator",
+      "entrypoint": "scripts/cam-gesture-see.py",
+      "kind": "local_script",
+      "inputs": {
+        "camera": "int?",
+        "replay": "path?",
+        "demo": "string?",
+        "post": "url?",
+        "record": "path?",
+        "teach_pose": "string?",
+        "context": "string?",
+        "identity": "boolean?",
+        "act": "boolean?"
+      },
+      "outputs": {
+        "segments": "string[]",
+        "intents": "object[]",
+        "status": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh",
+        "write_mesh",
+        "camera"
+      ],
+      "requires_switch": [
+        "switch.gesture_control",
+        "switch.identity",
+        "switch.kill"
+      ],
+      "risk": "medium",
+      "status": "active",
+      "integration": "config/integrations/hand-gestures.json",
+      "motor": "motor.gesture",
+      "module": "scripts/cam_gesture_engine.py",
+      "available_to": "chief_vision_ops_coding"
+    },
+    {
       "id": "tool.gesture.check",
       "purpose": "Validate the hand-gesture vocabulary, action catalog, connectome wiring, and canonical resolver demos",
       "created_by_role": "tool-creator",

@@ -2,7 +2,7 @@
 
 Plan: [`docs/HAND_GESTURES.md`](../../docs/HAND_GESTURES.md)  
 Vocabulary: [`config/gestures/gestures.json`](../gestures/gestures.json) · Actions: [`config/gestures/actions.json`](../gestures/actions.json)  
-Status: **planned** (Aaron, 2026-09-22) — `switch.gesture_control` is **hold** until the first live session
+Status: **dry run** (Aaron, 2026-09-22) — engine + companion eyes built; `switch.gesture_control` is **hold** until the first live session
 
 ## Role in the team
 
@@ -43,7 +43,7 @@ python3 scripts/connectome-route.py --sense sense.vision.gesture --goal "collaps
 
 ## Privacy and control defaults
 
-- Frames never leave the device; only labels, motion, duration, confidence, device id.
+- Frames never leave the device; 21 landmarks per hand (no pixels) cross the tailnet to Cam's converse server, which runs the engine (`scripts/cam_gesture_engine.py`) and answers with segments + intents; recordings (`cam-gesture-see.py --record`) are landmarks only.
 - Other people's hands are logged, never obeyed (`switch.identity`).
 - No gesture reaches egress, spend, self-modify, `switch.kill`, or Sentinel approval — those stay voice + CLI + Aaron.
 - Every held or unbound gesture lands in `mesh/gestures` as `system.log_only` so Aaron can teach it later.

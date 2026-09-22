@@ -23,7 +23,7 @@ Runtime distillates live under `data/runtime/` (gitignored). Scan delta cache sk
 - **Teams:** AGI Research Scan (daily) · Capability · Information · Tooling — [docs/AGI_RESEARCH_TEAM.md](docs/AGI_RESEARCH_TEAM.md)
 - **Swarm patterns:** privilege inheritance + boss/worker bus from [HAAS](https://github.com/afidurko/OpenAI_Agent_Swarm) — wired into the neural mesh + memory for all workspaces/agents — [docs/HAAS_CAM_PATTERNS.md](docs/HAAS_CAM_PATTERNS.md)
 - **Sentinel (Muse pattern):** Cam plans, Sentinel decides allow / ask / deny at the motor boundary, Aaron approves; tainted egress + append-only intent journal — [docs/MUSE_CAM_PATTERNS.md](docs/MUSE_CAM_PATTERNS.md)
-- **Hand gestures (Huawei Air Transfer pattern):** hand signal → meaning → action — collapse / expand / scroll the page, move Cam iPhone → iPad by grab → carry → release; Aaron teaches, Cam remembers; behind `switch.gesture_control` (hold) — [docs/HAND_GESTURES.md](docs/HAND_GESTURES.md) · `config/gestures/`
+- **Hand gestures (Huawei Air Transfer pattern):** hand signal → meaning → action — collapse / expand / scroll the page, move Cam iPhone → iPad by grab → carry → release; Aaron teaches, Cam remembers; Cam sees hands through the companion camera (`scripts/cam_gesture_engine.py` meshes HaGRID + hand-gesture-mediapipe + HandGestureRecognition); behind `switch.gesture_control` (hold) — [docs/HAND_GESTURES.md](docs/HAND_GESTURES.md) · `config/gestures/`
 - **Vault:** [`vault/`](vault/) starter Obsidian vault (open this folder in Obsidian)
 - **Tasks/mesh:** nulltickets · **Orchestration:** nullboiler · **Control:** Aaron only
 - **Presence:** [LLMAvatarTalk](https://github.com/afidurko/LLMAvatarTalk-An-Interactive-AI-Assistant) (RIVA + Audio2Face)
