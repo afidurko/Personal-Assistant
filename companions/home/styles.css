@@ -156,10 +156,10 @@ code { font: .82rem ui-monospace, "SF Mono", Menlo, monospace; color: var(--teal
   transition: border-color .35s ease, box-shadow .35s ease; }
 .grid .panel:hover { border-color: rgba(196,165,116,.42); box-shadow: 0 6px 26px rgba(0,0,0,.25); }
 
-.brain.ticked { animation: tickGlow 1.5s ease; }
+.brain.ticked { animation: tickGlow 2.4s ease; }
 @keyframes tickGlow {
   0% { border-color: rgba(111,184,176,.35); box-shadow: none; }
-  30% { border-color: rgba(111,184,176,.9); box-shadow: 0 0 26px rgba(111,184,176,.22); }
+  25% { border-color: rgba(111,184,176,1); box-shadow: 0 0 34px rgba(111,184,176,.35), inset 0 0 18px rgba(111,184,176,.08); }
   100% { border-color: rgba(111,184,176,.35); box-shadow: none; }
 }
 .panel h2 { margin: 0 0 .3rem; font-size: 1.05rem; color: var(--accent); font-weight: 600; }
@@ -226,7 +226,7 @@ code { font: .82rem ui-monospace, "SF Mono", Menlo, monospace; color: var(--teal
   display: flex; flex-direction: column; gap: .28rem; font-size: .88rem; }
 .feed li { display: flex; gap: .5rem; align-items: baseline; line-height: 1.35;
   padding: .16rem 0 .16rem .45rem; border-bottom: 1px dotted rgba(243,239,230,.07);
-  border-left: 2px solid transparent;
+  border-left: 3px solid transparent;
   animation: arrive .9s ease; }
 .feed li.st-observe { border-left-color: rgba(111,184,176,.55); }
 .feed li.st-analyze { border-left-color: rgba(147,155,220,.6); }

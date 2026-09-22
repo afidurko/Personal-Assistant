@@ -405,6 +405,14 @@ function focusSuggest() {
   $("suggestText").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+/* reclaim keyboard shortcuts after orbiting inside the brain iframe */
+$("brainFrame").addEventListener("mouseleave", () => {
+  if (document.activeElement === $("brainFrame")) {
+    $("brainFrame").blur();
+    window.focus();
+  }
+});
+
 $("vizExpand").addEventListener("click", () => {
   const viz = $("brainViz");
   viz.classList.toggle("expanded");
