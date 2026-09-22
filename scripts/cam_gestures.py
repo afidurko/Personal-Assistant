@@ -26,6 +26,7 @@ LEARNED_PATH = ROOT / "data" / "gestures" / "learned.json"
 SOLE_OPERATOR = "Aaron"
 LOG_ONLY = "system.log_only"
 ENGAGE = "system.engage"
+NOT_ENGAGED = "not engaged — hold an open palm to the screen first"
 KIND_RANK = {"sequence": 3, "dynamic": 2, "static": 1}
 HANDS_COUNT = {"one": 1, "two": 2}
 VALID_SUPPORT = {"canned", "landmark_rule", "custom", "sequence"}
@@ -200,6 +201,29 @@ def _validate_repos(vocab: dict, pose_ids: set[str], motion_ids: set[str]) -> li
     return errors
 
 
+PAUSE_MAX_MS = 500
+
+
+def _without_pauses(buffer: list[Segment]) -> list[Segment]:
+    """Drop short holds sandwiched between two motions of the same pose."""
+    out: list[Segment] = []
+    for i, s in enumerate(buffer):
+        prev = buffer[i - 1] if i > 0 else None
+        nxt = buffer[i + 1] if i + 1 < len(buffer) else None
+        pause = (
+            s.motion == "hold"
+            and s.duration_ms <= PAUSE_MAX_MS
+            and prev is not None
+            and nxt is not None
+            and prev.pose == s.pose == nxt.pose
+            and prev.motion != "hold"
+            and nxt.motion != "hold"
+        )
+        if not pause:
+            out.append(s)
+    return out
+
+
 def _signature(g: dict, context: str) -> tuple:
     """Two bindings with the same steps, hands, and context are ambiguous."""
     steps = tuple(
@@ -362,8 +386,10 @@ class GestureResolver:
         g, matched = candidates[0]
         intent = self._emit(g, matched, seg)
         # The engage palm stays in the buffer: it is the first step of the
-        # grab family. Every other match consumes its segments.
-        if g["action"] != ENGAGE:
+        # grab family. Every other match consumes its segments — except one held
+        # only for lack of engagement, which may still be the prefix of a longer,
+        # engagement-free gesture (flick, pause, flick).
+        if g["action"] != ENGAGE and intent.hold_reason != NOT_ENGAGED:
             self.buffer.clear()
         self.intents.append(intent)
         out.append(intent)
@@ -400,10 +426,20 @@ class GestureResolver:
         if self.bound_in(g) is None:
             return None
         steps = g.get("steps") or []
-        if not steps or len(steps) > len(self.buffer):
+        if not steps:
+            return None
+        hit = self._match_tail(g, steps, self.buffer)
+        if hit is None and any(st.get("motion", "hold") != "hold" for st in steps):
+            # A short still pause between two motions of the same pose (flick, pause, flick)
+            # is natural for a camera segmenter; retry with those pauses removed.
+            hit = self._match_tail(g, steps, _without_pauses(self.buffer))
+        return hit
+
+    def _match_tail(self, g: dict, steps: list[dict], buffer: list[Segment]) -> tuple[dict, list[Segment]] | None:
+        if len(steps) > len(buffer):
             return None
         need_hands = HANDS_COUNT.get(g.get("hands"), 1)
-        tail = self.buffer[-len(steps):]
+        tail = buffer[-len(steps):]
         for a, b in zip(tail, tail[1:]):
             if b.t_ms - a.end_ms > self.sequence_timeout:
                 return None
@@ -473,7 +509,7 @@ class GestureResolver:
             first = matched[0]
             self_engaging = first.pose in self.engagement_poses and first.motion == "hold" and first.duration_ms >= self.engagement_dwell
             if not self_engaging and self.engaged_until < first.t_ms:
-                return "not engaged — hold an open palm to the screen first"
+                return NOT_ENGAGED
         last = self.last_fired.get(g["id"])
         cooldown = int(g.get("cooldown_ms", self.default_cooldown))
         if last is not None and seg.end_ms - last < cooldown and action["id"] != ENGAGE:
