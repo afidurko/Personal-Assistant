@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-20T16:09:36Z",
+  "at": "2026-09-22T19:14:29Z",
   "overall": "warning",
   "ok": true,
   "assistant": "Cam",
@@ -235,13 +235,19 @@
       "id": "connectors-check",
       "ok": true,
       "exit": 0,
-      "preview": "note: inkbox.inbound: credential(s) not in env: ['INKBOX_API_KEY'] (local .env only \u2014 never commit)\nnote: inkbox.outbound: credential(s) not in env: ['INKBOX_API_KEY'] (local .env only \u2014 never commit)\nnote: google-scholar: credential(s) not"
+      "preview": "note: calendar.ics: credential(s) not in env: ['CAM_CALENDAR_ICS'] (local .env only \u2014 never commit)\nnote: inkbox.inbound: credential(s) not in env: ['INKBOX_API_KEY'] (local .env only \u2014 never commit)\nnote: inkbox.outbound: credential(s) not"
     },
     {
       "id": "swarm-runtime-doctor",
       "ok": true,
       "exit": 0,
-      "preview": "{\n  \"ok\": true,\n  \"problems\": [],\n  \"stats\": {\n    \"agents_total\": 10,\n    \"agents_active\": 9,\n    \"agents_terminated\": 1,\n    \"max_level\": 3,\n    \"by_role\": {\n      \"chief\": 1,\n      \"errand-runner\": 1,\n      \"follow-through-lead\": 1,\n    "
+      "preview": "{\n  \"ok\": true,\n  \"problems\": [],\n  \"stats\": {\n    \"agents_total\": 1,\n    \"agents_active\": 1,\n    \"agents_terminated\": 0,\n    \"max_level\": 1,\n    \"by_role\": {\n      \"chief\": 1\n    },\n    \"by_team\": {},\n    \"actions\": {\n      \"open\": 0,\n    "
+    },
+    {
+      "id": "privacy-check",
+      "ok": true,
+      "exit": 0,
+      "preview": "{\n  \"ok\": true,\n  \"errors\": [],\n  \"soft_warnings\": [\n    \"no ledger HMAC key (CAM_LEDGER_HMAC_KEY or identity/aaron/local/ledger.key) \\u2014 run `cam_privacy.py keygen --aaron` for tamper evidence\",\n    \"no personal vocabulary yet (identity"
     },
     {
       "id": "workspace-integration-check",
