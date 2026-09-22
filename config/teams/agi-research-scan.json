@@ -56,6 +56,8 @@
       "id": "arxiv",
       "api": "https://export.arxiv.org/api/query",
       "categories": ["cs.AI", "cs.LG", "cs.CL", "cs.MA", "cs.NE", "stat.ML"],
+      "min_interval_s": 3.0,
+      "etiquette": "https://info.arxiv.org/help/api/tou.html — one request per 3 s, identifying User-Agent",
       "sense": "sense.web.arxiv"
     },
     {

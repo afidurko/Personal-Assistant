@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -109,7 +110,12 @@ def fetch_arxiv(max_results: int, timeout: int = 45) -> list[dict]:
     }
     by_id: dict[str, dict] = {}
     errors: list[str] = []
-    for cat in categories:
+    # arXiv API etiquette asks for ≥3 s between requests; hammering six categories
+    # back-to-back is how a polite scout gets rate-limited into silence
+    min_interval = float(TEAM["sources"][0].get("min_interval_s", 3.0))
+    for i, cat in enumerate(categories):
+        if i and min_interval > 0:
+            time.sleep(min_interval)
         url = arxiv_query(cat, per_cat)
         try:
             req = urllib.request.Request(url, headers=headers)
