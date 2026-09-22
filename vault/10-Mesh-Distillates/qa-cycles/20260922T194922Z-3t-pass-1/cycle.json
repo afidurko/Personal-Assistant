@@ -1,0 +1,352 @@
+{
+  "pass": "1",
+  "n": 3000000000000,
+  "physical": 10000000,
+  "seed": 143,
+  "status": "green",
+  "results": [
+    {
+      "label": "ci-static-gate",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/ci-static-gate.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.9414878520001366
+    },
+    {
+      "label": "workspace-unit-tests",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cline_workspaces.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 4.715734937999514
+    },
+    {
+      "label": "cloud-agent-install",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cloud_agent_install.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.6987607580012991
+    },
+    {
+      "label": "cam-system-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_cam_system.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 1.1167591939993144
+    },
+    {
+      "label": "cam-reason-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test_cam_reason",
+        "test_cam_fast",
+        "test_cam_infinitemind"
+      ],
+      "exit_code": 0,
+      "wall_s": 1.7151964179993229
+    },
+    {
+      "label": "converse-voice-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test_aaron_voice_gate",
+        "test_cam_converse_voice_gate"
+      ],
+      "exit_code": 0,
+      "wall_s": 3.246366441000646
+    },
+    {
+      "label": "higgsfield-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/higgsfield-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.741750895000223
+    },
+    {
+      "label": "higgsfield-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_higgsfield.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 5.555090998999731
+    },
+    {
+      "label": "embodiment-lite",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_embodiment_lite.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.6744788679989142
+    },
+    {
+      "label": "presence-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/presence-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.3106683179994434
+    },
+    {
+      "label": "trajectory-policy-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/trajectory-policy-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.36046446499858575
+    },
+    {
+      "label": "predictive-cortex-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test_cam_experience"
+      ],
+      "exit_code": 0,
+      "wall_s": 4.015875438000876
+    },
+    {
+      "label": "research-ethics-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/research-ethics-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.3526764190009999
+    },
+    {
+      "label": "connectome-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/connectome-simulate.py",
+        "--n",
+        "3000000000000",
+        "--strict-edges",
+        "--scale",
+        "exhaustive",
+        "--physical",
+        "10000000",
+        "--seed",
+        "143",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/connectome-sim-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 8.325111240001206
+    },
+    {
+      "label": "illa-desktop-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_illa_desktop.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 1.3331775539991213
+    },
+    {
+      "label": "illa-electron-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/illa-electron-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 0.730750930000795
+    },
+    {
+      "label": "public-apis-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_public_apis.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 3.3379074100012076
+    },
+    {
+      "label": "public-apis-addons-unit",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/test_public_apis_addons.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 3.01122715999918
+    },
+    {
+      "label": "public-apis-check",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/public-apis-check.py"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.7274593909987743
+    },
+    {
+      "label": "trajectory-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/trajectory-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "160",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/trajectory-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 1.2841016290003608
+    },
+    {
+      "label": "embodiment-deps-offline",
+      "cmd": [
+        "/usr/bin/python3",
+        "-m",
+        "pip",
+        "install",
+        "-q",
+        "-r",
+        "/workspace/integrations/joshinator-analyzer/backend/requirements-ci.txt"
+      ],
+      "exit_code": 0,
+      "wall_s": 8.603531648999706,
+      "soft": true,
+      "note": "pypi unreachable; embodiment 3T uses catalog-only path"
+    },
+    {
+      "label": "embodiment-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/embodiment-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "174",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/embodiment-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.781620179001038
+    },
+    {
+      "label": "cam-reason-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/cam-reason-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "154",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/cam-reason-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 10.762837569000112
+    },
+    {
+      "label": "illa-desktop-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/illa-desktop-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "169",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/illa-desktop-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 3.270268106000003
+    },
+    {
+      "label": "aaron-voice-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/aaron-voice-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "162",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/aaron-voice-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 2.0238272360002156
+    },
+    {
+      "label": "public-apis-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/public-apis-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "166",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/public-apis-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 4.901457117000973
+    },
+    {
+      "label": "predictive-cortex-3t",
+      "cmd": [
+        "/usr/bin/python3",
+        "scripts/predictive-cortex-billion-fuzz.py",
+        "--n",
+        "3000000000000",
+        "--physical",
+        "10000000",
+        "--seed",
+        "172",
+        "--workers",
+        "4",
+        "--out",
+        "/workspace/vault/10-Mesh-Distillates/qa-cycles/predictive-cortex-3t-pass1.json"
+      ],
+      "exit_code": 0,
+      "wall_s": 71.43483253900013
+    }
+  ],
+  "at": "20260922T195151Z"
+}

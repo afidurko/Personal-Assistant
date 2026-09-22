@@ -4,9 +4,9 @@
   "passed": 3000000000000,
   "failed": 0,
   "first_error": null,
-  "elapsed_s": 1.2253777109999646,
-  "checks_per_sec": 2448224717219.5273,
-  "seed": 161,
+  "elapsed_s": 1.293744863000029,
+  "checks_per_sec": 2318849787000.03,
+  "seed": 162,
   "ok": true,
   "backend": "hash_dev",
   "sampler": "inline_modular_plus_0.01pct_full_gate:modular_period_scaled",
@@ -19,17 +19,7 @@
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 0.7769334160002472,
-      "ref_aaron_score": 1.0,
-      "ref_other_score": 0.004
-    },
-    {
-      "worker_id": 1,
-      "attempted": 2500000,
-      "passed": 2500000,
-      "failed": 0,
-      "first_error": null,
-      "elapsed_s": 0.7841302340002585,
+      "elapsed_s": 0.764977775999796,
       "ref_aaron_score": 1.0,
       "ref_other_score": 0.004
     },
@@ -39,7 +29,17 @@
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 0.7657361960000344,
+      "elapsed_s": 0.7633180839984561,
+      "ref_aaron_score": 1.0,
+      "ref_other_score": 0.004
+    },
+    {
+      "worker_id": 1,
+      "attempted": 2500000,
+      "passed": 2500000,
+      "failed": 0,
+      "first_error": null,
+      "elapsed_s": 0.7720777000013186,
       "ref_aaron_score": 1.0,
       "ref_other_score": 0.004
     },
@@ -49,7 +49,7 @@
       "passed": 2500000,
       "failed": 0,
       "first_error": null,
-      "elapsed_s": 0.762379730000248,
+      "elapsed_s": 0.7591201720006211,
       "ref_aaron_score": 1.0,
       "ref_other_score": 0.004
     }
