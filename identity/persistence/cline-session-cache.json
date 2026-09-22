@@ -3,10 +3,10 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-22T18:11:13.354153+00:00",
-    "mode": "plan",
-    "summary": "Hand gestures plan: 40-gesture vocabulary + 33 actions (config/gestures), resolver + Aaron-only teach memory (scripts/cam_gestures.py), connectome sense/switch/motor/hotspot behind switch.gesture_control hold; Huawei Air Transfer grab\u2192carry\u2192release for iPhone\u2192iPad",
-    "workspace": "/workspace"
+    "at": "2026-09-22T18:29:48.185152+00:00",
+    "mode": "act",
+    "summary": "Hand gestures: mounted Aaron's 3 repos (hagrid, hand-gesture-mediapipe, hand-gesture-recognition) as submodules; mapped labels onto vocabulary primitives (repos.* in gestures.json); +4 HaGRID poses, +4 gestures, +converse.mute_toggle; gesture-check verifies mapping + live label drift",
+    "workspace": "."
   },
   "mesh_notes": [
     {
@@ -110,6 +110,11 @@
       "at": "2026-09-22T18:11:13.354153+00:00",
       "text": "docs/HAND_GESTURES.md \u00b7 config/gestures/gestures.json \u00b7 scripts/cam-gestures.py list|resolve|teach \u00b7 scripts/gesture-check.py in ci-static-gate; Aaron's starter repo link pending",
       "workspace": "/workspace"
+    },
+    {
+      "at": "2026-09-22T18:29:48.185152+00:00",
+      "text": "44 gestures / 34 actions; switch.gesture_control still hold",
+      "workspace": "."
     }
   ],
   "rules": ".clinerules",
