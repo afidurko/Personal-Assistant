@@ -30,12 +30,13 @@
   },
   "redaction": {
     "fields": ["notes", "ref"],
+    "order_note": "applied in this order — specific shapes first so a generic pattern (phone) cannot swallow and mislabel a specific one (ssn)",
     "patterns": {
-      "email": "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}",
-      "phone": "(?<![\\w/])\\+?\\d[\\d\\s().-]{8,}\\d(?![\\w/])",
-      "token": "(?i)\\b(?:sk|ghp|gho|xox[bap]|AKIA|serp|hf)[_-]?[A-Za-z0-9_\\-]{16,}\\b",
       "bearer": "(?i)bearer\\s+[A-Za-z0-9._\\-]{12,}",
-      "ssn": "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+      "token": "(?i)\\b(?:sk|ghp|gho|xox[bap]|AKIA|serp|hf)[_-]?[A-Za-z0-9_\\-]{16,}\\b",
+      "ssn": "\\b\\d{3}-\\d{2}-\\d{4}\\b",
+      "email": "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}",
+      "phone": "(?<![\\w/])\\+?\\d[\\d\\s().-]{8,}\\d(?![\\w/])"
     },
     "replacement": "[redacted:{kind}]"
   },

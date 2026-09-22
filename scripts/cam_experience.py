@@ -189,7 +189,7 @@ def make_experience(
 ) -> dict[str, Any]:
     """Normalized experience record. ``ok`` is the Bernoulli outcome."""
     clean_notes, kinds = redact((notes or "")[:240])
-    clean_ref, ref_kinds = redact(ref or "") if ref else (ref, [])
+    clean_ref, ref_kinds = redact(ref or "")
     exp = {
         "kind": "experience",
         "schema": SCHEMA_VERSION,
@@ -478,19 +478,14 @@ def load_experiences(*, offline: bool = False, extra: Iterable[Path] = ()) -> tu
     global LAST_SOURCE_ERRORS
     LAST_SOURCE_ERRORS = []
     sources: dict[str, list[dict[str, Any]]] = {}
-    loaders: list[tuple[str, Any]] = (
-        [("fixture", lambda: read_jsonl(FIXTURE))]
-        if offline
-        else [
-            ("loop_run_log", ingest_loop_log),
-            ("loop_run_latest", ingest_loop_latest),
-            ("qa_cycle", ingest_qa_cycles),
-            ("reasoning_trace", ingest_reasoning),
-            ("runtime_log", lambda: read_jsonl(runtime_log_path())),
-        ]
-    )
-    for p in extra:
-        loaders.append((f"extra:{Path(p).name}", lambda p=p: read_jsonl(Path(p))))
+    loaders: list[tuple[str, Any]] = [("fixture", lambda: read_jsonl(FIXTURE))] if offline else [
+        ("loop_run_log", ingest_loop_log),
+        ("loop_run_latest", ingest_loop_latest),
+        ("qa_cycle", ingest_qa_cycles),
+        ("reasoning_trace", ingest_reasoning),
+        ("runtime_log", lambda: read_jsonl(runtime_log_path())),
+    ]
+    loaders += [(f"extra:{Path(p).name}", lambda p=p: read_jsonl(Path(p))) for p in extra]
     for name, fn in loaders:
         try:
             sources[name] = fn()
@@ -548,20 +543,45 @@ def beta_cdf(x: float, a: float, b: float) -> float:
     return 1.0 - front * _betacf(b, a, 1.0 - x) / b
 
 
-def beta_quantile(q: float, a: float, b: float, tol: float = 1e-7) -> float:
+def beta_quantile(q: float, a: float, b: float, tol: float = 1e-12) -> float:
+    """Inverse regularized incomplete beta — bracketed Newton with bisection fallback.
+
+    Tolerance is in x; the CDF is near-vertical in the tails for skewed (a, b),
+    so a loose x tolerance would put the quantile visibly off in probability.
+    Below min(a, b) ≈ 0.3 the tail quantile sits closer to 0/1 than a double can
+    resolve; the predictor stays clear of that via ``prior_floor`` (≥ 0.5).
+    """
+    if q <= 0.0:
+        return 0.0
+    if q >= 1.0:
+        return 1.0
+    lbeta = math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b)
     lo, hi = 0.0, 1.0
+    x = a / (a + b)
     for _ in range(200):
-        mid = 0.5 * (lo + hi)
-        if beta_cdf(mid, a, b) < q:
-            lo = mid
+        err = beta_cdf(x, a, b) - q
+        if abs(err) < 1e-10:
+            return x
+        if err < 0.0:
+            lo = x
         else:
-            hi = mid
-        if hi - lo < tol:
-            break
+            hi = x
+        # Newton step on the bracketed root; bisect whenever Newton leaves the bracket
+        pdf = math.exp(lbeta + (a - 1.0) * math.log(x) + (b - 1.0) * math.log(1.0 - x)) if 0.0 < x < 1.0 else 0.0
+        nxt = x - err / pdf if pdf > 0.0 else -1.0
+        if not (lo < nxt < hi):
+            nxt = 0.5 * (lo + hi)
+        if abs(nxt - x) < tol or hi - lo < tol:
+            return nxt
+        x = nxt
     return 0.5 * (lo + hi)
 
 
 # --- predictor ----------------------------------------------------------------
+
+def _round_or_none(value: float | None, digits: int = 4) -> float | None:
+    return None if value is None else round(value, digits)
+
 
 class ExperiencePredictor:
     """Online predictor over Cam's experience stream.
@@ -651,70 +671,70 @@ class ExperiencePredictor:
                 n_eff += w
         return a, bb, n_eff
 
-    def predict(self, ctx: dict[str, Any], now: datetime | None = None) -> dict[str, Any]:
-        ref = now or self.now or datetime.now(timezone.utc)
-        keys = context_keys(ctx)
+    def _backoff(self, keys: dict[str, str | None], ref: datetime) -> dict[str, Any]:
+        """Hierarchical backoff, coarse → fine: each level's posterior mean becomes
+        the next finer level's prior (shrinkage toward the parent)."""
         cfg = self.cfg
-        strength = float(cfg["backoff_prior_strength"])
-        floor = float(cfg["prior_floor"])
-
-        # hierarchical backoff: coarse → fine, each level's posterior mean becomes
-        # the next finer level's prior (shrinkage toward the parent)
+        strength, floor = float(cfg["backoff_prior_strength"]), float(cfg["prior_floor"])
         prior_a, prior_b = float(cfg["prior_alpha"]), float(cfg["prior_beta"])
-        chain = []
-        final = (prior_a, prior_b, 0.0, "prior", "global")
-        drift_flags: list[str] = []
+        a, b, n_eff, key_used = prior_a, prior_b, 0.0, "global"
+        chain: list[dict[str, Any]] = []
         for level in reversed(BACKOFF_ORDER):
             key = keys.get(level)
             if not key:
                 continue
             a, b, n_eff = self._posterior(key, ref, prior_a, prior_b)
+            key_used = key
             mean = a / (a + b)
-            drifting = self.drift_suspected(key)
-            if drifting:
-                drift_flags.append(key)
             children = len((self.stats.get(key) or {}).get("children") or ())
-            chain.append({"level": level, "key": key, "n_effective": round(n_eff, 3), "mean": round(mean, 4), "children": children, "drift": drifting})
+            chain.append({"level": level, "key": key, "n_effective": round(n_eff, 3), "mean": round(mean, 4), "children": children, "drift": self.drift_suspected(key)})
             # a parent whose evidence comes from a single child is a weak prior for its siblings
-            eff_strength = strength * (float(cfg["backoff_single_child_factor"]) if children <= 1 else 1.0)
-            prior_a, prior_b = max(floor, eff_strength * mean), max(floor, eff_strength * (1.0 - mean))
-            final = (a, b, n_eff, level, key)
-        a, b, n_eff, _level_used, key_used = final
+            eff = strength * (float(cfg["backoff_single_child_factor"]) if children <= 1 else 1.0)
+            prior_a, prior_b = max(floor, eff * mean), max(floor, eff * (1.0 - mean))
         min_n = float(cfg["min_effective_n"])
-        evidence_level = next((c["level"] for c in reversed(chain) if c["n_effective"] >= min_n), "prior")
-        evidence_key = next((c["key"] for c in reversed(chain) if c["n_effective"] >= min_n), "global")
-        mass = float(cfg["credible_mass"])
+        with_evidence = next((c for c in reversed(chain) if c["n_effective"] >= min_n), None)
+        return {
+            "a": a,
+            "b": b,
+            "n_effective": n_eff,
+            "key_used": key_used,
+            "chain": chain,
+            "drift_flags": [c["key"] for c in chain if c["drift"]],
+            "evidence_level": with_evidence["level"] if with_evidence else "prior",
+            "evidence_key": with_evidence["key"] if with_evidence else "global",
+        }
+
+    def predict(self, ctx: dict[str, Any], now: datetime | None = None) -> dict[str, Any]:
+        ref = now or self.now or datetime.now(timezone.utc)
+        keys = context_keys(ctx)
+        bo = self._backoff(keys, ref)
+        a, b = bo["a"], bo["b"]
+        mass = float(self.cfg["credible_mass"])
         lo = beta_quantile((1.0 - mass) / 2.0, a, b)
         hi = beta_quantile(1.0 - (1.0 - mass) / 2.0, a, b)
         p = a / (a + b)
-
-        score_stats = self._weighted_stats(evidence_key, ref, index=2)
-        dur_stats = self._weighted_stats(evidence_key, ref, index=3)
-        bucket = self.stats.get(evidence_key) or {}
-        td_value = bucket.get("td_value")
-        evidence = self._evidence(keys, ref)
-        ethics = load_ethics()
+        bucket = self.stats.get(bo["evidence_key"]) or {}
         result = {
             "p_success": round(p, 4),
             "credible_interval": [round(lo, 4), round(hi, 4)],
             "credible_mass": mass,
-            "n_effective": round(n_eff, 3),
-            "evidence_level": evidence_level,
-            "evidence_key": evidence_key,
-            "resolved_key": key_used,
-            "backoff_chain": chain,
-            "expected_score": score_stats,
-            "expected_duration_s": dur_stats,
-            "td_value": None if td_value is None else round(td_value, 4),
+            "n_effective": round(bo["n_effective"], 3),
+            "evidence_level": bo["evidence_level"],
+            "evidence_key": bo["evidence_key"],
+            "resolved_key": bo["key_used"],
+            "backoff_chain": bo["chain"],
+            "expected_score": self._weighted_stats(bo["evidence_key"], ref, index=2),
+            "expected_duration_s": self._weighted_stats(bo["evidence_key"], ref, index=3),
+            "td_value": _round_or_none(bucket.get("td_value")),
             "td_updates": bucket.get("td_updates", 0),
-            "last_surprise": None if bucket.get("last_surprise") is None else round(bucket["last_surprise"], 4),
+            "last_surprise": _round_or_none(bucket.get("last_surprise")),
             "surprise_if_fail": round(-math.log(max(1e-9, 1.0 - p)), 4),
             "surprise_if_ok": round(-math.log(max(1e-9, p)), 4),
             "confidence": round(1.0 - (hi - lo), 4),
-            "drift_suspected": drift_flags,
+            "drift_suspected": bo["drift_flags"],
             "protected_context": is_protected(ctx),
-            "evidence": evidence,
-            "limitations": (ethics.get("prediction_card") or {}).get("limitations") or [],
+            "evidence": self._evidence(keys, ref),
+            "limitations": (load_ethics().get("prediction_card") or {}).get("limitations") or [],
         }
         result["advice"] = self._advice(result)
         result["narration"] = narrate(result)
@@ -799,11 +819,14 @@ class ExperiencePredictor:
 
 
 def narrate(r: dict[str, Any]) -> str:
-    """A hedged sentence Cam can say out loud — numbers always come with their doubt."""
+    """A hedged sentence Cam can say out loud — numbers always come with their doubt.
+
+    Driven by ``advice.stance`` so the spoken line can never disagree with the card.
+    """
     lo, hi = r["credible_interval"]
     n = r["n_effective"]
-    stance = (r.get("advice") or {}).get("stance") if r.get("advice") else None
-    if r.get("protected_context"):
+    stance = r["advice"]["stance"]
+    if stance == "human_judgment_required":
         if r["evidence_level"] == "prior" or n < 1.0:
             return "This touches people or something I shouldn't decide alone, and I have no real experience with it — no number from me. The call is yours."
         return (
@@ -811,12 +834,12 @@ def narrate(r: dict[str, Any]) -> str:
             f"in about {n:.1f} weighted past runs it went well roughly {r['p_success']:.0%} of the time "
             f"({lo:.0%} to {hi:.0%}). The call is yours."
         )
-    if r["evidence_level"] == "prior":
+    if stance == "no_experience_yet":
         return "I haven't done anything like this before, so I won't give you a number — let's try it and I'll learn."
-    if stance == "abstain" or n < 1.0 or (hi - lo) > 0.6:
+    if stance == "abstain":
         have = "almost no experience with this exact situation" if n < 1.0 else f"only about {n:.1f} runs' worth of experience here"
         return f"I have {have}, and the honest range is {lo:.0%} to {hi:.0%} — too wide to call. I'd rather say I don't know yet."
-    drift = " Recent runs surprised me, so I'm holding this looser than usual." if r.get("drift_suspected") else ""
+    drift = " Recent runs surprised me, so I'm holding this looser than usual." if r["drift_suspected"] else ""
     return (
         f"From about {n:.1f} weighted past runs, I'd expect this to go well roughly {r['p_success']:.0%} of the time "
         f"(somewhere between {lo:.0%} and {hi:.0%}).{drift}"
