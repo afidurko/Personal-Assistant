@@ -8,8 +8,27 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header class="topbar">
+    <a class="ident" href="/" title="Cam home">
+      <img src="/face.jpg" alt="Cam" />
+      <span class="ident-name">Cam <em>home live</em></span>
+    </a>
+    <nav class="dock" aria-label="quick access">
+      <a href="/converse/" title="talk to Cam (c)">converse <kbd>c</kbd></a>
+      <a href="/connectome/" title="3D cortex (x)">cortex 3D <kbd>x</kbd></a>
+      <button id="dockSpeak" type="button" title="make Cam speak (s)">speak <kbd>s</kbd></button>
+      <button id="dockSuggest" type="button" title="queue a suggestion (g)">suggest <kbd>g</kbd></button>
+      <button id="refreshBtn" type="button" title="recompute status (r)">refresh <kbd>r</kbd></button>
+      <button id="dockHelp" type="button" title="all shortcuts (?)">?</button>
+    </nav>
+    <div class="brainpill" id="brainPill" title="composite health from live checks">
+      <span class="pulse" aria-hidden="true"></span>
+      <span id="pillHealth">—</span>
+    </div>
+  </header>
+
   <main class="stage">
-    <header class="hero">
+    <section class="hero">
       <div class="presence">
         <div class="portrait" id="portrait">
           <img id="camFace" src="/face.jpg" alt="Cam" />
@@ -45,26 +64,71 @@
         </figure>
         <div class="brand">
           <h1>Cam</h1>
-          <p class="tag">home live · mission control</p>
-          <p class="who">operator: <strong>Aaron</strong> · kill switch always wins</p>
+          <p class="tag">mission control · operator <strong>Aaron</strong> · kill switch always wins</p>
           <form id="speakForm" class="speakrow">
             <input id="speakText" type="text" placeholder="Have Cam mouth a line… (tier 0)" />
             <button type="submit">speak</button>
           </form>
         </div>
       </div>
-      <nav class="links">
-        <a href="/converse/">converse</a>
-        <a href="/connectome/">cortex 3D</a>
-        <button id="refreshBtn" type="button">refresh</button>
-      </nav>
-    </header>
+      <div class="focuscard" id="focusCard">
+        <p class="focus-k">current focus</p>
+        <p class="focus-v" id="focusPriority">warming up…</p>
+        <p class="focus-d" id="focusDetail"></p>
+      </div>
+    </section>
+
+    <section class="brain panel" id="panelBrain">
+      <div class="brain-head">
+        <h2><span class="pulse" aria-hidden="true"></span> Cortex — live thinking</h2>
+        <p class="meta" id="brainMeta">connecting to the thought stream…</p>
+      </div>
+      <div class="brain-body">
+        <div class="brain-gauges">
+          <div class="gauge">
+            <svg viewBox="0 0 84 84" class="ring">
+              <circle cx="42" cy="42" r="36" class="ring-bg" />
+              <circle cx="42" cy="42" r="36" class="ring-fg" id="healthRing" />
+            </svg>
+            <div class="gauge-num"><span id="healthNum">—</span></div>
+            <p class="gauge-k">health</p>
+          </div>
+          <div class="gauge wide">
+            <svg id="sparkline" viewBox="0 0 120 40" preserveAspectRatio="none"></svg>
+            <p class="gauge-k">trend · <span id="trendWord">—</span></p>
+          </div>
+          <div class="gauge">
+            <div class="gauge-num big"><span id="calibNum">—</span></div>
+            <p class="gauge-k">predictions held<br /><span id="calibSub" class="sub">no samples yet</span></p>
+          </div>
+        </div>
+
+        <div class="brain-cols">
+          <div class="thoughts">
+            <h3>thought stream</h3>
+            <ol class="feed" id="thoughtFeed" aria-live="polite"></ol>
+          </div>
+          <div class="fore">
+            <h3>predictive measures</h3>
+            <ul class="preds" id="predList"></ul>
+            <h3>next moves</h3>
+            <ol class="moves" id="actionList"></ol>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="grid">
       <article class="panel" id="panelSystem">
         <h2>What's running</h2>
         <p class="meta" id="systemMeta">loading…</p>
         <ul class="list" id="systemList"></ul>
+      </article>
+
+      <article class="panel" id="panelAttention">
+        <h2>Needs help</h2>
+        <p class="meta" id="attentionMeta">loading…</p>
+        <ul class="list" id="attentionList"></ul>
       </article>
 
       <article class="panel" id="panelPlan">
@@ -77,12 +141,6 @@
         <h2>Auto-sync</h2>
         <p class="meta" id="syncMeta">loading…</p>
         <ul class="list" id="syncList"></ul>
-      </article>
-
-      <article class="panel" id="panelAttention">
-        <h2>Needs help</h2>
-        <p class="meta" id="attentionMeta">loading…</p>
-        <ul class="list" id="attentionList"></ul>
       </article>
 
       <article class="panel" id="panelAvatar">
@@ -98,9 +156,9 @@
       </article>
     </section>
 
-    <section class="panel suggest">
+    <section class="panel suggest" id="panelSuggest">
       <h2>Suggest a change</h2>
-      <p class="meta">Queued to the inbox and triaged into tickets — you have ultimate say.</p>
+      <p class="meta">Queued to the inbox, surfaced first in dispatch — you have ultimate say.</p>
       <form id="suggestForm">
         <textarea id="suggestText" rows="3" placeholder="What should Cam change, build, or look into?"></textarea>
         <div class="row">
@@ -113,6 +171,23 @@
 
     <footer class="meta foot" id="footNote">—</footer>
   </main>
+
+  <div class="overlay" id="helpOverlay" hidden>
+    <div class="overlay-card">
+      <h2>Quick access</h2>
+      <ul class="keys">
+        <li><kbd>c</kbd> open converse (talk to Cam) · also <code>/cam</code></li>
+        <li><kbd>x</kbd> open 3D cortex · also <code>/cortex</code></li>
+        <li><kbd>s</kbd> focus the speak box</li>
+        <li><kbd>g</kbd> focus the suggestion box</li>
+        <li><kbd>r</kbd> refresh status in background</li>
+        <li><kbd>b</kbd> jump to the brain panel</li>
+        <li><kbd>?</kbd> toggle this help · <kbd>esc</kbd> close</li>
+      </ul>
+      <p class="meta">Shortcuts pause while you're typing in a field.</p>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

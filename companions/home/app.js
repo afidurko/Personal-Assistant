@@ -184,6 +184,203 @@ $("refreshBtn").addEventListener("click", async () => {
   setTimeout(loadStatus, 8000);
 });
 
+/* ---- Cortex: live thinking (SSE with polling fallback) ---- */
+
+const RING_C = 226.2;
+
+function thoughtRow(th) {
+  const el = document.createElement("li");
+  const chip = document.createElement("span");
+  chip.className = `stagechip ${th.stage}`;
+  chip.textContent = th.stage;
+  el.appendChild(chip);
+  const body = document.createElement("span");
+  body.textContent = th.text;
+  el.appendChild(body);
+  const t = document.createElement("span");
+  t.className = "t";
+  t.textContent = (th.at || "").slice(11, 19);
+  el.appendChild(t);
+  return el;
+}
+
+function pushThought(th) {
+  const feed = $("thoughtFeed");
+  feed.appendChild(thoughtRow(th));
+  while (feed.children.length > 60) feed.removeChild(feed.firstChild);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function renderSparkline(history) {
+  const svg = $("sparkline");
+  svg.replaceChildren();
+  if (!history || history.length < 2) return;
+  const min = Math.min(...history) - 3;
+  const max = Math.max(...history) + 3;
+  const pts = history.map((h, i) => {
+    const x = (i / (history.length - 1)) * 118 + 1;
+    const y = 38 - ((h - min) / Math.max(1, max - min)) * 34;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const area = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+  area.setAttribute("class", "area");
+  area.setAttribute("points", `1,39 ${pts.join(" ")} 119,39`);
+  svg.appendChild(area);
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+  line.setAttribute("points", pts.join(" "));
+  svg.appendChild(line);
+}
+
+function renderBrain(state) {
+  const m = state.metrics || {};
+  $("brainMeta").textContent =
+    `cycle ${state.tick} · ${state.at} · derived from live checks — nothing invented`;
+  if (m.health != null) {
+    $("healthNum").textContent = m.health;
+    const ring = $("healthRing");
+    ring.style.strokeDashoffset = (RING_C * (1 - m.health / 100)).toFixed(1);
+    ring.style.stroke = m.health >= 75 ? "var(--ok)" : m.health >= 50 ? "var(--warn)" : "var(--bad)";
+    $("pillHealth").innerHTML = `brain <strong>${m.health}</strong> · ${m.trend}`;
+  }
+  $("trendWord").textContent = m.trend || "—";
+  renderSparkline(m.history);
+  $("calibNum").textContent = m.prediction_accuracy != null ? `${m.prediction_accuracy}%` : "—";
+  $("calibSub").textContent = m.predictions_scored
+    ? `${m.predictions_scored} scored so far`
+    : "no samples yet";
+
+  const focus = state.focus || {};
+  $("focusPriority").textContent = focus.priority || "—";
+  $("focusDetail").textContent = focus.detail || "";
+
+  fill(
+    $("predList"),
+    (state.predictions || []).slice(0, 5).map((p) => {
+      const el = document.createElement("li");
+      const txt = document.createElement("span");
+      txt.textContent = p.statement;
+      el.appendChild(txt);
+      const bar = document.createElement("div");
+      bar.className = "pbar";
+      const fillEl = document.createElement("span");
+      fillEl.style.width = `${Math.round(p.probability * 100)}%`;
+      bar.appendChild(fillEl);
+      el.appendChild(bar);
+      const meta = document.createElement("div");
+      meta.className = "pmeta";
+      meta.innerHTML = `<span>p=${p.probability} · ${p.horizon}</span><span>${p.evidence}</span>`;
+      el.appendChild(meta);
+      return el;
+    })
+  );
+
+  fill(
+    $("actionList"),
+    (state.actions || []).slice(0, 5).map((a) => {
+      const el = document.createElement("li");
+      const t = document.createElement("span");
+      t.textContent = `${a.title} — `;
+      el.appendChild(t);
+      const g = document.createElement("span");
+      g.className = "gate";
+      g.textContent = a.gate;
+      el.appendChild(g);
+      const c = document.createElement("span");
+      c.className = "cmd";
+      c.textContent = a.command;
+      el.appendChild(c);
+      return el;
+    })
+  );
+}
+
+let brainSeq = 0;
+
+function connectBrain() {
+  try {
+    const es = new EventSource("/api/brain/stream");
+    es.addEventListener("state", (ev) => {
+      const state = JSON.parse(ev.data);
+      renderBrain(state);
+      (state.thoughts || []).forEach((th) => {
+        if (th.seq > brainSeq) {
+          pushThought(th);
+          brainSeq = th.seq;
+        }
+      });
+    });
+    es.addEventListener("thought", (ev) => {
+      const th = JSON.parse(ev.data);
+      if (th.seq > brainSeq) {
+        pushThought(th);
+        brainSeq = th.seq;
+      }
+    });
+    es.onerror = () => {
+      es.close();
+      setTimeout(pollBrain, 4000);
+    };
+  } catch {
+    pollBrain();
+  }
+}
+
+async function pollBrain() {
+  try {
+    const r = await fetch("/api/brain/state");
+    const state = await r.json();
+    renderBrain(state);
+    (state.thoughts || []).forEach((th) => {
+      if (th.seq > brainSeq) {
+        pushThought(th);
+        brainSeq = th.seq;
+      }
+    });
+  } catch {
+    /* retry on next interval */
+  }
+  setTimeout(pollBrain, 15000);
+}
+
+/* ---- quick access: dock + keyboard shortcuts ---- */
+
+function focusSpeak() {
+  $("speakText").focus();
+  $("speakText").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function focusSuggest() {
+  $("suggestText").focus();
+  $("suggestText").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+$("dockSpeak").addEventListener("click", focusSpeak);
+$("dockSuggest").addEventListener("click", focusSuggest);
+$("dockHelp").addEventListener("click", () => {
+  $("helpOverlay").hidden = !$("helpOverlay").hidden;
+});
+$("helpOverlay").addEventListener("click", (ev) => {
+  if (ev.target === $("helpOverlay")) $("helpOverlay").hidden = true;
+});
+
+document.addEventListener("keydown", (ev) => {
+  const typing = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
+  if (ev.key === "Escape") {
+    $("helpOverlay").hidden = true;
+    if (typing) document.activeElement.blur();
+    return;
+  }
+  if (typing || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+  switch (ev.key) {
+    case "c": window.location.href = "/converse/"; break;
+    case "x": window.location.href = "/connectome/"; break;
+    case "s": ev.preventDefault(); focusSpeak(); break;
+    case "g": ev.preventDefault(); focusSuggest(); break;
+    case "r": $("refreshBtn").click(); break;
+    case "b": $("panelBrain").scrollIntoView({ behavior: "smooth" }); break;
+    case "?": $("helpOverlay").hidden = !$("helpOverlay").hidden; break;
+  }
+});
+
 /* ---- AvatarFrame rig (tier 0 procedural) ---- */
 
 const rig = {
@@ -262,4 +459,5 @@ $("speakForm").addEventListener("submit", async (ev) => {
 
 loadStatus();
 loadSuggestions();
+connectBrain();
 setInterval(loadStatus, 90000);

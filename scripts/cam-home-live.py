@@ -30,6 +30,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import cam_avatar  # noqa: E402
+import cam_cortex  # noqa: E402
 
 HOME_WEB = ROOT / "companions" / "home"
 CONVERSE_WEB = ROOT / "companions" / "web"
@@ -54,6 +55,24 @@ MIME = {
 
 _status_lock = threading.Lock()
 _status_cache: dict = {"at": 0.0, "data": None, "refreshing": False}
+
+CORTEX = cam_cortex.Cortex()
+CORTEX_TICK_S = 25
+
+
+def brain_state() -> dict:
+    if CORTEX.tick_count == 0:
+        CORTEX.tick(get_status())
+    return CORTEX.state()
+
+
+def cortex_loop() -> None:
+    while True:
+        try:
+            CORTEX.tick(get_status())
+        except Exception:
+            pass
+        time.sleep(CORTEX_TICK_S)
 
 
 def utc() -> str:
@@ -179,10 +198,50 @@ class Handler(BaseHTTPRequestHandler):
         ctype = MIME.get(path.suffix.lower(), "application/octet-stream")
         self._send(200, path.read_bytes(), ctype)
 
+    def _redirect(self, target: str) -> None:
+        self.send_response(302)
+        self.send_header("Location", target)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    def _brain_stream(self) -> None:
+        """Server-sent events: live thought feed + state snapshots."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "keep-alive")
+        self.end_headers()
+
+        def emit(event: str, obj) -> None:
+            payload = f"event: {event}\ndata: {json.dumps(obj)}\n\n"
+            self.wfile.write(payload.encode("utf-8"))
+            self.wfile.flush()
+
+        try:
+            state = brain_state()
+            emit("state", state)
+            seq = max((t["seq"] for t in state["thoughts"]), default=0)
+            last_tick = state["tick"]
+            while True:
+                time.sleep(1.5)
+                fresh = CORTEX.thoughts_since(seq)
+                for th in fresh:
+                    emit("thought", th)
+                    seq = th["seq"]
+                if CORTEX.tick_count != last_tick:
+                    last_tick = CORTEX.tick_count
+                    emit("state", CORTEX.state())
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
+
     def do_GET(self) -> None:  # noqa: N802
         p = urlparse(self.path).path
         if p == "/api/home/status":
             self._json(get_status())
+        elif p == "/api/brain/state":
+            self._json(brain_state())
+        elif p == "/api/brain/stream":
+            self._brain_stream()
         elif p == "/api/avatar/contract":
             self._json(cam_avatar.contract())
         elif p == "/api/home/suggestions":
@@ -191,6 +250,10 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"ok": True, "at": utc(), "app": "cam-home-live"})
         elif p == "/face.jpg":
             self._static(FACE.parent, FACE.name)
+        elif p in ("/cam", "/cam/"):
+            self._redirect("/converse/")
+        elif p in ("/cortex", "/cortex/"):
+            self._redirect("/connectome/")
         elif p.startswith("/converse"):
             self._static(CONVERSE_WEB, p[len("/converse") :])
         elif p.startswith("/connectome"):
@@ -237,6 +300,7 @@ def main() -> int:
 
     if args.warm:
         get_status(force=True)
+    threading.Thread(target=cortex_loop, daemon=True).start()
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"Cam Home Live → http://{args.host}:{args.port}", flush=True)
     try:

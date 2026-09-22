@@ -26,6 +26,11 @@ spec.loader.exec_module(mod)
 mod.SUGGESTIONS = Path(tempfile.mkdtemp()) / "home-suggestions.jsonl"
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
 class CamHomeLiveTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -108,6 +113,28 @@ class CamHomeLiveTests(unittest.TestCase):
         status, body = self._get("/api/avatar/contract")
         self.assertEqual(status, 200)
         self.assertEqual(len(json.loads(body)["blendshape_keys"]), 52)
+
+    def test_brain_state_endpoint(self) -> None:
+        status, body = self._get("/api/brain/state")
+        self.assertEqual(status, 200)
+        state = json.loads(body)
+        self.assertGreaterEqual(state["tick"], 1)
+        self.assertIn("health", state["metrics"])
+        self.assertTrue(state["thoughts"])
+        self.assertTrue(state["predictions"])
+        self.assertTrue(state["actions"])
+        self.assertIn("priority", state["focus"])
+
+    def test_quick_access_redirects(self) -> None:
+        for path, target in (("/cam", "/converse/"), ("/cortex", "/connectome/")):
+            req = urllib.request.Request(f"http://127.0.0.1:{self.port}{path}")
+            opener = urllib.request.build_opener(NoRedirect)
+            try:
+                opener.open(req, timeout=10)
+                self.fail("expected redirect")
+            except urllib.error.HTTPError as e:
+                self.assertEqual(e.code, 302)
+                self.assertEqual(e.headers["Location"], target)
 
     def test_traversal_blocked(self) -> None:
         try:
