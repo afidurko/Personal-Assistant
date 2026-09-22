@@ -918,6 +918,83 @@
       "integration": "config/integrations/inkbox.json",
       "motor": null,
       "sense": "sense.inkbox.event"
+    },
+    {
+      "created_by_role": "privacy-officer",
+      "kind": "local_script",
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.privacy.kernel",
+      "purpose": "Privacy kernel: principal scoping, seals, classify/redact, sink enforcement, HMAC ledger seals, consent (charter config/privacy/charter.json). principals add / consent / keygen are Aaron CLI (--aaron) only.",
+      "entrypoint": "scripts/cam_privacy.py",
+      "inputs": {
+        "cmd": "doctor | audit | classify | redact | principals | consent | keygen",
+        "text": "string (classify / redact)"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "findings": "object[] (class, count, where — never values)"
+      },
+      "integration": "config/privacy/charter.json",
+      "motor": null,
+      "sense": null
+    },
+    {
+      "created_by_role": "privacy-officer",
+      "kind": "local_script",
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.privacy.check",
+      "purpose": "Static + runtime wiring check for the privacy charter (team, roles, guards in every script, guest MCP gate, git hygiene, distillate audit). Part of cam-system smoke.",
+      "entrypoint": "scripts/privacy-check.py",
+      "inputs": {},
+      "outputs": {
+        "ok": "boolean",
+        "errors": "string[]"
+      },
+      "integration": "config/privacy/charter.json",
+      "motor": null,
+      "sense": null
+    },
+    {
+      "created_by_role": "tool-creator",
+      "kind": "local_script",
+      "required_privileges": [
+        "use_tool"
+      ],
+      "requires_switch": [
+        "switch.autonomy",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "id": "tool.inkbox.webhook_drop",
+      "purpose": "Verify an Inkbox webhook body (HMAC-SHA256 with INKBOX_WEBHOOK_SECRET), write one O_EXCL drop per event stamped _verified.mac so inkbox-inbound can prove authenticity.",
+      "entrypoint": "scripts/inkbox-webhook-drop.py",
+      "inputs": {
+        "file": "path (default stdin)",
+        "signature": "hex | sha256=hex"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "stored": "path"
+      },
+      "integration": "config/connectors/inbound-policy.json",
+      "motor": null,
+      "sense": "sense.inkbox.event"
     }
   ]
 }

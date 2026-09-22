@@ -17,6 +17,28 @@
   },
   "connectors": [
     {
+      "id": "privacy",
+      "label": "Privacy kernel (charter enforcement, per-person isolation)",
+      "kind": "internal",
+      "mode": "read",
+      "sense": null,
+      "motor": null,
+      "switch": "switch.kill",
+      "scripts": [
+        "scripts/cam_privacy.py",
+        "scripts/privacy-check.py"
+      ],
+      "config": "config/privacy/charter.json",
+      "mcp_tools": [
+        "privacy_status",
+        "privacy_redact",
+        "privacy_audit"
+      ],
+      "roles": "all",
+      "status": "enabled",
+      "notes": "Every storing/sharing script calls it. Sits before every distillate, mesh note and third-party draft. principals add / consent / keygen are Aaron CLI (--aaron) — never MCP."
+    },
+    {
       "id": "instinct",
       "label": "Cam Instinct (follow-through ledger)",
       "kind": "internal",
@@ -106,9 +128,11 @@
       ],
       "scripts": [
         "scripts/inkbox-inbound.py",
+        "scripts/inkbox-webhook-drop.py",
         "scripts/inkbox-check.py"
       ],
       "config": "config/integrations/inkbox.json",
+      "policy": "config/connectors/inbound-policy.json",
       "mcp_tools": [
         "inkbox_inbound"
       ],
@@ -119,7 +143,7 @@
         "chief"
       ],
       "status": "enabled_needs_credential",
-      "notes": "Consumes event JSON dropped in data/inkbox/inbound/ (webhook or SDK export). Bodies are stored as data only, links/attachments stripped, never executed."
+      "notes": "Consumes event JSON dropped in data/inkbox/inbound/ by inkbox-webhook-drop.py (HMAC-verified, O_EXCL). Sender tiers per inbound-policy.json (known/unknown/blocked). Bodies are stored as data only, links/attachments stripped, never executed."
     },
     {
       "id": "inkbox.outbound",

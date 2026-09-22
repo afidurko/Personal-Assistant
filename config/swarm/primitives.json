@@ -43,6 +43,7 @@
         "team.tooling",
         "team.follow-through",
         "team.needs-attention",
+        "team.privacy",
         "mesh.all"
       ],
       "requires_switch": [

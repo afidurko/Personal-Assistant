@@ -10,7 +10,8 @@
     "outbound_send / careers_submit are never in a role default — they are granted per task by Aaron flipping switch.outbound / switch.careers_submit.",
     "Runtime: scripts/cam_swarm.py enforces these defaults at spawn (child ⊆ parent, level = parent + 1, unlimited count).",
     "non_inheritable: privileges only the chief may hold (live use is decided by switch.outbound / switch.careers_submit). They are stripped at spawn even though child ⊆ parent would allow them; cam_swarm doctor flags any other holder.",
-    "Reserved roles: chief, aaron, human, human.aaron cannot be spawned. Spawning under human.aaron and acting as human.aaron require the CLI --aaron flag; the MCP server never passes it."
+    "Reserved roles: chief, aaron, human, human.aaron cannot be spawned. Spawning under human.aaron and acting as human.aaron require the CLI --aaron flag; the MCP server never passes it.",
+    "disclose_personal (config/privacy/charter.json) is Aaron-only: releasing any personal information or preference to another person, agent, service or channel is never an agent privilege. Sharing with a named recipient happens only through Aaron's consent record."
   ],
   "levels": {
     "0": {
@@ -48,7 +49,8 @@
       "kill_master",
       "cam_enhance_apply",
       "revoke_standing_autonomy",
-      "enroll_identity"
+      "enroll_identity",
+      "disclose_personal"
     ],
     "agent_grantable": [
       "spawn_subagents",
@@ -390,6 +392,76 @@
         "web_fetch",
         "outbound_draft"
       ]
+    },
+    "privacy-officer": {
+      "level": 2,
+      "team": "team.privacy",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "broadcast",
+        "send_message",
+        "resolve_task",
+        "terminate_lineage",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "use_slm",
+        "use_tool"
+      ],
+      "notes": "No web_fetch, no outbound_*: nothing the privacy team touches can leave the machine. write_vault withheld — it blocks writes, it does not author them."
+    },
+    "redactor": {
+      "level": 3,
+      "team": "team.privacy",
+      "privileges": [
+        "spawn_subagents",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "use_slm",
+        "use_tool"
+      ]
+    },
+    "boundary-auditor": {
+      "level": 3,
+      "team": "team.privacy",
+      "privileges": [
+        "spawn_subagents",
+        "assign_task",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "use_tool"
+      ],
+      "notes": "Tests access, never reads content; no write_mesh so a probe cannot leave residue."
+    },
+    "memory-steward": {
+      "level": 3,
+      "team": "team.privacy",
+      "privileges": [
+        "spawn_subagents",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "write_mesh",
+        "read_vault",
+        "use_slm",
+        "use_tool"
+      ]
+    },
+    "consent-keeper": {
+      "level": 3,
+      "team": "team.privacy",
+      "privileges": [
+        "spawn_subagents",
+        "send_message",
+        "resolve_task",
+        "read_mesh",
+        "use_tool"
+      ],
+      "notes": "Reads identity/aaron/local/consent.json; never writes it (Aaron CLI only)."
     }
   },
   "inheritance_rules": {

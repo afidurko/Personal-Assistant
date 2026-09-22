@@ -364,7 +364,8 @@
     "team.info",
     "team.tooling",
     "team.needs-attention",
-    "team.follow-through"
+    "team.follow-through",
+    "team.privacy"
   ],
   "recursion": {
     "max_delegate_depth": null,

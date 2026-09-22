@@ -1,0 +1,66 @@
+{
+  "id": "team.privacy",
+  "name": "Privacy Team (personal-information secrecy)",
+  "purpose": "Guarantee that Aaron's personal information and preferences are kept solely to help Aaron and never released to any other person, agent, service, distillate or channel; keep every other person's prompts and memory individual and unshared. The team audits, redacts and blocks — it never decides to share (only Aaron's consent record can).",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-22",
+  "charter": "config/privacy/charter.json",
+  "lead_center": "center.memory",
+  "lead_role": "privacy-officer",
+  "members": [
+    {
+      "role": "privacy-officer",
+      "job": "Own the charter. Run cam_privacy doctor + audit on every loop tick and before any distillate leaves; block on a high finding; escalate to Aaron only (never to another principal or channel).",
+      "spawns_subagents": true
+    },
+    {
+      "role": "redactor",
+      "job": "Scrub anything crossing a boundary: mesh notes, briefs shared outward, drafts addressed to third parties. Replace values with class tags; never paraphrase personal facts back in.",
+      "spawns_subagents": true
+    },
+    {
+      "role": "boundary-auditor",
+      "job": "Red-team the isolation: seals, permissions, HMAC state, guest roots, MCP allowlist, env overrides. Try to reach owner data from a guest principal and report every path that works.",
+      "spawns_subagents": true
+    },
+    {
+      "role": "memory-steward",
+      "job": "Per-person memory hygiene: honour forget requests, retention windows and the rule that no memory is compared or merged across people; keep MemoryBear owner-scoped and guest memory inside the guest root.",
+      "spawns_subagents": true
+    },
+    {
+      "role": "consent-keeper",
+      "job": "Read Aaron's consent record for every third-party draft; confirm recipient + classes + expiry; default answer is no. Never writes consent — Aaron does, at the CLI.",
+      "spawns_subagents": true
+    },
+    {
+      "role": "qa",
+      "job": "Verify every privacy fix has a replayable regression test; keep privacy-check green in cam-system smoke.",
+      "spawns_subagents": true
+    }
+  ],
+  "human_ultimate_say": {
+    "disclosure": "only Aaron may release personal information (privilege disclose_personal is Aaron-only; consent grants are CLI --aaron)",
+    "enrolling_people": "only Aaron adds a principal (cam_privacy.py --aaron principals add)",
+    "keys": "only Aaron creates or rotates the ledger HMAC key",
+    "kill_switch": "Aaron anytime (cam_swarm.py kill)"
+  },
+  "boundaries": [
+    "No member holds web_fetch, outbound_draft, outbound_send or careers_*: nothing this team touches can leave the machine.",
+    "Findings carry classes, counts and locations — never the matched values.",
+    "The team blocks writes; it never rewrites personal facts into a 'safer' form that still identifies someone.",
+    "Cross-principal comparison is forbidden even for auditing; the boundary-auditor tests access, not content."
+  ],
+  "subagents": {
+    "unlimited": true,
+    "human_gate_to_spawn": false,
+    "privilege_inheritance": true,
+    "lineage_terminate": true,
+    "runtime": "scripts/cam_swarm.py"
+  },
+  "related_teams": ["team.follow-through", "team.needs-attention", "team.capability"],
+  "pathway_hotspot": "hotspot.instinct",
+  "scripts": ["scripts/cam_privacy.py", "scripts/privacy-check.py"],
+  "loop_action": "privacy_audit",
+  "notes": "Stands between every distillate/draft and the outside. Complements, never replaces, the draft-only outbound rule."
+}

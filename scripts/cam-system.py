@@ -88,6 +88,7 @@ def smoke_checks() -> list[dict]:
         ("swarm-check", [sys.executable, "scripts/swarm-check.py"]),
         ("connectors-check", [sys.executable, "scripts/connectors-check.py"]),
         ("swarm-runtime-doctor", [sys.executable, "scripts/cam_swarm.py", "doctor"]),
+        ("privacy-check", [sys.executable, "scripts/privacy-check.py"]),
         (
             "workspace-integration-check",
             [sys.executable, "scripts/workspace-integration-check.py"],

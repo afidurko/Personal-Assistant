@@ -212,6 +212,16 @@ def action_instinct_distill() -> dict:
     return run_py("scripts/instinct.py", ["distill"])
 
 
+def action_privacy_audit() -> dict:
+    """Privacy Team tick (config/teams/privacy.json): doctor (seals, modes,
+    keys) + audit of every distillate / cache written this run. Runs after
+    the distills so a leak is caught the same night it would appear."""
+    return {
+        "doctor": run_py("scripts/cam_privacy.py", ["doctor"]),
+        "audit": run_py("scripts/cam_privacy.py", ["audit"]),
+    }
+
+
 def action_list_open_prs_report() -> dict:
     proc = subprocess.run(
         ["gh", "pr", "list", "--limit", "10", "--json", "number,title,url,isDraft"],
@@ -274,6 +284,8 @@ def run_pattern(pattern: dict, level: str, dry_run: bool) -> dict:
             results[act] = action_instinct_scan()
         elif act == "instinct_distill":
             results[act] = action_instinct_distill()
+        elif act == "privacy_audit":
+            results[act] = action_privacy_audit()
         elif act in {"update_state", "append_run_log", "pack_mesh"}:
             continue
         else:

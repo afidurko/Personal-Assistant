@@ -128,6 +128,7 @@
         "instinct_scan",
         "instinct_distill",
         "swarm_distill",
+        "privacy_audit",
         "update_state",
         "append_run_log",
         "pack_mesh"
