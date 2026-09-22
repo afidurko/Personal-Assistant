@@ -211,5 +211,226 @@ class CliTests(unittest.TestCase):
             self.assertEqual(len(ce.read_jsonl(Path(tmp) / "exp.jsonl")), 1)
 
 
+class SurvivalTests(unittest.TestCase):
+    """Each test encodes a way the first draft would have failed."""
+
+    def test_cross_source_duplicate_collapses_but_same_source_does_not(self) -> None:
+        ts = stamp(T0)
+        a = ce.make_experience(ok=True, ts=ts, source="loop_run_log", hotspot="hotspot.loop_engineering", pattern="daily-triage", score=None)
+        b = ce.make_experience(ok=True, ts=ts, source="loop_run_latest", hotspot="hotspot.loop_engineering", pattern="daily-triage", score=91.0)
+        q1 = ce.make_experience(ok=True, ts=ts, source="qa_cycle", hotspot="hotspot.qa_cycle", pattern="qa-cycle", ref="cycle-01")
+        q2 = ce.make_experience(ok=False, ts=ts, source="qa_cycle", hotspot="hotspot.qa_cycle", pattern="qa-cycle", ref="cycle-02")
+        merged, removed = ce.dedupe([a, b, q1, q2])
+        self.assertEqual(removed, 1)
+        self.assertEqual(len(merged), 3)
+        loop = next(m for m in merged if m["context"]["hotspot"] == "hotspot.loop_engineering")
+        self.assertEqual(loop["outcome"]["score"], 91.0)  # richer field merged in
+        self.assertEqual(loop["source"], "loop_run_latest+loop_run_log")
+
+    def test_live_load_removes_latest_json_duplicate(self) -> None:
+        exps, counts = ce.load_experiences()
+        loop = [e for e in exps if e["context"]["hotspot"] == "hotspot.loop_engineering"]
+        stamps = [e["ts"] for e in loop]
+        self.assertEqual(len(stamps), len(set(stamps)), "same loop run counted twice")
+        self.assertGreaterEqual(counts["_duplicates_removed"], 0)
+
+    def test_unknown_timestamp_is_not_fresh(self) -> None:
+        m = ce.ExperiencePredictor({"unknown_ts_weight": 0.25})
+        ref = T0 + timedelta(days=1)
+        self.assertAlmostEqual(m._decay(None, ref), 0.25)
+        self.assertGreater(m._decay(T0, ref), 0.9)
+        bad = ce.make_experience(ok=False, ts="not-a-date", hotspot="hotspot.h")
+        m.update(bad)
+        self.assertEqual(m.predict({"hotspot": "hotspot.h"}, now=ref)["n_effective"], 0.25)
+
+    def test_source_error_is_isolated(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            bad = Path(tmp) / "bad.jsonl"
+            bad.write_bytes(b"\xff\xfe not utf8 \x00")
+            exps, counts = ce.load_experiences(offline=True, extra=[bad])
+            self.assertGreaterEqual(counts["fixture"], 50)
+            self.assertEqual(counts["_source_errors"], 1)
+            self.assertEqual(ce.LAST_SOURCE_ERRORS[0]["source"], "extra:bad.jsonl")
+            self.assertGreaterEqual(len(exps), 50)
+
+    def test_drift_detection_widens_interval(self) -> None:
+        m = ce.ExperiencePredictor({"half_life_days": 365.0, "drift_surprise_above": 0.6, "drift_ewma_beta": 0.5})
+        t = T0
+        for _ in range(12):
+            m.update(ce.make_experience(ok=True, ts=stamp(t), hotspot="hotspot.h", score=None))
+            t += timedelta(hours=1)
+        stable = m.predict({"hotspot": "hotspot.h"}, now=t)
+        self.assertFalse(stable["drift_suspected"])
+        for _ in range(3):
+            m.update(ce.make_experience(ok=False, ts=stamp(t), hotspot="hotspot.h", score=None))
+            t += timedelta(hours=1)
+        shifted = m.predict({"hotspot": "hotspot.h"}, now=t)
+        self.assertIn("hotspot:hotspot.h", shifted["drift_suspected"])
+        self.assertTrue(shifted["advice"]["suggest_gather_more"])
+        width = lambda r: r["credible_interval"][1] - r["credible_interval"][0]  # noqa: E731
+        self.assertGreater(width(shifted), width(stable))
+        # without inflation the same evidence would give a narrower interval
+        m.cfg["drift_inflation"] = 1.0
+        self.assertLess(width(m.predict({"hotspot": "hotspot.h"}, now=t)), width(shifted))
+
+    def test_single_child_parent_is_weak_prior(self) -> None:
+        # center.qa evidence comes only from hotspot.qa_cycle; a sibling hotspot must not inherit it fully
+        spec = [("hotspot.qa_cycle", True)] * 40
+        exps = stream(spec)
+        strong = ce.ExperiencePredictor({"backoff_single_child_factor": 1.0, "half_life_days": 365.0})
+        weak = ce.ExperiencePredictor({"backoff_single_child_factor": 0.5, "half_life_days": 365.0})
+        for e in exps:
+            strong.update(e)
+            weak.update(e)
+        ctx = {"hotspot": "hotspot.new_loop", "center": "center.qa", "sense": "sense.chat.aaron"}
+        now = T0 + timedelta(days=11)
+        ps, pw = strong.predict(ctx, now=now), weak.predict(ctx, now=now)
+        self.assertLess(pw["p_success"], ps["p_success"])
+        self.assertGreater(pw["credible_interval"][1] - pw["credible_interval"][0], ps["credible_interval"][1] - ps["credible_interval"][0])
+        self.assertEqual(next(c for c in pw["backoff_chain"] if c["level"] == "center")["children"], 1)
+
+    def test_stale_context_reported(self) -> None:
+        exps = stream([("hotspot.old", True), ("hotspot.old", True)])
+        with tempfile.TemporaryDirectory() as tmp:
+            extra = Path(tmp) / "old.jsonl"
+            extra.write_text("".join(json.dumps(e) + "\n" for e in exps), encoding="utf-8")
+            rep = ce.build_report(offline=True, extra=[extra], now=T0 + timedelta(days=40))
+        keys = {s["key"] for s in rep["coverage"]["stale_contexts"]}
+        self.assertIn("hotspot:hotspot.old", keys)
+
+    def test_offline_report_uses_fixture_clock(self) -> None:
+        rep = ce.build_report(offline=True)
+        self.assertEqual(rep["coverage"]["stale_contexts"], [])
+
+    def test_runtime_log_rotates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "exp.jsonl"
+            cfg = dict(ce.DEFAULTS, max_runtime_rows=5, keep_runtime_rows=2)
+            for i in range(7):
+                ce.record_experience(ce.make_experience(ok=True, ts=stamp(T0 + timedelta(hours=i)), hotspot="hotspot.r"), log, cfg)
+            live = ce.read_jsonl(log)
+            archives = list(Path(tmp).glob("exp-*.jsonl"))
+            self.assertEqual(len(archives), 1)
+            self.assertLessEqual(len(live), 5)
+            self.assertEqual(len(live) + sum(len(ce.read_jsonl(a)) for a in archives), 7)
+
+    def test_kill_switch_refuses_writes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "exp.jsonl"
+            old = os.environ.get("CAM_KILL")
+            os.environ["CAM_KILL"] = "1"
+            try:
+                with self.assertRaises(ce.KillSwitchActive):
+                    ce.record_experience(ce.make_experience(ok=True, hotspot="hotspot.k"), log)
+                with self.assertRaises(ce.KillSwitchActive):
+                    ce.write_distillate({"kind": "x"}, "never-written.json")
+                env = dict(os.environ, CAM_EXPERIENCE_LOG=str(log))
+                proc = subprocess.run([sys.executable, str(CLI), "--record", "--ok", "--hotspot", "hotspot.k"], capture_output=True, text=True, env=env)
+                self.assertEqual(proc.returncode, 3)
+                self.assertEqual(json.loads(proc.stdout)["error"], "kill_switch_active")
+                # reading stays allowed under kill
+                proc = subprocess.run([sys.executable, str(CLI), "--offline", "--hotspot", "hotspot.coding"], capture_output=True, text=True, env=env)
+                self.assertEqual(proc.returncode, 0)
+            finally:
+                if old is None:
+                    del os.environ["CAM_KILL"]
+                else:
+                    os.environ["CAM_KILL"] = old
+            self.assertFalse(log.exists())
+            self.assertFalse((ce.DISTILL_DIR / "never-written.json").exists())
+
+    def test_schema_version_stamped(self) -> None:
+        self.assertEqual(ce.make_experience(ok=True)["schema"], ce.SCHEMA_VERSION)
+
+
+class EthicsTests(unittest.TestCase):
+    def test_redaction_on_record(self) -> None:
+        fake_key = "ghp_" + "A" * 28  # assembled at runtime so no secret-shaped literal lands in git
+        exp = ce.make_experience(ok=True, hotspot="hotspot.h", notes=f"mail aaron@example.com, call +1 555 010 9999, key {fake_key}")
+        self.assertNotIn("@", exp["notes"])
+        self.assertNotIn("ghp_", exp["notes"])
+        self.assertNotIn("9999", exp["notes"])
+        self.assertEqual(exp["redacted"], ["email", "phone", "token"])
+        clean = ce.make_experience(ok=True, hotspot="hotspot.h", notes="loop ran fine, 3/3 checks green in 12s")
+        self.assertNotIn("redacted", clean)
+        self.assertEqual(clean["notes"], "loop ran fine, 3/3 checks green in 12s")
+
+    def test_protected_context_requires_human_judgment(self) -> None:
+        m = ce.ExperiencePredictor()
+        for e in stream([("hotspot.careers_submit", False)] * 6):
+            m.update(e)
+        r = m.predict({"hotspot": "hotspot.careers_submit", "motors": ["motor.jobs"]}, now=T0 + timedelta(days=2))
+        self.assertTrue(r["protected_context"])
+        self.assertEqual(r["advice"]["stance"], "human_judgment_required")
+        self.assertFalse(r["advice"]["suggest_qa_hold"])  # low p would normally suggest a hold
+        self.assertIn("call is yours", r["narration"])
+        plain = m.predict({"hotspot": "hotspot.coding"}, now=T0)
+        self.assertFalse(plain["protected_context"])
+        self.assertTrue(ce.is_protected({"hotspot": "hotspot.x", "motors": ["motor.outbound"]}))
+
+    def test_abstains_on_thin_evidence(self) -> None:
+        m = ce.ExperiencePredictor()
+        for e in stream([("hotspot.a", True)] * 30):
+            m.update(e)
+        thin = m.predict({"hotspot": "hotspot.b", "sense": "sense.chat.aaron"}, now=T0 + timedelta(days=8))
+        self.assertTrue(thin["advice"]["abstain"])
+        self.assertEqual(thin["advice"]["stance"], "abstain")
+        self.assertIn("don't know", thin["narration"])
+        rich = m.predict({"hotspot": "hotspot.a", "sense": "sense.chat.aaron"}, now=T0 + timedelta(days=8))
+        self.assertFalse(rich["advice"]["abstain"])
+        self.assertIn("%", rich["narration"])
+        self.assertIn("between", rich["narration"])  # the range travels with the number
+
+    def test_prediction_card_fields_and_limitations(self) -> None:
+        m = ce.ExperiencePredictor()
+        r = m.predict({"hotspot": "hotspot.h"})
+        for field in ("p_success", "credible_interval", "n_effective", "evidence_level", "evidence", "advice", "limitations", "narration"):
+            self.assertIn(field, r)
+        self.assertTrue(r["limitations"])
+        self.assertEqual(r["advice"]["stance"], "no_experience_yet")
+        self.assertIn("won't give you a number", r["narration"])
+
+    def test_calibration_parity_flags_overconfident_group(self) -> None:
+        good = [(0.9, 1.0)] * 9 + [(0.1, 0.0)] * 9
+        bad = [(0.95, 0.0)] * 10  # confidently wrong
+        agg = ce.calibration_metrics(good + bad)["ece"]
+        par = ce.calibration_parity({"hotspot.good": good, "hotspot.bad": bad, "hotspot.tiny": [(0.5, 1.0)]}, agg, 10)
+        self.assertEqual(par["flagged"], ["hotspot.bad"])
+        self.assertEqual({g["group"] for g in par["groups"]}, {"hotspot.good", "hotspot.bad"})  # tiny group skipped
+
+    def test_prequential_reports_abstention_and_parity(self) -> None:
+        exps, _ = ce.load_experiences(offline=True)
+        met = ce.prequential(exps, ce.load_config())["metrics"]
+        self.assertTrue(0.0 <= met["abstention_rate"] <= 1.0)
+        self.assertIn("groups", met["parity"])
+        self.assertGreaterEqual(len(met["parity"]["groups"]), 3)
+
+    def test_forget_by_ref_and_key(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "exp.jsonl"
+            ce.record_experience(ce.make_experience(ok=True, hotspot="hotspot.keep", ref="run-1"), log)
+            ce.record_experience(ce.make_experience(ok=True, hotspot="hotspot.drop", ref="run-2"), log)
+            ce.record_experience(ce.make_experience(ok=False, hotspot="hotspot.keep", ref="run-3-secret"), log)
+            self.assertEqual(ce.forget_experiences(key="hotspot:hotspot.drop", path=log), 1)
+            self.assertEqual(ce.forget_experiences(ref_contains="secret", path=log), 1)
+            left = ce.read_jsonl(log)
+            self.assertEqual([e["ref"] for e in left], ["run-1"])
+            env = dict(os.environ, CAM_EXPERIENCE_LOG=str(log))
+            proc = subprocess.run([sys.executable, str(CLI), "--forget-ref", "run-1"], capture_output=True, text=True, env=env)
+            self.assertEqual(json.loads(proc.stdout)["forgotten"], 1)
+            self.assertEqual(ce.read_jsonl(log), [])
+
+    def test_narrate_cli(self) -> None:
+        out = subprocess.check_output([sys.executable, str(CLI), "--offline", "--no-write", "--narrate", "--hotspot", "hotspot.loop_engineering", "--pattern", "daily-triage", "--sense", "sense.loop.tick"], text=True)
+        self.assertIn("%", out)
+        self.assertNotIn("{", out)
+
+    def test_ethics_gate_passes(self) -> None:
+        proc = subprocess.run([sys.executable, str(ROOT / "scripts" / "research-ethics-check.py")], capture_output=True, text=True)
+        doc = json.loads(proc.stdout)
+        self.assertEqual(proc.returncode, 0, doc.get("errors"))
+        self.assertTrue(doc["ok"])
+
+
 if __name__ == "__main__":
     unittest.main()
