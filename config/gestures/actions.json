@@ -350,6 +350,18 @@
       "aaron_identity_required": false
     },
     {
+      "id": "converse.mute_toggle",
+      "category": "converse",
+      "title": "Mute / unmute Cam's voice",
+      "effect": "Toggle Cam's audible speak for this session; text and portrait stay live.",
+      "target": "companion_pwa",
+      "motor": "motor.gesture",
+      "sentinel_class": "write_local",
+      "reversible": true,
+      "confirm": false,
+      "aaron_identity_required": false
+    },
+    {
       "id": "converse.thanks",
       "category": "converse",
       "title": "Thanks, Cam",

@@ -15,7 +15,10 @@
     "huawei_air_gestures": "https://consumer.huawei.com/en/support/content/en-us15974017/",
     "huawei_share_kit_gestures_share": "HarmonyOS Share Kit — harmonyShare.gesturesShare event; app must call sharableTarget.share() within ~3 s",
     "mediapipe_gesture_recognizer": "https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer",
-    "mediapipe_model_maker": "https://developers.google.com/edge/mediapipe/solutions/customization/gesture_recognizer"
+    "mediapipe_model_maker": "https://developers.google.com/edge/mediapipe/solutions/customization/gesture_recognizer",
+    "aaron_hagrid": "https://github.com/afidurko/hagrid (HaGRIDv2 paper: https://arxiv.org/abs/2412.01508)",
+    "aaron_hand_gesture_mediapipe": "https://github.com/afidurko/hand-gesture-recognition-using-mediapipe",
+    "aaron_hand_gesture_recognition": "https://github.com/afidurko/HandGestureRecognition (paper: https://arxiv.org/abs/1901.04622)"
   },
   "recognizer": {
     "primary": "mediapipe_gesture_recognizer",
@@ -40,7 +43,117 @@
     ],
     "frame_rate_hz": 15,
     "smoothing_window_frames": 5,
-    "aaron_repo_slot": "integrations/<gesture-repo> — Aaron's starter repo (link pending); mounted as a submodule and mapped onto these primitives, not the other way round"
+    "segmenter_reference": "integrations/hand-gesture-mediapipe — fingertip point-history classifier (16 frames) is the template for Cam's motion primitives; key-frame extraction from integrations/hand-gesture-recognition picks which frames matter",
+    "custom_pose_dataset": "integrations/hagrid — HaGRIDv2 labels feed Model Maker for every pose marked support=custom"
+  },
+  "repos": {
+    "note": "Aaron's repos are mounted as submodules and mapped onto primitives.poses / primitives.motions below. The vocabulary stays the source of truth; repos supply datasets, models, and segmenter patterns. Every repo label is either mapped to a primitive or listed under ignore (log-only, never bound).",
+    "hagrid": {
+      "path": "integrations/hagrid",
+      "remote": "github.com/afidurko/hagrid",
+      "upstream": "github.com/hukenovs/hagrid",
+      "branch": "master",
+      "what": "HaGRIDv2 — 1,086,158 FullHD images, 33 static gesture classes + no_gesture, 65,977 people, 0.5–4 m, pretrained YOLOv10 / ResNet detectors + full-frame classifiers; companion dynamic_gestures algorithm trained on the static set",
+      "role": "custom pose training data + label set (Model Maker folders per label); pretrained detector for the Mac/desktop path",
+      "labels": [
+        "grabbing", "grip", "holy", "point", "call", "three3", "timeout", "xsign", "hand_heart", "hand_heart2",
+        "little_finger", "middle_finger", "take_picture", "dislike", "fist", "four", "like", "mute", "ok", "one",
+        "palm", "peace", "peace_inverted", "rock", "stop", "stop_inverted", "three", "three2", "two_up",
+        "two_up_inverted", "three_gun", "thumb_index", "thumb_index2", "no_gesture"
+      ],
+      "pose_map": {
+        "palm": "open_palm",
+        "stop": "open_palm",
+        "stop_inverted": "back_of_hand",
+        "fist": "closed_fist",
+        "grabbing": "closed_fist",
+        "grip": "pinch",
+        "one": "pointing_up",
+        "point": "pointing_away",
+        "like": "thumb_up",
+        "dislike": "thumb_down",
+        "peace": "victory",
+        "two_up": "victory",
+        "peace_inverted": "victory",
+        "two_up_inverted": "victory",
+        "ok": "ok_sign",
+        "three": "three",
+        "three2": "three",
+        "three3": "three",
+        "four": "four",
+        "mute": "mute",
+        "take_picture": "take_picture",
+        "timeout": "timeout",
+        "hand_heart": "hand_heart",
+        "hand_heart2": "hand_heart",
+        "no_gesture": "none"
+      },
+      "approximate": ["grabbing", "two_up", "peace_inverted", "two_up_inverted"],
+      "ignore": ["holy", "call", "xsign", "little_finger", "middle_finger", "rock", "three_gun", "thumb_index", "thumb_index2"],
+      "ignore_reason": "call / rock / holy / xsign / thumb_index are reserved for Aaron to teach; middle_finger and little_finger are never bound"
+    },
+    "hand-gesture-mediapipe": {
+      "path": "integrations/hand-gesture-mediapipe",
+      "remote": "github.com/afidurko/hand-gesture-recognition-using-mediapipe",
+      "upstream": "github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe",
+      "branch": "main",
+      "license": "Apache-2.0",
+      "what": "MediaPipe Hands (Python) + two tiny MLPs: keypoint classifier on 21 normalized landmarks (Open / Close / Pointer) and point-history classifier on 16 frames of fingertip trajectory (Stop / Clockwise / Counter Clockwise / Move); press k / h to log samples, notebooks retrain to TFLite",
+      "role": "segmenter reference (landmark → pose, fingertip history → motion) and the teach-mode pipeline (log samples → retrain → swap model)",
+      "keypoint_labels": ["Open", "Close", "Pointer"],
+      "keypoint_map": {
+        "Open": "open_palm",
+        "Close": "closed_fist",
+        "Pointer": "pointing_up"
+      },
+      "point_history_labels": ["Stop", "Clockwise", "Counter Clockwise", "Move"],
+      "motion_map": {
+        "Stop": "hold",
+        "Clockwise": "circle_cw",
+        "Counter Clockwise": "circle_ccw",
+        "Move": "translate"
+      },
+      "motion_note": "Move is refined by direction and speed into flick_* / swipe_* / raise / lower / push_in / pull_out / translate_out in Cam's segmenter"
+    },
+    "hand-gesture-recognition": {
+      "path": "integrations/hand-gesture-recognition",
+      "remote": "github.com/afidurko/HandGestureRecognition",
+      "upstream": "github.com/Ha0Tang/HandGestureRecognition",
+      "branch": "master",
+      "license": "CC BY-NC-SA 4.0 — academic research only; patterns and datasets, no code shipped in Cam",
+      "what": "Fast and Robust Dynamic Hand Gesture Recognition via Key Frames Extraction and Feature Fusion (Tang, Liu, Xiao, Sebe — Neurocomputing 2019), MATLAB; datasets Cambridge, Northwestern, HandGesture (0–9, NO, OK), Action3D",
+      "role": "dynamic-gesture patterns: key-frame extraction decides which frames of a motion carry the gesture; dataset classes seed Cam's motion primitives and counting poses",
+      "dataset_labels": {
+        "Cambridge": ["flat_leftward", "flat_rightward", "flat_contract", "spread_leftward", "spread_rightward", "spread_contract", "vshape_leftward", "vshape_rightward", "vshape_contract"],
+        "Action3D": ["box", "high_wave", "horizontal_wave", "curl", "circle", "hand_up"],
+        "HandGesture": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "NO", "OK"]
+      },
+      "motion_map": {
+        "flat_leftward": "swipe_left",
+        "flat_rightward": "swipe_right",
+        "flat_contract": "pull_out",
+        "spread_leftward": "swipe_left",
+        "spread_rightward": "swipe_right",
+        "spread_contract": "pull_out",
+        "vshape_leftward": "swipe_left",
+        "vshape_rightward": "swipe_right",
+        "vshape_contract": "pull_out",
+        "high_wave": "wave",
+        "horizontal_wave": "wave",
+        "curl": "beckon",
+        "circle": "circle_cw",
+        "hand_up": "raise"
+      },
+      "pose_map": {
+        "1": "pointing_up",
+        "2": "victory",
+        "3": "three",
+        "4": "four",
+        "5": "open_palm",
+        "OK": "ok_sign"
+      },
+      "ignore": ["box", "0", "6", "7", "8", "9", "NO"]
+    }
   },
   "primitives": {
     "poses": [
@@ -108,19 +221,53 @@
         "id": "ok_sign",
         "label": "OK",
         "support": "custom",
+        "dataset": ["hagrid:ok", "hand-gesture-recognition:OK"],
         "desc": "Thumb–index ring, three fingers extended"
       },
       {
         "id": "three",
         "label": "Three",
         "support": "custom",
+        "dataset": ["hagrid:three", "hagrid:three2", "hagrid:three3", "hand-gesture-recognition:3"],
         "desc": "Index + middle + ring extended"
       },
       {
         "id": "four",
         "label": "Four",
         "support": "custom",
+        "dataset": ["hagrid:four", "hand-gesture-recognition:4"],
         "desc": "Four fingers extended, thumb tucked"
+      },
+      {
+        "id": "mute",
+        "label": "Mute",
+        "support": "custom",
+        "dataset": ["hagrid:mute"],
+        "desc": "Index finger held vertically over the lips (shh)"
+      },
+      {
+        "id": "take_picture",
+        "label": "Take_Picture",
+        "support": "custom",
+        "hands": "two",
+        "dataset": ["hagrid:take_picture"],
+        "desc": "Two hands framing a rectangle like a viewfinder"
+      },
+      {
+        "id": "timeout",
+        "label": "Timeout",
+        "support": "custom",
+        "hands": "two",
+        "dataset": ["hagrid:timeout"],
+        "desc": "Two hands forming a T (referee time-out)"
+      },
+      {
+        "id": "hand_heart",
+        "label": "Hand_Heart",
+        "support": "custom",
+        "hands": "two",
+        "dataset": ["hagrid:hand_heart", "hagrid:hand_heart2"],
+        "desc": "Two hands forming a heart"
       },
       {
         "id": "palm_down",
@@ -189,6 +336,10 @@
       {
         "id": "circle_ccw",
         "desc": "Fingertip traces ≥ 300° counter-clockwise within 1.5 s"
+      },
+      {
+        "id": "translate",
+        "desc": "Sustained displacement of unknown direction (hand-gesture-mediapipe 'Move'); the segmenter refines it into flick_* / swipe_* / raise / lower / push_in / pull_out / translate_out before a gesture can match"
       },
       {
         "id": "translate_out",
@@ -320,7 +471,7 @@
     "conflict_policy": "Re-binding a gesture that already has a default or learned meaning in the same context requires an explicit replace; otherwise Cam refuses and reports the existing meaning",
     "feedback": "converse.confirm / converse.reject within 5 s after a gesture action is logged as reinforcement; confidence_min adapts per gesture within [0.6, 0.95]; reject rate > 30% over 20 uses flags the gesture for recalibration in gesture-check",
     "forgetting": "Learned bindings unused for 90 days are flagged stale in doctor output; nothing is auto-deleted — only Aaron forgets",
-    "custom_model": "Once ≥ 30 samples exist for a custom pose, Model Maker retrains data/gestures/cam-gestures.task offline (switch.cam_enhance gate for shipping the new model)"
+    "custom_model": "Custom poses start from HaGRIDv2 folders (integrations/hagrid, labels in repos.hagrid.pose_map) so Cam recognizes them before Aaron has shown a single sample; once ≥ 30 of Aaron's own samples exist for a pose they are added to the folder and Model Maker retrains data/gestures/cam-gestures.task offline (switch.cam_enhance gate for shipping the new model). Motion classes retrain the point-history way (integrations/hand-gesture-mediapipe notebooks)."
   },
   "gestures": [
     {
@@ -1486,6 +1637,114 @@
       "support": "canned",
       "source": "cam",
       "notes": "Soft hold only; switch.kill remains Aaron voice/CLI",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.shh_mute",
+      "name": "Finger over lips (mute)",
+      "aliases": [
+        "shh",
+        "quiet Cam"
+      ],
+      "kind": "static",
+      "hands": "one",
+      "steps": [
+        {
+          "pose": "mute",
+          "motion": "hold",
+          "min_ms": 700
+        }
+      ],
+      "meaning": "Quiet — mute Cam's voice for now (same sign again unmutes).",
+      "action": "converse.mute_toggle",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 2000,
+      "requires_engagement": false,
+      "priority": 7,
+      "support": "custom",
+      "source": "hagrid",
+      "notes": "HaGRIDv2 class 'mute' — trained pose, needs the face in frame so the index sits over the lips",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.frame_shot",
+      "name": "Two-hand viewfinder (take a picture)",
+      "kind": "static",
+      "hands": "two",
+      "steps": [
+        {
+          "pose": "take_picture",
+          "motion": "hold",
+          "min_ms": 800
+        }
+      ],
+      "meaning": "Capture what's on screen — the unambiguous version of Grabshot.",
+      "action": "ui.screenshot",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 2000,
+      "requires_engagement": false,
+      "priority": 8,
+      "support": "custom",
+      "source": "hagrid",
+      "notes": "HaGRIDv2 class 'take_picture'; never collides with the grab family because it is two-handed",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.timeout_hold",
+      "name": "Referee T (time out)",
+      "kind": "static",
+      "hands": "two",
+      "steps": [
+        {
+          "pose": "timeout",
+          "motion": "hold",
+          "min_ms": 800
+        }
+      ],
+      "meaning": "Time out — everything on hold for this session.",
+      "action": "presence.hold_all",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.85,
+      "cooldown_ms": 3000,
+      "requires_engagement": false,
+      "priority": 10,
+      "support": "custom",
+      "source": "hagrid",
+      "notes": "HaGRIDv2 class 'timeout'; alternative to two open palms",
+      "status": "planned"
+    },
+    {
+      "id": "gesture.hand_heart_thanks",
+      "name": "Hand heart (love it)",
+      "kind": "static",
+      "hands": "two",
+      "steps": [
+        {
+          "pose": "hand_heart",
+          "motion": "hold",
+          "min_ms": 500
+        }
+      ],
+      "meaning": "Loved that — strongest positive feedback on the last turn.",
+      "action": "converse.thanks",
+      "contexts": [
+        "*"
+      ],
+      "confidence_min": 0.8,
+      "cooldown_ms": 2000,
+      "requires_engagement": false,
+      "priority": 3,
+      "support": "custom",
+      "source": "hagrid",
+      "notes": "HaGRIDv2 classes 'hand_heart' / 'hand_heart2'",
       "status": "planned"
     }
   ]

@@ -30,7 +30,7 @@ KIND_RANK = {"sequence": 3, "dynamic": 2, "static": 1}
 HANDS_COUNT = {"one": 1, "two": 2}
 VALID_SUPPORT = {"canned", "landmark_rule", "custom", "sequence"}
 VALID_KINDS = set(KIND_RANK)
-VALID_SOURCES = {"huawei", "mediapipe", "cam", "apple", "learned"}
+VALID_SOURCES = {"huawei", "mediapipe", "cam", "apple", "learned", "hagrid"}
 _SLUG = re.compile(r"[^a-z0-9]+")
 
 
@@ -107,6 +107,7 @@ def validate(vocab: dict | None = None, actions: dict | None = None, learned: di
     for p in vocab["primitives"]["poses"]:
         if p.get("support") == "canned" and p.get("label") not in canned:
             errors.append(f"pose_canned_label_unknown:{p['id']}:{p.get('label')}")
+    errors.extend(_validate_repos(vocab, pose_ids, motion_ids))
 
     gestures = vocab.get("gestures", [])
     ids = [g["id"] for g in gestures]
@@ -161,6 +162,41 @@ def validate(vocab: dict | None = None, actions: dict | None = None, learned: di
                 errors.append(f"learned_not_taught_by_aaron:{b.get('id')}")
             if b.get("action") not in action_ids:
                 errors.append(f"learned_unknown_action:{b.get('id')}:{b.get('action')}")
+    return errors
+
+
+def _repo_labels(spec: dict) -> set[str]:
+    labels: set[str] = set(spec.get("labels") or [])
+    labels |= set(spec.get("keypoint_labels") or [])
+    labels |= set(spec.get("point_history_labels") or [])
+    for group in (spec.get("dataset_labels") or {}).values():
+        labels |= set(group)
+    return labels
+
+
+def _validate_repos(vocab: dict, pose_ids: set[str], motion_ids: set[str]) -> list[str]:
+    """Aaron's repos map onto the primitives — every label mapped or explicitly ignored."""
+    errors: list[str] = []
+    repos = {k: v for k, v in (vocab.get("repos") or {}).items() if isinstance(v, dict)}
+    for rid, spec in repos.items():
+        labels = _repo_labels(spec)
+        covered: set[str] = set(spec.get("ignore") or [])
+        for key, targets in (("pose_map", pose_ids), ("keypoint_map", pose_ids), ("motion_map", motion_ids)):
+            for label, prim in (spec.get(key) or {}).items():
+                if label not in labels:
+                    errors.append(f"repo_map_unknown_label:{rid}:{key}:{label}")
+                if prim not in targets:
+                    errors.append(f"repo_map_unknown_primitive:{rid}:{key}:{label}->{prim}")
+                covered.add(label)
+        for label in sorted(labels - covered):
+            errors.append(f"repo_label_unmapped:{rid}:{label}")
+        for label in sorted(set(spec.get("ignore") or []) - labels):
+            errors.append(f"repo_ignore_unknown_label:{rid}:{label}")
+    for p in vocab["primitives"]["poses"]:
+        for ref in p.get("dataset") or []:
+            rid, _, label = ref.partition(":")
+            if rid not in repos or label not in _repo_labels(repos[rid]):
+                errors.append(f"pose_dataset_unknown:{p['id']}:{ref}")
     return errors
 
 
