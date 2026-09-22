@@ -289,6 +289,19 @@ class ExploitRegressionTests(SwarmBase):
     """Each test replays an attack from the round-5 red-team pass
     (docs/SWARM_CONNECTORS_SECURITY_REVIEW.md) and asserts it now fails."""
 
+    def test_p7_disclose_personal_is_never_an_agent_privilege(self):
+        # charter P7: releasing personal information is Aaron-only, so no spawn
+        # path can grant it and the chief never holds it.
+        out = run("--now", T0, "spawn", "redactor", "--privilege", "disclose_personal")
+        self.assertEqual(out["_exit"], 1)
+        chief = next(a for a in run("agents") if a["id"] == "chief")
+        self.assertNotIn("disclose_personal", chief["privileges"])
+        for role in ("privacy-officer", "redactor", "boundary-auditor", "memory-steward", "consent-keeper"):
+            child = run("--now", T0, "spawn", role)["agent"]
+            self.assertNotIn("disclose_personal", child["privileges"])
+            self.assertNotIn("web_fetch", child["privileges"])
+            self.assertNotIn("outbound_draft", child["privileges"])
+
     def test_x1_role_chief_cannot_inherit_outbound_send(self):
         out = run("--now", T0, "spawn", "chief")
         self.assertEqual(out["_exit"], 1)

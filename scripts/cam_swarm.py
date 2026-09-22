@@ -28,10 +28,13 @@ import os
 import re
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import cam_privacy as privacy  # noqa: E402
+
 PRIVILEGES = ROOT / "config/swarm/privileges.json"
 PRIMITIVES = ROOT / "config/swarm/primitives.json"
 
@@ -45,8 +48,9 @@ ROLE_RE = re.compile(r"^[a-z][a-z0-9_-]{1,31}$")
 # --- paths ------------------------------------------------------------------
 
 def data_dir() -> Path:
-    override = os.environ.get("CAM_SWARM_DIR")
-    return Path(override) if override else ROOT / "data/swarm"
+    """One lineage per principal. The owner keeps data/swarm (or CAM_SWARM_DIR);
+    a guest principal is confined to data/principals/<id>/swarm."""
+    return privacy.scoped_dir("swarm", "CAM_SWARM_DIR", ROOT / "data/swarm")
 
 
 def lineage_path() -> Path:
@@ -57,7 +61,20 @@ def kill_flag_path() -> Path:
     return data_dir() / "KILL"
 
 
+def archive_dir() -> Path:
+    return data_dir() / "archive"
+
+
+def bus_bridge_path() -> Path:
+    """Append-only SwarmBusEvent-shaped log the Node runtime can tail
+    (server/core/swarm-runtime.ts) so CLI spawns are visible before the
+    nightly distill."""
+    return data_dir() / "bus-bridge.jsonl"
+
+
 def mesh_out_path() -> Path:
+    if not privacy.is_owner():
+        return data_dir().parent / "distill" / "agent-lineage.json"
     override = os.environ.get("CAM_SWARM_MESH_OUT")
     return Path(override) if override else ROOT / "vault/10-Mesh-Distillates/agent-lineage/latest.json"
 
@@ -149,8 +166,12 @@ def empty_ledger(ts: datetime) -> dict:
     }
 
 
+SEAL_STATE: dict[str, str] = {"lineage": "nokey"}
+
+
 def load_ledger(ts: datetime | None = None) -> dict:
     path = lineage_path()
+    privacy.enter(path.parent, create=False)  # refuse a directory sealed to someone else
     if not path.exists():
         return empty_ledger(ts or now_utc())
     try:
@@ -158,6 +179,7 @@ def load_ledger(ts: datetime | None = None) -> dict:
     except json.JSONDecodeError as exc:
         raise SystemExit(f"swarm lineage is corrupt: {path} ({exc}). "
                          "Fix or move it aside; a fresh lineage is seeded on next write.")
+    SEAL_STATE["lineage"] = privacy.verify_doc(ledger)
     ledger.setdefault("agents", {})
     ledger.setdefault("actions", [])
     ledger.setdefault("commute", [])
@@ -167,6 +189,9 @@ def load_ledger(ts: datetime | None = None) -> dict:
 
 EVENT_CAP = 2000
 COMMUTE_CAP = 5000
+BRIDGE_OPS = {"spawn": "synapse.spawn", "assign_task": "synapse.assign_task",
+              "resolve_task": "synapse.resolve_task", "terminate_lineage": "synapse.terminate_lineage",
+              "kill_master": "denied", "kill_resume": "denied"}
 
 
 def save_ledger(ledger: dict) -> None:
@@ -177,26 +202,70 @@ def save_ledger(ledger: dict) -> None:
     if len(ledger["commute"]) > COMMUTE_CAP:
         ledger["commute"] = ledger["commute"][-COMMUTE_CAP:]
     path = lineage_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
+    privacy.enter(path.parent)
+    privacy.seal_doc(ledger)
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, path)
+    privacy.harden_file(path)
+    _flush_bridge(ledger)
+
+
+def _flush_bridge(ledger: dict) -> None:
+    """Mirror new lineage events into the SwarmBusEvent-shaped bridge log."""
+    pending = ledger.pop("_bridge_pending", None)
+    if not pending:
+        return
+    try:
+        with bus_bridge_path().open("a", encoding="utf-8") as fh:
+            for ev in pending:
+                fh.write(json.dumps(ev) + "\n")
+        privacy.harden_file(bus_bridge_path())
+    except OSError:
+        pass
 
 
 def log_event(ledger: dict, ts: datetime, kind: str, **fields) -> None:
     ledger["events"].append({"ts": iso(ts), "kind": kind, **fields})
+    if kind in BRIDGE_OPS:
+        # counts / ids only — no task text, no mandates (bridge is readable by the server)
+        ledger.setdefault("_bridge_pending", []).append({
+            "id": short_id("evt"), "op": BRIDGE_OPS[kind],
+            "from": str(fields.get("by") or fields.get("parent") or AARON_ID),
+            "to": fields.get("agent") or fields.get("assignee") or fields.get("target"),
+            "detail": f"{kind} role={fields.get('role')} level={fields.get('level')} status={fields.get('status')}",
+            "at": iso(ts), "workspaceIds": [], "ok": kind not in ("kill_master",),
+            "source": "scripts/cam_swarm.py",
+        })
 
 
 # --- kill switch ------------------------------------------------------------
 
-def kill_active() -> bool:
+def ledger_says_killed(ledger: dict | None) -> bool:
+    """The KILL file is convenience; the ledger is the record. If the last
+    kill_master event is newer than the last kill_resume, the swarm is killed
+    even when someone deleted the flag file."""
+    if not ledger:
+        return False
+    last_kill = last_resume = None
+    for e in ledger.get("events") or []:
+        if e.get("kind") == "kill_master":
+            last_kill = e["ts"]
+        elif e.get("kind") == "kill_resume":
+            last_resume = e["ts"]
+    return bool(last_kill and (not last_resume or last_resume < last_kill))
+
+
+def kill_active(ledger: dict | None = None) -> bool:
     if os.environ.get("CAM_SWITCH_KILL", "").lower() == "act":
         return True
-    return kill_flag_path().exists()
+    if kill_flag_path().exists():
+        return True
+    return ledger_says_killed(ledger)
 
 
-def require_motor(primitive: str) -> None:
-    if kill_active():
+def require_motor(primitive: str, ledger: dict | None = None) -> None:
+    if kill_active(ledger):
         raise SystemExit(f"switch.kill act — {primitive} silenced (records retained; `resume` to re-arm)")
 
 
@@ -275,7 +344,7 @@ def spawn(ledger: dict, parent_id: str, role: str, ts: datetime,
           privileges: list[str] | None = None, mandate: str | None = None,
           job_ref: str | None = None, team: str | None = None, aaron: bool = False) -> dict:
     """synapse.spawn — child at parent.level + 1 with privileges ⊆ parent."""
-    require_motor("synapse.spawn")
+    require_motor("synapse.spawn", ledger)
     role = (role or "").strip()
     if role in RESERVED_ROLES or not ROLE_RE.match(role):
         raise SystemExit(f"invalid or reserved role {role!r} (lowercase [a-z0-9_-], 2-32 chars; "
@@ -326,7 +395,7 @@ def assign(ledger: dict, caller_id: str, assignee_id: str, task: str, ts: dateti
            parent_action_id: str | None = None, job_ref: str | None = None,
            aaron: bool = False) -> dict:
     """synapse.assign_task — child ticket / mesh job queued on assignee."""
-    require_motor("synapse.assign_task")
+    require_motor("synapse.assign_task", ledger)
     caller = resolve_actor(ledger, caller_id, aaron)
     assignee = get_agent(ledger, assignee_id)
     if caller["kind"] == "agent" and "assign_task" not in caller["privileges"]:
@@ -391,7 +460,7 @@ def resolve(ledger: dict, caller_id: str, action_id: str, status: str, ts: datet
 def send_message(ledger: dict, sender_id: str, to_id: str, message: str, ts: datetime,
                  action_id: str | None = None, aaron: bool = False) -> dict:
     """synapse.send_message — internal agent bus only (never motor.text)."""
-    require_motor("synapse.send_message")
+    require_motor("synapse.send_message", ledger)
     sender = resolve_actor(ledger, sender_id, aaron)
     target = get_agent(ledger, to_id)
     if sender["kind"] == "agent" and "send_message" not in sender["privileges"]:
@@ -405,7 +474,7 @@ def send_message(ledger: dict, sender_id: str, to_id: str, message: str, ts: dat
 def broadcast(ledger: dict, sender_id: str, channel: str, message: str, ts: datetime,
               aaron: bool = False) -> dict:
     """synapse.broadcast — fan-out to a team channel; sender excluded."""
-    require_motor("synapse.broadcast")
+    require_motor("synapse.broadcast", ledger)
     sender = resolve_actor(ledger, sender_id, aaron)
     if sender["kind"] == "agent" and "broadcast" not in sender["privileges"]:
         raise SystemExit(f"{sender['id']} lacks broadcast")
@@ -497,6 +566,14 @@ def doctor(ledger: dict) -> list[str]:
         problems.append(f"server lineage grants Aaron-only privileges: {server['aaron_only_leaks']}")
     if server and server.get("error"):
         problems.append(f"server lineage unreadable: {server['path']}")
+    if SEAL_STATE.get("lineage") == "mismatch":
+        problems.append("lineage HMAC seal mismatch — ledger edited outside cam_swarm (or key rotated)")
+    if ledger_says_killed(ledger) and not kill_flag_path().exists() \
+            and os.environ.get("CAM_SWITCH_KILL", "").lower() != "act":
+        problems.append("KILL flag removed without `resume --aaron` — ledger still says killed; spawn stays silenced")
+    seal = privacy.read_seal(data_dir())
+    if seal and seal.get("principal") != privacy.current_principal():
+        problems.append(f"lineage dir sealed to {seal.get('principal')!r}, process is {privacy.current_principal()!r}")
     return problems
 
 
@@ -573,19 +650,25 @@ def stats(ledger: dict) -> dict:
         "by_team": dict(sorted(by_team.items())),
         "actions": {s: len([a for a in actions if a["status"] == s]) for s in ACTION_STATUSES},
         "commute_messages": len(ledger["commute"]),
-        "kill_active": kill_active(),
+        "kill_active": kill_active(ledger),
         "unlimited_spawn": True,
+        "principal": privacy.current_principal(),
+        "seal": SEAL_STATE.get("lineage"),
         "server_runtime": server_lineage_summary(),
     }
 
 
 def distill(ledger: dict, ts: datetime) -> dict:
-    """Counts-only mesh distillate — no task text, no mandates, no messages."""
+    """Counts-only mesh distillate — no task text, no mandates, no messages.
+    The privacy kernel re-checks that claim before anything is written: a
+    distillate carrying any personal class or secret is refused (charter P1).
+    Guest principals distill into their own root, never the owner's vault."""
     doc = {
         "kind": "agent-lineage",
         "generated": iso(ts),
         "source": "scripts/cam_swarm.py",
         "sole_operator": "Aaron",
+        "principal": privacy.current_principal(),
         "stats": stats(ledger),
         "doctor": doctor(ledger),
         "recent_events": [
@@ -593,10 +676,48 @@ def distill(ledger: dict, ts: datetime) -> dict:
             for e in ledger["events"][-20:]
         ],
     }
+    if privacy.is_owner():
+        doc = privacy.assert_shareable(doc, "mesh_distillate")
+    else:
+        doc = privacy.assert_operational(doc, "guest agent-lineage distillate")
     out = mesh_out_path()
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
     return doc
+
+
+def gc(ledger: dict, ts: datetime, older_than: timedelta) -> dict:
+    """Archive lineages terminated before `ts - older_than` (plus their
+    actions / commute) to data/swarm/archive/, mirroring the server's
+    lineage-guardian cap on ephemeral workers. Nothing is deleted — the
+    archive file keeps the records; the live ledger just stops growing."""
+    cutoff = iso(ts - older_than)
+    agents = ledger["agents"]
+    old = {a["id"] for a in agents.values()
+           if a["kind"] == "agent" and a["id"] != CHIEF_ID and a["status"] == "terminated"
+           and (a.get("terminated") or {}).get("ts", "9999") < cutoff}
+    # only lineages whose whole subtree is archivable go — never orphan a child
+    removable: set[str] = set()
+    for aid in old:
+        subtree = {d["id"] for d in descendants(ledger, aid)}
+        if subtree <= old:
+            removable.add(aid)
+    if not removable:
+        return {"archived_agents": 0, "archived_actions": 0, "archived_commute": 0, "cutoff": cutoff}
+    arch_agents = {aid: agents.pop(aid) for aid in removable}
+    arch_actions = [a for a in ledger["actions"] if a["assignee"] in removable and a["status"] != "open"]
+    ledger["actions"] = [a for a in ledger["actions"] if not (a["assignee"] in removable and a["status"] != "open")]
+    arch_commute = [c for c in ledger["commute"] if c.get("from") in removable or c.get("to") in removable]
+    ledger["commute"] = [c for c in ledger["commute"] if not (c.get("from") in removable or c.get("to") in removable)]
+    archive_dir().mkdir(parents=True, exist_ok=True)
+    privacy.harden_dir(archive_dir())
+    out = archive_dir() / f"lineage-{ts.strftime('%Y%m%dT%H%M%SZ')}.json"
+    out.write_text(json.dumps({"archived": iso(ts), "cutoff": cutoff, "agents": arch_agents,
+                               "actions": arch_actions, "commute": arch_commute}, indent=2) + "\n", encoding="utf-8")
+    privacy.harden_file(out)
+    log_event(ledger, ts, "gc", archived=len(arch_agents), archive=out.name)
+    return {"archived_agents": len(arch_agents), "archived_actions": len(arch_actions),
+            "archived_commute": len(arch_commute), "cutoff": cutoff, "archive": str(out)}
 
 
 # --- CLI --------------------------------------------------------------------
@@ -715,6 +836,26 @@ def cmd_distill(args: argparse.Namespace) -> int:
     return _dump({"ok": True, "out": str(mesh_out_path()), "stats": doc["stats"]})
 
 
+DURATION_RE = re.compile(r"^(\d+)([hdw])$")
+
+
+def parse_duration(s: str) -> timedelta:
+    m = DURATION_RE.match((s or "").strip())
+    if not m:
+        raise SystemExit("duration must look like 30d, 12h or 2w")
+    n, unit = int(m.group(1)), m.group(2)
+    return timedelta(hours=n) if unit == "h" else timedelta(days=n * (7 if unit == "w" else 1))
+
+
+def cmd_gc(args: argparse.Namespace) -> int:
+    ts = now_utc(args.now)
+    ledger = load_ledger(ts)
+    result = gc(ledger, ts, parse_duration(args.older_than))
+    if result["archived_agents"]:
+        save_ledger(ledger)
+    return _dump({"ok": True, **result})
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Cam swarm runtime — spawn / assign / resolve / terminate")
     parser.add_argument("--now", help="override clock (ISO8601)")
@@ -785,6 +926,9 @@ def main(argv: list[str] | None = None) -> int:
     p.set_defaults(fn=cmd_doctor)
     p = sub.add_parser("distill", help="counts-only mesh distillate")
     p.set_defaults(fn=cmd_distill)
+    p = sub.add_parser("gc", help="archive lineages terminated longer ago than --older-than")
+    p.add_argument("--older-than", default="30d", help="30d | 12h | 2w (default 30d)")
+    p.set_defaults(fn=cmd_gc)
 
     args = parser.parse_args(argv)
     return args.fn(args)

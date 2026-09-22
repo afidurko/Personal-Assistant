@@ -46,6 +46,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config/integrations/instinct.json"
+if str(ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(ROOT / "scripts"))
+import cam_privacy as privacy  # noqa: E402
 
 SENSE = "sense.instinct.followup"
 MOTOR = "motor.instinct"
@@ -56,11 +59,13 @@ PRIORITY_WINDOW = {"high": 0.5, "normal": 1.0, "low": 2.0}
 
 
 # --- paths (env-overridable so tests never touch real state) --------------
+# One process serves one principal (config/privacy/charter.json). The owner
+# keeps data/instinct; a guest principal is confined to data/principals/<id>/
+# and can never be pointed at the owner's directories.
 
 
 def data_dir() -> Path:
-    override = os.environ.get("INSTINCT_DATA_DIR")
-    return Path(override) if override else ROOT / "data/instinct"
+    return privacy.scoped_dir("instinct", "INSTINCT_DATA_DIR", ROOT / "data/instinct")
 
 
 def ledger_path() -> Path:
@@ -88,16 +93,22 @@ def escalations_path() -> Path:
 
 
 def vault_briefs_dir() -> Path:
+    if not privacy.is_owner():
+        return data_dir() / "vault-briefs"  # the owner's vault is owner-only (charter P4)
     override = os.environ.get("INSTINCT_VAULT_DIR")
     return Path(override) if override else ROOT / "vault/06-Life-Ops/instinct/briefs"
 
 
 def mesh_out_path() -> Path:
+    if not privacy.is_owner():
+        return data_dir().parent / "distill" / "instinct.json"
     override = os.environ.get("INSTINCT_MESH_OUT")
     return Path(override) if override else ROOT / "vault/10-Mesh-Distillates/instinct/latest.json"
 
 
 def attention_default_path() -> Path:
+    if not privacy.is_owner():
+        return data_dir() / "needs-attention-none.json"  # guests have no coding workspaces
     return ROOT / "vault/10-Mesh-Distillates/needs-attention/latest.json"
 
 
@@ -153,7 +164,8 @@ def pick_role(job: dict) -> str:
 
 def known_workspaces() -> list[dict]:
     cw = _cw()
-    if cw is None:
+    if cw is None or not privacy.is_owner():
+        # guests never see the owner's workspace registry (paths, remotes)
         return [{"id": DEFAULT_WORKSPACE, "label": "Personal-Assistant", "primary": True}]
     try:
         reg = cw.load_registry()
@@ -181,7 +193,7 @@ def resolve_workspace(goal: str, workspace_id: str | None = None) -> tuple[str, 
             raise SystemExit(f"unknown workspace '{workspace_id}' — known: {', '.join(sorted(ids))}")
         return workspace_id, "explicit"
     cw = _cw()
-    if cw is None:
+    if cw is None or not privacy.is_owner():
         return DEFAULT_WORKSPACE, "chooser_unavailable"
     try:
         choice = cw.choose_workspace(goal=goal)
@@ -244,8 +256,12 @@ def defaults() -> dict:
     }
 
 
+SEAL_STATE: dict[str, str] = {"ledger": "nokey"}
+
+
 def load_ledger() -> dict:
     p = ledger_path()
+    privacy.enter(p.parent, create=False)  # refuse a directory sealed to another principal
     if p.exists():
         try:
             ledger = json.loads(p.read_text(encoding="utf-8"))
@@ -253,6 +269,7 @@ def load_ledger() -> dict:
             raise SystemExit(
                 f"ledger corrupt at {p} ({exc}) — restore from git/backup or move the file aside"
             )
+        SEAL_STATE["ledger"] = privacy.verify_doc(ledger)
         ledger.setdefault("version", 2)
         return ledger
     return {
@@ -265,11 +282,15 @@ def load_ledger() -> dict:
 
 
 def save_ledger(ledger: dict) -> None:
-    """Atomic write (temp file + rename) so a crash mid-write never tears the ledger."""
-    data_dir().mkdir(parents=True, exist_ok=True)
+    """Atomic write (temp file + rename) so a crash mid-write never tears the
+    ledger. The directory is sealed to this principal and chmod 700; the
+    document is HMAC-sealed when a ledger key exists (charter P5/P6)."""
+    privacy.enter(data_dir())
+    privacy.seal_doc(ledger)
     tmp = ledger_path().with_suffix(".json.tmp")
     tmp.write_text(json.dumps(ledger, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, ledger_path())
+    privacy.harden_file(ledger_path())
 
 
 def emit_spike(kind: str, payload: dict, ts: datetime) -> None:
@@ -383,6 +404,36 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
+def apply_source_update(ledger: dict, ref: str, update: dict, ts: datetime) -> dict:
+    """Move an existing connector-sourced job (matched by source_ref) to new
+    facts: due / title / calendar blob; reopen a done prep job when the event
+    itself moved into the future."""
+    matches = [j for j in ledger["jobs"] if j.get("source_ref") == ref]
+    if not matches:
+        raise ValueError(f"update for unknown source_ref {ref}")
+    job = sorted(matches, key=lambda j: j["created"])[-1]
+    changes = []
+    if update.get("due"):
+        new_due = iso(parse_when(str(update["due"]), ts))
+        if new_due != job.get("due"):
+            changes.append(f"due {job.get('due')} → {new_due}")
+            job["due"] = new_due
+    if update.get("title") and update["title"] != job.get("title"):
+        changes.append(f"title → {update['title']}")
+        job["title"] = str(update["title"])
+    if isinstance(update.get("calendar"), dict):
+        job["calendar"] = update["calendar"]
+    if job["status"] == "done" and update.get("reopen_if_done"):
+        job["status"] = "open"
+        job["followups"] = 0
+        job["last_followup"] = None
+        changes.append("reopened (event rescheduled)")
+    job["snooze_until"] = None
+    job["updated"] = iso(ts)
+    job.setdefault("notes", []).append({"ts": iso(ts), "text": "rescheduled: " + ("; ".join(changes) or "no change")})
+    return job
+
+
 def cmd_sync(args: argparse.Namespace) -> int:
     """Fold external event drops into the thread. Each *.json file in the inbox
     is one event: {"from","text"[,"ts","job","due","priority","reply_to"]}.
@@ -400,7 +451,12 @@ def cmd_sync(args: argparse.Namespace) -> int:
             text = str(event["text"])
             ev_ts = parse_ts(event["ts"]) if event.get("ts") else ts
             job_id = None
-            if event.get("job"):
+            if event.get("update_ref"):
+                # a connector re-reporting a known item (e.g. a rescheduled calendar
+                # event): move the existing job instead of opening a second one
+                job = apply_source_update(ledger, str(event["update_ref"]), event.get("update") or {}, ev_ts)
+                job_id = job["id"]
+            elif event.get("job"):
                 ws = event.get("workspace")
                 if ws and ws not in {w["id"] for w in known_workspaces()}:
                     ws = None  # unregistered (e.g. ad-hoc path): let the chooser route it
@@ -409,6 +465,8 @@ def cmd_sync(args: argparse.Namespace) -> int:
                               workspace_id=ws,
                               kind=event.get("kind") or "life",
                               source_ref=event.get("source_ref"))
+                if isinstance(event.get("calendar"), dict):
+                    job["calendar"] = event["calendar"]  # start/sequence so reschedules can be detected
                 ledger["jobs"].append(job)
                 job_id = job["id"]
             msg = append_message(ledger, sender, text, ev_ts, job_id=job_id,
@@ -591,7 +649,13 @@ def draft_followup(ledger: dict, job: dict, reason: str, ts: datetime) -> Path:
         f"Suggested nudge (Aaron reviews before any send):\n\n"
         f"> {nudge}\n"
     )
+    # A draft may carry personal context (it is read by its own principal) but
+    # never a credential — a pasted key in a job note must not travel in a nudge.
+    body, scrubbed = privacy.redact_secrets(body)
+    if scrubbed:
+        body = body.replace("send_via: motor.inkbox\n", f"send_via: motor.inkbox\nprivacy: {scrubbed} secret(s) scrubbed\n", 1)
     path.write_text(body, encoding="utf-8")
+    privacy.harden_file(path)
     return path
 
 
@@ -840,14 +904,29 @@ def cmd_outbox(args: argparse.Namespace) -> int:
     dest = dest_dir / draft.name
     text = draft.read_text(encoding="utf-8")
     stamp = f"{args.action}d: {iso(ts)}\n"
+    privacy_note = None
+    recipient = (getattr(args, "to", None) or "").strip().lower()
+    if args.action == "approve" and recipient and recipient not in ("aaron", "me", "self", privacy.OWNER):
+        # Charter P10: a draft leaving for a third party carries personal classes
+        # only if Aaron's consent record names that recipient; otherwise redact.
+        classes = {f["class"] for f in privacy.classify(text)} & {"personal_info", "personal_preference"}
+        blocked = sorted(c for c in classes if not privacy.consent_allows(recipient, c, ts))
+        if blocked:
+            text, counts = privacy.redact(text)
+            privacy_note = f"redacted for {recipient} (no consent for {', '.join(blocked)}): {counts}"
+        else:
+            privacy_note = f"recipient {recipient}: consent ok" if classes else f"recipient {recipient}: no personal classes"
+        stamp += f"to: {recipient}\nprivacy: {privacy_note}\n"
     text = text.replace("---\n\n# Follow-up draft:", f"{stamp}---\n\n# Follow-up draft:", 1)
     dest.write_text(text, encoding="utf-8")
+    privacy.harden_file(dest)
     draft.unlink()
     emit_spike(f"draft_{args.action}d", {"draft": draft.name}, ts)
     print(json.dumps({
         "ok": True,
         "draft": draft.name,
         "moved_to": str(dest.relative_to(data_dir())),
+        "privacy": privacy_note,
         "note": ("approved drafts are handed to motor.inkbox under switch.outbound — "
                  "nothing was sent" if args.action == "approve" else "draft discarded"),
     }, indent=2))
@@ -936,9 +1015,16 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         answered = m.get("answered_by")
         if answered and not answered.startswith("job:") and answered not in msg_ids:
             problems.append(f"message {m['id']} answered_by unknown message {answered}")
+    if SEAL_STATE.get("ledger") == "mismatch":
+        problems.append("ledger HMAC seal mismatch — edited outside instinct.py (or key rotated)")
+    seal = privacy.read_seal(data_dir())
+    if seal and seal.get("principal") != privacy.current_principal():
+        problems.append(f"data dir sealed to {seal.get('principal')!r}; process is {privacy.current_principal()!r}")
     report = {
         "ok": not problems,
         "problems": problems,
+        "principal": privacy.current_principal(),
+        "seal": SEAL_STATE.get("ledger"),
         "data_dir": str(data_dir()),
         "jobs": len(ledger["jobs"]),
         "thread_messages": len(ledger["thread"]),
@@ -1124,13 +1210,21 @@ def cmd_distill(args: argparse.Namespace) -> int:
         "by_workspace": [r for r in rollup if r["live"] or r["done"]],
         "last_scan": report["last_scan"],
         "draft_only": True,
+        "principal": privacy.current_principal(),
     }
+    # Charter P1: the kernel re-checks "counts only" before the write; a
+    # distillate with any personal class or secret is refused, not written.
+    if privacy.is_owner():
+        doc = privacy.assert_shareable(doc, "mesh_distillate")
+    else:
+        doc = privacy.assert_operational(doc, "guest instinct distillate")
     out = mesh_out_path()
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     mirrored = False
     cw = _cw()
-    if cw is not None and not os.environ.get("INSTINCT_NO_CACHE_MIRROR") and cw.CLINE_CACHE.exists():
+    if cw is not None and privacy.is_owner() and not os.environ.get("INSTINCT_NO_CACHE_MIRROR") \
+            and cw.CLINE_CACHE.exists():
         try:
             cache = cw.load_json(cw.CLINE_CACHE)
             notes = cache.setdefault("mesh_notes", [])
@@ -1238,6 +1332,7 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("outbox", help="review drafted nudges: list / show / approve / discard")
     p.add_argument("action", choices=["list", "show", "approve", "discard"])
     p.add_argument("name", nargs="?", help="draft filename (or unique prefix/substring)")
+    p.add_argument("--to", help="approve: intended recipient; third parties get consent-checked redaction")
     p.set_defaults(fn=cmd_outbox)
 
     p = sub.add_parser("stats", help="follow-through scorecard from the ledger")

@@ -26,6 +26,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "integrations" / "memorybear.json"
 SAMPLE_READ = ROOT / "scripts" / "testdata" / "sample-memorybear-read.json"
+sys.path.insert(0, str(ROOT / "scripts"))
+import cam_privacy as privacy  # noqa: E402
+
+
+def require_owner_memory() -> None:
+    """Charter P4: MemoryBear (and its vault mirror) is the owner's memory,
+    keyed by the owner's end_user_id. A guest principal never reads or writes
+    it — their memory lives in their own root and nowhere else."""
+    pid = privacy.current_principal()
+    if pid != privacy.OWNER:
+        raise SystemExit(f"memorybear is owner-only memory; principal {pid!r} keeps memory in "
+                         f"data/principals/{pid}/ (no shared memory between people)")
 
 
 def load_config() -> dict:
@@ -273,6 +285,7 @@ def main() -> int:
     p_write.add_argument("--message", required=True)
 
     args = parser.parse_args()
+    require_owner_memory()
     save_vault_flag = bool(defaults.get("save_to_vault")) or args.save_vault
     if args.no_save_vault:
         save_vault_flag = False
