@@ -1,21 +1,29 @@
 #!/usr/bin/env python3
-"""private-memory — manage Cam's sealed store of Aaron's personal information.
+"""private-memory — manage the sealed store of the operator's personal information.
 
   python3 scripts/private-memory.py doctor
   python3 scripts/private-memory.py list
-  python3 scripts/private-memory.py put identity.aaron.timezone --value "Region/City"
-  python3 scripts/private-memory.py put identity.aaron.visual_profile --file ~/notes/profile.md
+  python3 scripts/private-memory.py put identity.<handle>.timezone --value "Region/City" --protect
+  python3 scripts/private-memory.py put identity.<handle>.visual_profile --file ~/notes/profile.md
   python3 scripts/private-memory.py put contacts.landlord --json '{"name": "...", "phone": "..."}'
-  python3 scripts/private-memory.py get identity.aaron.timezone
+  python3 scripts/private-memory.py get identity.<handle>.timezone
   python3 scripts/private-memory.py delete contacts.landlord
+  python3 scripts/private-memory.py protect --value "Full Legal Name" --value "12 Example Street"
+  python3 scripts/private-memory.py protect --file ~/my-private-facts.txt      # one term per line
+  python3 scripts/private-memory.py protected                                  # count only
+  python3 scripts/private-memory.py unprotect --value "old employer"
   python3 scripts/private-memory.py import-legacy [--dry-run] [--no-working-copy]
+
+`protect` seals *your own* personal facts (names, street, employer, plate,
+school, doctor, …). pii-guard blocks them in every commit / push / PR and every
+runtime redaction path strips them — the list itself never leaves private memory.
 
 `import-legacy` recovers the pre-redaction identity content from *local* git
 history (the newest revision that still fails pii-guard), seals it under the
 documented keys, and writes gitignored working copies the runtime reads. Run it
 BEFORE purging history (scripts/purge-git-history.sh).
 
-Store location: CAM_PRIVATE_HOME (default identity/aaron/local/private-memory/).
+Store location: PRIVATE_MEMORY_HOME / CAM_PRIVATE_HOME (default identity/<handle>/local/private-memory/).
 Key file:       CAM_PRIVATE_KEY_FILE (default <store>/.key).
 """
 
@@ -32,15 +40,16 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import privacy  # noqa: E402
 import private_memory as pm  # noqa: E402
 
-LOCAL = ROOT / "identity" / "aaron" / "local"
+HANDLE = pm.operator_handle()
+LOCAL = ROOT / "identity" / HANDLE / "local"
 
 # key, tracked path, kind, working copy (gitignored) the runtime reads
 LEGACY_FILES = [
-    ("identity.aaron.visual_profile", "identity/aaron/VISUAL_PROFILE.md", "text", LOCAL / "VISUAL_PROFILE.md"),
-    ("identity.aaron.enroll_index", "identity/aaron/enroll-index.json", "json", LOCAL / "enroll-index.json"),
+    (f"identity.{HANDLE}.visual_profile", f"identity/{HANDLE}/VISUAL_PROFILE.md", "text", LOCAL / "VISUAL_PROFILE.md"),
+    (f"identity.{HANDLE}.enroll_index", f"identity/{HANDLE}/enroll-index.json", "json", LOCAL / "enroll-index.json"),
 ]
 LEGACY_FIELDS = [
-    ("identity.aaron.timezone", "identity/ANSWERS_SESSION_01.json", ("human", "timezone")),
+    (f"identity.{HANDLE}.timezone", "identity/ANSWERS_SESSION_01.json", ("human", "timezone")),
 ]
 
 
@@ -150,7 +159,54 @@ def cmd_put(args) -> int:
         value = sys.stdin.read()
         kind = "text"
     rec = store.put(args.key, value, kind=kind, source=args.source or "")
-    print(json.dumps(rec.as_dict(), indent=2))
+    out = rec.as_dict()
+    if args.protect:
+        if kind == "text" and 3 <= len(value.strip()) <= 200 and "\n" not in value.strip():
+            out["protected_terms"] = store.protect([value.strip()])
+        else:
+            out["protect_skipped"] = "only short single-line text values can be protected terms"
+    print(json.dumps(out, indent=2))
+    return 0
+
+
+def _terms_from_args(args) -> list[str]:
+    terms = list(args.value or [])
+    if args.file:
+        for line in Path(args.file).expanduser().read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                terms.append(line)
+    if not terms:
+        terms = [l.strip() for l in sys.stdin.read().splitlines() if l.strip()]
+    return terms
+
+
+def cmd_protect(args) -> int:
+    store = _store(args)
+    terms = _terms_from_args(args)
+    if not terms:
+        print("private-memory: nothing to protect (pass --value / --file or pipe one term per line)", file=sys.stderr)
+        return 1
+    total = store.protect(terms)
+    print(json.dumps({"protected_terms": total, "added_or_present": len(terms), "key": pm.PERSONAL_TERMS_KEY}, indent=2))
+    return 0
+
+
+def cmd_unprotect(args) -> int:
+    store = _store(args)
+    total = store.unprotect(_terms_from_args(args))
+    print(json.dumps({"protected_terms": total}, indent=2))
+    return 0
+
+
+def cmd_protected(args) -> int:
+    store = _store(args)
+    terms = store.protected_terms()
+    if args.reveal:
+        for t in terms:
+            print(t)
+    else:
+        print(json.dumps({"protected_terms": len(terms), "reveal": "private-memory.py protected --reveal (local terminal only)"}, indent=2))
     return 0
 
 
@@ -204,7 +260,7 @@ def cmd_doctor(args) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--home", help="store directory (default CAM_PRIVATE_HOME or identity/aaron/local/private-memory)")
+    ap.add_argument("--home", help=f"store directory (default PRIVATE_MEMORY_HOME / CAM_PRIVATE_HOME or identity/{HANDLE}/local/private-memory)")
     ap.add_argument("--key-file", help="key file (default CAM_PRIVATE_KEY_FILE or <store>/.key)")
     ap.add_argument("--allow-plaintext", action="store_true", help="permit unencrypted records when no backend exists")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -216,7 +272,22 @@ def main() -> int:
     src.add_argument("--json")
     src.add_argument("--file")
     p.add_argument("--source", help="provenance note (no values)")
+    p.add_argument("--protect", action="store_true", help="also add the value to the protected personal terms")
     p.set_defaults(fn=cmd_put)
+
+    pr = sub.add_parser("protect", help="seal your own personal facts so pii-guard blocks them everywhere")
+    pr.add_argument("--value", action="append", help="a term (repeatable)")
+    pr.add_argument("--file", help="text file, one term per line (# comments allowed)")
+    pr.set_defaults(fn=cmd_protect)
+
+    up = sub.add_parser("unprotect", help="remove protected terms")
+    up.add_argument("--value", action="append")
+    up.add_argument("--file")
+    up.set_defaults(fn=cmd_unprotect)
+
+    pd = sub.add_parser("protected", help="how many terms are protected (values only with --reveal)")
+    pd.add_argument("--reveal", action="store_true")
+    pd.set_defaults(fn=cmd_protected)
 
     g = sub.add_parser("get", help="print (or --out write) a sealed value")
     g.add_argument("key")
@@ -236,7 +307,7 @@ def main() -> int:
 
     il = sub.add_parser("import-legacy", help="recover pre-redaction identity content from local git history")
     il.add_argument("--dry-run", action="store_true")
-    il.add_argument("--no-working-copy", action="store_true", help="seal only; do not write identity/aaron/local/ copies")
+    il.add_argument("--no-working-copy", action="store_true", help=f"seal only; do not write identity/{HANDLE}/local/ copies")
     il.set_defaults(fn=cmd_import_legacy)
 
     args = ap.parse_args()

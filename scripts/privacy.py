@@ -8,9 +8,15 @@ Used by:
   * scripts/cam_sentinel.py       — private-path deny at the motor boundary
   * scripts/system-health-scan.py — neuron.privacy_guard
 
-Policy lives in config/privacy/pii-guard.json (a Sentinel guardrail path). This
-module never prints or stores what it finds unredacted: findings carry a
+Policy lives in config/privacy/pii-guard.json (a Sentinel guardrail path). The
+policy is operator-agnostic: `operator.handle` / `operator.display_name` are
+expanded into paths and patterns, and the operator's own personal facts come
+from private memory (`privacy.personal_terms`) — never from a tracked file.
+This module never prints or stores what it finds unredacted: findings carry a
 redacted snippet only.
+
+Portable: scripts/privacy-kit.py exports this stack into any other repository;
+scripts/privacy-init.py sets it up for a new operator.
 """
 
 from __future__ import annotations
@@ -26,21 +32,102 @@ from typing import Callable, Iterable
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "privacy" / "pii-guard.json"
 
+# Sealed list of the operator's own personal facts (name, street, employer, …).
+# Lives only in private memory; the guard blocks and redacts every occurrence.
+PERSONAL_TERMS_KEY = "privacy.personal_terms"
+PERSONAL_TERMS_RULE = "personal_term"
+MIN_TERM_LEN = 3
+
 _CFG_CACHE: dict | None = None
 _RULES_CACHE: list["Rule"] | None = None
+_TERMS_CACHE: list[str] | None = None
 
 
 # --- config -------------------------------------------------------------------
 
+DEFAULT_OPERATOR = {"handle": "operator", "display_name": "the operator"}
+
+
+def operator(cfg: dict | None = None) -> dict:
+    """Who this checkout protects. Only a handle and a display name — nothing personal."""
+    raw = dict((cfg or load_config()).get("operator") or {})
+    out = dict(DEFAULT_OPERATOR)
+    out.update({k: v for k, v in raw.items() if isinstance(v, str) and v})
+    return out
+
+
+def _expand(node, op: dict):
+    """Replace {handle} / {display_name} placeholders in every string of the policy."""
+    if isinstance(node, str):
+        return node.replace("{handle}", op["handle"]).replace("{display_name}", op["display_name"])
+    if isinstance(node, list):
+        return [_expand(x, op) for x in node]
+    if isinstance(node, dict):
+        return {k: (v if k == "operator" else _expand(v, op)) for k, v in node.items()}
+    return node
+
+
 def load_config(path: Path | None = None, *, force: bool = False) -> dict:
-    global _CFG_CACHE, _RULES_CACHE
+    global _CFG_CACHE, _RULES_CACHE, _TERMS_CACHE
     if path is None and _CFG_CACHE is not None and not force:
         return _CFG_CACHE
-    cfg = json.loads((path or CONFIG_PATH).read_text(encoding="utf-8"))
+    raw = json.loads((path or CONFIG_PATH).read_text(encoding="utf-8"))
+    cfg = _expand(raw, operator(raw))
     if path is None:
         _CFG_CACHE = cfg
         _RULES_CACHE = None
+        _TERMS_CACHE = None
     return cfg
+
+
+def personal_terms(*, force: bool = False) -> list[str]:
+    """The operator's protected terms from private memory (empty when no store / no key).
+
+    Never raises and never logs: CI runners have no store and must simply see no terms.
+    Set PII_GUARD_SKIP_PRIVATE_TERMS=1 to disable (tests, throwaway machines).
+    """
+    global _TERMS_CACHE
+    if _TERMS_CACHE is not None and not force:
+        return _TERMS_CACHE
+    terms: list[str] = []
+    import os
+
+    if os.environ.get("PII_GUARD_SKIP_PRIVATE_TERMS") != "1":
+        try:
+            import private_memory as pm  # local import: private_memory must not import privacy
+
+            store = pm.PrivateMemory(create=False)
+            if store.home.exists() and store.has(PERSONAL_TERMS_KEY):
+                terms = normalize_terms(store.get_json(PERSONAL_TERMS_KEY))
+        except Exception:
+            terms = []
+    _TERMS_CACHE = terms
+    return terms
+
+
+def normalize_terms(values) -> list[str]:
+    out: list[str] = []
+    for v in values or []:
+        if not isinstance(v, str):
+            continue
+        t = " ".join(v.split())
+        if len(t) >= MIN_TERM_LEN and t.lower() not in {x.lower() for x in out}:
+            out.append(t)
+    return out
+
+
+def personal_terms_rule(terms: list[str]) -> "Rule | None":
+    """One case-insensitive rule for every protected term (longest first, flexible whitespace)."""
+    terms = normalize_terms(terms)
+    if not terms:
+        return None
+    alts = [re.escape(t).replace(r"\ ", r"\s+") for t in sorted(terms, key=len, reverse=True)]
+    return Rule(
+        id=PERSONAL_TERMS_RULE,
+        severity="block",
+        label="protected personal term (sealed in private memory)",
+        regex=re.compile(r"(?i)(?<![\w@])(?:" + "|".join(alts) + r")(?![\w@])"),
+    )
 
 
 @dataclass
@@ -145,6 +232,9 @@ def compile_rules(cfg: dict | None = None) -> list[Rule]:
                 validator=_VALIDATORS.get(raw.get("validator") or ""),
             )
         )
+    term_rule = personal_terms_rule(personal_terms())
+    if term_rule is not None:
+        rules.append(term_rule)
     if cfg is _CFG_CACHE:
         _RULES_CACHE = rules
     return rules
@@ -162,6 +252,10 @@ def normalize_rel(path: str | Path, root: Path | None = None) -> str:
     return rel.lstrip("/")
 
 
+def _glob_rx(pattern: str) -> str:
+    return re.escape(pattern).replace(r"\*\*/", "(?:.*/)?").replace(r"\*\*", ".*").replace(r"\*", "[^/]*").replace(r"\?", "[^/]")
+
+
 def glob_match(rel: str, pattern: str) -> bool:
     """Match a repo-relative path against a gitignore-flavoured glob.
 
@@ -173,13 +267,14 @@ def glob_match(rel: str, pattern: str) -> bool:
     rel = rel.lstrip("/")
     if pattern.endswith("/"):
         body = pattern.rstrip("/")
-        if body.startswith("**/"):
+        if body.startswith("**/") and "*" not in body[3:]:
             needle = "/" + body[3:] + "/"
             return ("/" + rel).find(needle) >= 0 and not ("/" + rel).endswith(needle.rstrip("/"))
+        if "*" in body or "?" in body:
+            return re.fullmatch(_glob_rx(body) + "(?:/.*)?", rel) is not None
         return rel == body or rel.startswith(body + "/")
     if "**" in pattern:
-        rx = re.escape(pattern).replace(r"\*\*/", "(?:.*/)?").replace(r"\*\*", ".*").replace(r"\*", "[^/]*").replace(r"\?", "[^/]")
-        return re.fullmatch(rx, rel) is not None
+        return re.fullmatch(_glob_rx(pattern), rel) is not None
     if "/" not in pattern:
         return fnmatch.fnmatchcase(Path(rel).name, pattern) or fnmatch.fnmatchcase(rel, pattern)
     return fnmatch.fnmatchcase(rel, pattern)

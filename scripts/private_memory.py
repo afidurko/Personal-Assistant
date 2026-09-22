@@ -1,11 +1,13 @@
-"""Cam private memory — sealed, host-only storage for Aaron's personal information.
+"""Private memory — sealed, host-only storage for the operator's personal information.
 
-Everything that describes Aaron as a person (visual profile, enrollment refs,
-timezone, contact details, device inventory, …) is written here and *referenced*
-from tracked files by key. The store is:
+Everything that describes the operator as a person (visual profile, enrollment
+refs, timezone, contact details, device inventory, …) is written here and
+*referenced* from tracked files by key. Works for any operator: the handle comes
+from config/privacy/pii-guard.json (`operator.handle`). The store is:
 
-  * outside git — default `identity/aaron/local/private-memory/` (gitignored and a
-    pii-guard private path), overridable with `CAM_PRIVATE_HOME` (e.g. ~/.cam/private)
+  * outside git — default `identity/<handle>/local/private-memory/` (gitignored and a
+    pii-guard private path), overridable with `PRIVATE_MEMORY_HOME` / `CAM_PRIVATE_HOME`
+    (e.g. ~/.cam/private)
   * encrypted at rest — Fernet (AES-128-CBC + HMAC) when `cryptography` is
     importable, else `openssl enc -aes-256-cbc -pbkdf2`; plaintext only when the
     operator explicitly allows it
@@ -30,9 +32,29 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_HOME = ROOT / "identity" / "aaron" / "local" / "private-memory"
+CONFIG_PATH = ROOT / "config" / "privacy" / "pii-guard.json"
 KEY_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,120}$")
 ENVELOPE_VERSION = 1
+PERSONAL_TERMS_KEY = "privacy.personal_terms"
+
+
+def operator_handle() -> str:
+    """Read operator.handle straight from the policy file (no import of privacy.py → no cycle)."""
+    try:
+        op = json.loads(CONFIG_PATH.read_text(encoding="utf-8")).get("operator") or {}
+        handle = str(op.get("handle") or "").strip()
+        if re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,40}", handle):
+            return handle
+    except (OSError, json.JSONDecodeError):
+        pass
+    return "operator"
+
+
+def default_home() -> Path:
+    return ROOT / "identity" / operator_handle() / "local" / "private-memory"
+
+
+DEFAULT_HOME = default_home()
 
 try:  # optional strong backend
     from cryptography.fernet import Fernet, InvalidToken  # type: ignore
@@ -59,8 +81,8 @@ def _chmod(path: Path, mode: int) -> None:
 def resolve_home(home: Path | None = None) -> Path:
     if home is not None:
         return Path(home)
-    env = os.environ.get("CAM_PRIVATE_HOME")
-    return Path(env).expanduser() if env else DEFAULT_HOME
+    env = os.environ.get("PRIVATE_MEMORY_HOME") or os.environ.get("CAM_PRIVATE_HOME")
+    return Path(env).expanduser() if env else default_home()
 
 
 def resolve_key_file(home: Path, key_file: Path | None = None) -> Path:
@@ -126,9 +148,9 @@ class PrivateMemory:
             self._write_index({})
         if not (self.home / "README.txt").exists():
             (self.home / "README.txt").write_text(
-                "Cam private memory. Sealed personal information for Aaron only.\n"
+                "Private memory. Sealed personal information for the operator only.\n"
                 "Never copy this folder into a repository, a PR, a chat, or a cloud VM.\n"
-                "Manage with: python3 scripts/private-memory.py {list,get,put,delete,doctor}\n",
+                "Manage with: python3 scripts/private-memory.py {list,get,put,delete,protect,doctor}\n",
                 encoding="utf-8",
             )
             _chmod(self.home / "README.txt", 0o600)
@@ -209,7 +231,7 @@ class PrivateMemory:
     @staticmethod
     def _check_key(key: str) -> str:
         if not KEY_RE.match(key):
-            raise PrivateMemoryError(f"bad key {key!r}: use lowercase dotted names like identity.aaron.timezone")
+            raise PrivateMemoryError(f"bad key {key!r}: use lowercase dotted names like identity.{operator_handle()}.timezone")
         return key
 
     def _record_path(self, key: str) -> Path:
@@ -302,6 +324,34 @@ class PrivateMemory:
             out.append(Record(**{k: meta.get(k, "") for k in Record.__dataclass_fields__}))
         return out
 
+    # --- protected personal terms -----------------------------------------------
+    # The operator's own facts (full name, street, employer, plate, …) sealed as one
+    # JSON list. pii-guard and every redaction path block them wherever they appear.
+
+    def protected_terms(self) -> list[str]:
+        if not self.has(PERSONAL_TERMS_KEY):
+            return []
+        data = self.get_json(PERSONAL_TERMS_KEY)
+        return [t for t in data if isinstance(t, str)] if isinstance(data, list) else []
+
+    def protect(self, terms: list[str]) -> int:
+        """Add terms; returns the new total. Terms shorter than 3 characters are ignored."""
+        current = self.protected_terms()
+        lowered = {t.lower() for t in current}
+        for raw in terms:
+            t = " ".join(str(raw).split())
+            if len(t) >= 3 and t.lower() not in lowered:
+                current.append(t)
+                lowered.add(t.lower())
+        self.put(PERSONAL_TERMS_KEY, current, kind="json", source="private-memory protect")
+        return len(current)
+
+    def unprotect(self, terms: list[str]) -> int:
+        drop = {" ".join(str(t).split()).lower() for t in terms}
+        current = [t for t in self.protected_terms() if t.lower() not in drop]
+        self.put(PERSONAL_TERMS_KEY, current, kind="json", source="private-memory unprotect")
+        return len(current)
+
     # --- health ---------------------------------------------------------------
 
     def doctor(self) -> dict:
@@ -352,10 +402,19 @@ class PrivateMemory:
         stale_plain = [r.key for r in records if r.cipher == "none"]
         if stale_plain and backend != "none":
             warnings.append(f"{len(stale_plain)} record(s) sealed in plaintext — re-put them to encrypt")
+        try:
+            n_terms = len(self.protected_terms()) if self.home.exists() else 0
+        except PrivateMemoryError:
+            n_terms = -1
+            problems.append("protected terms exist but cannot be opened (wrong key?)")
+        if n_terms == 0:
+            warnings.append("no protected personal terms — add your own facts with `private-memory.py protect`")
 
         return {
             "ok": not problems,
+            "operator": operator_handle(),
             "home": str(self.home),
+            "protected_terms": n_terms,
             "inside_repo": inside_repo,
             "gitignored": gitignored,
             "tracked_private_files": tracked,

@@ -23,17 +23,19 @@ identity/persistence/cam-persistence.zip
 
 # --- Personal information / private memory (never tracked) -------------------
 # Policy: docs/PRIVACY_SAFEGUARDS.md · guard: scripts/pii-guard.py
+# Any operator's private tree (identity/<handle>/local/) — set up by scripts/privacy-init.py
+identity/*/local/
 identity/aaron/local/
-identity/aaron/**/*.jpg
-identity/aaron/**/*.jpeg
-identity/aaron/**/*.png
-identity/aaron/**/*.heic
-identity/aaron/**/*.mp4
-identity/aaron/**/*.mov
-identity/aaron/**/*.wav
-identity/aaron/**/*.m4a
-identity/aaron/voice-profile.json
-identity/aaron/enroll.json
+identity/*/**/*.jpg
+identity/*/**/*.jpeg
+identity/*/**/*.png
+identity/*/**/*.heic
+identity/*/**/*.mp4
+identity/*/**/*.mov
+identity/*/**/*.wav
+identity/*/**/*.m4a
+identity/*/voice-profile.json
+identity/*/enroll.json
 **/private-memory/
 **/*.private.json
 **/*.private.md

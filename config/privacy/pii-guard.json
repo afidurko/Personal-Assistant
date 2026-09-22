@@ -1,9 +1,14 @@
 {
   "id": "cam-pii-guard",
   "title": "Personal-information guard — what may never reach a tracked file, a PR, a log, or an outbound motor",
-  "authorized_by": "Aaron",
+  "authorized_by": "{display_name}",
   "authorized_at": "2026-09-22",
   "status": "enforced",
+  "operator": {
+    "handle": "aaron",
+    "display_name": "Aaron",
+    "note": "Set with `python3 scripts/privacy-init.py --operator <handle> --name <Display>`. {handle} and {display_name} expand in every path and pattern below; the operator's own personal facts are sealed with `private-memory.py protect`, never written here."
+  },
   "policy_doc": "docs/PRIVACY_SAFEGUARDS.md",
   "allow_pragma": "pii-guard: allow",
   "max_file_bytes": 2000000,
@@ -18,7 +23,8 @@
     "*.lock"
   ],
   "private_paths": [
-    "identity/aaron/local/",
+    "identity/{handle}/local/",
+    "identity/*/local/",
     "**/private-memory/",
     ".cam/",
     ".cam-private/",
@@ -292,8 +298,8 @@
     {
       "id": "enrollment_media_ref",
       "severity": "block",
-      "label": "reference to an enrollment photo / clip of Aaron",
-      "pattern": "\\baaron-\\d{2}[a-z0-9-]*\\.(?:jpe?g|png|heic|mov|mp4|m4a|wav)\\b",
+      "label": "reference to an enrollment photo / clip of {display_name}",
+      "pattern": "\\b{handle}-\\d{2}[a-z0-9-]*\\.(?:jpe?g|png|heic|mov|mp4|m4a|wav)\\b",
       "exclude": [
         "config/integrations/funasr.md",
         "scripts/privacy.py",
