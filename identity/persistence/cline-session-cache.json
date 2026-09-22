@@ -3,9 +3,9 @@
   "cross_workspace": true,
   "effector": "cline",
   "last_session": {
-    "at": "2026-09-22T18:29:48.185152+00:00",
+    "at": "2026-09-22T19:47:32.511834+00:00",
     "mode": "act",
-    "summary": "Hand gestures: mounted Aaron's 3 repos (hagrid, hand-gesture-mediapipe, hand-gesture-recognition) as submodules; mapped labels onto vocabulary primitives (repos.* in gestures.json); +4 HaGRID poses, +4 gestures, +converse.mute_toggle; gesture-check verifies mapping + live label drift",
+    "summary": "Hand gestures P1: meshed Aaron's 3 repos into one engine (scripts/cam_gesture_engine.py \u2014 HaGRID labels + Kazuhito00 keypoint/point-history k-NN from the submodule CSVs + Ha0Tang key frames + Cam finger rules \u2192 segments); Cam's eyes: companions/web/gestures.js (MediaPipe on-device landmarks \u2192 POST /api/spike/hand), cam-gesture-see.py (Mac camera / replay / demo), converse-server GestureHub + /api/gesture/*; 30 engine tests + 6 eyes demos in gesture-check; switch.gesture_control still hold (dry run via --gesture-act + ?gesture-demo=)",
     "workspace": "."
   },
   "mesh_notes": [
@@ -114,6 +114,11 @@
     {
       "at": "2026-09-22T18:29:48.185152+00:00",
       "text": "44 gestures / 34 actions; switch.gesture_control still hold",
+      "workspace": "."
+    },
+    {
+      "at": "2026-09-22T19:47:32.511834+00:00",
+      "text": "gestures: engine + eyes built; first live camera session flips switch.gesture_control",
       "workspace": "."
     }
   ],
