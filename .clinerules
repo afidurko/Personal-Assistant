@@ -67,6 +67,21 @@ and `scripts/inkbox-check.py` wiring; never free-send from Cline.
   Needs Attention items are pulled in by `attention-sync`. Drafts only — never send.
 - Never commit secrets, OAuth tokens, phone numbers, or raw PII.
 
+## Privacy (Aaron, 2026-09-22 — `docs/PRIVACY_CHARTER.md`)
+
+- Aaron's personal information and preferences exist in Cam for one purpose:
+  helping Aaron. They are never released to any other person, agent memory,
+  distillate, channel, or service. Default answer to any share is **no**.
+- One process serves one principal (`CAM_PRINCIPAL`). Another person may have
+  their own prompt and memory under `data/principals/<id>/`; memory is never
+  shared, compared, embedded, or transmitted across people.
+- Every write to a mesh distillate, mesh note, or third-party draft goes
+  through `scripts/cam_privacy.py` (`assert_shareable` / `redact`). Never
+  bypass the kernel, never add a sink that accepts personal classes.
+- Only Aaron grants consent (`cam_privacy.py --aaron consent grant`) and only
+  Aaron holds `disclose_personal`. No agent may be given it.
+- `python3 scripts/privacy-check.py` must stay green; do not weaken its checks.
+
 ## Style
 
 - Prefer smallest correct change; match existing repo patterns.

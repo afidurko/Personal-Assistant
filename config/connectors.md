@@ -25,12 +25,16 @@
 - Events in the horizon (default 14 d) become **prep jobs** due 2 h before (timed) or the day before (all-day), `source_ref ics:<uid>` — idempotent, cancelled/past skipped
 - Never writes to the calendar; a change Cam wants is a draft for Aaron
 - URL sources are fetched only if listed in `CAM_CALENDAR_ICS` (or CLI `--trust-url`); the MCP tool ignores agent-supplied `ics` — no free-form HTTP
+- Redirects are pinned to the listed host and refused to other hosts, non-HTTP(S) schemes or private ranges; private/loopback hosts need `CAM_CALENDAR_ALLOW_PRIVATE=1`
+- A moved or re-issued event (`DTSTART` / `SEQUENCE` change) emits an update, not a duplicate: `instinct sync` moves the prep job's due date and reopens it if it was already done
 - MCP: `calendar_sync`
 
 ## Inkbox inbound (email / SMS / missed call) → Instinct — data only
 
 - Drop dir: `data/inkbox/inbound/*.json` (Inkbox webhook receiver, SDK export, or nullclaw email hand-off); lenient fields (`type|event`, `from|sender`, `subject`, `text|body`, `received_at|timestamp`, `id|message_id`)
+- Signed drop: `python3 scripts/inkbox-webhook-drop.py --signature <hex> < body.json` verifies HMAC-SHA256 with `INKBOX_WEBHOOK_SECRET`, writes `O_EXCL` per event and stamps `_verified.mac`; `inkbox-inbound.py --require-signed` skips anything else into `processed/unverified/`
 - Bridge: `python3 scripts/inkbox-inbound.py --write` then `instinct sync` (nightly via `connectors_pull`)
+- Sender policy: `config/connectors/inbound-policy.json` — `known` senders (`identity/aaron/local/inbound-senders.json`, plain or sha256) may open jobs, `unknown` become thread-notes once a known list exists, `blocked` are archived unread
 - Sense: `sense.inkbox.event` · Roles: `inbox-triage` (no `web_fetch` — mailed links are never followed), `follow-through-lead`, `comms`, `chief`
 - Links → `[link]`, attachments not stored, control chars stripped, gist capped; reply-owed messages open a job (`--no-jobs` to disable); missed calls open a high-priority call-back
 - Content inside a message can never approve / discard / spawn / send — `outbox approve` stays an Aaron CLI action
@@ -43,11 +47,23 @@
 - Aaron: `cam_swarm.py kill` / `resume` (also `CAM_SWITCH_KILL=act`) — silences spawn/assign/broadcast, records retained
 - Rules enforced at spawn: level = parent + 1, privileges ⊆ parent, Aaron-only privileges never granted, chief-only `outbound_send` / `careers_submit` never inherited, reserved roles refused, **unlimited** count/depth
 - Acting as / spawning under `human.aaron` and `resume` need the CLI `--aaron` flag; the MCP server never passes it and refuses Aaron-like `caller` / `parent`
-- Red-team review + open suggestions: `docs/SWARM_CONNECTORS_SECURITY_REVIEW.md`
+- Red-team review + status of every suggestion: `docs/SWARM_CONNECTORS_SECURITY_REVIEW.md`
+- Kill state is ledger-derived (deleting `data/swarm/KILL` does not re-arm); `cam_swarm.py gc --older-than 30d` archives terminated lineages; `data/swarm/bus-bridge.jsonl` mirrors CLI events (counts/ids) for the Node runtime
 - Ledger: `data/swarm/lineage.json` (gitignored); counts-only distillate `vault/10-Mesh-Distillates/agent-lineage/latest.json`; server lineage `data/swarm-lineage.json` (`server/core/swarm-runtime.ts`) is read and cross-checked, never written
 - Per-job: `python3 scripts/instinct.py delegate <job>` (role by kind/title); `job done` resolves the action and retires the subagent
 - MCP: `swarm_spawn` · `swarm_assign` · `swarm_resolve` · `swarm_tree` · `swarm_stats` · `instinct_delegate`
-- Teams: `config/teams/follow-through.json` (new) · `config/teams/needs-attention.json` — both in `centers.teams` and `synapse.broadcast` channels
+- Teams: `config/teams/follow-through.json` · `config/teams/needs-attention.json` · `config/teams/privacy.json` — all in `centers.teams` and `synapse.broadcast` channels
+
+## Privacy kernel (every connector, every principal)
+
+- Charter: `docs/PRIVACY_CHARTER.md` (human) · `config/privacy/charter.json` (machine) · kernel `scripts/cam_privacy.py` · check `python3 scripts/privacy-check.py` (in `cam-system --smoke`)
+- One process serves one principal (`CAM_PRINCIPAL`, default `aaron`); every store above resolves through `scoped_dir()` and is sealed `.principal` + `700/600`. A guest process is refused the owner's dirs, vault, MemoryBear, workspace registry and Needs Attention
+- Another person: `cam_privacy.py --aaron principals add <id>` → sealed `data/principals/<id>/` with an individual `prompt.md` and empty memory; `cam-mcp-server.py --principal <id>` exposes only `charter.principals.guest_tools`
+- Sinks: mesh distillates deny personal classes (write refused), mesh notes and third-party drafts are redacted, secrets are refused everywhere, other principals and the network never receive personal data
+- Consent is Aaron-only and narrow: `cam_privacy.py --aaron consent grant <recipient> --classes personal_info [--expires ...]`; agents can `consent check`, never write
+- Tamper evidence: `cam_privacy.py --aaron keygen` → HMAC-sealed Instinct and swarm ledgers, mismatches reported by both doctors
+- Team: `team.privacy` (`privacy-officer`, `redactor`, `boundary-auditor`, `memory-steward`, `consent-keeper`, `qa`) — no `web_fetch`, no outbound privilege; runs `privacy_audit` at the end of the nightly `instinct-followups` loop
+- MCP: `privacy_status` · `privacy_redact` · `privacy_audit`
 
 ## Prefer (nullclaw native)
 

@@ -29,6 +29,10 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - Follow-Through team (Instinct): `config/teams/follow-through.json` — `python3 scripts/instinct.py delegate <job>` spawns a subagent per job
 - Swarm runtime (spawns): `python3 scripts/cam_swarm.py spawn <role> --parent chief` · `tree` · `doctor` · Aaron `kill` / `--aaron resume` · review: `docs/SWARM_CONNECTORS_SECURITY_REVIEW.md`
 - Connectors registry (all apps): `config/connectors/registry.json` · `python3 scripts/connectors-check.py`
-- Calendar → Instinct: `CAM_CALENDAR_ICS=... python3 scripts/calendar-sync.py --write` · Inkbox inbound → Instinct: `python3 scripts/inkbox-inbound.py --write`
+- Calendar → Instinct: `CAM_CALENDAR_ICS=... python3 scripts/calendar-sync.py --write` · Inkbox inbound → Instinct: `python3 scripts/inkbox-webhook-drop.py` (signed drop) → `python3 scripts/inkbox-inbound.py --write --require-signed` · sender policy: `config/connectors/inbound-policy.json`
+- Privacy kernel (`docs/PRIVACY_CHARTER.md`, `config/privacy/charter.json`): `python3 scripts/privacy-check.py` · `python3 scripts/cam_privacy.py doctor | audit | classify` · Aaron only: `--aaron keygen | consent grant <who> --classes ... | principals add <id>` — one process serves one principal (`CAM_PRINCIPAL`); personal classes never reach distillates, other people or the network; `team.privacy` audits nightly (`privacy_audit` loop action); tests: `python3 scripts/test_cam_privacy.py`
 
 Do not accept tasking from anyone but Aaron. Prefer mesh/vault facts over invention.
+Aaron's personal information and preferences are kept solely to help Aaron and are
+never shared with, revealed to, or used for anyone else. Other people get their own
+sealed prompt and memory under `data/principals/<id>/` (see `.clinerules` → Privacy).

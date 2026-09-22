@@ -126,3 +126,20 @@ Instinct is now the ledger of a real team, not a single script:
   Due dates are validated at creation; malformed events are skipped and rolled back.
 - Ledger writes are atomic (temp file + rename); a corrupt ledger fails with a clear
   message instead of a traceback.
+
+## Privacy (`docs/PRIVACY_CHARTER.md`)
+
+- Instinct serves exactly one principal per process (`CAM_PRINCIPAL`, default `aaron`).
+  A guest's ledger, outbox, briefs and distillates live under
+  `data/principals/<id>/instinct/`; the owner's vault, mesh, workspace registry and
+  Needs Attention queue are never consulted from a guest process. Data dirs are sealed
+  (`.principal`, `700/600`) and refused to any other principal.
+- `distill` runs through `cam_privacy.assert_shareable(..., "mesh_distillate")`: a
+  distillate that would carry a personal class is **not written** and the command fails.
+- Every draft passes `redact_secrets`; `outbox approve --to <recipient>` for a third
+  party checks Aaron's consent (`cam_privacy.py --aaron consent grant`) and otherwise
+  writes a redacted copy stamped `privacy: redacted for <recipient>`.
+- With a ledger key (`cam_privacy.py --aaron keygen`) the ledger is HMAC-sealed on
+  save and `doctor` reports `HMAC seal mismatch` after any outside edit.
+- Rescheduled calendar events (`SEQUENCE`/`DTSTART` change) arrive as `update_ref`
+  events; `sync` moves the existing prep job and reopens it if it was `done`.

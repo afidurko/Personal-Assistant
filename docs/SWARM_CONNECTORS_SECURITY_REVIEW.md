@@ -33,9 +33,27 @@ Also fixed while in there: `resume` requires `--aaron` (`kill` stays available t
 anyone — fail-safe); event/commute logs are ring-buffered (`EVENT_CAP`,
 `COMMUTE_CAP`) so unlimited spawn cannot grow the ledger without bound.
 
-## Not fixed — suggestions for Aaron
+## Status of the suggestions (2026-09-22)
 
-These are real but sit outside what a script can enforce on its own machine.
+Aaron said yes to everything that keeps personal information private; all nine
+items below are now implemented, with the trust-model caveat that remains in
+[`PRIVACY_CHARTER.md`](PRIVACY_CHARTER.md#what-this-does-not-claim).
+
+| # | status | where |
+|---|---|---|
+| 1 | done — `chmod 700/600` at every touch, HMAC-sealed ledgers (`CAM_LEDGER_HMAC_KEY` / `identity/aaron/local/ledger.key`), doctors report mismatch | `cam_privacy.py`, `test_cam_privacy.SealTests`, `HardeningTests` |
+| 2 | done — kill state is ledger-derived; deleting `KILL` no longer re-arms; CLI events mirrored to `data/swarm/bus-bridge.jsonl` | `cam_swarm.ledger_says_killed`, `test_deleting_kill_file_does_not_rearm` |
+| 3 | done — `inkbox-webhook-drop.py` verifies HMAC-SHA256, writes `O_EXCL`, stamps `_verified.mac`; `inkbox-inbound.py --require-signed` | `test_connectors.WebhookDropTests` |
+| 4 | done — `config/connectors/inbound-policy.json` (known / unknown / blocked → job / note / archive) | `test_connectors.SenderPolicyTests` |
+| 5 | done — `SEQUENCE`/`DTSTART` tracked per ref; moved events update or reopen the prep job | `test_connectors.RescheduleTests` |
+| 6 | done — `PinnedRedirects` refuses cross-host, non-HTTP(S) and private-range redirects; private hosts need `CAM_CALENDAR_ALLOW_PRIVATE=1` | `test_redirect_to_other_host_or_private_refused` |
+| 7 | done — MCP strips `now` on `instinct_scan`/`instinct_brief` when `write=true` | `test_mcp_guards.test_instinct_scan_write_ignores_now` |
+| 8 | done — `cam_swarm.py gc --older-than 30d` archives fully-terminated lineages | `test_gc_archives_old_terminated_lineages_only` |
+| 9 | partial — bus bridge (`bus-bridge.jsonl`, counts/ids only) for the Node runtime to tail; one shared store is still future work | `test_bridge_log_mirrors_events_counts_only` |
+
+## Original suggestions (kept for history)
+
+These were real but sat outside what a script could enforce on its own machine.
 
 1. **Local trust model.** The CLI believes `--caller`; anyone who can run
    `python3 scripts/cam_swarm.py --aaron …` or edit `data/swarm/lineage.json`
@@ -73,10 +91,12 @@ These are real but sit outside what a script can enforce on its own machine.
 ## Re-verification
 
 ```
-python3 scripts/test_cam_swarm.py      # 32 OK
-python3 scripts/test_connectors.py     # 24 OK
-python3 scripts/test_mcp_guards.py     # 9 OK  (drives the real MCP server)
+python3 scripts/test_cam_swarm.py      # 33 OK
+python3 scripts/test_connectors.py     # 26 OK
+python3 scripts/test_mcp_guards.py     # 17 OK  (drives the real MCP server, owner + guest)
 python3 scripts/test_instinct.py       # 56 OK
+python3 scripts/test_cam_privacy.py    # 53 OK
+python3 scripts/privacy-check.py       # P1–P10 wired
 python3 scripts/instinct-check.py      # guards asserted (non_inheritable, resolve_actor, MCP guard, ics drop)
 python3 scripts/cam-system.py --smoke  # all OK
 ```
