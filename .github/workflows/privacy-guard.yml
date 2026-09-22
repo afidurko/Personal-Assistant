@@ -1,9 +1,12 @@
 name: privacy-guard
 
-# Layer 4 of Cam's personal-information safeguards (docs/PRIVACY_SAFEGUARDS.md).
-# Fails any push or pull request that carries personal information, secrets,
-# biometric material, or private-memory paths — including the PR title/body.
-# Findings are printed as location + rule only, never as content.
+# Layer 4 of the personal-information safeguards (docs/PRIVACY_SAFEGUARDS.md,
+# docs/PRIVACY_QUICKSTART.md). Fails any push or pull request that carries
+# personal information, secrets, biometric material, or private-memory paths —
+# including the PR title/body. Findings are printed as location + rule only,
+# never as content. Portable: ships unchanged via scripts/privacy-kit.py.
+# CI runners have no private-memory store, so the operator's protected terms
+# are enforced by the local hooks; everything else is enforced here too.
 
 on:
   push:
@@ -51,12 +54,14 @@ jobs:
 
       - name: Privacy unit tests
         run: |
-          cd scripts && python3 -m unittest test_privacy
+          # Cam-only test classes skip themselves when this workflow runs in a repo that
+          # received the stack through scripts/privacy-kit.py.
+          cd scripts && PII_GUARD_SKIP_PRIVATE_TERMS=1 python3 -m unittest test_privacy
 
       - name: Private-memory paths are not tracked
         run: |
           set -euo pipefail
-          leaks="$(git ls-files identity/aaron/local '**/private-memory/**' 'data/runtime/**' | grep -v '\.gitkeep$' || true)"
+          leaks="$(git ls-files 'identity/*/local/**' '**/private-memory/**' 'data/runtime/**' | grep -v '\.gitkeep$' || true)"
           if [ -n "$leaks" ]; then
             echo "private paths tracked in git:"; echo "$leaks"; exit 1
           fi

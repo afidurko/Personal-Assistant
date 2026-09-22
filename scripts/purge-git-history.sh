@@ -4,7 +4,7 @@
 # Redacting HEAD is not enough on a public repository: every old commit, every
 # branch, and every PR ref still serves the pre-redaction files. This script
 # rewrites history with git-filter-repo. It is DRY-RUN by default and it NEVER
-# pushes — Aaron runs the printed force-push himself.
+# pushes — the operator runs the printed force-push themself.
 #
 #   bash scripts/purge-git-history.sh            # show the plan
 #   bash scripts/purge-git-history.sh --execute  # rewrite THIS clone (fresh clone recommended)
@@ -23,13 +23,16 @@ cd "$ROOT"
 EXECUTE=0
 [ "${1:-}" = "--execute" ] && EXECUTE=1
 
+# Operator handle from the policy (config/privacy/pii-guard.json → operator.handle).
+HANDLE="$(python3 -c 'import json;print((json.load(open("config/privacy/pii-guard.json")).get("operator") or {}).get("handle") or "operator")')"
+
 # Historical files whose every revision is personal information. HEAD holds
 # public stubs; they are saved and restored after the rewrite.
 PURGE_PATHS=(
-  "identity/aaron/VISUAL_PROFILE.md"
-  "identity/aaron/enroll-index.json"
-  "identity/aaron/voice-profile.json"
-  "identity/aaron/enroll.json"
+  "identity/${HANDLE}/VISUAL_PROFILE.md"
+  "identity/${HANDLE}/enroll-index.json"
+  "identity/${HANDLE}/voice-profile.json"
+  "identity/${HANDLE}/enroll.json"
 )
 
 # Literal / regex replacements applied to every remaining blob in history.
@@ -37,18 +40,18 @@ PURGE_PATHS=(
 # this script: it is read from private memory at run time (import-legacy first).
 REPLACE_FILE="$(mktemp)"
 chmod 600 "$REPLACE_FILE"
-cat >"$REPLACE_FILE" <<'EOF'
+cat >"$REPLACE_FILE" <<EOF
 regex:\bEST / (?:Africa|America|Antarctica|Asia|Atlantic|Australia|Europe|Indian|Pacific)/[A-Z][A-Za-z_]+\b==>operator_local
 regex:\b(?:Africa|America|Antarctica|Asia|Atlantic|Australia|Europe|Indian|Pacific)/[A-Z][A-Za-z_]+ \(E[SD]T\)==>operator_local
-regex:\(Aaron / E[SD]T\)==>
-regex:aaron-\d{2}-[a-z0-9-]+\.(?:jpe?g|png|heic|mov|mp4|m4a|wav)==>[removed]
+regex:\([A-Z][a-z]+ / E[SD]T\)==>
+regex:${HANDLE}-\d{2}-[a-z0-9-]+\.(?:jpe?g|png|heic|mov|mp4|m4a|wav)==>[removed]
 face_enrollment_complete_4_photos_voice_enrolled==>face_enrollment_complete_voice_enrolled
 face_enrollment_complete_4_photos==>face_enrollment_complete
 EOF
 TZ_NOTE="(not in private memory — only the generic patterns above will apply)"
-if tz_value="$(python3 scripts/private-memory.py get identity.aaron.timezone 2>/dev/null)" && [ -n "$tz_value" ]; then
+if tz_value="$(python3 scripts/private-memory.py get "identity.${HANDLE}.timezone" 2>/dev/null)" && [ -n "$tz_value" ]; then
   printf '%s==>operator_local\n' "$tz_value" >>"$REPLACE_FILE"
-  TZ_NOTE="(literal value loaded from private memory key identity.aaron.timezone)"
+  TZ_NOTE="(literal value loaded from private memory key identity.${HANDLE}.timezone)"
 fi
 
 echo "== purge-git-history: plan"
@@ -65,7 +68,7 @@ echo
 echo "text replaced in every historical blob:"
 grep -v '==>operator_local$' "$REPLACE_FILE" | grep -v '^regex:' | sed 's/^/  - /' || true
 grep '^regex:' "$REPLACE_FILE" | sed 's/^/  - /' || true
-echo "  - <identity.aaron.timezone>==>operator_local  $TZ_NOTE"
+echo "  - <identity.${HANDLE}.timezone>==>operator_local  $TZ_NOTE"
 echo
 
 if ! command -v git-filter-repo >/dev/null 2>&1 && ! git filter-repo --version >/dev/null 2>&1; then
@@ -83,7 +86,7 @@ DRY RUN — nothing changed. To execute (preferably in a fresh clone):
   git clone --mirror <remote-url> purge-work && cd purge-work   # or use this clone with --force
   bash scripts/purge-git-history.sh --execute
 
-Afterwards (Aaron only — this rewrites the public remote):
+Afterwards (operator only — this rewrites the public remote):
 
   git push --force --all origin
   git push --force --tags origin
@@ -126,7 +129,7 @@ echo
 echo "== verify"
 python3 scripts/pii-guard.py --all
 echo "history check (should print nothing):"
-git log --all --oneline -- identity/aaron/VISUAL_PROFILE.md | tail -n +2 || true
+git log --all --oneline -- "identity/${HANDLE}/VISUAL_PROFILE.md" | tail -n +2 || true
 echo
 echo "Rewrite complete in this clone. filter-repo removed the 'origin' remote on purpose."
 echo "Re-add it and force-push when ready:"
