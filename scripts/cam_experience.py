@@ -71,6 +71,7 @@ DEFAULTS: dict[str, Any] = {
     "prior_alpha": 1.0,
     "prior_beta": 1.0,
     "backoff_prior_strength": 2.0,
+    "prior_floor": 0.5,
     "td_alpha": 0.2,
     "ece_bins": 10,
     "credible_mass": 0.9,
@@ -78,6 +79,8 @@ DEFAULTS: dict[str, Any] = {
     "evidence_limit": 5,
     "low_confidence_below": 0.5,
     "high_surprise_above": 0.6,
+    "min_n_for_verdict": 30,
+    "min_outcomes_each_class": 5,
 }
 
 
@@ -485,7 +488,9 @@ class ExperiencePredictor:
             a, b, n_eff = self._posterior(key, ref, prior_a, prior_b)
             mean = a / (a + b)
             chain.append({"level": level, "key": key, "n_effective": round(n_eff, 3), "mean": round(mean, 4)})
-            prior_a, prior_b = strength * mean, strength * (1.0 - mean)
+            # floor keeps a near-certain parent from collapsing the child's interval on 2-3 events
+            floor = float(cfg["prior_floor"])
+            prior_a, prior_b = max(floor, strength * mean), max(floor, strength * (1.0 - mean))
             final = (a, b, n_eff, level, key)
         a, b, n_eff, _level_used, key_used = final
         # the finest level with real evidence is what the number "means"
@@ -719,8 +724,16 @@ def build_report(*, offline: bool = False, extra: Iterable[Path] = (), cfg: dict
     ]
     met = ev["metrics"]
     skill = met.get("brier_skill")
+    n_ok = sum(1 for e in experiences if (e.get("outcome") or {}).get("ok"))
+    n_fail = len(experiences) - n_ok
+    min_each = int(cfg["min_outcomes_each_class"])
     if not experiences:
         verdict = "no_experience_yet"
+    elif len(experiences) < int(cfg["min_n_for_verdict"]) or min(n_ok, n_fail) < min_each:
+        verdict = (
+            f"insufficient_sample — n={len(experiences)} (ok={n_ok}, fail={n_fail}); "
+            f"need ≥{cfg['min_n_for_verdict']} experiences with ≥{min_each} of each outcome before trusting skill/ECE"
+        )
     elif skill is None or skill <= 0.0:
         verdict = "not_yet_skillful — predictions no better than the running base rate; keep gathering experience"
     elif (met.get("ece") or 0.0) > 0.1:
