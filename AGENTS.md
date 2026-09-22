@@ -17,7 +17,7 @@ This repository is Aaron’s Personal-Assistant (Cam) home workspace.
 - System: `python3 scripts/cam-system.py --smoke` — all pieces on one bus
 - Home build plan (priorities · avatar tiers · auto-update): [`docs/CAM_HOME_BUILD.md`](docs/CAM_HOME_BUILD.md) — `python3 scripts/build-plan-check.py`
 - Auto-sync from all projects/repos (report-first, never auto-merge): `python3 scripts/auto-sync.py` · pull: `--pull` (ff-only, gated)
-- Home Live app (zero-dep mission control + converse + cortex on one port): `python3 scripts/cam-home-live.py` → http://127.0.0.1:8790 — homepage shows the cortex thinking live (`scripts/cam_cortex.py`: observe/reflect/predict/act, scored predictions); shortcuts `/cam` → converse, `/cortex` → 3D, keys c/x/s/g/r/b/?
+- Home Live app (zero-dep mission control + converse + cortex on one port): `python3 scripts/cam-home-live.py` → http://127.0.0.1:8790 — homepage embeds the anatomical 3D brain (`visualizations/connectome`, three.js vendored offline) fired live by her thinking (`scripts/cam_cortex.py`: observe/analyze/reflect/predict/act grounded in named telemetry; speech lights Broca); shortcuts `/cam` → converse, `/cortex` → 3D, keys c/x/s/g/r/b/v/?
 - Avatar AvatarFrame service (tier 0 procedural visemes/blendshapes): `python3 scripts/cam-avatar-server.py` → :8791 · ethics inheritance: `config/swarm/ethics.json`
 - MCP: `python3 scripts/cam-mcp-server.py` (stdio) — install with `cline mcp install cam -- ...`
 - Schedules: `python3 scripts/sync-cline-schedules.py --apply-cache --print-commands`

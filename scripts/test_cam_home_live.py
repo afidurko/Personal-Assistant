@@ -125,6 +125,46 @@ class CamHomeLiveTests(unittest.TestCase):
         self.assertTrue(state["actions"])
         self.assertIn("priority", state["focus"])
 
+    def test_brain_viz_embedded_on_homepage(self) -> None:
+        status, body = self._get("/")
+        self.assertEqual(status, 200)
+        self.assertIn(b'id="brainFrame"', body)
+        self.assertIn(b"/connectome/index.html?embed=1", body)
+
+    def test_connectome_vendored_three(self) -> None:
+        status, body = self._get("/connectome/index.html")
+        self.assertEqual(status, 200)
+        self.assertIn(b"./vendor/three/three.module.js", body)
+        self.assertNotIn(b"unpkg.com", body)
+        self.assertNotIn(b"fonts.googleapis.com", body)
+        for asset in (
+            "/connectome/vendor/three/three.module.js",
+            "/connectome/vendor/three/addons/controls/OrbitControls.js",
+            "/connectome/vendor/three/addons/loaders/GLTFLoader.js",
+            "/connectome/assets/cam-cortex.glb",
+        ):
+            status, _ = self._get(asset)
+            self.assertEqual(status, 200, asset)
+
+    def test_viz_data_mounts(self) -> None:
+        status, body = self._get("/config/connectome/neurons.json")
+        self.assertEqual(status, 200)
+        self.assertTrue(json.loads(body))
+        status, _ = self._get("/identity/persona/cam-face.jpg")
+        self.assertEqual(status, 200)
+
+    def test_live_activity_is_her_thinking(self) -> None:
+        # Make her speak, then confirm the brain feed fires Broca with the line.
+        self._post("/api/avatar/speak", {"text": "brain feed check"})
+        status, body = self._get("/vault/10-Mesh-Distillates/live-activity.json")
+        self.assertEqual(status, 200)
+        feed = json.loads(body)
+        self.assertEqual(feed["source"], "cam_cortex")
+        self.assertGreater(feed["firing_count"], 0)
+        self.assertIn("area.broca", feed["active_areas"])
+        reasons = " ".join(f["reason"] for f in feed["firing"])
+        self.assertIn("brain feed check", reasons)
+
     def test_quick_access_redirects(self) -> None:
         for path, target in (("/cam", "/converse/"), ("/cortex", "/connectome/")):
             req = urllib.request.Request(f"http://127.0.0.1:{self.port}{path}")

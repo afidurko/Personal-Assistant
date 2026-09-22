@@ -19,7 +19,9 @@ def fake_status(
     out_of_sync: int = 2,
     suggestions: int = 2,
 ) -> dict:
-    pieces = [{"status": "healthy"}] * healthy + [{"status": "warning"}] * warning
+    pieces = [
+        {"id": f"piece.h{i}", "status": "healthy"} for i in range(healthy)
+    ] + [{"id": f"piece.w{i}", "status": "warning"} for i in range(warning)]
     items = [
         {
             "kind": "suggestion",
@@ -118,6 +120,68 @@ class CortexTests(unittest.TestCase):
         cx = cam_cortex.Cortex()
         state = cx.tick(fake_status(suggestions=2))
         self.assertIn("P3", state["focus"]["priority"])
+
+    def test_observe_names_actual_entities(self) -> None:
+        cx = cam_cortex.Cortex()
+        state = cx.tick(fake_status(warning=2, out_of_sync=2))
+        blob = " ".join(t["text"] for t in state["thoughts"])
+        self.assertIn("piece.w0", blob)          # actual warning piece named
+        self.assertIn("integrations/x0", blob)   # actual drifting repo named
+        f = state["facts"]
+        self.assertEqual(f["warning_pieces"], ["piece.w0", "piece.w1"])
+        self.assertEqual(f["out_of_sync_names"], ["integrations/x0", "integrations/x1"])
+
+    def test_analyze_reports_real_deltas(self) -> None:
+        cx = cam_cortex.Cortex()
+        cx.tick(fake_status(warning=3, out_of_sync=3))
+        recovered = fake_status(warning=3, out_of_sync=1)
+        recovered["system"]["data"]["pieces"][18]["status"] = "healthy"  # piece.w0
+        state = cx.tick(recovered)
+        analyze = [t["text"] for t in state["thoughts"] if t["stage"] == "analyze"]
+        blob = " ".join(analyze)
+        self.assertTrue(analyze)
+        self.assertIn("piece.w0: warning→healthy", blob)
+        self.assertIn("repos drifting 3→1", blob)
+
+    def test_analyze_steady_state(self) -> None:
+        cx = cam_cortex.Cortex()
+        cx.tick(fake_status())
+        state = cx.tick(fake_status())
+        analyze = [t["text"] for t in state["thoughts"] if t["stage"] == "analyze"]
+        self.assertIn("no state change", analyze[-1])
+
+    def test_activity_maps_thoughts_to_anatomy(self) -> None:
+        cx = cam_cortex.Cortex()
+        cx.tick(fake_status())
+        feed = cx.activity()
+        self.assertEqual(feed["source"], "cam_cortex")
+        self.assertTrue(feed["firing"])
+        areas = set(feed["active_areas"])
+        # observe→visual/wernicke, predict→dlpfc, act→motor must be firing
+        self.assertIn("area.visual", areas)
+        self.assertIn("area.dlpfc", areas)
+        self.assertIn("area.motor", areas)
+        for f in feed["firing"]:
+            self.assertGreaterEqual(f["intensity"], 0.3)
+            self.assertLessEqual(f["intensity"], 1.0)
+            self.assertTrue(f["reason"])
+            self.assertTrue(f["tracts"])
+            self.assertTrue(f["neuron"].startswith("neuron."))
+
+    def test_speech_note_fires_broca(self) -> None:
+        cx = cam_cortex.Cortex()
+        cx.tick(fake_status())
+        cx.note_speech("Hello Aaron")
+        feed = cx.activity()
+        self.assertIn("area.broca", feed["active_areas"])
+        reasons = [f["reason"] for f in feed["firing"] if f["area"] == "area.broca"]
+        self.assertTrue(any("Hello Aaron" in r for r in reasons))
+
+    def test_input_note_fires_wernicke(self) -> None:
+        cx = cam_cortex.Cortex()
+        cx.note_input("build the jarvis bridge")
+        feed = cx.activity()
+        self.assertIn("area.wernicke", feed["active_areas"])
 
     def test_thoughts_since(self) -> None:
         cx = cam_cortex.Cortex()

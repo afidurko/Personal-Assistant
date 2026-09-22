@@ -103,6 +103,26 @@
           </div>
         </div>
 
+        <div class="brain-viz" id="brainViz">
+          <iframe id="brainFrame" src="/connectome/index.html?embed=1" title="Cam cortex — live 3D brain" loading="lazy"></iframe>
+          <div class="viz-tools">
+            <span class="meta" id="vizCaption">her cortex, live — regions fire as her thoughts arrive</span>
+            <div class="viz-links">
+              <button id="vizExpand" type="button" title="expand the brain (v)">expand <kbd>v</kbd></button>
+              <a href="/connectome/" target="_blank" rel="noopener">full brain ⤢</a>
+              <a href="/connectome/flat.html" target="_blank" rel="noopener">2D map</a>
+            </div>
+          </div>
+          <ul class="anatomy-legend">
+            <li><span class="stagechip observe">observe</span> visual · Wernicke</li>
+            <li><span class="stagechip analyze">analyze</span> temporal · ACC</li>
+            <li><span class="stagechip reflect">reflect</span> MTL memory loop</li>
+            <li><span class="stagechip predict">predict</span> DLPFC · aPFC</li>
+            <li><span class="stagechip act">act</span> premotor · M1</li>
+            <li><span class="stagechip speech">speech</span> Broca · auditory</li>
+          </ul>
+        </div>
+
         <div class="brain-cols">
           <div class="thoughts">
             <h3>thought stream</h3>
@@ -182,6 +202,7 @@
         <li><kbd>g</kbd> focus the suggestion box</li>
         <li><kbd>r</kbd> refresh status in background</li>
         <li><kbd>b</kbd> jump to the brain panel</li>
+        <li><kbd>v</kbd> expand / shrink the 3D brain</li>
         <li><kbd>?</kbd> toggle this help · <kbd>esc</kbd> close</li>
       </ul>
       <p class="meta">Shortcuts pause while you're typing in a field.</p>

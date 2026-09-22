@@ -233,7 +233,7 @@
       "priority": 4,
       "title": "Mission panels + suggest-changes queue; avatar hf_realtime tier; auto-enhancement closed loop",
       "status": "in_progress",
-      "landed": "cam-home-live mission control (quick-access dock + shortcuts); cortex live-thinking loop on the homepage (observe/reflect/predict/act with scored predictions, scripts/cam_cortex.py); AvatarFrame tier-0 engine + rig speaks in the home; suggestions feed needs-attention dispatch; HF weights still blocked on egress",
+      "landed": "cam-home-live mission control (quick-access dock + shortcuts); cortex live-thinking loop grounded in named telemetry (observe/analyze/reflect/predict/act, scripts/cam_cortex.py); the anatomical 3D brain (visualizations/connectome, vendored three.js) is embedded on the homepage and fires with her actual thoughts via the live-activity feed; AvatarFrame tier-0 engine + rig speaks in the home (speech lights Broca); suggestions feed needs-attention dispatch; HF weights still blocked on egress",
       "exit_check": "Aaron sees live status, files a suggestion that becomes a ticket, and Cam avatar passes muscle-grade believability check"
     },
     {

@@ -204,11 +204,23 @@ function thoughtRow(th) {
   return el;
 }
 
+const STAGE_REGION = {
+  observe: "visual + Wernicke intake",
+  analyze: "temporal + ACC comparison",
+  reflect: "MTL memory loop",
+  predict: "DLPFC + aPFC planning",
+  act: "premotor + M1 output",
+  speech: "Broca + auditory speech loop",
+  input: "Wernicke + MTL (Aaron's words arriving)",
+};
+
 function pushThought(th) {
   const feed = $("thoughtFeed");
   feed.appendChild(thoughtRow(th));
   while (feed.children.length > 60) feed.removeChild(feed.firstChild);
   feed.scrollTop = feed.scrollHeight;
+  const region = STAGE_REGION[th.stage];
+  if (region) $("vizCaption").textContent = `firing now → ${region}`;
 }
 
 function renderSparkline(history) {
@@ -353,6 +365,12 @@ function focusSuggest() {
   $("suggestText").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+$("vizExpand").addEventListener("click", () => {
+  const viz = $("brainViz");
+  viz.classList.toggle("expanded");
+  $("vizExpand").firstChild.textContent = viz.classList.contains("expanded") ? "shrink " : "expand ";
+});
+
 $("dockSpeak").addEventListener("click", focusSpeak);
 $("dockSuggest").addEventListener("click", focusSuggest);
 $("dockHelp").addEventListener("click", () => {
@@ -377,6 +395,7 @@ document.addEventListener("keydown", (ev) => {
     case "g": ev.preventDefault(); focusSuggest(); break;
     case "r": $("refreshBtn").click(); break;
     case "b": $("panelBrain").scrollIntoView({ behavior: "smooth" }); break;
+    case "v": $("vizExpand").click(); break;
     case "?": $("helpOverlay").hidden = !$("helpOverlay").hidden; break;
   }
 });

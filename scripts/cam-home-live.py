@@ -75,6 +75,32 @@ def cortex_loop() -> None:
         time.sleep(CORTEX_TICK_S)
 
 
+def live_activity_feed() -> dict:
+    """Her thinking as anatomical firing, merged with the standing-loop feed."""
+    brain_state()  # ensure at least one cognition cycle has run
+    feed = CORTEX.activity()
+    disk = read_json(LIVE_ACTIVITY)
+    if isinstance(disk, dict):
+        try:
+            at = datetime.strptime(disk.get("at", ""), "%Y-%m-%dT%H:%M:%SZ")
+            fresh = (datetime.now(timezone.utc).replace(tzinfo=None) - at).total_seconds() < 900
+        except Exception:
+            fresh = False
+        if fresh:
+            seen = {f["neuron"] for f in feed["firing"]}
+            for f in disk.get("firing") or []:
+                if f.get("neuron") not in seen:
+                    feed["firing"].append(f)
+            feed["firing_count"] = len(feed["firing"])
+            feed["active_areas"] = sorted(
+                {f.get("area") for f in feed["firing"] if f.get("area")}
+            )
+            feed["active_tracts"] = sorted(
+                {t for f in feed["firing"] for t in f.get("tracts") or []}
+            )
+    return feed
+
+
 def utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -258,6 +284,14 @@ class Handler(BaseHTTPRequestHandler):
             self._static(CONVERSE_WEB, p[len("/converse") :])
         elif p.startswith("/connectome"):
             self._static(CONNECTOME_WEB, p[len("/connectome") :])
+        elif p == "/vault/10-Mesh-Distillates/live-activity.json":
+            self._json(live_activity_feed())
+        elif p.startswith("/vault/10-Mesh-Distillates/") and p.endswith(".json"):
+            self._static(LIVE_ACTIVITY.parent, p[len("/vault/10-Mesh-Distillates/") :])
+        elif p.startswith("/config/") and p.endswith(".json"):
+            self._static(ROOT / "config", p[len("/config/") :])
+        elif p == "/identity/persona/cam-face.jpg":
+            self._static(FACE.parent, FACE.name)
         else:
             self._static(HOME_WEB, p)
 
@@ -274,6 +308,7 @@ class Handler(BaseHTTPRequestHandler):
             if not text:
                 self._json({"ok": False, "error": "text required"}, 400)
                 return
+            CORTEX.note_speech(text)
             self._json(cam_avatar.timeline(text[:1200], body.get("emotion", "warm")))
         elif p == "/api/home/suggest":
             text = (body.get("text") or "").strip()
@@ -281,6 +316,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._json({"ok": False, "error": "text required"}, 400)
                 return
             entry = add_suggestion(text, body.get("author", "Aaron"))
+            CORTEX.note_input(text)
             self._json({"ok": True, "suggestion": entry})
         elif p == "/api/home/refresh":
             threading.Thread(
