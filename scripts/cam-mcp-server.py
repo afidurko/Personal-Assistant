@@ -11,7 +11,8 @@ Tools:
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   loop_check, loop_audit, loop_run, higgsfield_check, presence_check,
   voicestudio_health, needs_attention,
-  sentinel_decide, sentinel_pending, sentinel_ledger (read-only; Aaron approves via CLI)
+  sentinel_decide, sentinel_pending, sentinel_ledger (read-only; Aaron approves via CLI),
+  privacy_scan (pii-guard for text / paths / staged — read-only, never returns matched content)
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -354,6 +355,22 @@ def tool_defs() -> list[dict]:
             "inputSchema": {
                 "type": "object",
                 "properties": {"day": {"type": "string"}},
+            },
+        },
+        {
+            "name": "privacy_scan",
+            "description": (
+                "pii-guard: check text (a PR body, a note, a distillate) or repo paths for personal "
+                "information and secrets before they are written or pushed. Returns rule ids and "
+                "locations only — never the matched content. Read-only."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string"},
+                    "paths": {"type": "array", "items": {"type": "string"}},
+                    "staged": {"type": "boolean", "description": "scan the git index instead"},
+                },
             },
         },
     ]
@@ -764,7 +781,37 @@ def sentinel_ledger(arguments: dict | None = None) -> Any:
     return cj.export((arguments or {}).get("day"))
 
 
+def privacy_scan(arguments: dict | None = None) -> Any:
+    import privacy
+
+    args = arguments or {}
+    cfg = privacy.load_config()
+    findings: list = []
+    if args.get("text"):
+        findings.extend(privacy.scan_text(str(args["text"]), "<text>", cfg))
+    if args.get("paths"):
+        findings.extend(privacy.scan_paths([str(p) for p in args["paths"]], ROOT, cfg))
+    if args.get("staged"):
+        import cam_inproc
+
+        guard = cam_inproc.load_script("pii-guard.py")
+        findings.extend(guard.staged_findings(cfg))
+    summ = privacy.summary(findings)
+    return {
+        "ok": summ["blocking"] == 0,
+        "summary": summ,
+        "findings": [
+            {"path": f.path, "line": f.line, "rule": f.rule, "severity": f.severity, "label": f.label}
+            for f in findings
+        ],
+        "policy": "config/privacy/pii-guard.json",
+        "remedy": "python3 scripts/private-memory.py put <key> ... then reference by key",
+    }
+
+
 def call_tool(name: str, arguments: dict) -> Any:
+    if name == "privacy_scan":
+        return privacy_scan(arguments)
     if name == "sentinel_decide":
         return sentinel_decide(arguments)
     if name == "sentinel_pending":

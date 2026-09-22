@@ -46,11 +46,21 @@ def today() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+def _privacy_redact(text: str) -> str:
+    """Personal-information pass (emails, phones, addresses, descriptions…) — scripts/privacy.py."""
+    try:
+        import privacy  # local import: journal must never fail because policy is unreadable
+
+        return privacy.redact(text)
+    except Exception:  # noqa: BLE001
+        return text
+
+
 def redact(text: str) -> str:
     out = text
     for pat, rep in _REDACT:
         out = pat.sub(rep, out)
-    return out
+    return _privacy_redact(out)
 
 
 _SECRET_KEY = re.compile(r"(?i)(secret|token|password|passwd|api_key|apikey|private_key|credential)")

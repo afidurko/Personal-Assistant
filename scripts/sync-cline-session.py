@@ -19,9 +19,22 @@ def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _scrub(data: dict) -> dict:
+    """Distillates are tracked in git — strip personal information before they land."""
+    try:
+        import sys
+
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import privacy
+
+        return privacy.scrub_obj(data)
+    except Exception:  # noqa: BLE001
+        return data
+
+
 def write_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(_scrub(data), indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def export_payload(state: dict) -> dict:

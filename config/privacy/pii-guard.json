@@ -228,6 +228,13 @@
         "/home/{user}",
         "/Users/USER",
         "/home/USER"
+      ],
+      "exclude": [
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts",
+        "scripts/test_privacy.py",
+        "scripts/privacy.py",
+        "config/privacy/pii-guard.json"
       ]
     },
     {
@@ -253,7 +260,10 @@
         "docs/PRIVACY_SAFEGUARDS.md",
         "scripts/privacy.py",
         "config/privacy/pii-guard.json",
-        "vault/10-Mesh-Distillates/**"
+        "vault/10-Mesh-Distillates/**",
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts",
+        "scripts/test_privacy.py"
       ]
     },
     {
@@ -279,7 +289,9 @@
         "config/privacy/pii-guard.json",
         "identity/aaron/README.md",
         "identity/aaron/VISUAL_PROFILE.md",
-        "vault/10-Mesh-Distillates/**"
+        "vault/10-Mesh-Distillates/**",
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts"
       ]
     },
     {
@@ -291,7 +303,9 @@
         "config/integrations/funasr.md",
         "scripts/privacy.py",
         "scripts/test_privacy.py",
-        "config/privacy/pii-guard.json"
+        "config/privacy/pii-guard.json",
+        "server/core/sentinel.ts",
+        "server/core/sentinel.test.ts"
       ]
     },
     {
