@@ -30,7 +30,13 @@
     <p class="voice-score" id="voiceScore">Not enrolled</p>
 
     <section class="media">
-      <video id="camPreview" playsinline muted autoplay></video>
+      <div class="cam-wrap">
+        <video id="camPreview" playsinline muted autoplay></video>
+        <canvas id="gestureOverlay" class="gesture-overlay" aria-hidden="true"></canvas>
+        <span id="gestureGlyph" class="gesture-glyph" hidden title="Engaged — next motion is a command">✋</span>
+      </div>
+      <p id="gestureStatus" class="gesture-status">Gestures off</p>
+      <p id="gestureIntent" class="gesture-intent" aria-live="polite"></p>
       <div class="meters">
         <div class="meter"><span id="micLevel"></span></div>
         <p id="partial" class="partial"></p>
@@ -46,6 +52,7 @@
       <button type="button" id="btnImport" hidden>Import voice profile</button>
       <input type="file" id="importFile" accept="application/json,.json" hidden />
       <button type="button" id="btnCam">Enable camera</button>
+      <button type="button" id="btnGestures">Enable gestures</button>
       <button type="button" id="btnStop" disabled>Stop</button>
     </section>
 
@@ -56,5 +63,6 @@
   </main>
   <script src="voice-gate.js"></script>
   <script src="app.js"></script>
+  <script src="gestures.js"></script>
 </body>
 </html>
