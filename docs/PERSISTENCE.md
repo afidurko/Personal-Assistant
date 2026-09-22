@@ -59,7 +59,7 @@ python3 scripts/workspace-integration-check.py
 2. Copy or `persist-import` the bundle (auto-installs Cline rules + schedule sync)
 3. `git submodule update --init --recursive` (includes `integrations/cline`)
 4. Confirm `.clinerules` / `AGENTS.md` / `.cursor/rules/cam-cline.mdc`
-5. Confirm `identity/PROFILE.md` still says Aaron / Cam / EST
+5. Confirm `identity/PROFILE.md` still says Aaron / Cam (timezone stays in private memory)
 6. Confirm mesh flags: `daily_agi_research_scan`, `unlimited_subagents`, `cam_enhance_apply_requires_aaron`, `cline_coding_effector`
 7. Re-attach secrets/connectors locally (`cline auth` or provider env vars)
 8. Run `python3 scripts/workspace-integration-check.py`

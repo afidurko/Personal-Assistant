@@ -12,7 +12,7 @@ Aaron retains **ultimate say** over applying functionality changes (`switch.cam_
 
 ## Details
 
-- Standing trigger: `sense.clock.daily` (America/New_York)
+- Standing trigger: `sense.clock.daily` (operator-local timezone from `CAM_OPERATOR_TZ` / private memory)
 - Sources: arXiv + open research feeds (see `config/teams/agi-research-scan.json`)
 - Teams may spawn unlimited subagents (no human gate)
 - Propose autonomously; apply only with Aaron approval

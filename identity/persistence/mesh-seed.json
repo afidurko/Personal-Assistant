@@ -279,7 +279,7 @@
     "supreme_oversight_board": false,
     "swarm_config": "config/swarm/privileges.json",
     "tailscale_enabled": true,
-    "timezone": "America/New_York",
+    "timezone": "operator_local",
     "tool_creator_user": true,
     "unlimited_subagents": true,
     "voicestudio_config": "config/integrations/voicestudio.json",

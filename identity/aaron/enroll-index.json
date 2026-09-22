@@ -1,67 +1,27 @@
 {
   "subject": "Aaron",
-  "updated_at": "2026-09-19T18:20:00Z",
+  "updated_at": "2026-09-22T00:00:00Z",
   "purpose": "understand_aaron_look_and_sound",
+  "visibility": "public_stub",
+  "private_store": "identity/aaron/local/enroll-index.json",
+  "private_memory_key": "identity.aaron.enroll_index",
   "photo_to_video_match": true,
-  "primary_face_cluster": [
-    {
-      "id": "aaron-face-01",
-      "file": "aaron-01-mirror-selfie.jpg",
-      "label": "Aaron",
-      "confidence": "high",
-      "notes": "mirror selfie; glasses; curly dark hair; goatee; iPhone Pro visible"
-    },
-    {
-      "id": "aaron-face-02-left",
-      "file": "aaron-02-gym-pair.jpg",
-      "label": "Aaron",
-      "bbox_hint": "left",
-      "confidence": "high",
-      "confirmed_by": "Aaron",
-      "confirmed_at": "2026-09-16",
-      "notes": "Yankees Baseball tee; yellow belt; short dark hair; no glasses; smiling"
-    },
-    {
-      "id": "aaron-face-03",
-      "file": "aaron-03-closeup-glasses.jpg",
-      "label": "Aaron",
-      "confidence": "high",
-      "notes": "close frontal; glasses glare; curly hair; green tee"
-    },
-    {
-      "id": "aaron-face-04",
-      "file": "aaron-04-cafe-cap.jpg",
-      "label": "Aaron",
-      "confidence": "high",
-      "notes": "cafe; trucker cap; glasses; laptop; latte"
-    }
-  ],
-  "non_aaron_faces": [
-    {
-      "file": "aaron-02-gym-pair.jpg",
-      "bbox_hint": "right",
-      "label": "not_Aaron",
-      "notes": "buzz cut; arm tattoos; Punch Gear tee — do not match as Aaron"
-    }
-  ],
+  "primary_face_cluster": "private",
+  "non_aaron_faces": "private",
   "pending_labels": [],
-  "voices": [
-    {
-      "id": "aaron-voice-gate-v1",
-      "kind": "spectral_voiceprint",
-      "storage": "localStorage:cam.aaron.voice.profile.v1",
-      "config": "config/identity/aaron-voice-gate.json",
-      "status": "enroll_on_device",
-      "notes": "Aaron-only gate for noisy rooms; companion enrolls ~10s quiet speech"
-    }
-  ],
-  "videos": [],
+  "voices": "private",
+  "videos": "private",
   "voice_gate": {
     "status": "awaiting_aaron_wav_enrollment",
     "config": "config/identity/aaron-voice.json",
     "cli": "scripts/aaron-voice-enroll.py",
     "doc": "docs/AARON_VOICE_GATE.md",
-    "notes": "Face enrolled; spectral browser gate ready; FunASR templates empty until Aaron records samples on host"
+    "notes": "Face enrolled; spectral browser gate ready; FunASR templates live only in identity/aaron/local/"
   },
-  "status": "face_enrollment_complete_4_photos; voice_gate_ready"
+  "status": "face_enrollment_complete; voice_gate_ready; details_in_private_memory",
+  "notes": [
+    "Source file names, physical traits, and any third-party descriptions are personal information.",
+    "They live in Cam's private memory (scripts/private-memory.py) and the gitignored identity/aaron/local/ tree.",
+    "scripts/pii-guard.py refuses commits that put them back here."
+  ]
 }

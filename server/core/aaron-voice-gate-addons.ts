@@ -129,7 +129,7 @@ export class AaronVoiceGateAddons {
   }
 
   async saveProfile(profile: unknown): Promise<string> {
-    const out = path.join(this.rootDir, 'identity', 'aaron', 'voice-profile.json');
+    const out = path.join(this.rootDir, 'identity', 'aaron', 'local', 'voice-profile.json');
     await mkdir(path.dirname(out), { recursive: true });
     const doc = {
       subject: 'Aaron',
@@ -144,7 +144,7 @@ export class AaronVoiceGateAddons {
   async loadSavedProfile(): Promise<unknown | null> {
     try {
       const raw = await readFile(
-        path.join(this.rootDir, 'identity', 'aaron', 'voice-profile.json'),
+        path.join(this.rootDir, 'identity', 'aaron', 'local', 'voice-profile.json'),
         'utf8',
       );
       return JSON.parse(raw);

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pack / import Aaron voice-profile for Cam voice-gate add-on.
 
-Export a browser-enrolled spectral profile into identity/aaron/voice-profile.json,
+Export a browser-enrolled spectral profile into identity/aaron/local/voice-profile.json (gitignored),
 or import a previously packed profile for device restore.
 """
 
@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT = ROOT / "identity" / "aaron" / "voice-profile.json"
+DEFAULT_OUT = ROOT / "identity" / "aaron" / "local" / "voice-profile.json"
 GATE_CFG = ROOT / "config" / "identity" / "aaron-voice-gate.json"
 
 

@@ -20,7 +20,48 @@ __pycache__/
 .venv/
 
 identity/persistence/cam-persistence.zip
+
+# --- Personal information / private memory (never tracked) -------------------
+# Policy: docs/PRIVACY_SAFEGUARDS.md · guard: scripts/pii-guard.py
 identity/aaron/local/
+identity/aaron/**/*.jpg
+identity/aaron/**/*.jpeg
+identity/aaron/**/*.png
+identity/aaron/**/*.heic
+identity/aaron/**/*.mp4
+identity/aaron/**/*.mov
+identity/aaron/**/*.wav
+identity/aaron/**/*.m4a
+identity/aaron/voice-profile.json
+identity/aaron/enroll.json
+**/private-memory/
+**/*.private.json
+**/*.private.md
+**/embeddings.json
+**/embeddings/
+**/*.voiceprint
+**/*.faceprint
+.cam-private/
+.cam/
+*.pem
+*.p12
+*.pfx
+*.key
+*.keystore
+id_rsa*
+id_ed25519*
+.envrc
+secrets/
+credentials/
+data/runtime/journal/
+data/runtime/sentinel-*.json
+data/runtime/aaron-voice-*.json*
+vault/00-Inbox/attachments/*
+!vault/00-Inbox/attachments/.gitkeep
+vault/08-People/*
+!vault/08-People/People.md
+# ----------------------------------------------------------------------------
+
 vault/10-Mesh-Distillates/converse/*.jsonl
 vault/10-Mesh-Distillates/reasoning/*.jsonl
 vault/10-Mesh-Distillates/activity-events.jsonl

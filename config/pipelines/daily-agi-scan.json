@@ -6,7 +6,7 @@
   "authorized_at": "2026-09-17",
   "schedule": {
     "cadence": "daily",
-    "timezone": "America/New_York",
+    "timezone": "operator_local",
     "trigger": "sense.clock.daily"
   },
   "team": "team.agi-research-scan",

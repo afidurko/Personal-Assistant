@@ -1,7 +1,7 @@
 {
   "human": {
     "preferred_name": "Aaron",
-    "timezone": "America/New_York"
+    "timezone": "operator_local"
   },
   "assistant": {
     "name": "Cam",
@@ -36,7 +36,7 @@
     "J_efficiency": { "56": true, "57": true, "58": true, "59": true, "60": true },
     "anchors": {
       "61": "Aaron",
-      "62": "EST / America/New_York",
+      "62": "operator_local",
       "63": "most_priority_first",
       "assistant_name": "Cam"
     }

@@ -1,26 +1,46 @@
-# Aaron identity media (local)
+# Aaron identity media (private)
 
-Private originals stay on Aaron’s devices. This folder holds **refs and enrollment notes only** — do not commit personal photos/videos here.
+Everything that describes Aaron as a person — photos, voice samples, embeddings,
+physical descriptions, device names, timezone, contact details — is **personal
+information**. It stays on Aaron's devices and in Cam's **private memory**. This
+folder holds only public stubs that point at where the private data lives.
 
-## Current enrollment (2026-09-16 / voice gate 2026-09-19)
-- Visual profile: [`VISUAL_PROFILE.md`](VISUAL_PROFILE.md)
-- Index: [`enroll-index.json`](enroll-index.json)
-- Local copies (gitignored): `local/photos/` — 4 primary Aaron face shots enrolled
-- **Voice gate:** ready — record WAVs into `local/voice/samples/` then run `scripts/aaron-voice-enroll.py` (see `docs/AARON_VOICE_GATE.md`)
+## What is tracked here (safe)
 
-## Purpose
-Build Cam’s understanding of Aaron’s look and sound, including matching a face from a photo to the same person talking in a video — and **hearing only Aaron** when others are speaking nearby.
+- [`VISUAL_PROFILE.md`](VISUAL_PROFILE.md) — stub; the real profile is sealed in private memory
+- [`enroll-index.json`](enroll-index.json) — stub; the real index is `local/enroll-index.json`
+- This README
 
-## Expected local layout (on Aaron’s machine)
+## What is never tracked (private, gitignored)
+
 ```text
-identity/aaron/local/          # gitignored
-  photos/                      # optional copies Aaron chooses to share
-  videos/
-  voice/
-    samples/                   # clean Aaron-only WAV clips for enrollment
-    embeddings.json            # CAM++ templates + centroid (never commit)
-  embeddings/                  # face/voice vectors (not for public push)
-  enroll.json                  # manifest of sources + hashes
+identity/aaron/local/            # gitignored — the whole tree
+  VISUAL_PROFILE.md              # durable description Cam uses for face matching
+  enroll-index.json              # source refs, labels, confidence, voice refs
+  private-memory/                # sealed records written by scripts/private-memory.py
+  photos/  videos/               # optional copies Aaron chooses to share
+  voice/samples/                 # clean Aaron-only WAV clips for enrollment
+  voice/embeddings.json          # CAM++ templates + centroid
+  embeddings/                    # face/voice vectors
+  enroll.json                    # manifest of sources + hashes
 ```
 
-See `identity/persistence/AARON_MEDIA_ACCESS.md`.
+## Working with private memory
+
+```bash
+python3 scripts/private-memory.py doctor                     # store health, cipher, permissions
+python3 scripts/private-memory.py list                       # keys only — never values
+python3 scripts/private-memory.py get identity.aaron.visual_profile
+python3 scripts/private-memory.py put identity.aaron.timezone --value "Region/City"
+python3 scripts/private-memory.py import-legacy              # one-time: pull pre-redaction content out of git history
+```
+
+Voice gate: record WAVs into `local/voice/samples/` then run
+`scripts/aaron-voice-enroll.py` (see `docs/AARON_VOICE_GATE.md`).
+
+## Guardrails
+
+- `.gitignore` excludes `identity/aaron/local/` and every private-memory path
+- `scripts/pii-guard.py` (pre-commit, pre-push, CI) blocks descriptions, contact data, secrets, and private paths
+- Sentinel denies any motor plan that tries to move private-memory paths off-host
+- Policy: [`docs/PRIVACY_SAFEGUARDS.md`](../../docs/PRIVACY_SAFEGUARDS.md) · [`SECURITY.md`](../../SECURITY.md)

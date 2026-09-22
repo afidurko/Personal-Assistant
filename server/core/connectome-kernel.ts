@@ -158,9 +158,7 @@ export class ConnectomeKernel {
         { area: string; neuron: string; bus: string }
       >,
       identityThreshold: typeof idSwitch?.threshold === 'number' ? idSwitch.threshold : 0.85,
-      quietHours: qh
-        ? { start: qh.start, end: qh.end, timezone: avail?.timezone || 'America/New_York' }
-        : null,
+      quietHours: qh ? { start: qh.start, end: qh.end, timezone: resolveOperatorTimezone(avail?.timezone) } : null,
       policies,
       sentinelPolicy,
     };
@@ -560,6 +558,16 @@ function buildMapPlan(
         status: (needsPlan ? 'planned' : id === 'action_proposal' ? 'active' : 'skipped') as MapStage['status'],
       };
     });
+}
+
+/**
+ * The operator's timezone is personal information and is never written into tracked
+ * config. Configs carry the `operator_local` placeholder; the real value comes from
+ * `CAM_OPERATOR_TZ` (or `TZ`) on the host, falling back to UTC.
+ */
+export function resolveOperatorTimezone(raw: string | undefined | null): string {
+  if (raw && raw !== 'operator_local') return raw;
+  return process.env.CAM_OPERATOR_TZ || process.env.TZ || 'UTC';
 }
 
 function resolveCircadian(
