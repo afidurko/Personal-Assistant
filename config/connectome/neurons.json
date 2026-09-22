@@ -353,6 +353,15 @@
       "recurrence": "daily",
       "script": "scripts/loop-run.py",
       "notes": "Issue triage propose-only"
+    },
+    {
+      "id": "neuron.predict_experience",
+      "kind": "loop",
+      "area": "area.apfc",
+      "role": "dl-enhance",
+      "recurrence": "on_outcome",
+      "script": "scripts/cam-predict.py",
+      "notes": "Predictive cortex column — state_prediction from experience (advisory)"
     }
   ],
   "suggested_next_implementations": [

@@ -87,6 +87,11 @@ def pick_hotspot(
             score += 4
         if ("embed" in g or "deep learning" in g or " dl" in f" {g}") and "dl" in blob:
             score += 4
+        if any(
+            tok in g
+            for tok in ("predict", "forecast", "from experience", "calibrat", "odds of", "will it pass")
+        ) and ("predict" in blob or "experience" in blob):
+            score += 5
         if ("info" in g or "lookup" in g or "find out" in g) and "info" in blob:
             score += 3
         if ("capability" in g or "complete" in g or "team" in g) and "capability" in blob:

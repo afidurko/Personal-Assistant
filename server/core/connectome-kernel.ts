@@ -447,6 +447,13 @@ function pickHotspot(
       (blob.includes('agi') || blob.includes('arxiv') || blob.includes('scan')))
       score += 4;
     if ((g.includes('enhance') || g.includes('upgrade')) && blob.includes('enhance')) score += 4;
+    if (
+      ['predict', 'forecast', 'from experience', 'calibrat', 'odds of', 'will it pass'].some((t) =>
+        g.includes(t),
+      ) &&
+      (blob.includes('predict') || blob.includes('experience'))
+    )
+      score += 5;
     if ((g.includes('info') || g.includes('lookup')) && blob.includes('info')) score += 3;
     if (
       ['code', 'coding', 'cline', 'refactor', 'implement', 'typescript', 'python'].some((t) =>

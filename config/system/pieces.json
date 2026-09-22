@@ -109,6 +109,15 @@
       "feeds": []
     },
     {
+      "id": "piece.predictive_cortex",
+      "title": "Predictive cortex (outcome prediction from experience)",
+      "layer": "brain",
+      "paths": ["config/enhancement/predictive-cortex.json", "scripts/cam_experience.py", "scripts/cam-predict.py", "scripts/testdata/sample-experiences.jsonl"],
+      "check": "python3 scripts/predictive-cortex-check.py",
+      "depends_on": ["piece.connectome"],
+      "feeds": ["piece.teams", "piece.health"]
+    },
+    {
       "id": "piece.scholar",
       "title": "Google Scholar",
       "layer": "sense",

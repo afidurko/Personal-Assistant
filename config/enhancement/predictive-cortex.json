@@ -1,0 +1,84 @@
+{
+  "id": "cam-predictive-cortex",
+  "title": "Cam predictive cortex — outcome prediction from experience",
+  "status": "implemented_advisory",
+  "authorized_by": "Aaron",
+  "authorized_at": "2026-09-22",
+  "authorization_note": "Aaron 2026-09-22: research plan + deep dive on deep learning networks and predictive measures based on experiences; 'enhance Cam'. Prediction is advisory (report-only). Closing the loop — letting predictions alter routing or fire motors — still requires switch.cam_enhance.",
+  "plan_doc": "docs/PREDICTIVE_CORTEX.md",
+  "research_plan": "vault/04-Research/2026-09-22-Research-Plan-Predictive-Cam.md",
+  "briefs": [
+    "vault/04-Research/2026-09-22-Research-Tools-For-Cam.md",
+    "vault/04-Research/2026-09-22-Deep-Learning-Prediction-From-Experience.md"
+  ],
+  "proposal": "vault/02-Cam/enhancement-proposals/2026-09-22-predictive-cortex-from-experience.md",
+  "center": "center.dl",
+  "area": "area.apfc",
+  "map_stage": "state_prediction",
+  "sense": "sense.experience.outcome",
+  "hotspot": "hotspot.predict_from_experience",
+  "motor": "motor.dl",
+  "switch": "switch.dl_local",
+  "act_gate": "switch.cam_enhance",
+  "library": "scripts/cam_experience.py",
+  "cli": "scripts/cam-predict.py",
+  "check": "scripts/predictive-cortex-check.py",
+  "tests": "scripts/test_cam_experience.py",
+  "fixture": "scripts/testdata/sample-experiences.jsonl",
+  "runtime_log": "data/runtime/experiences.jsonl",
+  "distill_dir": "vault/10-Mesh-Distillates/predictive-cortex",
+  "mesh_namespace": "mesh/enhance/dl/predict",
+  "experience_sources": [
+    { "id": "loop_run_log", "path": "loop-run-log.md", "pattern_key": "pattern" },
+    { "id": "loop_run_latest", "path": "vault/10-Mesh-Distillates/loop-runs/latest.json" },
+    { "id": "qa_cycle", "path": "vault/10-Mesh-Distillates/qa-cycles/*/cycle.json" },
+    { "id": "reasoning_trace", "path": "vault/10-Mesh-Distillates/reasoning/*.jsonl" },
+    { "id": "runtime_log", "path": "data/runtime/experiences.jsonl", "writer": "scripts/cam-predict.py --record" }
+  ],
+  "predictor": {
+    "half_life_days": 14.0,
+    "prior_alpha": 1.0,
+    "prior_beta": 1.0,
+    "backoff_prior_strength": 2.0,
+    "prior_floor": 0.5,
+    "td_alpha": 0.2,
+    "ece_bins": 10,
+    "credible_mass": 0.9,
+    "min_effective_n": 1.0,
+    "evidence_limit": 5,
+    "low_confidence_below": 0.5,
+    "high_surprise_above": 0.6,
+    "min_n_for_verdict": 30,
+    "min_outcomes_each_class": 5
+  },
+  "predictive_measures": {
+    "p_success": "Beta-Bernoulli posterior mean with exponential forgetting (half_life_days) and hierarchical backoff hotspot→pattern→center→sense→global",
+    "credible_interval": "central 90% Beta credible interval (stdlib incomplete beta)",
+    "expected_score": "recency-weighted mean/std of 0-100 scores at the finest context with evidence",
+    "expected_duration_s": "recency-weighted mean/std of durations",
+    "td_value": "TD(0) value V ← V + α(r − V) per context; r = score/100 or ok",
+    "surprise": "|reward prediction error| per update — plasticity signal for center.qa",
+    "calibration": "prequential Brier, log loss, ECE, AUROC, Brier skill vs running base rate, score MAE + 90% interval coverage"
+  },
+  "literature_basis": [
+    { "topic": "TD learning / reward prediction error", "ref": "Sutton 1988 Machine Learning 3:9-44; Schultz, Dayan & Montague 1997 Science 275:1593" },
+    { "topic": "Bayesian forgetting / non-stationary Bernoulli", "ref": "Adams & MacKay 2007 arXiv:0710.3742 (Bayesian online changepoint)" },
+    { "topic": "Calibration metrics", "ref": "Brier 1950; Naeini et al. 2015 AAAI (ECE); Guo et al. 2017 ICML arXiv:1706.04599" },
+    { "topic": "Agent calibration", "ref": "arXiv:2609.09448 Do Agents Know When They Succeed; arXiv:2609.07395 UQ for LLM agents (TC-ECE)" },
+    { "topic": "Experiential learning agents", "ref": "ExpeL AAAI 2024 arXiv:2308.10144; Reflexion arXiv:2303.11366; Early Experience arXiv:2510.08558; OEL arXiv:2603.16856; MemRL arXiv:2601.03192" },
+    { "topic": "Forecasting memory", "ref": "ForecastCompass arXiv:2605.30858" },
+    { "topic": "World models / replay", "ref": "DreamerV3 Nature 2025 arXiv:2301.04104; ARROW arXiv:2603.11395; Agentic World Modeling arXiv:2604.22748" },
+    { "topic": "Predictive representations", "ref": "Carvalho, Tomov, de Cothi, Barry & Gershman 2024 Annual Review of Psychology (successor representation)" }
+  ],
+  "phase_next_requires_aaron": [
+    "Use p_success / surprise to bias pick_hotspot or insert center.qa hold (closing the loop)",
+    "Distill experience-prediction rows into MemoryBear / mesh/enhance/dl/predict on a schedule",
+    "Successor-representation over hotspot sequences (what usually follows a failure)",
+    "sLM/DL learned predictor (LoRA on Cam traces) once experience_count is large"
+  ],
+  "non_goals": [
+    "Training foundation models in this repo",
+    "Letting predictions assign tasks (Aaron only)",
+    "Bypassing switch.kill / switch.cam_enhance"
+  ]
+}

@@ -404,6 +404,22 @@
         "spike.fact"
       ],
       "notes": "Loop Engineering cadence tick — daily triage / QA bridge / PR babysitter (integrations/loop-engineering)"
+    },
+    {
+      "id": "sense.experience.outcome",
+      "modality": "interoception",
+      "source": [
+        "loop_run_log",
+        "qa_cycles",
+        "reasoning_traces",
+        "cam_predict_record"
+      ],
+      "emits": [
+        "spike.tool_result",
+        "spike.fact",
+        "spike.route_hint"
+      ],
+      "notes": "Cam's own outcome feedback (ok/score/duration per hotspot, pattern, center) — feeds the predictive cortex (scripts/cam-predict.py); advisory, never tasking"
     }
   ]
 }

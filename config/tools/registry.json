@@ -634,6 +634,37 @@
       ],
       "risk": "low",
       "status": "active"
+    },
+    {
+      "id": "tool.predict.experience",
+      "purpose": "Predict outcome (p_success, score, duration, surprise) for a Cam context from Cam's own experience stream; prequential calibration report",
+      "created_by_role": "dl-enhance",
+      "entrypoint": "scripts/cam-predict.py",
+      "kind": "local_script",
+      "inputs": {
+        "goal": "string",
+        "sense": "string",
+        "hotspot": "string",
+        "pattern": "string",
+        "report": "boolean",
+        "offline": "boolean"
+      },
+      "outputs": {
+        "prediction": "object",
+        "calibration": "object"
+      },
+      "required_privileges": [
+        "use_tool",
+        "read_mesh"
+      ],
+      "requires_switch": [
+        "switch.dl_local",
+        "switch.kill"
+      ],
+      "risk": "low",
+      "status": "active",
+      "available_to": "all_roles_and_subagents",
+      "notes": "Advisory only. Acting on predictions (routing bias, QA hold) requires switch.cam_enhance."
     }
   ]
 }

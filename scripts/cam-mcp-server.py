@@ -10,7 +10,7 @@ Tools:
   kill_switch_status, ticket_list,
   public_apis_search, public_apis_addon, google_trends_search, google_trends_addon, inkbox_check,
   loop_check, loop_audit, loop_run, higgsfield_check, presence_check,
-  voicestudio_health, needs_attention
+  voicestudio_health, needs_attention, predict_experience
 
 Install into Cline (example):
   cline mcp install cam -- python3 /path/to/Personal-Assistant/scripts/cam-mcp-server.py
@@ -275,6 +275,25 @@ def tool_defs() -> list[dict]:
                     "level": {"type": "string"},
                     "list": {"type": "boolean"},
                     "dry_run": {"type": "boolean"},
+                },
+            },
+        },
+        {
+            "name": "predict_experience",
+            "description": (
+                "Cam predictive cortex: p_success / expected score / surprise for a goal or hotspot "
+                "from Cam's own experience stream, or a prequential calibration report (report=true). "
+                "Advisory only — acting on predictions needs switch.cam_enhance."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "goal": {"type": "string"},
+                    "sense": {"type": "string"},
+                    "hotspot": {"type": "string"},
+                    "pattern": {"type": "string"},
+                    "report": {"type": "boolean"},
+                    "offline": {"type": "boolean"},
                 },
             },
         },
@@ -659,6 +678,35 @@ def voicestudio_health(base_url: str | None = None, timeout: float = 5.0) -> dic
         }
 
 
+def predict_experience(arguments: dict | None = None) -> Any:
+    args = arguments or {}
+    cmd = [sys.executable, str(ROOT / "scripts" / "cam-predict.py"), "--no-write"]
+    if args.get("report"):
+        cmd.append("--report")
+    else:
+        if args.get("goal"):
+            cmd.extend(["--goal", str(args["goal"])])
+        if args.get("hotspot"):
+            cmd.extend(["--hotspot", str(args["hotspot"])])
+        if args.get("pattern"):
+            cmd.extend(["--pattern", str(args["pattern"])])
+    if args.get("sense"):
+        cmd.extend(["--sense", str(args["sense"])])
+    if args.get("offline"):
+        cmd.append("--offline")
+    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+    try:
+        return json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "error": "predict_experience_failed",
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+            "exit_code": proc.returncode,
+        }
+
+
 def needs_attention(arguments: dict | None = None) -> Any:
     args = arguments or {}
     cmd = [sys.executable, str(ROOT / "scripts" / "needs-attention.py"), "--json"]
@@ -749,6 +797,8 @@ def call_tool(name: str, arguments: dict) -> Any:
         )
     if name == "needs_attention":
         return needs_attention(arguments)
+    if name == "predict_experience":
+        return predict_experience(arguments)
     raise ValueError(f"unknown tool: {name}")
 
 

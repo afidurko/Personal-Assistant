@@ -135,9 +135,26 @@ def score_paper(paper: dict) -> dict:
         "enhance_vision": 0,
         "enhance_slm_local": 0,
         "enhance_dl_embeddings": 0,
+        "enhance_predictive_cortex": 0,
         "general_agi_theory": 0,
     }
     checks = [
+        (
+            "enhance_predictive_cortex",
+            [
+                "world model",
+                "experience replay",
+                "learn from experience",
+                "experiential",
+                "calibrat",
+                "conformal",
+                "uncertainty quantification",
+                "brier",
+                "successor representation",
+                "temporal difference",
+                "predictive coding",
+            ],
+        ),
         ("enhance_cam_routing", ["agent", "multi-agent", "tool use", "planning", "orchestr"]),
         ("enhance_memory_mesh", ["retriev", "rag", "memory", "continual", "knowledge graph"]),
         ("enhance_presence_voice", ["speech", "tts", "avatar", "dialogue", "convers"]),
@@ -159,6 +176,8 @@ def score_paper(paper: dict) -> dict:
         touchpoints += ["center.slm", "config/enhancement/slm-dl.json"]
     if scores["enhance_dl_embeddings"]:
         touchpoints += ["center.dl", "config/enhancement/slm-dl.json"]
+    if scores["enhance_predictive_cortex"]:
+        touchpoints += ["center.dl", "config/enhancement/predictive-cortex.json", "scripts/cam_experience.py"]
     if scores["enhance_presence_voice"]:
         touchpoints += ["center.comms", "motor.speak"]
     if scores["enhance_vision"]:
